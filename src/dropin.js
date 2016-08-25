@@ -17,7 +17,7 @@ function Dropin(options) {
 Dropin.prototype.initialize = function (callback) {
   var container, authorizationFingerprint, hasCustomerId, mainViewOptions;
   var assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
-  var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin-frame@DOT_MIN.css';
+  var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin-frame.css';
   var dropinInstance = this; // eslint-disable-line consistent-this
 
   if (!this._options.selector) {
