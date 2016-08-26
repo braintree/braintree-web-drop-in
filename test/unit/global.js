@@ -1,6 +1,5 @@
 'use strict';
 
-
 beforeEach(function () {
   this.sandbox = sinon.sandbox.create();
 });
