@@ -3,6 +3,7 @@
 var browserify = require('browserify');
 var cleanCSS = require('gulp-clean-css');
 var del = require('del');
+var fs = require('fs');
 var gulp = require('gulp');
 var path = require('path');
 var rename = require('gulp-rename');
@@ -54,6 +55,10 @@ gulp.task('build:css', function () {
     .pipe(gulp.dest(config.dist.css))
 });
 
+gulp.task('build:link-latest', function (done) {
+  fs.symlink(VERSION, 'dist/web/dev', done);
+});
+
 gulp.task('clean', function () {
   return del([config.dist.js, config.dist.css]);
 });
@@ -61,5 +66,6 @@ gulp.task('clean', function () {
 gulp.task('build', [
   'clean',
   'build:js',
-  'build:css'
+  'build:css',
+  'build:link-latest'
 ]);
