@@ -1,7 +1,6 @@
 'use strict';
 
 var BraintreeError = require('./lib/error');
-var createAuthorizationData = require('./lib/create-authorization-data');
 var MainView = require('./views/main-view');
 var uuid = require('./lib/uuid');
 var errors = require('./errors');
@@ -15,10 +14,11 @@ function Dropin(options) {
 }
 
 Dropin.prototype.initialize = function (callback) {
-  var container, authorizationFingerprint, hasCustomerId, mainViewOptions;
+  var container, authorizationFingerprint, mainViewOptions;
   var assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
-  var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin-frame.css';
   var dropinInstance = this; // eslint-disable-line consistent-this
+  var hasCustomerId = false;
+  var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin-frame.css';
 
   if (!this._options.selector) {
     callback(new BraintreeError(errors.SELECTOR_REQUIRED));
@@ -38,9 +38,10 @@ Dropin.prototype.initialize = function (callback) {
   this._dropinWrapper.innerHTML = Dropin.generateDropinTemplate(stylesheetUrl);
   container.appendChild(this._dropinWrapper);
 
-  authorizationFingerprint = createAuthorizationData(this._options.authorization);
-  authorizationFingerprint = authorizationFingerprint.attrs.authorizationFingerprint;
-  hasCustomerId = authorizationFingerprint && authorizationFingerprint.indexOf('customer_id=') !== -1;
+  if (!isTokenizationKey(this._options.authorization)) {
+    authorizationFingerprint = JSON.parse(atob(this._options.authorization)).authorizationFingerprint;
+    hasCustomerId = authorizationFingerprint && authorizationFingerprint.indexOf('customer_id=') !== -1;
+  }
 
   mainViewOptions = {
     callback: function () {
@@ -132,6 +133,10 @@ function formatPaymentMethodPayload(paymentMethod) {
   }
 
   return formattedPaymentMethod;
+}
+
+function isTokenizationKey(str) {
+  return /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_[a-zA-Z0-9_]+$/.test(str);
 }
 
 module.exports = Dropin;
