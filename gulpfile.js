@@ -7,6 +7,7 @@ var fs = require('fs');
 var gulp = require('gulp');
 var path = require('path');
 var rename = require('gulp-rename');
+var runSequence = require('run-sequence');
 var sass = require('gulp-sass');
 var size = require('gulp-size');
 var source = require('vinyl-source-stream');
@@ -21,11 +22,13 @@ var config = {
   src: {
     js: {
       main: './src/index.js',
+      watch: 'src/**/*.js',
       output: 'dropin.js',
       min: 'dropin.min.js'
     },
     css: {
       main: './src/dropin-frame.scss',
+      watch: 'src/**/*.scss',
       output: 'dropin-frame.css'
     }
   },
@@ -60,12 +63,19 @@ gulp.task('build:link-latest', function (done) {
 });
 
 gulp.task('clean', function () {
-  return del([config.dist.js, config.dist.css]);
+  return del(['./dist']);
 });
 
-gulp.task('build', [
+gulp.task('build', function (done) {
+  runSequence(
   'clean',
-  'build:js',
-  'build:css',
-  'build:link-latest'
-]);
+  ['build:js', 'build:css'],
+  'build:link-latest',
+  done);
+});
+
+gulp.task('build:integration', ['build']);
+
+gulp.task('watch:integration', function () {
+  gulp.watch([config.src.js.watch, config.src.css.watch], ['build'])
+});
