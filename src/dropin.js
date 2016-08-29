@@ -1,9 +1,7 @@
 'use strict';
 
-var BraintreeError = require('./lib/error');
 var MainView = require('./views/main-view');
 var uuid = require('./lib/uuid');
-var errors = require('./errors');
 var VERSION = require('package.version');
 
 function Dropin(options) {
@@ -21,17 +19,17 @@ Dropin.prototype.initialize = function (callback) {
   var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin-frame@DOT_MIN.css';
 
   if (!this._options.selector) {
-    callback(new BraintreeError(errors.SELECTOR_REQUIRED));
+    callback(new Error('options.selector is required.'));
     return;
   }
 
   container = document.querySelector(this._options.selector);
 
   if (!container) {
-    callback(new BraintreeError(errors.VALID_DOM_NODE_REQUIRED));
+    callback(new Error('options.selector must reference a valid DOM node.'));
     return;
   } else if (container.innerHTML.trim()) {
-    callback(new BraintreeError(errors.EMPTY_DOM_NODE_REQUIRED));
+    callback(new Error('options.selector must reference an empty DOM node.'));
     return;
   }
 

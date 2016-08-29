@@ -1,9 +1,7 @@
 'use strict';
 
-var BraintreeError = require('../lib/error');
 var BaseView = require('./base-view');
 var CompletedView = require('./completed-view');
-var errors = require('../errors');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
 
@@ -62,7 +60,7 @@ MainView.prototype.setActiveView = function (id) {
 
 MainView.prototype.requestPaymentMethod = function (callback) {
   if (typeof this.activeView.requestPaymentMethod !== 'function') {
-    callback(new BraintreeError(errors.REQUEST_PAYMENT_METHOD_UNAVAILABLE));
+    callback(new Error('No payment method available.'));
     return;
   }
 

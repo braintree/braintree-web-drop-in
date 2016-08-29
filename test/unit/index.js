@@ -1,6 +1,5 @@
 'use strict';
 
-var BraintreeError = require('../../src/lib/error');
 var dropin = require('../../src/index');
 var Dropin = require('../../src/dropin');
 var client = require('braintree-web/client');
@@ -26,9 +25,7 @@ describe('dropin.create', function () {
 
   it('errors out if no authorization given', function (done) {
     dropin.create({}, function (err, instance) {
-      expect(err).to.be.an.instanceOf(BraintreeError);
-      expect(err.type).to.equal('MERCHANT');
-      expect(err.code).to.equal('AUTHORIZATION_REQUIRED');
+      expect(err).to.be.an.instanceOf(Error);
       expect(err.message).to.equal('options.authorization is required.');
       expect(instance).not.to.exist;
       done();
@@ -57,9 +54,7 @@ describe('dropin.create', function () {
         selector: '#foo'
       });
     } catch (err) {
-      expect(err).to.be.an.instanceOf(BraintreeError);
-      expect(err.type).to.equal(BraintreeError.types.MERCHANT);
-      expect(err.code).to.equal('CALLBACK_REQUIRED');
+      expect(err).to.be.an.instanceOf(Error);
       expect(err.message).to.equal('create must include a callback function.');
 
       done();

@@ -1,9 +1,7 @@
 'use strict';
 
 var BaseView = require('./base-view');
-var BraintreeError = require('../lib/error');
 var cardTypes = require('../constants').cardTypes;
-var errors = require('../errors');
 var hostedFields = require('braintree-web/hosted-fields');
 
 function PayWithCardView() {
@@ -82,7 +80,7 @@ PayWithCardView.prototype.requestPaymentMethod = function (callback) {
   var cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
 
   if (!cardTypeSupported) {
-    callback(new BraintreeError(errors.DROPIN_CARD_TYPE_UNSUPPORTED));
+    callback(new Error('Card type is unsupported.'));
     return;
   }
 

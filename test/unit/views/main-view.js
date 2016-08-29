@@ -1,6 +1,5 @@
 'use strict';
 
-var BraintreeError = require('../../../src/lib/error');
 var Dropin = require('../../../src/dropin');
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
@@ -189,9 +188,7 @@ describe('MainView', function () {
       delete this.context.activeView.requestPaymentMethod;
 
       MainView.prototype.requestPaymentMethod.call(this.context, function (err) {
-        expect(err).to.be.an.instanceOf(BraintreeError);
-        expect(err.type).to.equal('MERCHANT');
-        expect(err.code).to.equal('REQUEST_PAYMENT_METHOD_UNAVAILABLE');
+        expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('No payment method available.');
 
         done();

@@ -216,9 +216,8 @@ describe('PayWithCardView', function () {
       };
 
       PayWithCardView.prototype.requestPaymentMethod.call(this.context, function (err, res) {
-        expect(err.type).to.equal('CUSTOMER');
-        expect(err.code).to.equal('DROPIN_CARD_TYPE_UNSUPPORTED');
-        expect(err.type).to.equal('CUSTOMER');
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('Card type is unsupported.');
         expect(res).to.not.exist;
 
         done();

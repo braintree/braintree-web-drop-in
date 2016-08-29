@@ -1,6 +1,5 @@
 'use strict';
 
-var BraintreeError = require('../../src/lib/error');
 var Dropin = require('../../src/dropin/');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
@@ -43,9 +42,7 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function (err) {
-        expect(err).to.be.an.instanceOf(BraintreeError);
-        expect(err.type).to.equal('MERCHANT');
-        expect(err.code).to.equal('SELECTOR_REQUIRED');
+        expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector is required.');
         done();
       });
@@ -59,9 +56,7 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function (err) {
-        expect(err).to.be.an.instanceOf(BraintreeError);
-        expect(err.type).to.equal('MERCHANT');
-        expect(err.code).to.equal('VALID_DOM_NODE_REQUIRED');
+        expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector must reference a valid DOM node.');
         done();
       });
@@ -76,9 +71,7 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function (err) {
-        expect(err).to.be.an.instanceOf(BraintreeError);
-        expect(err.type).to.equal('MERCHANT');
-        expect(err.code).to.equal('EMPTY_DOM_NODE_REQUIRED');
+        expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector must reference an empty DOM node.');
         done();
       });
