@@ -20,6 +20,7 @@
     "eslint-config-braintree": "1.0.2",
     "gulp": "3.9.1",
     "gulp-rename": "1.2.2",
+    "gulp-replace": "0.5.4",
     "gulp-sass": "2.3.2",
     "gulp-size": "2.1.0",
     "gulp-streamify": "1.0.2",

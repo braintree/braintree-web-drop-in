@@ -7,6 +7,7 @@ var fs = require('fs');
 var gulp = require('gulp');
 var path = require('path');
 var rename = require('gulp-rename');
+var replace = require('gulp-replace');
 var runSequence = require('run-sequence');
 var sass = require('gulp-sass');
 var size = require('gulp-size');
@@ -29,7 +30,8 @@ var config = {
     css: {
       main: './src/dropin-frame.scss',
       watch: 'src/**/*.scss',
-      output: 'dropin-frame.css'
+      output: 'dropin-frame.css',
+      min: 'dropin-frame.min.css'
     }
   },
   dist: {
@@ -38,12 +40,22 @@ var config = {
   }
 };
 
-gulp.task('build:js', function () {
+gulp.task('build:js', ['build:js:unmin', 'build:js:min']);
+
+gulp.task('build:js:unmin', function () {
   return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
     .bundle()
     .pipe(source(config.src.js.output))
+    .pipe(replace('@DOT_MIN', ''))
     .pipe(streamify(size()))
     .pipe(gulp.dest(config.dist.js))
+});
+
+gulp.task('build:js:min', function () {
+  return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
+    .bundle()
+    .pipe(source(config.src.js.output))
+    .pipe(replace('@DOT_MIN', '.min'))
     .pipe(streamify(uglify()))
     .pipe(streamify(size()))
     .pipe(rename(config.src.js.min))
@@ -56,6 +68,9 @@ gulp.task('build:css', function () {
   return gulp.src(config.src.css.main)
     .pipe(sass(sassOptions).on('error', sass.logError))
     .pipe(gulp.dest(config.dist.css))
+    .pipe(cleanCSS())
+    .pipe(rename(config.src.css.min))
+    .pipe(gulp.dest(config.dist.css));
 });
 
 gulp.task('build:link-latest', function (done) {
