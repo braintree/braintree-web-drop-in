@@ -1,9 +1,9 @@
 'use strict';
 
 var Dropin = require('../../src/dropin/');
+var EventEmitter = require('../../src/lib/event-emitter');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
-var deferred = require('../../src/lib/deferred');
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -23,7 +23,9 @@ describe('Dropin', function () {
     };
 
     this.sandbox.stub(hostedFields, 'create', function (options, cb) {
-      deferred(cb)();
+      setTimeout(function () {
+        cb(null, {on: function () {}});
+      }, 100);
     });
   });
 
@@ -31,6 +33,14 @@ describe('Dropin', function () {
     if (document.body.querySelector('#foo')) {
       document.body.removeChild(this.container);
     }
+  });
+
+  describe('Constructor', function () {
+    it('inherits from EventEmitter', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      expect(instance).to.be.an.instanceof(EventEmitter);
+    });
   });
 
   describe('initialize', function () {

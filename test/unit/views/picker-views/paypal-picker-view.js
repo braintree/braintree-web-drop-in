@@ -3,6 +3,7 @@
 var PayPalPickerView = require('../../../../src/views/picker-views/paypal-picker-view');
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var classlist = require('../../../../src/lib/classlist');
+var events = require('../../../../src/constants').events;
 var fake = require('../../../helpers/fake');
 var paypal = require('braintree-web/paypal');
 
@@ -42,6 +43,7 @@ describe('PayPalPickerView', function () {
         },
         mainView: {
           componentId: 'component-id',
+          emit: this.sandbox.stub(),
           asyncDependencyStarting: this.sandbox.stub(),
           asyncDependencyReady: this.sandbox.stub()
         }
@@ -98,6 +100,7 @@ describe('PayPalPickerView', function () {
         mainView: {
           asyncDependencyStarting: this.sandbox.stub(),
           asyncDependencyReady: this.sandbox.stub(),
+          emit: this.sandbox.stub(),
           updateCompletedView: this.sandbox.stub()
         }
       };
@@ -114,6 +117,20 @@ describe('PayPalPickerView', function () {
       this.context.element.click();
 
       expect(stubPaypalInstance.tokenize).to.be.calledWith(this.context.options.paypal);
+    });
+
+    it('emits PAYMENT_METHOD_REQUESTABLE when tokenize is successful', function () {
+      var stubTokenizePayload = {foo: 'bar'};
+      var stubPaypalInstance = {
+        tokenize: this.sandbox.stub().callsArgWith(1, null, stubTokenizePayload)
+      };
+
+      this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+      PayPalPickerView.prototype._initialize.call(this.context);
+
+      this.context.element.click();
+
+      expect(this.context.mainView.emit).to.be.calledWith(events.PAYMENT_METHOD_REQUESTABLE);
     });
 
     it('calls updateCompletedView when tokenize is successful', function () {

@@ -2,6 +2,7 @@
 
 var BasePickerView = require('./base-picker-view');
 var classList = require('../../lib/classlist');
+var events = require('../../constants').events;
 var paypal = require('braintree-web/paypal');
 
 function PayPalPickerView() {
@@ -45,6 +46,7 @@ PayPalPickerView.prototype._initialize = function () {
         }
 
         this.mainView.updateCompletedView(tokenizePayload);
+        this.mainView.emit(events.PAYMENT_METHOD_REQUESTABLE);
       }.bind(this));
     }.bind(this));
 

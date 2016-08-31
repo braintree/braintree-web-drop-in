@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = {
+  events: {
+    NO_PAYMENT_METHOD_REQUESTABLE: 'noPaymentMethodRequestable',
+    PAYMENT_METHOD_REQUESTABLE: 'paymentMethodRequestable'
+  },
   cardTypes: {
     visa: 'Visa',
     'master-card': 'MasterCard',
