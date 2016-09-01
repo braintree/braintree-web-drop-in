@@ -66,11 +66,8 @@ PayWithCardView.prototype._initialize = function () {
       return;
     }
 
-    this.hostedFieldsInstance = hostedFieldsInstance;
-
-    this.fieldsValid = false;
-    this.cardTypeSupported = false;
     this.paymentMethodRequestable = false;
+    this.hostedFieldsInstance = hostedFieldsInstance;
 
     this.hostedFieldsInstance.on('validityChange', this._handlePaymentMethodRequestableEvents.bind(this));
     this.hostedFieldsInstance.on('cardTypeChange', this._handlePaymentMethodRequestableEvents.bind(this));
@@ -79,17 +76,19 @@ PayWithCardView.prototype._initialize = function () {
 };
 
 PayWithCardView.prototype._handlePaymentMethodRequestableEvents = function (state) {
-  this.cardTypeSupported = state.cards.some(function (card) {
+  var cardTypeSupported = state.cards.some(function (card) {
     return this._isSupportedCardType(card);
   }.bind(this));
-  this.fieldsValid = Object.keys(state.fields).every(function (key) {
+  var fieldsValid = Object.keys(state.fields).every(function (key) {
     return state.fields[key].isValid;
   });
 
-  if (this.fieldsValid && this.cardTypeSupported && !this.paymentMethodRequestable) {
+  var formValid = cardTypeSupported && fieldsValid;
+
+  if (formValid && !this.paymentMethodRequestable) {
     this.mainView.emit(events.PAYMENT_METHOD_REQUESTABLE);
     this.paymentMethodRequestable = true;
-  } else if ((!this.fieldsValid || !this.cardTypeSupported) && this.paymentMethodRequestable) {
+  } else if (!formValid && this.paymentMethodRequestable) {
     this.mainView.emit(events.NO_PAYMENT_METHOD_REQUESTABLE);
     this.paymentMethodRequestable = false;
   }

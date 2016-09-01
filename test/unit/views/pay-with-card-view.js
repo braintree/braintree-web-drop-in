@@ -131,58 +131,100 @@ describe('PayWithCardView', function () {
       expect(console.error).to.be.calledWith(new Error('create failed'));
     });
 
-    it('creates Hosted Fields with number and expiration date', function () {
-      PayWithCardView.prototype._initialize.call(this.context);
+    describe('creates Hosted Fields with', function () {
+      it('number and expiration date', function () {
+        PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(hostedFields.create).to.be.calledWith(this.sandbox.match({
-        client: this.context.options.client,
-        fields: {
-          number: {
-          },
-          expirationDate: {}
-        }
-      }), this.sandbox.match.func);
-      expect(hostedFields.create.lastCall.args[0]).not.to.have.deep.property('fields.cvv');
-      expect(hostedFields.create.lastCall.args[0]).not.to.have.deep.property('fields.postalCode');
-    });
+        expect(hostedFields.create).to.be.calledWith(this.sandbox.match({
+          client: this.context.options.client,
+          fields: {
+            number: {
+            },
+            expirationDate: {}
+          }
+        }), this.sandbox.match.func);
+        expect(hostedFields.create.lastCall.args[0]).not.to.have.deep.property('fields.cvv');
+        expect(hostedFields.create.lastCall.args[0]).not.to.have.deep.property('fields.postalCode');
+      });
 
-    it('creates Hosted Fields with cvv if included in challenges', function () {
-      this.context.options.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {challenges: ['cvv']}
+      it('cvv if included in challenges', function () {
+        this.context.options.client.getConfiguration = function () {
+          return {
+            gatewayConfiguration: {challenges: ['cvv']}
+          };
         };
-      };
 
-      PayWithCardView.prototype._initialize.call(this.context);
+        PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.cvv');
-    });
+        expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.cvv');
+      });
 
-    it('creates Hosted Fields with postal code if included in challenges', function () {
-      this.context.options.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {challenges: ['postal_code']}
+      it('postal code if included in challenges', function () {
+        this.context.options.client.getConfiguration = function () {
+          return {
+            gatewayConfiguration: {challenges: ['postal_code']}
+          };
         };
-      };
 
-      PayWithCardView.prototype._initialize.call(this.context);
+        PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
+        expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
+      });
     });
 
-    it('calls handlePaymentMethodRequestableEvents when subscribed to validityChange and cardTypeChange', function (done) {
+    it('calls handlePaymentMethodRequestableEvents when subscribed to validityChange and cardTypeChange', function () {
+      var stubbedOn;
+
       this.sandbox.restore();
-      this.sandbox.stub(hostedFields, 'create', function (opts, cb) {
-        setTimeout(function () {
-          var stubbedOn = this.sandbox.stub();
+      stubbedOn = this.sandbox.stub();
+      this.sandbox.stub(hostedFields, 'create').yields(null, {on: stubbedOn});
 
-          cb(null, {on: stubbedOn});
-          expect(stubbedOn).to.have.been.calledWith('validityChange', sinon.match.func);
-          expect(stubbedOn).to.have.been.calledWith('cardTypeChange', sinon.match.func);
-          done();
-        }.bind(this), 100);
-      }.bind(this));
       PayWithCardView.prototype._initialize.call(this.context);
+
+      expect(stubbedOn).to.have.been.calledWith('validityChange', sinon.match.func);
+      expect(stubbedOn).to.have.been.calledWith('cardTypeChange', sinon.match.func);
+    });
+  });
+
+  describe('responds to hosted fields event', function () {
+    var hostedFieldsEvents = [
+      'validityChange',
+      'cardTypeChange'
+    ];
+    var validHostedFieldsState = {
+      cards: [{
+        type: 'visa'
+      }],
+      fields: {
+        number: {
+          isValid: true
+        }
+      }
+    };
+
+    hostedFieldsEvents.forEach(function (hostedFieldsEvent) {
+      it(hostedFieldsEvent, function (done) {
+        var self = this;
+        var stateCallback;
+
+        self.context.mainView.emit = self.sandbox.stub();
+        self.context.mainView.asyncDependencyReady = function () {
+          stateCallback(validHostedFieldsState);
+
+          setTimeout(function () {
+            expect(self.context.mainView.emit).to.have.been.calledWith('paymentMethodRequestable');
+            done();
+          }, 1);
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, {
+          on: function (event, callback) {
+            if (event === hostedFieldsEvent) {
+              stateCallback = callback;
+            }
+          }});
+        PayWithCardView.prototype._initialize.call(this.context);
+      });
     });
   });
 
@@ -192,16 +234,8 @@ describe('PayWithCardView', function () {
         cards: [],
         fields: {}
       };
-      this.context = {
-        _isSupportedCardType: PayWithCardView.prototype._isSupportedCardType,
-        mainView: {
-          emit: this.sandbox.stub()
-        },
-        options: {
-          client: {
-            getConfiguration: fake.configuration
-          }
-        }
+      this.context.mainView = {
+        emit: this.sandbox.stub()
       };
     });
 
