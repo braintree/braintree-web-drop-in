@@ -11,5 +11,5 @@ module.exports = {
     unionpay: 'UnionPay',
     maestro: 'Maestro'
   },
-  INTEGRATION: 'dropin2'
+  INTEGRATION: 'dropin'
 };
