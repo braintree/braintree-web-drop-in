@@ -1,6 +1,6 @@
 # Development Notes
 
-This document outlines development practices that we follow internally why developing Drop-in.
+This document outlines development practices that we follow internally while developing Drop-in.
 
 ## Building
 
