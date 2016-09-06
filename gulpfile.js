@@ -29,10 +29,10 @@ var config = {
       min: 'dropin.min.js'
     },
     css: {
-      main: './src/dropin-frame.scss',
-      watch: 'src/**/*.scss',
-      output: 'dropin-frame.css',
-      min: 'dropin-frame.min.css'
+      main: './src/scss/dropin.scss',
+      watch: 'src/scss/**/*.scss',
+      output: 'dropin.css',
+      min: 'dropin.min.css'
     }
   },
   dist: {
@@ -76,6 +76,7 @@ gulp.task('build:css', function () {
 
   return gulp.src(config.src.css.main)
     .pipe(sass(sassOptions).on('error', sass.logError))
+    .pipe(rename(config.src.css.output))
     .pipe(gulp.dest(config.dist.css))
     .pipe(cleanCSS())
     .pipe(rename(config.src.css.min))

@@ -17,7 +17,7 @@ Dropin.prototype.initialize = function (callback) {
   var assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var hasCustomerId = false;
-  var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin-frame@DOT_MIN.css';
+  var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin@DOT_MIN.css';
 
   if (!this._options.selector) {
     callback(new Error('options.selector is required.'));
