@@ -3,6 +3,7 @@
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var CompletedPickerView = require('../../../../src/views/picker-views/completed-picker-view');
 var classlist = require('../../../../src/lib/classlist');
+var events = require('../../../../src/constants').events;
 
 describe('CompletedPickerView', function () {
   describe('Constructor', function () {
@@ -28,7 +29,10 @@ describe('CompletedPickerView', function () {
 
       this.context = {
         element: this.fakeCompletedPickerView,
-        mainView: {updateCompletedView: this.sandbox.stub()},
+        mainView: {
+          emit: this.sandbox.stub(),
+          updateCompletedView: this.sandbox.stub()
+        },
         paymentMethod: 'a-payment-method'
       };
     });
@@ -46,6 +50,14 @@ describe('CompletedPickerView', function () {
       this.context.element.click();
 
       expect(this.context.mainView.updateCompletedView).to.be.calledWith(this.context.paymentMethod, true);
+    });
+
+    it('emits PAYMENT_METHOD_REQUESTABLE when clicked', function () {
+      CompletedPickerView.prototype._initialize.call(this.context);
+
+      this.context.element.click();
+
+      expect(this.context.mainView.emit).to.be.calledWith(events.PAYMENT_METHOD_REQUESTABLE);
     });
   });
 });

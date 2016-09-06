@@ -11,5 +11,9 @@ module.exports = {
     unionpay: 'UnionPay',
     maestro: 'Maestro'
   },
+  events: {
+    NO_PAYMENT_METHOD_REQUESTABLE: 'noPaymentMethodRequestable',
+    PAYMENT_METHOD_REQUESTABLE: 'paymentMethodRequestable'
+  },
   INTEGRATION: 'dropin'
 };

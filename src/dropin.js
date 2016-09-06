@@ -1,5 +1,6 @@
 'use strict';
 
+var EventEmitter = require('./lib/event-emitter');
 var MainView = require('./views/main-view');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
@@ -9,7 +10,13 @@ function Dropin(options) {
   this._options = options;
   this._dropinWrapper = document.createElement('div');
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentId;
+
+  EventEmitter.call(this);
 }
+
+Dropin.prototype = Object.create(EventEmitter.prototype, {
+  constructor: Dropin
+});
 
 Dropin.prototype.initialize = function (callback) {
   var container, authorizationFingerprint, mainViewOptions;
@@ -47,6 +54,9 @@ Dropin.prototype.initialize = function (callback) {
     },
     componentId: this._componentId,
     dropinWrapper: this._dropinWrapper,
+    emit: function (eventType) {
+      this._emit(eventType);
+    }.bind(this),
     existingPaymentMethods: [],
     options: this._options
   };
