@@ -1,10 +1,6 @@
 'use strict';
 
 module.exports = {
-  events: {
-    NO_PAYMENT_METHOD_REQUESTABLE: 'noPaymentMethodRequestable',
-    PAYMENT_METHOD_REQUESTABLE: 'paymentMethodRequestable'
-  },
   cardTypes: {
     visa: 'Visa',
     'master-card': 'MasterCard',
@@ -14,6 +10,10 @@ module.exports = {
     jcb: 'JCB',
     unionpay: 'UnionPay',
     maestro: 'Maestro'
+  },
+  events: {
+    NO_PAYMENT_METHOD_REQUESTABLE: 'noPaymentMethodRequestable',
+    PAYMENT_METHOD_REQUESTABLE: 'paymentMethodRequestable'
   },
   INTEGRATION: 'dropin'
 };
