@@ -29,7 +29,7 @@ var config = {
       min: 'dropin.min.js'
     },
     css: {
-      main: './src/scss/dropin.scss',
+      main: './src/scss/main.scss',
       watch: 'src/scss/**/*.scss',
       output: 'dropin.css',
       min: 'dropin.min.css'

@@ -1,0 +1,44 @@
+.braintree-form {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+.braintree-form__fieldset {
+    border: 0;
+    margin: 0 0 16px;
+    padding: 0;
+}
+.braintree-form__label {
+    line-height: 1.4;
+    display: block;
+    font-size: $type-16;
+    color: $black;
+    margin: 0;
+    padding: 0;
+}
+.braintree-form__label--relative {
+    position: relative;
+}
+.braintree-form__inline-error {
+    color: $red;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+}
+.braintree-form__fields {
+    margin: 4px 0 0;
+    padding: 8px;
+    border: 1px solid $black-75;
+}
+.braintree-form__fields--hosted {
+    height: 44px;
+}
+.braintree-form__icon--absolute {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    transition: opacity $time-faster linear;
+}
+@include placeholder {
+    color: $black-75;
+}

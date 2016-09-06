@@ -1,0 +1,14 @@
+.braintree-alert {
+    line-height: 1.4;
+    font-size: $type-14;
+    padding: 12px 10px;
+    margin-bottom: 16px;
+}
+.braintree-alert--error {
+    background: lighten($red, 55%);
+    border: 1px solid $red;
+    color: $red;
+}
+.braintree-alert__link {
+    color: $red;
+}

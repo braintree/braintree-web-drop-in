@@ -1,0 +1,14 @@
+@media (max-width: 620px) {
+    .braintree-form__label {
+        font-size: $type-14;
+    }
+    .braintree-dropdown__option {
+        justify-content: space-between;
+    }
+    .image--PayPal-button {
+        width: 140px;
+    }
+    .braintree-dropdown__image {
+        text-align: right;
+    }
+}

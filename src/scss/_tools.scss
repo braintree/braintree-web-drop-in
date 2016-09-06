@@ -1,0 +1,20 @@
+.braintree-hide {
+    visibility: hidden;
+    transition: all $time-faster linear;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
+.braintree-desaturate {
+    opacity: 0.6;
+    transition: filter $time-faster;
+    -webkit-filter: grayscale(1);
+    /* Google Chrome, Safari 6+ & Opera 15+ */
+    filter: gray;
+    /* IE6-9 */
+    filter: grayscale(1);
+    /* Microsoft Edge and Firefox 35+ */
+}
+.braintree-display--none {
+    display: none;
+}

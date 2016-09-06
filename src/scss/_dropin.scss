@@ -1,0 +1,105 @@
+.braintree-dropdown--payment {
+    position: relative;
+    margin-bottom: 20px;
+}
+.braintree-dropdown__default {
+    width: 100%;
+    display: flex;
+    padding: 8px 16px 8px 12px;
+    margin: 0;
+    cursor: pointer;
+    transition: all $time-fast;
+    align-items: center;
+    justify-content: space-between;
+}
+.braintree-dropdown__default--container {
+    border-radius: 3px;
+    border: 1px solid $black-85;
+    background: $black-95;
+    background-image: linear-gradient(-180deg, $black-97 0%, $black-95 100%);
+}
+.braintree-dropdown__default--active {
+    background: $black-97;
+    background-image: linear-gradient(-180deg, $black-90 0%, $black-95 100%);
+    border-radius: 3px 3px 0 0;
+}
+.braintree-icon--arrow {
+    width: 20px;
+    height: 20px;
+    transition: transform 100ms ease-in-out;
+    transform: rotate(0deg);
+    &.braintree-arrow--active {
+        transition: transform 100ms ease-in-out;
+        transform: rotate(180deg);
+    }
+}
+.braintree-icon--check {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    stroke-width: 0;
+    stroke: currentColor;
+    fill: currentColor;
+}
+.braintree-dropdown__option--container {
+    position: absolute;
+    z-index: 2147483647; // highest z-index!
+    width: 100%;
+    transition: all $time-fast;
+    border: 1px solid $black-85;
+    border-top: 0;
+    border-radius: 0 0 3px 3px;
+    background: $white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: opacity $time-faster linear;
+}
+.braintree-dropdown__option {
+    display: flex;
+    padding: 8px 16px 8px 12px;
+    transition: background $time-faster ease-in-out;
+    text-decoration: none;
+    color: $black;
+    font-size: $type-16;
+    line-height: 1.4;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    &:hover {
+        background: $black-95;
+    }
+    &:active {
+        background: $black-97;
+    }
+}
+.braintree-dropdown__option--divider {
+    border-bottom: 1px solid $black-85;
+}
+.braintree-dropdown__option--vaulted {
+    justify-content: flex-start;
+}
+.braintree-dropdown__category {
+    line-height: 1.4;
+    margin: 0;
+    padding: 8px;
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: $black-40;
+    background: $black-90;
+    font-size: $type-12;
+    font-weight: 600;
+}
+.braintree-dropdown__label {
+    font-size: $type-16;
+    margin-right: 30px;
+    margin-bottom: 0;
+}
+.braintree-card-logos__group {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.braintree-icon--card {
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
