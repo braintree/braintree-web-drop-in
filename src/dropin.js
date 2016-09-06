@@ -4,6 +4,7 @@ var MainView = require('./views/main-view');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
 var mainHTML = require('./html/main.html');
+var constants = require('./constants');
 
 function Dropin(options) {
   this._componentId = uuid();
@@ -14,10 +15,10 @@ function Dropin(options) {
 
 Dropin.prototype.initialize = function (callback) {
   var container, authorizationFingerprint, mainViewOptions;
-  var assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var hasCustomerId = false;
-  var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin@DOT_MIN.css';
+
+  this.injectStylesheet();
 
   if (!this._options.selector) {
     callback(new Error('options.selector is required.'));
@@ -34,7 +35,7 @@ Dropin.prototype.initialize = function (callback) {
     return;
   }
 
-  this._dropinWrapper.innerHTML = Dropin.generateDropinTemplate(stylesheetUrl);
+  this._dropinWrapper.innerHTML = mainHTML;
   container.appendChild(this._dropinWrapper);
 
   if (!isTokenizationKey(this._options.authorization)) {
@@ -70,19 +71,46 @@ Dropin.prototype.initialize = function (callback) {
   }
 };
 
+Dropin.prototype.removeStylesheet = function () {
+  var stylesheet = document.getElementById(constants.STYLESHEET_ID);
+
+  if (stylesheet) {
+    stylesheet.parentNode.removeChild(stylesheet);
+  }
+};
+
+Dropin.prototype.injectStylesheet = function () {
+  var stylesheet, stylesheetUrl, head, assetsUrl;
+
+  if (document.getElementById(constants.STYLESHEET_ID)) { return; }
+
+  assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
+  stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin@DOT_MIN.css';
+  stylesheet = document.createElement('link');
+  head = document.head;
+
+  stylesheet.setAttribute('rel', 'stylesheet');
+  stylesheet.setAttribute('type', 'text/css');
+  stylesheet.setAttribute('href', stylesheetUrl);
+
+  if (head.firstChild) {
+    head.insertBefore(stylesheet, head.firstChild);
+  } else {
+    head.appendChild(stylesheet);
+  }
+};
+
 Dropin.prototype.requestPaymentMethod = function (callback) {
   this.mainView.requestPaymentMethod(callback);
 };
 
 Dropin.prototype.teardown = function (callback) {
+  this.removeStylesheet();
+
   this.mainView.teardown(function (err) {
     this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
     callback(err);
   }.bind(this));
-};
-
-Dropin.generateDropinTemplate = function (stylesheetUrl) {
-  return mainHTML.replace('@STYLESHEET_URL', stylesheetUrl);
 };
 
 function formatPaymentMethodPayload(paymentMethod) {

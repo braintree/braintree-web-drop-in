@@ -11,5 +11,6 @@ module.exports = {
     unionpay: 'UnionPay',
     maestro: 'Maestro'
   },
-  INTEGRATION: 'dropin'
+  INTEGRATION: 'dropin',
+  STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
