@@ -19,6 +19,7 @@ module.exports = function (config) {
     },
     browserify: {
       extensions: ['.js', '.json'],
+      transform: ['stringify'],
       ignore: [],
       watch: true,
       debug: true,

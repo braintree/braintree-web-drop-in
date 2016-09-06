@@ -1,12 +1,12 @@
 'use strict';
 
-var Dropin = require('../../../src/dropin');
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
 var CompletedView = require('../../../src/views/completed-view');
 var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var fake = require('../../helpers/fake');
+var templateHTML = require('../../../src/html/main.html');
 
 describe('MainView', function () {
   describe('Constructor', function () {
@@ -29,7 +29,7 @@ describe('MainView', function () {
     beforeEach(function () {
       var dropinWrapper = document.createElement('div');
 
-      dropinWrapper.innerHTML = Dropin.generateDropinTemplate();
+      dropinWrapper.innerHTML = templateHTML;
 
       this.context = {
         dropinWrapper: dropinWrapper,
