@@ -1,6 +1,7 @@
 'use strict';
 
 var browserify = require('browserify');
+var stringify = require('stringify');
 var cleanCSS = require('gulp-clean-css');
 var del = require('del');
 var fs = require('fs');
@@ -44,6 +45,10 @@ gulp.task('build:js', ['build:js:unmin', 'build:js:min']);
 
 gulp.task('build:js:unmin', function () {
   return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
+    .transform(stringify, {
+      appliesTo: { includeExtensions: ['.html'] },
+      minify: false
+    })
     .bundle()
     .pipe(source(config.src.js.output))
     .pipe(replace('@DOT_MIN', ''))
@@ -53,6 +58,10 @@ gulp.task('build:js:unmin', function () {
 
 gulp.task('build:js:min', function () {
   return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
+    .transform(stringify, {
+      appliesTo: { includeExtensions: ['.html'] },
+      minify: true
+    })
     .bundle()
     .pipe(source(config.src.js.output))
     .pipe(replace('@DOT_MIN', '.min'))

@@ -3,6 +3,7 @@
 var MainView = require('./views/main-view');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
+var mainHTML = require('./html/main.html');
 
 function Dropin(options) {
   this._componentId = uuid();
@@ -81,42 +82,7 @@ Dropin.prototype.teardown = function (callback) {
 };
 
 Dropin.generateDropinTemplate = function (stylesheetUrl) {
-  return '<link rel="stylesheet" type="text/css" href="' + stylesheetUrl + '">' +
-    '<div class="braintree-dropin braintree-dropin__loader">' +
-      '<div class="braintree-dropin__view">loading!</div>' +
-
-      '<div class="braintree-dropin__view braintree-dropin__pay-with-card">' +
-        '<div class="braintree-dropin__card-field">' +
-          '<label for="number">Card Number</label>' +
-          '<div class="braintree-dropin__number braintree-dropin__braintree-hosted-field"></div>' +
-        '</div>' +
-
-        '<div class="braintree-dropin__card-field">' +
-          '<label for="expiration">Expiration Date</label>' +
-          '<div class="braintree-dropin__expiration braintree-dropin__braintree-hosted-field"></div>' +
-        '</div>' +
-
-        '<div class="braintree-dropin__card-field braintree-dropin__cvv-container">' +
-          '<label for="cvv">CVV</label>' +
-          '<div class="braintree-dropin__cvv braintree-dropin__braintree-hosted-field"></div>' +
-        '</div>' +
-
-        '<div class="braintree-dropin__card-field braintree-dropin__postal-code-container">' +
-          '<label for="postal-code">Postal Code</label>' +
-          '<div class="braintree-dropin__postal-code braintree-dropin__braintree-hosted-field"></div>' +
-        '</div>' +
-      '</div>' +
-
-      '<div class="braintree-dropin__view braintree-dropin__completed">' +
-        '<div class="braintree-dropin__completed-type"></div>' +
-        'nonce:' +
-        '<div class="braintree-dropin__completed-nonce"></div>' +
-      '</div>' +
-
-      '<div class="braintree-dropin__closed braintree-dropin__payment-method-picker">' +
-        '<div class="braintree-dropin__payment-method-picker-toggler">Payment Method</div>' +
-      '</div>' +
-    '</div>';
+  return mainHTML.replace('@STYLESHEET_URL', stylesheetUrl);
 };
 
 function formatPaymentMethodPayload(paymentMethod) {
