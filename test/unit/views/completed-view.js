@@ -38,11 +38,11 @@ describe('CompletedView', function () {
 
   describe('updatePaymentMethod', function () {
     beforeEach(function () {
-      var typeSlot = document.createElement('div');
-      var nonceSlot = document.createElement('div');
+      var termSlot = document.createElement('div');
+      var descriptionSlot = document.createElement('div');
 
-      document.body.appendChild(typeSlot);
-      document.body.appendChild(nonceSlot);
+      document.body.appendChild(termSlot);
+      document.body.appendChild(descriptionSlot);
 
       this.context = {
         paymentMethod: {
@@ -52,8 +52,8 @@ describe('CompletedView', function () {
             oldDetails: 'old'
           }
         },
-        typeSlot: typeSlot,
-        nonceSlot: nonceSlot
+        termSlot: termSlot,
+        descriptionSlot: descriptionSlot
       };
     });
 
@@ -73,16 +73,35 @@ describe('CompletedView', function () {
       expect(this.context.paymentMethod.details.newDetails).to.equal('new');
     });
 
-    it('updates view texts with new payment method', function () {
+    it('updates view texts with new payment method for PayPal', function () {
       var fakePaymentMethod = {
         nonce: '123abc',
-        type: 'FooPayAccount'
+        type: 'PayPalAccount',
+        details: {
+          email: 'fake@email.biz'
+        }
       };
 
       CompletedView.prototype.updatePaymentMethod.call(this.context, fakePaymentMethod);
 
-      expect(this.context.nonceSlot.innerHTML).to.equal('123abc');
-      expect(this.context.typeSlot.innerHTML).to.equal('FooPayAccount');
+      expect(this.context.termSlot.innerHTML).to.equal('fake@email.biz');
+      expect(this.context.descriptionSlot.innerHTML).to.equal('PayPal');
+    });
+
+    it('updates view texts with new payment method for cards', function () {
+      var fakePaymentMethod = {
+        nonce: '123abc',
+        type: 'CreditCard',
+        details: {
+          lastTwo: '66',
+          cardType: 'A Card Type'
+        }
+      };
+
+      CompletedView.prototype.updatePaymentMethod.call(this.context, fakePaymentMethod);
+
+      expect(this.context.termSlot.innerHTML).to.equal('Ending in ••66');
+      expect(this.context.descriptionSlot.innerHTML).to.equal('A Card Type');
     });
   });
 });

@@ -39,21 +39,35 @@ PayWithCardView.prototype._initialize = function () {
       }
     },
     styles: {
-      '.invalid': {
-        color: 'tomato'
+      input: {
+        'font-size': '16px',
+        'font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+        color: '#000'
       },
-      '.valid': {
-        color: 'green'
+      ':focus': {
+        color: 'black'
+      },
+      '::-webkit-input-placeholder': {
+        color: 'rgba(0,0,0,0.25)'
+      },
+      ':-moz-placeholder': {
+        color: 'rgba(0,0,0,0.25)'
+      },
+      '::-moz-placeholder': {
+        color: 'rgba(0,0,0,0.25)'
+      },
+      ':-ms-input-placeholder ': {
+        color: 'rgba(0,0,0,0.25)'
       }
     }
   };
 
   if (!hasCVV) {
-    this.element.removeChild(this.element.querySelector('.braintree-dropin__cvv-container'));
+    this.element.removeChild(this.element.querySelector('.braintree-form__cvv-container'));
     delete hfOptions.fields.cvv;
   }
   if (!hasPostal) {
-    this.element.removeChild(this.element.querySelector('.braintree-dropin__postal-code-container'));
+    this.element.removeChild(this.element.querySelector('.braintree-form__postal-code-container'));
     delete hfOptions.fields.postalCode;
   }
 
@@ -102,7 +116,7 @@ PayWithCardView.prototype.requestPaymentMethod = function (callback) {
 };
 
 PayWithCardView.prototype._generateFieldSelector = function (field) {
-  return '#braintree--dropin__' + this.mainView.componentId + ' .braintree-dropin__' + field;
+  return '#braintree--dropin__' + this.mainView.componentId + ' .braintree-form__' + field;
 };
 
 PayWithCardView.prototype.teardown = function (callback) {

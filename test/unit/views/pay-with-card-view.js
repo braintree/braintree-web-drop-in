@@ -12,8 +12,8 @@ describe('PayWithCardView', function () {
     this.fakePayWithCardTemplate.innerHTML = [
       '<div><input name="number"></div>',
       '<div><input name="expiration"></div>',
-      '<div class="braintree-dropin__cvv-container"><input name="cvv"></div>',
-      '<div class="braintree-dropin__postal-code-container"><input name="postal-code"></div>'
+      '<div class="braintree-form__cvv-container"><input name="cvv"></div>',
+      '<div class="braintree-form__postal-code-container"><input name="postal-code"></div>'
     ];
 
     document.body.appendChild(this.fakePayWithCardTemplate);
@@ -67,13 +67,13 @@ describe('PayWithCardView', function () {
       };
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__cvv-container')).to.exist;
+      expect(this.context.element.querySelector('.braintree-form__cvv-container')).to.exist;
     });
 
     it('does not have cvv if not supplied in challenges', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__cvv-container')).not.to.exist;
+      expect(this.context.element.querySelector('.braintree-form__cvv-container')).not.to.exist;
     });
 
     it('has postal code if supplied in challenges', function () {
@@ -84,13 +84,13 @@ describe('PayWithCardView', function () {
       };
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__postal-code-container')).to.exist;
+      expect(this.context.element.querySelector('.braintree-form__postal-code-container')).to.exist;
     });
 
     it('does not have postal code if not supplied in challenges', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__postal-code-container')).not.to.exist;
+      expect(this.context.element.querySelector('.braintree-form__postal-code-container')).not.to.exist;
     });
 
     it('starts async dependency', function () {

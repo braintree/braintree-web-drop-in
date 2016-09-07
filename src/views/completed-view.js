@@ -12,8 +12,8 @@ CompletedView.prototype.constructor = CompletedView;
 CompletedView.ID = CompletedView.prototype.ID = 'braintree-dropin__completed';
 
 CompletedView.prototype._initialize = function () {
-  this.typeSlot = this.element.querySelector('.braintree-dropin__completed-type');
-  this.nonceSlot = this.element.querySelector('.braintree-dropin__completed-nonce');
+  this.termSlot = this.element.querySelector('.braintree-list__term');
+  this.descriptionSlot = this.element.querySelector('.braintree-list__desc');
 };
 
 CompletedView.prototype.requestPaymentMethod = function (callback) {
@@ -22,8 +22,14 @@ CompletedView.prototype.requestPaymentMethod = function (callback) {
 
 CompletedView.prototype.updatePaymentMethod = function (paymentMethod) {
   this.paymentMethod = paymentMethod;
-  this.typeSlot.textContent = this.paymentMethod.type;
-  this.nonceSlot.textContent = this.paymentMethod.nonce;
+
+  if (this.paymentMethod.type === 'PayPalAccount') {
+    this.termSlot.textContent = this.paymentMethod.details.email;
+    this.descriptionSlot.textContent = 'PayPal';
+  } else {
+    this.termSlot.textContent = 'Ending in ••' + this.paymentMethod.details.lastTwo;
+    this.descriptionSlot.textContent = this.paymentMethod.details.cardType;
+  }
 };
 
 module.exports = CompletedView;
