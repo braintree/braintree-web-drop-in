@@ -17,11 +17,16 @@ PaymentMethodPickerView.prototype.constructor = PaymentMethodPickerView;
 PaymentMethodPickerView.ID = PaymentMethodPickerView.prototype.ID = 'braintree-dropin__payment-method-picker';
 
 PaymentMethodPickerView.prototype._initialize = function () {
-  this.togglerItem = this.element.querySelector('.braintree-dropin__payment-method-picker-toggler');
+  var enabledPaymentMethods = this.element.querySelector('.braintree-dropin__enabled-payment-methods');
 
-  this.togglerItem.addEventListener('click', function () {
-    this.toggle();
+  this.element.addEventListener('click', function () {
+    this.toggleDrawer();
   }.bind(this));
+
+  this.drawer = this.element.querySelector('.braintree-dropin__drawer');
+  this.savedPaymentMethods = this.element.querySelector('.braintree-dropin__saved-payment-methods');
+  this.activePaymentMethod = this.element.querySelector('.braintree-dropin__active-payment-method');
+  this.choosePaymentMethod = this.element.querySelector('.braintree-dropin__choose-payment-method');
 
   this.views = [
     CardPickerView,
@@ -34,7 +39,7 @@ PaymentMethodPickerView.prototype._initialize = function () {
         mainView: this.mainView,
         options: this.options
       });
-      this.element.appendChild(pickerView.element);
+      enabledPaymentMethods.appendChild(pickerView.element);
 
       views.push(pickerView);
     }
@@ -42,21 +47,13 @@ PaymentMethodPickerView.prototype._initialize = function () {
     return views;
   }.bind(this), []);
 
-  if (this.views.length === 1) {
-    classlist.add(this.element, 'braintree-dropin__hidden');
-  }
-
   this.existingPaymentMethods.forEach(function (paymentMethod) {
     this.addCompletedPickerView(paymentMethod);
   }.bind(this));
 };
 
-PaymentMethodPickerView.prototype.toggle = function () {
-  classlist.toggle(this.element, 'braintree-dropin__closed');
-};
-
-PaymentMethodPickerView.prototype.collapse = function () {
-  classlist.add(this.element, 'braintree-dropin__closed');
+PaymentMethodPickerView.prototype.toggleDrawer = function () {
+  classlist.toggle(this.drawer, 'braintree-dropin__hide');
 };
 
 PaymentMethodPickerView.prototype.addCompletedPickerView = function (paymentMethod) {
@@ -65,9 +62,26 @@ PaymentMethodPickerView.prototype.addCompletedPickerView = function (paymentMeth
     paymentMethod: paymentMethod
   });
 
-  this.element.appendChild(completedPickerView.element);
-  classlist.remove(this.element, 'braintree-dropin__hidden');
+  this.savedPaymentMethods.appendChild(completedPickerView.element);
   this.views.push(completedPickerView);
+};
+
+PaymentMethodPickerView.prototype.setActivePaymentMethod = function (paymentMethod) {
+  var termSlot = this.activePaymentMethod.querySelector('.braintree-dropin__list-term');
+  var descriptionSlot = this.activePaymentMethod.querySelector('.braintree-dropin__list-desc');
+
+  this.paymentMethod = paymentMethod;
+
+  if (paymentMethod.type === 'PayPalAccount') {
+    termSlot.textContent = this.paymentMethod.details.email;
+    descriptionSlot.textContent = 'PayPal';
+  } else if (paymentMethod.type === 'CreditCard') {
+    termSlot.textContent = 'Ending in ••' + this.paymentMethod.details.lastTwo;
+    descriptionSlot.textContent = this.paymentMethod.details.cardType;
+  }
+
+  classlist.add(this.choosePaymentMethod, 'braintree-dropin__hide');
+  classlist.remove(this.activePaymentMethod, 'braintree-dropin__hide');
 };
 
 PaymentMethodPickerView.prototype.teardown = function (callback) {
@@ -88,6 +102,15 @@ PaymentMethodPickerView.prototype.teardown = function (callback) {
       }
     });
   }.bind(this));
+};
+
+PaymentMethodPickerView.prototype.requestPaymentMethod = function (callback) {
+  if (!this.paymentMethod) {
+    callback(new Error('No payment method available.'));
+    return;
+  }
+
+  callback(null, this.paymentMethod);
 };
 
 module.exports = PaymentMethodPickerView;

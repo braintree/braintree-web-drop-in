@@ -2,7 +2,6 @@
 
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
-var CompletedView = require('../../../src/views/completed-view');
 var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var fake = require('../../helpers/fake');
@@ -38,10 +37,6 @@ describe('MainView', function () {
             getConfiguration: fake.configuration
           }
         },
-        bus: {
-          on: this.sandbox.spy(),
-          emit: this.sandbox.spy()
-        },
         addView: this.sandbox.stub(),
         setActiveView: this.sandbox.stub(),
         existingPaymentMethods: {},
@@ -52,12 +47,6 @@ describe('MainView', function () {
         this.views = [{}];
       });
       this.sandbox.stub(PayWithCardView.prototype, '_initialize');
-    });
-
-    it('creates a CompletedView', function () {
-      MainView.prototype._initialize.call(this.context);
-
-      expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(CompletedView));
     });
 
     it('creates a PayWithCardView', function () {
@@ -71,16 +60,6 @@ describe('MainView', function () {
 
       expect(this.context.paymentMethodPickerView).to.be.an.instanceOf(PaymentMethodPickerView);
       expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PaymentMethodPickerView));
-    });
-
-    it('sets the CompletedView as the active view if there are existing payment methods', function () {
-      this.sandbox.stub(CompletedView.prototype, 'updatePaymentMethod');
-      this.context.existingPaymentMethods = [{}, {}];
-
-      MainView.prototype._initialize.call(this.context);
-
-      expect(CompletedView.prototype.updatePaymentMethod).to.have.been.calledWith(this.context.existingPaymentMethods[0]);
-      expect(this.context.setActiveView).to.have.been.calledWith(CompletedView.ID);
     });
 
     it('sets the PaymentMethodPickerView as the active view if multiple payment methods are available', function () {
@@ -150,12 +129,6 @@ describe('MainView', function () {
       MainView.prototype.setActiveView.call(this.context, 'id2');
 
       expect(this.context.activeView).to.equal(this.context.views.id2);
-    });
-
-    it('collapses the picker view', function () {
-      MainView.prototype.setActiveView.call(this.context, 'id1');
-
-      expect(this.context.paymentMethodPickerView.collapse).to.have.been.called;
     });
 
     it('shows the selected view', function () {
@@ -233,41 +206,42 @@ describe('MainView', function () {
     });
   });
 
-  describe('updateCompletedView', function () {
+  describe('updateActivePaymentMethod', function () {
     beforeEach(function () {
       this.context = {
-        views: {
-          'braintree-dropin__completed': {
-            updatePaymentMethod: this.sandbox.stub()
-          }
-        },
         paymentMethodPickerView: {
-          addCompletedPickerView: this.sandbox.stub()
+          addCompletedPickerView: this.sandbox.stub(),
+          setActivePaymentMethod: this.sandbox.stub()
         },
-        setActiveView: this.sandbox.stub()
+        setActiveView: this.sandbox.stub(),
+        views: [{
+          'braintree-dropin__payment-method-picker': {
+            setActivePaymentMethod: this.sandbox.stub()
+          }
+        }]
       };
     });
 
-    it('calls updatePaymentMethod on completed view', function () {
+    it('sets payment method picker view as active view', function () {
       var paymentMethod = {};
 
-      MainView.prototype.updateCompletedView.call(this.context, paymentMethod);
+      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
 
-      expect(this.context.views['braintree-dropin__completed'].updatePaymentMethod).to.be.calledWith(paymentMethod);
+      expect(this.context.setActiveView).to.be.calledWith(PaymentMethodPickerView.ID);
     });
 
-    it('sets completed view as active view', function () {
+    it('sets the payment method as the active payment method', function () {
       var paymentMethod = {};
 
-      MainView.prototype.updateCompletedView.call(this.context, paymentMethod);
+      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
 
-      expect(this.context.setActiveView).to.be.calledWith('braintree-dropin__completed');
+      expect(this.context.paymentMethodPickerView.setActivePaymentMethod).to.be.calledWith(paymentMethod);
     });
 
     it('adds payment method to picker view by default', function () {
       var paymentMethod = {};
 
-      MainView.prototype.updateCompletedView.call(this.context, paymentMethod);
+      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
 
       expect(this.context.paymentMethodPickerView.addCompletedPickerView).to.be.calledWith(paymentMethod);
     });
@@ -275,13 +249,15 @@ describe('MainView', function () {
     it('adds payment method to picker view when existing is false', function () {
       var paymentMethod = {};
 
-      MainView.prototype.updateCompletedView.call(this.context, paymentMethod, false);
+      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
 
       expect(this.context.paymentMethodPickerView.addCompletedPickerView).to.be.calledWith(paymentMethod);
     });
 
     it('does not add payment method to picker view when existing is true', function () {
-      MainView.prototype.updateCompletedView.call(this.context, {}, true);
+      var paymentMethod = {};
+
+      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod, true);
 
       expect(this.context.paymentMethodPickerView.addCompletedPickerView).to.not.have.been.called;
     });
@@ -293,9 +269,6 @@ describe('MainView', function () {
         views: {
           'braintree-dropin__pay-with-card-view': {
             teardown: this.sandbox.stub().yields()
-          },
-          'braintree-dropin__completed': {
-            teardown: this.sandbox.stub().yields()
           }
         }
       };
@@ -303,11 +276,9 @@ describe('MainView', function () {
 
     it('calls teardown on each view', function (done) {
       var payWithCardView = this.context.views['braintree-dropin__pay-with-card-view'];
-      var completedView = this.context.views['braintree-dropin__completed'];
 
       MainView.prototype.teardown.call(this.context, function () {
         expect(payWithCardView.teardown).to.be.calledOnce;
-        expect(completedView.teardown).to.be.calledOnce;
         done();
       });
     });
@@ -331,20 +302,6 @@ describe('MainView', function () {
 
       MainView.prototype.teardown.call(this.context, function (err) {
         expect(err).to.equal(error);
-        done();
-      });
-    });
-
-    it('calls callback with last error if multiple views error', function (done) {
-      var payWithCardView = this.context.views['braintree-dropin__pay-with-card-view'];
-      var completedView = this.context.views['braintree-dropin__completed'];
-      var completedError = new Error('completed view teardown error');
-
-      payWithCardView.teardown.yields(new Error('pay with card teardown error'));
-      completedView.teardown.yields(completedError);
-
-      MainView.prototype.teardown.call(this.context, function (err) {
-        expect(err).to.equal(completedError);
         done();
       });
     });

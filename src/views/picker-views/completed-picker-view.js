@@ -22,7 +22,7 @@ CompletedPickerView.prototype._initialize = function () {
   classList.add(this.element, 'braintree-dropin__completed-picker-view');
 
   this.element.addEventListener('click', function () {
-    this.mainView.updateCompletedView(this.paymentMethod, true);
+    this.mainView.updateActivePaymentMethod(this.paymentMethod, true);
   }.bind(this));
 
   a.textContent = this.paymentMethod.type;

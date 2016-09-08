@@ -28,7 +28,7 @@ describe('CompletedPickerView', function () {
 
       this.context = {
         element: this.fakeCompletedPickerView,
-        mainView: {updateCompletedView: this.sandbox.stub()},
+        mainView: {updateActivePaymentMethod: this.sandbox.stub()},
         paymentMethod: 'a-payment-method'
       };
     });
@@ -40,12 +40,12 @@ describe('CompletedPickerView', function () {
       expect(classlist.add).to.have.been.calledWith(this.context.element, 'braintree-dropin__completed-picker-view');
     });
 
-    it('calls updateCompletedView when clicked', function () {
+    it('sets the active payment method when clicked', function () {
       CompletedPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
-      expect(this.context.mainView.updateCompletedView).to.be.calledWith(this.context.paymentMethod, true);
+      expect(this.context.mainView.updateActivePaymentMethod).to.be.calledWith(this.context.paymentMethod, true);
     });
   });
 });

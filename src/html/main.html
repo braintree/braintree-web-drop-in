@@ -1,36 +1,45 @@
-<div class="braintree-drop-in">
-  <div class="braintree-dropin__closed braintree-dropin__payment-method-picker">
-    <div class="braintree-dropin__payment-method-picker-toggler">Payment Method</div>
-  </div>
+<div class="braintree-dropin">
+  <div class="braintree-dropin__payment-method-picker">
+    <div class="braintree-dropin__display">
 
-  <div class="braintree-dropin__view braintree-dropin__pay-with-card braintree-form">
-    <div class="braintree-form__card-field">
-      <label class="braintree-form__label" for="number">Card Number</label>
-      <div class="braintree-form__fields braintree-form__fields--hosted braintree-form__number"></div>
+      <div class="braintree-dropin__active-payment-method braintree-dropin__hide">
+        <div class="braintree-dropin__icon-card"></div>
+        <dl class="braintree-dropin__list-definition">
+          <dt class="braintree-dropin__list-term"></dt>
+          <dd class="braintree-dropin__list-desc"></dd>
+        </dl>
+      </div>
+
+      <div class="braintree-dropin__choose-payment-method">Choose Payment Method</div>
+      <div class="braintree-dropin__icon-arrow"></div>
     </div>
 
-    <div class="braintree-form__card-field">
-      <label class="braintree-form__label" for="expiration">Expiration Date</label>
-      <div class="braintree-form__fields braintree-form__fields--hosted braintree-form__expiration"></div>
-    </div>
-
-    <div class="braintree-form__card-field braintree-form__cvv-container">
-      <label class="braintree-form__label" for="cvv">CVV</label>
-      <div class="braintree-form__fields braintree-form__fields--hosted braintree-form__cvv"></div>
-    </div>
-
-    <div class="braintree-form__card-field braintree-form__postal-code-container">
-      <label class="braintree-form__label" for="postal-code">Postal Code</label>
-      <div class="braintree-form__fields braintree-form__fields--hosted braintree-form__postal-code"></div>
+    <div class="braintree-dropin__drawer braintree-dropin__hide">
+      <ul class="braintree-dropin__saved-payment-methods">Saved Payment Methods</ul>
+      <ul class="braintree-dropin__enabled-payment-methods">Add Another Payment Method</ul>
     </div>
   </div>
 
-  <div class="braintree-dropin__view braintree-dropin__completed">
-    <div class="braintree-icon--card"></div>
-    <dl class="braintree-list--definition">
-      <dt class="braintree-list__term"></dt>
-      <dd class="braintree-list__desc"></dd>
-    </dl>
-    <div class="braintree-icon--arrow"></div>
+  <!-- temporarily hidden -->
+  <div class="braintree-dropin__view braintree-dropin__pay-with-card braintree-dropin__form braintree-dropin__hide">
+    <div class="braintree-dropin__form-card-field">
+      <label class="braintree-dropin__form-label" for="number">Card Number</label>
+      <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-number"></div>
+    </div>
+
+    <div class="braintree-dropin__form-card-field">
+      <label class="braintree-dropin__form-label" for="expiration">Expiration Date</label>
+      <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-expiration"></div>
+    </div>
+
+    <div class="braintree-dropin__form-card-field braintree-dropin__form-cvv-container">
+      <label class="braintree-dropin__form-label" for="cvv">CVV</label>
+      <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-cvv"></div>
+    </div>
+
+    <div class="braintree-dropin__form-card-field braintree-dropin__form-postal-code-container">
+      <label class="braintree-dropin__form-label" for="postal-code">Postal Code</label>
+      <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-postal-code"></div>
+    </div>
   </div>
 </div>

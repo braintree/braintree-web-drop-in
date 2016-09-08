@@ -1,3 +1,22 @@
+.braintree-dropin__payment-method-picker {
+    width: 100%;
+    display: flex;
+    padding: 1em 2em 1em 1.5em;
+    margin: 0;
+    cursor: pointer;
+    transition: all $time-fast;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+
+
+
+
+
+
+/*
 .braintree-dropdown--payment {
     position: relative;
     margin-bottom: 20px;
@@ -12,6 +31,7 @@
     align-items: center;
     justify-content: space-between;
 }
+
 .braintree-dropdown__default--container {
     border-radius: 3px;
     border: 1px solid $black-85;
@@ -23,17 +43,17 @@
     background-image: linear-gradient(-180deg, $black-90 0%, $black-95 100%);
     border-radius: 3px 3px 0 0;
 }
-.braintree-icon--arrow {
+.braintree-dropin__icon-arrow {
     width: 20px;
     height: 20px;
     transition: transform 100ms ease-in-out;
     transform: rotate(0deg);
-    &.braintree-arrow--active {
+    &.braintree-dropin__icon-arrow-active {
         transition: transform 100ms ease-in-out;
         transform: rotate(180deg);
     }
 }
-.braintree-icon--check {
+.braintree-dropin__icon-check {
     display: inline-block;
     width: 20px;
     height: 20px;
@@ -94,12 +114,13 @@
     margin-right: 30px;
     margin-bottom: 0;
 }
-.braintree-card-logos__group {
+.braintree-dropin__card-logos-group {
     text-align: center;
     margin-bottom: 20px;
 }
-.braintree-icon--card {
+.braintree-dropin__icon-card {
     display: inline-block;
     width: 44px;
     height: 24px;
 }
+*/

@@ -1,7 +1,6 @@
 'use strict';
 
 var BaseView = require('./base-view');
-var CompletedView = require('./completed-view');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
 
@@ -16,9 +15,6 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
-  var completedView = new CompletedView({
-    element: this.dropinWrapper.querySelector('.' + CompletedView.ID)
-  });
   var payWithCardView = new PayWithCardView({
     element: this.dropinWrapper.querySelector('.' + PayWithCardView.ID),
     mainView: this,
@@ -32,18 +28,14 @@ MainView.prototype._initialize = function () {
   });
 
   this.views = {};
-  this.addView(completedView);
   this.addView(payWithCardView);
   this.addView(paymentMethodPickerView);
   this.paymentMethodPickerView = paymentMethodPickerView;
 
-  if (this.existingPaymentMethods.length > 0) {
-    completedView.updatePaymentMethod(this.existingPaymentMethods[0]);
-    this.setActiveView(completedView.ID);
-  } else if (this.paymentMethodPickerView.views.length > 1) {
-    this.setActiveView(this.paymentMethodPickerView.ID);
+  if (this.paymentMethodPickerView.views.length === 1) {
+    this.setActiveView(PayWithCardView.ID);
   } else {
-    this.setActiveView(payWithCardView.ID);
+    this.setActiveView(PaymentMethodPickerView.ID);
   }
 };
 
@@ -53,8 +45,6 @@ MainView.prototype.addView = function (view) {
 
 MainView.prototype.setActiveView = function (id) {
   this.activeView = this.views[id];
-  this.paymentMethodPickerView.collapse();
-
   this.dropinWrapper.className = id;
 };
 
@@ -78,11 +68,9 @@ MainView.prototype.asyncDependencyReady = function () {
   }
 };
 
-MainView.prototype.updateCompletedView = function (paymentMethod, existing) {
-  var completedView = this.views[CompletedView.ID];
-
-  completedView.updatePaymentMethod(paymentMethod);
-  this.setActiveView(CompletedView.ID);
+MainView.prototype.updateActivePaymentMethod = function (paymentMethod, existing) {
+  this.setActiveView(PaymentMethodPickerView.ID);
+  this.paymentMethodPickerView.setActivePaymentMethod(paymentMethod);
 
   if (!existing) {
     this.paymentMethodPickerView.addCompletedPickerView(paymentMethod);

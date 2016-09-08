@@ -12,8 +12,8 @@ describe('PayWithCardView', function () {
     this.fakePayWithCardTemplate.innerHTML = [
       '<div><input name="number"></div>',
       '<div><input name="expiration"></div>',
-      '<div class="braintree-form__cvv-container"><input name="cvv"></div>',
-      '<div class="braintree-form__postal-code-container"><input name="postal-code"></div>'
+      '<div class="braintree-dropin__form-cvv-container"><input name="cvv"></div>',
+      '<div class="braintree-dropin__form-postal-code-container"><input name="postal-code"></div>'
     ];
 
     document.body.appendChild(this.fakePayWithCardTemplate);
@@ -52,7 +52,8 @@ describe('PayWithCardView', function () {
         mainView: {
           componentId: 'component-id',
           asyncDependencyStarting: this.sandbox.stub(),
-          asyncDependencyReady: this.sandbox.stub()
+          asyncDependencyReady: this.sandbox.stub(),
+          updateActivePaymentMethod: this.sandbox.stub()
         },
         _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector
       };
@@ -67,13 +68,13 @@ describe('PayWithCardView', function () {
       };
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-form__cvv-container')).to.exist;
+      expect(this.context.element.querySelector('.braintree-dropin__form-cvv-container')).to.exist;
     });
 
     it('does not have cvv if not supplied in challenges', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-form__cvv-container')).not.to.exist;
+      expect(this.context.element.querySelector('.braintree-dropin__form-cvv-container')).not.to.exist;
     });
 
     it('has postal code if supplied in challenges', function () {
@@ -84,13 +85,13 @@ describe('PayWithCardView', function () {
       };
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-form__postal-code-container')).to.exist;
+      expect(this.context.element.querySelector('.braintree-dropin__form-postal-code-container')).to.exist;
     });
 
     it('does not have postal code if not supplied in challenges', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-form__postal-code-container')).not.to.exist;
+      expect(this.context.element.querySelector('.braintree-dropin__form-postal-code-container')).not.to.exist;
     });
 
     it('starts async dependency', function () {
@@ -176,7 +177,7 @@ describe('PayWithCardView', function () {
           tokenize: this.sandbox.stub()
         },
         mainView: {
-          updateCompletedView: this.sandbox.stub()
+          updateActivePaymentMethod: this.sandbox.stub()
         },
         options: {
           client: {
@@ -266,22 +267,22 @@ describe('PayWithCardView', function () {
       });
     });
 
-    it('calls updateCompletedView when tokenize is successful', function () {
+    it('updates the active payment method when tokenize is successful', function () {
       var stubPayload = {};
 
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
 
       PayWithCardView.prototype.requestPaymentMethod.call(this.context, function () {});
 
-      expect(this.context.mainView.updateCompletedView).to.have.been.calledWith(stubPayload);
+      expect(this.context.mainView.updateActivePaymentMethod).to.have.been.calledWith(stubPayload);
     });
 
-    it('does not call updateCompletedView when tokenize fails', function () {
+    it('does not update the active payment method when tokenize fails', function () {
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(new Error('bad happen'));
 
       PayWithCardView.prototype.requestPaymentMethod.call(this.context, function () {});
 
-      expect(this.context.mainView.updateCompletedView).to.not.have.been.called;
+      expect(this.context.mainView.updateActivePaymentMethod).to.not.have.been.called;
     });
   });
 

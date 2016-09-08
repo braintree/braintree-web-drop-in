@@ -44,7 +44,7 @@ PayPalPickerView.prototype._initialize = function () {
           return;
         }
 
-        this.mainView.updateCompletedView(tokenizePayload);
+        this.mainView.updateActivePaymentMethod(tokenizePayload);
       }.bind(this));
     }.bind(this));
 
