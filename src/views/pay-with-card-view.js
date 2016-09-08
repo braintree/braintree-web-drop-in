@@ -7,6 +7,7 @@ var hostedFields = require('braintree-web/hosted-fields');
 function PayWithCardView() {
   BaseView.apply(this, arguments);
 
+  this.submit = this.element.querySelector('.braintree-dropin__form-submit');
   this._initialize();
 }
 
@@ -79,9 +80,14 @@ PayWithCardView.prototype._initialize = function () {
       return;
     }
 
+    this.submit.addEventListener('click', this.tokenize.bind(this));
     this.hostedFieldsInstance = hostedFieldsInstance;
     this.mainView.asyncDependencyReady();
   }.bind(this));
+};
+
+PayWithCardView.prototype.tokenize = function () {
+  this.requestPaymentMethod(function () {});
 };
 
 PayWithCardView.prototype.requestPaymentMethod = function (callback) {

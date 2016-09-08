@@ -16,7 +16,7 @@ CardPickerView.prototype = Object.create(BasePickerView.prototype);
 CardPickerView.prototype.constructor = CardPickerView;
 
 CardPickerView.prototype._initialize = function () {
-  var a = document.createElement('a');
+  var button = document.createElement('button');
 
   BasePickerView.prototype._initialize.apply(this, arguments);
 
@@ -26,9 +26,9 @@ CardPickerView.prototype._initialize = function () {
     this.mainView.setActiveView(PayWithCardView.ID);
   }.bind(this), false);
 
-  a.textContent = 'Pay with Card';
-  a.href = '#';
-  this.element.appendChild(a);
+  button.textContent = 'Pay with Card';
+  button.type = 'button';
+  this.element.appendChild(button);
 };
 
 module.exports = CardPickerView;

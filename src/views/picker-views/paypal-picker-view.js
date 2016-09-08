@@ -19,14 +19,14 @@ PayPalPickerView.prototype = Object.create(BasePickerView.prototype);
 PayPalPickerView.prototype.constructor = PayPalPickerView;
 
 PayPalPickerView.prototype._initialize = function () {
-  var a = document.createElement('a');
+  var button = document.createElement('button');
 
   BasePickerView.prototype._initialize.apply(this, arguments);
 
   classList.add(this.element, 'braintree-dropin__paypal-picker-view');
-  a.href = '#';
-  a.textContent = 'Pay with PayPal';
-  this.element.appendChild(a);
+  button.textContent = 'Pay with PayPal';
+  button.type = 'button';
+  this.element.appendChild(button);
   this.mainView.asyncDependencyStarting();
 
   paypal.create({client: this.options.client}, function (err, paypalInstance) {
