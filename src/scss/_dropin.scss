@@ -51,6 +51,7 @@
 }
 
 .braintree-dropin__drawer {
+  box-shadow: 0 1px 1px 1px lightgray;
   background: white;
   width: 100%;
   position: absolute;
@@ -104,4 +105,8 @@
   border: none;
   border-bottom: 1px solid #bfbfbf;
   width: 100%;
+}
+
+.braintree-dropin__picker-view:last-child button {
+  border: none;
 }
