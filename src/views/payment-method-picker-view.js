@@ -53,7 +53,7 @@ PaymentMethodPickerView.prototype._initialize = function () {
 };
 
 PaymentMethodPickerView.prototype.toggleDrawer = function () {
-  classlist.toggle(this.drawer, 'braintree-dropin__hide');
+  classlist.toggle(this.element, 'braintree-dropin__collapsed');
 };
 
 PaymentMethodPickerView.prototype.addCompletedPickerView = function (paymentMethod) {

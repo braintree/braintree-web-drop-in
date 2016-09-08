@@ -107,12 +107,12 @@ describe('PaymentMethodPickerView', function () {
     it('toggles braintree-dropin__hide class of payment method picker element', function () {
       this.sandbox.spy(classlist, 'toggle');
       this.context = {
-        drawer: this.element.querySelector('.braintree-dropin__drawer')
+        element: this.element.querySelector('.braintree-dropin__drawer')
       };
       PaymentMethodPickerView.prototype.toggleDrawer.call(this.context);
 
       expect(classlist.toggle).to.be.calledOnce;
-      expect(classlist.toggle).to.be.calledWith(this.context.drawer, 'braintree-dropin__hide');
+      expect(classlist.toggle).to.be.calledWith(this.context.element, 'braintree-dropin__collapsed');
     });
   });
 

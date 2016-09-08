@@ -1,126 +1,100 @@
 .braintree-dropin__payment-method-picker {
-    width: 100%;
-    display: flex;
-    padding: 1em 2em 1em 1.5em;
-    margin: 0;
-    cursor: pointer;
-    transition: all $time-fast;
-    align-items: center;
-    justify-content: space-between;
+  width: 100%;
+  border-radius: 3px;
+  overflow: hidden;
 }
 
+.braintree-dropin__display {
+  background: #f7f7f7;
+  background-image: linear-gradient(-180deg, #e6e6e6 0%, #f2f2f2 100%);
+  border: 1px solid #d9d9d9;
+  display: flex;
+  padding: 1em 2em 1em 1.5em;
+  margin: 0;
+  cursor: pointer;
+  transition: all $time-fast;
+  align-items: center;
+  justify-content: space-between;
 
-
-
-
-
-
-
-/*
-.braintree-dropdown--payment {
-    position: relative;
-    margin-bottom: 20px;
-}
-.braintree-dropdown__default {
-    width: 100%;
-    display: flex;
-    padding: 8px 16px 8px 12px;
-    margin: 0;
-    cursor: pointer;
-    transition: all $time-fast;
-    align-items: center;
-    justify-content: space-between;
+  opacity: 0.6;
+  -webkit-transition: -webkit-filter 100ms;
+  transition: -webkit-filter 100ms;
+  transition: filter 100ms;
+  transition: filter 100ms, -webkit-filter 100ms;
+  -webkit-filter: grayscale(1);
 }
 
-.braintree-dropdown__default--container {
-    border-radius: 3px;
-    border: 1px solid $black-85;
-    background: $black-95;
-    background-image: linear-gradient(-180deg, $black-97 0%, $black-95 100%);
+.braintree-dropin__collapsed .braintree-dropin__display {
+  opacity: 1;
+  -webkit-filter: none;
 }
-.braintree-dropdown__default--active {
-    background: $black-97;
-    background-image: linear-gradient(-180deg, $black-90 0%, $black-95 100%);
-    border-radius: 3px 3px 0 0;
+
+.braintree-dropin__hide,
+.braintree-dropin__collapsed .braintree-dropin__drawer {
+    visibility: hidden;
+    transition: all $time-faster linear;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
 }
-.braintree-dropin__icon-arrow {
-    width: 20px;
-    height: 20px;
-    transition: transform 100ms ease-in-out;
-    transform: rotate(0deg);
-    &.braintree-dropin__icon-arrow-active {
-        transition: transform 100ms ease-in-out;
-        transform: rotate(180deg);
-    }
+
+.braintree-dropin__icon-arrow::before {
+  content: ">";
+  display: block;
+  font-family: Courier, monospace;
+  transition: transform 100ms ease-in-out, -webkit-transform 100ms ease-in-out;
+  transform: rotate(-90deg);
 }
-.braintree-dropin__icon-check {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    stroke-width: 0;
-    stroke: currentColor;
-    fill: currentColor;
+
+.braintree-dropin__collapsed .braintree-dropin__icon-arrow::before {
+  transform: rotate(90deg);
 }
-.braintree-dropdown__option--container {
-    position: absolute;
-    z-index: 2147483647; // highest z-index!
-    width: 100%;
-    transition: all $time-fast;
-    border: 1px solid $black-85;
-    border-top: 0;
-    border-radius: 0 0 3px 3px;
-    background: $white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    transition: opacity $time-faster linear;
+
+.braintree-dropin__drawer {
+  background: white;
+  width: 100%;
+  position: absolute;
+  z-index: 2147483647;
+  border: 1px solid #d9d9d9;
 }
-.braintree-dropdown__option {
-    display: flex;
-    padding: 8px 16px 8px 12px;
-    transition: background $time-faster ease-in-out;
-    text-decoration: none;
-    color: $black;
-    font-size: $type-16;
-    line-height: 1.4;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    &:hover {
-        background: $black-95;
-    }
-    &:active {
-        background: $black-97;
-    }
+
+.braintree-dropin__drawer-list {
+  padding: 0;
+  margin: 0;
 }
-.braintree-dropdown__option--divider {
-    border-bottom: 1px solid $black-85;
+
+.braintree-dropin__drawer-header {
+  line-height: 1.4;
+  margin: 0;
+  border: 1px solid #d9d9d9;
+  border-left: none;
+  border-right: none;
+  padding: 1em;
+  font-size: 12px;
+  text-align: center;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #666;
+  background: #e6e6e6;
+  font-weight: 600;
 }
-.braintree-dropdown__option--vaulted {
-    justify-content: flex-start;
+
+.braintree-dropin__view {
+  display: none;
 }
-.braintree-dropdown__category {
-    line-height: 1.4;
-    margin: 0;
-    padding: 8px;
-    text-align: center;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: $black-40;
-    background: $black-90;
-    font-size: $type-12;
-    font-weight: 600;
+
+.braintree-dropin__pay-with-card .braintree-dropin__pay-with-card {
+  display: block;
 }
-.braintree-dropdown__label {
-    font-size: $type-16;
-    margin-right: 30px;
-    margin-bottom: 0;
+
+.braintree-dropin__view.braintree-dropin__pay-with-card {
+  padding: 1em;
+  border: 1px solid #d9d9d9;
 }
-.braintree-dropin__card-logos-group {
-    text-align: center;
-    margin-bottom: 20px;
+
+.braintree-dropin__form-fields-hosted {
+  height: 2em;
+  padding: 0.5em;
+  margin: 0.5em 0;
+  border: 1px solid #bfbfbf;
 }
-.braintree-dropin__icon-card {
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-}
-*/
