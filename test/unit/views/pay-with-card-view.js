@@ -1,26 +1,22 @@
 'use strict';
 
-var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var BaseView = require('../../../src/views/base-view');
 var fake = require('../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
+var mainHTML = require('../../../src/html/main.html');
+var PayWithCardView = require('../../../src/views/pay-with-card-view');
 
 describe('PayWithCardView', function () {
   beforeEach(function () {
-    this.fakePayWithCardTemplate = document.createElement('form');
-    this.fakePayWithCardTemplate.id = 'pay-with-card-view';
-    this.fakePayWithCardTemplate.innerHTML = [
-      '<div><input name="number"></div>',
-      '<div><input name="expiration"></div>',
-      '<div class="braintree-dropin__form-cvv-container"><input name="cvv"></div>',
-      '<div class="braintree-dropin__form-postal-code-container"><input name="postal-code"></div>'
-    ];
+    this.div = document.createElement('div');
 
-    document.body.appendChild(this.fakePayWithCardTemplate);
+    this.div.innerHTML = mainHTML;
+    document.body.appendChild(this.div);
+    this.element = document.body.querySelector('.braintree-dropin__pay-with-card');
   });
 
   afterEach(function () {
-    document.body.removeChild(this.fakePayWithCardTemplate);
+    document.body.removeChild(this.div);
   });
 
   describe('Constructor', function () {
@@ -29,20 +25,21 @@ describe('PayWithCardView', function () {
     });
 
     it('calls _initialize', function () {
-      new PayWithCardView(); // eslint-disable-line no-new
+      new PayWithCardView({element: this.element}); // eslint-disable-line no-new
 
       expect(PayWithCardView.prototype._initialize).to.have.been.calledOnce;
     });
 
     it('inherits from BaseView', function () {
-      expect(new PayWithCardView()).to.be.an.instanceOf(BaseView);
+      expect(new PayWithCardView({element: this.element})).to.be.an.instanceOf(BaseView);
     });
   });
 
   describe('_initialize', function () {
     beforeEach(function () {
       this.context = {
-        element: this.fakePayWithCardTemplate,
+        element: this.element,
+        submit: this.element.querySelector('.braintree-dropin__form-submit'),
         options: {
           client: {
             getConfiguration: fake.configuration,
@@ -55,7 +52,8 @@ describe('PayWithCardView', function () {
           asyncDependencyReady: this.sandbox.stub(),
           updateActivePaymentMethod: this.sandbox.stub()
         },
-        _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector
+        _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
+        tokenize: PayWithCardView.prototype.tokenize
       };
       this.sandbox.stub(hostedFields, 'create').yields(null, {});
     });

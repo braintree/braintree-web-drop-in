@@ -11,11 +11,15 @@ var PayPalPickerView = require('../../../src/views/picker-views/paypal-picker-vi
 
 describe('PaymentMethodPickerView', function () {
   beforeEach(function () {
-    var div = document.createElement('div');
+    this.div = document.createElement('div');
 
-    div.innerHTML = mainHTML;
-    document.body.appendChild(div);
+    this.div.innerHTML = mainHTML;
+    document.body.appendChild(this.div);
     this.element = document.body.querySelector('.braintree-dropin__payment-method-picker');
+  });
+
+  afterEach(function () {
+    document.body.removeChild(this.div);
   });
 
   describe('Constructor', function () {
