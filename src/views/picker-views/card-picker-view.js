@@ -1,8 +1,8 @@
 'use strict';
 
 var BasePickerView = require('./base-picker-view');
+var cardHTML = require('../../html/card-picker.html');
 var PayWithCardView = require('../pay-with-card-view');
-var classList = require('../../lib/classlist');
 
 function CardPickerView() {
   BasePickerView.apply(this, arguments);
@@ -16,19 +16,17 @@ CardPickerView.prototype = Object.create(BasePickerView.prototype);
 CardPickerView.prototype.constructor = CardPickerView;
 
 CardPickerView.prototype._initialize = function () {
-  var button = document.createElement('button');
+  var div = document.createElement('div');
+  var html = cardHTML;
 
   BasePickerView.prototype._initialize.apply(this, arguments);
 
-  classList.add(this.element, 'braintree-dropin__pay-with-card-picker-view');
+  div.innerHTML = html;
+  this.element.appendChild(div);
 
   this.element.addEventListener('click', function () {
     this.mainView.setActiveView(PayWithCardView.ID);
   }.bind(this), false);
-
-  button.textContent = 'Pay with Card';
-  button.type = 'button';
-  this.element.appendChild(button);
 };
 
 module.exports = CardPickerView;

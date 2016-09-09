@@ -1,8 +1,8 @@
 'use strict';
 
 var BasePickerView = require('./base-picker-view');
-var classList = require('../../lib/classlist');
 var paypal = require('braintree-web/paypal');
+var paypalHTML = require('../../html/paypal-picker.html');
 
 function PayPalPickerView() {
   BasePickerView.apply(this, arguments);
@@ -19,14 +19,13 @@ PayPalPickerView.prototype = Object.create(BasePickerView.prototype);
 PayPalPickerView.prototype.constructor = PayPalPickerView;
 
 PayPalPickerView.prototype._initialize = function () {
-  var button = document.createElement('button');
+  var div = document.createElement('div');
+  var html = paypalHTML;
 
   BasePickerView.prototype._initialize.apply(this, arguments);
 
-  classList.add(this.element, 'braintree-dropin__paypal-picker-view');
-  button.textContent = 'Pay with PayPal';
-  button.type = 'button';
-  this.element.appendChild(button);
+  div.innerHTML = html;
+  this.element.appendChild(div);
   this.mainView.asyncDependencyStarting();
 
   paypal.create({client: this.options.client}, function (err, paypalInstance) {

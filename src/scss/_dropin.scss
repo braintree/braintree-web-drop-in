@@ -100,14 +100,44 @@
   border: 1px solid #bfbfbf;
 }
 
+.braintree-dropin__picker-view {
+  display: flex;
+  padding: 8px 16px 8px 12px;
+  transition: background $time-faster ease-in-out;
+  text-decoration: none;
+  color: $black;
+  font-size: $type-16;
+  line-height: 1.4;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  &:hover {
+    background: $black-95;
+  }
+  &:active {
+    background: $black-97;
+  }
+  border-bottom: 1px solid $black-85;
+}
+
 .braintree-dropin__picker-view button {
   outline: none;
-  background: white;
+  background: #009cde;
+  color: white;
   border: none;
   border-bottom: 1px solid #bfbfbf;
-  width: 100%;
 }
 
 .braintree-dropin__picker-view:last-child button {
   border: none;
+}
+
+.braintree-dropin__picker-label {
+  font-size: $type-16;
+  margin-right: 30px;
+  margin-bottom: 0;
+}
+
+.braintree-dropin__completed-picker-view {
+  justify-content: flex-start;
 }

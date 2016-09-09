@@ -2,7 +2,6 @@
 
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var CardPickerView = require('../../../../src/views/picker-views/card-picker-view');
-var classlist = require('../../../../src/lib/classlist');
 
 describe('CardPickerView', function () {
   describe('Constructor', function () {
@@ -37,14 +36,6 @@ describe('CardPickerView', function () {
       };
     });
 
-    it('adds pay with card picker view class', function () {
-      this.sandbox.spy(classlist, 'add');
-
-      CardPickerView.prototype._initialize.call(this.context);
-
-      expect(classlist.add).to.have.been.calledWith(this.context.element, 'braintree-dropin__pay-with-card-picker-view');
-    });
-
     it('sets pay with card view as the active view when clicked', function () {
       CardPickerView.prototype._initialize.call(this.context);
 
@@ -52,6 +43,12 @@ describe('CardPickerView', function () {
 
       expect(this.context.mainView.setActiveView).to.be.calledOnce;
       expect(this.context.mainView.setActiveView).to.be.calledWith('braintree-dropin__pay-with-card');
+    });
+
+    it('appends card picker html', function () {
+      CardPickerView.prototype._initialize.call(this.context);
+
+      expect(this.context.element.querySelector('.braintree-dropin__pay-with-card-picker-view')).to.exist;
     });
   });
 });

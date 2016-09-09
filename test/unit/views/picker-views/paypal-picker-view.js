@@ -2,7 +2,6 @@
 
 var PayPalPickerView = require('../../../../src/views/picker-views/paypal-picker-view');
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
-var classlist = require('../../../../src/lib/classlist');
 var fake = require('../../../helpers/fake');
 var paypal = require('braintree-web/paypal');
 
@@ -79,12 +78,10 @@ describe('PayPalPickerView', function () {
       expect(console.error).to.have.been.calledWith(new Error('create failed'));
     });
 
-    it('adds pay with paypal picker view class', function () {
-      this.sandbox.spy(classlist, 'add');
-
+    it('appends PayPal picker html', function () {
       PayPalPickerView.prototype._initialize.call(this.context);
 
-      expect(classlist.add).to.have.been.calledWith(this.context.element, 'braintree-dropin__paypal-picker-view');
+      expect(this.context.element.querySelector('.braintree-dropin__paypal-picker-view')).to.exist;
     });
   });
 

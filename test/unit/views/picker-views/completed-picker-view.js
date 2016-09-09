@@ -2,7 +2,6 @@
 
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var CompletedPickerView = require('../../../../src/views/picker-views/completed-picker-view');
-var classlist = require('../../../../src/lib/classlist');
 
 describe('CompletedPickerView', function () {
   describe('Constructor', function () {
@@ -33,19 +32,18 @@ describe('CompletedPickerView', function () {
       };
     });
 
-    it('adds completed picker view class', function () {
-      this.sandbox.stub(classlist, 'add');
-      CompletedPickerView.prototype._initialize.call(this.context);
-
-      expect(classlist.add).to.have.been.calledWith(this.context.element, 'braintree-dropin__completed-picker-view');
-    });
-
     it('sets the active payment method when clicked', function () {
       CompletedPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
       expect(this.context.mainView.updateActivePaymentMethod).to.be.calledWith(this.context.paymentMethod, true);
+    });
+
+    it('appends completed picker html', function () {
+      CompletedPickerView.prototype._initialize.call(this.context);
+
+      expect(this.context.element.querySelector('.braintree-dropin__completed-picker-view')).to.exist;
     });
   });
 });
