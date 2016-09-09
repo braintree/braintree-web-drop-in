@@ -12,7 +12,7 @@ describe('PayWithCardView', function () {
 
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
-    this.element = document.body.querySelector('.braintree-dropin__pay-with-card');
+    this.element = document.body.querySelector('.braintree-dropin__view.braintree-dropin__pay-with-card');
   });
 
   afterEach(function () {

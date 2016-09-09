@@ -16,7 +16,7 @@ MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
   var payWithCardView = new PayWithCardView({
-    element: this.dropinWrapper.querySelector('.' + PayWithCardView.ID),
+    element: this.dropinWrapper.querySelector('.braintree-dropin__view.' + PayWithCardView.ID),
     mainView: this,
     options: this.options
   });
