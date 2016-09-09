@@ -8,6 +8,7 @@ function MainView() {
   BaseView.apply(this, arguments);
 
   this.dependenciesInitializing = 0;
+  this.element = this.dropinWrapper;
   this._initialize();
 }
 
@@ -16,12 +17,12 @@ MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
   var payWithCardView = new PayWithCardView({
-    element: this.dropinWrapper.querySelector('.braintree-dropin__view.' + PayWithCardView.ID),
+    element: this.getElementById(PayWithCardView.ID),
     mainView: this,
     options: this.options
   });
   var paymentMethodPickerView = new PaymentMethodPickerView({
-    element: this.dropinWrapper.querySelector('.' + PaymentMethodPickerView.ID),
+    element: this.getElementById(PaymentMethodPickerView.ID),
     existingPaymentMethods: this.existingPaymentMethods,
     mainView: this,
     options: this.options
@@ -35,7 +36,7 @@ MainView.prototype._initialize = function () {
   if (this.paymentMethodPickerView.views.length === 1) {
     this.setActiveView(PayWithCardView.ID);
   } else {
-    this.setActiveView(PaymentMethodPickerView.ID);
+    this.setActiveView('choose-payment-method');
   }
 };
 
@@ -44,8 +45,8 @@ MainView.prototype.addView = function (view) {
 };
 
 MainView.prototype.setActiveView = function (id) {
-  this.activeView = this.views[id];
-  this.dropinWrapper.className = id;
+  this.activeView = this.views[id] || PaymentMethodPickerView.ID;
+  this.dropinWrapper.className = 'braintree-dropin__' + id;
 };
 
 MainView.prototype.requestPaymentMethod = function (callback) {
@@ -69,7 +70,7 @@ MainView.prototype.asyncDependencyReady = function () {
 };
 
 MainView.prototype.updateActivePaymentMethod = function (paymentMethod, existing) {
-  this.setActiveView(PaymentMethodPickerView.ID);
+  this.setActiveView('active-payment-method');
   this.paymentMethodPickerView.setActivePaymentMethod(paymentMethod);
 
   if (!existing) {

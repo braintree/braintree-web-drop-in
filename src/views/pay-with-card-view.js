@@ -7,13 +7,12 @@ var hostedFields = require('braintree-web/hosted-fields');
 function PayWithCardView() {
   BaseView.apply(this, arguments);
 
-  this.submit = this.element.querySelector('.braintree-dropin__form-submit');
   this._initialize();
 }
 
 PayWithCardView.prototype = Object.create(BaseView.prototype);
 PayWithCardView.prototype.constructor = PayWithCardView;
-PayWithCardView.ID = PayWithCardView.prototype.ID = 'braintree-dropin__pay-with-card';
+PayWithCardView.ID = PayWithCardView.prototype.ID = 'pay-with-card';
 
 PayWithCardView.prototype._initialize = function () {
   var challenges = this.options.client.getConfiguration().gatewayConfiguration.challenges;
@@ -80,6 +79,7 @@ PayWithCardView.prototype._initialize = function () {
       return;
     }
 
+    this.submit = this.element.querySelector('.braintree-dropin__form-submit');
     this.submit.addEventListener('click', this.tokenize.bind(this));
     this.hostedFieldsInstance = hostedFieldsInstance;
     this.mainView.asyncDependencyReady();

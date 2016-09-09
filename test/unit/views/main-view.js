@@ -40,7 +40,8 @@ describe('MainView', function () {
         addView: this.sandbox.stub(),
         setActiveView: this.sandbox.stub(),
         existingPaymentMethods: {},
-        dependenciesInitializing: 0
+        dependenciesInitializing: 0,
+        getElementById: BaseView.prototype.getElementById
       };
 
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
@@ -62,7 +63,7 @@ describe('MainView', function () {
       expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PaymentMethodPickerView));
     });
 
-    it('sets the PaymentMethodPickerView as the active view if multiple payment methods are available', function () {
+    it('sets choose payment method as the active view if multiple payment methods are available', function () {
       PaymentMethodPickerView.prototype._initialize.restore();
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
         this.views = [{}, {}];
@@ -70,7 +71,7 @@ describe('MainView', function () {
 
       MainView.prototype._initialize.call(this.context);
 
-      expect(this.context.setActiveView).to.have.been.calledWith(PaymentMethodPickerView.ID);
+      expect(this.context.setActiveView).to.have.been.calledWith('choose-payment-method');
     });
 
     it('creates a PayWithCardView if one payment method is available', function () {
@@ -222,12 +223,12 @@ describe('MainView', function () {
       };
     });
 
-    it('sets payment method picker view as active view', function () {
+    it('sets active payment method as active view', function () {
       var paymentMethod = {};
 
       MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
 
-      expect(this.context.setActiveView).to.be.calledWith(PaymentMethodPickerView.ID);
+      expect(this.context.setActiveView).to.be.calledWith('active-payment-method');
     });
 
     it('sets the payment method as the active payment method', function () {

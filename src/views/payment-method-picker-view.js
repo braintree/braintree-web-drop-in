@@ -14,19 +14,19 @@ function PaymentMethodPickerView() {
 
 PaymentMethodPickerView.prototype = Object.create(BaseView.prototype);
 PaymentMethodPickerView.prototype.constructor = PaymentMethodPickerView;
-PaymentMethodPickerView.ID = PaymentMethodPickerView.prototype.ID = 'braintree-dropin__payment-method-picker';
+PaymentMethodPickerView.ID = PaymentMethodPickerView.prototype.ID = 'payment-method-picker';
 
 PaymentMethodPickerView.prototype._initialize = function () {
-  var enabledPaymentMethods = this.element.querySelector('.braintree-dropin__enabled-payment-methods');
+  var enabledPaymentMethods = this.getElementById('enabled-payment-methods');
 
   this.element.addEventListener('click', function () {
     this.toggleDrawer();
   }.bind(this));
 
-  this.drawer = this.element.querySelector('.braintree-dropin__drawer');
-  this.savedPaymentMethods = this.element.querySelector('.braintree-dropin__saved-payment-methods');
-  this.activePaymentMethod = this.element.querySelector('.braintree-dropin__active-payment-method');
-  this.choosePaymentMethod = this.element.querySelector('.braintree-dropin__choose-payment-method');
+  this.drawer = this.getElementById('drawer');
+  this.savedPaymentMethods = this.getElementById('saved-payment-methods');
+  this.activePaymentMethod = this.getElementById('active-payment-method');
+  this.choosePaymentMethod = this.getElementById('choose-payment-method');
 
   this.views = [
     CardPickerView,
@@ -79,9 +79,6 @@ PaymentMethodPickerView.prototype.setActivePaymentMethod = function (paymentMeth
     termSlot.textContent = 'Ending in ••' + this.paymentMethod.details.lastTwo;
     descriptionSlot.textContent = this.paymentMethod.details.cardType;
   }
-
-  classlist.add(this.choosePaymentMethod, 'braintree-dropin__hide');
-  classlist.remove(this.activePaymentMethod, 'braintree-dropin__hide');
 };
 
 PaymentMethodPickerView.prototype.teardown = function (callback) {

@@ -15,7 +15,7 @@ describe('PaymentMethodPickerView', function () {
 
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
-    this.element = document.body.querySelector('.braintree-dropin__payment-method-picker');
+    this.element = document.body.querySelector('[data-braintree-id="payment-method-picker"]');
   });
 
   afterEach(function () {
@@ -43,10 +43,12 @@ describe('PaymentMethodPickerView', function () {
       this.context = {
         element: this.element,
         existingPaymentMethods: [],
-        ID: 'braintree-dropin__payment-method-picker',
+        getElementById: BaseView.prototype.getElementById,
+        ID: PaymentMethodPickerView.ID,
         mainView: {
           asyncDependencyStarting: function () {},
-          asyncDependencyReady: function () {}
+          asyncDependencyReady: function () {},
+          element: document.body.querySelector('.braintree-dropin')
         },
         options: {
           client: {}
@@ -61,7 +63,7 @@ describe('PaymentMethodPickerView', function () {
     });
 
     it('adds an event listener for payment method picker toggle', function () {
-      var drawer = document.body.querySelector('.braintree-dropin__drawer');
+      var drawer = document.body.querySelector('[data-braintree-id="drawer"]');
 
       PaymentMethodPickerView.prototype._initialize.call(this.context);
 
@@ -195,7 +197,7 @@ describe('PaymentMethodPickerView', function () {
   describe('addCompletedPickerView', function () {
     beforeEach(function () {
       this.context = {
-        savedPaymentMethods: this.element.querySelector('.braintree-dropin__saved-payment-methods'),
+        savedPaymentMethods: this.element.querySelector('[data-braintree-id="saved-payment-methods"]'),
         views: []
       };
     });

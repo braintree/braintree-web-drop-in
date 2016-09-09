@@ -1,56 +1,56 @@
 <div class="braintree-dropin">
-  <div class="braintree-dropin__payment-method-picker braintree-dropin__collapsed">
-    <div class="braintree-dropin__display">
+  <div data-braintree-id="payment-method-picker" class="braintree-dropin__collapsed">
+    <div class="braintree-dropin__header-area">
 
-      <div class="braintree-dropin__display-details">
-        <div class="braintree-dropin__active-payment-method braintree-dropin__hide">
-          <div class="braintree-dropin__icon-card"></div>
-          <dl class="braintree-dropin__list-definition">
-            <dt class="braintree-dropin__list-term"></dt>
-            <dd class="braintree-dropin__list-desc"></dd>
-          </dl>
-        </div>
-
-        <div class="braintree-dropin__choose-payment-method braintree-dropin__hide">Choose Payment Method</div>
-        <div class="braintree-dropin__pay-with-card">Pay with Card</div>
+      <div data-braintree-id="active-payment-method" class="braintree-dropin__header braintree-dropin__active-payment-method">
+        <div class="braintree-dropin__icon-card"></div>
+        <dl class="braintree-dropin__list-definition">
+          <dt class="braintree-dropin__list-term"></dt>
+          <dd class="braintree-dropin__list-desc"></dd>
+        </dl>
       </div>
+
+      <div data-braintree-id="choose-payment-method" class="braintree-dropin__header braintree-dropin__choose-payment-method">Choose Payment Method</div>
+      <div class="braintree-dropin__header braintree-dropin__pay-with-card">Pay with Card</div>
 
       <div class="braintree-dropin__icon-arrow"></div>
     </div>
 
-    <div class="braintree-dropin__drawer">
+    <div data-braintree-id="drawer" class="braintree-dropin__drawer">
       <h2 class="braintree-dropin__drawer-header">Saved Payment Methods</h2>
-      <ul class="braintree-dropin__drawer-list braintree-dropin__saved-payment-methods"></ul>
+      <ul data-braintree-id="saved-payment-methods" class="braintree-dropin__drawer-list"></ul>
       <h2 class="braintree-dropin__drawer-header">Add Another Payment Method</h2>
-      <ul class="braintree-dropin__drawer-list braintree-dropin__enabled-payment-methods"></ul>
+      <ul data-braintree-id="enabled-payment-methods" class="braintree-dropin__drawer-list"></ul>
     </div>
   </div>
 
-  <div class="braintree-dropin__view braintree-dropin__pay-with-card braintree-dropin__form">
-    <div class="braintree-dropin__form-card-field">
-      <label class="braintree-dropin__form-label">Card Number
-        <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-number"></div>
-      </label>
-    </div>
+  <div class="braintree-dropin__sheet-area">
+    <div data-braintree-id="pay-with-card" class="braintree-dropin__sheet braintree-dropin__pay-with-card braintree-dropin__form">
+      <div class="braintree-dropin__form-card-field">
+        <label class="braintree-dropin__form-label">Card Number
+          <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-number"></div>
+        </label>
+      </div>
 
-    <div class="braintree-dropin__form-card-field">
-      <label class="braintree-dropin__form-label">Expiration Date
-        <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-expiration"></div>
-      </label>
-    </div>
+      <div class="braintree-dropin__form-card-field">
+        <label class="braintree-dropin__form-label">Expiration Date
+          <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-expiration"></div>
+        </label>
+      </div>
 
-    <div class="braintree-dropin__form-card-field braintree-dropin__form-cvv-container">
-      <label class="braintree-dropin__form-label">CVV
-        <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-cvv"></div>
-      </label>
-    </div>
+      <div class="braintree-dropin__form-card-field braintree-dropin__form-cvv-container">
+        <label class="braintree-dropin__form-label">CVV
+          <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-cvv"></div>
+        </label>
+      </div>
 
-    <div class="braintree-dropin__form-card-field braintree-dropin__form-postal-code-container">
-      <label class="braintree-dropin__form-label">Postal Code
-        <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-postal-code"></div>
-      </label>
-    </div>
+      <div class="braintree-dropin__form-card-field braintree-dropin__form-postal-code-container">
+        <label class="braintree-dropin__form-label">Postal Code
+          <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-postal-code"></div>
+        </label>
+      </div>
 
-    <button type="button" class="braintree-dropin__form-submit">Use this card</button>
+      <button type="button" class="braintree-dropin__form-submit">Use this card</button>
+    </div>
   </div>
 </div>

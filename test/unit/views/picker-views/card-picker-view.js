@@ -2,6 +2,7 @@
 
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var CardPickerView = require('../../../../src/views/picker-views/card-picker-view');
+var PayWithCardView = require('../../../../src/views/pay-with-card-view');
 
 describe('CardPickerView', function () {
   describe('Constructor', function () {
@@ -42,7 +43,7 @@ describe('CardPickerView', function () {
       this.context.element.click();
 
       expect(this.context.mainView.setActiveView).to.be.calledOnce;
-      expect(this.context.mainView.setActiveView).to.be.calledWith('braintree-dropin__pay-with-card');
+      expect(this.context.mainView.setActiveView).to.be.calledWith(PayWithCardView.ID);
     });
 
     it('appends card picker html', function () {

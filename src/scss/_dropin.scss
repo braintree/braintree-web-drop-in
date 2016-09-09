@@ -10,7 +10,7 @@
   user-select: none; 
 }
 
-.braintree-dropin__display {
+.braintree-dropin__header-area {
   background: #f7f7f7;
   background-image: linear-gradient(-180deg, #e6e6e6 0%, #f2f2f2 100%);
   border: 1px solid #d9d9d9;
@@ -30,7 +30,7 @@
   -webkit-filter: grayscale(1);
 }
 
-.braintree-dropin__collapsed .braintree-dropin__display {
+.braintree-dropin__collapsed .braintree-dropin__header-area {
   opacity: 1;
   -webkit-filter: none;
 }
@@ -86,15 +86,17 @@
   font-weight: 600;
 }
 
-.braintree-dropin__view {
+.braintree-dropin__sheet {
   display: none;
 }
 
+.braintree-dropin__active-payment-method .braintree-dropin__active-payment-method,
+.braintree-dropin__choose-payment-method .braintree-dropin__choose-payment-method,
 .braintree-dropin__pay-with-card .braintree-dropin__pay-with-card {
   display: block;
 }
 
-.braintree-dropin__view.braintree-dropin__pay-with-card {
+.braintree-dropin__sheet.braintree-dropin__pay-with-card {
   padding: 1em;
   border: 1px solid #d9d9d9;
 }
@@ -146,4 +148,8 @@
 
 .braintree-dropin__completed-picker-view {
   justify-content: flex-start;
+}
+
+.braintree-dropin__header {
+  display: none;
 }
