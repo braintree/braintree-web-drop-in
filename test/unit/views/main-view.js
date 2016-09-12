@@ -2,6 +2,7 @@
 
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
+var DropinModel = require('../../../src/dropin-model');
 var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var fake = require('../../helpers/fake');
@@ -30,6 +31,8 @@ describe('MainView', function () {
 
       dropinWrapper.innerHTML = templateHTML;
 
+      this.model = new DropinModel();
+
       this.context = {
         dropinWrapper: dropinWrapper,
         options: {
@@ -39,9 +42,9 @@ describe('MainView', function () {
         },
         addView: this.sandbox.stub(),
         setActiveView: this.sandbox.stub(),
-        existingPaymentMethods: {},
         dependenciesInitializing: 0,
-        getElementById: BaseView.prototype.getElementById
+        getElementById: BaseView.prototype.getElementById,
+        model: this.model
       };
 
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
@@ -59,11 +62,38 @@ describe('MainView', function () {
     it('creates a PaymentMethodPickerView', function () {
       MainView.prototype._initialize.call(this.context);
 
-      expect(this.context.paymentMethodPickerView).to.be.an.instanceOf(PaymentMethodPickerView);
       expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PaymentMethodPickerView));
     });
 
-    it('sets choose payment method as the active view if multiple payment methods are available', function () {
+    it('adds a listener for changeActivePaymentMethod', function () {
+      var instance;
+
+      this.sandbox.stub(MainView.prototype, 'setActiveView');
+
+      instance = new MainView({
+        element: this.context.dropinWrapper,
+        model: this.context.model,
+        options: this.context.options
+      });
+
+      this.context.model.changeActivePaymentMethod('payment-method');
+
+      expect(instance.setActiveView).to.be.calledWith('active-payment-method');
+    });
+
+    it('sets the active payment method as the active view if there are vaulted payment methods', function () {
+      var vaultedPaymentMethod = 'vaulted payment method';
+
+      this.model.addPaymentMethod(vaultedPaymentMethod);
+      this.sandbox.spy(this.model, 'changeActivePaymentMethod');
+
+      MainView.prototype._initialize.call(this.context);
+
+      expect(this.context.model.changeActivePaymentMethod).to.have.been.calledWith(vaultedPaymentMethod);
+      expect(this.context.setActiveView).to.have.been.calledWith('active-payment-method');
+    });
+
+    it('sets choose payment method as the active view if multiple payment methods are enabled', function () {
       PaymentMethodPickerView.prototype._initialize.restore();
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
         this.views = [{}, {}];
@@ -74,7 +104,7 @@ describe('MainView', function () {
       expect(this.context.setActiveView).to.have.been.calledWith('choose-payment-method');
     });
 
-    it('creates a PayWithCardView if one payment method is available', function () {
+    it('creates a PayWithCardView if one payment method is enabled', function () {
       PaymentMethodPickerView.prototype._initialize.restore();
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
         this.views = [{}];
@@ -114,9 +144,6 @@ describe('MainView', function () {
       }
 
       this.context = {
-        paymentMethodPickerView: {
-          collapse: this.sandbox.stub()
-        },
         dropinWrapper: document.createElement('div'),
         views: {
           id1: new FakeView('id1'),
@@ -126,47 +153,10 @@ describe('MainView', function () {
       };
     });
 
-    it('sets the active view', function () {
-      MainView.prototype.setActiveView.call(this.context, 'id2');
-
-      expect(this.context.activeView).to.equal(this.context.views.id2);
-    });
-
     it('shows the selected view', function () {
       MainView.prototype.setActiveView.call(this.context, 'id1');
 
       expect(this.context.dropinWrapper.className).to.contain('id1');
-    });
-  });
-
-  describe('requestPaymentMethod', function () {
-    beforeEach(function () {
-      this.context = {
-        activeView: {
-          requestPaymentMethod: this.sandbox.stub().yields(null, 'payment-method')
-        }
-      };
-    });
-
-    it('calls the callback with the payment method of the active view', function (done) {
-      MainView.prototype.requestPaymentMethod.call(this.context, function (err, paymentMethod) {
-        expect(err).to.not.exist;
-        expect(paymentMethod).to.eql('payment-method');
-        expect(this.context.activeView.requestPaymentMethod).to.be.calledOnce;
-
-        done();
-      }.bind(this));
-    });
-
-    it('calls callback with error if activeView does not have a requestPaymentMethod function', function (done) {
-      delete this.context.activeView.requestPaymentMethod;
-
-      MainView.prototype.requestPaymentMethod.call(this.context, function (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('No payment method available.');
-
-        done();
-      });
     });
   });
 
@@ -204,63 +194,6 @@ describe('MainView', function () {
 
       expect(this.context.dependenciesInitializing).to.equal(0);
       expect(this.context.callback).to.be.called;
-    });
-  });
-
-  describe('updateActivePaymentMethod', function () {
-    beforeEach(function () {
-      this.context = {
-        paymentMethodPickerView: {
-          addCompletedPickerView: this.sandbox.stub(),
-          setActivePaymentMethod: this.sandbox.stub()
-        },
-        setActiveView: this.sandbox.stub(),
-        views: [{
-          'braintree-dropin__payment-method-picker': {
-            setActivePaymentMethod: this.sandbox.stub()
-          }
-        }]
-      };
-    });
-
-    it('sets active payment method as active view', function () {
-      var paymentMethod = {};
-
-      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
-
-      expect(this.context.setActiveView).to.be.calledWith('active-payment-method');
-    });
-
-    it('sets the payment method as the active payment method', function () {
-      var paymentMethod = {};
-
-      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
-
-      expect(this.context.paymentMethodPickerView.setActivePaymentMethod).to.be.calledWith(paymentMethod);
-    });
-
-    it('adds payment method to picker view by default', function () {
-      var paymentMethod = {};
-
-      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
-
-      expect(this.context.paymentMethodPickerView.addCompletedPickerView).to.be.calledWith(paymentMethod);
-    });
-
-    it('adds payment method to picker view when existing is false', function () {
-      var paymentMethod = {};
-
-      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod);
-
-      expect(this.context.paymentMethodPickerView.addCompletedPickerView).to.be.calledWith(paymentMethod);
-    });
-
-    it('does not add payment method to picker view when existing is true', function () {
-      var paymentMethod = {};
-
-      MainView.prototype.updateActivePaymentMethod.call(this.context, paymentMethod, true);
-
-      expect(this.context.paymentMethodPickerView.addCompletedPickerView).to.not.have.been.called;
     });
   });
 

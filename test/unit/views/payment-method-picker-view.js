@@ -4,6 +4,7 @@ var BaseView = require('../../../src/views/base-view');
 var CardPickerView = require('../../../src/views/picker-views/card-picker-view');
 var classlist = require('../../../src/lib/classlist');
 var CompletedPickerView = require('../../../src/views/picker-views/completed-picker-view');
+var DropinModel = require('../../../src/dropin-model');
 var mainHTML = require('../../../src/html/main.html');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var paypal = require('braintree-web/paypal');
@@ -42,14 +43,13 @@ describe('PaymentMethodPickerView', function () {
     beforeEach(function () {
       this.context = {
         element: this.element,
-        existingPaymentMethods: [],
         getElementById: BaseView.prototype.getElementById,
         ID: PaymentMethodPickerView.ID,
         mainView: {
           asyncDependencyStarting: function () {},
-          asyncDependencyReady: function () {},
-          element: document.body.querySelector('.braintree-dropin')
+          asyncDependencyReady: function () {}
         },
+        model: new DropinModel(),
         options: {
           client: {}
         },
@@ -100,7 +100,7 @@ describe('PaymentMethodPickerView', function () {
     });
 
     it('creates completed picker views for all existing payment methods', function () {
-      this.context.existingPaymentMethods = [{nonce: 'nonce', type: 'type'}];
+      this.sandbox.stub(this.context.model, 'getPaymentMethods').returns([{nonce: 'nonce', type: 'type'}]);
       this.context.addCompletedPickerView = this.sandbox.spy();
 
       PaymentMethodPickerView.prototype._initialize.call(this.context);
@@ -110,7 +110,7 @@ describe('PaymentMethodPickerView', function () {
   });
 
   describe('toggleDrawer', function () {
-    it('toggles braintree-dropin__hide class of payment method picker element', function () {
+    it('toggles braintree-dropin__collapsed class of payment method picker element', function () {
       this.sandbox.spy(classlist, 'toggle');
       this.context = {
         element: this.element.querySelector('.braintree-dropin__drawer')
@@ -283,28 +283,6 @@ describe('PaymentMethodPickerView', function () {
 
       PaymentMethodPickerView.prototype.teardown.call(this.context, function (err) {
         expect(err).to.equal(cardPickerViewError);
-        done();
-      });
-    });
-  });
-
-  describe('requestPaymentMethod', function () {
-    it('calls the callback with the active payment method if one exists', function (done) {
-      var context = {
-        paymentMethod: 'really cool payment method'
-      };
-
-      PaymentMethodPickerView.prototype.requestPaymentMethod.call(context, function (err, data) {
-        expect(err).to.not.exist;
-        expect(data).to.equal(context.paymentMethod);
-        done();
-      });
-    });
-
-    it('calls the callback with an error if no active payment method exists', function (done) {
-      PaymentMethodPickerView.prototype.requestPaymentMethod.call(context, function (err, data) {
-        expect(data).to.not.exist;
-        expect(err.message).to.equal('No payment method available.');
         done();
       });
     });

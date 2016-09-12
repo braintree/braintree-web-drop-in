@@ -21,7 +21,7 @@ CompletedPickerView.prototype._initialize = function () {
   BasePickerView.prototype._initialize.apply(this, arguments);
 
   this.element.addEventListener('click', function () {
-    this.mainView.updateActivePaymentMethod(this.paymentMethod, true);
+    this.model.changeActivePaymentMethod(this.paymentMethod);
   }.bind(this));
 
   switch (this.paymentMethod.type) {

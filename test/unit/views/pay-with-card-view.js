@@ -1,6 +1,7 @@
 'use strict';
 
 var BaseView = require('../../../src/views/base-view');
+var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var mainHTML = require('../../../src/html/main.html');
@@ -155,28 +156,28 @@ describe('PayWithCardView', function () {
     });
   });
 
-  describe('requestPaymentMethod', function () {
+  describe('tokenize', function () {
     beforeEach(function () {
-      this.context = {
-        element: this.fakePayWithCardTemplate,
-        hostedFieldsInstance: {
-          clear: this.sandbox.stub(),
-          getState: this.sandbox.stub().returns({
-            cards: [{type: 'visa'}],
-            fields: {
-              number: {
-                isValid: true
-              },
-              expirationDate: {
-                isValid: true
-              }
+      this.fakeHostedFieldsInstance = {
+        clear: this.sandbox.stub(),
+        getState: this.sandbox.stub().returns({
+          cards: [{type: 'visa'}],
+          fields: {
+            number: {
+              isValid: true
+            },
+            expirationDate: {
+              isValid: true
             }
-          }),
-          tokenize: this.sandbox.stub()
-        },
-        mainView: {
-          updateActivePaymentMethod: this.sandbox.stub()
-        },
+          }
+        }),
+        tokenize: this.sandbox.stub()
+      };
+      this.model = new DropinModel();
+
+      this.context = {
+        hostedFieldsInstance: this.fakeHostedFieldsInstance,
+        model: this.model,
         options: {
           client: {
             getConfiguration: fake.configuration
@@ -198,12 +199,12 @@ describe('PayWithCardView', function () {
         }
       });
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context);
+      PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('errors and does not tokenize if card type is not supported', function (done) {
+    it('console errors if card type is not supported', function () {
       this.context.options.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
@@ -214,18 +215,16 @@ describe('PayWithCardView', function () {
         };
       };
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function (err, res) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('Card type is unsupported.');
-        expect(res).to.not.exist;
+      this.sandbox.stub(console, 'error');
 
-        done();
-      });
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(console.error).to.have.been.calledWith(new Error('Card type is unsupported.'));
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
     it('calls tokenize', function () {
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context);
+      PayWithCardView.prototype.tokenize.call(this.context);
 
       expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: true}, this.sandbox.match.func);
     });
@@ -233,7 +232,7 @@ describe('PayWithCardView', function () {
     it('clears fields after successful tokenization', function () {
       this.context.hostedFieldsInstance.tokenize.yields(null, {nonce: 'foo'});
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function () {});
+      PayWithCardView.prototype.tokenize.call(this.context);
 
       expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('number');
       expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
@@ -241,46 +240,34 @@ describe('PayWithCardView', function () {
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
     });
 
-    it('returns error when tokenization fails', function (done) {
+    it('console errors when tokenization fails', function () {
       this.context.hostedFieldsInstance.tokenize.yields(new Error('foo'));
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function (err) {
-        expect(err).to.exist;
-        expect(err).to.deep.equal(new Error('foo'));
+      this.sandbox.stub(console, 'error');
 
-        done();
-      });
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(console.error).to.have.been.called;
     });
 
-    it('returns payload when tokenization succeeds', function (done) {
-      var payload = {cards: 'yay'};
-
-      this.context.hostedFieldsInstance.tokenize.yields(null, payload);
-
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function (err, res) {
-        expect(err).to.not.exist;
-        expect(res).to.equal(payload);
-
-        done();
-      });
-    });
-
-    it('updates the active payment method when tokenize is successful', function () {
+    it('adds a new payment method when tokenize is successful', function () {
       var stubPayload = {};
 
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
+      this.sandbox.stub(this.model, 'addPaymentMethod');
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function () {});
+      PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.mainView.updateActivePaymentMethod).to.have.been.calledWith(stubPayload);
+      expect(this.model.addPaymentMethod).to.have.been.calledWith(stubPayload);
     });
 
     it('does not update the active payment method when tokenize fails', function () {
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(new Error('bad happen'));
+      this.sandbox.stub(this.model, 'addPaymentMethod');
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function () {});
+      PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.mainView.updateActivePaymentMethod).to.not.have.been.called;
+      expect(this.model.addPaymentMethod).to.not.have.been.called;
     });
   });
 

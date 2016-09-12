@@ -1,10 +1,11 @@
 'use strict';
 
 var MainView = require('./views/main-view');
+var constants = require('./constants');
+var DropinModel = require('./dropin-model');
+var mainHTML = require('./html/main.html');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
-var mainHTML = require('./html/main.html');
-var constants = require('./constants');
 
 function Dropin(options) {
   this._componentId = uuid();
@@ -14,7 +15,7 @@ function Dropin(options) {
 }
 
 Dropin.prototype.initialize = function (callback) {
-  var container, authorizationFingerprint, mainViewOptions;
+  var container, authorizationFingerprint, mainViewOptions, paymentMethods;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var hasCustomerId = false;
 
@@ -42,14 +43,12 @@ Dropin.prototype.initialize = function (callback) {
     authorizationFingerprint = JSON.parse(atob(this._options.authorization)).authorizationFingerprint;
     hasCustomerId = authorizationFingerprint && authorizationFingerprint.indexOf('customer_id=') !== -1;
   }
-
   mainViewOptions = {
     callback: function () {
       callback(null, dropinInstance);
     },
     componentId: this._componentId,
     dropinWrapper: this._dropinWrapper,
-    existingPaymentMethods: [],
     options: this._options
   };
 
@@ -62,11 +61,16 @@ Dropin.prototype.initialize = function (callback) {
       }
     }, function (err, paymentMethodsPayload) {
       if (!err) {
-        mainViewOptions.existingPaymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
+        paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
       }
+
+      this._model = new DropinModel({paymentMethods: paymentMethods});
+      mainViewOptions.model = this._model;
       this.mainView = new MainView(mainViewOptions);
     }.bind(this));
   } else {
+    this._model = new DropinModel();
+    mainViewOptions.model = this._model;
     this.mainView = new MainView(mainViewOptions);
   }
 };
@@ -101,7 +105,14 @@ Dropin.prototype.injectStylesheet = function () {
 };
 
 Dropin.prototype.requestPaymentMethod = function (callback) {
-  this.mainView.requestPaymentMethod(callback);
+  var paymentMethod = this._model.getActivePaymentMethod();
+
+  if (!paymentMethod) {
+    callback(new Error('No payment method available.'));
+    return;
+  }
+
+  callback(null, paymentMethod);
 };
 
 Dropin.prototype.teardown = function (callback) {

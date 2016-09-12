@@ -16,14 +16,16 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
+  var paymentMethods = this.model.getPaymentMethods();
   var payWithCardView = new PayWithCardView({
     element: this.getElementById(PayWithCardView.ID),
     mainView: this,
+    model: this.model,
     options: this.options
   });
   var paymentMethodPickerView = new PaymentMethodPickerView({
     element: this.getElementById(PaymentMethodPickerView.ID),
-    existingPaymentMethods: this.existingPaymentMethods,
+    model: this.model,
     mainView: this,
     options: this.options
   });
@@ -31,9 +33,14 @@ MainView.prototype._initialize = function () {
   this.views = {};
   this.addView(payWithCardView);
   this.addView(paymentMethodPickerView);
-  this.paymentMethodPickerView = paymentMethodPickerView;
 
-  if (this.paymentMethodPickerView.views.length === 1) {
+  this.model.on('changeActivePaymentMethod', function () {
+    this.setActiveView('active-payment-method');
+  }.bind(this));
+
+  if (paymentMethods.length > 0) {
+    this.model.changeActivePaymentMethod(paymentMethods[0]);
+  } else if (paymentMethodPickerView.views.length === 1) {
     this.setActiveView(PayWithCardView.ID);
   } else {
     this.setActiveView('choose-payment-method');
@@ -45,17 +52,7 @@ MainView.prototype.addView = function (view) {
 };
 
 MainView.prototype.setActiveView = function (id) {
-  this.activeView = this.views[id] || PaymentMethodPickerView.ID;
   this.dropinWrapper.className = 'braintree-dropin__' + id;
-};
-
-MainView.prototype.requestPaymentMethod = function (callback) {
-  if (typeof this.activeView.requestPaymentMethod !== 'function') {
-    callback(new Error('No payment method available.'));
-    return;
-  }
-
-  this.activeView.requestPaymentMethod(callback);
 };
 
 MainView.prototype.asyncDependencyStarting = function () {
@@ -66,15 +63,6 @@ MainView.prototype.asyncDependencyReady = function () {
   this.dependenciesInitializing--;
   if (this.dependenciesInitializing === 0) {
     this.callback();
-  }
-};
-
-MainView.prototype.updateActivePaymentMethod = function (paymentMethod, existing) {
-  this.setActiveView('active-payment-method');
-  this.paymentMethodPickerView.setActivePaymentMethod(paymentMethod);
-
-  if (!existing) {
-    this.paymentMethodPickerView.addCompletedPickerView(paymentMethod);
   }
 };
 

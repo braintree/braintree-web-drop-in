@@ -94,8 +94,10 @@ describe('PayPalPickerView', function () {
         },
         mainView: {
           asyncDependencyStarting: this.sandbox.stub(),
-          asyncDependencyReady: this.sandbox.stub(),
-          updateActivePaymentMethod: this.sandbox.stub()
+          asyncDependencyReady: this.sandbox.stub()
+        },
+        model: {
+          addPaymentMethod: this.sandbox.stub()
         }
       };
     });
@@ -113,7 +115,7 @@ describe('PayPalPickerView', function () {
       expect(stubPaypalInstance.tokenize).to.be.calledWith(this.context.options.paypal);
     });
 
-    it('calls updateActivePaymentMethod when tokenize is successful', function () {
+    it('adds a new payment method when tokenize is successful', function () {
       var stubTokenizePayload = {foo: 'bar'};
       var stubPaypalInstance = {
         tokenize: this.sandbox.stub().callsArgWith(1, null, stubTokenizePayload)
@@ -124,10 +126,10 @@ describe('PayPalPickerView', function () {
 
       this.context.element.click();
 
-      expect(this.context.mainView.updateActivePaymentMethod).to.be.calledWith(stubTokenizePayload);
+      expect(this.context.model.addPaymentMethod).to.be.calledWith(stubTokenizePayload);
     });
 
-    it('does not call updateActivePaymentMethod when tokenize fails', function () {
+    it('does not add a new payment method when tokenize fails', function () {
       var stubPaypalInstance = {
         tokenize: this.sandbox.stub().callsArgWith(1, new Error('bad things'), null)
       };
@@ -138,7 +140,7 @@ describe('PayPalPickerView', function () {
 
       this.context.element.click();
 
-      expect(this.context.mainView.updateActivePaymentMethod).to.not.have.been.called;
+      expect(this.context.model.addPaymentMethod).to.not.have.been.called;
     });
 
     it('console errors when tokenize fails', function () {

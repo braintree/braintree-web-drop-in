@@ -152,7 +152,7 @@ describe('Dropin', function () {
 
       instance.initialize(function () {
         expect(hostedFields.create).to.be.called;
-        expect(instance.mainView.existingPaymentMethods).to.have.a.lengthOf(0);
+        expect(instance._model.getPaymentMethods()).to.have.a.lengthOf(0);
 
         done();
       });
@@ -178,7 +178,7 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
-        var existingPaymentMethod = instance.mainView.existingPaymentMethods[0];
+        var existingPaymentMethod = instance._model.getPaymentMethods()[0];
 
         expect(existingPaymentMethod.nonce).to.equal('nonce');
         expect(existingPaymentMethod.details).to.deep.equal({});
@@ -218,19 +218,32 @@ describe('Dropin', function () {
   });
 
   describe('requestPaymentMethod', function () {
-    it('calls callback with paymentMethod returned from mainView.requestPaymentMethod', function (done) {
-      var instance = new Dropin(this.dropinOptions);
+    it('calls callback with active payment method if available', function (done) {
+      var dropin = new Dropin(this.dropinOptions);
 
-      instance.mainView = {
-        requestPaymentMethod: this.sandbox.stub().yields(null, {paymentMethod: 'foo'})
-      };
+      dropin.initialize(function (err, instance) {
+        instance._model.changeActivePaymentMethod('active payment method');
 
-      instance.requestPaymentMethod(function (err, data) {
-        expect(err).to.not.exist;
-        expect(data.paymentMethod).to.equal('foo');
-        expect(instance.mainView.requestPaymentMethod).to.be.calledOnce;
+        instance.requestPaymentMethod(function (err2, data) {
+          expect(err2).to.not.exist;
+          expect(data).to.equal('active payment method');
 
-        done();
+          done();
+        });
+      });
+    });
+
+    it('calls callback with error if no payment method is available', function (done) {
+      var dropin = new Dropin(this.dropinOptions);
+
+      dropin.initialize(function (err, instance) {
+        instance.requestPaymentMethod(function (err2, data) {
+          expect(err2).to.be.an.instanceOf(Error);
+          expect(err2.message).to.equal('No payment method available.');
+          expect(data).to.not.exist;
+
+          done();
+        });
       });
     });
   });

@@ -24,7 +24,7 @@ PayPalPickerView.prototype._initialize = function () {
 
   BasePickerView.prototype._initialize.apply(this, arguments);
 
-  div.innerHTML = html;
+  this.element.innerHTML = html;
   this.element.appendChild(div);
   this.mainView.asyncDependencyStarting();
 
@@ -36,14 +36,15 @@ PayPalPickerView.prototype._initialize = function () {
 
     this.paypalInstance = paypalInstance;
 
-    this.element.addEventListener('click', function () {
+    this.element.addEventListener('click', function (event) {
+      event.preventDefault();
       this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
         if (tokenizeErr) {
           console.error(tokenizeErr);
           return;
         }
 
-        this.mainView.updateActivePaymentMethod(tokenizePayload);
+        this.model.addPaymentMethod(tokenizePayload);
       }.bind(this));
     }.bind(this));
 

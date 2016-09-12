@@ -37,6 +37,7 @@ PaymentMethodPickerView.prototype._initialize = function () {
     if (PickerView.isEnabled(this.options)) {
       pickerView = new PickerView({
         mainView: this.mainView,
+        model: this.model,
         options: this.options
       });
       enabledPaymentMethods.appendChild(pickerView.element);
@@ -47,7 +48,15 @@ PaymentMethodPickerView.prototype._initialize = function () {
     return views;
   }.bind(this), []);
 
-  this.existingPaymentMethods.forEach(function (paymentMethod) {
+  this.model.getPaymentMethods().forEach(function (paymentMethod) {
+    this.addCompletedPickerView(paymentMethod);
+  }.bind(this));
+
+  this.model.on('changeActivePaymentMethod', function (paymentMethod) {
+    this.setActivePaymentMethod(paymentMethod);
+  }.bind(this));
+
+  this.model.on('addPaymentMethod', function (paymentMethod) {
     this.addCompletedPickerView(paymentMethod);
   }.bind(this));
 };
@@ -58,7 +67,7 @@ PaymentMethodPickerView.prototype.toggleDrawer = function () {
 
 PaymentMethodPickerView.prototype.addCompletedPickerView = function (paymentMethod) {
   var completedPickerView = new CompletedPickerView({
-    mainView: this.mainView,
+    model: this.model,
     paymentMethod: paymentMethod
   });
 
@@ -99,15 +108,6 @@ PaymentMethodPickerView.prototype.teardown = function (callback) {
       }
     });
   }.bind(this));
-};
-
-PaymentMethodPickerView.prototype.requestPaymentMethod = function (callback) {
-  if (!this.paymentMethod) {
-    callback(new Error('No payment method available.'));
-    return;
-  }
-
-  callback(null, this.paymentMethod);
 };
 
 module.exports = PaymentMethodPickerView;

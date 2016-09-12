@@ -87,10 +87,6 @@ PayWithCardView.prototype._initialize = function () {
 };
 
 PayWithCardView.prototype.tokenize = function () {
-  this.requestPaymentMethod(function () {});
-};
-
-PayWithCardView.prototype.requestPaymentMethod = function (callback) {
   var state = this.hostedFieldsInstance.getState();
   var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
   var formValid = Object.keys(state.fields).every(function (key) {
@@ -100,14 +96,14 @@ PayWithCardView.prototype.requestPaymentMethod = function (callback) {
   var cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
 
   if (!cardTypeSupported) {
-    callback(new Error('Card type is unsupported.'));
+    console.error(new Error('Card type is unsupported.'));
     return;
   }
 
   if (formValid) {
     this.hostedFieldsInstance.tokenize({vault: true}, function (err, payload) {
       if (err) {
-        callback(err);
+        console.error(err);
         return;
       }
 
@@ -115,8 +111,7 @@ PayWithCardView.prototype.requestPaymentMethod = function (callback) {
         this.hostedFieldsInstance.clear(field);
       }.bind(this));
 
-      this.mainView.updateActivePaymentMethod(payload);
-      callback(null, payload);
+      this.model.addPaymentMethod(payload);
     }.bind(this));
   }
 };
