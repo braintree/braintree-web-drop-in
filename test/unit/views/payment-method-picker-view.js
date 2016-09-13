@@ -42,6 +42,7 @@ describe('PaymentMethodPickerView', function () {
   describe('_initialize', function () {
     beforeEach(function () {
       this.context = {
+        addCompletedPickerView: this.sandbox.stub(),
         element: this.element,
         getElementById: BaseView.prototype.getElementById,
         ID: PaymentMethodPickerView.ID,
@@ -53,6 +54,7 @@ describe('PaymentMethodPickerView', function () {
         options: {
           client: {}
         },
+        setActivePaymentMethod: this.sandbox.stub(),
         toggleDrawer: this.sandbox.stub(),
         views: []
       };
@@ -100,12 +102,23 @@ describe('PaymentMethodPickerView', function () {
     });
 
     it('creates completed picker views for all existing payment methods', function () {
-      this.sandbox.stub(this.context.model, 'getPaymentMethods').returns([{nonce: 'nonce', type: 'type'}]);
       this.context.addCompletedPickerView = this.sandbox.spy();
+      this.context.model._paymentMethods = [{}];
 
       PaymentMethodPickerView.prototype._initialize.call(this.context);
 
       expect(this.context.addCompletedPickerView).to.be.calledOnce;
+    });
+
+    it('shows saved payment methods header when a payment method is added', function () {
+      var savedPaymentMethodsHeader;
+
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+
+      this.context.model.addPaymentMethod({});
+      savedPaymentMethodsHeader = this.element.querySelector('[data-braintree-id="saved-payment-methods-header"]');
+
+      expect(savedPaymentMethodsHeader.className).to.equal('braintree-dropin__drawer-header');
     });
   });
 
