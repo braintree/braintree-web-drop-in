@@ -11,9 +11,9 @@
 }
 
 .braintree-dropin__header-area {
-  background: #f7f7f7;
-  background-image: linear-gradient(-180deg, #e6e6e6 0%, #f2f2f2 100%);
-  border: 1px solid #d9d9d9;
+  background: $black-95;
+  background-image: linear-gradient(-180deg, $black-97 0%, $black-95 100%);
+  border: 1px solid $black-85;
   display: flex;
   padding: 1em 2em 1em 1.5em;
   margin: 0;
@@ -35,7 +35,6 @@
   -webkit-filter: none;
 }
 
-.braintree-dropin__hide,
 .braintree-dropin__collapsed .braintree-dropin__drawer {
     visibility: hidden;
     transition: all $time-faster linear;
@@ -57,12 +56,15 @@
 }
 
 .braintree-dropin__drawer {
-  box-shadow: 0 1px 1px 1px lightgray;
-  background: white;
-  width: 100%;
   position: absolute;
   z-index: 2147483647;
-  border: 1px solid #d9d9d9;
+  width: 100%;
+  transition: opacity $time-faster linear;
+  border: 1px solid $black-85;
+  border-top: 0;
+  border-radius: 0 0 3px 3px;
+  background: $white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 .braintree-dropin__drawer-list {
@@ -73,16 +75,13 @@
 .braintree-dropin__drawer-header {
   line-height: 1.4;
   margin: 0;
-  border: 1px solid #d9d9d9;
-  border-left: none;
-  border-right: none;
   padding: 1em;
-  font-size: 12px;
   text-align: center;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #666;
-  background: #e6e6e6;
+  color: $black-40;
+  background: $black-90;
+  font-size: $type-12;
   font-weight: 600;
 }
 
