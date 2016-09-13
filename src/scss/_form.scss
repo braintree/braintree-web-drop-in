@@ -1,14 +1,14 @@
-.braintree-form {
+.braintree-dropin__form {
     display: block;
     margin: 0;
     padding: 0;
 }
-.braintree-form__card-field {
+.braintree-dropin__form-card-field {
     border: 0;
     margin: 0 0 16px;
     padding: 0;
 }
-.braintree-form__label {
+.braintree-dropin__form-label {
     line-height: 1.4;
     display: block;
     font-size: $type-16;
@@ -16,24 +16,24 @@
     margin: 0;
     padding: 0;
 }
-.braintree-form__label--relative {
+.braintree-dropin__form-label--relative {
     position: relative;
 }
-.braintree-form__inline-error {
+.braintree-dropin__form-inline-error {
     color: $red;
     margin: 0;
     padding: 0;
     line-height: 1.4;
 }
-.braintree-form__fields {
+.braintree-dropin__form-fields {
     margin: 4px 0 0;
     padding: 8px;
     border: 1px solid $black-75;
 }
-.braintree-form__fields--hosted {
+.braintree-dropin__form-fields--hosted {
     height: 44px;
 }
-.braintree-form__icon--absolute {
+.braintree-dropin__form-icon--absolute {
     position: absolute;
     bottom: 5px;
     right: 5px;

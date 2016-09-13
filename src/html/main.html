@@ -22,26 +22,28 @@
   <div class="braintree-dropin__sheet-area">
     <div data-braintree-id="pay-with-card" class="braintree-dropin__sheet braintree-dropin__pay-with-card braintree-dropin__form">
       <div class="braintree-dropin__form-card-field">
-        <label class="braintree-dropin__form-label">Card Number
-          <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-number"></div>
+        <label class="braintree-dropin__form-label braintree-dropin__form-label--relative">Card Number
+          <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-number"></div>
         </label>
       </div>
 
       <div class="braintree-dropin__form-card-field">
         <label class="braintree-dropin__form-label">Expiration Date
-          <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-expiration"></div>
+          <span class="braintree-form__descriptor">(MM/YY)</span>
+          <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-expiration"></div>
         </label>
       </div>
 
       <div data-braintree-id="cvv-container" class="braintree-dropin__form-card-field">
-        <label class="braintree-dropin__form-label">CVV
-          <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-cvv"></div>
+        <label class="braintree-dropin__form-label braintree-dropin__form-label--relative">CVV
+          <span class="braintree-form__descriptor">(3 digits)</span>
+          <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-cvv"></div>
         </label>
       </div>
 
       <div data-braintree-id="postal-code-container" class="braintree-dropin__form-card-field">
         <label class="braintree-dropin__form-label">Postal Code
-          <div class="braintree-dropin__form-fields braintree-dropin__form-fields-hosted braintree-dropin__form-postal-code"></div>
+          <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-postal-code"></div>
         </label>
       </div>
 
