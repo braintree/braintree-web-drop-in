@@ -1,9 +1,10 @@
 'use strict';
 
 var Dropin = require('../../src/dropin/');
+var deferred = require('../../src/lib/deferred');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
-var deferred = require('../../src/lib/deferred');
+var PaymentMethodPickerView = require('../../src/views/payment-method-picker-view');
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -219,7 +220,11 @@ describe('Dropin', function () {
 
   describe('requestPaymentMethod', function () {
     it('calls callback with active payment method if available', function (done) {
-      var dropin = new Dropin(this.dropinOptions);
+      var dropin;
+
+      this.sandbox.stub(PaymentMethodPickerView.prototype, 'setActivePaymentMethod');
+
+      dropin = new Dropin(this.dropinOptions);
 
       dropin.initialize(function (err, instance) {
         instance._model.changeActivePaymentMethod('active payment method');

@@ -1,7 +1,8 @@
 'use strict';
 
 var BasePickerView = require('./base-picker-view');
-var completedHTML = require('../../html/completed-picker.html');
+var classlist = require('../../lib/classlist');
+var paymentMethodHTML = require('../../html/payment-method.html');
 
 function CompletedPickerView() {
   BasePickerView.apply(this, arguments);
@@ -16,9 +17,10 @@ CompletedPickerView.prototype.constructor = CompletedPickerView;
 
 CompletedPickerView.prototype._initialize = function () {
   var div = document.createElement('div');
-  var html = completedHTML;
+  var html = paymentMethodHTML;
 
   BasePickerView.prototype._initialize.apply(this, arguments);
+  classlist.add(div, 'braintree-dropin__completed-picker-view');
 
   this.element.addEventListener('click', function () {
     this.model.changeActivePaymentMethod(this.paymentMethod);

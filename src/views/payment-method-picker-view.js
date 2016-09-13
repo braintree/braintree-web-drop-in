@@ -75,19 +75,25 @@ PaymentMethodPickerView.prototype.addCompletedPickerView = function (paymentMeth
   this.views.push(completedPickerView);
 };
 
+PaymentMethodPickerView.prototype.getCompletedPickerView = function (paymentMethod) {
+  var completedView;
+
+  this.views.forEach(function (view) {
+    if (view.paymentMethod && view.paymentMethod.nonce === paymentMethod.nonce) {
+      completedView = view;
+    }
+  });
+
+  return completedView;
+};
+
 PaymentMethodPickerView.prototype.setActivePaymentMethod = function (paymentMethod) {
-  var termSlot = this.activePaymentMethod.querySelector('.braintree-dropin__list-term');
-  var descriptionSlot = this.activePaymentMethod.querySelector('.braintree-dropin__list-desc');
+  var html;
+  var completedPickerView = this.getCompletedPickerView(paymentMethod);
 
-  this.paymentMethod = paymentMethod;
+  html = completedPickerView.element.querySelector('.braintree-dropin__payment-method').innerHTML;
 
-  if (paymentMethod.type === 'PayPalAccount') {
-    termSlot.textContent = this.paymentMethod.details.email;
-    descriptionSlot.textContent = 'PayPal';
-  } else if (paymentMethod.type === 'CreditCard') {
-    termSlot.textContent = 'Ending in ••' + this.paymentMethod.details.lastTwo;
-    descriptionSlot.textContent = this.paymentMethod.details.cardType;
-  }
+  this.activePaymentMethod.innerHTML = html;
 };
 
 PaymentMethodPickerView.prototype.teardown = function (callback) {

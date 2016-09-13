@@ -124,73 +124,31 @@ describe('PaymentMethodPickerView', function () {
 
   describe('setActivePaymentMethod', function () {
     beforeEach(function () {
+      this.paymentMethod = {
+        details: {
+          email: 'me@real.biz'
+        },
+        type: 'PayPalAccount'
+      };
+      this.completedPickerView = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: this.paymentMethod
+      });
+
       this.context = {
         activePaymentMethod: this.element.querySelector('.braintree-dropin__active-payment-method'),
-        choosePaymentMethod: this.element.querySelector('.braintree-dropin__choose-payment-method')
+        choosePaymentMethod: this.element.querySelector('.braintree-dropin__choose-payment-method'),
+        getElementById: BaseView.prototype.getElementById,
+        getCompletedPickerView: this.sandbox.stub().returns(this.completedPickerView)
       };
     });
 
-    it('sets the new payment method', function () {
-      var paymentMethod = {
-        foo: 'bar'
-      };
+    it('updates the active payment method HTML', function () {
+      var completedViewHTML = this.completedPickerView.element.querySelector('.braintree-dropin__payment-method');
 
-      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, paymentMethod);
+      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
 
-      expect(this.context.paymentMethod).to.equal(paymentMethod);
-    });
-
-    describe('with a PayPalAccount', function () {
-      beforeEach(function () {
-        this.paymentMethod = {
-          details: {
-            email: 'me@real.biz'
-          },
-          type: 'PayPalAccount'
-        };
-
-        this.termSlot = this.context.activePaymentMethod.querySelector('.braintree-dropin__list-term');
-        this.descriptionSlot = this.context.activePaymentMethod.querySelector('.braintree-dropin__list-desc');
-      });
-
-      it('sets the payer email as the term slot', function () {
-        PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
-
-        expect(this.termSlot.innerHTML).to.equal('me@real.biz');
-      });
-
-      it('sets PayPal as the description slot', function () {
-        PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
-
-        expect(this.descriptionSlot.innerHTML).to.equal('PayPal');
-      });
-    });
-
-    describe('with a CreditCard', function () {
-      beforeEach(function () {
-        this.paymentMethod = {
-          details: {
-            cardType: 'FooCard',
-            lastTwo: 'LastTwo'
-          },
-          type: 'CreditCard'
-        };
-
-        this.termSlot = this.context.activePaymentMethod.querySelector('.braintree-dropin__list-term');
-        this.descriptionSlot = this.context.activePaymentMethod.querySelector('.braintree-dropin__list-desc');
-      });
-
-      it('sets the last two numbers of the card in the term slot', function () {
-        PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
-
-        expect(this.termSlot.innerHTML).to.equal('Ending in ••LastTwo');
-      });
-
-      it('sets card type as the description slot', function () {
-        PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
-
-        expect(this.descriptionSlot.innerHTML).to.equal('FooCard');
-      });
+      expect(this.context.activePaymentMethod.innerHTML).to.equal(completedViewHTML.innerHTML);
     });
   });
 
@@ -217,6 +175,25 @@ describe('PaymentMethodPickerView', function () {
 
       expect(this.context.views).to.have.a.lengthOf(1);
       expect(this.context.views[0]).to.be.an.instanceOf(CompletedPickerView);
+    });
+  });
+
+  describe('getCompletedPickerView', function () {
+    it('returns a completed picker view with the same nonce', function () {
+      var paymentMethod = {nonce: 'my-nonce'};
+      var fakeView = {paymentMethod: paymentMethod};
+      var context = {views: [fakeView]};
+      var view = PaymentMethodPickerView.prototype.getCompletedPickerView.call(context, paymentMethod);
+
+      expect(view).to.equal(fakeView);
+    });
+
+    it('returns null if the completed picker view does not exist', function () {
+      var paymentMethod = {nonce: 'my-nonce'};
+      var context = {views: [{}]};
+      var view = PaymentMethodPickerView.prototype.getCompletedPickerView.call(context, paymentMethod);
+
+      expect(view).to.not.exist;
     });
   });
 

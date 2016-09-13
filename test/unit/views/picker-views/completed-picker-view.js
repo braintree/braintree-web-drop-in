@@ -64,8 +64,8 @@ describe('CompletedPickerView', function () {
 
       CompletedPickerView.prototype._initialize.call(this.context);
 
-      detail = this.context.element.querySelector('.braintree-dropin__completed-picker-detail');
-      type = this.context.element.querySelector('.braintree-dropin__completed-picker-type');
+      detail = this.context.element.querySelector('.braintree-dropin__list-term');
+      type = this.context.element.querySelector('.braintree-dropin__list-desc');
 
       expect(detail.innerHTML).to.equal('Ending in ••66');
       expect(type.innerHTML).to.equal('FooCard');
@@ -83,8 +83,8 @@ describe('CompletedPickerView', function () {
 
       CompletedPickerView.prototype._initialize.call(this.context);
 
-      detail = this.context.element.querySelector('.braintree-dropin__completed-picker-detail');
-      type = this.context.element.querySelector('.braintree-dropin__completed-picker-type');
+      detail = this.context.element.querySelector('.braintree-dropin__list-term');
+      type = this.context.element.querySelector('.braintree-dropin__list-desc');
 
       expect(detail.innerHTML).to.equal('my-email@cool.biz');
       expect(type.innerHTML).to.equal('PayPal');
