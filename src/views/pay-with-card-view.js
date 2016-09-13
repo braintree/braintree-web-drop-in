@@ -63,11 +63,11 @@ PayWithCardView.prototype._initialize = function () {
   };
 
   if (!hasCVV) {
-    this.element.removeChild(this.element.querySelector('.braintree-dropin__form-cvv-container'));
+    this.element.removeChild(this.getElementById('cvv-container'));
     delete hfOptions.fields.cvv;
   }
   if (!hasPostal) {
-    this.element.removeChild(this.element.querySelector('.braintree-dropin__form-postal-code-container'));
+    this.element.removeChild(this.getElementById('postal-code-container'));
     delete hfOptions.fields.postalCode;
   }
 
@@ -79,7 +79,7 @@ PayWithCardView.prototype._initialize = function () {
       return;
     }
 
-    this.submit = this.element.querySelector('.braintree-dropin__form-submit');
+    this.submit = this.getElementById('card-submit');
     this.submit.addEventListener('click', this.tokenize.bind(this));
     this.hostedFieldsInstance = hostedFieldsInstance;
     this.mainView.asyncDependencyReady();

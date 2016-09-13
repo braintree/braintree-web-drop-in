@@ -40,20 +40,20 @@ describe('PayWithCardView', function () {
     beforeEach(function () {
       this.context = {
         element: this.element,
-        submit: this.element.querySelector('.braintree-dropin__form-submit'),
-        options: {
-          client: {
-            getConfiguration: fake.configuration,
-            request: this.sandbox.spy()
-          }
-        },
+        _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
+        getElementById: BaseView.prototype.getElementById,
         mainView: {
           componentId: 'component-id',
           asyncDependencyStarting: this.sandbox.stub(),
           asyncDependencyReady: this.sandbox.stub(),
           updateActivePaymentMethod: this.sandbox.stub()
         },
-        _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
+        options: {
+          client: {
+            getConfiguration: fake.configuration,
+            request: this.sandbox.spy()
+          }
+        },
         tokenize: PayWithCardView.prototype.tokenize
       };
       this.sandbox.stub(hostedFields, 'create').yields(null, {});
@@ -67,13 +67,13 @@ describe('PayWithCardView', function () {
       };
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__form-cvv-container')).to.exist;
+      expect(this.context.element.querySelector('[data-braintree-id="cvv-container"]')).to.exist;
     });
 
     it('does not have cvv if not supplied in challenges', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__form-cvv-container')).not.to.exist;
+      expect(this.context.element.querySelector('[data-braintree-id="cvv-container"]')).not.to.exist;
     });
 
     it('has postal code if supplied in challenges', function () {
@@ -84,13 +84,13 @@ describe('PayWithCardView', function () {
       };
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__form-postal-code-container')).to.exist;
+      expect(this.context.element.querySelector('[data-braintree-id="postal-code-container"]')).to.exist;
     });
 
     it('does not have postal code if not supplied in challenges', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__form-postal-code-container')).not.to.exist;
+      expect(this.context.element.querySelector('[data-braintree-id="postal-code-container"]')).not.to.exist;
     });
 
     it('starts async dependency', function () {
