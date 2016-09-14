@@ -120,6 +120,16 @@ describe('PaymentMethodPickerView', function () {
 
       expect(savedPaymentMethodsHeader.className).to.equal('braintree-dropin__drawer-header');
     });
+
+    it('shows saved payment methods header if there existing payment methods', function () {
+      var savedPaymentMethodsHeader;
+
+      this.context.model.addPaymentMethod({});
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+      savedPaymentMethodsHeader = this.element.querySelector('[data-braintree-id="saved-payment-methods-header"]');
+
+      expect(savedPaymentMethodsHeader.className).to.equal('braintree-dropin__drawer-header');
+    });
   });
 
   describe('toggleDrawer', function () {

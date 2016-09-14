@@ -19,6 +19,7 @@ PaymentMethodPickerView.ID = PaymentMethodPickerView.prototype.ID = 'payment-met
 PaymentMethodPickerView.prototype._initialize = function () {
   var enabledPaymentMethods = this.getElementById('enabled-payment-methods');
   var savedPaymentMethodsHeader = this.getElementById('saved-payment-methods-header');
+  var paymentMethods = this.model.getPaymentMethods();
 
   this.element.addEventListener('click', function () {
     this.toggleDrawer();
@@ -49,9 +50,12 @@ PaymentMethodPickerView.prototype._initialize = function () {
     return views;
   }.bind(this), []);
 
-  this.model.getPaymentMethods().forEach(function (paymentMethod) {
-    this.addCompletedPickerView(paymentMethod);
-  }.bind(this));
+  if (paymentMethods) {
+    classlist.remove(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
+    paymentMethods.forEach(function (paymentMethod) {
+      this.addCompletedPickerView(paymentMethod);
+    }.bind(this));
+  }
 
   this.model.on('changeActivePaymentMethod', function (paymentMethod) {
     this.setActivePaymentMethod(paymentMethod);
