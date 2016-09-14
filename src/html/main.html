@@ -1,3 +1,12 @@
+<svg class="braintree-dropin__display--none">
+  <defs>
+    <symbol id="iconArrow" viewBox="0 0 48 32">
+      <title>Arrow</title>
+      <path class="path1" d="M22.858 29.923l22.738-23.593-3.687-3.843-19.051 20-19.018-20-3.84 3.668z"></path>
+    </symbol>
+  </defs>
+</svg>
+
 <div class="braintree-dropin">
   <div data-braintree-id="payment-method-picker" class="braintree-dropin__collapsed">
     <div class="braintree-dropin__header-area">
@@ -8,7 +17,9 @@
       <div data-braintree-id="choose-payment-method" class="braintree-dropin__header braintree-dropin__choose-payment-method">Choose Payment Method</div>
       <div class="braintree-dropin__header braintree-dropin__pay-with-card">Pay with Card</div>
 
-      <div class="braintree-dropin__icon-arrow"></div>
+      <svg height="24" width="24" data-braintree-id="disclosure-arrow">
+        <use xlink:href="#iconArrow" />
+      </svg>
     </div>
 
     <div data-braintree-id="drawer" class="braintree-dropin__drawer">

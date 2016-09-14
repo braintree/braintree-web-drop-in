@@ -1,4 +1,4 @@
-.braintree-dropin__payment-method-picker {
+[data-braintree-id="payment-method-picker"] {
   width: 100%;
   border-radius: 3px;
   overflow: hidden;
@@ -7,7 +7,7 @@
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  user-select: none; 
+  user-select: none;
 }
 
 .braintree-dropin__header-area {
@@ -36,23 +36,23 @@
 }
 
 .braintree-dropin__collapsed .braintree-dropin__drawer {
-    visibility: hidden;
-    transition: all $time-faster linear;
-    opacity: 0;
-    height: 0;
-    overflow: hidden;
+  visibility: hidden;
+  transition: all $time-faster linear;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
 }
 
-.braintree-dropin__icon-arrow::before {
-  content: ">";
-  display: block;
-  font-family: Courier, monospace;
-  transition: transform 100ms ease-in-out, -webkit-transform 100ms ease-in-out;
-  transform: rotate(-90deg);
+[data-braintree-id="disclosure-arrow"] {
+  width: 20px;
+  height: 20px;
+  transition: transform 100ms ease-in-out;
+  transform: rotate(180deg);
 }
 
-.braintree-dropin__collapsed .braintree-dropin__icon-arrow::before {
-  transform: rotate(90deg);
+.braintree-dropin__collapsed [data-braintree-id="disclosure-arrow"] {
+  transition: transform 100ms ease-in-out;
+  transform: rotate(0deg);
 }
 
 .braintree-dropin__drawer {
