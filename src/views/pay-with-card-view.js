@@ -71,7 +71,7 @@ PayWithCardView.prototype._initialize = function () {
     delete hfOptions.fields.postalCode;
   }
 
-  this.mainView.asyncDependencyStarting();
+  this.model.asyncDependencyStarting();
 
   hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
     if (err) {
@@ -82,7 +82,7 @@ PayWithCardView.prototype._initialize = function () {
     this.submit = this.getElementById('card-submit');
     this.submit.addEventListener('click', this.tokenize.bind(this));
     this.hostedFieldsInstance = hostedFieldsInstance;
-    this.mainView.asyncDependencyReady();
+    this.model.asyncDependencyReady();
   }.bind(this));
 };
 

@@ -107,4 +107,46 @@ describe('DropinModel', function () {
       expect(model.getActivePaymentMethod()).to.equal('this is my active payment method');
     });
   });
+
+  describe('asyncDependencyStarting', function () {
+    beforeEach(function () {
+      this.context = {
+        dependenciesInitializing: 0
+      };
+    });
+
+    it('increments dependenciesInitializing by one', function () {
+      DropinModel.prototype.asyncDependencyStarting.call(this.context);
+      expect(this.context.dependenciesInitializing).to.equal(1);
+    });
+  });
+
+  describe('asyncDependencyReady', function () {
+    beforeEach(function () {
+      this.context = {callback: this.sandbox.stub()};
+    });
+
+    it('decrements dependenciesInitializing by one', function () {
+      this.context.dependenciesInitializing = 2;
+
+      DropinModel.prototype.asyncDependencyReady.call(this.context);
+
+      expect(this.context.dependenciesInitializing).to.equal(1);
+      expect(this.context.callback).to.not.be.called;
+    });
+
+    it('emits asyncDependenciesReady event when there are no dependencies initializing', function (done) {
+      var model = new DropinModel();
+
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
+
+      model.on('asyncDependenciesReady', function () {
+        expect(DropinModel.prototype.asyncDependencyReady).to.have.been.calledOnce;
+        done();
+      });
+
+      model.asyncDependencyStarting();
+      model.asyncDependencyReady();
+    });
+  });
 });

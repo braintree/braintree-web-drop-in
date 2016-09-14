@@ -15,9 +15,8 @@ function Dropin(options) {
 }
 
 Dropin.prototype.initialize = function (callback) {
-  var container, authorizationFingerprint, mainViewOptions, paymentMethods;
+  var container;
   var dropinInstance = this; // eslint-disable-line consistent-this
-  var hasCustomerId = false;
 
   this.injectStylesheet();
 
@@ -39,40 +38,23 @@ Dropin.prototype.initialize = function (callback) {
   this._dropinWrapper.innerHTML = mainHTML;
   container.appendChild(this._dropinWrapper);
 
-  if (!isTokenizationKey(this._options.authorization)) {
-    authorizationFingerprint = JSON.parse(atob(this._options.authorization)).authorizationFingerprint;
-    hasCustomerId = authorizationFingerprint && authorizationFingerprint.indexOf('customer_id=') !== -1;
-  }
-  mainViewOptions = {
-    callback: function () {
+  this.getVaultedPaymentMethods(function (paymentMethods) {
+    var mainViewOptions;
+
+    this._model = new DropinModel({paymentMethods: paymentMethods});
+    this._model.on('asyncDependenciesReady', function () {
       callback(null, dropinInstance);
-    },
-    componentId: this._componentId,
-    dropinWrapper: this._dropinWrapper,
-    options: this._options
-  };
+    });
 
-  if (hasCustomerId) {
-    this._options.client.request({
-      endpoint: 'payment_methods',
-      method: 'get',
-      data: {
-        defaultFirst: 1
-      }
-    }, function (err, paymentMethodsPayload) {
-      if (!err) {
-        paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
-      }
+    mainViewOptions = {
+      componentId: this._componentId,
+      dropinWrapper: this._dropinWrapper,
+      model: this._model,
+      options: this._options
+    };
 
-      this._model = new DropinModel({paymentMethods: paymentMethods});
-      mainViewOptions.model = this._model;
-      this.mainView = new MainView(mainViewOptions);
-    }.bind(this));
-  } else {
-    this._model = new DropinModel();
-    mainViewOptions.model = this._model;
     this.mainView = new MainView(mainViewOptions);
-  }
+  }.bind(this));
 };
 
 Dropin.prototype.removeStylesheet = function () {
@@ -101,6 +83,33 @@ Dropin.prototype.injectStylesheet = function () {
     head.insertBefore(stylesheet, head.firstChild);
   } else {
     head.appendChild(stylesheet);
+  }
+};
+
+Dropin.prototype.getVaultedPaymentMethods = function (callback) {
+  var authorizationFingerprint, paymentMethods;
+  var hasCustomerId = false;
+
+  if (!isTokenizationKey(this._options.authorization)) {
+    authorizationFingerprint = JSON.parse(atob(this._options.authorization)).authorizationFingerprint;
+    hasCustomerId = authorizationFingerprint && authorizationFingerprint.indexOf('customer_id=') !== -1;
+  }
+
+  if (hasCustomerId) {
+    this._options.client.request({
+      endpoint: 'payment_methods',
+      method: 'get',
+      data: {
+        defaultFirst: 1
+      }
+    }, function (err, paymentMethodsPayload) {
+      if (!err) {
+        paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
+      }
+      callback(paymentMethods);
+    });
+  } else {
+    callback();
   }
 };
 

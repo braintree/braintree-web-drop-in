@@ -2,6 +2,7 @@
 
 var Dropin = require('../../src/dropin/');
 var deferred = require('../../src/lib/deferred');
+var DropinModel = require('../../src/dropin-model');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var PaymentMethodPickerView = require('../../src/views/payment-method-picker-view');
@@ -215,6 +216,19 @@ describe('Dropin', function () {
         expect(instance.mainView).to.exist;
         done();
       });
+    });
+
+    it('calls the create callback when async dependencies are ready', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+
+      instance.initialize(function () {
+        done();
+      });
+
+      instance._model._emit('asyncDependenciesReady');
     });
   });
 

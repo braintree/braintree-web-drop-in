@@ -4,6 +4,7 @@ function DropinModel(options) {
   this._listeners = {};
   this._paymentMethods = options && options.paymentMethods ? options.paymentMethods : [];
   this._activePaymentMethod = this._paymentMethods[0];
+  this.dependenciesInitializing = 0;
 }
 
 DropinModel.prototype.on = function (event, handler) {
@@ -46,6 +47,17 @@ DropinModel.prototype.getPaymentMethods = function () {
 
 DropinModel.prototype.getActivePaymentMethod = function () {
   return this._activePaymentMethod;
+};
+
+DropinModel.prototype.asyncDependencyStarting = function () {
+  this.dependenciesInitializing++;
+};
+
+DropinModel.prototype.asyncDependencyReady = function () {
+  this.dependenciesInitializing--;
+  if (this.dependenciesInitializing === 0) {
+    this._emit('asyncDependenciesReady');
+  }
 };
 
 module.exports = DropinModel;

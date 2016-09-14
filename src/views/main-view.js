@@ -55,17 +55,6 @@ MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = 'braintree-dropin__' + id;
 };
 
-MainView.prototype.asyncDependencyStarting = function () {
-  this.dependenciesInitializing++;
-};
-
-MainView.prototype.asyncDependencyReady = function () {
-  this.dependenciesInitializing--;
-  if (this.dependenciesInitializing === 0) {
-    this.callback();
-  }
-};
-
 MainView.prototype.teardown = function (callback) {
   var viewNames = Object.keys(this.views);
   var numberOfViews = viewNames.length;

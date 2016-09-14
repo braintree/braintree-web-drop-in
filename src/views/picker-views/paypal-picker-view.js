@@ -26,7 +26,7 @@ PayPalPickerView.prototype._initialize = function () {
 
   this.element.innerHTML = html;
   this.element.appendChild(div);
-  this.mainView.asyncDependencyStarting();
+  this.model.asyncDependencyStarting();
 
   paypal.create({client: this.options.client}, function (err, paypalInstance) {
     if (err) {
@@ -48,7 +48,7 @@ PayPalPickerView.prototype._initialize = function () {
       }.bind(this));
     }.bind(this));
 
-    this.mainView.asyncDependencyReady();
+    this.model.asyncDependencyReady();
   }.bind(this));
 };
 

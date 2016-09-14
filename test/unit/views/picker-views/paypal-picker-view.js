@@ -2,6 +2,7 @@
 
 var PayPalPickerView = require('../../../../src/views/picker-views/paypal-picker-view');
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
+var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var paypal = require('braintree-web/paypal');
 
@@ -33,16 +34,12 @@ describe('PayPalPickerView', function () {
     beforeEach(function () {
       this.context = {
         element: this.fakePayPalPickerView,
+        model: new DropinModel(),
         options: {
           client: {
             getConfiguration: fake.configuration,
             request: this.sandbox.spy()
           }
-        },
-        mainView: {
-          componentId: 'component-id',
-          asyncDependencyStarting: this.sandbox.stub(),
-          asyncDependencyReady: this.sandbox.stub()
         }
       };
 
@@ -50,15 +47,19 @@ describe('PayPalPickerView', function () {
     });
 
     it('starts async dependency', function () {
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+
       PayPalPickerView.prototype._initialize.call(this.context);
 
-      expect(this.context.mainView.asyncDependencyStarting).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
     });
 
     it('notifies async dependency is ready when PayPal is created', function () {
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+
       PayPalPickerView.prototype._initialize.call(this.context);
 
-      expect(this.context.mainView.asyncDependencyReady).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
     });
 
     it('creates PayPal', function () {
@@ -92,13 +93,7 @@ describe('PayPalPickerView', function () {
         options: {
           paypal: {}
         },
-        mainView: {
-          asyncDependencyStarting: this.sandbox.stub(),
-          asyncDependencyReady: this.sandbox.stub()
-        },
-        model: {
-          addPaymentMethod: this.sandbox.stub()
-        }
+        model: new DropinModel()
       };
     });
 
@@ -121,12 +116,14 @@ describe('PayPalPickerView', function () {
         tokenize: this.sandbox.stub().callsArgWith(1, null, stubTokenizePayload)
       };
 
+      this.sandbox.spy(DropinModel.prototype, 'addPaymentMethod');
+
       this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
       PayPalPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
-      expect(this.context.model.addPaymentMethod).to.be.calledWith(stubTokenizePayload);
+      expect(DropinModel.prototype.addPaymentMethod).to.be.calledWith(stubTokenizePayload);
     });
 
     it('does not add a new payment method when tokenize fails', function () {
@@ -134,13 +131,15 @@ describe('PayPalPickerView', function () {
         tokenize: this.sandbox.stub().callsArgWith(1, new Error('bad things'), null)
       };
 
+      this.sandbox.spy(DropinModel.prototype, 'addPaymentMethod');
       this.sandbox.stub(console, 'error');
       this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+
       PayPalPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
-      expect(this.context.model.addPaymentMethod).to.not.have.been.called;
+      expect(DropinModel.prototype.addPaymentMethod).to.not.have.been.called;
     });
 
     it('console errors when tokenize fails', function () {

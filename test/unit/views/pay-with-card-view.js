@@ -43,11 +43,9 @@ describe('PayWithCardView', function () {
         _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
         getElementById: BaseView.prototype.getElementById,
         mainView: {
-          componentId: 'component-id',
-          asyncDependencyStarting: this.sandbox.stub(),
-          asyncDependencyReady: this.sandbox.stub(),
-          updateActivePaymentMethod: this.sandbox.stub()
+          componentId: 'component-id'
         },
+        model: new DropinModel(),
         options: {
           client: {
             getConfiguration: fake.configuration,
@@ -94,17 +92,21 @@ describe('PayWithCardView', function () {
     });
 
     it('starts async dependency', function () {
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
+
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.mainView.asyncDependencyStarting).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
     });
 
     it('notifies async dependency is ready when Hosted Fields is created', function () {
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
+
       hostedFields.create.callsArg(1);
 
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.mainView.asyncDependencyReady).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
     });
 
     it('console errors with a Hosted Fields create error', function () {

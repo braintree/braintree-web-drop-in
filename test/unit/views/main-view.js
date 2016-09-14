@@ -8,7 +8,7 @@ var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-
 var fake = require('../../helpers/fake');
 var templateHTML = require('../../../src/html/main.html');
 
-describe('MainView', function () {
+describe('MainVtew', function () {
   describe('Constructor', function () {
     beforeEach(function () {
       this.sandbox.stub(MainView.prototype, '_initialize');
@@ -157,43 +157,6 @@ describe('MainView', function () {
       MainView.prototype.setActiveView.call(this.context, 'id1');
 
       expect(this.context.dropinWrapper.className).to.contain('id1');
-    });
-  });
-
-  describe('asyncDependencyStarting', function () {
-    beforeEach(function () {
-      this.context = {
-        dependenciesInitializing: 0
-      };
-    });
-
-    it('increments dependenciesInitializing by one', function () {
-      MainView.prototype.asyncDependencyStarting.call(this.context);
-      expect(this.context.dependenciesInitializing).to.equal(1);
-    });
-  });
-
-  describe('asyncDependencyReady', function () {
-    beforeEach(function () {
-      this.context = {callback: this.sandbox.stub()};
-    });
-
-    it('decrements dependenciesInitializing by one', function () {
-      this.context.dependenciesInitializing = 2;
-
-      MainView.prototype.asyncDependencyReady.call(this.context);
-
-      expect(this.context.dependenciesInitializing).to.equal(1);
-      expect(this.context.callback).to.not.be.called;
-    });
-
-    it('calls the create callback when there are no dependencies initializing', function () {
-      this.context.dependenciesInitializing = 1;
-
-      MainView.prototype.asyncDependencyReady.call(this.context);
-
-      expect(this.context.dependenciesInitializing).to.equal(0);
-      expect(this.context.callback).to.be.called;
     });
   });
 
