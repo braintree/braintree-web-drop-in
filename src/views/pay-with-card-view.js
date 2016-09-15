@@ -1,6 +1,7 @@
 'use strict';
 
 var BaseView = require('./base-view');
+var cardIconHTML = require('../html/card-icons.html');
 var cardTypes = require('../constants').supportedCardTypes;
 var hostedFields = require('braintree-web/hosted-fields');
 
@@ -15,6 +16,7 @@ PayWithCardView.prototype.constructor = PayWithCardView;
 PayWithCardView.ID = PayWithCardView.prototype.ID = 'pay-with-card';
 
 PayWithCardView.prototype._initialize = function () {
+  var cardIcons = this.getElementById('card-view-icons');
   var challenges = this.options.client.getConfiguration().gatewayConfiguration.challenges;
   var hasCVV = challenges.indexOf('cvv') !== -1;
   var hasPostal = challenges.indexOf('postal_code') !== -1;
@@ -70,6 +72,8 @@ PayWithCardView.prototype._initialize = function () {
     this.element.removeChild(this.getElementById('postal-code-container'));
     delete hfOptions.fields.postalCode;
   }
+
+  cardIcons.innerHTML = cardIconHTML;
 
   this.model.asyncDependencyStarting();
 

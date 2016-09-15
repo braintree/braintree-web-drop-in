@@ -19,13 +19,9 @@ PayPalPickerView.prototype = Object.create(BasePickerView.prototype);
 PayPalPickerView.prototype.constructor = PayPalPickerView;
 
 PayPalPickerView.prototype._initialize = function () {
-  var div = document.createElement('div');
-  var html = paypalHTML;
-
   BasePickerView.prototype._initialize.apply(this, arguments);
 
-  this.element.innerHTML = html;
-  this.element.appendChild(div);
+  this.element.innerHTML = paypalHTML;
   this.model.asyncDependencyStarting();
 
   paypal.create({client: this.options.client}, function (err, paypalInstance) {
