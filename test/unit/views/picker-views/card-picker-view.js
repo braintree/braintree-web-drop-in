@@ -29,8 +29,12 @@ describe('CardPickerView', function () {
 
   describe('_initialize', function () {
     beforeEach(function () {
+      var element = document.createElement('div');
+
+      element.innerHTML = '<div data-braintree-id="card-picker-icons"></div>';
       this.context = {
-        element: document.createElement('div'),
+        element: element,
+        getElementById: BasePickerView.prototype.getElementById,
         mainView: {
           setActiveView: this.sandbox.spy()
         }
@@ -49,7 +53,7 @@ describe('CardPickerView', function () {
     it('appends card picker html', function () {
       CardPickerView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__pay-with-card-picker-view')).to.exist;
+      expect(this.context.element.querySelector('.braintree-dropin__picker-label').innerHTML).to.equal('Card');
     });
   });
 });

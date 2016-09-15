@@ -92,13 +92,9 @@ describe('PaymentMethodPickerView', function () {
     });
 
     it('appends picker view to payment method picker', function () {
-      var paymentPickerNode;
-
       PaymentMethodPickerView.prototype._initialize.call(this.context);
 
-      paymentPickerNode = this.element.querySelector('.braintree-dropin__pay-with-card-picker-view');
-
-      expect(paymentPickerNode).to.exist;
+      expect(this.element.querySelector('.braintree-dropin__picker-label').innerHTML).to.equal('Card');
     });
 
     it('creates completed picker views for all existing payment methods', function () {

@@ -82,7 +82,7 @@ describe('PayPalPickerView', function () {
     it('appends PayPal picker html', function () {
       PayPalPickerView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__paypal-picker-view')).to.exist;
+      expect(this.context.element.querySelector('.braintree-dropin__picker-label').innerHTML).to.equal('PayPal');
     });
   });
 
