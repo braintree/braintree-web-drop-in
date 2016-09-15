@@ -52,11 +52,11 @@ describe('CompletedPickerView', function () {
     });
 
     it('sets correct details for CreditCard payment methods', function () {
-      var detail, type;
+      var detail, icon, type;
 
       this.context.paymentMethod = {
         details: {
-          cardType: 'FooCard',
+          cardType: 'MasterCard',
           lastTwo: '66'
         },
         type: 'CreditCard'
@@ -66,9 +66,11 @@ describe('CompletedPickerView', function () {
 
       detail = this.context.element.querySelector('.braintree-dropin__list-term');
       type = this.context.element.querySelector('.braintree-dropin__list-desc');
+      icon = this.context.element.querySelector('[*|href="#icon-master-card"]');
 
       expect(detail.innerHTML).to.equal('Ending in ••66');
-      expect(type.innerHTML).to.equal('FooCard');
+      expect(type.innerHTML).to.equal('MasterCard');
+      expect(icon).to.exist;
     });
 
     it('sets correct details for PayPalAccount payment methods', function () {

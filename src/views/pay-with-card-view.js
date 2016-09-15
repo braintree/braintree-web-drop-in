@@ -1,7 +1,7 @@
 'use strict';
 
 var BaseView = require('./base-view');
-var cardTypes = require('../constants').cardTypes;
+var cardTypes = require('../constants').supportedCardTypes;
 var hostedFields = require('braintree-web/hosted-fields');
 
 function PayWithCardView() {

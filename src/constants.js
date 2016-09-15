@@ -2,6 +2,16 @@
 
 module.exports = {
   cardTypes: {
+    Visa: 'visa',
+    MasterCard: 'master-card',
+    'American Express': 'american-express',
+    'Diners Club': 'diners-club',
+    Discover: 'discover',
+    JCB: 'jcb',
+    UnionPay: 'unionpay',
+    Maestro: 'maestro'
+  },
+  supportedCardTypes: {
     visa: 'Visa',
     'master-card': 'MasterCard',
     'american-express': 'American Express',
