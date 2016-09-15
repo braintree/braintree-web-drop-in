@@ -17,8 +17,8 @@ CompletedPickerView.prototype.constructor = CompletedPickerView;
 
 CompletedPickerView.prototype._initialize = function () {
   var div = document.createElement('div');
-  var html = paymentMethodHTML;
 
+  this.html = paymentMethodHTML;
   BasePickerView.prototype._initialize.apply(this, arguments);
   classlist.add(div, 'braintree-dropin__completed-picker-view');
 
@@ -28,21 +28,22 @@ CompletedPickerView.prototype._initialize = function () {
 
   switch (this.paymentMethod.type) {
     case 'CreditCard':
-      html = html.replace(/@ICON/g, this.paymentMethod.details.cardType);
-      html = html.replace(/@DETAIL/g, 'Ending in ••' + this.paymentMethod.details.lastTwo);
-      html = html.replace(/@TYPE/g, this.paymentMethod.details.cardType);
+      this.html = this.html.replace(/@ICON/g, this.paymentMethod.details.cardType);
+      this.html = this.html.replace(/@DETAIL/g, 'Ending in ••' + this.paymentMethod.details.lastTwo);
+      this.html = this.html.replace(/@TYPE/g, this.paymentMethod.details.cardType);
       break;
     case 'PayPalAccount':
-      html = html.replace(/@ICON/g, 'paypal');
-      html = html.replace(/@DETAIL/g, this.paymentMethod.details.email);
-      html = html.replace(/@TYPE/g, 'PayPal');
+      this.html = this.html.replace(/@ICON/g, 'paypal');
+      this.html = this.html.replace(/@DETAIL/g, this.paymentMethod.details.email);
+      this.html = this.html.replace(/@TYPE/g, 'PayPal');
       break;
     default:
       break;
   }
 
-  div.innerHTML = html;
+  div.innerHTML = this.html;
   this.element.appendChild(div);
+  this.checkIcon = this.element.querySelector('.braintree-dropin__check-container');
 };
 
 module.exports = CompletedPickerView;

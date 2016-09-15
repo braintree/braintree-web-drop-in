@@ -94,12 +94,18 @@ PaymentMethodPickerView.prototype.getCompletedPickerView = function (paymentMeth
 };
 
 PaymentMethodPickerView.prototype.setActivePaymentMethod = function (paymentMethod) {
-  var html;
   var completedPickerView = this.getCompletedPickerView(paymentMethod);
-
-  html = completedPickerView.element.querySelector('.braintree-dropin__payment-method').innerHTML;
+  var html = completedPickerView.html;
 
   this.activePaymentMethod.innerHTML = html;
+
+  this.views.forEach(function (view) {
+    if (view.checkIcon) {
+      classlist.remove(view.checkIcon, 'braintree-dropin__check-container--active');
+    }
+  });
+
+  classlist.add(completedPickerView.checkIcon, 'braintree-dropin__check-container--active');
 };
 
 PaymentMethodPickerView.prototype.teardown = function (callback) {

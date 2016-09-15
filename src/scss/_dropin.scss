@@ -55,6 +55,23 @@
   transform: rotate(0deg);
 }
 
+.braintree-dropin__check-container {
+  display: none;
+}
+
+.braintree-dropin__check-container--active {
+  display: inline-block;
+}
+
+.braintree-dropin__icon-check {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+
 .braintree-dropin__drawer {
   position: absolute;
   z-index: 2147483647;
@@ -108,7 +125,6 @@
   color: $black;
   font-size: $type-16;
   line-height: 1.4;
-  align-items: center;
   justify-content: center;
   width: 100%;
   &:hover {
@@ -139,7 +155,10 @@
 }
 
 .braintree-dropin__completed-picker-view {
+  display: flex;
+  align-items: center;
   justify-content: flex-start;
+  width: 100%;
 }
 
 .braintree-dropin__header {

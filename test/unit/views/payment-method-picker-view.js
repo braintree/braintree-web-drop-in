@@ -161,17 +161,43 @@ describe('PaymentMethodPickerView', function () {
       this.context = {
         activePaymentMethod: this.element.querySelector('.braintree-dropin__active-payment-method'),
         choosePaymentMethod: this.element.querySelector('.braintree-dropin__choose-payment-method'),
+        views: [this.completedPickerView],
         getElementById: BaseView.prototype.getElementById,
         getCompletedPickerView: this.sandbox.stub().returns(this.completedPickerView)
       };
     });
 
     it('updates the active payment method HTML', function () {
-      var completedViewHTML = this.completedPickerView.element.querySelector('.braintree-dropin__payment-method');
+      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
+
+      expect(this.context.activePaymentMethod.innerHTML).to.equal(this.completedPickerView.html);
+    });
+
+    it('hides the check from non-active payment methods', function () {
+      var paymentMethod2 = {
+        details: {
+          email: 'me@real.biz'
+        },
+        type: 'PayPalAccount'
+      };
+      var completedPickerView2 = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: paymentMethod2
+      });
+
+      this.context.views = [this.completedPickerView, completedPickerView2];
+
+      classlist.add(completedPickerView2.checkIcon, 'braintree-dropin__check-container--active');
 
       PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
 
-      expect(this.context.activePaymentMethod.innerHTML).to.equal(completedViewHTML.innerHTML);
+      expect(completedPickerView2.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.false;
+    });
+
+    it('shows the check on the active payment method', function () {
+      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
+
+      expect(this.completedPickerView.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.true;
     });
   });
 
