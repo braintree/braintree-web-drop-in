@@ -72,7 +72,7 @@ describe('CompletedPickerView', function () {
     });
 
     it('sets correct details for PayPalAccount payment methods', function () {
-      var detail, type;
+      var detail, icon, type;
 
       this.context.paymentMethod = {
         details: {
@@ -85,9 +85,11 @@ describe('CompletedPickerView', function () {
 
       detail = this.context.element.querySelector('.braintree-dropin__list-term');
       type = this.context.element.querySelector('.braintree-dropin__list-desc');
+      icon = this.context.element.querySelector('[*|href="#logoPayPal"]');
 
       expect(detail.innerHTML).to.equal('my-email@cool.biz');
       expect(type.innerHTML).to.equal('PayPal');
+      expect(icon).to.exist;
     });
   });
 });
