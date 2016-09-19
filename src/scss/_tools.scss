@@ -11,3 +11,12 @@
 .braintree-dropin__display--none {
     display: none;
 }
+
+.braintree-dropin__hide {
+  height: 0;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all $time-faster linear;
+  visibility: hidden;
+}

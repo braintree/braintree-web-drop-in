@@ -3,6 +3,7 @@
 var BaseView = require('./base-view');
 var cardIconHTML = require('../html/card-icons.html');
 var cardTypes = require('../constants').supportedCardTypes;
+var classlist = require('../lib/classlist');
 var hideUnsupportedCardIcons = require('../lib/hide-unsupported-card-icons');
 var hostedFields = require('braintree-web/hosted-fields');
 
@@ -77,6 +78,7 @@ PayWithCardView.prototype._initialize = function () {
 
   cardIcons.innerHTML = cardIconHTML;
   hideUnsupportedCardIcons(this.element, supportedCardTypes);
+  this.cardNumberIcon = this.getElementById('card-number-icon');
 
   this.model.asyncDependencyStarting();
 
@@ -86,9 +88,14 @@ PayWithCardView.prototype._initialize = function () {
       return;
     }
 
+    this.hostedFieldsInstance = hostedFieldsInstance;
+    this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
+    this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
+    this.hostedFieldsInstance.on('cardTypeChange', this._onCardTypeChangeEvent.bind(this));
+
     this.submit = this.getElementById('card-submit');
     this.submit.addEventListener('click', this.tokenize.bind(this));
-    this.hostedFieldsInstance = hostedFieldsInstance;
+
     this.model.asyncDependencyReady();
   }.bind(this));
 };
@@ -129,6 +136,29 @@ PayWithCardView.prototype._generateFieldSelector = function (field) {
 
 PayWithCardView.prototype.teardown = function (callback) {
   this.hostedFieldsInstance.teardown(callback);
+};
+
+PayWithCardView.prototype._onFocusEvent = function (event) {
+  switch (event.emittedBy) {
+    case 'number':
+      classlist.remove(this.cardNumberIcon, 'braintree-dropin__hide');
+      break;
+    default:
+      return;
+  }
+};
+
+PayWithCardView.prototype._onBlurEvent = function (event) {
+  if (event.fields.number.isEmpty) {
+    classlist.add(this.cardNumberIcon, 'braintree-dropin__hide');
+  }
+};
+
+PayWithCardView.prototype._onCardTypeChangeEvent = function (event) {
+  var use = this.getElementById('card-number-icon').querySelector('use');
+  var hrefLink = event.cards.length === 1 ? '#icon-' + event.cards[0].type : '#iconCardFront';
+
+  use.setAttribute('xlink:href', hrefLink);
 };
 
 module.exports = PayWithCardView;

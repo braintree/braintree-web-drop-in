@@ -25,7 +25,7 @@ describe('Dropin', function () {
     };
 
     this.sandbox.stub(hostedFields, 'create', function (options, cb) {
-      deferred(cb)();
+      deferred(cb)(null, {on: function () {}});
     });
   });
 

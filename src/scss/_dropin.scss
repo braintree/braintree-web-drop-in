@@ -62,6 +62,13 @@
   display: inline-block;
 }
 
+.braintree-dropin__icon {
+  display: inline-block;
+  height: 24px;
+  transition: opacity $time-fast ease, transform $time-fast ease;
+  width: 44px;
+}
+
 .braintree-dropin__icon-check {
   display: inline-block;
   width: 20px;

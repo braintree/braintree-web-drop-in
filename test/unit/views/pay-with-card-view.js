@@ -1,6 +1,7 @@
 'use strict';
 
 var BaseView = require('../../../src/views/base-view');
+var classlist = require('../../../src/lib/classlist');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
@@ -52,9 +53,15 @@ describe('PayWithCardView', function () {
             request: this.sandbox.spy()
           }
         },
-        tokenize: PayWithCardView.prototype.tokenize
+        tokenize: PayWithCardView.prototype.tokenize,
+        _onFocusEvent: PayWithCardView.prototype._onFocusEvent,
+        _onBlurEvent: function () {},
+        _onCardTypeChangeEvent: function () {}
       };
-      this.sandbox.stub(hostedFields, 'create').yields(null, {});
+      this.hostedFieldsInstance = {
+        on: this.sandbox.spy()
+      };
+      this.sandbox.stub(hostedFields, 'create').yields(null, this.hostedFieldsInstance);
     });
 
     it('has cvv if supplied in challenges', function () {
@@ -112,7 +119,7 @@ describe('PayWithCardView', function () {
     it('notifies async dependency is ready when Hosted Fields is created', function () {
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
 
-      hostedFields.create.callsArg(1);
+      hostedFields.create.callsArgWith(1, null, {on: function () {}});
 
       PayWithCardView.prototype._initialize.call(this.context);
 
@@ -199,6 +206,150 @@ describe('PayWithCardView', function () {
 
         expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.true;
       }.bind(this));
+    });
+  });
+
+  describe('Hosted Fields events', function () {
+    beforeEach(function () {
+      this.context = {
+        element: this.element,
+        _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
+        getElementById: BaseView.prototype.getElementById,
+        mainView: {
+          componentId: 'component-id'
+        },
+        model: new DropinModel(),
+        options: {
+          client: {
+            getConfiguration: fake.configuration,
+            request: this.sandbox.spy()
+          }
+        },
+        tokenize: PayWithCardView.prototype.tokenize,
+        _onFocusEvent: function () {},
+        _onBlurEvent: function () {},
+        _onCardTypeChangeEvent: function () {}
+      };
+    });
+
+    describe('onFocusEvent', function () {
+      beforeEach(function () {
+        this.context._onFocusEvent = PayWithCardView.prototype._onFocusEvent;
+      });
+
+      it('calls onFocusEvent on focus events', function () {
+        var cardNumberIcon;
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'number'})
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        PayWithCardView.prototype._initialize.call(this.context);
+        cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+
+        expect(cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+      });
+    });
+
+    describe('onBlurEvent', function () {
+      beforeEach(function () {
+        this.context._onBlurEvent = PayWithCardView.prototype._onBlurEvent;
+      });
+
+      it('hides the card number icon when the number field is blurred and empty', function () {
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {isEmpty: true}
+          }
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        classlist.remove(cardNumberIcon, 'braintree-dropin__hide');
+
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(this.context.cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.true;
+      });
+
+      it('does not hide the card number icon when the number field is blurred and not empty', function () {
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {isEmpty: false}
+          }
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        classlist.remove(cardNumberIcon, 'braintree-dropin__hide');
+
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(this.context.cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+      });
+    });
+
+    describe('onCardTypeChange event', function () {
+      beforeEach(function () {
+        this.context._onCardTypeChangeEvent = PayWithCardView.prototype._onCardTypeChangeEvent;
+      });
+
+      it('updates the card icon to the card type if there is one possible card type', function () {
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+        var fakeEvent = {
+          cards: [{type: 'master-card'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#icon-master-card');
+      });
+
+      it('updates the card icon to the generic card if there are many possible card types', function () {
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+        var fakeEvent = {
+          cards: [{type: 'master-card'}, {type: 'foo-pay'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+      });
+
+      it('updates the card icon to the generic card if there no card types', function () {
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+        var fakeEvent = {
+          cards: [],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+      });
     });
   });
 
