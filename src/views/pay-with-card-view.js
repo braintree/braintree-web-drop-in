@@ -67,6 +67,11 @@ PayWithCardView.prototype._initialize = function () {
     }
   };
 
+  cardIcons.innerHTML = cardIconHTML;
+  hideUnsupportedCardIcons(this.element, supportedCardTypes);
+  this.cardNumberIcon = this.getElementById('card-number-icon');
+  this.cvvIcon = this.getElementById('cvv-icon');
+
   if (!hasCVV) {
     this.element.removeChild(this.getElementById('cvv-container'));
     delete hfOptions.fields.cvv;
@@ -75,10 +80,6 @@ PayWithCardView.prototype._initialize = function () {
     this.element.removeChild(this.getElementById('postal-code-container'));
     delete hfOptions.fields.postalCode;
   }
-
-  cardIcons.innerHTML = cardIconHTML;
-  hideUnsupportedCardIcons(this.element, supportedCardTypes);
-  this.cardNumberIcon = this.getElementById('card-number-icon');
 
   this.model.asyncDependencyStarting();
 
@@ -143,22 +144,37 @@ PayWithCardView.prototype._onFocusEvent = function (event) {
     case 'number':
       classlist.remove(this.cardNumberIcon, 'braintree-dropin__hide');
       break;
+    case 'cvv':
+      classlist.remove(this.cvvIcon, 'braintree-dropin__hide');
+      break;
     default:
       return;
   }
 };
 
 PayWithCardView.prototype._onBlurEvent = function (event) {
-  if (event.fields.number.isEmpty) {
-    classlist.add(this.cardNumberIcon, 'braintree-dropin__hide');
+  switch (event.emittedBy) {
+    case 'number':
+      if (event.fields.number.isEmpty) {
+        classlist.add(this.cardNumberIcon, 'braintree-dropin__hide');
+      }
+      break;
+    case 'cvv':
+      classlist.add(this.cvvIcon, 'braintree-dropin__hide');
+      break;
+    default:
+      return;
   }
 };
 
 PayWithCardView.prototype._onCardTypeChangeEvent = function (event) {
-  var use = this.getElementById('card-number-icon').querySelector('use');
-  var hrefLink = event.cards.length === 1 ? '#icon-' + event.cards[0].type : '#iconCardFront';
+  var cardNumberUse = this.getElementById('card-number-icon').querySelector('use');
+  var cvvUse = this.getElementById('cvv-icon').querySelector('use');
+  var cardNumberHrefLink = event.cards.length === 1 ? '#icon-' + event.cards[0].type : '#iconCardFront';
+  var cvvHrefLink = event.cards.length === 1 && event.cards[0].type === 'american-express' ? '#iconCVVFront' : '#iconCVVBack';
 
-  use.setAttribute('xlink:href', hrefLink);
+  cardNumberUse.setAttribute('xlink:href', cardNumberHrefLink);
+  cvvUse.setAttribute('xlink:href', cvvHrefLink);
 };
 
 module.exports = PayWithCardView;

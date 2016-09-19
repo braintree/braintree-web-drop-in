@@ -221,7 +221,16 @@ describe('PayWithCardView', function () {
         model: new DropinModel(),
         options: {
           client: {
-            getConfiguration: fake.configuration,
+            getConfiguration: function () {
+              return {
+                gatewayConfiguration: {
+                  challenges: ['cvv'],
+                  creditCards: {
+                    supportedCardTypes: []
+                  }
+                }
+              };
+            },
             request: this.sandbox.spy()
           }
         },
@@ -237,7 +246,7 @@ describe('PayWithCardView', function () {
         this.context._onFocusEvent = PayWithCardView.prototype._onFocusEvent;
       });
 
-      it('calls onFocusEvent on focus events', function () {
+      it('shows default card icon in number field when focused', function () {
         var cardNumberIcon;
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'number'})
@@ -249,6 +258,22 @@ describe('PayWithCardView', function () {
         cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
 
         expect(cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+      });
+
+      it('shows default cvv icon in cvv field when focused', function () {
+        var cvvIcon;
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'cvv'})
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        PayWithCardView.prototype._initialize.call(this.context);
+        cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
+
+        expect(cvvIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+        expect(cvvIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCVVBack');
       });
     });
 
@@ -296,6 +321,20 @@ describe('PayWithCardView', function () {
 
         expect(this.context.cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.false;
       });
+
+      it('hides cvv icon in cvv field when blurred', function () {
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'cvv'})
+        };
+        var cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
+
+        classlist.remove(cvvIcon, 'braintree-dropin__hide');
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(this.context.cvvIcon.classList.contains('braintree-dropin__hide')).to.be.true;
+      });
     });
 
     describe('onCardTypeChange event', function () {
@@ -303,7 +342,7 @@ describe('PayWithCardView', function () {
         this.context._onCardTypeChangeEvent = PayWithCardView.prototype._onCardTypeChangeEvent;
       });
 
-      it('updates the card icon to the card type if there is one possible card type', function () {
+      it('updates the card number icon to the card type if there is one possible card type', function () {
         var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
         var fakeEvent = {
           cards: [{type: 'master-card'}],
@@ -319,7 +358,7 @@ describe('PayWithCardView', function () {
         expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#icon-master-card');
       });
 
-      it('updates the card icon to the generic card if there are many possible card types', function () {
+      it('updates the card number icon to the generic card if there are many possible card types', function () {
         var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
         var fakeEvent = {
           cards: [{type: 'master-card'}, {type: 'foo-pay'}],
@@ -349,6 +388,42 @@ describe('PayWithCardView', function () {
         PayWithCardView.prototype._initialize.call(this.context);
 
         expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+      });
+
+      it('updates the cvv icon to back icon for non-amex cards', function () {
+        var use = this.element.querySelector('[data-braintree-id="cvv-icon"]').querySelector('use');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+
+        use.setAttribute('xlink:href', '#iconCVVFront');
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(use.getAttribute('xlink:href')).to.equal('#iconCVVBack');
+      });
+
+      it('updates the cvv icon to front icon for amex cards', function () {
+        var cvvIcon, use;
+        var fakeEvent = {
+          cards: [{type: 'american-express'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
+        use = cvvIcon.querySelector('use');
+
+        expect(use.getAttribute('xlink:href')).to.equal('#iconCVVFront');
       });
     });
   });
