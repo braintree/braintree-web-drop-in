@@ -3,6 +3,7 @@
 var BaseView = require('./base-view');
 var cardIconHTML = require('../html/card-icons.html');
 var cardTypes = require('../constants').supportedCardTypes;
+var hideUnsupportedCardIcons = require('../lib/hide-unsupported-card-icons');
 var hostedFields = require('braintree-web/hosted-fields');
 
 function PayWithCardView() {
@@ -20,6 +21,7 @@ PayWithCardView.prototype._initialize = function () {
   var challenges = this.options.client.getConfiguration().gatewayConfiguration.challenges;
   var hasCVV = challenges.indexOf('cvv') !== -1;
   var hasPostal = challenges.indexOf('postal_code') !== -1;
+  var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
   var hfOptions = {
     client: this.options.client,
     fields: {
@@ -74,6 +76,7 @@ PayWithCardView.prototype._initialize = function () {
   }
 
   cardIcons.innerHTML = cardIconHTML;
+  hideUnsupportedCardIcons(this.element, supportedCardTypes);
 
   this.model.asyncDependencyStarting();
 

@@ -5,6 +5,7 @@ var CardPickerView = require('../../../src/views/picker-views/card-picker-view')
 var classlist = require('../../../src/lib/classlist');
 var CompletedPickerView = require('../../../src/views/picker-views/completed-picker-view');
 var DropinModel = require('../../../src/dropin-model');
+var fake = require('../../helpers/fake');
 var mainHTML = require('../../../src/html/main.html');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var paypal = require('braintree-web/paypal');
@@ -52,7 +53,11 @@ describe('PaymentMethodPickerView', function () {
         },
         model: new DropinModel(),
         options: {
-          client: {}
+          client: {
+            getConfiguration: function () {
+              return fake.configuration();
+            }
+          }
         },
         setActivePaymentMethod: this.sandbox.stub(),
         toggleDrawer: this.sandbox.stub(),

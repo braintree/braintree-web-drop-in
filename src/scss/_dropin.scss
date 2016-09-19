@@ -148,6 +148,7 @@
 }
 
 .braintree-dropin__picker-label {
+  align-self: center;
   font-size: $type-16;
   margin-right: 30px;
   margin-bottom: 0;
@@ -167,7 +168,7 @@
   width: 100%;
 }
 
-.braintree-dropin__icon-card {
+[class^="braintree-dropin__icon-card-"], [class*=" braintree-dropin__icon-card-"] {
   display: inline-block;
   width: 44px;
   height: 24px;

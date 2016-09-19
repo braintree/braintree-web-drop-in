@@ -60,7 +60,12 @@ describe('PayWithCardView', function () {
     it('has cvv if supplied in challenges', function () {
       this.context.options.client.getConfiguration = function () {
         return {
-          gatewayConfiguration: {challenges: ['cvv']}
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
         };
       };
       PayWithCardView.prototype._initialize.call(this.context);
@@ -77,7 +82,12 @@ describe('PayWithCardView', function () {
     it('has postal code if supplied in challenges', function () {
       this.context.options.client.getConfiguration = function () {
         return {
-          gatewayConfiguration: {challenges: ['postal_code']}
+          gatewayConfiguration: {
+            challenges: ['postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
         };
       };
       PayWithCardView.prototype._initialize.call(this.context);
@@ -136,7 +146,12 @@ describe('PayWithCardView', function () {
     it('creates Hosted Fields with cvv if included in challenges', function () {
       this.context.options.client.getConfiguration = function () {
         return {
-          gatewayConfiguration: {challenges: ['cvv']}
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
         };
       };
 
@@ -148,13 +163,42 @@ describe('PayWithCardView', function () {
     it('creates Hosted Fields with postal code if included in challenges', function () {
       this.context.options.client.getConfiguration = function () {
         return {
-          gatewayConfiguration: {challenges: ['postal_code']}
+          gatewayConfiguration: {
+            challenges: ['postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
         };
       };
 
       PayWithCardView.prototype._initialize.call(this.context);
 
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
+    });
+
+    it('shows supported card icons', function () {
+      var supportedCardTypes = ['american-express', 'discover', 'diners-club', 'jcb', 'master-card', 'visa'];
+
+      PayWithCardView.prototype._initialize.call(this.context);
+
+      supportedCardTypes.forEach(function (cardType) {
+        var cardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-' + cardType);
+
+        expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.false;
+      }.bind(this));
+    });
+
+    it('hides unsupported card icons', function () {
+      var unsupportedCardTypes = ['unionpay', 'maestro'];
+
+      PayWithCardView.prototype._initialize.call(this.context);
+
+      unsupportedCardTypes.forEach(function (cardType) {
+        var cardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-' + cardType);
+
+        expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.true;
+      }.bind(this));
     });
   });
 

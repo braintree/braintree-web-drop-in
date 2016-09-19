@@ -2,6 +2,7 @@
 
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var CardPickerView = require('../../../../src/views/picker-views/card-picker-view');
+var fake = require('../../../helpers/fake');
 var PayWithCardView = require('../../../../src/views/pay-with-card-view');
 
 describe('CardPickerView', function () {
@@ -37,6 +38,13 @@ describe('CardPickerView', function () {
         getElementById: BasePickerView.prototype.getElementById,
         mainView: {
           setActiveView: this.sandbox.spy()
+        },
+        options: {
+          client: {
+            getConfiguration: function () {
+              return fake.configuration();
+            }
+          }
         }
       };
     });
@@ -54,6 +62,30 @@ describe('CardPickerView', function () {
       CardPickerView.prototype._initialize.call(this.context);
 
       expect(this.context.element.querySelector('.braintree-dropin__picker-label').innerHTML).to.equal('Card');
+    });
+
+    it('shows supported card icons', function () {
+      var supportedCardTypes = ['american-express', 'discover', 'diners-club', 'jcb', 'master-card', 'visa'];
+
+      CardPickerView.prototype._initialize.call(this.context);
+
+      supportedCardTypes.forEach(function (cardType) {
+        var cardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-' + cardType);
+
+        expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.false;
+      }.bind(this));
+    });
+
+    it('hides unsupported card icons', function () {
+      var unsupportedCardTypes = ['unionpay', 'maestro'];
+
+      CardPickerView.prototype._initialize.call(this.context);
+
+      unsupportedCardTypes.forEach(function (cardType) {
+        var cardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-' + cardType);
+
+        expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.true;
+      }.bind(this));
     });
   });
 });
