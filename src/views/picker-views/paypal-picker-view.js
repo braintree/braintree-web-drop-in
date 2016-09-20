@@ -23,6 +23,7 @@ PayPalPickerView.prototype._initialize = function () {
 
   this.element.innerHTML = paypalHTML;
   this.model.asyncDependencyStarting();
+  this._createPayPalButton();
 
   paypal.create({client: this.options.client}, function (err, paypalInstance) {
     if (err) {
@@ -46,6 +47,28 @@ PayPalPickerView.prototype._initialize = function () {
 
     this.model.asyncDependencyReady();
   }.bind(this));
+};
+
+PayPalPickerView.prototype._createPayPalButton = function () {
+  var attr;
+  var script = document.createElement('script');
+  var scriptAttrs = {
+    'data-merchant': 'braintree',
+    'data-button': 'checkout',
+    'data-type': 'button',
+    'data-color': 'blue'
+  };
+
+  script.src = '//www.paypalobjects.com/api/button.js';
+  script.async = true;
+
+  for (attr in scriptAttrs) {
+    if (scriptAttrs.hasOwnProperty(attr)) {
+      script.setAttribute(attr, scriptAttrs[attr]);
+    }
+  }
+
+  this.getElementById('paypal-button').appendChild(script);
 };
 
 PayPalPickerView.prototype.teardown = function (callback) {

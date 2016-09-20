@@ -142,18 +142,6 @@
   border-bottom: 1px solid $black-85;
 }
 
-.braintree-dropin__picker-view button {
-  outline: none;
-  background: #009cde;
-  color: white;
-  border: none;
-  border-bottom: 1px solid #bfbfbf;
-}
-
-.braintree-dropin__picker-view:last-child button {
-  border: none;
-}
-
 .braintree-dropin__picker-label {
   align-self: center;
   font-size: $type-16;

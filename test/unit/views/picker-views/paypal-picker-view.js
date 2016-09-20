@@ -1,15 +1,17 @@
 'use strict';
 
 var PayPalPickerView = require('../../../../src/views/picker-views/paypal-picker-view');
+var BaseView = require('../../../../src/views/base-view');
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var paypal = require('braintree-web/paypal');
+var paypalHTML = require('../../../../src/html/paypal-picker.html');
 
 describe('PayPalPickerView', function () {
   beforeEach(function () {
     this.fakePayPalPickerView = document.createElement('div');
-    this.fakePayPalPickerView.id = 'paypal-picker-view';
+    this.fakePayPalPickerView.innerHTML = paypalHTML;
 
     document.body.appendChild(this.fakePayPalPickerView);
   });
@@ -33,7 +35,9 @@ describe('PayPalPickerView', function () {
   describe('_initialize', function () {
     beforeEach(function () {
       this.context = {
+        _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
+        getElementById: BaseView.prototype.getElementById,
         model: new DropinModel(),
         options: {
           client: {
@@ -84,12 +88,27 @@ describe('PayPalPickerView', function () {
 
       expect(this.context.element.querySelector('.braintree-dropin__picker-label').innerHTML).to.equal('PayPal');
     });
+
+    it('creates a paypal button', function () {
+      var paypalButton;
+
+      PayPalPickerView.prototype._initialize.call(this.context);
+      paypalButton = this.context.element.querySelector('[data-braintree-id="paypal-button"] script');
+
+      expect(paypalButton.getAttribute('src')).to.equal('//www.paypalobjects.com/api/button.js');
+      expect(paypalButton.getAttribute('data-merchant')).to.equal('braintree');
+      expect(paypalButton.getAttribute('data-button')).to.equal('checkout');
+      expect(paypalButton.getAttribute('data-type')).to.equal('button');
+      expect(paypalButton.getAttribute('data-color')).to.equal('blue');
+    });
   });
 
   describe('element after initialization', function () {
     beforeEach(function () {
       this.context = {
+        _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
+        getElementById: BaseView.prototype.getElementById,
         options: {
           paypal: {}
         },
