@@ -47,6 +47,25 @@
     transition: opacity $time-faster linear;
 }
 
+.braintree-dropin__form-button {
+  background: $black-90;
+  background-image: linear-gradient(-180deg, $black-95 0%, $black-85 100%);
+  border: 1px solid $black-85;
+  border-radius: 3px;
+  font-size: $type-16;
+  padding: 14px 20px;
+
+  &:hover {
+    background: $black-75;
+    background-image: linear-gradient(-180deg, $black-85 0%, $black-75 100%);
+  }
+
+  &:active {
+    background: $black-95;
+    background-image: linear-gradient(-180deg, $black-90 0%, $black-95 100%);
+  }
+}
+
 @include placeholder {
     color: $black-75;
 }
