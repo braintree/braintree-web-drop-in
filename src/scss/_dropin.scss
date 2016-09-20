@@ -122,6 +122,16 @@
   padding: 1em;
 }
 
+.braintree-dropin__option--default__text {
+  color: #000;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+  padding: 8px 0;
+  text-align: left;
+  text-transform: none;
+}
+
 .braintree-dropin__picker-view {
   display: flex;
   padding: 8px 16px 8px 12px;
