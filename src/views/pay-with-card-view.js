@@ -69,8 +69,12 @@ PayWithCardView.prototype._initialize = function () {
 
   cardIcons.innerHTML = cardIconHTML;
   hideUnsupportedCardIcons(this.element, supportedCardTypes);
+
   this.cardNumberIcon = this.getElementById('card-number-icon');
+  this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
   this.cvvIcon = this.getElementById('cvv-icon');
+  this.cvvIconSvg = this.getElementById('cvv-icon-svg');
+  this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
 
   if (!hasCVV) {
     this.element.removeChild(this.getElementById('cvv-container'));
@@ -168,13 +172,26 @@ PayWithCardView.prototype._onBlurEvent = function (event) {
 };
 
 PayWithCardView.prototype._onCardTypeChangeEvent = function (event) {
-  var cardNumberUse = this.getElementById('card-number-icon').querySelector('use');
-  var cvvUse = this.getElementById('cvv-icon').querySelector('use');
-  var cardNumberHrefLink = event.cards.length === 1 ? '#icon-' + event.cards[0].type : '#iconCardFront';
-  var cvvHrefLink = event.cards.length === 1 && event.cards[0].type === 'american-express' ? '#iconCVVFront' : '#iconCVVBack';
+  var cardType;
+  var cardNumberHrefLink = '#iconCardFront';
+  var cvvHrefLink = '#iconCVVBack';
+  var cvvDescriptor = '(3 digits)';
+  var cvvPlaceholder = '•••';
 
-  cardNumberUse.setAttribute('xlink:href', cardNumberHrefLink);
-  cvvUse.setAttribute('xlink:href', cvvHrefLink);
+  if (event.cards.length === 1) {
+    cardType = event.cards[0].type;
+    cardNumberHrefLink = '#icon-' + cardType;
+    if (cardType === 'american-express') {
+      cvvHrefLink = '#iconCVVFront';
+      cvvDescriptor = '(4 digits)';
+      cvvPlaceholder = '••••';
+    }
+  }
+
+  this.cardNumberIconSvg.setAttribute('xlink:href', cardNumberHrefLink);
+  this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
+  this.cvvLabelDescriptor.textContent = cvvDescriptor;
+  this.hostedFieldsInstance.setPlaceholder('cvv', cvvPlaceholder);
 };
 
 module.exports = PayWithCardView;

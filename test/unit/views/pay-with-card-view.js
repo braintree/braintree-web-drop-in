@@ -349,7 +349,8 @@ describe('PayWithCardView', function () {
           emittedBy: 'number'
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -365,7 +366,8 @@ describe('PayWithCardView', function () {
           emittedBy: 'number'
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -381,7 +383,8 @@ describe('PayWithCardView', function () {
           emittedBy: 'number'
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -397,7 +400,8 @@ describe('PayWithCardView', function () {
           emittedBy: 'number'
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
         };
 
         use.setAttribute('xlink:href', '#iconCVVFront');
@@ -408,22 +412,122 @@ describe('PayWithCardView', function () {
       });
 
       it('updates the cvv icon to front icon for amex cards', function () {
-        var cvvIcon, use;
+        var use = this.element.querySelector('[data-braintree-id="cvv-icon"]').querySelector('use');
         var fakeEvent = {
           cards: [{type: 'american-express'}],
           emittedBy: 'number'
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         PayWithCardView.prototype._initialize.call(this.context);
 
-        cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
-        use = cvvIcon.querySelector('use');
-
         expect(use.getAttribute('xlink:href')).to.equal('#iconCVVFront');
+      });
+
+      it('updates the cvv label descriptor to four digits when card type is amex', function () {
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var fakeEvent = {
+          cards: [{type: 'american-express'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        cvvLabelDescriptor.textContent = 'some value';
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cvvLabelDescriptor.textContent).to.equal('(4 digits)');
+      });
+
+      it('updates the cvv label descriptor to three digits when card type is non-amex', function () {
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        cvvLabelDescriptor.textContent = 'some value';
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cvvLabelDescriptor.textContent).to.equal('(3 digits)');
+      });
+
+      it('updates the cvv label descriptor to three digits when multiple card types', function () {
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        cvvLabelDescriptor.textContent = 'some value';
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cvvLabelDescriptor.textContent).to.equal('(3 digits)');
+      });
+
+      it('updates the cvv field placeholder when card type is amex', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: this.sandbox.spy()
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '••••');
+      });
+
+      it('updates the cvv field placeholder when card type is non-amex', function () {
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: this.sandbox.spy()
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '•••');
+      });
+
+      it('updates the cvv field placeholder when multiple card types', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: this.sandbox.spy()
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '•••');
       });
     });
   });
