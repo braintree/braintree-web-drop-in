@@ -63,6 +63,7 @@ PaymentMethodPickerView.prototype._initialize = function () {
 
   this.model.on('addPaymentMethod', function (paymentMethod) {
     classlist.remove(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
+    classlist.remove(this.element, 'braintree-dropin__hide');
     this.addCompletedPickerView(paymentMethod);
   }.bind(this));
 };

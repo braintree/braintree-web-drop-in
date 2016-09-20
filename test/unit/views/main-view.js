@@ -8,7 +8,7 @@ var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-
 var fake = require('../../helpers/fake');
 var templateHTML = require('../../../src/html/main.html');
 
-describe('MainVtew', function () {
+describe('MainView', function () {
   describe('Constructor', function () {
     beforeEach(function () {
       this.sandbox.stub(MainView.prototype, '_initialize');
@@ -35,6 +35,7 @@ describe('MainVtew', function () {
 
       this.context = {
         dropinWrapper: dropinWrapper,
+        element: dropinWrapper,
         options: {
           client: {
             getConfiguration: fake.configuration
@@ -71,7 +72,7 @@ describe('MainVtew', function () {
       this.sandbox.stub(MainView.prototype, 'setActiveView');
 
       instance = new MainView({
-        element: this.context.dropinWrapper,
+        dropinWrapper: this.context.dropinWrapper,
         model: this.context.model,
         options: this.context.options
       });
@@ -114,6 +115,20 @@ describe('MainVtew', function () {
 
       expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PayWithCardView));
       expect(this.context.setActiveView).to.have.been.calledWith(PayWithCardView.ID);
+    });
+
+    it('hides payment method picker if one payment method is enabled', function () {
+      var paymentMethodPicker;
+
+      PaymentMethodPickerView.prototype._initialize.restore();
+      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
+        this.views = [{}];
+      });
+
+      MainView.prototype._initialize.call(this.context);
+      paymentMethodPicker = this.context.dropinWrapper.querySelector('[data-braintree-id="payment-method-picker"]');
+
+      expect(paymentMethodPicker.classList.contains('braintree-dropin__hide')).to.be.true;
     });
   });
 

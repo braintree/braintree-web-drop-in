@@ -132,6 +132,16 @@ describe('PaymentMethodPickerView', function () {
       expect(savedPaymentMethodsHeader.classList.contains('braintree-dropin__display--none')).to.be.false;
     });
 
+    it('shows payment method picker when a payment method is added', function () {
+      classlist.add(this.element, 'braintree-dropin__hide');
+
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+
+      this.context.model.addPaymentMethod({});
+
+      expect(this.element.classList.contains('braintree-dropin__hide')).to.be.false;
+    });
+
     it('shows saved payment methods header if there existing payment methods', function () {
       var savedPaymentMethodsHeader;
 

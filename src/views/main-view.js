@@ -1,6 +1,7 @@
 'use strict';
 
 var BaseView = require('./base-view');
+var classlist = require('../lib/classlist');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
 
@@ -42,6 +43,7 @@ MainView.prototype._initialize = function () {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
   } else if (paymentMethodPickerView.views.length === 1) {
     this.setActiveView(PayWithCardView.ID);
+    classlist.add(this.getElementById('payment-method-picker'), 'braintree-dropin__hide');
   } else {
     this.setActiveView('choose-payment-method');
   }
