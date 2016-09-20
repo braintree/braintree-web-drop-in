@@ -111,6 +111,16 @@ describe('PaymentMethodPickerView', function () {
       expect(this.context.addCompletedPickerView).to.be.calledOnce;
     });
 
+    it('does not show saved payment methods header if there are no saved payment methods', function () {
+      var savedPaymentMethodsHeader;
+
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+
+      savedPaymentMethodsHeader = this.element.querySelector('[data-braintree-id="saved-payment-methods-header"]');
+
+      expect(savedPaymentMethodsHeader.classList.contains('braintree-dropin__display--none')).to.be.true;
+    });
+
     it('shows saved payment methods header when a payment method is added', function () {
       var savedPaymentMethodsHeader;
 
@@ -119,7 +129,7 @@ describe('PaymentMethodPickerView', function () {
       this.context.model.addPaymentMethod({});
       savedPaymentMethodsHeader = this.element.querySelector('[data-braintree-id="saved-payment-methods-header"]');
 
-      expect(savedPaymentMethodsHeader.className).to.equal('braintree-dropin__drawer-header');
+      expect(savedPaymentMethodsHeader.classList.contains('braintree-dropin__display--none')).to.be.false;
     });
 
     it('shows saved payment methods header if there existing payment methods', function () {
@@ -129,7 +139,7 @@ describe('PaymentMethodPickerView', function () {
       PaymentMethodPickerView.prototype._initialize.call(this.context);
       savedPaymentMethodsHeader = this.element.querySelector('[data-braintree-id="saved-payment-methods-header"]');
 
-      expect(savedPaymentMethodsHeader.className).to.equal('braintree-dropin__drawer-header');
+      expect(savedPaymentMethodsHeader.classList.contains('braintree-dropin__display--none')).to.be.false;
     });
   });
 

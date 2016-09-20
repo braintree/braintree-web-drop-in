@@ -50,7 +50,7 @@ PaymentMethodPickerView.prototype._initialize = function () {
     return views;
   }.bind(this), []);
 
-  if (paymentMethods) {
+  if (paymentMethods.length > 0) {
     classlist.remove(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
     paymentMethods.forEach(function (paymentMethod) {
       this.addCompletedPickerView(paymentMethod);
