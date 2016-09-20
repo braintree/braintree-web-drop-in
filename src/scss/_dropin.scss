@@ -62,13 +62,6 @@
   display: inline-block;
 }
 
-.braintree-dropin__icon {
-  display: inline-block;
-  height: 24px;
-  transition: opacity $time-fast ease, transform $time-fast ease;
-  width: 44px;
-}
-
 .braintree-dropin__icon-check {
   display: inline-block;
   width: 20px;
@@ -116,10 +109,6 @@
 .braintree-dropin__choose-payment-method .braintree-dropin__choose-payment-method,
 .braintree-dropin__pay-with-card .braintree-dropin__pay-with-card {
   display: block;
-}
-
-.braintree-dropin__sheet.braintree-dropin__pay-with-card {
-  padding: 1em;
 }
 
 .braintree-dropin__option--default__text {
@@ -172,14 +161,9 @@
   width: 100%;
 }
 
-[class^="braintree-dropin__icon-card-"], [class*=" braintree-dropin__icon-card-"] {
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
-
 [data-braintree-id="card-view-icons"] {
   text-align: center;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 

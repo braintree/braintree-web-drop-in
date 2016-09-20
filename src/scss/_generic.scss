@@ -5,3 +5,11 @@
     margin: 0;
     padding: 0;
 }
+
+[class^="braintree-dropin__icon-card"], [class*=" braintree-dropin__icon-card"] {
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  transition: opacity $time-fast ease, transform $time-fast ease;
+}
+
