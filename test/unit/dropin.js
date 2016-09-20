@@ -103,6 +103,16 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('inserts svgs into container', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(this.container.innerHTML).to.include('data-braintree-id="svgs"');
+
+        done();
+      }.bind(this));
+    });
+
     it('requests payment methods if a customerId is provided', function (done) {
       var instance;
       var fakeClientToken = fake.configuration().gatewayConfiguration;

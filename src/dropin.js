@@ -4,6 +4,7 @@ var MainView = require('./views/main-view');
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
 var mainHTML = require('./html/main.html');
+var svgHTML = require('./html/svgs.html');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
 
@@ -35,7 +36,8 @@ Dropin.prototype.initialize = function (callback) {
     return;
   }
 
-  this._dropinWrapper.innerHTML = mainHTML;
+  this._dropinWrapper.innerHTML = svgHTML;
+  this._dropinWrapper.innerHTML += mainHTML;
   container.appendChild(this._dropinWrapper);
 
   this.getVaultedPaymentMethods(function (paymentMethods) {
