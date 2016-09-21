@@ -36,8 +36,7 @@ Dropin.prototype.initialize = function (callback) {
     return;
   }
 
-  this._dropinWrapper.innerHTML = svgHTML;
-  this._dropinWrapper.innerHTML += mainHTML;
+  this._dropinWrapper.innerHTML = svgHTML + mainHTML;
   container.appendChild(this._dropinWrapper);
 
   this.getVaultedPaymentMethods(function (paymentMethods) {
