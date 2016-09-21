@@ -83,15 +83,16 @@ PaymentMethodPickerView.prototype.addCompletedPickerView = function (paymentMeth
 };
 
 PaymentMethodPickerView.prototype.getCompletedPickerView = function (paymentMethod) {
-  var completedView;
+  var i, view;
 
-  this.views.forEach(function (view) {
+  for (i = 0; i < this.views.length; i++) {
+    view = this.views[i];
+
     if (view.paymentMethod && view.paymentMethod.nonce === paymentMethod.nonce) {
-      completedView = view;
+      return view;
     }
-  });
-
-  return completedView;
+  }
+  return null;
 };
 
 PaymentMethodPickerView.prototype.setActivePaymentMethod = function (paymentMethod) {

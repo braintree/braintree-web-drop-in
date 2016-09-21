@@ -95,7 +95,7 @@ describe('PayPalPickerView', function () {
       PayPalPickerView.prototype._initialize.call(this.context);
       paypalButton = this.context.element.querySelector('[data-braintree-id="paypal-button"] script');
 
-      expect(paypalButton.getAttribute('src')).to.equal('//www.paypalobjects.com/api/button.js');
+      expect(paypalButton.getAttribute('src')).to.equal('https://www.paypalobjects.com/api/button.js');
       expect(paypalButton.getAttribute('data-merchant')).to.equal('braintree');
       expect(paypalButton.getAttribute('data-button')).to.equal('checkout');
       expect(paypalButton.getAttribute('data-type')).to.equal('button');

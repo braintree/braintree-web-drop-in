@@ -50,7 +50,6 @@ PayPalPickerView.prototype._initialize = function () {
 };
 
 PayPalPickerView.prototype._createPayPalButton = function () {
-  var attr;
   var script = document.createElement('script');
   var scriptAttrs = {
     'data-merchant': 'braintree',
@@ -59,14 +58,12 @@ PayPalPickerView.prototype._createPayPalButton = function () {
     'data-color': 'blue'
   };
 
-  script.src = '//www.paypalobjects.com/api/button.js';
+  script.src = 'https://www.paypalobjects.com/api/button.js';
   script.async = true;
 
-  for (attr in scriptAttrs) {
-    if (scriptAttrs.hasOwnProperty(attr)) {
-      script.setAttribute(attr, scriptAttrs[attr]);
-    }
-  }
+  Object.keys(scriptAttrs).forEach(function (attr) {
+    script.setAttribute(attr, scriptAttrs[attr]);
+  });
 
   this.getElementById('paypal-button').appendChild(script);
 };

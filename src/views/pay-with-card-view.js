@@ -144,30 +144,20 @@ PayWithCardView.prototype.teardown = function (callback) {
 };
 
 PayWithCardView.prototype._onFocusEvent = function (event) {
-  switch (event.emittedBy) {
-    case 'number':
-      classlist.remove(this.cardNumberIcon, 'braintree-dropin__hide');
-      break;
-    case 'cvv':
-      classlist.remove(this.cvvIcon, 'braintree-dropin__hide');
-      break;
-    default:
-      return;
+  if (event.emittedBy === 'number') {
+    classlist.remove(this.cardNumberIcon, 'braintree-dropin__hide');
+  } else if (event.emittedBy === 'cvv') {
+    classlist.remove(this.cvvIcon, 'braintree-dropin__hide');
   }
 };
 
 PayWithCardView.prototype._onBlurEvent = function (event) {
-  switch (event.emittedBy) {
-    case 'number':
-      if (event.fields.number.isEmpty) {
-        classlist.add(this.cardNumberIcon, 'braintree-dropin__hide');
-      }
-      break;
-    case 'cvv':
-      classlist.add(this.cvvIcon, 'braintree-dropin__hide');
-      break;
-    default:
-      return;
+  if (event.emittedBy === 'number') {
+    if (event.fields.number.isEmpty) {
+      classlist.add(this.cardNumberIcon, 'braintree-dropin__hide');
+    }
+  } else if (event.emittedBy === 'cvv') {
+    classlist.add(this.cvvIcon, 'braintree-dropin__hide');
   }
 };
 
