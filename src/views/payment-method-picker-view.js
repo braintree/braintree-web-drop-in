@@ -97,6 +97,7 @@ PaymentMethodPickerView.prototype.getCompletedPickerView = function (paymentMeth
 PaymentMethodPickerView.prototype.setActivePaymentMethod = function (paymentMethod) {
   var completedPickerView = this.getCompletedPickerView(paymentMethod);
   var html = completedPickerView.html;
+  var firstChild = this.savedPaymentMethods.firstChild;
 
   this.activePaymentMethod.innerHTML = html;
 
@@ -107,6 +108,7 @@ PaymentMethodPickerView.prototype.setActivePaymentMethod = function (paymentMeth
   });
 
   classlist.add(completedPickerView.checkIcon, 'braintree-dropin__check-container--active');
+  this.savedPaymentMethods.insertBefore(completedPickerView.element, firstChild);
 };
 
 PaymentMethodPickerView.prototype.teardown = function (callback) {

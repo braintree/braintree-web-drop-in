@@ -182,9 +182,10 @@ describe('PaymentMethodPickerView', function () {
       this.context = {
         activePaymentMethod: this.element.querySelector('.braintree-dropin__active-payment-method'),
         choosePaymentMethod: this.element.querySelector('.braintree-dropin__choose-payment-method'),
-        views: [this.completedPickerView],
         getElementById: BaseView.prototype.getElementById,
-        getCompletedPickerView: this.sandbox.stub().returns(this.completedPickerView)
+        getCompletedPickerView: this.sandbox.stub().returns(this.completedPickerView),
+        savedPaymentMethods: this.element.querySelector('[data-braintree-id="saved-payment-methods"]'),
+        views: [this.completedPickerView]
       };
     });
 
@@ -219,6 +220,27 @@ describe('PaymentMethodPickerView', function () {
       PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
 
       expect(this.completedPickerView.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.true;
+    });
+
+    it('puts the active payment method first in the saved payment methods', function () {
+      var paymentMethod2 = {
+        details: {
+          email: 'me@real.biz'
+        },
+        type: 'PayPalAccount'
+      };
+      var completedPickerView2 = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: paymentMethod2
+      });
+
+      this.context.views = [this.completedPickerView, completedPickerView2];
+
+      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
+
+      classlist.add(completedPickerView2.checkIcon, 'braintree-dropin__check-container--active');
+
+      expect(this.context.savedPaymentMethods.firstChild.innerHTML).to.equal(completedPickerView2.element.innerHTML);
     });
   });
 
