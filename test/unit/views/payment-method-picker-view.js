@@ -184,6 +184,7 @@ describe('PaymentMethodPickerView', function () {
         choosePaymentMethod: this.element.querySelector('.braintree-dropin__choose-payment-method'),
         getElementById: BaseView.prototype.getElementById,
         getCompletedPickerView: this.sandbox.stub().returns(this.completedPickerView),
+        hideCheckMarks: PaymentMethodPickerView.prototype.hideCheckMarks,
         savedPaymentMethods: this.element.querySelector('[data-braintree-id="saved-payment-methods"]'),
         views: [this.completedPickerView]
       };
@@ -241,6 +242,27 @@ describe('PaymentMethodPickerView', function () {
       classlist.add(completedPickerView2.checkIcon, 'braintree-dropin__check-container--active');
 
       expect(this.context.savedPaymentMethods.firstChild.innerHTML).to.equal(completedPickerView2.element.innerHTML);
+    });
+  });
+
+  describe('hideCheckMarks', function () {
+    it('hides the check marks of all views', function () {
+      var view1 = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: {}
+      });
+      var view2 = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: {}
+      });
+      var context = {
+        views: [view1, view2]
+      };
+
+      PaymentMethodPickerView.prototype.hideCheckMarks.call(context);
+
+      expect(view1.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.false;
+      expect(view2.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.false;
     });
   });
 

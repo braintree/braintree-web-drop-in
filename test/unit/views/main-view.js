@@ -158,8 +158,13 @@ describe('MainView', function () {
         this.ID = id;
       }
 
+      this.fakePaymentMethodPickerView = {
+        hideCheckMarks: this.sandbox.stub()
+      };
+
       this.context = {
         dropinWrapper: document.createElement('div'),
+        paymentMethodPickerView: this.fakePaymentMethodPickerView,
         views: {
           id1: new FakeView('id1'),
           id2: new FakeView('id2'),
@@ -172,6 +177,18 @@ describe('MainView', function () {
       MainView.prototype.setActiveView.call(this.context, 'id1');
 
       expect(this.context.dropinWrapper.className).to.contain('id1');
+    });
+
+    it('hides payment method picker check marks if the active view is not the active payment method', function () {
+      MainView.prototype.setActiveView.call(this.context, 'id1');
+
+      expect(this.fakePaymentMethodPickerView.hideCheckMarks).to.have.been.calledOnce;
+    });
+
+    it('does not hide payment method picker check marks if the active view is the active payment method', function () {
+      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
+
+      expect(this.fakePaymentMethodPickerView.hideCheckMarks).to.not.have.been.called;
     });
   });
 

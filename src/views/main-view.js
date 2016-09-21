@@ -24,7 +24,8 @@ MainView.prototype._initialize = function () {
     model: this.model,
     options: this.options
   });
-  var paymentMethodPickerView = new PaymentMethodPickerView({
+
+  this.paymentMethodPickerView = new PaymentMethodPickerView({
     element: this.getElementById(PaymentMethodPickerView.ID),
     model: this.model,
     mainView: this,
@@ -33,7 +34,7 @@ MainView.prototype._initialize = function () {
 
   this.views = {};
   this.addView(payWithCardView);
-  this.addView(paymentMethodPickerView);
+  this.addView(this.paymentMethodPickerView);
 
   this.model.on('changeActivePaymentMethod', function () {
     this.setActiveView('active-payment-method');
@@ -41,7 +42,7 @@ MainView.prototype._initialize = function () {
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
-  } else if (paymentMethodPickerView.views.length === 1) {
+  } else if (this.paymentMethodPickerView.views.length === 1) {
     this.setActiveView(PayWithCardView.ID);
     classlist.add(this.getElementById('payment-method-picker'), 'braintree-dropin__hide');
   } else {
@@ -55,6 +56,10 @@ MainView.prototype.addView = function (view) {
 
 MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = 'braintree-dropin__' + id;
+
+  if (id !== 'active-payment-method') {
+    this.paymentMethodPickerView.hideCheckMarks();
+  }
 };
 
 MainView.prototype.teardown = function (callback) {

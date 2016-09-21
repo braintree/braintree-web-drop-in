@@ -101,14 +101,17 @@ PaymentMethodPickerView.prototype.setActivePaymentMethod = function (paymentMeth
 
   this.activePaymentMethod.innerHTML = html;
 
+  this.hideCheckMarks();
+  classlist.add(completedPickerView.checkIcon, 'braintree-dropin__check-container--active');
+  this.savedPaymentMethods.insertBefore(completedPickerView.element, firstChild);
+};
+
+PaymentMethodPickerView.prototype.hideCheckMarks = function () {
   this.views.forEach(function (view) {
     if (view.checkIcon) {
       classlist.remove(view.checkIcon, 'braintree-dropin__check-container--active');
     }
   });
-
-  classlist.add(completedPickerView.checkIcon, 'braintree-dropin__check-container--active');
-  this.savedPaymentMethods.insertBefore(completedPickerView.element, firstChild);
 };
 
 PaymentMethodPickerView.prototype.teardown = function (callback) {
