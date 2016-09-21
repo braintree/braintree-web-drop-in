@@ -1,26 +1,24 @@
 'use strict';
 
-var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var BaseView = require('../../../src/views/base-view');
+var classlist = require('../../../src/lib/classlist');
+var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
+var mainHTML = require('../../../src/html/main.html');
+var PayWithCardView = require('../../../src/views/pay-with-card-view');
 
 describe('PayWithCardView', function () {
   beforeEach(function () {
-    this.fakePayWithCardTemplate = document.createElement('form');
-    this.fakePayWithCardTemplate.id = 'pay-with-card-view';
-    this.fakePayWithCardTemplate.innerHTML = [
-      '<div><input name="number"></div>',
-      '<div><input name="expiration"></div>',
-      '<div class="braintree-dropin__cvv-container"><input name="cvv"></div>',
-      '<div class="braintree-dropin__postal-code-container"><input name="postal-code"></div>'
-    ];
+    this.div = document.createElement('div');
 
-    document.body.appendChild(this.fakePayWithCardTemplate);
+    this.div.innerHTML = mainHTML;
+    document.body.appendChild(this.div);
+    this.element = document.body.querySelector('.braintree-dropin__sheet.braintree-dropin__pay-with-card');
   });
 
   afterEach(function () {
-    document.body.removeChild(this.fakePayWithCardTemplate);
+    document.body.removeChild(this.div);
   });
 
   describe('Constructor', function () {
@@ -29,82 +27,103 @@ describe('PayWithCardView', function () {
     });
 
     it('calls _initialize', function () {
-      new PayWithCardView(); // eslint-disable-line no-new
+      new PayWithCardView({element: this.element}); // eslint-disable-line no-new
 
       expect(PayWithCardView.prototype._initialize).to.have.been.calledOnce;
     });
 
     it('inherits from BaseView', function () {
-      expect(new PayWithCardView()).to.be.an.instanceOf(BaseView);
+      expect(new PayWithCardView({element: this.element})).to.be.an.instanceOf(BaseView);
     });
   });
 
   describe('_initialize', function () {
     beforeEach(function () {
       this.context = {
-        element: this.fakePayWithCardTemplate,
+        element: this.element,
+        _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
+        getElementById: BaseView.prototype.getElementById,
+        mainView: {
+          componentId: 'component-id'
+        },
+        model: new DropinModel(),
         options: {
           client: {
             getConfiguration: fake.configuration,
             request: this.sandbox.spy()
           }
         },
-        mainView: {
-          componentId: 'component-id',
-          asyncDependencyStarting: this.sandbox.stub(),
-          asyncDependencyReady: this.sandbox.stub()
-        },
-        _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector
+        tokenize: PayWithCardView.prototype.tokenize,
+        _onFocusEvent: PayWithCardView.prototype._onFocusEvent,
+        _onBlurEvent: function () {},
+        _onCardTypeChangeEvent: function () {}
       };
-      this.sandbox.stub(hostedFields, 'create').yields(null, {});
+      this.hostedFieldsInstance = {
+        on: this.sandbox.spy()
+      };
+      this.sandbox.stub(hostedFields, 'create').yields(null, this.hostedFieldsInstance);
     });
 
     it('has cvv if supplied in challenges', function () {
       this.context.options.client.getConfiguration = function () {
         return {
-          gatewayConfiguration: {challenges: ['cvv']}
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
         };
       };
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__cvv-container')).to.exist;
+      expect(this.context.element.querySelector('[data-braintree-id="cvv-container"]')).to.exist;
     });
 
     it('does not have cvv if not supplied in challenges', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__cvv-container')).not.to.exist;
+      expect(this.context.element.querySelector('[data-braintree-id="cvv-container"]')).not.to.exist;
     });
 
     it('has postal code if supplied in challenges', function () {
       this.context.options.client.getConfiguration = function () {
         return {
-          gatewayConfiguration: {challenges: ['postal_code']}
+          gatewayConfiguration: {
+            challenges: ['postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
         };
       };
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__postal-code-container')).to.exist;
+      expect(this.context.element.querySelector('[data-braintree-id="postal-code-container"]')).to.exist;
     });
 
     it('does not have postal code if not supplied in challenges', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.element.querySelector('.braintree-dropin__postal-code-container')).not.to.exist;
+      expect(this.context.element.querySelector('[data-braintree-id="postal-code-container"]')).not.to.exist;
     });
 
     it('starts async dependency', function () {
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
+
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.mainView.asyncDependencyStarting).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
     });
 
     it('notifies async dependency is ready when Hosted Fields is created', function () {
-      hostedFields.create.callsArg(1);
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
+
+      hostedFields.create.callsArgWith(1, null, {on: function () {}});
 
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.mainView.asyncDependencyReady).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
     });
 
     it('console errors with a Hosted Fields create error', function () {
@@ -134,7 +153,12 @@ describe('PayWithCardView', function () {
     it('creates Hosted Fields with cvv if included in challenges', function () {
       this.context.options.client.getConfiguration = function () {
         return {
-          gatewayConfiguration: {challenges: ['cvv']}
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
         };
       };
 
@@ -146,7 +170,12 @@ describe('PayWithCardView', function () {
     it('creates Hosted Fields with postal code if included in challenges', function () {
       this.context.options.client.getConfiguration = function () {
         return {
-          gatewayConfiguration: {challenges: ['postal_code']}
+          gatewayConfiguration: {
+            challenges: ['postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
         };
       };
 
@@ -154,30 +183,377 @@ describe('PayWithCardView', function () {
 
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
     });
+
+    it('shows supported card icons', function () {
+      var supportedCardTypes = ['american-express', 'discover', 'diners-club', 'jcb', 'master-card', 'visa'];
+
+      PayWithCardView.prototype._initialize.call(this.context);
+
+      supportedCardTypes.forEach(function (cardType) {
+        var cardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-' + cardType);
+
+        expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.false;
+      }.bind(this));
+    });
+
+    it('hides unsupported card icons', function () {
+      var unsupportedCardTypes = ['unionpay', 'maestro'];
+
+      PayWithCardView.prototype._initialize.call(this.context);
+
+      unsupportedCardTypes.forEach(function (cardType) {
+        var cardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-' + cardType);
+
+        expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.true;
+      }.bind(this));
+    });
   });
 
-  describe('requestPaymentMethod', function () {
+  describe('Hosted Fields events', function () {
     beforeEach(function () {
       this.context = {
-        element: this.fakePayWithCardTemplate,
-        hostedFieldsInstance: {
-          clear: this.sandbox.stub(),
-          getState: this.sandbox.stub().returns({
-            cards: [{type: 'visa'}],
-            fields: {
-              number: {
-                isValid: true
-              },
-              expirationDate: {
-                isValid: true
-              }
-            }
-          }),
-          tokenize: this.sandbox.stub()
-        },
+        element: this.element,
+        _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
+        getElementById: BaseView.prototype.getElementById,
         mainView: {
-          updateCompletedView: this.sandbox.stub()
+          componentId: 'component-id'
         },
+        model: new DropinModel(),
+        options: {
+          client: {
+            getConfiguration: function () {
+              return {
+                gatewayConfiguration: {
+                  challenges: ['cvv'],
+                  creditCards: {
+                    supportedCardTypes: []
+                  }
+                }
+              };
+            },
+            request: this.sandbox.spy()
+          }
+        },
+        tokenize: PayWithCardView.prototype.tokenize,
+        _onFocusEvent: function () {},
+        _onBlurEvent: function () {},
+        _onCardTypeChangeEvent: function () {}
+      };
+    });
+
+    describe('onFocusEvent', function () {
+      beforeEach(function () {
+        this.context._onFocusEvent = PayWithCardView.prototype._onFocusEvent;
+      });
+
+      it('shows default card icon in number field when focused', function () {
+        var cardNumberIcon;
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'number'})
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        PayWithCardView.prototype._initialize.call(this.context);
+        cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+
+        expect(cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+      });
+
+      it('shows default cvv icon in cvv field when focused', function () {
+        var cvvIcon;
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'cvv'})
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        PayWithCardView.prototype._initialize.call(this.context);
+        cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
+
+        expect(cvvIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+        expect(cvvIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCVVBack');
+      });
+    });
+
+    describe('onBlurEvent', function () {
+      beforeEach(function () {
+        this.context._onBlurEvent = PayWithCardView.prototype._onBlurEvent;
+      });
+
+      it('hides the card number icon when the number field is blurred and empty', function () {
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {isEmpty: true}
+          }
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        classlist.remove(cardNumberIcon, 'braintree-dropin__hide');
+
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(this.context.cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.true;
+      });
+
+      it('does not hide the card number icon when the number field is blurred and not empty', function () {
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {isEmpty: false}
+          }
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        classlist.remove(cardNumberIcon, 'braintree-dropin__hide');
+
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(this.context.cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+      });
+
+      it('hides cvv icon in cvv field when blurred', function () {
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'cvv'})
+        };
+        var cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
+
+        classlist.remove(cvvIcon, 'braintree-dropin__hide');
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(this.context.cvvIcon.classList.contains('braintree-dropin__hide')).to.be.true;
+      });
+    });
+
+    describe('onCardTypeChange event', function () {
+      beforeEach(function () {
+        this.context._onCardTypeChangeEvent = PayWithCardView.prototype._onCardTypeChangeEvent;
+      });
+
+      it('updates the card number icon to the card type if there is one possible card type', function () {
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+        var fakeEvent = {
+          cards: [{type: 'master-card'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#icon-master-card');
+      });
+
+      it('updates the card number icon to the generic card if there are many possible card types', function () {
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+        var fakeEvent = {
+          cards: [{type: 'master-card'}, {type: 'foo-pay'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+      });
+
+      it('updates the card icon to the generic card if there no card types', function () {
+        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+        var fakeEvent = {
+          cards: [],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+      });
+
+      it('updates the cvv icon to back icon for non-amex cards', function () {
+        var use = this.element.querySelector('[data-braintree-id="cvv-icon"]').querySelector('use');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        use.setAttribute('xlink:href', '#iconCVVFront');
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(use.getAttribute('xlink:href')).to.equal('#iconCVVBack');
+      });
+
+      it('updates the cvv icon to front icon for amex cards', function () {
+        var use = this.element.querySelector('[data-braintree-id="cvv-icon"]').querySelector('use');
+        var fakeEvent = {
+          cards: [{type: 'american-express'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(use.getAttribute('xlink:href')).to.equal('#iconCVVFront');
+      });
+
+      it('updates the cvv label descriptor to four digits when card type is amex', function () {
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var fakeEvent = {
+          cards: [{type: 'american-express'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        cvvLabelDescriptor.textContent = 'some value';
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cvvLabelDescriptor.textContent).to.equal('(4 digits)');
+      });
+
+      it('updates the cvv label descriptor to three digits when card type is non-amex', function () {
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        cvvLabelDescriptor.textContent = 'some value';
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cvvLabelDescriptor.textContent).to.equal('(3 digits)');
+      });
+
+      it('updates the cvv label descriptor to three digits when multiple card types', function () {
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        cvvLabelDescriptor.textContent = 'some value';
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(cvvLabelDescriptor.textContent).to.equal('(3 digits)');
+      });
+
+      it('updates the cvv field placeholder when card type is amex', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: this.sandbox.spy()
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '••••');
+      });
+
+      it('updates the cvv field placeholder when card type is non-amex', function () {
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: this.sandbox.spy()
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '•••');
+      });
+
+      it('updates the cvv field placeholder when multiple card types', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: this.sandbox.spy()
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '•••');
+      });
+    });
+  });
+
+  describe('tokenize', function () {
+    beforeEach(function () {
+      this.fakeHostedFieldsInstance = {
+        clear: this.sandbox.stub(),
+        getState: this.sandbox.stub().returns({
+          cards: [{type: 'visa'}],
+          fields: {
+            number: {
+              isValid: true
+            },
+            expirationDate: {
+              isValid: true
+            }
+          }
+        }),
+        tokenize: this.sandbox.stub()
+      };
+      this.model = new DropinModel();
+
+      this.context = {
+        hostedFieldsInstance: this.fakeHostedFieldsInstance,
+        model: this.model,
         options: {
           client: {
             getConfiguration: fake.configuration
@@ -199,12 +575,12 @@ describe('PayWithCardView', function () {
         }
       });
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context);
+      PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('errors and does not tokenize if card type is not supported', function (done) {
+    it('console errors if card type is not supported', function () {
       this.context.options.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
@@ -215,18 +591,16 @@ describe('PayWithCardView', function () {
         };
       };
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function (err, res) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('Card type is unsupported.');
-        expect(res).to.not.exist;
+      this.sandbox.stub(console, 'error');
 
-        done();
-      });
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(console.error).to.have.been.calledWith(new Error('Card type is unsupported.'));
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
     it('calls tokenize', function () {
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context);
+      PayWithCardView.prototype.tokenize.call(this.context);
 
       expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: true}, this.sandbox.match.func);
     });
@@ -234,7 +608,7 @@ describe('PayWithCardView', function () {
     it('clears fields after successful tokenization', function () {
       this.context.hostedFieldsInstance.tokenize.yields(null, {nonce: 'foo'});
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function () {});
+      PayWithCardView.prototype.tokenize.call(this.context);
 
       expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('number');
       expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
@@ -242,46 +616,34 @@ describe('PayWithCardView', function () {
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
     });
 
-    it('returns error when tokenization fails', function (done) {
+    it('console errors when tokenization fails', function () {
       this.context.hostedFieldsInstance.tokenize.yields(new Error('foo'));
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function (err) {
-        expect(err).to.exist;
-        expect(err).to.deep.equal(new Error('foo'));
+      this.sandbox.stub(console, 'error');
 
-        done();
-      });
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(console.error).to.have.been.called;
     });
 
-    it('returns payload when tokenization succeeds', function (done) {
-      var payload = {cards: 'yay'};
-
-      this.context.hostedFieldsInstance.tokenize.yields(null, payload);
-
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function (err, res) {
-        expect(err).to.not.exist;
-        expect(res).to.equal(payload);
-
-        done();
-      });
-    });
-
-    it('calls updateCompletedView when tokenize is successful', function () {
+    it('adds a new payment method when tokenize is successful', function () {
       var stubPayload = {};
 
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
+      this.sandbox.stub(this.model, 'addPaymentMethod');
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function () {});
+      PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.mainView.updateCompletedView).to.have.been.calledWith(stubPayload);
+      expect(this.model.addPaymentMethod).to.have.been.calledWith(stubPayload);
     });
 
-    it('does not call updateCompletedView when tokenize fails', function () {
+    it('does not update the active payment method when tokenize fails', function () {
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(new Error('bad happen'));
+      this.sandbox.stub(this.model, 'addPaymentMethod');
 
-      PayWithCardView.prototype.requestPaymentMethod.call(this.context, function () {});
+      PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.mainView.updateCompletedView).to.not.have.been.called;
+      expect(this.model.addPaymentMethod).to.not.have.been.called;
     });
   });
 

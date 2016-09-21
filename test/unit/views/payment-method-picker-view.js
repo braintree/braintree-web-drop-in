@@ -4,11 +4,26 @@ var BaseView = require('../../../src/views/base-view');
 var CardPickerView = require('../../../src/views/picker-views/card-picker-view');
 var classlist = require('../../../src/lib/classlist');
 var CompletedPickerView = require('../../../src/views/picker-views/completed-picker-view');
+var DropinModel = require('../../../src/dropin-model');
+var fake = require('../../helpers/fake');
+var mainHTML = require('../../../src/html/main.html');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var paypal = require('braintree-web/paypal');
 var PayPalPickerView = require('../../../src/views/picker-views/paypal-picker-view');
 
 describe('PaymentMethodPickerView', function () {
+  beforeEach(function () {
+    this.div = document.createElement('div');
+
+    this.div.innerHTML = mainHTML;
+    document.body.appendChild(this.div);
+    this.element = document.body.querySelector('[data-braintree-id="payment-method-picker"]');
+  });
+
+  afterEach(function () {
+    document.body.removeChild(this.div);
+  });
+
   describe('Constructor', function () {
     beforeEach(function () {
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize');
@@ -27,25 +42,25 @@ describe('PaymentMethodPickerView', function () {
 
   describe('_initialize', function () {
     beforeEach(function () {
-      this.element = document.createElement('div');
-      this.element.id = 'braintree-dropin__payment-method-picker';
-      this.togglerItem = document.createElement('div');
-      this.togglerItem.className = 'braintree-dropin__payment-method-picker-toggler';
-      this.element.appendChild(this.togglerItem);
-      document.body.appendChild(this.element);
-
       this.context = {
+        addCompletedPickerView: this.sandbox.stub(),
         element: this.element,
-        existingPaymentMethods: [],
-        ID: 'braintree-dropin__payment-method-picker',
+        getElementById: BaseView.prototype.getElementById,
+        ID: PaymentMethodPickerView.ID,
         mainView: {
           asyncDependencyStarting: function () {},
           asyncDependencyReady: function () {}
         },
+        model: new DropinModel(),
         options: {
-          client: {}
+          client: {
+            getConfiguration: function () {
+              return fake.configuration();
+            }
+          }
         },
-        toggle: this.sandbox.stub(),
+        setActivePaymentMethod: this.sandbox.stub(),
+        toggleDrawer: this.sandbox.stub(),
         views: []
       };
 
@@ -54,15 +69,14 @@ describe('PaymentMethodPickerView', function () {
       this.sandbox.stub(CardPickerView, 'isEnabled').returns(true);
     });
 
-    afterEach(function () {
-      this.element.parentNode.removeChild(this.element);
-    });
-
     it('adds an event listener for payment method picker toggle', function () {
-      PaymentMethodPickerView.prototype._initialize.call(this.context);
-      this.togglerItem.click();
+      var drawer = document.body.querySelector('[data-braintree-id="drawer"]');
 
-      expect(this.context.toggle).to.have.been.calledOnce;
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+
+      drawer.click();
+
+      expect(this.context.toggleDrawer).to.have.been.calledOnce;
     });
 
     it('creates picker views for enabled views', function () {
@@ -83,64 +97,179 @@ describe('PaymentMethodPickerView', function () {
     });
 
     it('appends picker view to payment method picker', function () {
-      var paymentPickerNode;
-
       PaymentMethodPickerView.prototype._initialize.call(this.context);
 
-      paymentPickerNode = this.element.querySelector('.braintree-dropin__pay-with-card-picker-view');
-
-      expect(paymentPickerNode).to.exist;
-    });
-
-    it('hides payment method picker if one payment method is enabled', function () {
-      PayPalPickerView.isEnabled.returns(false);
-      this.sandbox.spy(classlist, 'add');
-
-      PaymentMethodPickerView.prototype._initialize.call(this.context);
-
-      expect(classlist.add).to.have.been.calledWith(this.element, 'braintree-dropin__hidden');
+      expect(this.element.querySelector('.braintree-dropin__picker-label').innerHTML).to.equal('Card');
     });
 
     it('creates completed picker views for all existing payment methods', function () {
-      this.context.existingPaymentMethods = [{nonce: 'nonce', type: 'type'}];
       this.context.addCompletedPickerView = this.sandbox.spy();
+      this.context.model._paymentMethods = [{}];
 
       PaymentMethodPickerView.prototype._initialize.call(this.context);
 
       expect(this.context.addCompletedPickerView).to.be.calledOnce;
     });
-  });
 
-  describe('toggle', function () {
-    it('toggles closed class of payment method picker element', function () {
-      this.sandbox.spy(classlist, 'toggle');
-      this.context = {
-        element: document.createElement('div')
-      };
-      PaymentMethodPickerView.prototype.toggle.call(this.context);
+    it('does not show saved payment methods header if there are no saved payment methods', function () {
+      var savedPaymentMethodsHeader;
 
-      expect(classlist.toggle).to.be.calledOnce;
-      expect(classlist.toggle).to.be.calledWith(this.context.element, 'braintree-dropin__closed');
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+
+      savedPaymentMethodsHeader = this.element.querySelector('[data-braintree-id="saved-payment-methods-header"]');
+
+      expect(savedPaymentMethodsHeader.classList.contains('braintree-dropin__display--none')).to.be.true;
+    });
+
+    it('shows saved payment methods header when a payment method is added', function () {
+      var savedPaymentMethodsHeader;
+
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+
+      this.context.model.addPaymentMethod({});
+      savedPaymentMethodsHeader = this.element.querySelector('[data-braintree-id="saved-payment-methods-header"]');
+
+      expect(savedPaymentMethodsHeader.classList.contains('braintree-dropin__display--none')).to.be.false;
+    });
+
+    it('shows payment method picker when a payment method is added', function () {
+      classlist.add(this.element, 'braintree-dropin__hide');
+
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+
+      this.context.model.addPaymentMethod({});
+
+      expect(this.element.classList.contains('braintree-dropin__hide')).to.be.false;
+    });
+
+    it('shows saved payment methods header if there existing payment methods', function () {
+      var savedPaymentMethodsHeader;
+
+      this.context.model.addPaymentMethod({});
+      PaymentMethodPickerView.prototype._initialize.call(this.context);
+      savedPaymentMethodsHeader = this.element.querySelector('[data-braintree-id="saved-payment-methods-header"]');
+
+      expect(savedPaymentMethodsHeader.classList.contains('braintree-dropin__display--none')).to.be.false;
     });
   });
 
-  describe('collapse', function () {
-    it('adds closed class to payment method picker element', function () {
-      this.sandbox.spy(classlist, 'add');
+  describe('toggleDrawer', function () {
+    it('toggles braintree-dropin__collapsed class of payment method picker element', function () {
+      this.sandbox.spy(classlist, 'toggle');
       this.context = {
-        element: document.createElement('div')
+        element: this.element.querySelector('.braintree-dropin__drawer')
       };
-      PaymentMethodPickerView.prototype.collapse.call(this.context);
+      PaymentMethodPickerView.prototype.toggleDrawer.call(this.context);
 
-      expect(classlist.add).to.be.calledOnce;
-      expect(classlist.add).to.be.calledWith(this.context.element, 'braintree-dropin__closed');
+      expect(classlist.toggle).to.be.calledOnce;
+      expect(classlist.toggle).to.be.calledWith(this.context.element, 'braintree-dropin__collapsed');
+    });
+  });
+
+  describe('setActivePaymentMethod', function () {
+    beforeEach(function () {
+      this.paymentMethod = {
+        details: {
+          email: 'me@real.biz'
+        },
+        type: 'PayPalAccount'
+      };
+      this.completedPickerView = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: this.paymentMethod
+      });
+
+      this.context = {
+        activePaymentMethod: this.element.querySelector('.braintree-dropin__active-payment-method'),
+        choosePaymentMethod: this.element.querySelector('.braintree-dropin__choose-payment-method'),
+        getElementById: BaseView.prototype.getElementById,
+        getCompletedPickerView: this.sandbox.stub().returns(this.completedPickerView),
+        hideCheckMarks: PaymentMethodPickerView.prototype.hideCheckMarks,
+        savedPaymentMethods: this.element.querySelector('[data-braintree-id="saved-payment-methods"]'),
+        views: [this.completedPickerView]
+      };
+    });
+
+    it('updates the active payment method HTML', function () {
+      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
+
+      expect(this.context.activePaymentMethod.innerHTML).to.equal(this.completedPickerView.html);
+    });
+
+    it('hides the check from non-active payment methods', function () {
+      var paymentMethod2 = {
+        details: {
+          email: 'me@real.biz'
+        },
+        type: 'PayPalAccount'
+      };
+      var completedPickerView2 = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: paymentMethod2
+      });
+
+      this.context.views = [this.completedPickerView, completedPickerView2];
+
+      classlist.add(completedPickerView2.checkIcon, 'braintree-dropin__check-container--active');
+
+      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
+
+      expect(completedPickerView2.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.false;
+    });
+
+    it('shows the check on the active payment method', function () {
+      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
+
+      expect(this.completedPickerView.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.true;
+    });
+
+    it('puts the active payment method first in the saved payment methods', function () {
+      var paymentMethod2 = {
+        details: {
+          email: 'me@real.biz'
+        },
+        type: 'PayPalAccount'
+      };
+      var completedPickerView2 = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: paymentMethod2
+      });
+
+      this.context.views = [this.completedPickerView, completedPickerView2];
+
+      PaymentMethodPickerView.prototype.setActivePaymentMethod.call(this.context, this.paymentMethod);
+
+      classlist.add(completedPickerView2.checkIcon, 'braintree-dropin__check-container--active');
+
+      expect(this.context.savedPaymentMethods.firstChild.innerHTML).to.equal(completedPickerView2.element.innerHTML);
+    });
+  });
+
+  describe('hideCheckMarks', function () {
+    it('hides the check marks of all views', function () {
+      var view1 = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: {}
+      });
+      var view2 = new CompletedPickerView({
+        model: new DropinModel(),
+        paymentMethod: {}
+      });
+      var context = {
+        views: [view1, view2]
+      };
+
+      PaymentMethodPickerView.prototype.hideCheckMarks.call(context);
+
+      expect(view1.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.false;
+      expect(view2.checkIcon.classList.contains('braintree-dropin__check-container--active')).to.be.false;
     });
   });
 
   describe('addCompletedPickerView', function () {
     beforeEach(function () {
       this.context = {
-        element: document.createElement('div'),
+        savedPaymentMethods: this.element.querySelector('[data-braintree-id="saved-payment-methods"]'),
         views: []
       };
     });
@@ -150,17 +279,9 @@ describe('PaymentMethodPickerView', function () {
       var paymentMethod = {};
 
       PaymentMethodPickerView.prototype.addCompletedPickerView.call(this.context, paymentMethod);
-      completedPickerView = this.context.element.querySelector('.braintree-dropin__completed-picker-view');
+      completedPickerView = this.context.savedPaymentMethods.querySelector('.braintree-dropin__completed-picker-view');
 
       expect(completedPickerView).to.exist;
-    });
-
-    it('removes hidden class from payment method picker element', function () {
-      this.sandbox.spy(classlist, 'remove');
-
-      PaymentMethodPickerView.prototype.addCompletedPickerView.call(this.context, {});
-
-      expect(classlist.remove).to.be.calledWith(this.context.element, 'braintree-dropin__hidden');
     });
 
     it('adds newly created CompletedPickerView to views', function () {
@@ -168,6 +289,25 @@ describe('PaymentMethodPickerView', function () {
 
       expect(this.context.views).to.have.a.lengthOf(1);
       expect(this.context.views[0]).to.be.an.instanceOf(CompletedPickerView);
+    });
+  });
+
+  describe('getCompletedPickerView', function () {
+    it('returns a completed picker view with the same nonce', function () {
+      var paymentMethod = {nonce: 'my-nonce'};
+      var fakeView = {paymentMethod: paymentMethod};
+      var context = {views: [fakeView]};
+      var view = PaymentMethodPickerView.prototype.getCompletedPickerView.call(context, paymentMethod);
+
+      expect(view).to.equal(fakeView);
+    });
+
+    it('returns null if the completed picker view does not exist', function () {
+      var paymentMethod = {nonce: 'my-nonce'};
+      var context = {views: [{}]};
+      var view = PaymentMethodPickerView.prototype.getCompletedPickerView.call(context, paymentMethod);
+
+      expect(view).to.not.exist;
     });
   });
 

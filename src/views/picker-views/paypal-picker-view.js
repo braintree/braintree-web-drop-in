@@ -1,8 +1,8 @@
 'use strict';
 
 var BasePickerView = require('./base-picker-view');
-var classList = require('../../lib/classlist');
 var paypal = require('braintree-web/paypal');
+var paypalHTML = require('../../html/paypal-picker.html');
 
 function PayPalPickerView() {
   BasePickerView.apply(this, arguments);
@@ -19,15 +19,11 @@ PayPalPickerView.prototype = Object.create(BasePickerView.prototype);
 PayPalPickerView.prototype.constructor = PayPalPickerView;
 
 PayPalPickerView.prototype._initialize = function () {
-  var a = document.createElement('a');
-
   BasePickerView.prototype._initialize.apply(this, arguments);
 
-  classList.add(this.element, 'braintree-dropin__paypal-picker-view');
-  a.href = '#';
-  a.textContent = 'Pay with PayPal';
-  this.element.appendChild(a);
-  this.mainView.asyncDependencyStarting();
+  this.element.innerHTML = paypalHTML;
+  this.model.asyncDependencyStarting();
+  this._createPayPalButton();
 
   paypal.create({client: this.options.client}, function (err, paypalInstance) {
     if (err) {
@@ -37,19 +33,39 @@ PayPalPickerView.prototype._initialize = function () {
 
     this.paypalInstance = paypalInstance;
 
-    this.element.addEventListener('click', function () {
+    this.element.addEventListener('click', function (event) {
+      event.preventDefault();
       this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
         if (tokenizeErr) {
           console.error(tokenizeErr);
           return;
         }
 
-        this.mainView.updateCompletedView(tokenizePayload);
+        this.model.addPaymentMethod(tokenizePayload);
       }.bind(this));
     }.bind(this));
 
-    this.mainView.asyncDependencyReady();
+    this.model.asyncDependencyReady();
   }.bind(this));
+};
+
+PayPalPickerView.prototype._createPayPalButton = function () {
+  var script = document.createElement('script');
+  var scriptAttrs = {
+    'data-merchant': 'braintree',
+    'data-button': 'checkout',
+    'data-type': 'button',
+    'data-color': 'blue'
+  };
+
+  script.src = 'https://www.paypalobjects.com/api/button.js';
+  script.async = true;
+
+  Object.keys(scriptAttrs).forEach(function (attr) {
+    script.setAttribute(attr, scriptAttrs[attr]);
+  });
+
+  this.getElementById('paypal-button').appendChild(script);
 };
 
 PayPalPickerView.prototype.teardown = function (callback) {

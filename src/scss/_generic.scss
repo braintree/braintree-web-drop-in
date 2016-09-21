@@ -1,0 +1,15 @@
+.braintree-dropin {
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    min-width: 290px;
+    margin: 0;
+    padding: 0;
+}
+
+[class^="braintree-dropin__icon-card"], [class*=" braintree-dropin__icon-card"] {
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  transition: opacity $time-fast ease, transform $time-fast ease;
+}
+

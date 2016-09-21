@@ -1,9 +1,11 @@
 'use strict';
 
 var Dropin = require('../../src/dropin/');
+var deferred = require('../../src/lib/deferred');
+var DropinModel = require('../../src/dropin-model');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
-var deferred = require('../../src/lib/deferred');
+var PaymentMethodPickerView = require('../../src/views/payment-method-picker-view');
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -23,7 +25,7 @@ describe('Dropin', function () {
     };
 
     this.sandbox.stub(hostedFields, 'create', function (options, cb) {
-      deferred(cb)();
+      deferred(cb)(null, {on: function () {}});
     });
   });
 
@@ -101,6 +103,16 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('inserts svgs into container', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(this.container.innerHTML).to.include('data-braintree-id="svgs"');
+
+        done();
+      }.bind(this));
+    });
+
     it('requests payment methods if a customerId is provided', function (done) {
       var instance;
       var fakeClientToken = fake.configuration().gatewayConfiguration;
@@ -152,7 +164,7 @@ describe('Dropin', function () {
 
       instance.initialize(function () {
         expect(hostedFields.create).to.be.called;
-        expect(instance.mainView.existingPaymentMethods).to.have.a.lengthOf(0);
+        expect(instance._model.getPaymentMethods()).to.have.a.lengthOf(0);
 
         done();
       });
@@ -178,7 +190,7 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
-        var existingPaymentMethod = instance.mainView.existingPaymentMethods[0];
+        var existingPaymentMethod = instance._model.getPaymentMethods()[0];
 
         expect(existingPaymentMethod.nonce).to.equal('nonce');
         expect(existingPaymentMethod.details).to.deep.equal({});
@@ -215,22 +227,52 @@ describe('Dropin', function () {
         done();
       });
     });
+
+    it('calls the create callback when async dependencies are ready', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+
+      instance.initialize(function () {
+        done();
+      });
+
+      instance._model._emit('asyncDependenciesReady');
+    });
   });
 
   describe('requestPaymentMethod', function () {
-    it('calls callback with paymentMethod returned from mainView.requestPaymentMethod', function (done) {
-      var instance = new Dropin(this.dropinOptions);
+    it('calls callback with active payment method if available', function (done) {
+      var dropin;
 
-      instance.mainView = {
-        requestPaymentMethod: this.sandbox.stub().yields(null, {paymentMethod: 'foo'})
-      };
+      this.sandbox.stub(PaymentMethodPickerView.prototype, 'setActivePaymentMethod');
 
-      instance.requestPaymentMethod(function (err, data) {
-        expect(err).to.not.exist;
-        expect(data.paymentMethod).to.equal('foo');
-        expect(instance.mainView.requestPaymentMethod).to.be.calledOnce;
+      dropin = new Dropin(this.dropinOptions);
 
-        done();
+      dropin.initialize(function (err, instance) {
+        instance._model.changeActivePaymentMethod('active payment method');
+
+        instance.requestPaymentMethod(function (err2, data) {
+          expect(err2).to.not.exist;
+          expect(data).to.equal('active payment method');
+
+          done();
+        });
+      });
+    });
+
+    it('calls callback with error if no payment method is available', function (done) {
+      var dropin = new Dropin(this.dropinOptions);
+
+      dropin.initialize(function (err, instance) {
+        instance.requestPaymentMethod(function (err2, data) {
+          expect(err2).to.be.an.instanceOf(Error);
+          expect(err2.message).to.equal('No payment method available.');
+          expect(data).to.not.exist;
+
+          done();
+        });
       });
     });
   });

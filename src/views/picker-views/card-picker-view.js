@@ -1,8 +1,10 @@
 'use strict';
 
 var BasePickerView = require('./base-picker-view');
+var cardHTML = require('../../html/card-picker.html');
+var cardIconHTML = require('../../html/card-icons.html');
+var hideUnsupportedCardIcons = require('../../lib/hide-unsupported-card-icons');
 var PayWithCardView = require('../pay-with-card-view');
-var classList = require('../../lib/classlist');
 
 function CardPickerView() {
   BasePickerView.apply(this, arguments);
@@ -16,19 +18,20 @@ CardPickerView.prototype = Object.create(BasePickerView.prototype);
 CardPickerView.prototype.constructor = CardPickerView;
 
 CardPickerView.prototype._initialize = function () {
-  var a = document.createElement('a');
+  var cardIcons;
+  var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   BasePickerView.prototype._initialize.apply(this, arguments);
 
-  classList.add(this.element, 'braintree-dropin__pay-with-card-picker-view');
+  this.element.innerHTML = cardHTML;
+
+  cardIcons = this.getElementById('card-picker-icons');
+  cardIcons.innerHTML = cardIconHTML;
+  hideUnsupportedCardIcons(this.element, supportedCardTypes);
 
   this.element.addEventListener('click', function () {
     this.mainView.setActiveView(PayWithCardView.ID);
   }.bind(this), false);
-
-  a.textContent = 'Pay with Card';
-  a.href = '#';
-  this.element.appendChild(a);
 };
 
 module.exports = CardPickerView;

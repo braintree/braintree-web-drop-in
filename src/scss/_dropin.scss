@@ -1,0 +1,172 @@
+[data-braintree-id="payment-method-picker"] {
+  width: 100%;
+  border-radius: 3px;
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.braintree-dropin__header-area {
+  background: $black-95;
+  background-image: linear-gradient(-180deg, $black-95 0%, $black-90 100%);
+  border: 1px solid $black-85;
+  display: flex;
+  padding: 8px 16px 8px 12px;
+  cursor: pointer;
+  transition: all $time-fast;
+  align-items: center;
+  justify-content: space-between;
+
+  opacity: 0.6;
+  -webkit-transition: -webkit-filter 100ms;
+  transition: -webkit-filter 100ms;
+  transition: filter 100ms;
+  transition: filter 100ms, -webkit-filter 100ms;
+  -webkit-filter: grayscale(1);
+}
+
+.braintree-dropin__collapsed .braintree-dropin__header-area {
+  opacity: 1;
+  -webkit-filter: none;
+}
+
+.braintree-dropin__collapsed .braintree-dropin__drawer {
+  visibility: hidden;
+  transition: all $time-faster linear;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+[data-braintree-id="disclosure-arrow"] {
+  width: 20px;
+  height: 20px;
+  transition: transform 100ms ease-in-out;
+  transform: rotate(180deg);
+}
+
+.braintree-dropin__collapsed [data-braintree-id="disclosure-arrow"] {
+  transition: transform 100ms ease-in-out;
+  transform: rotate(0deg);
+}
+
+.braintree-dropin__check-container {
+  display: none;
+}
+
+.braintree-dropin__check-container--active {
+  display: inline-block;
+}
+
+.braintree-dropin__icon-check {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+
+.braintree-dropin__drawer {
+  position: absolute;
+  z-index: 2147483647;
+  width: 100%;
+  transition: opacity $time-faster linear;
+  border: 1px solid $black-85;
+  border-top: 0;
+  border-radius: 0 0 3px 3px;
+  background: $white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.braintree-dropin__drawer-list {
+  padding: 0;
+  margin: 0;
+}
+
+.braintree-dropin__drawer-header {
+  line-height: 1.4;
+  margin: 0;
+  padding: 8px;
+  text-align: center;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: $black-40;
+  background: $black-90;
+  font-size: $type-12;
+  font-weight: 600;
+}
+
+.braintree-dropin__sheet {
+  display: none;
+}
+
+.braintree-dropin__active-payment-method .braintree-dropin__active-payment-method,
+.braintree-dropin__choose-payment-method .braintree-dropin__choose-payment-method,
+.braintree-dropin__pay-with-card .braintree-dropin__pay-with-card {
+  display: block;
+}
+
+.braintree-dropin__option--default__text {
+  color: #000;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+  padding: 8px 0;
+  text-align: left;
+  text-transform: none;
+}
+
+.braintree-dropin__picker-view {
+  display: flex;
+  padding: 8px 16px 8px 12px;
+  transition: background $time-faster ease-in-out;
+  text-decoration: none;
+  color: $black;
+  font-size: $type-16;
+  line-height: 1.4;
+  justify-content: center;
+  width: 100%;
+  &:hover {
+    background: $black-95;
+  }
+  &:active {
+    background: $black-97;
+  }
+  border-bottom: 1px solid $black-85;
+}
+
+.braintree-dropin__picker-label {
+  align-self: center;
+  font-size: $type-16;
+  margin-right: 30px;
+  margin-bottom: 0;
+}
+
+.braintree-dropin__completed-picker-view {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.braintree-dropin__payment-method {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+[data-braintree-id="card-view-icons"] {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.braintree-dropin__header {
+  display: none;
+}

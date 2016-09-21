@@ -8,6 +8,12 @@ function BaseView(options) {
   assign(this, options);
 }
 
+BaseView.prototype.getElementById = function (id) {
+  if (!this.element) { return null; }
+
+  return this.element.querySelector('[data-braintree-id="' + id + '"]');
+};
+
 BaseView.prototype.teardown = function (cb) {
   cb();
 };

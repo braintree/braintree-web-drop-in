@@ -1,15 +1,17 @@
 'use strict';
 
 var PayPalPickerView = require('../../../../src/views/picker-views/paypal-picker-view');
+var BaseView = require('../../../../src/views/base-view');
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
-var classlist = require('../../../../src/lib/classlist');
+var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var paypal = require('braintree-web/paypal');
+var paypalHTML = require('../../../../src/html/paypal-picker.html');
 
 describe('PayPalPickerView', function () {
   beforeEach(function () {
     this.fakePayPalPickerView = document.createElement('div');
-    this.fakePayPalPickerView.id = 'paypal-picker-view';
+    this.fakePayPalPickerView.innerHTML = paypalHTML;
 
     document.body.appendChild(this.fakePayPalPickerView);
   });
@@ -33,17 +35,15 @@ describe('PayPalPickerView', function () {
   describe('_initialize', function () {
     beforeEach(function () {
       this.context = {
+        _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
+        getElementById: BaseView.prototype.getElementById,
+        model: new DropinModel(),
         options: {
           client: {
             getConfiguration: fake.configuration,
             request: this.sandbox.spy()
           }
-        },
-        mainView: {
-          componentId: 'component-id',
-          asyncDependencyStarting: this.sandbox.stub(),
-          asyncDependencyReady: this.sandbox.stub()
         }
       };
 
@@ -51,15 +51,19 @@ describe('PayPalPickerView', function () {
     });
 
     it('starts async dependency', function () {
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+
       PayPalPickerView.prototype._initialize.call(this.context);
 
-      expect(this.context.mainView.asyncDependencyStarting).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
     });
 
     it('notifies async dependency is ready when PayPal is created', function () {
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+
       PayPalPickerView.prototype._initialize.call(this.context);
 
-      expect(this.context.mainView.asyncDependencyReady).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
     });
 
     it('creates PayPal', function () {
@@ -79,27 +83,36 @@ describe('PayPalPickerView', function () {
       expect(console.error).to.have.been.calledWith(new Error('create failed'));
     });
 
-    it('adds pay with paypal picker view class', function () {
-      this.sandbox.spy(classlist, 'add');
-
+    it('appends PayPal picker html', function () {
       PayPalPickerView.prototype._initialize.call(this.context);
 
-      expect(classlist.add).to.have.been.calledWith(this.context.element, 'braintree-dropin__paypal-picker-view');
+      expect(this.context.element.querySelector('.braintree-dropin__picker-label').innerHTML).to.equal('PayPal');
+    });
+
+    it('creates a paypal button', function () {
+      var paypalButton;
+
+      PayPalPickerView.prototype._initialize.call(this.context);
+      paypalButton = this.context.element.querySelector('[data-braintree-id="paypal-button"] script');
+
+      expect(paypalButton.getAttribute('src')).to.equal('https://www.paypalobjects.com/api/button.js');
+      expect(paypalButton.getAttribute('data-merchant')).to.equal('braintree');
+      expect(paypalButton.getAttribute('data-button')).to.equal('checkout');
+      expect(paypalButton.getAttribute('data-type')).to.equal('button');
+      expect(paypalButton.getAttribute('data-color')).to.equal('blue');
     });
   });
 
   describe('element after initialization', function () {
     beforeEach(function () {
       this.context = {
+        _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
+        getElementById: BaseView.prototype.getElementById,
         options: {
           paypal: {}
         },
-        mainView: {
-          asyncDependencyStarting: this.sandbox.stub(),
-          asyncDependencyReady: this.sandbox.stub(),
-          updateCompletedView: this.sandbox.stub()
-        }
+        model: new DropinModel()
       };
     });
 
@@ -116,32 +129,36 @@ describe('PayPalPickerView', function () {
       expect(stubPaypalInstance.tokenize).to.be.calledWith(this.context.options.paypal);
     });
 
-    it('calls updateCompletedView when tokenize is successful', function () {
+    it('adds a new payment method when tokenize is successful', function () {
       var stubTokenizePayload = {foo: 'bar'};
       var stubPaypalInstance = {
         tokenize: this.sandbox.stub().callsArgWith(1, null, stubTokenizePayload)
       };
 
+      this.sandbox.spy(DropinModel.prototype, 'addPaymentMethod');
+
       this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
       PayPalPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
-      expect(this.context.mainView.updateCompletedView).to.be.calledWith(stubTokenizePayload);
+      expect(DropinModel.prototype.addPaymentMethod).to.be.calledWith(stubTokenizePayload);
     });
 
-    it('does not call updateCompletedView when tokenize fails', function () {
+    it('does not add a new payment method when tokenize fails', function () {
       var stubPaypalInstance = {
         tokenize: this.sandbox.stub().callsArgWith(1, new Error('bad things'), null)
       };
 
+      this.sandbox.spy(DropinModel.prototype, 'addPaymentMethod');
       this.sandbox.stub(console, 'error');
       this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+
       PayPalPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
-      expect(this.context.mainView.updateCompletedView).to.not.have.been.called;
+      expect(DropinModel.prototype.addPaymentMethod).to.not.have.been.called;
     });
 
     it('console errors when tokenize fails', function () {

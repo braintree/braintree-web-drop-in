@@ -1,7 +1,7 @@
 'use strict';
 
 var BaseView = require('./base-view');
-var CompletedView = require('./completed-view');
+var classlist = require('../lib/classlist');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
 
@@ -9,6 +9,7 @@ function MainView() {
   BaseView.apply(this, arguments);
 
   this.dependenciesInitializing = 0;
+  this.element = this.dropinWrapper;
   this._initialize();
 }
 
@@ -16,34 +17,36 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
-  var completedView = new CompletedView({
-    element: this.dropinWrapper.querySelector('.' + CompletedView.ID)
-  });
+  var paymentMethods = this.model.getPaymentMethods();
   var payWithCardView = new PayWithCardView({
-    element: this.dropinWrapper.querySelector('.' + PayWithCardView.ID),
+    element: this.getElementById(PayWithCardView.ID),
     mainView: this,
+    model: this.model,
     options: this.options
   });
-  var paymentMethodPickerView = new PaymentMethodPickerView({
-    element: this.dropinWrapper.querySelector('.' + PaymentMethodPickerView.ID),
-    existingPaymentMethods: this.existingPaymentMethods,
+
+  this.paymentMethodPickerView = new PaymentMethodPickerView({
+    element: this.getElementById(PaymentMethodPickerView.ID),
+    model: this.model,
     mainView: this,
     options: this.options
   });
 
   this.views = {};
-  this.addView(completedView);
   this.addView(payWithCardView);
-  this.addView(paymentMethodPickerView);
-  this.paymentMethodPickerView = paymentMethodPickerView;
+  this.addView(this.paymentMethodPickerView);
 
-  if (this.existingPaymentMethods.length > 0) {
-    completedView.updatePaymentMethod(this.existingPaymentMethods[0]);
-    this.setActiveView(completedView.ID);
-  } else if (this.paymentMethodPickerView.views.length > 1) {
-    this.setActiveView(this.paymentMethodPickerView.ID);
+  this.model.on('changeActivePaymentMethod', function () {
+    this.setActiveView('active-payment-method');
+  }.bind(this));
+
+  if (paymentMethods.length > 0) {
+    this.model.changeActivePaymentMethod(paymentMethods[0]);
+  } else if (this.paymentMethodPickerView.views.length === 1) {
+    this.setActiveView(PayWithCardView.ID);
+    classlist.add(this.getElementById('payment-method-picker'), 'braintree-dropin__hide');
   } else {
-    this.setActiveView(payWithCardView.ID);
+    this.setActiveView('choose-payment-method');
   }
 };
 
@@ -52,40 +55,10 @@ MainView.prototype.addView = function (view) {
 };
 
 MainView.prototype.setActiveView = function (id) {
-  this.activeView = this.views[id];
-  this.paymentMethodPickerView.collapse();
+  this.dropinWrapper.className = 'braintree-dropin__' + id;
 
-  this.dropinWrapper.className = id;
-};
-
-MainView.prototype.requestPaymentMethod = function (callback) {
-  if (typeof this.activeView.requestPaymentMethod !== 'function') {
-    callback(new Error('No payment method available.'));
-    return;
-  }
-
-  this.activeView.requestPaymentMethod(callback);
-};
-
-MainView.prototype.asyncDependencyStarting = function () {
-  this.dependenciesInitializing++;
-};
-
-MainView.prototype.asyncDependencyReady = function () {
-  this.dependenciesInitializing--;
-  if (this.dependenciesInitializing === 0) {
-    this.callback();
-  }
-};
-
-MainView.prototype.updateCompletedView = function (paymentMethod, existing) {
-  var completedView = this.views[CompletedView.ID];
-
-  completedView.updatePaymentMethod(paymentMethod);
-  this.setActiveView(CompletedView.ID);
-
-  if (!existing) {
-    this.paymentMethodPickerView.addCompletedPickerView(paymentMethod);
+  if (id !== 'active-payment-method') {
+    this.paymentMethodPickerView.hideCheckMarks();
   }
 };
 

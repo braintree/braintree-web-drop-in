@@ -1,0 +1,24 @@
+.braintree-dropin__list-definition {
+    line-height: 1.4;
+    flex-grow: 2;
+    margin: 0;
+    padding: 4px 12px;
+}
+
+.braintree-dropin__list-term {
+    line-height: 1.4;
+    font-size: $type-16;
+    font-weight: 600;
+    margin: 0 0 3px;
+    padding: 0;
+    color: $black;
+}
+
+.braintree-dropin__list-desc {
+    line-height: 1.4;
+    color: $black-40;
+    font-size: $type-14;
+    margin: 0;
+    padding: 0;
+}
+

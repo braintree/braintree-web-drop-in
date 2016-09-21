@@ -1,6 +1,10 @@
 'use strict';
 
 var MainView = require('./views/main-view');
+var constants = require('./constants');
+var DropinModel = require('./dropin-model');
+var mainHTML = require('./html/main.html');
+var svgHTML = require('./html/svgs.html');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
 
@@ -12,11 +16,10 @@ function Dropin(options) {
 }
 
 Dropin.prototype.initialize = function (callback) {
-  var container, authorizationFingerprint, mainViewOptions;
-  var assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
+  var container;
   var dropinInstance = this; // eslint-disable-line consistent-this
-  var hasCustomerId = false;
-  var stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin-frame@DOT_MIN.css';
+
+  this.injectStylesheet();
 
   if (!this._options.selector) {
     callback(new Error('options.selector is required.'));
@@ -33,23 +36,65 @@ Dropin.prototype.initialize = function (callback) {
     return;
   }
 
-  this._dropinWrapper.innerHTML = Dropin.generateDropinTemplate(stylesheetUrl);
+  this._dropinWrapper.innerHTML = svgHTML + mainHTML;
   container.appendChild(this._dropinWrapper);
+
+  this.getVaultedPaymentMethods(function (paymentMethods) {
+    var mainViewOptions;
+
+    this._model = new DropinModel({paymentMethods: paymentMethods});
+    this._model.on('asyncDependenciesReady', function () {
+      callback(null, dropinInstance);
+    });
+
+    mainViewOptions = {
+      componentId: this._componentId,
+      dropinWrapper: this._dropinWrapper,
+      model: this._model,
+      options: this._options
+    };
+
+    this.mainView = new MainView(mainViewOptions);
+  }.bind(this));
+};
+
+Dropin.prototype.removeStylesheet = function () {
+  var stylesheet = document.getElementById(constants.STYLESHEET_ID);
+
+  if (stylesheet) {
+    stylesheet.parentNode.removeChild(stylesheet);
+  }
+};
+
+Dropin.prototype.injectStylesheet = function () {
+  var stylesheet, stylesheetUrl, head, assetsUrl;
+
+  if (document.getElementById(constants.STYLESHEET_ID)) { return; }
+
+  assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
+  stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin@DOT_MIN.css';
+  stylesheet = document.createElement('link');
+  head = document.head;
+
+  stylesheet.setAttribute('rel', 'stylesheet');
+  stylesheet.setAttribute('type', 'text/css');
+  stylesheet.setAttribute('href', stylesheetUrl);
+
+  if (head.firstChild) {
+    head.insertBefore(stylesheet, head.firstChild);
+  } else {
+    head.appendChild(stylesheet);
+  }
+};
+
+Dropin.prototype.getVaultedPaymentMethods = function (callback) {
+  var authorizationFingerprint, paymentMethods;
+  var hasCustomerId = false;
 
   if (!isTokenizationKey(this._options.authorization)) {
     authorizationFingerprint = JSON.parse(atob(this._options.authorization)).authorizationFingerprint;
     hasCustomerId = authorizationFingerprint && authorizationFingerprint.indexOf('customer_id=') !== -1;
   }
-
-  mainViewOptions = {
-    callback: function () {
-      callback(null, dropinInstance);
-    },
-    componentId: this._componentId,
-    dropinWrapper: this._dropinWrapper,
-    existingPaymentMethods: [],
-    options: this._options
-  };
 
   if (hasCustomerId) {
     this._options.client.request({
@@ -60,63 +105,33 @@ Dropin.prototype.initialize = function (callback) {
       }
     }, function (err, paymentMethodsPayload) {
       if (!err) {
-        mainViewOptions.existingPaymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
+        paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
       }
-      this.mainView = new MainView(mainViewOptions);
-    }.bind(this));
+      callback(paymentMethods);
+    });
   } else {
-    this.mainView = new MainView(mainViewOptions);
+    callback();
   }
 };
 
 Dropin.prototype.requestPaymentMethod = function (callback) {
-  this.mainView.requestPaymentMethod(callback);
+  var paymentMethod = this._model.getActivePaymentMethod();
+
+  if (!paymentMethod) {
+    callback(new Error('No payment method available.'));
+    return;
+  }
+
+  callback(null, paymentMethod);
 };
 
 Dropin.prototype.teardown = function (callback) {
+  this.removeStylesheet();
+
   this.mainView.teardown(function (err) {
     this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
     callback(err);
   }.bind(this));
-};
-
-Dropin.generateDropinTemplate = function (stylesheetUrl) {
-  return '<link rel="stylesheet" type="text/css" href="' + stylesheetUrl + '">' +
-    '<div class="braintree-dropin braintree-dropin__loader">' +
-      '<div class="braintree-dropin__view">loading!</div>' +
-
-      '<div class="braintree-dropin__view braintree-dropin__pay-with-card">' +
-        '<div class="braintree-dropin__card-field">' +
-          '<label for="number">Card Number</label>' +
-          '<div class="braintree-dropin__number braintree-dropin__braintree-hosted-field"></div>' +
-        '</div>' +
-
-        '<div class="braintree-dropin__card-field">' +
-          '<label for="expiration">Expiration Date</label>' +
-          '<div class="braintree-dropin__expiration braintree-dropin__braintree-hosted-field"></div>' +
-        '</div>' +
-
-        '<div class="braintree-dropin__card-field braintree-dropin__cvv-container">' +
-          '<label for="cvv">CVV</label>' +
-          '<div class="braintree-dropin__cvv braintree-dropin__braintree-hosted-field"></div>' +
-        '</div>' +
-
-        '<div class="braintree-dropin__card-field braintree-dropin__postal-code-container">' +
-          '<label for="postal-code">Postal Code</label>' +
-          '<div class="braintree-dropin__postal-code braintree-dropin__braintree-hosted-field"></div>' +
-        '</div>' +
-      '</div>' +
-
-      '<div class="braintree-dropin__view braintree-dropin__completed">' +
-        '<div class="braintree-dropin__completed-type"></div>' +
-        'nonce:' +
-        '<div class="braintree-dropin__completed-nonce"></div>' +
-      '</div>' +
-
-      '<div class="braintree-dropin__closed braintree-dropin__payment-method-picker">' +
-        '<div class="braintree-dropin__payment-method-picker-toggler">Payment Method</div>' +
-      '</div>' +
-    '</div>';
 };
 
 function formatPaymentMethodPayload(paymentMethod) {

@@ -1,0 +1,71 @@
+.braintree-dropin__form {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.braintree-dropin__form-card-field {
+    border: 0;
+    margin: 0 0 16px;
+    padding: 0;
+}
+
+.braintree-dropin__form-label {
+    line-height: 1.4;
+    display: block;
+    font-size: $type-16;
+    color: $black;
+    margin: 0;
+    padding: 0;
+}
+
+.braintree-dropin__form-label--relative {
+    position: relative;
+}
+
+.braintree-dropin__form-inline-error {
+    color: $red;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+}
+
+.braintree-dropin__form-fields {
+    margin: 4px 0 0;
+    padding: 0px 8px 0px 8px;
+    border: 1px solid $black-75;
+}
+
+.braintree-dropin__form-fields--hosted {
+    height: 44px;
+}
+
+.braintree-dropin__form-icon--absolute {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    transition: opacity $time-faster linear;
+}
+
+.braintree-dropin__form-button {
+  background: $black-90;
+  background-image: linear-gradient(-180deg, $black-95 0%, $black-85 100%);
+  border: 1px solid $black-85;
+  border-radius: 3px;
+  font-size: $type-16;
+  padding: 14px 20px;
+
+  &:hover {
+    background: $black-75;
+    background-image: linear-gradient(-180deg, $black-85 0%, $black-75 100%);
+  }
+
+  &:active {
+    background: $black-95;
+    background-image: linear-gradient(-180deg, $black-90 0%, $black-95 100%);
+  }
+}
+
+@include placeholder {
+    color: $black-75;
+}

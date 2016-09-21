@@ -2,7 +2,7 @@
 
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var CompletedPickerView = require('../../../../src/views/picker-views/completed-picker-view');
-var classlist = require('../../../../src/lib/classlist');
+var DropinModel = require('../../../../src/dropin-model');
 
 describe('CompletedPickerView', function () {
   describe('Constructor', function () {
@@ -26,26 +26,72 @@ describe('CompletedPickerView', function () {
       this.fakeCompletedPickerView = document.createElement('div');
       document.body.appendChild(this.fakeCompletedPickerView);
 
+      this.model = new DropinModel();
+
       this.context = {
         element: this.fakeCompletedPickerView,
-        mainView: {updateCompletedView: this.sandbox.stub()},
+        model: this.model,
         paymentMethod: 'a-payment-method'
       };
     });
 
-    it('adds completed picker view class', function () {
-      this.sandbox.stub(classlist, 'add');
-      CompletedPickerView.prototype._initialize.call(this.context);
+    it('sets the active payment method when clicked', function () {
+      this.sandbox.stub(this.model, 'changeActivePaymentMethod');
 
-      expect(classlist.add).to.have.been.calledWith(this.context.element, 'braintree-dropin__completed-picker-view');
-    });
-
-    it('calls updateCompletedView when clicked', function () {
       CompletedPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
-      expect(this.context.mainView.updateCompletedView).to.be.calledWith(this.context.paymentMethod, true);
+      expect(this.model.changeActivePaymentMethod).to.be.calledWith(this.context.paymentMethod);
+    });
+
+    it('appends completed picker html', function () {
+      CompletedPickerView.prototype._initialize.call(this.context);
+
+      expect(this.context.element.querySelector('.braintree-dropin__completed-picker-view')).to.exist;
+    });
+
+    it('sets correct details for CreditCard payment methods', function () {
+      var detail, icon, type;
+
+      this.context.paymentMethod = {
+        details: {
+          cardType: 'MasterCard',
+          lastTwo: '66'
+        },
+        type: 'CreditCard'
+      };
+
+      CompletedPickerView.prototype._initialize.call(this.context);
+
+      detail = this.context.element.querySelector('.braintree-dropin__list-term');
+      type = this.context.element.querySelector('.braintree-dropin__list-desc');
+      icon = this.context.element.querySelector('[*|href="#icon-master-card"]');
+
+      expect(detail.innerHTML).to.equal('Ending in ••66');
+      expect(type.innerHTML).to.equal('MasterCard');
+      expect(icon).to.exist;
+    });
+
+    it('sets correct details for PayPalAccount payment methods', function () {
+      var detail, icon, type;
+
+      this.context.paymentMethod = {
+        details: {
+          email: 'my-email@cool.biz'
+        },
+        type: 'PayPalAccount'
+      };
+
+      CompletedPickerView.prototype._initialize.call(this.context);
+
+      detail = this.context.element.querySelector('.braintree-dropin__list-term');
+      type = this.context.element.querySelector('.braintree-dropin__list-desc');
+      icon = this.context.element.querySelector('[*|href="#logoPayPal"]');
+
+      expect(detail.innerHTML).to.equal('my-email@cool.biz');
+      expect(type.innerHTML).to.equal('PayPal');
+      expect(icon).to.exist;
     });
   });
 });

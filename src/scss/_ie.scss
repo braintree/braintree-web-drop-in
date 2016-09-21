@@ -1,0 +1,63 @@
+.browser-upgrade {
+    font-size: 16px;
+    line-height: 1.4;
+    font-family: sans-serif;
+}
+.ieno-flexbox {
+    .braintree-card-logos__group {
+        display: block;
+        text-align: center;
+        .braintree-icon--card {
+            float: none;
+            margin-top: 0;
+        }
+    }
+    .braintree-card-logos__group:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    img {
+        border: 0;
+    }
+    .braintree-dropdown__default {
+        display: block;
+        padding-top: 16px;
+    }
+    .braintree-dropdown__default:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .braintree-icon--card {
+        float: left;
+        margin-top: 10px;
+    }
+    .braintree-list--definition {
+        padding-top: 0;
+        float: left;
+    }
+    .braintree-icon--arrow,
+    .braintree-icon--check {
+        float: right;
+        margin-top: 10px;
+    }
+    .braintree-dropdown__option {
+        display: block;
+        padding-top: 16px;
+        clear: both;
+        text-decoration: none;
+    }
+    .braintree-dropdown__option:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .braintree-dropdown__label {
+        float: left;
+        padding-top: 10px;
+    }
+    .braintree-dropdown__image {
+        float: left;
+    }
+}
