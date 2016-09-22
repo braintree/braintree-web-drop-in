@@ -45,7 +45,8 @@ describe('MainView', function () {
         setActiveView: this.sandbox.stub(),
         dependenciesInitializing: 0,
         getElementById: BaseView.prototype.getElementById,
-        model: this.model
+        model: this.model,
+        showLoadingIndicator: function () {}
       };
 
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {

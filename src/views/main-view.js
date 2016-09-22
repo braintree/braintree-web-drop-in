@@ -17,6 +17,7 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
+  var hideLoadingIndicator = this.showLoadingIndicator();
   var paymentMethods = this.model.getPaymentMethods();
   var payWithCardView = new PayWithCardView({
     element: this.getElementById(PayWithCardView.ID),
@@ -35,6 +36,10 @@ MainView.prototype._initialize = function () {
   this.views = {};
   this.addView(payWithCardView);
   this.addView(this.paymentMethodPickerView);
+
+  this.model.on('asyncDependenciesReady', function () {
+    hideLoadingIndicator();
+  });
 
   this.model.on('changeActivePaymentMethod', function () {
     this.setActiveView('active-payment-method');
@@ -60,6 +65,33 @@ MainView.prototype.setActiveView = function (id) {
   if (id !== 'active-payment-method') {
     this.paymentMethodPickerView.hideCheckMarks();
   }
+};
+
+MainView.prototype.showLoadingIndicator = function () {
+  var dropinContainer = this.element.querySelector('.braintree-dropin');
+  var loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
+  var loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
+
+  loadingContainer.style.opacity = 1;
+  loadingContainer.style.zindex = 2;
+
+  return function () {
+    setTimeout(function () {
+      loadingIndicator.style.transform = 'scale(0)';
+    }, 200);
+
+    setTimeout(function () {
+      loadingContainer.style.opacity = 0;
+      classlist.remove(dropinContainer, 'braintree-dropin__hide');
+
+      setTimeout(function () {
+        loadingContainer.style.zIndex = -2;
+        loadingContainer.style.height = 0;
+
+        loadingIndicator.style.transform = 'scale(1)';
+      }, 200);
+    }, 800);
+  };
 };
 
 MainView.prototype.teardown = function (callback) {

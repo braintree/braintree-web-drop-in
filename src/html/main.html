@@ -1,4 +1,12 @@
-<div class="braintree-dropin">
+<div data-braintree-id="loading-container" class="braintree-dropin__loading-container">
+  <div data-braintree-id="loading-indicator" class="braintree-dropin__loading-indicator">
+    <svg width="14" height="16" class="braintree-dropin__icon--lock">
+    <use xlink:href="#iconLockLoader"></use>
+    </svg>
+  </div>
+</div>
+
+<div class="braintree-dropin braintree-dropin__hide">
   <div data-braintree-id="payment-method-picker" class="braintree-dropin__collapsed">
     <div class="braintree-dropin__header-area">
 
@@ -9,7 +17,7 @@
       <div class="braintree-dropin__header braintree-dropin__pay-with-card braintree-dropin__option--default__text">Card</div>
 
       <svg height="24" width="24" data-braintree-id="disclosure-arrow">
-        <use xlink:href="#iconArrow" />
+        <use xlink:href="#iconArrow"></use>
       </svg>
     </div>
 

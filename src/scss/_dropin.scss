@@ -170,3 +170,55 @@
 .braintree-dropin__header {
   display: none;
 }
+
+[data-braintree-id="loading-container"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: $white;
+  opacity: 1;
+  z-index: 2;
+  position: absolute;
+  transition: opacity 500ms ease;
+}
+
+[data-braintree-id="loading-indicator"] {
+  border: solid 2px $black-75;
+  border-radius: 50%;
+  height: 72px;
+  width: 72px;
+  position: relative;
+  transition: transform 300ms $curve-springy;
+
+  &:before {
+    animation: rotate 512ms infinite $curve-swing;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: solid 2px transparent;
+    border-top-color: $black-40;
+    margin-left: -2px;
+    margin-top: -2px;
+    content: "";
+    border-radius: 50%;
+  }
+}
+
+.braintree-dropin__icon--lock {
+  position: absolute;
+  top: 50%;
+  margin-top: -9px;
+  left: 50%;
+  margin-left: -7px;
+  fill: $black-40;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
