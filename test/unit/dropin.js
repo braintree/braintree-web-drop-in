@@ -246,28 +246,17 @@ describe('Dropin', function () {
 
       instance._model._emit('asyncDependenciesReady');
     });
+  });
 
-    it('sets the active payment method if one exists', function (done) {
-      var instance;
-      var paymentMethod = {foo: 'bar'};
+  describe('getActivePaymentMethod', function () {
+    it('returns the active payment method', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var fakePaymentMethod = {foo: 'bar'};
 
-      this.sandbox.stub(Dropin.prototype, 'getVaultedPaymentMethods').yields([paymentMethod]);
-      instance = new Dropin(this.dropinOptions);
-
-      instance.initialize(function () {
-        expect(instance.activePaymentMethod).to.equal(paymentMethod);
-        done();
-      });
-    });
-
-    it('returns null for active payment method if one does not exist', function (done) {
-      var instance;
-
-      this.sandbox.stub(Dropin.prototype, 'getVaultedPaymentMethods').callsArg(0);
-      instance = new Dropin(this.dropinOptions);
+      this.sandbox.stub(DropinModel.prototype, 'getActivePaymentMethod').returns(fakePaymentMethod);
 
       instance.initialize(function () {
-        expect(instance.activePaymentMethod).to.not.exist;
+        expect(instance.getActivePaymentMethod()).to.equal(fakePaymentMethod);
         done();
       });
     });
@@ -316,20 +305,6 @@ describe('Dropin', function () {
       instance.initialize(function () {
         instance.on('paymentMethodAvailable', function (paymentMethod) {
           expect(paymentMethod).to.deep.equal(fakePaymentMethod);
-          done();
-        });
-
-        instance._model._emit('changeActivePaymentMethod', fakePaymentMethod);
-      });
-    });
-
-    it('updates the activePaymentMethod when the model emits a changeActivePaymentMethod event', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var fakePaymentMethod = {foo: 'bar'};
-
-      instance.initialize(function () {
-        instance.on('paymentMethodAvailable', function () {
-          expect(instance.activePaymentMethod).to.deep.equal(fakePaymentMethod);
           done();
         });
 

@@ -50,14 +50,12 @@ Dropin.prototype.initialize = function (callback) {
     var mainViewOptions;
 
     this._model = new DropinModel({paymentMethods: paymentMethods});
-    this.activePaymentMethod = this._model.getActivePaymentMethod();
 
     this._model.on('asyncDependenciesReady', function () {
       callback(null, dropinInstance);
     });
 
     this._model.on('changeActivePaymentMethod', function (paymentMethod) {
-      this.activePaymentMethod = paymentMethod;
       this._emit('paymentMethodAvailable', paymentMethod);
     }.bind(this));
 
@@ -70,6 +68,10 @@ Dropin.prototype.initialize = function (callback) {
 
     this.mainView = new MainView(mainViewOptions);
   }.bind(this));
+};
+
+Dropin.prototype.getActivePaymentMethod = function () {
+  return this._model.getActivePaymentMethod();
 };
 
 Dropin.prototype.removeStylesheet = function () {
