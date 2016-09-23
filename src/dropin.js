@@ -3,6 +3,7 @@
 var MainView = require('./views/main-view');
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
+var EventEmitter = require('./lib/event-emitter');
 var mainHTML = require('./html/main.html');
 var svgHTML = require('./html/svgs.html');
 var uuid = require('./lib/uuid');
@@ -13,7 +14,13 @@ function Dropin(options) {
   this._options = options;
   this._dropinWrapper = document.createElement('div');
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentId;
+
+  EventEmitter.call(this);
 }
+
+Dropin.prototype = Object.create(EventEmitter.prototype, {
+  constructor: Dropin
+});
 
 Dropin.prototype.initialize = function (callback) {
   var container;
@@ -43,9 +50,14 @@ Dropin.prototype.initialize = function (callback) {
     var mainViewOptions;
 
     this._model = new DropinModel({paymentMethods: paymentMethods});
+
     this._model.on('asyncDependenciesReady', function () {
       callback(null, dropinInstance);
     });
+
+    this._model.on('changeActivePaymentMethod', function (paymentMethod) {
+      this._emit('paymentMethodAvailable', paymentMethod);
+    }.bind(this));
 
     mainViewOptions = {
       componentId: this._componentId,
@@ -56,6 +68,10 @@ Dropin.prototype.initialize = function (callback) {
 
     this.mainView = new MainView(mainViewOptions);
   }.bind(this));
+};
+
+Dropin.prototype.getActivePaymentMethod = function () {
+  return this._model.getActivePaymentMethod();
 };
 
 Dropin.prototype.removeStylesheet = function () {
@@ -112,17 +128,6 @@ Dropin.prototype.getVaultedPaymentMethods = function (callback) {
   } else {
     callback();
   }
-};
-
-Dropin.prototype.requestPaymentMethod = function (callback) {
-  var paymentMethod = this._model.getActivePaymentMethod();
-
-  if (!paymentMethod) {
-    callback(new Error('No payment method available.'));
-    return;
-  }
-
-  callback(null, paymentMethod);
 };
 
 Dropin.prototype.teardown = function (callback) {

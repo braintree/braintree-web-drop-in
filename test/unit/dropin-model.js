@@ -1,9 +1,14 @@
 'use strict';
 
 var DropinModel = require('../../src/dropin-model');
+var EventEmitter = require('../../src/lib/event-emitter');
 
 describe('DropinModel', function () {
   describe('Constructor', function () {
+    it('inherits from EventEmitter', function () {
+      expect(new DropinModel({})).to.be.an.instanceOf(EventEmitter);
+    });
+
     it('sets existing payment methods as _paymentMethods', function () {
       var model = new DropinModel({paymentMethods: ['foo']});
 

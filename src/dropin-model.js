@@ -1,34 +1,19 @@
 'use strict';
 
+var EventEmitter = require('./lib/event-emitter');
+
 function DropinModel(options) {
   this._listeners = {};
   this._paymentMethods = options && options.paymentMethods ? options.paymentMethods : [];
   this._activePaymentMethod = this._paymentMethods[0];
   this.dependenciesInitializing = 0;
+
+  EventEmitter.call(this);
 }
 
-DropinModel.prototype.on = function (event, handler) {
-  var listeners = this._listeners[event];
-
-  if (!listeners) {
-    this._listeners[event] = [handler];
-  } else {
-    listeners.push(handler);
-  }
-};
-
-DropinModel.prototype._emit = function (event) {
-  var i;
-  var args = arguments;
-  var self = this;
-  var listeners = this._listeners[event];
-
-  if (!listeners) { return; }
-
-  for (i = 0; i < listeners.length; i++) {
-    listeners[i].apply(self, Array.prototype.slice.call(args, 1));
-  }
-};
+DropinModel.prototype = Object.create(EventEmitter.prototype, {
+  constructor: DropinModel
+});
 
 DropinModel.prototype.addPaymentMethod = function (paymentMethod) {
   this._paymentMethods.push(paymentMethod);
