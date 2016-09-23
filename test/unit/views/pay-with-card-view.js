@@ -3,6 +3,7 @@
 var BaseView = require('../../../src/views/base-view');
 var classlist = require('../../../src/lib/classlist');
 var DropinModel = require('../../../src/dropin-model');
+var errors = require('../../../src/errors');
 var fake = require('../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var mainHTML = require('../../../src/html/main.html');
@@ -53,7 +54,8 @@ describe('PayWithCardView', function () {
             request: this.sandbox.spy()
           }
         },
-        tokenize: PayWithCardView.prototype.tokenize,
+        showAlert: PayWithCardView.prototype.showAlert,
+        tokenize: function () {},
         _onFocusEvent: PayWithCardView.prototype._onFocusEvent,
         _onBlurEvent: function () {},
         _onCardTypeChangeEvent: function () {}
@@ -126,15 +128,6 @@ describe('PayWithCardView', function () {
       expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
     });
 
-    it('console errors with a Hosted Fields create error', function () {
-      hostedFields.create.yields(new Error('create failed'));
-      this.sandbox.stub(console, 'error');
-
-      PayWithCardView.prototype._initialize.call(this.context);
-
-      expect(console.error).to.be.calledWith(new Error('create failed'));
-    });
-
     it('creates Hosted Fields with number and expiration date', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
@@ -182,6 +175,21 @@ describe('PayWithCardView', function () {
       PayWithCardView.prototype._initialize.call(this.context);
 
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
+    });
+
+    it('shows an error when Hosted Fields creation fails', function () {
+      var fakeError = {
+        code: 'A_REAL_ERROR_CODE'
+      };
+      var alert = this.context.element.querySelector('.braintree-dropin__alert');
+
+      hostedFields.create.restore();
+      this.sandbox.stub(hostedFields, 'create').yields(fakeError, null);
+
+      PayWithCardView.prototype._initialize.call(this.context);
+
+      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(alert.textContent).to.equal(errors.GENERIC_CARD_VIEW);
     });
 
     it('shows supported card icons', function () {
@@ -552,13 +560,15 @@ describe('PayWithCardView', function () {
       this.model = new DropinModel();
 
       this.context = {
+        alert: this.element.querySelector('.braintree-dropin__alert'),
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
         model: this.model,
         options: {
           client: {
             getConfiguration: fake.configuration
           }
-        }
+        },
+        showAlert: PayWithCardView.prototype.showAlert
       };
     });
 
@@ -580,7 +590,21 @@ describe('PayWithCardView', function () {
       expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('console errors if card type is not supported', function () {
+    it('shows an error when Hosted Fields tokenization returns an error', function () {
+      var fakeError = {
+        code: 'A_REAL_ERROR_CODE'
+      };
+      var alert = this.element.querySelector('.braintree-dropin__alert');
+
+      this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(alert.textContent).to.equal(errors.GENERIC_CARD_VIEW);
+    });
+
+    it('shows unsupported card error when attempting to use an unsupported card', function () {
       this.context.options.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
@@ -591,11 +615,10 @@ describe('PayWithCardView', function () {
         };
       };
 
-      this.sandbox.stub(console, 'error');
-
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(console.error).to.have.been.calledWith(new Error('Card type is unsupported.'));
+      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(this.context.alert.textContent).to.equal(errors.UNSUPPORTED_CARD_TYPE);
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
@@ -614,16 +637,6 @@ describe('PayWithCardView', function () {
       expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('cvv');
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
-    });
-
-    it('console errors when tokenization fails', function () {
-      this.context.hostedFieldsInstance.tokenize.yields(new Error('foo'));
-
-      this.sandbox.stub(console, 'error');
-
-      PayWithCardView.prototype.tokenize.call(this.context);
-
-      expect(console.error).to.have.been.called;
     });
 
     it('adds a new payment method when tokenize is successful', function () {

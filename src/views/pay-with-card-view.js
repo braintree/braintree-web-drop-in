@@ -4,6 +4,7 @@ var BaseView = require('./base-view');
 var cardIconHTML = require('../html/card-icons.html');
 var cardTypes = require('../constants').supportedCardTypes;
 var classlist = require('../lib/classlist');
+var errors = require('../errors');
 var hideUnsupportedCardIcons = require('../lib/hide-unsupported-card-icons');
 var hostedFields = require('braintree-web/hosted-fields');
 
@@ -70,6 +71,7 @@ PayWithCardView.prototype._initialize = function () {
   cardIcons.innerHTML = cardIconHTML;
   hideUnsupportedCardIcons(this.element, supportedCardTypes);
 
+  this.alert = this.getElementById('card-view-alert');
   this.cardNumberIcon = this.getElementById('card-number-icon');
   this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
   this.cvvIcon = this.getElementById('cvv-icon');
@@ -89,7 +91,7 @@ PayWithCardView.prototype._initialize = function () {
 
   hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
     if (err) {
-      console.error(err);
+      this.showAlert(err.code);
       return;
     }
 
@@ -115,14 +117,14 @@ PayWithCardView.prototype.tokenize = function () {
   var cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
 
   if (!cardTypeSupported) {
-    console.error(new Error('Card type is unsupported.'));
+    this.showAlert('UNSUPPORTED_CARD_TYPE');
     return;
   }
 
   if (formValid) {
     this.hostedFieldsInstance.tokenize({vault: true}, function (err, payload) {
       if (err) {
-        console.error(err);
+        this.showAlert(err.code);
         return;
       }
 
@@ -135,12 +137,19 @@ PayWithCardView.prototype.tokenize = function () {
   }
 };
 
-PayWithCardView.prototype._generateFieldSelector = function (field) {
-  return '#braintree--dropin__' + this.mainView.componentId + ' .braintree-dropin__form-' + field;
+PayWithCardView.prototype.showAlert = function (errorCode) {
+  var errorMessage = errors[errorCode] || errors.GENERIC_CARD_VIEW;
+
+  classlist.remove(this.alert, 'braintree-dropin__display--none');
+  this.alert.textContent = errorMessage;
 };
 
 PayWithCardView.prototype.teardown = function (callback) {
   this.hostedFieldsInstance.teardown(callback);
+};
+
+PayWithCardView.prototype._generateFieldSelector = function (field) {
+  return '#braintree--dropin__' + this.mainView.componentId + ' .braintree-dropin__form-' + field;
 };
 
 PayWithCardView.prototype._onFocusEvent = function (event) {
