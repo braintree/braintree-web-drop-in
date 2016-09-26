@@ -687,6 +687,20 @@ describe('PayWithCardView', function () {
       expect(alert.textContent).to.equal(errors.GENERIC_CARD_VIEW);
     });
 
+    it('shows an error when Hosted Fields returns a tokenization failure error', function () {
+      var fakeError = {
+        code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
+      };
+      var alert = this.element.querySelector('.braintree-dropin__alert');
+
+      this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(alert.textContent).to.equal(errors.HOSTED_FIELDS_FAILED_TOKENIZATION);
+    });
+
     it('hides previous errors', function () {
       var alert = this.element.querySelector('.braintree-dropin__alert');
 
