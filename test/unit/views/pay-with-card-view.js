@@ -56,9 +56,11 @@ describe('PayWithCardView', function () {
         },
         showAlert: PayWithCardView.prototype.showAlert,
         tokenize: function () {},
-        _onFocusEvent: PayWithCardView.prototype._onFocusEvent,
         _onBlurEvent: function () {},
-        _onCardTypeChangeEvent: function () {}
+        _onCardTypeChangeEvent: function () {},
+        _onFocusEvent: function () {},
+        _onNotEmptyEvent: function () {},
+        _onValidityChangeEvent: function () {}
       };
       this.hostedFieldsInstance = {
         on: this.sandbox.spy()
@@ -223,6 +225,8 @@ describe('PayWithCardView', function () {
         element: this.element,
         _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
         getElementById: BaseView.prototype.getElementById,
+        hideInlineError: PayWithCardView.prototype.hideInlineError,
+        showInlineError: PayWithCardView.prototype.showInlineError,
         mainView: {
           componentId: 'component-id'
         },
@@ -243,9 +247,11 @@ describe('PayWithCardView', function () {
           }
         },
         tokenize: PayWithCardView.prototype.tokenize,
-        _onFocusEvent: function () {},
         _onBlurEvent: function () {},
-        _onCardTypeChangeEvent: function () {}
+        _onCardTypeChangeEvent: function () {},
+        _onFocusEvent: function () {},
+        _onNotEmptyEvent: function () {},
+        _onValidityChangeEvent: function () {}
       };
     });
 
@@ -538,6 +544,78 @@ describe('PayWithCardView', function () {
         expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '•••');
       });
     });
+
+    describe('onValidityChangeEvent', function () {
+      beforeEach(function () {
+        this.context._onValidityChangeEvent = PayWithCardView.prototype._onValidityChangeEvent;
+      });
+
+      it('shows an inline error if a field is invalid', function () {
+        var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isValid: false,
+              isPotentiallyValid: false
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
+        expect(numberInlineError.textContent).to.equal(errors.FIELD_INVALID.number);
+      });
+
+      it('hides the inline error if a field is potentially valid', function () {
+        var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.true;
+        expect(numberInlineError.textContent).to.equal('');
+      });
+    });
+
+    describe('onNotEmptyEvent', function () {
+      beforeEach(function () {
+        this.context._onNotEmptyEvent = PayWithCardView.prototype._onNotEmptyEvent;
+      });
+
+      it('hides inline errors', function () {
+        var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+        var fakeEvent = {emittedBy: 'number'};
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+
+        classlist.remove(numberInlineError, 'braintree-dropin__display--none');
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        PayWithCardView.prototype._initialize.call(this.context);
+
+        expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.true;
+        expect(numberInlineError.textContent).to.equal('');
+      });
+    });
   });
 
   describe('tokenize', function () {
@@ -561,14 +639,18 @@ describe('PayWithCardView', function () {
 
       this.context = {
         alert: this.element.querySelector('.braintree-dropin__alert'),
+        element: this.element,
+        getElementById: BaseView.prototype.getElementById,
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
+        inlineErrors: {},
         model: this.model,
         options: {
           client: {
             getConfiguration: fake.configuration
           }
         },
-        showAlert: PayWithCardView.prototype.showAlert
+        showAlert: PayWithCardView.prototype.showAlert,
+        showInlineError: PayWithCardView.prototype.showInlineError
       };
     });
 
@@ -604,7 +686,9 @@ describe('PayWithCardView', function () {
       expect(alert.textContent).to.equal(errors.GENERIC_CARD_VIEW);
     });
 
-    it('shows unsupported card error when attempting to use an unsupported card', function () {
+    it('shows unsupported card inline error when attempting to use an unsupported card', function () {
+      var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+
       this.context.options.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
@@ -617,8 +701,53 @@ describe('PayWithCardView', function () {
 
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(this.context.alert.textContent).to.equal(errors.UNSUPPORTED_CARD_TYPE);
+      expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(numberInlineError.textContent).to.equal(errors.UNSUPPORTED_CARD_TYPE);
+      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+    });
+
+    it('shows empty inline error when attempting to sumbit an empty field', function () {
+      var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isEmpty: true,
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(numberInlineError.textContent).to.equal(errors.FIELD_EMPTY.number);
+      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+    });
+
+    it('shows invalid inline error when attempting to sumbit an invalid field', function () {
+      var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(numberInlineError.textContent).to.equal(errors.FIELD_INVALID.number);
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
