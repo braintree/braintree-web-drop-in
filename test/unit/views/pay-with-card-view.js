@@ -641,6 +641,7 @@ describe('PayWithCardView', function () {
         alert: this.element.querySelector('.braintree-dropin__alert'),
         element: this.element,
         getElementById: BaseView.prototype.getElementById,
+        hideAlert: PayWithCardView.prototype.hideAlert,
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
         inlineErrors: {},
         model: this.model,
@@ -684,6 +685,16 @@ describe('PayWithCardView', function () {
 
       expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
       expect(alert.textContent).to.equal(errors.GENERIC_CARD_VIEW);
+    });
+
+    it('hides previous errors', function () {
+      var alert = this.element.querySelector('.braintree-dropin__alert');
+
+      alert.classList.remove('braintree-dropin__display--none');
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.true;
     });
 
     it('shows unsupported card inline error when attempting to use an unsupported card', function () {

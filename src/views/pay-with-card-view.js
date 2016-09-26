@@ -117,6 +117,8 @@ PayWithCardView.prototype.tokenize = function () {
   var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
   var cardType = cardTypes[state.cards[0].type];
 
+  this.hideAlert();
+
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
 
@@ -157,6 +159,10 @@ PayWithCardView.prototype.showAlert = function (errorCode) {
 
   classlist.remove(this.alert, 'braintree-dropin__display--none');
   this.alert.textContent = errorMessage;
+};
+
+PayWithCardView.prototype.hideAlert = function () {
+  classlist.add(this.alert, 'braintree-dropin__display--none');
 };
 
 PayWithCardView.prototype.showInlineError = function (field, errorMessage) {
