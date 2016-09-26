@@ -701,6 +701,20 @@ describe('PayWithCardView', function () {
       expect(alert.textContent).to.equal(errors.HOSTED_FIELDS_FAILED_TOKENIZATION);
     });
 
+    it('shows an error when Hosted Fields returns a fields invalid error', function () {
+      var fakeError = {
+        code: 'HOSTED_FIELDS_FIELDS_INVALID'
+      };
+      var alert = this.element.querySelector('.braintree-dropin__alert');
+
+      this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(alert.textContent).to.equal(errors.HOSTED_FIELDS_FIELDS_INVALID);
+    });
+
     it('hides previous errors', function () {
       var alert = this.element.querySelector('.braintree-dropin__alert');
 

@@ -15,5 +15,6 @@ module.exports = {
   },
   GENERIC_CARD_VIEW: 'Something went wrong on our end. Please try again.',
   HOSTED_FIELDS_FAILED_TOKENIZATION: 'Please check your information and try again.',
+  HOSTED_FIELDS_FIELDS_INVALID: 'Please check your information and try again.',
   UNSUPPORTED_CARD_TYPE: 'This card type is not supported. Please try another card.'
 };
