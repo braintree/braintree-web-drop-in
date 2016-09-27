@@ -6,6 +6,8 @@ This version of Drop-in is still in development, but will be available in the ne
 
 ## Usage
 
+Using `getActivePaymentMethod()`
+
 ```js
 braintree.dropin.create({
   authorization: 'CLIENT_AUTHORIZATION',
@@ -15,8 +17,34 @@ braintree.dropin.create({
   }
 }, function (err, dropinInstance) {
   submitButton.addEventListener('click', function () {
-    dropinInstance.requestPaymentMethod(function (err, data) {
-      // Submit data.nonce to your server
+    var paymentMethod = dropinInstance.getActivePaymentMethod();
+
+    if (paymentMethod) {
+      // Submit paymentMethod.nonce to your server
+    }
+  }
+});
+```
+
+Subscribing to `paymentMethodAvailable` events:
+
+```js
+braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  selector: '#dropin-container',
+  paypal: {
+    flow: 'vault'
+  }
+}, function (err, dropinInstance) {
+  var activePaymentMethod = dropinInstance.getActivePaymentMethod();
+
+  dropinInstance.on('paymentMethodAvailable', function (paymentMethod) {
+    activePaymentMethod = paymentMethod;
+  });
+
+  submitButton.addEventListener('click', function () {
+    if (activePaymentMethod) {
+      // Submit activePaymentMethod.nonce to your server
     }
   }
 });
