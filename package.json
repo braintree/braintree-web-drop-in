@@ -19,6 +19,7 @@
     "eslint": "2.7.0",
     "eslint-config-braintree": "1.0.2",
     "gulp": "3.9.1",
+    "gulp-clean-css": "2.0.13",
     "gulp-rename": "1.2.2",
     "gulp-replace": "0.5.4",
     "gulp-sass": "2.3.2",
