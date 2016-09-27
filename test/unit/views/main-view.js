@@ -171,6 +171,7 @@ describe('MainView', function () {
 
       this.context = {
         dropinWrapper: document.createElement('div'),
+        errorState: new DropinErrorState(),
         paymentMethodPickerView: this.fakePaymentMethodPickerView,
         views: {
           id1: new FakeView('id1'),
@@ -196,6 +197,14 @@ describe('MainView', function () {
       MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
 
       expect(this.fakePaymentMethodPickerView.hideCheckMarks).to.not.have.been.called;
+    });
+
+    it('clears any errors', function () {
+      this.sandbox.stub(DropinErrorState.prototype, 'clear');
+
+      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
+
+      expect(DropinErrorState.prototype.clear).to.have.been.calledOnce;
     });
   });
 
@@ -240,7 +249,7 @@ describe('MainView', function () {
       this.context.errorState._emit('errorOccurred', 'UNKNOWN_CODE_FOO');
 
       expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(this.context.alert.textContent).to.equal('Something went wrong on our end. Please try again.');
+      expect(this.context.alert.textContent).to.equal('Something went wrong on our end.');
     });
 
     it('hides the error message alert when errorCleared is emitted', function () {

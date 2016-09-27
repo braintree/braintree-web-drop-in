@@ -108,6 +108,10 @@ describe('PayPalPickerView', function () {
       this.context = {
         _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
+        errorState: {
+          report: this.sandbox.stub(),
+          clear: this.sandbox.stub()
+        },
         getElementById: BaseView.prototype.getElementById,
         options: {
           paypal: {}
@@ -151,7 +155,6 @@ describe('PayPalPickerView', function () {
       };
 
       this.sandbox.spy(DropinModel.prototype, 'addPaymentMethod');
-      this.sandbox.stub(console, 'error');
       this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
 
       PayPalPickerView.prototype._initialize.call(this.context);
@@ -161,9 +164,48 @@ describe('PayPalPickerView', function () {
       expect(DropinModel.prototype.addPaymentMethod).to.not.have.been.called;
     });
 
-    it('console errors when tokenize fails', function () {
+    it('reports an error to DropinErrorState when PayPal tokenization returns an error', function () {
+      var fakeError = {
+        code: 'A_REAL_ERROR_CODE'
+      };
       var stubPaypalInstance = {
-        tokenize: this.sandbox.stub().callsArgWith(1, new Error('bad things'), null)
+        tokenize: this.sandbox.stub().callsArgWith(1, fakeError, null)
+      };
+
+      this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+
+      PayPalPickerView.prototype._initialize.call(this.context);
+
+      this.context.element.click();
+
+      expect(this.context.errorState.report).to.be.calledWith('A_REAL_ERROR_CODE');
+    });
+
+    it('does not report an error to DropinErrorState when PayPal tokenization returns a PAYPAL_POPUP_CLOSED error', function () {
+      var fakeError = {
+        code: 'PAYPAL_POPUP_CLOSED'
+      };
+      var stubPaypalInstance = {
+        tokenize: this.sandbox.stub().callsArgWith(1, fakeError, null)
+      };
+
+      this.sandbox.spy(DropinModel.prototype, 'addPaymentMethod');
+      this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+
+      PayPalPickerView.prototype._initialize.call(this.context);
+
+      this.context.element.click();
+
+      expect(this.context.errorState.report).to.not.have.been.called;
+      expect(DropinModel.prototype.addPaymentMethod).to.not.have.been.called;
+    });
+
+    it('console errors PAYPAL_INVALID_PAYMENT_OPTION errors', function () {
+      var fakeError = {
+        code: 'PAYPAL_INVALID_PAYMENT_OPTION'
+      };
+      var stubPaypalInstance = {
+        tokenize: this.sandbox.stub().callsArgWith(1, fakeError, null)
       };
 
       this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
@@ -173,7 +215,25 @@ describe('PayPalPickerView', function () {
 
       this.context.element.click();
 
-      expect(console.error).to.have.been.calledWith(new Error('bad things'));
+      expect(console.error).to.have.been.calledWith(fakeError);
+    });
+
+    it('console errors PAYPAL_INVALID_PAYMENT_OPTION errors', function () {
+      var fakeError = {
+        code: 'PAYPAL_INVALID_PAYMENT_OPTION'
+      };
+      var stubPaypalInstance = {
+        tokenize: this.sandbox.stub().callsArgWith(1, fakeError, null)
+      };
+
+      this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+      this.sandbox.stub(console, 'error');
+
+      PayPalPickerView.prototype._initialize.call(this.context);
+
+      this.context.element.click();
+
+      expect(console.error).to.have.been.calledWith(fakeError);
     });
   });
 

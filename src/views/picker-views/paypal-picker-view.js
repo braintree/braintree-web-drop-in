@@ -37,7 +37,12 @@ PayPalPickerView.prototype._initialize = function () {
       event.preventDefault();
       this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
         if (tokenizeErr) {
-          console.error(tokenizeErr);
+          if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
+            this.errorState.report(tokenizeErr.code);
+            if (tokenizeErr.code === 'PAYPAL_INVALID_PAYMENT_OPTION' || tokenizeErr.code === 'PAYPAL_FLOW_OPTION_REQUIRED') {
+              console.error(tokenizeErr);
+            }
+          }
           return;
         }
 

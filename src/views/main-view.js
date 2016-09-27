@@ -73,6 +73,7 @@ MainView.prototype.addView = function (view) {
 
 MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = 'braintree-dropin__' + id;
+  this.errorState.clear();
 
   if (id !== 'active-payment-method') {
     this.paymentMethodPickerView.hideCheckMarks();
