@@ -108,7 +108,7 @@ describe('PayPalPickerView', function () {
       this.context = {
         _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
-        errorState: {
+        errorEmitter: {
           report: this.sandbox.stub(),
           clear: this.sandbox.stub()
         },
@@ -164,7 +164,7 @@ describe('PayPalPickerView', function () {
       expect(DropinModel.prototype.addPaymentMethod).to.not.have.been.called;
     });
 
-    it('reports an error to DropinErrorState when PayPal tokenization returns an error', function () {
+    it('reports an error to DropinErrorEmitter when PayPal tokenization returns an error', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
@@ -178,10 +178,10 @@ describe('PayPalPickerView', function () {
 
       this.context.element.click();
 
-      expect(this.context.errorState.report).to.be.calledWith('A_REAL_ERROR_CODE');
+      expect(this.context.errorEmitter.report).to.be.calledWith('A_REAL_ERROR_CODE');
     });
 
-    it('does not report an error to DropinErrorState when PayPal tokenization returns a PAYPAL_POPUP_CLOSED error', function () {
+    it('does not report an error to DropinErrorEmitter when PayPal tokenization returns a PAYPAL_POPUP_CLOSED error', function () {
       var fakeError = {
         code: 'PAYPAL_POPUP_CLOSED'
       };
@@ -196,7 +196,7 @@ describe('PayPalPickerView', function () {
 
       this.context.element.click();
 
-      expect(this.context.errorState.report).to.not.have.been.called;
+      expect(this.context.errorEmitter.report).to.not.have.been.called;
       expect(DropinModel.prototype.addPaymentMethod).to.not.have.been.called;
     });
 

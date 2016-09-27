@@ -2,7 +2,7 @@
 
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
-var DropinErrorState = require('../../../src/dropin-error-state');
+var DropinErrorEmitter = require('../../../src/dropin-error-emitter');
 var DropinModel = require('../../../src/dropin-model');
 var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
@@ -67,10 +67,10 @@ describe('MainView', function () {
       expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PaymentMethodPickerView));
     });
 
-    it('creates a DropinErrorState', function () {
+    it('creates a DropinErrorEmitter', function () {
       MainView.prototype._initialize.call(this.context);
 
-      expect(this.context.errorState).to.be.an.instanceof(DropinErrorState);
+      expect(this.context.errorEmitter).to.be.an.instanceof(DropinErrorEmitter);
     });
 
     it('adds a listener for changeActivePaymentMethod', function () {
@@ -171,7 +171,7 @@ describe('MainView', function () {
 
       this.context = {
         dropinWrapper: document.createElement('div'),
-        errorState: new DropinErrorState(),
+        errorEmitter: new DropinErrorEmitter(),
         paymentMethodPickerView: this.fakePaymentMethodPickerView,
         views: {
           id1: new FakeView('id1'),
@@ -200,11 +200,11 @@ describe('MainView', function () {
     });
 
     it('clears any errors', function () {
-      this.sandbox.stub(DropinErrorState.prototype, 'clear');
+      this.sandbox.stub(DropinErrorEmitter.prototype, 'clear');
 
       MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
 
-      expect(DropinErrorState.prototype.clear).to.have.been.calledOnce;
+      expect(DropinErrorEmitter.prototype.clear).to.have.been.calledOnce;
     });
   });
 
@@ -239,21 +239,21 @@ describe('MainView', function () {
     });
 
     it('shows the error message alert when errorOccurred is emitted', function () {
-      this.context.errorState._emit('errorOccurred', 'HOSTED_FIELDS_FAILED_TOKENIZATION');
+      this.context.errorEmitter._emit('errorOccurred', 'HOSTED_FIELDS_FAILED_TOKENIZATION');
 
       expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
       expect(this.context.alert.textContent).to.equal('Please check your information and try again.');
     });
 
     it('shows a fallback error message when errorOccurred is emitted with an unknown error code', function () {
-      this.context.errorState._emit('errorOccurred', 'UNKNOWN_CODE_FOO');
+      this.context.errorEmitter._emit('errorOccurred', 'UNKNOWN_CODE_FOO');
 
       expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
       expect(this.context.alert.textContent).to.equal('Something went wrong on our end.');
     });
 
     it('hides the error message alert when errorCleared is emitted', function () {
-      this.context.errorState._emit('errorCleared');
+      this.context.errorEmitter._emit('errorCleared');
 
       expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.true;
     });
