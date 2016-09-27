@@ -2,6 +2,8 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
+var DropinErrorState = require('../dropin-error-state');
+var errors = require('../errors');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
 
@@ -18,8 +20,14 @@ MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
   var paymentMethods = this.model.getPaymentMethods();
-  var payWithCardView = new PayWithCardView({
+  var payWithCardView;
+
+  this.errorState = new DropinErrorState();
+  this.alert = this.getElementById('alert');
+
+  payWithCardView = new PayWithCardView({
     element: this.getElementById(PayWithCardView.ID),
+    errorState: this.errorState,
     mainView: this,
     model: this.model,
     options: this.options
@@ -27,6 +35,7 @@ MainView.prototype._initialize = function () {
 
   this.paymentMethodPickerView = new PaymentMethodPickerView({
     element: this.getElementById(PaymentMethodPickerView.ID),
+    errorState: this.errorState,
     model: this.model,
     mainView: this,
     options: this.options
@@ -38,6 +47,14 @@ MainView.prototype._initialize = function () {
 
   this.model.on('changeActivePaymentMethod', function () {
     this.setActiveView('active-payment-method');
+  }.bind(this));
+
+  this.errorState.on('errorOccurred', function (errorCode) {
+    this.showAlert(errorCode);
+  }.bind(this));
+
+  this.errorState.on('errorCleared', function () {
+    this.hideAlert();
   }.bind(this));
 
   if (paymentMethods.length > 0) {
@@ -60,6 +77,17 @@ MainView.prototype.setActiveView = function (id) {
   if (id !== 'active-payment-method') {
     this.paymentMethodPickerView.hideCheckMarks();
   }
+};
+
+MainView.prototype.showAlert = function (errorCode) {
+  var errorMessage = errors[errorCode] || errors.GENERIC;
+
+  classlist.remove(this.alert, 'braintree-dropin__display--none');
+  this.alert.textContent = errorMessage;
+};
+
+MainView.prototype.hideAlert = function () {
+  classlist.add(this.alert, 'braintree-dropin__display--none');
 };
 
 MainView.prototype.teardown = function (callback) {

@@ -2,6 +2,7 @@
 
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
+var DropinErrorState = require('../../../src/dropin-error-state');
 var DropinModel = require('../../../src/dropin-model');
 var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
@@ -21,7 +22,7 @@ describe('MainView', function () {
     });
 
     it('inherits from BaseView', function () {
-      expect(new MainView()).to.be.an.instanceOf(BaseView);
+      expect(new MainView()).to.be.an.instanceof(BaseView);
     });
   });
 
@@ -64,6 +65,12 @@ describe('MainView', function () {
       MainView.prototype._initialize.call(this.context);
 
       expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PaymentMethodPickerView));
+    });
+
+    it('creates a DropinErrorState', function () {
+      MainView.prototype._initialize.call(this.context);
+
+      expect(this.context.errorState).to.be.an.instanceof(DropinErrorState);
     });
 
     it('adds a listener for changeActivePaymentMethod', function () {
@@ -189,6 +196,57 @@ describe('MainView', function () {
       MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
 
       expect(this.fakePaymentMethodPickerView.hideCheckMarks).to.not.have.been.called;
+    });
+  });
+
+  describe('dropinErrorState events', function () {
+    beforeEach(function () {
+      var dropinWrapper = document.createElement('div');
+
+      dropinWrapper.innerHTML = templateHTML;
+
+      this.context = {
+        addView: this.sandbox.stub(),
+        hideAlert: MainView.prototype.hideAlert,
+        dropinWrapper: dropinWrapper,
+        element: dropinWrapper,
+        getElementById: BaseView.prototype.getElementById,
+        model: new DropinModel(),
+        options: {
+          client: {
+            getConfiguration: fake.configuration
+          }
+        },
+        setActiveView: this.sandbox.stub(),
+        showAlert: MainView.prototype.showAlert
+      };
+
+      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
+        this.views = [{}];
+      });
+      this.sandbox.stub(PayWithCardView.prototype, '_initialize');
+
+      MainView.prototype._initialize.call(this.context);
+    });
+
+    it('shows the error message alert when errorOccurred is emitted', function () {
+      this.context.errorState._emit('errorOccurred', 'HOSTED_FIELDS_FAILED_TOKENIZATION');
+
+      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(this.context.alert.textContent).to.equal('Please check your information and try again.');
+    });
+
+    it('shows a fallback error message when errorOccurred is emitted with an unknown error code', function () {
+      this.context.errorState._emit('errorOccurred', 'UNKNOWN_CODE_FOO');
+
+      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(this.context.alert.textContent).to.equal('Something went wrong on our end. Please try again.');
+    });
+
+    it('hides the error message alert when errorCleared is emitted', function () {
+      this.context.errorState._emit('errorCleared');
+
+      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.true;
     });
   });
 

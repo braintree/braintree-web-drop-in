@@ -92,7 +92,7 @@ PayWithCardView.prototype._initialize = function () {
 
   hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
     if (err) {
-      this.showAlert(err.code);
+      this.errorState.report(err.code);
       return;
     }
 
@@ -117,7 +117,7 @@ PayWithCardView.prototype.tokenize = function () {
   var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
   var cardType = cardTypes[state.cards[0].type];
 
-  this.hideAlert();
+  this.errorState.clear();
 
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
@@ -141,7 +141,7 @@ PayWithCardView.prototype.tokenize = function () {
   if (formValid) {
     this.hostedFieldsInstance.tokenize({vault: true}, function (err, payload) {
       if (err) {
-        this.showAlert(err.code);
+        this.errorState.report(err.code);
         return;
       }
 
@@ -152,17 +152,6 @@ PayWithCardView.prototype.tokenize = function () {
       this.model.addPaymentMethod(payload);
     }.bind(this));
   }
-};
-
-PayWithCardView.prototype.showAlert = function (errorCode) {
-  var errorMessage = errors[errorCode] || errors.GENERIC_CARD_VIEW;
-
-  classlist.remove(this.alert, 'braintree-dropin__display--none');
-  this.alert.textContent = errorMessage;
-};
-
-PayWithCardView.prototype.hideAlert = function () {
-  classlist.add(this.alert, 'braintree-dropin__display--none');
 };
 
 PayWithCardView.prototype.showInlineError = function (field, errorMessage) {

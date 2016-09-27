@@ -42,6 +42,9 @@ describe('PayWithCardView', function () {
     beforeEach(function () {
       this.context = {
         element: this.element,
+        errorState: {
+          report: this.sandbox.stub()
+        },
         _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
         getElementById: BaseView.prototype.getElementById,
         mainView: {
@@ -179,19 +182,17 @@ describe('PayWithCardView', function () {
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
     });
 
-    it('shows an error when Hosted Fields creation fails', function () {
+    it('reports an error to DropinErrorState when Hosted Fields creation fails', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
-      var alert = this.context.element.querySelector('.braintree-dropin__alert');
 
       hostedFields.create.restore();
       this.sandbox.stub(hostedFields, 'create').yields(fakeError, null);
 
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(alert.textContent).to.equal(errors.GENERIC_CARD_VIEW);
+      expect(this.context.errorState.report).to.be.calledWith('A_REAL_ERROR_CODE');
     });
 
     it('shows supported card icons', function () {
@@ -640,6 +641,10 @@ describe('PayWithCardView', function () {
       this.context = {
         alert: this.element.querySelector('.braintree-dropin__alert'),
         element: this.element,
+        errorState: {
+          report: this.sandbox.stub(),
+          clear: this.sandbox.stub()
+        },
         getElementById: BaseView.prototype.getElementById,
         hideAlert: PayWithCardView.prototype.hideAlert,
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
@@ -673,56 +678,46 @@ describe('PayWithCardView', function () {
       expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('shows an error when Hosted Fields tokenization returns an error', function () {
+    it('reports an error to DropinErrorState when Hosted Fields tokenization returns an error', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
-      var alert = this.element.querySelector('.braintree-dropin__alert');
 
       this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
 
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(alert.textContent).to.equal(errors.GENERIC_CARD_VIEW);
+      expect(this.context.errorState.report).to.be.calledWith('A_REAL_ERROR_CODE');
     });
 
-    it('shows an error when Hosted Fields returns a tokenization failure error', function () {
+    it('reports an error to DropinErrorState when Hosted Fields returns a tokenization failure error', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
       };
-      var alert = this.element.querySelector('.braintree-dropin__alert');
 
       this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
 
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(alert.textContent).to.equal(errors.HOSTED_FIELDS_FAILED_TOKENIZATION);
+      expect(this.context.errorState.report).to.be.calledWith('HOSTED_FIELDS_FAILED_TOKENIZATION');
     });
 
-    it('shows an error when Hosted Fields returns a fields invalid error', function () {
+    it('reports an error to DropinErrorState when Hosted Fields returns a fields invalid error', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FIELDS_INVALID'
       };
-      var alert = this.element.querySelector('.braintree-dropin__alert');
 
       this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
 
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(alert.textContent).to.equal(errors.HOSTED_FIELDS_FIELDS_INVALID);
+      expect(this.context.errorState.report).to.be.calledWith('HOSTED_FIELDS_FIELDS_INVALID');
     });
 
-    it('hides previous errors', function () {
-      var alert = this.element.querySelector('.braintree-dropin__alert');
-
-      alert.classList.remove('braintree-dropin__display--none');
-
+    it('clears previous errors', function () {
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(alert.classList.contains('braintree-dropin__display--none')).to.be.true;
+      expect(this.context.errorState.clear).to.be.called;
     });
 
     it('shows unsupported card inline error when attempting to use an unsupported card', function () {

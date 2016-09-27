@@ -13,7 +13,7 @@ module.exports = {
     number: 'This card number is not valid.',
     postalCode: 'This postal code is not valid.'
   },
-  GENERIC_CARD_VIEW: 'Something went wrong on our end. Please try again.',
+  GENERIC: 'Something went wrong on our end. Please try again.',
   HOSTED_FIELDS_FAILED_TOKENIZATION: 'Please check your information and try again.',
   HOSTED_FIELDS_FIELDS_INVALID: 'Please check your information and try again.',
   UNSUPPORTED_CARD_TYPE: 'This card type is not supported. Please try another card.'
