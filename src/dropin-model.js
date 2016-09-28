@@ -3,7 +3,6 @@
 var EventEmitter = require('./lib/event-emitter');
 
 function DropinModel(options) {
-  this._listeners = {};
   this._paymentMethods = options && options.paymentMethods ? options.paymentMethods : [];
   this._activePaymentMethod = this._paymentMethods[0];
   this.dependenciesInitializing = 0;
@@ -43,6 +42,14 @@ DropinModel.prototype.asyncDependencyReady = function () {
   if (this.dependenciesInitializing === 0) {
     this._emit('asyncDependenciesReady');
   }
+};
+
+DropinModel.prototype.reportError = function (error) {
+  this._emit('errorOccurred', error);
+};
+
+DropinModel.prototype.clearError = function () {
+  this._emit('errorCleared');
 };
 
 module.exports = DropinModel;

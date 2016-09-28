@@ -21,7 +21,7 @@ describe('MainView', function () {
     });
 
     it('inherits from BaseView', function () {
-      expect(new MainView()).to.be.an.instanceOf(BaseView);
+      expect(new MainView()).to.be.an.instanceof(BaseView);
     });
   });
 
@@ -164,6 +164,7 @@ describe('MainView', function () {
 
       this.context = {
         dropinWrapper: document.createElement('div'),
+        model: new DropinModel(),
         paymentMethodPickerView: this.fakePaymentMethodPickerView,
         views: {
           id1: new FakeView('id1'),
@@ -189,6 +190,121 @@ describe('MainView', function () {
       MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
 
       expect(this.fakePaymentMethodPickerView.hideCheckMarks).to.not.have.been.called;
+    });
+
+    it('clears any errors', function () {
+      this.sandbox.stub(DropinModel.prototype, 'clearError');
+
+      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
+
+      expect(DropinModel.prototype.clearError).to.have.been.calledOnce;
+    });
+  });
+
+  describe('showAlert', function () {
+    beforeEach(function () {
+      this.context = {
+        alert: document.createElement('div')
+      };
+    });
+
+    it('shows the alert', function () {
+      MainView.prototype.showAlert.call(this.context, {});
+
+      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+    });
+
+    it('sets the alert to the expected message for the error code', function () {
+      var fakeError = {
+        code: 'HOSTED_FIELDS_FAILED_TOKENIZATION',
+        message: 'Some text we do not use'
+      };
+
+      MainView.prototype.showAlert.call(this.context, fakeError);
+
+      expect(this.context.alert.textContent).to.equal('Please check your information and try again.');
+    });
+
+    it('shows the raw error message when the error has an unknown error code', function () {
+      var fakeError = {
+        code: 'AN_UNKNOWN_ERROR',
+        message: 'Some text we will use because we do not know this error code'
+      };
+
+      MainView.prototype.showAlert.call(this.context, fakeError);
+
+      expect(this.context.alert.textContent).to.equal('Some text we will use because we do not know this error code');
+    });
+
+    it('shows a fallback error message when the error code is unknown and the error is missing a message', function () {
+      var fakeError = {
+        code: 'AN_UNKNOWN_ERROR'
+      };
+
+      MainView.prototype.showAlert.call(this.context, fakeError);
+
+      expect(this.context.alert.textContent).to.equal('Something went wrong on our end.');
+    });
+  });
+
+  describe('hideAlert', function () {
+    beforeEach(function () {
+      this.context = {
+        alert: document.createElement('div')
+      };
+    });
+
+    it('hides the alert', function () {
+      MainView.prototype.hideAlert.call(this.context);
+
+      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.true;
+    });
+  });
+
+  describe('dropinErrorState events', function () {
+    beforeEach(function () {
+      var dropinWrapper = document.createElement('div');
+
+      dropinWrapper.innerHTML = templateHTML;
+
+      this.context = {
+        addView: this.sandbox.stub(),
+        hideAlert: this.sandbox.stub(),
+        dropinWrapper: dropinWrapper,
+        element: dropinWrapper,
+        getElementById: BaseView.prototype.getElementById,
+        model: new DropinModel(),
+        options: {
+          client: {
+            getConfiguration: fake.configuration
+          }
+        },
+        setActiveView: this.sandbox.stub(),
+        showAlert: this.sandbox.stub()
+      };
+
+      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
+        this.views = [{}];
+      });
+      this.sandbox.stub(PayWithCardView.prototype, '_initialize');
+
+      MainView.prototype._initialize.call(this.context);
+    });
+
+    it('calls showAlert when errorOccurred is emitted', function () {
+      var fakeError = {
+        code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
+      };
+
+      this.context.model._emit('errorOccurred', fakeError);
+
+      expect(this.context.showAlert).to.be.calledWith(fakeError);
+    });
+
+    it('calls hideAlert when errorCleared is emitted', function () {
+      this.context.model._emit('errorCleared');
+
+      expect(this.context.hideAlert).to.be.called;
     });
   });
 
