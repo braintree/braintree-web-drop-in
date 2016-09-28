@@ -54,7 +54,6 @@ describe('PayWithCardView', function () {
             request: this.sandbox.spy()
           }
         },
-        showAlert: PayWithCardView.prototype.showAlert,
         tokenize: function () {},
         _onBlurEvent: function () {},
         _onCardTypeChangeEvent: function () {},
@@ -639,7 +638,6 @@ describe('PayWithCardView', function () {
       this.context = {
         element: this.element,
         getElementById: BaseView.prototype.getElementById,
-        hideAlert: PayWithCardView.prototype.hideAlert,
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
         inlineErrors: {},
         model: this.model,
@@ -648,7 +646,6 @@ describe('PayWithCardView', function () {
             getConfiguration: fake.configuration
           }
         },
-        showAlert: PayWithCardView.prototype.showAlert,
         showInlineError: PayWithCardView.prototype.showInlineError
       };
     });

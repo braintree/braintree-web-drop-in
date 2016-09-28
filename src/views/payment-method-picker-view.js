@@ -38,7 +38,6 @@ PaymentMethodPickerView.prototype._initialize = function () {
 
     if (PickerView.isEnabled(this.options)) {
       pickerView = new PickerView({
-        errorEmitter: this.errorEmitter,
         mainView: this.mainView,
         model: this.model,
         options: this.options
