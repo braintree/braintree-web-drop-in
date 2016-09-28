@@ -193,6 +193,60 @@ describe('MainView', function () {
     });
   });
 
+  describe('showLoadingIndicator', function () {
+    it('shows the loading indicator');
+  });
+
+  describe('hideLoadingIndicator', function () {
+    it('hides the loading indicator');
+  });
+
+  describe('DropinModel events', function () {
+    beforeEach(function () {
+      var dropinWrapper = document.createElement('div');
+
+      dropinWrapper.innerHTML = templateHTML;
+
+      this.context = {
+        addView: this.sandbox.stub(),
+        dropinWrapper: dropinWrapper,
+        element: dropinWrapper,
+        getElementById: BaseView.prototype.getElementById,
+        model: new DropinModel(),
+        options: {
+          client: {
+            getConfiguration: fake.configuration
+          }
+        },
+        setActiveView: this.sandbox.stub(),
+        showLoadingIndicator: function () {}
+      };
+
+      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
+        this.views = [{}];
+      });
+      this.sandbox.stub(PayWithCardView.prototype, '_initialize');
+
+      MainView.prototype._initialize.call(this.context);
+    });
+
+    it('calls showLoadingIndicator on loadBegin', function () {
+      this.context.showLoadingIndicator = this.sandbox.stub();
+
+      this.context.model._emit('loadBegin');
+
+      expect(this.context.showLoadingIndicator).to.be.calledOnce;
+    });
+
+    it('calls hideLoadingIndicator on loadEnd', function () {
+      this.context.hideLoadingIndicator = this.sandbox.stub();
+
+      this.context.model._emit('loadEnd');
+
+      expect(this.context.hideLoadingIndicator).to.be.calledOnce;
+    });
+  });
+
   describe('teardown', function () {
     beforeEach(function () {
       this.context = {

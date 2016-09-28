@@ -60,4 +60,12 @@ DropinModel.prototype.asyncDependencyReady = function () {
   }
 };
 
+DropinModel.prototype.beginLoading = function () {
+  this._emit('loadBegin');
+};
+
+DropinModel.prototype.endLoading = function () {
+  this._emit('loadEnd');
+};
+
 module.exports = DropinModel;

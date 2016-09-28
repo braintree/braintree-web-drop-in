@@ -188,6 +188,16 @@
   transition: opacity 500ms ease;
 }
 
+.braintree-dropin__loading-indicator--inactive {
+  transform: scale(0);
+}
+
+.braintree-dropin__loading-container--inactive {
+  z-index: -2;
+  height: 0;
+  opacity: 0;
+}
+
 [data-braintree-id="loading-indicator"] {
   border: solid 2px $black-75;
   border-radius: 50%;

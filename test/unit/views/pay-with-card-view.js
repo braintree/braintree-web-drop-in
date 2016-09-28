@@ -599,6 +599,33 @@ describe('PayWithCardView', function () {
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
+    it('calls beginLoading when form is valid', function () {
+      this.context.model.beginLoading = this.sandbox.stub();
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(this.context.model.beginLoading).to.have.been.calledOnce;
+    });
+
+    it('does not call beginLoading if form is invalid', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: false
+          }
+        }
+      });
+      this.context.model.beginLoading = this.sandbox.stub();
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(this.context.model.beginLoading).to.not.be.called;
+    });
+
     it('calls tokenize', function () {
       PayWithCardView.prototype.tokenize.call(this.context);
 
@@ -614,6 +641,26 @@ describe('PayWithCardView', function () {
       expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('cvv');
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
+    });
+
+    it('calls endLoading after successful tokenization', function () {
+      var stubPayload = {};
+
+      this.sandbox.stub(this.context.model, 'endLoading');
+      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(this.context.model.endLoading).to.have.been.calledOnce;
+    });
+
+    it('calls endLoading after tokenization fails', function () {
+      this.sandbox.stub(this.context.model, 'endLoading');
+      this.context.hostedFieldsInstance.tokenize.yields(new Error('foo'));
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(this.context.model.endLoading).to.have.been.calledOnce;
     });
 
     it('console errors when tokenization fails', function () {
