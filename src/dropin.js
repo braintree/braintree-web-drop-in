@@ -13,6 +13,8 @@ function Dropin(options) {
   this._options = options;
   this._dropinWrapper = document.createElement('div');
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentId;
+  this._dropinWrapper.setAttribute('data-braintree-id', 'wrapper');
+  this._dropinWrapper.style.display = 'none';
 }
 
 Dropin.prototype.initialize = function (callback) {

@@ -10,6 +10,10 @@
   user-select: none;
 }
 
+[data-braintree-id="wrapper"] {
+  display: block !important;
+}
+
 .braintree-dropin__header-area {
   background: $black-95;
   background-image: linear-gradient(-180deg, $black-95 0%, $black-90 100%);
