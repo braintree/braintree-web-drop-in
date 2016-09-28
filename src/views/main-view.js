@@ -25,7 +25,6 @@ MainView.prototype._initialize = function () {
 
   payWithCardView = new PayWithCardView({
     element: this.getElementById(PayWithCardView.ID),
-    errorEmitter: this.errorEmitter,
     mainView: this,
     model: this.model,
     options: this.options
@@ -33,7 +32,6 @@ MainView.prototype._initialize = function () {
 
   this.paymentMethodPickerView = new PaymentMethodPickerView({
     element: this.getElementById(PaymentMethodPickerView.ID),
-    errorEmitter: this.errorEmitter,
     model: this.model,
     mainView: this,
     options: this.options
