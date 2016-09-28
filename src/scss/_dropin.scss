@@ -12,6 +12,8 @@
 
 [data-braintree-id="wrapper"] {
   display: block !important;
+  height: 100%;
+  width: 100%;
 }
 
 .braintree-dropin__header-area {
@@ -180,10 +182,9 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  background: $white;
+  height: 100%;
   opacity: 1;
   z-index: 2;
-  position: absolute;
   transition: opacity 500ms ease;
 }
 

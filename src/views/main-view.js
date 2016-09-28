@@ -82,13 +82,11 @@ MainView.prototype.showLoadingIndicator = function () {
 
     setTimeout(function () {
       loadingContainer.style.opacity = 0;
-      classlist.remove(dropinContainer, 'braintree-dropin__hide');
 
       setTimeout(function () {
         loadingContainer.style.zIndex = -2;
         loadingContainer.style.height = 0;
-
-        loadingIndicator.style.transform = 'scale(1)';
+        classlist.remove(dropinContainer, 'braintree-dropin__hide');
       }, 200);
     }, 800);
   };
