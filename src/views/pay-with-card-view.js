@@ -92,7 +92,7 @@ PayWithCardView.prototype._initialize = function () {
 
   hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
     if (err) {
-      this.errorEmitter.report(err.code);
+      this.model.reportError(err);
       return;
     }
 
@@ -117,7 +117,7 @@ PayWithCardView.prototype.tokenize = function () {
   var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
   var cardType = cardTypes[state.cards[0].type];
 
-  this.errorEmitter.clear();
+  this.model.clearError();
 
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
@@ -141,7 +141,7 @@ PayWithCardView.prototype.tokenize = function () {
   if (formValid) {
     this.hostedFieldsInstance.tokenize({vault: true}, function (err, payload) {
       if (err) {
-        this.errorEmitter.report(err.code);
+        this.model.reportError(err);
         return;
       }
 

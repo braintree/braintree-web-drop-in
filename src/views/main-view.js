@@ -2,7 +2,6 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
-var DropinErrorEmitter = require('../dropin-error-emitter');
 var errors = require('../errors');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
@@ -22,7 +21,6 @@ MainView.prototype._initialize = function () {
   var paymentMethods = this.model.getPaymentMethods();
   var payWithCardView;
 
-  this.errorEmitter = new DropinErrorEmitter();
   this.alert = this.getElementById('alert');
 
   payWithCardView = new PayWithCardView({
@@ -49,11 +47,11 @@ MainView.prototype._initialize = function () {
     this.setActiveView('active-payment-method');
   }.bind(this));
 
-  this.errorEmitter.on('errorOccurred', function (errorCode) {
+  this.model.on('errorOccurred', function (errorCode) {
     this.showAlert(errorCode);
   }.bind(this));
 
-  this.errorEmitter.on('errorCleared', function () {
+  this.model.on('errorCleared', function () {
     this.hideAlert();
   }.bind(this));
 
@@ -73,15 +71,21 @@ MainView.prototype.addView = function (view) {
 
 MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = 'braintree-dropin__' + id;
-  this.errorEmitter.clear();
+  this.model.clearError();
 
   if (id !== 'active-payment-method') {
     this.paymentMethodPickerView.hideCheckMarks();
   }
 };
 
-MainView.prototype.showAlert = function (errorCode) {
-  var errorMessage = errors[errorCode] || errors.GENERIC;
+MainView.prototype.showAlert = function (error) {
+  var errorMessage;
+
+  if (error && error.code && errors[error.code]) {
+    errorMessage = errors[error.code];
+  } else {
+    errorMessage = error.message || errors.GENERIC;
+  }
 
   classlist.remove(this.alert, 'braintree-dropin__display--none');
   this.alert.textContent = errorMessage;

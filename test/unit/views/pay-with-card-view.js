@@ -42,9 +42,6 @@ describe('PayWithCardView', function () {
     beforeEach(function () {
       this.context = {
         element: this.element,
-        errorEmitter: {
-          report: this.sandbox.stub()
-        },
         _generateFieldSelector: PayWithCardView.prototype._generateFieldSelector,
         getElementById: BaseView.prototype.getElementById,
         mainView: {
@@ -182,17 +179,18 @@ describe('PayWithCardView', function () {
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
     });
 
-    it('reports an error to DropinErrorEmitter when Hosted Fields creation fails', function () {
+    it('reports an error to DropinModel when Hosted Fields creation fails', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
 
       hostedFields.create.restore();
       this.sandbox.stub(hostedFields, 'create').yields(fakeError, null);
+      this.sandbox.stub(this.context.model, 'reportError');
 
       PayWithCardView.prototype._initialize.call(this.context);
 
-      expect(this.context.errorEmitter.report).to.be.calledWith('A_REAL_ERROR_CODE');
+      expect(this.context.model.reportError).to.be.calledWith(fakeError);
     });
 
     it('shows supported card icons', function () {
@@ -641,10 +639,6 @@ describe('PayWithCardView', function () {
       this.context = {
         alert: this.element.querySelector('.braintree-dropin__alert'),
         element: this.element,
-        errorEmitter: {
-          report: this.sandbox.stub(),
-          clear: this.sandbox.stub()
-        },
         getElementById: BaseView.prototype.getElementById,
         hideAlert: PayWithCardView.prototype.hideAlert,
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
@@ -678,46 +672,51 @@ describe('PayWithCardView', function () {
       expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('reports an error to DropinErrorEmitter when Hosted Fields tokenization returns an error', function () {
+    it('reports an error to DropinModel when Hosted Fields tokenization returns an error', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
 
       this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
+      this.sandbox.stub(this.context.model, 'reportError');
 
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.errorEmitter.report).to.be.calledWith('A_REAL_ERROR_CODE');
+      expect(this.context.model.reportError).to.be.calledWith(fakeError);
     });
 
-    it('reports an error to DropinErrorEmitter when Hosted Fields returns a tokenization failure error', function () {
+    it('reports an error to DropinModel when Hosted Fields returns a tokenization failure error', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
       };
 
       this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
+      this.sandbox.stub(this.context.model, 'reportError');
 
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.errorEmitter.report).to.be.calledWith('HOSTED_FIELDS_FAILED_TOKENIZATION');
+      expect(this.context.model.reportError).to.be.calledWith(fakeError);
     });
 
-    it('reports an error to DropinErrorEmitter when Hosted Fields returns a fields invalid error', function () {
+    it('reports an error to DropinModel when Hosted Fields returns a fields invalid error', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FIELDS_INVALID'
       };
 
       this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
+      this.sandbox.stub(this.context.model, 'reportError');
 
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.errorEmitter.report).to.be.calledWith('HOSTED_FIELDS_FIELDS_INVALID');
+      expect(this.context.model.reportError).to.be.calledWith(fakeError);
     });
 
     it('clears previous errors', function () {
+      this.sandbox.stub(this.context.model, 'clearError');
+
       PayWithCardView.prototype.tokenize.call(this.context);
 
-      expect(this.context.errorEmitter.clear).to.be.called;
+      expect(this.context.model.clearError).to.be.called;
     });
 
     it('shows unsupported card inline error when attempting to use an unsupported card', function () {

@@ -108,10 +108,6 @@ describe('PayPalPickerView', function () {
       this.context = {
         _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
-        errorEmitter: {
-          report: this.sandbox.stub(),
-          clear: this.sandbox.stub()
-        },
         getElementById: BaseView.prototype.getElementById,
         options: {
           paypal: {}
@@ -164,7 +160,7 @@ describe('PayPalPickerView', function () {
       expect(DropinModel.prototype.addPaymentMethod).to.not.have.been.called;
     });
 
-    it('reports an error to DropinErrorEmitter when PayPal tokenization returns an error', function () {
+    it('reports an error to DropinModel when PayPal tokenization returns an error', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
@@ -173,15 +169,16 @@ describe('PayPalPickerView', function () {
       };
 
       this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+      this.sandbox.stub(this.context.model, 'reportError');
 
       PayPalPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
-      expect(this.context.errorEmitter.report).to.be.calledWith('A_REAL_ERROR_CODE');
+      expect(this.context.model.reportError).to.be.calledWith(fakeError);
     });
 
-    it('does not report an error to DropinErrorEmitter when PayPal tokenization returns a PAYPAL_POPUP_CLOSED error', function () {
+    it('does not report an error to DropinModel when PayPal tokenization returns a PAYPAL_POPUP_CLOSED error', function () {
       var fakeError = {
         code: 'PAYPAL_POPUP_CLOSED'
       };
@@ -191,12 +188,13 @@ describe('PayPalPickerView', function () {
 
       this.sandbox.spy(DropinModel.prototype, 'addPaymentMethod');
       this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+      this.sandbox.stub(this.context.model, 'reportError');
 
       PayPalPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
 
-      expect(this.context.errorEmitter.report).to.not.have.been.called;
+      expect(this.context.model.reportError).to.not.have.been.called;
       expect(DropinModel.prototype.addPaymentMethod).to.not.have.been.called;
     });
 

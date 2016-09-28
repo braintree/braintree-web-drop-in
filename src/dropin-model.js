@@ -44,4 +44,12 @@ DropinModel.prototype.asyncDependencyReady = function () {
   }
 };
 
+DropinModel.prototype.reportError = function (error) {
+  this._emit('errorOccurred', error);
+};
+
+DropinModel.prototype.clearError = function () {
+  this._emit('errorCleared');
+};
+
 module.exports = DropinModel;
