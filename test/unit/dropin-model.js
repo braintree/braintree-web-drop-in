@@ -1,9 +1,14 @@
 'use strict';
 
 var DropinModel = require('../../src/dropin-model');
+var EventEmitter = require('../../src/lib/event-emitter');
 
 describe('DropinModel', function () {
   describe('Constructor', function () {
+    it('inherits from EventEmitter', function () {
+      expect(new DropinModel({})).to.be.an.instanceOf(EventEmitter);
+    });
+
     it('sets existing payment methods as _paymentMethods', function () {
       var model = new DropinModel({paymentMethods: ['foo']});
 
@@ -171,6 +176,32 @@ describe('DropinModel', function () {
       });
 
       model.endLoading();
+    });
+  });
+
+  describe('reportError', function () {
+    it('emits an errorOccurred event with the error', function (done) {
+      var dropinModel = new DropinModel();
+      var fakeError = {foo: 'boo'};
+
+      dropinModel.on('errorOccurred', function (error) {
+        expect(error).to.deep.equal(fakeError);
+        done();
+      });
+
+      dropinModel.reportError(fakeError);
+    });
+  });
+
+  describe('clearError', function () {
+    it('emits an errorCleared event', function (done) {
+      var dropinModel = new DropinModel();
+
+      dropinModel.on('errorCleared', function () {
+        done();
+      });
+
+      dropinModel.clearError();
     });
   });
 });

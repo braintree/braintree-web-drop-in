@@ -3,9 +3,9 @@
 var Dropin = require('../../src/dropin/');
 var deferred = require('../../src/lib/deferred');
 var DropinModel = require('../../src/dropin-model');
+var EventEmitter = require('../../src/lib/event-emitter');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
-var PaymentMethodPickerView = require('../../src/views/payment-method-picker-view');
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -33,6 +33,12 @@ describe('Dropin', function () {
     if (document.body.querySelector('#foo')) {
       document.body.removeChild(this.container);
     }
+  });
+
+  describe('Constructor', function () {
+    it('inherits from EventEmitter', function () {
+      expect(new Dropin(this.dropinOptions)).to.be.an.instanceOf(EventEmitter);
+    });
   });
 
   describe('initialize', function () {
@@ -242,37 +248,16 @@ describe('Dropin', function () {
     });
   });
 
-  describe('requestPaymentMethod', function () {
-    it('calls callback with active payment method if available', function (done) {
-      var dropin;
+  describe('getActivePaymentMethod', function () {
+    it('returns the active payment method', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var fakePaymentMethod = {foo: 'bar'};
 
-      this.sandbox.stub(PaymentMethodPickerView.prototype, 'setActivePaymentMethod');
+      this.sandbox.stub(DropinModel.prototype, 'getActivePaymentMethod').returns(fakePaymentMethod);
 
-      dropin = new Dropin(this.dropinOptions);
-
-      dropin.initialize(function (err, instance) {
-        instance._model.changeActivePaymentMethod('active payment method');
-
-        instance.requestPaymentMethod(function (err2, data) {
-          expect(err2).to.not.exist;
-          expect(data).to.equal('active payment method');
-
-          done();
-        });
-      });
-    });
-
-    it('calls callback with error if no payment method is available', function (done) {
-      var dropin = new Dropin(this.dropinOptions);
-
-      dropin.initialize(function (err, instance) {
-        instance.requestPaymentMethod(function (err2, data) {
-          expect(err2).to.be.an.instanceOf(Error);
-          expect(err2.message).to.equal('No payment method available.');
-          expect(data).to.not.exist;
-
-          done();
-        });
+      instance.initialize(function () {
+        expect(instance.getActivePaymentMethod()).to.equal(fakePaymentMethod);
+        done();
       });
     });
   });
@@ -308,6 +293,22 @@ describe('Dropin', function () {
       this.instance.teardown(function (err) {
         expect(err).to.equal(error);
         done();
+      });
+    });
+  });
+
+  describe('event handling', function () {
+    it('emits a paymentMethodAvailable event when the model emits a changeActivePaymentMethod event', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var fakePaymentMethod = {foo: 'bar'};
+
+      instance.initialize(function () {
+        instance.on('paymentMethodAvailable', function (paymentMethod) {
+          expect(paymentMethod).to.deep.equal(fakePaymentMethod);
+          done();
+        });
+
+        instance._model._emit('changeActivePaymentMethod', fakePaymentMethod);
       });
     });
   });
