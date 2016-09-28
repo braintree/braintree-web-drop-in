@@ -637,7 +637,6 @@ describe('PayWithCardView', function () {
       this.model = new DropinModel();
 
       this.context = {
-        alert: this.element.querySelector('.braintree-dropin__alert'),
         element: this.element,
         getElementById: BaseView.prototype.getElementById,
         hideAlert: PayWithCardView.prototype.hideAlert,
