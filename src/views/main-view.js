@@ -40,18 +40,24 @@ MainView.prototype._initialize = function () {
   this.views = {};
   this.addView(payWithCardView);
   this.addView(this.paymentMethodPickerView);
+  this.loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
+  this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
+  this.dropinContainer = this.element.querySelector('.braintree-dropin');
+
+  this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
     this.setActiveView('active-payment-method');
   }.bind(this));
 
+  this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
+  this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
+
   this.model.on('errorOccurred', function (errorCode) {
     this.showAlert(errorCode);
   }.bind(this));
 
-  this.model.on('errorCleared', function () {
-    this.hideAlert();
-  }.bind(this));
+  this.model.on('errorCleared', this.hideAlert.bind(this));
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
@@ -74,6 +80,24 @@ MainView.prototype.setActiveView = function (id) {
   if (id !== 'active-payment-method') {
     this.paymentMethodPickerView.hideCheckMarks();
   }
+  this.model.endLoading();
+};
+
+MainView.prototype.showLoadingIndicator = function () {
+  classlist.remove(this.loadingIndicator, 'braintree-dropin__loading-indicator--inactive');
+  classlist.remove(this.loadingContainer, 'braintree-dropin__loading-container--inactive');
+  classlist.add(this.dropinContainer, 'braintree-dropin__hide');
+};
+
+MainView.prototype.hideLoadingIndicator = function () {
+  setTimeout(function () {
+    classlist.add(this.loadingIndicator, 'braintree-dropin__loading-indicator--inactive');
+  }.bind(this), 200);
+
+  setTimeout(function () {
+    classlist.add(this.loadingContainer, 'braintree-dropin__loading-container--inactive');
+    classlist.remove(this.dropinContainer, 'braintree-dropin__hide');
+  }.bind(this), 1000);
 };
 
 MainView.prototype.showAlert = function (error) {

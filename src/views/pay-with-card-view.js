@@ -138,7 +138,11 @@ PayWithCardView.prototype.tokenize = function () {
   }
 
   if (formValid) {
+    this.model.beginLoading();
+
     this.hostedFieldsInstance.tokenize({vault: true}, function (err, payload) {
+      this.model.endLoading();
+
       if (err) {
         this.model.reportError(err);
         return;
