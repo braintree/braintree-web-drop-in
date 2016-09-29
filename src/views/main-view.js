@@ -44,29 +44,20 @@ MainView.prototype._initialize = function () {
   this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
 
-  this.model.on('asyncDependenciesReady', function () {
-    this.hideLoadingIndicator();
-  }.bind(this));
+  this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
     this.setActiveView('active-payment-method');
   }.bind(this));
 
-  this.model.on('loadBegin', function () {
-    this.showLoadingIndicator();
-  }.bind(this));
-
-  this.model.on('loadEnd', function () {
-    this.hideLoadingIndicator();
-  }.bind(this));
+  this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
+  this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
   this.model.on('errorOccurred', function (errorCode) {
     this.showAlert(errorCode);
   }.bind(this));
 
-  this.model.on('errorCleared', function () {
-    this.hideAlert();
-  }.bind(this));
+  this.model.on('errorCleared', this.hideAlert.bind(this));
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);

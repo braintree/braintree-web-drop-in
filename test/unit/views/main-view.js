@@ -34,18 +34,20 @@ describe('MainView', function () {
       this.model = new DropinModel();
 
       this.context = {
+        addView: this.sandbox.stub(),
+        dependenciesInitializing: 0,
         dropinWrapper: dropinWrapper,
         element: dropinWrapper,
+        getElementById: BaseView.prototype.getElementById,
+        hideAlert: function () {},
+        hideLoadingIndicator: function () {},
+        model: this.model,
         options: {
           client: {
             getConfiguration: fake.configuration
           }
         },
-        addView: this.sandbox.stub(),
         setActiveView: this.sandbox.stub(),
-        dependenciesInitializing: 0,
-        getElementById: BaseView.prototype.getElementById,
-        model: this.model,
         showLoadingIndicator: function () {}
       };
 
@@ -270,10 +272,11 @@ describe('MainView', function () {
 
       this.context = {
         addView: this.sandbox.stub(),
-        hideAlert: this.sandbox.stub(),
         dropinWrapper: dropinWrapper,
         element: dropinWrapper,
         getElementById: BaseView.prototype.getElementById,
+        hideAlert: this.sandbox.stub(),
+        hideLoadingIndicator: function () {},
         model: new DropinModel(),
         options: {
           client: {
@@ -281,7 +284,8 @@ describe('MainView', function () {
           }
         },
         setActiveView: this.sandbox.stub(),
-        showAlert: this.sandbox.stub()
+        showAlert: this.sandbox.stub(),
+        showLoadingIndicator: function () {}
       };
 
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
@@ -328,6 +332,8 @@ describe('MainView', function () {
         dropinWrapper: dropinWrapper,
         element: dropinWrapper,
         getElementById: BaseView.prototype.getElementById,
+        hideAlert: function () {},
+        hideLoadingIndicator: this.sandbox.stub(),
         model: new DropinModel(),
         options: {
           client: {
@@ -335,7 +341,7 @@ describe('MainView', function () {
           }
         },
         setActiveView: this.sandbox.stub(),
-        showLoadingIndicator: function () {}
+        showLoadingIndicator: this.sandbox.stub()
       };
 
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
@@ -347,16 +353,12 @@ describe('MainView', function () {
     });
 
     it('calls showLoadingIndicator on loadBegin', function () {
-      this.context.showLoadingIndicator = this.sandbox.stub();
-
       this.context.model._emit('loadBegin');
 
       expect(this.context.showLoadingIndicator).to.be.calledOnce;
     });
 
     it('calls hideLoadingIndicator on loadEnd', function () {
-      this.context.hideLoadingIndicator = this.sandbox.stub();
-
       this.context.model._emit('loadEnd');
 
       expect(this.context.hideLoadingIndicator).to.be.calledOnce;
