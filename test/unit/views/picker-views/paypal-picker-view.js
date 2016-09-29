@@ -83,6 +83,14 @@ describe('PayPalPickerView', function () {
       expect(console.error).to.have.been.calledWith(new Error('create failed'));
     });
 
+    it('hides the element when PayPal create fails', function () {
+      paypal.create.yields(new Error('create failed'));
+
+      PayPalPickerView.prototype._initialize.call(this.context);
+
+      expect(this.context.element.classList.contains('braintree-dropin__display--none')).to.be.true;
+    });
+
     it('appends PayPal picker html', function () {
       PayPalPickerView.prototype._initialize.call(this.context);
 

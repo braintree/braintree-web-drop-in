@@ -1,6 +1,7 @@
 'use strict';
 
 var BasePickerView = require('./base-picker-view');
+var classlist = require('../../lib/classlist');
 var paypal = require('braintree-web/paypal');
 var paypalHTML = require('../../html/paypal-picker.html');
 
@@ -27,6 +28,7 @@ PayPalPickerView.prototype._initialize = function () {
 
   paypal.create({client: this.options.client}, function (err, paypalInstance) {
     if (err) {
+      classlist.add(this.element, 'braintree-dropin__display--none');
       console.error(err);
       return;
     }
