@@ -314,11 +314,57 @@ describe('MainView', function () {
   });
 
   describe('showLoadingIndicator', function () {
-    it('shows the loading indicator');
+    it('shows the loading indicator', function () {
+      var dropinContainer = document.createElement('div');
+      var loadingContainer = document.createElement('div');
+      var loadingIndicator = document.createElement('div');
+      var context = {
+        dropinContainer: dropinContainer,
+        loadingContainer: loadingContainer,
+        loadingIndicator: loadingIndicator
+      };
+
+      loadingContainer.className = 'braintree-dropin__loading-container--inactive';
+      loadingIndicator.className = 'braintree-dropin__loading_indicator--inactive';
+
+      MainView.prototype.showLoadingIndicator.call(context);
+
+      expect(context.dropinContainer.classList.contains('braintree-dropin__hide')).to.be.true;
+      expect(context.loadingContainer.classList.contains('braintree-dropin__loading-container--inactive')).to.be.false;
+      expect(context.loadingIndicator.classList.contains('braintree-dropin__loading-indicator--inactive')).to.be.false;
+    });
   });
 
   describe('hideLoadingIndicator', function () {
-    it('hides the loading indicator');
+    var clock;
+
+    beforeEach(function () {
+      clock = sinon.useFakeTimers();
+    });
+
+    afterEach(function () {
+      clock.restore();
+    });
+
+    it('hides the loading indicator', function () {
+      var dropinContainer = document.createElement('div');
+      var loadingContainer = document.createElement('div');
+      var loadingIndicator = document.createElement('div');
+      var context = {
+        dropinContainer: dropinContainer,
+        loadingContainer: loadingContainer,
+        loadingIndicator: loadingIndicator
+      };
+
+      dropinContainer.className = 'braintree-dropin__hide';
+
+      MainView.prototype.hideLoadingIndicator.call(context);
+      clock.tick(1001);
+
+      expect(context.dropinContainer.classList.contains('braintree-dropin__hide')).to.be.false;
+      expect(context.loadingContainer.classList.contains('braintree-dropin__loading-container--inactive')).to.be.true;
+      expect(context.loadingIndicator.classList.contains('braintree-dropin__loading-indicator--inactive')).to.be.true;
+    });
   });
 
   describe('DropinModel events', function () {

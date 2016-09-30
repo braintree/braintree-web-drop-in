@@ -18,6 +18,6 @@ module.exports = {
   HOSTED_FIELDS_FIELDS_INVALID: 'Please check your information and try again.',
   PAYPAL_ACCOUNT_TOKENIZATION_FAILED: 'Something went wrong adding the PayPal account. Please try again.',
   PAYPAL_FLOW_FAILED: 'Something went wrong connecting to PayPal. Please try again.',
-  PAYPAL_TOKENIZATION_REQUEST_ACTIVE: 'PayPal checkout is already in progress.',
+  PAYPAL_TOKENIZATION_REQUEST_ACTIVE: 'PayPal payment authorization is already in progress.',
   UNSUPPORTED_CARD_TYPE: 'This card type is not supported. Please try another card.'
 };
