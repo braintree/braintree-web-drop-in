@@ -39,6 +39,7 @@ describe('CardPickerView', function () {
         mainView: {
           setActiveView: this.sandbox.spy()
         },
+        _onSelect: CardPickerView.prototype._onSelect,
         options: {
           client: {
             getConfiguration: function () {

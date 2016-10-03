@@ -29,9 +29,14 @@ CardPickerView.prototype._initialize = function () {
   cardIcons.innerHTML = cardIconHTML;
   hideUnsupportedCardIcons(this.element, supportedCardTypes);
 
-  this.element.addEventListener('click', function () {
-    this.mainView.setActiveView(PayWithCardView.ID);
-  }.bind(this), false);
+  this.element.addEventListener('click', this._onSelect.bind(this), false);
+  this.element.addEventListener('keydown', function (event) {
+    if (event.which === 13) { this._onSelect(); }
+  }.bind(this));
+};
+
+CardPickerView.prototype._onSelect = function () {
+  this.mainView.setActiveView(PayWithCardView.ID);
 };
 
 module.exports = CardPickerView;

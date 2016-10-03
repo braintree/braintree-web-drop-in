@@ -31,6 +31,7 @@ describe('CompletedPickerView', function () {
       this.context = {
         element: this.fakeCompletedPickerView,
         model: this.model,
+        _onSelect: CompletedPickerView.prototype._onSelect,
         paymentMethod: 'a-payment-method'
       };
     });

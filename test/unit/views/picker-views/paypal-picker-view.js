@@ -39,6 +39,7 @@ describe('PayPalPickerView', function () {
         element: this.fakePayPalPickerView,
         getElementById: BaseView.prototype.getElementById,
         model: new DropinModel(),
+        _onSelect: PayPalPickerView.prototype._onSelect,
         options: {
           client: {
             getConfiguration: fake.configuration,
@@ -117,6 +118,7 @@ describe('PayPalPickerView', function () {
         _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
         getElementById: BaseView.prototype.getElementById,
+        _onSelect: PayPalPickerView.prototype._onSelect,
         options: {
           paypal: {}
         },

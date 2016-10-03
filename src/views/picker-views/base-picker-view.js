@@ -15,6 +15,7 @@ BasePickerView.prototype._initialize = function () {
   this.element = document.createElement('div');
 
   this.element.className = 'braintree-dropin__picker-view';
+  this.element.setAttribute('tabindex', '0');
 };
 
 module.exports = BasePickerView;
