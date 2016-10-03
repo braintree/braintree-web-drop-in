@@ -1,6 +1,7 @@
 'use strict';
 
 var MainView = require('./views/main-view');
+var atob = require('./lib/polyfill').atob;
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');

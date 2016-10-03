@@ -1,63 +1,86 @@
-.browser-upgrade {
-    font-size: 16px;
-    line-height: 1.4;
-    font-family: sans-serif;
-}
-.ieno-flexbox {
-    .braintree-card-logos__group {
-        display: block;
-        text-align: center;
-        .braintree-icon--card {
-            float: none;
-            margin-top: 0;
-        }
-    }
-    .braintree-card-logos__group:after {
-        content: "";
-        display: table;
-        clear: both;
-    }
-    img {
-        border: 0;
-    }
-    .braintree-dropdown__default {
-        display: block;
-        padding-top: 16px;
-    }
-    .braintree-dropdown__default:after {
-        content: "";
-        display: table;
-        clear: both;
-    }
-    .braintree-icon--card {
-        float: left;
-        margin-top: 10px;
-    }
-    .braintree-list--definition {
-        padding-top: 0;
-        float: left;
-    }
-    .braintree-icon--arrow,
-    .braintree-icon--check {
-        float: right;
-        margin-top: 10px;
-    }
-    .braintree-dropdown__option {
-        display: block;
-        padding-top: 16px;
-        clear: both;
-        text-decoration: none;
-    }
-    .braintree-dropdown__option:after {
-        content: "";
-        display: table;
-        clear: both;
-    }
-    .braintree-dropdown__label {
-        float: left;
-        padding-top: 10px;
-    }
-    .braintree-dropdown__image {
-        float: left;
-    }
+.braintree-dropin__no-flexbox {
+  .braintree-dropin__picker-view {
+    display: block;
+  }
+
+  [data-braintree-id="disclosure-arrow"] {
+    display: block;
+    margin-top: -10px;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+  }
+
+  [data-braintree-id="card-picker-icons"] {
+    display: block;
+  }
+
+  .braintree-dropin__icon-card {
+    float: left;
+    padding-top: 0;
+  }
+
+  .braintree-dropin__icon-card--center {
+    left: 14px;
+    margin-top: -14px;
+    position: absolute;
+    top: 50%;
+  }
+
+  .braintree-dropin__check-container {
+    float: right;
+    margin-top: -9px;
+    padding-top: 0;
+    position: absolute;
+    right: 18px;
+    top: 50%;
+  }
+
+  .braintree-dropin__picker-view {
+    position: relative;
+    text-align: center;
+  }
+
+  .braintree-dropin__completed-picker-view {
+    text-align: left;
+  }
+
+  .braintree-dropin__picker-label {
+    float: left;
+    left: 18px;
+    margin-top: -11px;
+    position: absolute;
+    top: 50%;
+  }
+
+  .braintree-dropin__payment-method {
+    clear: both;
+  }
+
+  .braintree-dropin__payment-method:after {
+    clear: both;
+    content: ".";
+    display: block;
+    height: 0;
+    visibility: hidden;
+  }
+
+  .braintree-dropin__list-definition {
+    float: left;
+    margin-left: 48px;
+    padding-top: 0;
+    width: 80%;
+  }
+
+  .braintree-dropin__loading-indicator {
+    margin: 0 auto;
+  }
+
+  .braintree-dropin__form-icon--absolute {
+    float: right;
+    margin-top: -1px;
+    position: absolute;
+    right: 9px;
+    top: 50%;
+  }
 }
