@@ -59,6 +59,18 @@ describe('CardPickerView', function () {
       expect(this.context.mainView.setActiveView).to.be.calledWith(PayWithCardView.ID);
     });
 
+    it('sets pay with card view as the active view when enter is pressed', function () {
+      var event = new CustomEvent('keydown');
+
+      CardPickerView.prototype._initialize.call(this.context);
+
+      event.which = 13;
+      this.context.element.dispatchEvent(event);
+
+      expect(this.context.mainView.setActiveView).to.be.calledOnce;
+      expect(this.context.mainView.setActiveView).to.be.calledWith(PayWithCardView.ID);
+    });
+
     it('appends card picker html', function () {
       CardPickerView.prototype._initialize.call(this.context);
 

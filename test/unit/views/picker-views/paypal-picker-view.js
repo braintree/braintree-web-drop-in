@@ -139,6 +139,21 @@ describe('PayPalPickerView', function () {
       expect(stubPaypalInstance.tokenize).to.be.calledWith(this.context.options.paypal);
     });
 
+    it('calls tokenize when enter is pressed', function () {
+      var event = new CustomEvent('keydown');
+      var stubPaypalInstance = {
+        tokenize: this.sandbox.stub()
+      };
+
+      this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+      PayPalPickerView.prototype._initialize.call(this.context);
+
+      event.which = 13;
+      this.context.element.dispatchEvent(event);
+
+      expect(stubPaypalInstance.tokenize).to.be.calledWith(this.context.options.paypal);
+    });
+
     it('adds a new payment method when tokenize is successful', function () {
       var stubTokenizePayload = {foo: 'bar'};
       var stubPaypalInstance = {
