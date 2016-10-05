@@ -17,7 +17,7 @@ var streamify = require('gulp-streamify');
 var uglify = require('gulp-uglify');
 var VERSION = require('./package.json').version;
 
-var DIST_PATH = 'dist/web/' + VERSION;
+var DIST_PATH = 'dist/web/dropin/' + VERSION;
 
 var config = {
   namespace: 'braintree',
@@ -84,7 +84,7 @@ gulp.task('build:css', function () {
 });
 
 gulp.task('build:link-latest', function (done) {
-  fs.symlink(VERSION, 'dist/web/dev', done);
+  fs.symlink(VERSION, 'dist/web/dropin/dev', done);
 });
 
 gulp.task('clean', function () {
