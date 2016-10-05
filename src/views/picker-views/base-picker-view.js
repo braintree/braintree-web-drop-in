@@ -23,6 +23,4 @@ BasePickerView.prototype._initialize = function () {
   }.bind(this));
 };
 
-BasePickerView.prototype._onSelect = function () {};
-
 module.exports = BasePickerView;
