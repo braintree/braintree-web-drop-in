@@ -5,7 +5,8 @@
   "scripts": {
     "build": "gulp build",
     "lint": "eslint src test",
-    "test": "npm run lint && karma start test/config/karma.js --single-run"
+    "pretest": "npm run lint",
+    "test": "karma start test/config/karma.js --single-run"
   },
   "repository": {
     "type": "git",
