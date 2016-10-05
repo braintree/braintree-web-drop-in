@@ -16,6 +16,13 @@ BasePickerView.prototype._initialize = function () {
 
   this.element.className = 'braintree-dropin__picker-view';
   this.element.setAttribute('tabindex', '0');
+
+  this.element.addEventListener('click', this._onSelect.bind(this), false);
+  this.element.addEventListener('keydown', function (event) {
+    if (event.which === 13) { this._onSelect(); }
+  }.bind(this));
 };
+
+BasePickerView.prototype._onSelect = function () {};
 
 module.exports = BasePickerView;

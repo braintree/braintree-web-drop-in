@@ -35,11 +35,6 @@ PayPalPickerView.prototype._initialize = function () {
 
     this.paypalInstance = paypalInstance;
 
-    this.element.addEventListener('click', this._onSelect.bind(this), false);
-    this.element.addEventListener('keydown', function (event) {
-      if (event.which === 13) { this._onSelect(); }
-    }.bind(this));
-
     this.model.asyncDependencyReady();
   }.bind(this));
 };

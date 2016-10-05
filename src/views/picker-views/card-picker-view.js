@@ -28,11 +28,6 @@ CardPickerView.prototype._initialize = function () {
   cardIcons = this.getElementById('card-picker-icons');
   cardIcons.innerHTML = cardIconHTML;
   hideUnsupportedCardIcons(this.element, supportedCardTypes);
-
-  this.element.addEventListener('click', this._onSelect.bind(this), false);
-  this.element.addEventListener('keydown', function (event) {
-    if (event.which === 13) { this._onSelect(); }
-  }.bind(this));
 };
 
 CardPickerView.prototype._onSelect = function () {

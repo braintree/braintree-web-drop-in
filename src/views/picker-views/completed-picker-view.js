@@ -23,11 +23,6 @@ CompletedPickerView.prototype._initialize = function () {
   BasePickerView.prototype._initialize.apply(this, arguments);
   classlist.add(div, 'braintree-dropin__completed-picker-view');
 
-  this.element.addEventListener('click', this._onSelect.bind(this), false);
-  this.element.addEventListener('keydown', function (event) {
-    if (event.which === 13) { this._onSelect(); }
-  }.bind(this));
-
   switch (this.paymentMethod.type) {
     case 'CreditCard':
       this.html = this.html.replace(/@ICON/g, 'icon-' + cardTypes[this.paymentMethod.details.cardType]);
