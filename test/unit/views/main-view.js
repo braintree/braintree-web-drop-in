@@ -202,6 +202,22 @@ describe('MainView', function () {
 
       expect(DropinModel.prototype.clearError).to.have.been.calledOnce;
     });
+
+    it('applies no-flexbox class when flexbox is not supported', function () {
+      this.context.supportsFlexbox = false;
+
+      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
+
+      expect(this.context.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
+    });
+
+    it('does not apply no-flexbox class when flexbox is supported', function () {
+      this.context.supportsFlexbox = true;
+
+      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
+
+      expect(this.context.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
+    });
   });
 
   describe('showAlert', function () {

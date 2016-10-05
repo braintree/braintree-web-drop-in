@@ -1,6 +1,7 @@
 'use strict';
 
 var MainView = require('./views/main-view');
+var atob = require('./lib/polyfill').atob;
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
@@ -90,7 +91,7 @@ Dropin.prototype.injectStylesheet = function () {
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
   assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
-  stylesheetUrl = assetsUrl + '/web/' + VERSION + '/css/dropin@DOT_MIN.css';
+  stylesheetUrl = assetsUrl + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
   stylesheet = document.createElement('link');
   head = document.head;
 

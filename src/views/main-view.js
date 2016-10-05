@@ -5,6 +5,7 @@ var classlist = require('../lib/classlist');
 var errors = require('../errors');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
+var supportsFlexbox = require('../lib/supports-flexbox');
 
 function MainView() {
   BaseView.apply(this, arguments);
@@ -43,6 +44,7 @@ MainView.prototype._initialize = function () {
   this.loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
   this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
+  this.supportsFlexbox = supportsFlexbox();
 
   this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
 
@@ -75,6 +77,11 @@ MainView.prototype.addView = function (view) {
 
 MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = 'braintree-dropin__' + id;
+
+  if (!this.supportsFlexbox) {
+    this.dropinWrapper.className += ' braintree-dropin__no-flexbox';
+  }
+
   this.model.clearError();
 
   if (id !== 'active-payment-method') {
