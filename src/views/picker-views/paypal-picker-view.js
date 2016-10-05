@@ -62,7 +62,9 @@ PayPalPickerView.prototype.teardown = function (callback) {
   this.paypalInstance.teardown(callback);
 };
 
-PayPalPickerView.prototype._onSelect = function () {
+PayPalPickerView.prototype._onSelect = function (event) {
+  event.preventDefault();
+
   this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
     if (tokenizeErr) {
       if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
