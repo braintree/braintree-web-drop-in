@@ -23,10 +23,6 @@ CompletedPickerView.prototype._initialize = function () {
   BasePickerView.prototype._initialize.apply(this, arguments);
   classlist.add(div, 'braintree-dropin__completed-picker-view');
 
-  this.element.addEventListener('click', function () {
-    this.model.changeActivePaymentMethod(this.paymentMethod);
-  }.bind(this));
-
   switch (this.paymentMethod.type) {
     case 'CreditCard':
       this.html = this.html.replace(/@ICON/g, 'icon-' + cardTypes[this.paymentMethod.details.cardType]);
@@ -45,6 +41,10 @@ CompletedPickerView.prototype._initialize = function () {
   div.innerHTML = this.html;
   this.element.appendChild(div);
   this.checkIcon = this.element.querySelector('.braintree-dropin__check-container');
+};
+
+CompletedPickerView.prototype._onSelect = function () {
+  this.model.changeActivePaymentMethod(this.paymentMethod);
 };
 
 module.exports = CompletedPickerView;

@@ -28,10 +28,10 @@ CardPickerView.prototype._initialize = function () {
   cardIcons = this.getElementById('card-picker-icons');
   cardIcons.innerHTML = cardIconHTML;
   hideUnsupportedCardIcons(this.element, supportedCardTypes);
+};
 
-  this.element.addEventListener('click', function () {
-    this.mainView.setActiveView(PayWithCardView.ID);
-  }.bind(this), false);
+CardPickerView.prototype._onSelect = function () {
+  this.mainView.setActiveView(PayWithCardView.ID);
 };
 
 module.exports = CardPickerView;

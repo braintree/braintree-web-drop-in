@@ -39,6 +39,7 @@ describe('PayPalPickerView', function () {
         element: this.fakePayPalPickerView,
         getElementById: BaseView.prototype.getElementById,
         model: new DropinModel(),
+        _onSelect: PayPalPickerView.prototype._onSelect,
         options: {
           client: {
             getConfiguration: fake.configuration,
@@ -117,6 +118,7 @@ describe('PayPalPickerView', function () {
         _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
         getElementById: BaseView.prototype.getElementById,
+        _onSelect: PayPalPickerView.prototype._onSelect,
         options: {
           paypal: {}
         },
@@ -133,6 +135,21 @@ describe('PayPalPickerView', function () {
       PayPalPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
+
+      expect(stubPaypalInstance.tokenize).to.be.calledWith(this.context.options.paypal);
+    });
+
+    it('calls tokenize when enter is pressed', function () {
+      var event = new CustomEvent('keydown');
+      var stubPaypalInstance = {
+        tokenize: this.sandbox.stub()
+      };
+
+      this.sandbox.stub(paypal, 'create').callsArgWith(1, null, stubPaypalInstance);
+      PayPalPickerView.prototype._initialize.call(this.context);
+
+      event.which = 13;
+      this.context.element.dispatchEvent(event);
 
       expect(stubPaypalInstance.tokenize).to.be.calledWith(this.context.options.paypal);
     });

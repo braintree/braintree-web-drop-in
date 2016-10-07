@@ -35,23 +35,6 @@ PayPalPickerView.prototype._initialize = function () {
 
     this.paypalInstance = paypalInstance;
 
-    this.element.addEventListener('click', function (event) {
-      event.preventDefault();
-      this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
-        if (tokenizeErr) {
-          if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
-            this.model.reportError(tokenizeErr);
-            if (tokenizeErr.code === 'PAYPAL_INVALID_PAYMENT_OPTION' || tokenizeErr.code === 'PAYPAL_FLOW_OPTION_REQUIRED') {
-              console.error(tokenizeErr);
-            }
-          }
-          return;
-        }
-
-        this.model.addPaymentMethod(tokenizePayload);
-      }.bind(this));
-    }.bind(this));
-
     this.model.asyncDependencyReady();
   }.bind(this));
 };
@@ -77,6 +60,24 @@ PayPalPickerView.prototype._createPayPalButton = function () {
 
 PayPalPickerView.prototype.teardown = function (callback) {
   this.paypalInstance.teardown(callback);
+};
+
+PayPalPickerView.prototype._onSelect = function (event) {
+  event.preventDefault();
+
+  this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
+    if (tokenizeErr) {
+      if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
+        this.model.reportError(tokenizeErr);
+        if (tokenizeErr.code === 'PAYPAL_INVALID_PAYMENT_OPTION' || tokenizeErr.code === 'PAYPAL_FLOW_OPTION_REQUIRED') {
+          console.error(tokenizeErr);
+        }
+      }
+      return;
+    }
+
+    this.model.addPaymentMethod(tokenizePayload);
+  }.bind(this));
 };
 
 module.exports = PayPalPickerView;

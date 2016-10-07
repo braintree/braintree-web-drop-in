@@ -25,6 +25,10 @@ PaymentMethodPickerView.prototype._initialize = function () {
     this.toggleDrawer();
   }.bind(this));
 
+  this.element.addEventListener('keydown', function (event) {
+    if (event.which === 13) { this.toggleDrawer(); }
+  }.bind(this));
+
   this.drawer = this.getElementById('drawer');
   this.savedPaymentMethods = this.getElementById('saved-payment-methods');
   this.activePaymentMethod = this.getElementById('active-payment-method');

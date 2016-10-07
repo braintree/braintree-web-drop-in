@@ -31,6 +31,7 @@ describe('CompletedPickerView', function () {
       this.context = {
         element: this.fakeCompletedPickerView,
         model: this.model,
+        _onSelect: CompletedPickerView.prototype._onSelect,
         paymentMethod: 'a-payment-method'
       };
     });
@@ -41,6 +42,19 @@ describe('CompletedPickerView', function () {
       CompletedPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
+
+      expect(this.model.changeActivePaymentMethod).to.be.calledWith(this.context.paymentMethod);
+    });
+
+    it('sets the active payment method when enter is pressed', function () {
+      var event = new CustomEvent('keydown');
+
+      this.sandbox.stub(this.model, 'changeActivePaymentMethod');
+
+      CompletedPickerView.prototype._initialize.call(this.context);
+
+      event.which = 13;
+      this.context.element.dispatchEvent(event);
 
       expect(this.model.changeActivePaymentMethod).to.be.calledWith(this.context.paymentMethod);
     });

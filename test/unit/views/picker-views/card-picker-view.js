@@ -39,6 +39,7 @@ describe('CardPickerView', function () {
         mainView: {
           setActiveView: this.sandbox.spy()
         },
+        _onSelect: CardPickerView.prototype._onSelect,
         options: {
           client: {
             getConfiguration: function () {
@@ -53,6 +54,18 @@ describe('CardPickerView', function () {
       CardPickerView.prototype._initialize.call(this.context);
 
       this.context.element.click();
+
+      expect(this.context.mainView.setActiveView).to.be.calledOnce;
+      expect(this.context.mainView.setActiveView).to.be.calledWith(PayWithCardView.ID);
+    });
+
+    it('sets pay with card view as the active view when enter is pressed', function () {
+      var event = new CustomEvent('keydown');
+
+      CardPickerView.prototype._initialize.call(this.context);
+
+      event.which = 13;
+      this.context.element.dispatchEvent(event);
 
       expect(this.context.mainView.setActiveView).to.be.calledOnce;
       expect(this.context.mainView.setActiveView).to.be.calledWith(PayWithCardView.ID);
