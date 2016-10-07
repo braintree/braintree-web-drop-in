@@ -1,7 +1,8 @@
 CHANGELOG
 =========
 
-## UNRELEASED
+1.0.0-beta.1
+------------
 
 This version of Drop-in uses v3 of Braintree's JS SDK to build a ready-made UI for easily accepting payments on the web. This release includes:
 
