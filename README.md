@@ -6,9 +6,9 @@ Because we're still in beta, the API and designs are subject to change. If you h
 
 ## What's new
 
-  - Updated UI to easily accommodate multiple payment methods
-  - Not in an iframe; feel free to style Drop-in to blend in with your website
-  - Open source and open development
+- Updated UI to easily accommodate multiple payment methods
+- Not in an iframe; feel free to style Drop-in to blend in with your website
+- Open source and open development
 
 ## Basic usage
 
@@ -57,7 +57,7 @@ The structure of the credit card payment method objects that will be returned fr
 
 ## Using PayPal
 
-If your merchant account is configured to use PayPal, simply include a PayPal configuration object in your create call to have the PayPal button option included in your dropdown. The following example uses our [PayPal Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3).
+If your merchant account is configured to use PayPal, simply include a PayPal configuration object in your create call to have the PayPal button option included in your dropdown. The following example uses the [PayPal Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3).
 
 ```js
 braintree.dropin.create({
@@ -69,9 +69,9 @@ braintree.dropin.create({
 }, callback);
 ```
 
-You can find more PayPal configuration options in the [Braintree JS client SDK v3 reference](https://braintree.github.io/braintree-web/3.3.0/PayPal.html#tokenize).
+You can find more PayPal configuration options in the [Braintree JS client SDK v3 reference](https://braintree.github.io/braintree-web/current/PayPal.html#tokenize).
 
-The structure of the credit card payment method objects that will be returned from Drop-in can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizeReturn);
+The structure of the PayPal payment method objects that will be returned from Drop-in can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizeReturn);
 
 ## Full example
 
@@ -103,7 +103,8 @@ This is a full example of a Drop-in integration only accepting credit cards.
            return;
          }
 
-         submitButton.addEventListener('click', function () {
+         submitButton.addEventListener('click', function (event) {
+           event.preventDefault();
            var paymentMethod = dropinInstance.getActivePaymentMethod();
 
            if (paymentMethod) {

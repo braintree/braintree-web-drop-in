@@ -33,9 +33,3 @@ npm test
 ```
 npm run lint
 ```
-
-## Integration app
-
-For internal development, the asset server included in the `js-sdk-integration` app is required.
-
-At the moment, there is no externally available development merchant server set up with this project.
