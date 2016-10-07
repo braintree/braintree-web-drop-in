@@ -2,9 +2,10 @@
 
 var BaseView = require('./base-view');
 var CardPickerView = require('./picker-views/card-picker-view');
-var CompletedPickerView = require('./picker-views/completed-picker-view');
-var PayPalPickerView = require('./picker-views/paypal-picker-view');
 var classlist = require('../lib/classlist');
+var CompletedPickerView = require('./picker-views/completed-picker-view');
+var isGuestCheckout = require('../lib/is-guest-checkout');
+var PayPalPickerView = require('./picker-views/paypal-picker-view');
 
 function PaymentMethodPickerView() {
   BaseView.apply(this, arguments);
@@ -19,7 +20,10 @@ PaymentMethodPickerView.ID = PaymentMethodPickerView.prototype.ID = 'payment-met
 PaymentMethodPickerView.prototype._initialize = function () {
   var enabledPaymentMethods = this.getElementById('enabled-payment-methods');
   var savedPaymentMethodsHeader = this.getElementById('saved-payment-methods-header');
+  var addPaymentMethodHeader = this.getElementById('add-payment-method-header');
   var paymentMethods = this.model.getPaymentMethods();
+
+  this.isGuestCheckout = isGuestCheckout(this.options.authorization);
 
   this.element.addEventListener('click', function () {
     this.toggleDrawer();
@@ -33,6 +37,13 @@ PaymentMethodPickerView.prototype._initialize = function () {
   this.savedPaymentMethods = this.getElementById('saved-payment-methods');
   this.activePaymentMethod = this.getElementById('active-payment-method');
   this.choosePaymentMethod = this.getElementById('choose-payment-method');
+
+  if (this.isGuestCheckout) {
+    classlist.add(this.savedPaymentMethods, 'braintree-dropin__display--none');
+    classlist.add(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
+
+    addPaymentMethodHeader.innerHTML = 'Change Payment Method';
+  }
 
   this.views = [
     CardPickerView,
@@ -66,7 +77,9 @@ PaymentMethodPickerView.prototype._initialize = function () {
   }.bind(this));
 
   this.model.on('addPaymentMethod', function (paymentMethod) {
-    classlist.remove(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
+    if (!this.isGuestCheckout) {
+      classlist.remove(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
+    }
     classlist.remove(this.element, 'braintree-dropin__hide');
     this.addCompletedPickerView(paymentMethod);
   }.bind(this));

@@ -1,10 +1,10 @@
 'use strict';
 
 var MainView = require('./views/main-view');
-var atob = require('./lib/polyfill').atob;
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
+var isGuestCheckout = require('./lib/is-guest-checkout');
 var mainHTML = require('./html/main.html');
 var svgHTML = require('./html/svgs.html');
 var uuid = require('./lib/uuid');
@@ -107,15 +107,9 @@ Dropin.prototype.injectStylesheet = function () {
 };
 
 Dropin.prototype.getVaultedPaymentMethods = function (callback) {
-  var authorizationFingerprint, paymentMethods;
-  var hasCustomerId = false;
-
-  if (!isTokenizationKey(this._options.authorization)) {
-    authorizationFingerprint = JSON.parse(atob(this._options.authorization)).authorizationFingerprint;
-    hasCustomerId = authorizationFingerprint && authorizationFingerprint.indexOf('customer_id=') !== -1;
-  }
-
-  if (hasCustomerId) {
+  if (isGuestCheckout(this._options.authorization)) {
+    callback();
+  } else {
     this._options.client.request({
       endpoint: 'payment_methods',
       method: 'get',
@@ -123,13 +117,13 @@ Dropin.prototype.getVaultedPaymentMethods = function (callback) {
         defaultFirst: 1
       }
     }, function (err, paymentMethodsPayload) {
+      var paymentMethods;
+
       if (!err) {
         paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
       }
       callback(paymentMethods);
     });
-  } else {
-    callback();
   }
 };
 
@@ -154,10 +148,6 @@ function formatPaymentMethodPayload(paymentMethod) {
   }
 
   return formattedPaymentMethod;
-}
-
-function isTokenizationKey(str) {
-  return /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_[a-zA-Z0-9_]+$/.test(str);
 }
 
 module.exports = Dropin;
