@@ -2,7 +2,7 @@
 
 A pre-made payments UI for accepting cards and alternative payments in the browser built using version 3 of the [Braintree JS client SDK](https://github.com/braintree/braintree-web).
 
-Because we're still in beta, the API and designs are subject to change. If you have any feedback in these areas, create an [issue](https://github.com/braintree/braintree-web-drop-in/issues) or email us at [web-drop-in-beta@braintreepayments.com](mailto:web-drop-in-beta@braintreepayments.com).
+Because we're still in beta, the API and designs are subject to change. If you have any feedback in these areas, create an [issue](https://github.com/braintree/braintree-web-drop-in/issues) or email us at [web-drop-in-beta@getbraintree.com](mailto:web-drop-in-beta@getbraintree.com).
 
 ## What's new
 
