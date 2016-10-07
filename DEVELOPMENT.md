@@ -15,10 +15,11 @@ This creates the following `dist` structure:
 ```
 dist
 └── web
-    ├── 1.0.0
-    │   ├── css
-    │   └── js
-    └── dev -> 1.0.0
+  └── dropin
+      ├── 1.0.0
+      │   ├── css
+      │   └── js
+      └── dev -> 1.0.0
 ```
 
 ## Testing
