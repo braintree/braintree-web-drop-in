@@ -19,7 +19,7 @@ BasePickerView.prototype._initialize = function () {
 
   this.element.addEventListener('click', this._onSelect.bind(this), false);
   this.element.addEventListener('keydown', function (event) {
-    if (event.which === 13) { this._onSelect(); }
+    if (event.which === 13) { this._onSelect(event); }
   }.bind(this));
 };
 
