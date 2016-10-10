@@ -44,7 +44,7 @@ PayPalPickerView.prototype._createPayPalButton = function () {
   var scriptAttrs = {
     'data-merchant': 'braintree',
     'data-button': 'checkout',
-    'data-type': 'button',
+    'data-button_type': 'button',
     'data-color': 'blue'
   };
 

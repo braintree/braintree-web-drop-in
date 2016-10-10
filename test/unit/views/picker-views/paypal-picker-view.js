@@ -107,7 +107,7 @@ describe('PayPalPickerView', function () {
       expect(paypalButton.getAttribute('src')).to.equal('https://www.paypalobjects.com/api/button.js');
       expect(paypalButton.getAttribute('data-merchant')).to.equal('braintree');
       expect(paypalButton.getAttribute('data-button')).to.equal('checkout');
-      expect(paypalButton.getAttribute('data-type')).to.equal('button');
+      expect(paypalButton.getAttribute('data-button_type')).to.equal('button');
       expect(paypalButton.getAttribute('data-color')).to.equal('blue');
     });
   });
