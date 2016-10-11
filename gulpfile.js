@@ -33,6 +33,9 @@ var config = {
       watch: 'src/scss/**/*.scss',
       output: 'dropin.css',
       min: 'dropin.min.css'
+    },
+    html: {
+      watch: 'src/html/**/*.html'
     }
   },
   dist: {
@@ -100,5 +103,5 @@ gulp.task('build', function (done) {
 });
 
 gulp.task('watch:integration', function () {
-  gulp.watch([config.src.js.watch, config.src.css.watch], ['build'])
+  gulp.watch([config.src.js.watch, config.src.css.watch, config.src.html.watch], ['build'])
 });
