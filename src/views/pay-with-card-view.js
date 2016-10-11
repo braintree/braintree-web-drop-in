@@ -141,7 +141,9 @@ PayWithCardView.prototype.tokenize = function () {
   if (formValid) {
     this.model.beginLoading();
 
-    this.hostedFieldsInstance.tokenize({vault: !isGuestCheckout(this.options.authorization)}, function (err, payload) {
+    this.hostedFieldsInstance.tokenize({
+      vault: !isGuestCheckout(this.options.authorization)
+    }, function (err, payload) {
       this.model.endLoading();
 
       if (err) {
