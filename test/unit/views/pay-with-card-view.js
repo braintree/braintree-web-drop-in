@@ -644,7 +644,8 @@ describe('PayWithCardView', function () {
         options: {
           client: {
             getConfiguration: fake.configuration
-          }
+          },
+          authorization: fake.configuration().authorization
         },
         showInlineError: PayWithCardView.prototype.showInlineError
       };
@@ -807,10 +808,24 @@ describe('PayWithCardView', function () {
       expect(this.context.model.beginLoading).to.not.be.called;
     });
 
-    it('calls tokenize', function () {
+    it('vaults on tokenization if not using guest checkout', function () {
+      var fakeClientToken = fake.configuration().gatewayConfiguration;
+
+      fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
+      fakeClientToken = btoa(JSON.stringify(fakeClientToken));
+      this.context.options.authorization = fakeClientToken;
+
       PayWithCardView.prototype.tokenize.call(this.context);
 
       expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: true}, this.sandbox.match.func);
+    });
+
+    it('does not vault on tokenization if using guest checkout', function () {
+      this.context.options.authorization = 'fake_tokenization_key';
+
+      PayWithCardView.prototype.tokenize.call(this.context);
+
+      expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: false}, this.sandbox.match.func);
     });
 
     it('clears fields after successful tokenization', function () {

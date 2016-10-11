@@ -99,8 +99,6 @@ gulp.task('build', function (done) {
   done);
 });
 
-gulp.task('build:integration', ['build']);
-
 gulp.task('watch:integration', function () {
   gulp.watch([config.src.js.watch, config.src.css.watch], ['build'])
 });

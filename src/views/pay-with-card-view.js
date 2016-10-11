@@ -7,6 +7,7 @@ var classlist = require('../lib/classlist');
 var errors = require('../errors');
 var hideUnsupportedCardIcons = require('../lib/hide-unsupported-card-icons');
 var hostedFields = require('braintree-web/hosted-fields');
+var isGuestCheckout = require('../lib/is-guest-checkout');
 
 function PayWithCardView() {
   BaseView.apply(this, arguments);
@@ -140,7 +141,9 @@ PayWithCardView.prototype.tokenize = function () {
   if (formValid) {
     this.model.beginLoading();
 
-    this.hostedFieldsInstance.tokenize({vault: true}, function (err, payload) {
+    this.hostedFieldsInstance.tokenize({
+      vault: !isGuestCheckout(this.options.authorization)
+    }, function (err, payload) {
       this.model.endLoading();
 
       if (err) {
