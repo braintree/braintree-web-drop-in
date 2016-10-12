@@ -16,42 +16,42 @@ Drop-in provides a payment method object containing the [payment method nonce](h
 
 1. Use `getActivePaymentMethod()` to get the payment method object at any time, such as a button click. This example assumes you want to get a payment method object when a `submitButton` is clicked.
 
-```js
-braintree.dropin.create({
-  authorization: 'CLIENT_AUTHORIZATION',
-  selector: '#dropin-container'
-}, function (err, dropinInstance) {
-  submitButton.addEventListener('click', function () {
-    var paymentMethod = dropinInstance.getActivePaymentMethod();
+  ```js
+  braintree.dropin.create({
+    authorization: 'CLIENT_AUTHORIZATION',
+    selector: '#dropin-container'
+  }, function (err, dropinInstance) {
+    submitButton.addEventListener('click', function () {
+      var paymentMethod = dropinInstance.getActivePaymentMethod();
 
-    if (paymentMethod) {
-      // Submit paymentMethod.nonce to your server
+      if (paymentMethod) {
+        // Submit paymentMethod.nonce to your server
+      }
     }
-  }
-});
-```
+  });
+  ```
 
 2. Use `paymentMethodAvailable` events to get the payment method object as soon as it becomes available, such as when a customer adds a new payment method or selects an existing one from the dropdown menu. If you are using the [Braintree Vault](https://articles.braintreepayments.com/control-panel/vault/overview), please note that this event will _not_ fire when Drop-in initially loads the vaulted payment methods.
 
-```js
-braintree.dropin.create({
-  authorization: 'CLIENT_AUTHORIZATION',
-  selector: '#dropin-container',
-}, function (err, dropinInstance) {
-  // If using the Braintree vault, get the active payment method first
-  var activePaymentMethod = dropinInstance.getActivePaymentMethod();
+  ```js
+  braintree.dropin.create({
+    authorization: 'CLIENT_AUTHORIZATION',
+    selector: '#dropin-container',
+  }, function (err, dropinInstance) {
+    // If using the Braintree vault, get the active payment method first
+    var activePaymentMethod = dropinInstance.getActivePaymentMethod();
 
-  dropinInstance.on('paymentMethodAvailable', function (paymentMethod) {
-    activePaymentMethod = paymentMethod;
-  });
+    dropinInstance.on('paymentMethodAvailable', function (paymentMethod) {
+      activePaymentMethod = paymentMethod;
+    });
 
-  submitButton.addEventListener('click', function () {
-    if (activePaymentMethod) {
-      // Submit activePaymentMethod.nonce to your server
+    submitButton.addEventListener('click', function () {
+      if (activePaymentMethod) {
+        // Submit activePaymentMethod.nonce to your server
+      }
     }
-  }
-});
-```
+  });
+  ```
 
 The structure of the credit card payment method objects that will be returned from Drop-in can be found [here](http://braintree.github.io/braintree-web/current/HostedFields.html#~tokenizePayload);
 
