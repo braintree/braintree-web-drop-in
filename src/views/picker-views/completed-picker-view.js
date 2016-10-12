@@ -1,7 +1,7 @@
 'use strict';
 
 var BasePickerView = require('./base-picker-view');
-var cardTypes = require('../../constants').cardTypes;
+var paymentMethodCardTypes = require('../../constants').paymentMethodCardTypes;
 var classlist = require('../../lib/classlist');
 var paymentMethodHTML = require('../../html/payment-method.html');
 
@@ -25,7 +25,7 @@ CompletedPickerView.prototype._initialize = function () {
 
   switch (this.paymentMethod.type) {
     case 'CreditCard':
-      this.html = this.html.replace(/@ICON/g, 'icon-' + cardTypes[this.paymentMethod.details.cardType]);
+      this.html = this.html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType]);
       this.html = this.html.replace(/@DETAIL/g, 'Ending in ••' + this.paymentMethod.details.lastTwo);
       this.html = this.html.replace(/@TYPE/g, this.paymentMethod.details.cardType);
       break;

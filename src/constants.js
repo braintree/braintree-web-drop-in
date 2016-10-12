@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  cardTypes: {
+  paymentMethodCardTypes: {
     Visa: 'visa',
     MasterCard: 'master-card',
     'American Express': 'american-express',
@@ -11,7 +11,7 @@ module.exports = {
     UnionPay: 'unionpay',
     Maestro: 'maestro'
   },
-  supportedCardTypes: {
+  configurationCardTypes: {
     visa: 'Visa',
     'master-card': 'MasterCard',
     'american-express': 'American Express',

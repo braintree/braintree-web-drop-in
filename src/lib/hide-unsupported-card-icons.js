@@ -1,15 +1,15 @@
 'use strict';
 
 var classlist = require('./classlist');
-var cardTypes = require('../constants').supportedCardTypes;
+var configurationCardTypes = require('../constants').configurationCardTypes;
 
 module.exports = function (element, supportedCardTypes) {
-  Object.keys(cardTypes).forEach(function (cardType) {
+  Object.keys(configurationCardTypes).forEach(function (paymentMethodCardType) {
     var cardIcon;
-    var cardNiceType = cardTypes[cardType];
+    var configurationCardType = configurationCardTypes[paymentMethodCardType];
 
-    if (supportedCardTypes.indexOf(cardNiceType) === -1 || cardType === 'unionpay') {
-      cardIcon = element.querySelector('.braintree-dropin__icon-card-' + cardType);
+    if (supportedCardTypes.indexOf(configurationCardType) === -1) {
+      cardIcon = element.querySelector('.braintree-dropin__icon-card-' + paymentMethodCardType);
       classlist.add(cardIcon, 'braintree-dropin__display--none');
     }
   });

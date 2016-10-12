@@ -2,7 +2,7 @@
 
 var BaseView = require('./base-view');
 var cardIconHTML = require('../html/card-icons.html');
-var cardTypes = require('../constants').supportedCardTypes;
+var configurationCardTypes = require('../constants').configurationCardTypes;
 var classlist = require('../lib/classlist');
 var errors = require('../errors');
 var hideUnsupportedCardIcons = require('../lib/hide-unsupported-card-icons');
@@ -115,7 +115,7 @@ PayWithCardView.prototype.tokenize = function () {
   var formValid = true;
   var state = this.hostedFieldsInstance.getState();
   var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
-  var cardType = cardTypes[state.cards[0].type];
+  var cardType = configurationCardTypes[state.cards[0].type];
 
   this.model.clearError();
 
