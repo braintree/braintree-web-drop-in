@@ -8,7 +8,7 @@ module.exports = function (element, supportedCardTypes) {
     var cardIcon;
     var cardNiceType = cardTypes[cardType];
 
-    if (supportedCardTypes.indexOf(cardNiceType) === -1) {
+    if (supportedCardTypes.indexOf(cardNiceType) === -1 || cardType === 'unionpay') {
       cardIcon = element.querySelector('.braintree-dropin__icon-card-' + cardType);
       classlist.add(cardIcon, 'braintree-dropin__display--none');
     }
