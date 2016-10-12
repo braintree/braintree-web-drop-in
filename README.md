@@ -12,9 +12,9 @@ Because we're still in beta, the API and designs are subject to change. If you h
 
 ## Basic usage
 
-Drop-in provides a payment method object containing the payment method nonce to send to your server. There are two ways to get this payment method object.
+Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. There are two ways to get this payment method object:
 
-Use `getActivePaymentMethod()` to get the payment method object at any time, such as a button click. This example assumes you want to get a payment method object when a `submitButton` is clicked.
+1. Use `getActivePaymentMethod()` to get the payment method object at any time, such as a button click. This example assumes you want to get a payment method object when a `submitButton` is clicked.
 
 ```js
 braintree.dropin.create({
@@ -31,14 +31,14 @@ braintree.dropin.create({
 });
 ```
 
-Use `paymentMethodAvailable` events to get the payment method object as soon as it becomes available. This event will _not_ be fired in the case that you are using a vaulted flow using a client token generated with a customer id.
+2. Use `paymentMethodAvailable` events to get the payment method object as soon as it becomes available, such as when a customer adds a new payment method or selects an existing one from the dropdown menu. If you are using the [Braintree Vault](https://articles.braintreepayments.com/control-panel/vault/overview), please note that this event will _not_ fire when Drop-in initially loads the vaulted payment methods.
 
 ```js
 braintree.dropin.create({
   authorization: 'CLIENT_AUTHORIZATION',
   selector: '#dropin-container',
 }, function (err, dropinInstance) {
-  // Make sure to get the first active payment method if you are using a vaulted flow
+  // If using the Braintree vault, get the active payment method first
   var activePaymentMethod = dropinInstance.getActivePaymentMethod();
 
   dropinInstance.on('paymentMethodAvailable', function (paymentMethod) {
