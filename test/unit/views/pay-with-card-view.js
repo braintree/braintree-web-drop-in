@@ -205,7 +205,7 @@ describe('PayWithCardView', function () {
     });
 
     it('hides unsupported card icons', function () {
-      var unsupportedCardTypes = ['unionpay', 'maestro'];
+      var unsupportedCardTypes = ['maestro'];
 
       PayWithCardView.prototype._initialize.call(this.context);
 
@@ -214,6 +214,27 @@ describe('PayWithCardView', function () {
 
         expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.true;
       }.bind(this));
+    });
+
+    it('does not show UnionPay icon even if it is supported', function () {
+      var unionPayCardIcon;
+
+      this.context.options.client.getConfiguration = function () {
+        return {
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['UnionPay']
+            }
+          }
+        };
+      };
+
+      PayWithCardView.prototype._initialize.call(this.context);
+
+      unionPayCardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-unionpay');
+
+      expect(unionPayCardIcon.classList.contains('braintree-dropin__display--none')).to.be.true;
     });
   });
 
