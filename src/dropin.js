@@ -1,11 +1,13 @@
 'use strict';
 
+var assign = require('./lib/assign').assign;
 var MainView = require('./views/main-view');
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var mainHTML = require('./html/main.html');
+var strings = require('./translations/');
 var svgHTML = require('./html/svgs.html');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
@@ -26,7 +28,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype.initialize = function (callback) {
-  var container;
+  var container, localizedStrings;
   var dropinInstance = this; // eslint-disable-line consistent-this
 
   this.injectStylesheet();
@@ -44,6 +46,12 @@ Dropin.prototype.initialize = function (callback) {
   } else if (container.innerHTML.trim()) {
     callback(new Error('options.selector must reference an empty DOM node.'));
     return;
+  }
+
+  this._strings = assign({}, strings.en);
+  if (this._options.language) {
+    localizedStrings = strings[this._options.language] || strings[this._options.language.split('_')[0]];
+    this._strings = assign(this._strings, localizedStrings);
   }
 
   this._dropinWrapper.innerHTML = svgHTML + mainHTML;

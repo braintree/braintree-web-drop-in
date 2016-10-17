@@ -246,6 +246,63 @@ describe('Dropin', function () {
 
       instance._model._emit('asyncDependenciesReady');
     });
+
+    it('loads strings by default', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance._strings.postalCodeLabel).to.equal('Postal Code');
+        done();
+      });
+    });
+
+    it('loads localized strings when options.language is specified', function (done) {
+      var instance;
+
+      this.dropinOptions.language = 'es';
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance._strings.postalCodeLabel).to.equal('Código Postal');
+        done();
+      });
+    });
+
+    it('loads localized strings when options.language is a supported locale ID', function (done) {
+      var instance;
+
+      this.dropinOptions.language = 'en_GB';
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance._strings.postalCodeLabel).to.equal('Postcode');
+        done();
+      });
+    });
+
+    it('loads supported language strings when options.language is a locale ID with an unsupported country', function (done) {
+      var instance;
+
+      this.dropinOptions.language = 'en_NA';
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance._strings.postalCodeLabel).to.equal('Postal Code');
+        done();
+      });
+    });
+
+    it('loads default strings when options.language is unknown', function (done) {
+      var instance;
+
+      this.dropinOptions.language = 'foo';
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance._strings.postalCodeLabel).to.equal('Postal Code');
+        done();
+      });
+    });
   });
 
   describe('getActivePaymentMethod', function () {
