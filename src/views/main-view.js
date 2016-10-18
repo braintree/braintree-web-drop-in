@@ -28,14 +28,16 @@ MainView.prototype._initialize = function () {
     element: this.getElementById(PayWithCardView.ID),
     mainView: this,
     model: this.model,
-    options: this.options
+    options: this.options,
+    strings: this.strings
   });
 
   this.paymentMethodPickerView = new PaymentMethodPickerView({
     element: this.getElementById(PaymentMethodPickerView.ID),
     model: this.model,
     mainView: this,
-    options: this.options
+    options: this.options,
+    strings: this.strings
   });
 
   this.views = {};

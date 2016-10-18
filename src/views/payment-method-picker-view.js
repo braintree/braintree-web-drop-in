@@ -42,7 +42,9 @@ PaymentMethodPickerView.prototype._initialize = function () {
     classlist.add(this.savedPaymentMethods, 'braintree-dropin__display--none');
     classlist.add(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
 
-    addPaymentMethodHeader.innerHTML = 'Change Payment Method';
+    addPaymentMethodHeader.innerHTML = this.strings.changePaymentMethod;
+  } else {
+    addPaymentMethodHeader.innerHTML = this.strings.addPaymentMethod;
   }
 
   this.views = [

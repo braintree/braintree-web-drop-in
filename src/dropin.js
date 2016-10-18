@@ -7,7 +7,7 @@ var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var mainHTML = require('./html/main.html');
-var strings = require('./translations');
+var translations = require('./translations');
 var svgHTML = require('./html/svgs.html');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
@@ -28,7 +28,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype.initialize = function (callback) {
-  var container, localizedStrings;
+  var container, strings, localizedStrings;
   var dropinInstance = this; // eslint-disable-line consistent-this
 
   this.injectStylesheet();
@@ -48,10 +48,10 @@ Dropin.prototype.initialize = function (callback) {
     return;
   }
 
-  this._strings = assign({}, strings.en);
+  strings = assign({}, translations.en);
   if (this._options.language) {
-    localizedStrings = strings[this._options.language] || strings[this._options.language.split('_')[0]];
-    this._strings = assign(this._strings, localizedStrings);
+    localizedStrings = translations[this._options.language] || translations[this._options.language.split('_')[0]];
+    strings = assign(strings, localizedStrings);
   }
 
   this._dropinWrapper.innerHTML = svgHTML + mainHTML;
@@ -74,7 +74,8 @@ Dropin.prototype.initialize = function (callback) {
       componentId: this._componentId,
       dropinWrapper: this._dropinWrapper,
       model: this._model,
-      options: this._options
+      options: this._options,
+      strings: strings
     };
 
     this.mainView = new MainView(mainViewOptions);

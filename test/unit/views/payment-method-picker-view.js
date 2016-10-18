@@ -10,6 +10,7 @@ var mainHTML = require('../../../src/html/main.html');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var paypal = require('braintree-web/paypal');
 var PayPalPickerView = require('../../../src/views/picker-views/paypal-picker-view');
+var strings = require('../../../src/translations/en');
 
 describe('PaymentMethodPickerView', function () {
   beforeEach(function () {
@@ -61,6 +62,7 @@ describe('PaymentMethodPickerView', function () {
           }
         },
         setActivePaymentMethod: this.sandbox.stub(),
+        strings: strings,
         toggleDrawer: this.sandbox.stub(),
         views: []
       };
