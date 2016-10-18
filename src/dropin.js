@@ -28,7 +28,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype.initialize = function (callback) {
-  var container, strings, localizedStrings;
+  var container, strings, localizedStrings, localizedHTML;
   var dropinInstance = this; // eslint-disable-line consistent-this
 
   this.injectStylesheet();
@@ -54,7 +54,13 @@ Dropin.prototype.initialize = function (callback) {
     strings = assign(strings, localizedStrings);
   }
 
-  this._dropinWrapper.innerHTML = svgHTML + mainHTML;
+  localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {
+    var stringValue = strings[stringKey];
+
+    return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
+  }, mainHTML);
+
+  this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(this._dropinWrapper);
 
   this.getVaultedPaymentMethods(function (paymentMethods) {

@@ -3,6 +3,7 @@
 var BasePickerView = require('../../../../src/views/picker-views/base-picker-view');
 var CompletedPickerView = require('../../../../src/views/picker-views/completed-picker-view');
 var DropinModel = require('../../../../src/dropin-model');
+var strings = require('../../../../src/translations/en');
 
 describe('CompletedPickerView', function () {
   describe('Constructor', function () {
@@ -32,7 +33,8 @@ describe('CompletedPickerView', function () {
         element: this.fakeCompletedPickerView,
         model: this.model,
         _onSelect: CompletedPickerView.prototype._onSelect,
-        paymentMethod: 'a-payment-method'
+        paymentMethod: 'a-payment-method',
+        strings: strings
       };
     });
 

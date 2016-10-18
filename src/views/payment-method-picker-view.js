@@ -42,9 +42,9 @@ PaymentMethodPickerView.prototype._initialize = function () {
     classlist.add(this.savedPaymentMethods, 'braintree-dropin__display--none');
     classlist.add(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
 
-    addPaymentMethodHeader.innerHTML = this.strings.changePaymentMethod;
+    addPaymentMethodHeader.textContent = this.strings.changePaymentMethod;
   } else {
-    addPaymentMethodHeader.innerHTML = this.strings.addPaymentMethod;
+    addPaymentMethodHeader.textContent = this.strings.addPaymentMethod;
   }
 
   this.views = [
@@ -94,7 +94,8 @@ PaymentMethodPickerView.prototype.toggleDrawer = function () {
 PaymentMethodPickerView.prototype.addCompletedPickerView = function (paymentMethod) {
   var completedPickerView = new CompletedPickerView({
     model: this.model,
-    paymentMethod: paymentMethod
+    paymentMethod: paymentMethod,
+    strings: this.strings
   });
 
   this.savedPaymentMethods.appendChild(completedPickerView.element);
