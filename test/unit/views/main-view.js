@@ -6,6 +6,7 @@ var DropinModel = require('../../../src/dropin-model');
 var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var fake = require('../../helpers/fake');
+var strings = require('../../../src/translations/en');
 var templateHTML = require('../../../src/html/main.html');
 
 describe('MainView', function () {
@@ -242,7 +243,8 @@ describe('MainView', function () {
   describe('showAlert', function () {
     beforeEach(function () {
       this.context = {
-        alert: document.createElement('div')
+        alert: document.createElement('div'),
+        strings: strings
       };
     });
 

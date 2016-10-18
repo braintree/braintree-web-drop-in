@@ -2,7 +2,6 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
-var errors = require('../errors');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
@@ -109,13 +108,19 @@ MainView.prototype.hideLoadingIndicator = function () {
   }.bind(this), 1000);
 };
 
+function snakeCaseToCamelCase(s) {
+  return s.toLowerCase().replace(/(\_\w)/g, function (m) {
+    return m[1].toUpperCase();
+  });
+}
+
 MainView.prototype.showAlert = function (error) {
   var errorMessage;
 
-  if (error && error.code && errors[error.code]) {
-    errorMessage = errors[error.code];
+  if (error && error.code && this.strings[snakeCaseToCamelCase(error.code) + 'Error']) {
+    errorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
   } else {
-    errorMessage = error.message || errors.GENERIC;
+    errorMessage = error.message || this.strings.genericError;
   }
 
   classlist.remove(this.alert, 'braintree-dropin__display--none');
