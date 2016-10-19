@@ -4,7 +4,6 @@ var BaseView = require('./base-view');
 var cardIconHTML = require('../html/card-icons.html');
 var configurationCardTypes = require('../constants').configurationCardTypes;
 var classlist = require('../lib/classlist');
-var errors = require('../errors');
 var hideUnsupportedCardIcons = require('../lib/hide-unsupported-card-icons');
 var hostedFields = require('braintree-web/hosted-fields');
 var isGuestCheckout = require('../lib/is-guest-checkout');
@@ -123,10 +122,10 @@ PayWithCardView.prototype.tokenize = function () {
     var field = state.fields[key];
 
     if (field.isEmpty) {
-      this.showInlineError(key, errors.FIELD_EMPTY[key]);
+      this.showInlineError(key, this.strings['fieldEmptyFor' + capitalize(key)]);
       formValid = false;
     } else if (!field.isValid) {
-      this.showInlineError(key, errors.FIELD_INVALID[key]);
+      this.showInlineError(key, this.strings['fieldInvalidFor' + capitalize(key)]);
       formValid = false;
     }
   }.bind(this));
@@ -134,7 +133,7 @@ PayWithCardView.prototype.tokenize = function () {
   cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
 
   if (!cardTypeSupported) {
-    this.showInlineError('number', errors.UNSUPPORTED_CARD_TYPE);
+    this.showInlineError('number', this.strings.unsupportedCardTypeError);
     return;
   }
 
@@ -243,12 +242,16 @@ PayWithCardView.prototype._onValidityChangeEvent = function (event) {
   if (field.isPotentiallyValid) {
     this.hideInlineError(event.emittedBy);
   } else {
-    this.showInlineError(event.emittedBy, errors.FIELD_INVALID[event.emittedBy]);
+    this.showInlineError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
   }
 };
 
 function camelCaseToSnakeCase(string) {
   return string.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
+function capitalize(string) {
+  return string[0].toUpperCase() + string.substr(1);
 }
 
 module.exports = PayWithCardView;

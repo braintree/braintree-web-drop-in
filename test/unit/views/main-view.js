@@ -6,6 +6,7 @@ var DropinModel = require('../../../src/dropin-model');
 var PayWithCardView = require('../../../src/views/pay-with-card-view');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var fake = require('../../helpers/fake');
+var strings = require('../../../src/translations/en');
 var templateHTML = require('../../../src/html/main.html');
 
 describe('MainView', function () {
@@ -48,7 +49,10 @@ describe('MainView', function () {
           }
         },
         setActiveView: this.sandbox.stub(),
-        showLoadingIndicator: function () {}
+        showLoadingIndicator: function () {},
+        strings: {
+          foo: 'bar'
+        }
       };
 
       this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
@@ -63,10 +67,26 @@ describe('MainView', function () {
       expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PayWithCardView));
     });
 
+    it('passes localization strings to the PayWithCardView', function () {
+      this.context.addView = function (view) {
+        if (view instanceof PayWithCardView) {
+          expect(view.strings.foo).to.equal('bar');
+        }
+      };
+
+      MainView.prototype._initialize.call(this.context);
+    });
+
     it('creates a PaymentMethodPickerView', function () {
       MainView.prototype._initialize.call(this.context);
 
       expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PaymentMethodPickerView));
+    });
+
+    it('passes localization strings to the PaymentMethodPickerView', function () {
+      MainView.prototype._initialize.call(this.context);
+
+      expect(this.context.paymentMethodPickerView.strings.foo).to.equal('bar');
     });
 
     it('adds a listener for changeActivePaymentMethod', function () {
@@ -223,7 +243,8 @@ describe('MainView', function () {
   describe('showAlert', function () {
     beforeEach(function () {
       this.context = {
-        alert: document.createElement('div')
+        alert: document.createElement('div'),
+        strings: strings
       };
     });
 

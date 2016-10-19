@@ -1,11 +1,13 @@
 'use strict';
 
+var assign = require('./lib/assign').assign;
 var MainView = require('./views/main-view');
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var mainHTML = require('./html/main.html');
+var translations = require('./translations');
 var svgHTML = require('./html/svgs.html');
 var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
@@ -26,7 +28,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype.initialize = function (callback) {
-  var container;
+  var container, strings, localizedStrings, localizedHTML;
   var dropinInstance = this; // eslint-disable-line consistent-this
 
   this.injectStylesheet();
@@ -46,7 +48,19 @@ Dropin.prototype.initialize = function (callback) {
     return;
   }
 
-  this._dropinWrapper.innerHTML = svgHTML + mainHTML;
+  strings = assign({}, translations.en);
+  if (this._options.locale) {
+    localizedStrings = translations[this._options.locale] || translations[this._options.locale.split('_')[0]];
+    strings = assign(strings, localizedStrings);
+  }
+
+  localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {
+    var stringValue = strings[stringKey];
+
+    return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
+  }, mainHTML);
+
+  this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(this._dropinWrapper);
 
   this.getVaultedPaymentMethods(function (paymentMethods) {
@@ -66,7 +80,8 @@ Dropin.prototype.initialize = function (callback) {
       componentId: this._componentId,
       dropinWrapper: this._dropinWrapper,
       model: this._model,
-      options: this._options
+      options: this._options,
+      strings: strings
     };
 
     this.mainView = new MainView(mainViewOptions);

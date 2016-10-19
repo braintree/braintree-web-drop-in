@@ -10,6 +10,7 @@ var mainHTML = require('../../../src/html/main.html');
 var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var paypal = require('braintree-web/paypal');
 var PayPalPickerView = require('../../../src/views/picker-views/paypal-picker-view');
+var strings = require('../../../src/translations/en');
 
 describe('PaymentMethodPickerView', function () {
   beforeEach(function () {
@@ -61,6 +62,7 @@ describe('PaymentMethodPickerView', function () {
           }
         },
         setActivePaymentMethod: this.sandbox.stub(),
+        strings: strings,
         toggleDrawer: this.sandbox.stub(),
         views: []
       };
@@ -231,7 +233,8 @@ describe('PaymentMethodPickerView', function () {
       };
       this.completedPickerView = new CompletedPickerView({
         model: new DropinModel(),
-        paymentMethod: this.paymentMethod
+        paymentMethod: this.paymentMethod,
+        strings: strings
       });
 
       this.context = {
@@ -260,7 +263,8 @@ describe('PaymentMethodPickerView', function () {
       };
       var completedPickerView2 = new CompletedPickerView({
         model: new DropinModel(),
-        paymentMethod: paymentMethod2
+        paymentMethod: paymentMethod2,
+        strings: strings
       });
 
       this.context.views = [this.completedPickerView, completedPickerView2];
@@ -287,7 +291,8 @@ describe('PaymentMethodPickerView', function () {
       };
       var completedPickerView2 = new CompletedPickerView({
         model: new DropinModel(),
-        paymentMethod: paymentMethod2
+        paymentMethod: paymentMethod2,
+        strings: strings
       });
 
       this.context.views = [this.completedPickerView, completedPickerView2];
@@ -325,6 +330,7 @@ describe('PaymentMethodPickerView', function () {
     beforeEach(function () {
       this.context = {
         savedPaymentMethods: this.element.querySelector('[data-braintree-id="saved-payment-methods"]'),
+        strings: strings,
         views: []
       };
     });
@@ -344,6 +350,13 @@ describe('PaymentMethodPickerView', function () {
 
       expect(this.context.views).to.have.a.lengthOf(1);
       expect(this.context.views[0]).to.be.an.instanceOf(CompletedPickerView);
+    });
+
+    it('passes localized strings to the CompletedPickerView', function () {
+      PaymentMethodPickerView.prototype.addCompletedPickerView.call(this.context, {});
+
+      expect(this.context.views).to.have.a.lengthOf(1);
+      expect(this.context.views[0].strings).to.equal(this.context.strings);
     });
   });
 

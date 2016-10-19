@@ -246,6 +246,63 @@ describe('Dropin', function () {
 
       instance._model._emit('asyncDependenciesReady');
     });
+
+    it('loads strings by default', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance.mainView.strings.postalCodeLabel).to.equal('Postal Code');
+        done();
+      });
+    });
+
+    it('loads localized strings into mainView when options.locale is specified', function (done) {
+      var instance;
+
+      this.dropinOptions.locale = 'es';
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance.mainView.strings.postalCodeLabel).to.equal('Código Postal');
+        done();
+      });
+    });
+
+    it('loads localized strings into mainView when options.locale is a supported locale ID', function (done) {
+      var instance;
+
+      this.dropinOptions.locale = 'en_GB';
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance.mainView.strings.postalCodeLabel).to.equal('Postcode');
+        done();
+      });
+    });
+
+    it('loads supported localized strings into mainView when options.locale is a locale ID with an unsupported country', function (done) {
+      var instance;
+
+      this.dropinOptions.locale = 'en_NA';
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance.mainView.strings.postalCodeLabel).to.equal('Postal Code');
+        done();
+      });
+    });
+
+    it('loads default strings into mainView when options.locale is unknown', function (done) {
+      var instance;
+
+      this.dropinOptions.locale = 'foo';
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        expect(instance.mainView.strings.postalCodeLabel).to.equal('Postal Code');
+        done();
+      });
+    });
   });
 
   describe('getActivePaymentMethod', function () {

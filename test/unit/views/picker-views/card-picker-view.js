@@ -4,6 +4,7 @@ var BasePickerView = require('../../../../src/views/picker-views/base-picker-vie
 var CardPickerView = require('../../../../src/views/picker-views/card-picker-view');
 var fake = require('../../../helpers/fake');
 var PayWithCardView = require('../../../../src/views/pay-with-card-view');
+var strings = require('../../../../src/translations/en');
 
 describe('CardPickerView', function () {
   describe('Constructor', function () {
@@ -46,7 +47,8 @@ describe('CardPickerView', function () {
               return fake.configuration();
             }
           }
-        }
+        },
+        strings: strings
       };
     });
 

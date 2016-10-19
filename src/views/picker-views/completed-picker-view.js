@@ -26,13 +26,13 @@ CompletedPickerView.prototype._initialize = function () {
   switch (this.paymentMethod.type) {
     case 'CreditCard':
       this.html = this.html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType]);
-      this.html = this.html.replace(/@DETAIL/g, 'Ending in ••' + this.paymentMethod.details.lastTwo);
-      this.html = this.html.replace(/@TYPE/g, this.paymentMethod.details.cardType);
+      this.html = this.html.replace(/@DETAIL/g, this.strings.endingIn + this.paymentMethod.details.lastTwo);
+      this.html = this.html.replace(/@TYPE/g, this.strings[this.paymentMethod.details.cardType]);
       break;
     case 'PayPalAccount':
       this.html = this.html.replace(/@ICON/g, 'logoPayPal');
       this.html = this.html.replace(/@DETAIL/g, this.paymentMethod.details.email);
-      this.html = this.html.replace(/@TYPE/g, 'PayPal');
+      this.html = this.html.replace(/@TYPE/g, this.strings.PayPal);
       break;
     default:
       break;

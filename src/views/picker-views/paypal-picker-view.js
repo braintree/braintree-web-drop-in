@@ -22,7 +22,7 @@ PayPalPickerView.prototype.constructor = PayPalPickerView;
 PayPalPickerView.prototype._initialize = function () {
   BasePickerView.prototype._initialize.apply(this, arguments);
 
-  this.element.innerHTML = paypalHTML;
+  this.element.innerHTML = paypalHTML.replace(/{{PayPal}}/g, this.strings.PayPal);
   this.model.asyncDependencyStarting();
   this._createPayPalButton();
 

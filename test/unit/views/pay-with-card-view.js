@@ -3,11 +3,11 @@
 var BaseView = require('../../../src/views/base-view');
 var classlist = require('../../../src/lib/classlist');
 var DropinModel = require('../../../src/dropin-model');
-var errors = require('../../../src/errors');
 var fake = require('../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var mainHTML = require('../../../src/html/main.html');
 var PayWithCardView = require('../../../src/views/pay-with-card-view');
+var strings = require('../../../src/translations/en');
 
 describe('PayWithCardView', function () {
   beforeEach(function () {
@@ -265,6 +265,7 @@ describe('PayWithCardView', function () {
             request: this.sandbox.spy()
           }
         },
+        strings: strings,
         tokenize: PayWithCardView.prototype.tokenize,
         _onBlurEvent: function () {},
         _onCardTypeChangeEvent: function () {},
@@ -588,7 +589,7 @@ describe('PayWithCardView', function () {
         PayWithCardView.prototype._initialize.call(this.context);
 
         expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
-        expect(numberInlineError.textContent).to.equal(errors.FIELD_INVALID.number);
+        expect(numberInlineError.textContent).to.equal('This card number is not valid.');
       });
 
       it('hides the inline error if a field is potentially valid', function () {
@@ -668,7 +669,8 @@ describe('PayWithCardView', function () {
           },
           authorization: fake.configuration().authorization
         },
-        showInlineError: PayWithCardView.prototype.showInlineError
+        showInlineError: PayWithCardView.prototype.showInlineError,
+        strings: strings
       };
     });
 
@@ -753,7 +755,7 @@ describe('PayWithCardView', function () {
       PayWithCardView.prototype.tokenize.call(this.context);
 
       expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(numberInlineError.textContent).to.equal(errors.UNSUPPORTED_CARD_TYPE);
+      expect(numberInlineError.textContent).to.equal('This card type is not supported. Please try another card.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
@@ -776,7 +778,7 @@ describe('PayWithCardView', function () {
       PayWithCardView.prototype.tokenize.call(this.context);
 
       expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(numberInlineError.textContent).to.equal(errors.FIELD_EMPTY.number);
+      expect(numberInlineError.textContent).to.equal('Please fill out a number.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
@@ -798,7 +800,7 @@ describe('PayWithCardView', function () {
       PayWithCardView.prototype.tokenize.call(this.context);
 
       expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
-      expect(numberInlineError.textContent).to.equal(errors.FIELD_INVALID.number);
+      expect(numberInlineError.textContent).to.equal('This card number is not valid.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 

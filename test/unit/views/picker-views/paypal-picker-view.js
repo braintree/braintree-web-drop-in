@@ -7,6 +7,7 @@ var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var paypal = require('braintree-web/paypal');
 var paypalHTML = require('../../../../src/html/paypal-picker.html');
+var strings = require('../../../../src/translations/en');
 
 describe('PayPalPickerView', function () {
   beforeEach(function () {
@@ -45,7 +46,8 @@ describe('PayPalPickerView', function () {
             getConfiguration: fake.configuration,
             request: this.sandbox.spy()
           }
-        }
+        },
+        strings: strings
       };
 
       this.sandbox.stub(paypal, 'create').yields(null, {});
@@ -118,11 +120,12 @@ describe('PayPalPickerView', function () {
         _createPayPalButton: PayPalPickerView.prototype._createPayPalButton,
         element: this.fakePayPalPickerView,
         getElementById: BaseView.prototype.getElementById,
+        model: new DropinModel(),
         _onSelect: PayPalPickerView.prototype._onSelect,
         options: {
           paypal: {}
         },
-        model: new DropinModel()
+        strings: strings
       };
     });
 

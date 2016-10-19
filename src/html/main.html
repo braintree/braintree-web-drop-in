@@ -14,7 +14,7 @@
         <div data-braintree-id="active-payment-method" class="braintree-dropin__header braintree-dropin__active-payment-method">
         </div>
 
-        <div data-braintree-id="choose-payment-method" class="braintree-dropin__header braintree-dropin__choose-payment-method braintree-dropin__option--default__text">Choose a payment method</div>
+        <div data-braintree-id="choose-payment-method" class="braintree-dropin__header braintree-dropin__choose-payment-method braintree-dropin__option--default__text">{{choosePaymentMethod}}</div>
         <div class="braintree-dropin__header braintree-dropin__pay-with-card braintree-dropin__option--default__text">Card</div>
 
         <svg height="24" width="24" data-braintree-id="disclosure-arrow">
@@ -24,9 +24,9 @@
     </div>
 
     <div data-braintree-id="drawer" class="braintree-dropin__drawer">
-      <h2 data-braintree-id="saved-payment-methods-header" class="braintree-dropin__drawer-header braintree-dropin__display--none">Saved Payment Methods</h2>
+      <h2 data-braintree-id="saved-payment-methods-header" class="braintree-dropin__drawer-header braintree-dropin__display--none">{{savedPaymentMethods}}</h2>
       <ul data-braintree-id="saved-payment-methods" class="braintree-dropin__drawer-list"></ul>
-      <h2 data-braintree-id="add-payment-method-header" class="braintree-dropin__drawer-header">Add A Payment Method</h2>
+      <h2 data-braintree-id="add-payment-method-header" class="braintree-dropin__drawer-header"><!-- set by JavaScript --></h2>
       <ul data-braintree-id="enabled-payment-methods" class="braintree-dropin__drawer-list"></ul>
     </div>
   </div>
@@ -39,7 +39,7 @@
     <div data-braintree-id="pay-with-card" class="braintree-dropin__sheet braintree-dropin__pay-with-card braintree-dropin__form">
       <div data-braintree-id="card-view-icons"></div>
       <div class="braintree-dropin__form-card-field">
-        <label class="braintree-dropin__form-label braintree-dropin__form-label--relative">Card Number
+        <label class="braintree-dropin__form-label braintree-dropin__form-label--relative">{{cardNumberLabel}}
           <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-number">
             <div data-braintree-id="card-number-icon" class="braintree-dropin__form-icon--absolute braintree-dropin__hide">
               <svg height="28" width="48" class="braintree-dropin__icon-card">
@@ -52,16 +52,16 @@
       </div>
 
       <div class="braintree-dropin__form-card-field">
-        <label class="braintree-dropin__form-label">Expiration Date
-          <span class="braintree-form__descriptor">(MM/YY)</span>
+        <label class="braintree-dropin__form-label">{{expirationDateLabel}}
+          <span class="braintree-form__descriptor">{{expirationDateLabelSubheading}}</span>
           <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-expiration"></div>
         </label>
         <div data-braintree-id="expiration-date-inline-error" class="braintree-dropin__form-inline-error braintree-dropin__display--none"></div>
       </div>
 
       <div data-braintree-id="cvv-container" class="braintree-dropin__form-card-field">
-        <label class="braintree-dropin__form-label braintree-dropin__form-label--relative">CVV
-          <span data-braintree-id="cvv-label-descriptor" class="braintree-form__descriptor">(3 digits)</span>
+        <label class="braintree-dropin__form-label braintree-dropin__form-label--relative">{{cvvLabel}}
+          <span data-braintree-id="cvv-label-descriptor" class="braintree-form__descriptor">{{cvvThreeDigitLabelSubheading}}</span>
           <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-cvv"></div>
             <div data-braintree-id="cvv-icon" class="braintree-dropin__form-icon--absolute braintree-dropin__hide">
               <svg height="28" width="48" class="braintree-dropin__icon-card">
@@ -73,7 +73,7 @@
       </div>
 
       <div data-braintree-id="postal-code-container" class="braintree-dropin__form-card-field">
-        <label class="braintree-dropin__form-label">Postal Code
+        <label class="braintree-dropin__form-label">{{postalCodeLabel}}
           <div class="braintree-dropin__form-fields braintree-dropin__form-fields--hosted braintree-dropin__form-postal-code"></div>
         </label>
         <div data-braintree-id="postal-code-inline-error" class="braintree-dropin__form-inline-error braintree-dropin__display--none"></div>

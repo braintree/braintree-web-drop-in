@@ -2,7 +2,6 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
-var errors = require('../errors');
 var PaymentMethodPickerView = require('./payment-method-picker-view');
 var PayWithCardView = require('./pay-with-card-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
@@ -28,14 +27,16 @@ MainView.prototype._initialize = function () {
     element: this.getElementById(PayWithCardView.ID),
     mainView: this,
     model: this.model,
-    options: this.options
+    options: this.options,
+    strings: this.strings
   });
 
   this.paymentMethodPickerView = new PaymentMethodPickerView({
     element: this.getElementById(PaymentMethodPickerView.ID),
     model: this.model,
     mainView: this,
-    options: this.options
+    options: this.options,
+    strings: this.strings
   });
 
   this.views = {};
@@ -107,13 +108,19 @@ MainView.prototype.hideLoadingIndicator = function () {
   }.bind(this), 1000);
 };
 
+function snakeCaseToCamelCase(s) {
+  return s.toLowerCase().replace(/(\_\w)/g, function (m) {
+    return m[1].toUpperCase();
+  });
+}
+
 MainView.prototype.showAlert = function (error) {
   var errorMessage;
 
-  if (error && error.code && errors[error.code]) {
-    errorMessage = errors[error.code];
+  if (error && error.code && this.strings[snakeCaseToCamelCase(error.code) + 'Error']) {
+    errorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
   } else {
-    errorMessage = error.message || errors.GENERIC;
+    errorMessage = error.message || this.strings.genericError;
   }
 
   classlist.remove(this.alert, 'braintree-dropin__display--none');

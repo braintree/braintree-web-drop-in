@@ -42,7 +42,9 @@ PaymentMethodPickerView.prototype._initialize = function () {
     classlist.add(this.savedPaymentMethods, 'braintree-dropin__display--none');
     classlist.add(savedPaymentMethodsHeader, 'braintree-dropin__display--none');
 
-    addPaymentMethodHeader.innerHTML = 'Change Payment Method';
+    addPaymentMethodHeader.textContent = this.strings.changePaymentMethod;
+  } else {
+    addPaymentMethodHeader.textContent = this.strings.addPaymentMethod;
   }
 
   this.views = [
@@ -55,7 +57,8 @@ PaymentMethodPickerView.prototype._initialize = function () {
       pickerView = new PickerView({
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        options: this.options,
+        strings: this.strings
       });
       enabledPaymentMethods.appendChild(pickerView.element);
 
@@ -92,7 +95,8 @@ PaymentMethodPickerView.prototype.toggleDrawer = function () {
 PaymentMethodPickerView.prototype.addCompletedPickerView = function (paymentMethod) {
   var completedPickerView = new CompletedPickerView({
     model: this.model,
-    paymentMethod: paymentMethod
+    paymentMethod: paymentMethod,
+    strings: this.strings
   });
 
   this.savedPaymentMethods.appendChild(completedPickerView.element);
