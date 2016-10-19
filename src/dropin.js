@@ -49,8 +49,8 @@ Dropin.prototype.initialize = function (callback) {
   }
 
   strings = assign({}, translations.en);
-  if (this._options.language) {
-    localizedStrings = translations[this._options.language] || translations[this._options.language.split('_')[0]];
+  if (this._options.locale) {
+    localizedStrings = translations[this._options.locale] || translations[this._options.locale.split('_')[0]];
     strings = assign(strings, localizedStrings);
   }
 

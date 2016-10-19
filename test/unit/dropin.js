@@ -256,10 +256,10 @@ describe('Dropin', function () {
       });
     });
 
-    it('loads localized strings into mainView when options.language is specified', function (done) {
+    it('loads localized strings into mainView when options.locale is specified', function (done) {
       var instance;
 
-      this.dropinOptions.language = 'es';
+      this.dropinOptions.locale = 'es';
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
@@ -268,10 +268,10 @@ describe('Dropin', function () {
       });
     });
 
-    it('loads localized strings into mainView when options.language is a supported locale ID', function (done) {
+    it('loads localized strings into mainView when options.locale is a supported locale ID', function (done) {
       var instance;
 
-      this.dropinOptions.language = 'en_GB';
+      this.dropinOptions.locale = 'en_GB';
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
@@ -280,10 +280,10 @@ describe('Dropin', function () {
       });
     });
 
-    it('loads supported language strings into mainView when options.language is a locale ID with an unsupported country', function (done) {
+    it('loads supported localized strings into mainView when options.locale is a locale ID with an unsupported country', function (done) {
       var instance;
 
-      this.dropinOptions.language = 'en_NA';
+      this.dropinOptions.locale = 'en_NA';
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
@@ -292,10 +292,10 @@ describe('Dropin', function () {
       });
     });
 
-    it('loads default strings into mainView when options.language is unknown', function (done) {
+    it('loads default strings into mainView when options.locale is unknown', function (done) {
       var instance;
 
-      this.dropinOptions.language = 'foo';
+      this.dropinOptions.locale = 'foo';
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
