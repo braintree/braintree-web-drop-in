@@ -31,8 +31,8 @@ module.exports = {
   postalCodeLabel: 'Postal Code',
   // Payment Method descriptions
   endingIn: 'Ending in ••',
-  card: 'Card',
-  paypal: 'PayPal',
+  Card: 'Card',
+  PayPal: 'PayPal',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',
