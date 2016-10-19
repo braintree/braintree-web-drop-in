@@ -57,7 +57,8 @@ PaymentMethodPickerView.prototype._initialize = function () {
       pickerView = new PickerView({
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        options: this.options,
+        strings: this.strings
       });
       enabledPaymentMethods.appendChild(pickerView.element);
 

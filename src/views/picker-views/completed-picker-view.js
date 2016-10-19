@@ -32,7 +32,7 @@ CompletedPickerView.prototype._initialize = function () {
     case 'PayPalAccount':
       this.html = this.html.replace(/@ICON/g, 'logoPayPal');
       this.html = this.html.replace(/@DETAIL/g, this.paymentMethod.details.email);
-      this.html = this.html.replace(/@TYPE/g, this.strings.PayPal);
+      this.html = this.html.replace(/@TYPE/g, this.strings.paypal);
       break;
     default:
       break;

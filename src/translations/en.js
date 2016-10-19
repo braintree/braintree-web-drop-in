@@ -32,7 +32,7 @@ module.exports = {
   // Payment Method descriptions
   endingIn: 'Ending in ••',
   card: 'Card',
-  PayPal: 'PayPal',
+  paypal: 'PayPal',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',

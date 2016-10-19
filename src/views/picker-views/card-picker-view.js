@@ -23,7 +23,7 @@ CardPickerView.prototype._initialize = function () {
 
   BasePickerView.prototype._initialize.apply(this, arguments);
 
-  this.element.innerHTML = cardHTML;
+  this.element.innerHTML = cardHTML.replace(/{{card}}/g, this.strings.card);
 
   cardIcons = this.getElementById('card-picker-icons');
   cardIcons.innerHTML = cardIconHTML;
