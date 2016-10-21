@@ -28,6 +28,8 @@
     "gulp-streamify": "1.0.2",
     "gulp-uglify": "2.0.0",
     "is-uuid": "1.0.2",
+    "jsdoc": "3.4.0",
+    "jsdoc-template": "braintree/jsdoc-template#1.2.6",
     "karma": "0.13.22",
     "karma-browserify": "5.0.5",
     "karma-chai-sinon": "0.1.5",
