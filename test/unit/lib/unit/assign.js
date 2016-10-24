@@ -1,6 +1,6 @@
 'use strict';
 
-var assignModule = require('../../../src/lib/assign');
+var assignModule = require('../../../../src/lib/assign');
 
 describe('assign', function () {
   describe('exported function', function () {
