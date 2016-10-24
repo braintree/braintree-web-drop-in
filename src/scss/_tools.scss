@@ -1,12 +1,12 @@
 .braintree-dropin__desaturate {
-    opacity: 0.6;
-    transition: filter $time-faster;
-    -webkit-filter: grayscale(1);
-    /* Google Chrome, Safari 6+ & Opera 15+ */
-    filter: gray;
-    /* IE6-9 */
-    filter: grayscale(1);
-    /* Microsoft Edge and Firefox 35+ */
+  opacity: 0.6;
+  transition: filter $time-faster;
+  -webkit-filter: grayscale(1);
+  /* Google Chrome, Safari 6+ & Opera 15+ */
+  filter: gray;
+  /* IE6-9 */
+  filter: grayscale(1);
+  /* Microsoft Edge and Firefox 35+ */
 }
 
 .braintree-dropin__display--none {
