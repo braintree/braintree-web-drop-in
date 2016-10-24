@@ -44,7 +44,7 @@
   <input type="submit" value="Pay">
 </form>
 
-<div id="results"></div>
+<pre id="results"></pre>
 
 <script src="http://localhost:9000/web/dropin/dev/js/dropin.min.js"></script>
 
@@ -73,7 +73,7 @@
       event.preventDefault();
 
       if (paymentMethod) {
-        results.textContent = 'Submit this payment method nonce to your server: ' + paymentMethod.nonce;
+        results.textContent = JSON.stringify(paymentMethod, null, 2);
       } else {
         results.textContent = 'No payment method nonce available.';
       }
