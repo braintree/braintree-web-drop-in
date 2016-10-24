@@ -1,5 +1,7 @@
 'use strict';
 
+/* globals __dirname */
+
 var browserify = require('browserify');
 var stringify = require('stringify');
 var cleanCSS = require('gulp-clean-css');
@@ -15,6 +17,10 @@ var size = require('gulp-size');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
 var uglify = require('gulp-uglify');
+var http = require('http');
+var serveStatic = require('serve-static');
+var finalhandler = require('finalhandler');
+var gutil = require('gulp-util');
 var VERSION = require('./package.json').version;
 
 var DIST_PATH = 'dist/web/dropin/' + VERSION;
@@ -41,6 +47,18 @@ var config = {
   dist: {
     js: DIST_PATH + '/js',
     css: DIST_PATH + '/css'
+  },
+  serve: {
+    assets: {
+      name: 'Asset server',
+      path: 'dist',
+      port: 9000
+    },
+    demo: {
+      name: 'Demo app',
+      path: 'test/app',
+      port: 4567
+    }
   }
 };
 
@@ -102,6 +120,31 @@ gulp.task('build', function (done) {
   done);
 });
 
-gulp.task('watch:integration', function () {
-  gulp.watch([config.src.js.watch, config.src.css.watch, config.src.html.watch], ['build'])
+function serveTask(options) {
+  var serve = serveStatic(path.join(__dirname, options.path));
+
+  return function () {
+    http.createServer(function (req, res) {
+      serve(req, res, finalhandler(req, res));
+    }).listen(options.port, function () {
+      gutil.log(gutil.colors.magenta(options.name), 'started on port', gutil.colors.yellow(options.port));
+    });
+  };
+}
+
+gulp.task('serve:assets', serveTask(config.serve.assets));
+gulp.task('serve:demo', serveTask(config.serve.demo));
+
+gulp.task('development', [
+  'build',
+  'watch',
+  'serve:assets',
+  'serve:demo'
+]);
+
+gulp.task('watch', function () {
+  gulp.watch([config.src.js.watch, config.src.html.watch], ['build:js']);
+  gulp.watch([config.src.css.watch], ['build:css']);
 });
+
+gulp.task('watch:integration', ['watch']);
