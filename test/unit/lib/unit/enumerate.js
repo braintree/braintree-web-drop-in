@@ -1,6 +1,6 @@
 'use strict';
 
-var enumerate = require('../../../src/lib/enumerate');
+var enumerate = require('../../../../src/lib/enumerate');
 
 describe('enumerate', function () {
   it('sets keys equal to their values', function () {
