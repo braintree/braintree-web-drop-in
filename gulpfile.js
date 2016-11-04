@@ -1,5 +1,7 @@
 'use strict';
 
+/* globals __dirname */
+
 var browserify = require('browserify');
 var stringify = require('stringify');
 var cleanCSS = require('gulp-clean-css');
@@ -16,6 +18,10 @@ var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
 var uglify = require('gulp-uglify');
 var spawn = require('child_process').spawn;
+var connect = require('connect');
+var serveStatic = require('serve-static');
+var finalhandler = require('finalhandler');
+var gutil = require('gulp-util');
 var VERSION = require('./package.json').version;
 
 var DIST_PATH = 'dist/web/dropin/' + VERSION;
@@ -47,6 +53,11 @@ var config = {
     js: DIST_PATH + '/js',
     css: DIST_PATH + '/css',
     jsdoc: DIST_PATH + '/jsdoc'
+  },
+  server: {
+    assetsPath: 'dist',
+    demoPath: 'test/app',
+    port: 4567
   }
 };
 
@@ -155,7 +166,25 @@ gulp.task('build:jsdoc', function (done) {
   }, done);
 });
 
-gulp.task('watch:integration', function () {
-  gulp.watch([config.src.js.watch, config.src.css.watch, config.src.html.watch], ['build'])
+gulp.task('demoapp', function () {
+  connect()
+    .use(serveStatic(path.join(__dirname, config.server.demoPath)))
+    .use(serveStatic(path.join(__dirname, config.server.assetsPath)))
+    .listen(config.server.port, function () {
+      gutil.log(gutil.colors.magenta('Demo app'), 'started on port', gutil.colors.yellow(config.server.port));
+    });
+});
+
+gulp.task('development', [
+  'build',
+  'watch',
+  'demoapp'
+]);
+
+gulp.task('watch', function () {
+  gulp.watch([config.src.js.watch, config.src.html.watch], ['build:js']);
+  gulp.watch([config.src.css.watch], ['build:css']);
   gulp.watch([config.src.js.watch, config.jsdoc.watch], ['jsdoc']);
 });
+
+gulp.task('watch:integration', ['watch']);

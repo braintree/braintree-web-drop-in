@@ -1,7 +1,7 @@
 'use strict';
 
-var cardIcons = require('../../../src/html/card-icons.html');
-var hideUnsupportedCardIcons = require('../../../src/lib/hide-unsupported-card-icons');
+var cardIcons = require('../../../../src/html/card-icons.html');
+var hideUnsupportedCardIcons = require('../../../../src/lib/hide-unsupported-card-icons');
 
 describe('hideUnsupportedCardIcons', function () {
   beforeEach(function () {
