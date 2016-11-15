@@ -15,7 +15,7 @@ BaseView.prototype.getElementById = function (id) {
 };
 
 BaseView.prototype.requestPaymentMethod = function (callback) {
-  callback('pls no');
+  callback(new Error('No payment method is available.'));
 };
 
 BaseView.prototype.teardown = function (cb) {
