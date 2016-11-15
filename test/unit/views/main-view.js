@@ -3,8 +3,6 @@
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
 var DropinModel = require('../../../src/dropin-model');
-var PayWithCardView = require('../../../src/views/pay-with-card-view');
-var PaymentMethodPickerView = require('../../../src/views/payment-method-picker-view');
 var fake = require('../../helpers/fake');
 var strings = require('../../../src/translations/en');
 var templateHTML = require('../../../src/html/main.html');
@@ -54,104 +52,6 @@ describe('MainView', function () {
           foo: 'bar'
         }
       };
-
-      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
-        this.views = [{}];
-      });
-      this.sandbox.stub(PayWithCardView.prototype, '_initialize');
-    });
-
-    it('creates a PayWithCardView', function () {
-      MainView.prototype._initialize.call(this.context);
-
-      expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PayWithCardView));
-    });
-
-    it('passes localization strings to the PayWithCardView', function () {
-      this.context.addView = function (view) {
-        if (view instanceof PayWithCardView) {
-          expect(view.strings.foo).to.equal('bar');
-        }
-      };
-
-      MainView.prototype._initialize.call(this.context);
-    });
-
-    it('creates a PaymentMethodPickerView', function () {
-      MainView.prototype._initialize.call(this.context);
-
-      expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PaymentMethodPickerView));
-    });
-
-    it('passes localization strings to the PaymentMethodPickerView', function () {
-      MainView.prototype._initialize.call(this.context);
-
-      expect(this.context.paymentMethodPickerView.strings.foo).to.equal('bar');
-    });
-
-    it('adds a listener for changeActivePaymentMethod', function () {
-      var instance;
-
-      this.sandbox.stub(MainView.prototype, 'setActiveView');
-
-      instance = new MainView({
-        dropinWrapper: this.context.dropinWrapper,
-        model: this.context.model,
-        options: this.context.options
-      });
-
-      this.context.model.changeActivePaymentMethod('payment-method');
-
-      expect(instance.setActiveView).to.be.calledWith('active-payment-method');
-    });
-
-    it('sets the active payment method as the active view if there are vaulted payment methods', function () {
-      var vaultedPaymentMethod = 'vaulted payment method';
-
-      this.model.addPaymentMethod(vaultedPaymentMethod);
-      this.sandbox.spy(this.model, 'changeActivePaymentMethod');
-
-      MainView.prototype._initialize.call(this.context);
-
-      expect(this.context.model.changeActivePaymentMethod).to.have.been.calledWith(vaultedPaymentMethod);
-      expect(this.context.setActiveView).to.have.been.calledWith('active-payment-method');
-    });
-
-    it('sets choose payment method as the active view if multiple payment methods are enabled', function () {
-      PaymentMethodPickerView.prototype._initialize.restore();
-      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
-        this.views = [{}, {}];
-      });
-
-      MainView.prototype._initialize.call(this.context);
-
-      expect(this.context.setActiveView).to.have.been.calledWith('choose-payment-method');
-    });
-
-    it('creates a PayWithCardView if one payment method is enabled', function () {
-      PaymentMethodPickerView.prototype._initialize.restore();
-      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
-        this.views = [{}];
-      });
-
-      MainView.prototype._initialize.call(this.context);
-
-      expect(this.context.addView).to.have.been.calledWith(this.sandbox.match.instanceOf(PayWithCardView));
-      expect(this.context.setActiveView).to.have.been.calledWith(PayWithCardView.ID);
-    });
-
-    it('hides payment method picker if one payment method is enabled', function () {
-      var paymentMethodPicker;
-
-      PaymentMethodPickerView.prototype._initialize.restore();
-      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
-        this.views = [{}];
-      });
-
-      MainView.prototype._initialize.call(this.context);
-      paymentMethodPicker = this.context.dropinWrapper.querySelector('[data-braintree-id="payment-method-picker"]');
-
-      expect(paymentMethodPicker.classList.contains('braintree-dropin__hide')).to.be.true;
     });
   });
 
@@ -181,14 +81,9 @@ describe('MainView', function () {
         this.ID = id;
       }
 
-      this.fakePaymentMethodPickerView = {
-        hideCheckMarks: this.sandbox.stub()
-      };
-
       this.context = {
         dropinWrapper: document.createElement('div'),
         model: new DropinModel(),
-        paymentMethodPickerView: this.fakePaymentMethodPickerView,
         views: {
           id1: new FakeView('id1'),
           id2: new FakeView('id2'),
@@ -201,18 +96,6 @@ describe('MainView', function () {
       MainView.prototype.setActiveView.call(this.context, 'id1');
 
       expect(this.context.dropinWrapper.className).to.contain('id1');
-    });
-
-    it('hides payment method picker check marks if the active view is not the active payment method', function () {
-      MainView.prototype.setActiveView.call(this.context, 'id1');
-
-      expect(this.fakePaymentMethodPickerView.hideCheckMarks).to.have.been.calledOnce;
-    });
-
-    it('does not hide payment method picker check marks if the active view is the active payment method', function () {
-      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
-
-      expect(this.fakePaymentMethodPickerView.hideCheckMarks).to.not.have.been.called;
     });
 
     it('clears any errors', function () {
@@ -325,29 +208,25 @@ describe('MainView', function () {
         showLoadingIndicator: function () {}
       };
 
-      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
-        this.views = [{}];
-      });
-      this.sandbox.stub(PayWithCardView.prototype, '_initialize');
-
       MainView.prototype._initialize.call(this.context);
     });
 
-    it('calls showAlert when errorOccurred is emitted', function () {
-      var fakeError = {
-        code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
-      };
-
-      this.context.model._emit('errorOccurred', fakeError);
-
-      expect(this.context.showAlert).to.be.calledWith(fakeError);
-    });
-
-    it('calls hideAlert when errorCleared is emitted', function () {
-      this.context.model._emit('errorCleared');
-
-      expect(this.context.hideAlert).to.be.called;
-    });
+    // TODO: add these back in when error handling is ready
+    // it('calls showAlert when errorOccurred is emitted', function () {
+    //   var fakeError = {
+    //     code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
+    //   };
+    //
+    //   this.context.model._emit('errorOccurred', fakeError);
+    //
+    //   expect(this.context.showAlert).to.be.calledWith(fakeError);
+    // });
+    //
+    // it('calls hideAlert when errorCleared is emitted', function () {
+    //   this.context.model._emit('errorCleared');
+    //
+    //   expect(this.context.hideAlert).to.be.called;
+    // });
   });
 
   describe('showLoadingIndicator', function () {
@@ -426,11 +305,6 @@ describe('MainView', function () {
         setActiveView: this.sandbox.stub(),
         showLoadingIndicator: this.sandbox.stub()
       };
-
-      this.sandbox.stub(PaymentMethodPickerView.prototype, '_initialize', function () {
-        this.views = [{}];
-      });
-      this.sandbox.stub(PayWithCardView.prototype, '_initialize');
 
       MainView.prototype._initialize.call(this.context);
     });
