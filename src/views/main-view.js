@@ -24,8 +24,7 @@ MainView.prototype._initialize = function () {
   //  - 1+ payment method enabled: show AccordionView
   // If vaulted:
   //  - show CompletedView
-  var paymentMethods = this.model.getPaymentMethods();
-
+  // var paymentMethods = this.model.getPaymentMethods();
   this.additionalOptions = this.getElementById('additional-options');
   this.alert = this.getElementById('alert');
 

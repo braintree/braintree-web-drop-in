@@ -22,8 +22,6 @@ CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = 'pay-with-card';
 
 CardView.prototype._initialize = function () {
-  BasePaymentMethodView.prototype._initialize.apply(this, arguments);
-
   var cardIcons = this.getElementById('card-view-icons');
   var challenges = this.options.client.getConfiguration().gatewayConfiguration.challenges;
   var hasCVV = challenges.indexOf('cvv') !== -1;
@@ -72,6 +70,8 @@ CardView.prototype._initialize = function () {
       }
     }
   };
+
+  BasePaymentMethodView.prototype._initialize.apply(this, arguments);
 
   cardIcons.innerHTML = cardIconHTML;
   hideUnsupportedCardIcons(this.element, supportedCardTypes);
@@ -136,7 +136,7 @@ CardView.prototype.tokenize = function (callback) {
 
   if (!cardTypeSupported) {
     this.showInlineError('number', this.strings.unsupportedCardTypeError);
-    callback(this.strings.unsupportedCardTypeError);
+    callback(new Error('No payment method is available.'));
     return;
   }
 
@@ -150,7 +150,7 @@ CardView.prototype.tokenize = function (callback) {
 
       if (err) {
         this.model.reportError(err);
-        callback(err);
+        callback(new Error('No payment method is available.'));
         return;
       }
 
@@ -161,6 +161,8 @@ CardView.prototype.tokenize = function (callback) {
       this.model.addPaymentMethod(payload);
       callback(null, payload);
     }.bind(this));
+  } else {
+    callback(new Error('No payment method is available.'));
   }
 };
 
@@ -256,9 +258,9 @@ CardView.prototype.requestPaymentMethod = function (callback) {
     if (err) {
       callback(err);
     } else {
-      callback(null, payload);
       this.mainView.setActiveView('completed');
       this.mainView.showAdditionalOptions();
+      callback(null, payload);
     }
   }.bind(this));
 };
