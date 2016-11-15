@@ -2,8 +2,8 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
-var PaymentMethodPickerView = require('./payment-method-picker-view');
-var PayWithCardView = require('./pay-with-card-view');
+var CardView = require('./payment-method-views/card-view');
+var CompletedView = require('./completed-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
 function MainView() {
@@ -18,30 +18,41 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
+  // Make PaymentMethodViews for every enabled payment option
+  // If guest checkout:
+  //  - One payment method enabled: show that PaymentMethodView
+  //  - 1+ payment method enabled: show AccordionView
+  // If vaulted:
+  //  - show CompletedView
   var paymentMethods = this.model.getPaymentMethods();
-  var payWithCardView;
 
+  this.additionalOptions = this.getElementById('additional-options');
   this.alert = this.getElementById('alert');
 
-  payWithCardView = new PayWithCardView({
-    element: this.getElementById(PayWithCardView.ID),
+  this.cardView = new CardView({
+    element: this.getElementById(CardView.ID),
     mainView: this,
     model: this.model,
     options: this.options,
     strings: this.strings
   });
 
-  this.paymentMethodPickerView = new PaymentMethodPickerView({
-    element: this.getElementById(PaymentMethodPickerView.ID),
-    model: this.model,
+  this.completedView = new CompletedView({
+    element: this.getElementById(CompletedView.ID),
     mainView: this,
+    model: this.model,
     options: this.options,
     strings: this.strings
   });
+
+  this.setActiveView(CardView.ID);
+  this.additionalOptions.addEventListener('click', function () {
+    this.hideAdditionalOptions();
+    this.setActiveView(CardView.ID);
+  }.bind(this));
 
   this.views = {};
-  this.addView(payWithCardView);
-  this.addView(this.paymentMethodPickerView);
+  this.addView(this.cardView);
   this.loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
   this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
@@ -56,20 +67,13 @@ MainView.prototype._initialize = function () {
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  this.model.on('errorOccurred', function (errorCode) {
-    this.showAlert(errorCode);
-  }.bind(this));
-
-  this.model.on('errorCleared', this.hideAlert.bind(this));
-
-  if (paymentMethods.length > 0) {
-    this.model.changeActivePaymentMethod(paymentMethods[0]);
-  } else if (this.paymentMethodPickerView.views.length === 1) {
-    this.setActiveView(PayWithCardView.ID);
-    classlist.add(this.getElementById('payment-method-picker'), 'braintree-dropin__hide');
-  } else {
-    this.setActiveView('choose-payment-method');
-  }
+  // if (paymentMethods.length > 0) {
+  //   this.model.changeActivePaymentMethod(paymentMethods[0]);
+  // } else if (this.paymentMethodPickerView.views.length === 1) {
+  //   classlist.add(this.getElementById('payment-method-picker'), 'braintree-dropin__hide');
+  // } else {
+  //   this.setActiveView('choose-payment-method');
+  // }
 };
 
 MainView.prototype.addView = function (view) {
@@ -78,16 +82,13 @@ MainView.prototype.addView = function (view) {
 
 MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = 'braintree-dropin__' + id;
+  this.activeView = this.cardView;
 
   if (!this.supportsFlexbox) {
     this.dropinWrapper.className += ' braintree-dropin__no-flexbox';
   }
 
   this.model.clearError();
-
-  if (id !== 'active-payment-method') {
-    this.paymentMethodPickerView.hideCheckMarks();
-  }
   this.model.endLoading();
 };
 
@@ -113,6 +114,14 @@ function snakeCaseToCamelCase(s) {
     return m[1].toUpperCase();
   });
 }
+
+MainView.prototype.showAdditionalOptions = function () {
+  classlist.remove(this.additionalOptions, 'braintree-dropin__display--none');
+};
+
+MainView.prototype.hideAdditionalOptions = function () {
+  classlist.add(this.additionalOptions, 'braintree-dropin__display--none');
+};
 
 MainView.prototype.showAlert = function (error) {
   var errorMessage;

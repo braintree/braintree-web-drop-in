@@ -4,6 +4,7 @@ module.exports = {
   addPaymentMethod: 'Add A Payment Method',
   changePaymentMethod: 'Change Payment Method',
   choosePaymentMethod: 'Choose a payment method',
+  payingWith: 'Paying with',
   savedPaymentMethods: 'Saved Payment Methods',
   // Errors
   fieldEmptyForCvv: 'Please fill out a CVV.',

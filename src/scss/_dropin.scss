@@ -113,8 +113,11 @@
   display: none;
 }
 
-.braintree-dropin__active-payment-method .braintree-dropin__active-payment-method,
-.braintree-dropin__choose-payment-method .braintree-dropin__choose-payment-method,
+.braintree-dropin__completed {
+  display: none;
+}
+
+.braintree-dropin__completed .braintree-dropin__completed,
 .braintree-dropin__pay-with-card .braintree-dropin__pay-with-card {
   display: block;
 }
@@ -236,5 +239,197 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+.braintree-exposed__title {
+  font-size: 16px;
+  color: #4F4F4F;
+  margin: 5px 5px 12px 5px;
+}
+
+.braintree-exposed__option {
+  border-left: 1px solid #C5C5C5;
+  border-top: 1px solid #C5C5C5;
+  border-right: 1px solid #C5C5C5;
+  border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+  width: 98%;
+  margin: 0 auto;
+
+  &:last-child {
+    border-bottom: 1px solid #C5C5C5;
+  }
+  &.braintree-exposed__last {
+    border-bottom: 1px solid #C5C5C5;
+  }
+
+  &.option--is-open.option--is-saved {
+    border: 2px solid $green;
+    border-radius: 5px;
+    width: 100%;
+
+    &:nth-child(1) {
+      border-bottom: 2px solid $green;
+    }
+
+    .braintree-exposed__content {
+      display: none;
+    }
+  }
+
+  * {
+    transition: all 0.2s ease;
+  }
+
+  .braintree-exposed__header {
+    cursor: pointer;
+    display: flex;
+    padding: 12px 10px;
+    border-bottom: 1px solid #E0E0E0;
+    align-items: center;
+
+    .braintree-exposed__acceptance_logo {
+      text-align: center;
+      width: 50px
+    }
+
+    .braintree-exposed__label {
+      font-size: 16px;
+      color: #4F4F4F;
+    }
+  }
+  .braintree-exposed__saved {
+    padding: 14px 10px;
+
+    .braintree-exposed__label {
+      font-weight: bold;
+
+      small {
+        font-weight: normal;
+        font-size: 11px;
+      }
+    }
+
+    .braintree-exposed__saved__icon {
+      margin-right: 7px;
+      width: 41px;
+      height: 41px;
+      border-radius: 100px;
+      background-color: $green;
+      padding: 11px;
+      fill: white;
+    }
+  }
+  .braintree-exposed__content {
+    margin: 0 20px;
+    padding-bottom: 20px;
+    padding-top: 20px;
+    text-align: center;
+
+    .braintree-form {
+      text-align: left;
+
+      .braintree-form__label--relative {
+        display: block;
+        width: 100%;
+      }
+
+      .braintree-form__descriptor {
+        color: #C5C5C5;
+        margin-left: 6px;
+        font-size: 13px;
+      }
+
+      .flex .braintree-form__fieldset {
+        width: 48%;
+
+        @media screen and (max-width: $break-small) {
+          width: 100%;
+        }
+      }
+    }
+  }
+  &.option--is-closed {
+    border-radius: 0px;
+    background-color: #FAFAFA;
+
+    &:first-child {
+      border-radius: 4px 4px 0 0;
+    }
+
+    &:last-child {
+      border-radius: 0 0 4px 4px;
+    }
+
+    .braintree-exposed__header {
+      border-bottom: 0px;
+    }
+    .braintree-exposed__content {
+      height: 0;
+      margin: 0;
+      opacity: 0;
+      overflow: hidden;
+      padding: 0;
+      transition: all $time-faster linear;
+      visibility: hidden;
+    }
+  }
+  &.option--is-hidden {
+    display: none;
+  }
+  &.option--is-open {
+    border-bottom: 1px solid #C5C5C5;
+
+    .braintree-exposed__header {
+      cursor: default;
+    }
+
+    .braintree-exposed__content {
+      min-height: 120px;
+    }
+  }
+
+  .braintree-exposed__label {
+    margin-left: 16px;
+  }
+}
+
+.braintree-icon {
+  display: inline-block;
+  height: 24px;
+  transition: opacity $time-fast ease, transform $time-fast ease;
+  width: 44px;
+}
+
+.braintree-additional-options {
+  background: #FAFAFA;
+  border-radius: 4px;
+  color: #4F4F4F;
+  cursor: pointer;
+  font-size: 13px;
+  margin: 13px auto 0 auto;
+  padding: 18px;
+  width: 98%;
+  text-align: center;
+
+  @media screen and (max-width: $break-small) {
+    &.flex {
+      display: block;
+    }
+  }
+
+  .braintree-additional-options-icons {
+    margin-bottom: 0;
+    transform: scale(0.8);
+
+    @media screen and (max-width: $break-small) {
+      display: none;
+    }
+  }
+
+  p {
+    margin: 0;
   }
 }

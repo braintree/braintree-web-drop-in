@@ -14,6 +14,10 @@ BaseView.prototype.getElementById = function (id) {
   return this.element.querySelector('[data-braintree-id="' + id + '"]');
 };
 
+BaseView.prototype.requestPaymentMethod = function (callback) {
+  callback('pls no');
+};
+
 BaseView.prototype.teardown = function (cb) {
   cb();
 };
