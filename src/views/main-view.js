@@ -24,7 +24,8 @@ MainView.prototype._initialize = function () {
   //  - 1+ payment method enabled: show AccordionView
   // If vaulted:
   //  - show CompletedView
-  // var paymentMethods = this.model.getPaymentMethods();
+  var paymentMethods = this.model.getPaymentMethods();
+
   this.additionalOptions = this.getElementById('additional-options');
   this.alert = this.getElementById('alert');
 
@@ -38,7 +39,6 @@ MainView.prototype._initialize = function () {
 
   this.completedView = new CompletedView({
     element: this.getElementById(CompletedView.ID),
-    mainView: this,
     model: this.model,
     options: this.options,
     strings: this.strings
@@ -60,14 +60,15 @@ MainView.prototype._initialize = function () {
   this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
-    this.setActiveView('active-payment-method');
+    this.setActiveView(CompletedView.ID);
   }.bind(this));
 
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  // if (paymentMethods.length > 0) {
-  //   this.model.changeActivePaymentMethod(paymentMethods[0]);
+  if (paymentMethods.length > 0) {
+    this.model.changeActivePaymentMethod(paymentMethods[0]);
+  }
   // } else if (this.paymentMethodPickerView.views.length === 1) {
   //   classlist.add(this.getElementById('payment-method-picker'), 'braintree-dropin__hide');
   // } else {
@@ -81,7 +82,19 @@ MainView.prototype.addView = function (view) {
 
 MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = 'braintree-dropin__' + id;
-  this.activeView = this.cardView;
+
+  // TODO: make this better
+  switch (id) {
+    case CardView.ID:
+      this.activeView = this.cardView;
+      break;
+    case CompletedView.ID:
+      this.activeView = this.completedView;
+      this.showAdditionalOptions();
+      break;
+    default:
+      break;
+  }
 
   if (!this.supportsFlexbox) {
     this.dropinWrapper.className += ' braintree-dropin__no-flexbox';

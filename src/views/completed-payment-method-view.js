@@ -1,6 +1,7 @@
 'use strict';
 
 var BaseView = require('./base-view');
+var classlist = require('../lib/classlist');
 var paymentMethodCardTypes = require('../constants').paymentMethodCardTypes;
 var paymentMethodHTML = require('../html/completed-payment-method.html');
 
@@ -16,6 +17,11 @@ CompletedPaymentMethodView.ID = CompletedPaymentMethodView.prototype.ID = 'compl
 
 CompletedPaymentMethodView.prototype._initialize = function () {
   this.element = document.createElement('div');
+  this.element.className = 'braintree-exposed__option option--is-open';
+
+  this.element.addEventListener('click', function () {
+    this.model.changeActivePaymentMethod(this.paymentMethod);
+  }.bind(this));
 
   this.html = paymentMethodHTML;
   switch (this.paymentMethod.type) {
@@ -34,6 +40,15 @@ CompletedPaymentMethodView.prototype._initialize = function () {
   }
 
   this.element.innerHTML = this.html;
+};
+
+CompletedPaymentMethodView.prototype.setActive = function (isActive) {
+  if (isActive) {
+    // TODO rename this class to be more fitting
+    classlist.add(this.element, 'option--is-saved');
+    return;
+  }
+  classlist.remove(this.element, 'option--is-saved');
 };
 
 module.exports = CompletedPaymentMethodView;

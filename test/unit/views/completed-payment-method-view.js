@@ -78,4 +78,22 @@ describe('CompletedPaymentMethodView', function () {
       expect(labelElement.querySelector('small').textContent).to.equal('PayPal');
     });
   });
+
+  describe('setActive', function () {
+    beforeEach(function () {
+      this.context = {element: document.createElement('div')};
+    });
+
+    it('adds option--is-saved if setting active payment method', function () {
+      CompletedPaymentMethodView.prototype.setActive.call(this.context, true);
+
+      expect(this.context.element.classList.contains('option--is-saved')).to.be.true;
+    });
+
+    it('removes option--is-saved if setting active payment method', function () {
+      CompletedPaymentMethodView.prototype.setActive.call(this.context, false);
+
+      expect(this.context.element.classList.contains('option--is-saved')).to.be.false;
+    });
+  });
 });

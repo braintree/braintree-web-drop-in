@@ -277,6 +277,11 @@
     .braintree-exposed__content {
       display: none;
     }
+
+    .braintree-exposed__saved__icon {
+      background-color: $green;
+      fill: white;
+    }
   }
 
   * {
@@ -317,9 +322,9 @@
       width: 41px;
       height: 41px;
       border-radius: 100px;
-      background-color: $green;
       padding: 11px;
-      fill: white;
+      background-color: #FAFAFA;
+      fill: #FAFAFA;
     }
   }
   .braintree-exposed__content {
