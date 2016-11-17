@@ -260,7 +260,7 @@ CardView.prototype.requestPaymentMethod = function (callback) {
       callback(err);
     } else {
       this.mainView.setActiveView(CompletedView.ID);
-      this.mainView.showAdditionalOptions();
+      this.mainView.showAdditionalOptionsButton();
       callback(null, payload);
     }
   }.bind(this));

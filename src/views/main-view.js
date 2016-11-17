@@ -4,6 +4,7 @@ var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
 var CardView = require('./payment-method-views/card-view');
 var CompletedView = require('./completed-view');
+var isGuestCheckout = require('../lib/is-guest-checkout');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
 function MainView() {
@@ -45,10 +46,7 @@ MainView.prototype._initialize = function () {
   });
 
   this.setActiveView(CardView.ID);
-  this.additionalOptions.addEventListener('click', function () {
-    this.hideAdditionalOptions();
-    this.setActiveView(CardView.ID);
-  }.bind(this));
+  this.additionalOptions.addEventListener('click', this.showAdditionalOptions.bind(this));
 
   this.views = {};
   this.addView(this.cardView);
@@ -69,11 +67,6 @@ MainView.prototype._initialize = function () {
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
   }
-  // } else if (this.paymentMethodPickerView.views.length === 1) {
-  //   classlist.add(this.getElementById('payment-method-picker'), 'braintree-dropin__hide');
-  // } else {
-  //   this.setActiveView('choose-payment-method');
-  // }
 };
 
 MainView.prototype.addView = function (view) {
@@ -87,10 +80,15 @@ MainView.prototype.setActiveView = function (id) {
   switch (id) {
     case CardView.ID:
       this.activeView = this.cardView;
+      if (!isGuestCheckout(this.options.authorization)) {
+        this.showAdditionalOptionsButton();
+      } else {
+        this.hideAdditionalOptionsButton();
+      }
       break;
     case CompletedView.ID:
       this.activeView = this.completedView;
-      this.showAdditionalOptions();
+      this.showAdditionalOptionsButton();
       break;
     default:
       break;
@@ -128,10 +126,20 @@ function snakeCaseToCamelCase(s) {
 }
 
 MainView.prototype.showAdditionalOptions = function () {
+  if (this.activeView === this.completedView) {
+    // TODO: if there's only one payment method, make that the active view.
+    // If there are multiple, show the accordion.
+    this.setActiveView(CardView.ID);
+  } else {
+    this.setActiveView(CompletedView.ID);
+  }
+};
+
+MainView.prototype.showAdditionalOptionsButton = function () {
   classlist.remove(this.additionalOptions, 'braintree-dropin__display--none');
 };
 
-MainView.prototype.hideAdditionalOptions = function () {
+MainView.prototype.hideAdditionalOptionsButton = function () {
   classlist.add(this.additionalOptions, 'braintree-dropin__display--none');
 };
 

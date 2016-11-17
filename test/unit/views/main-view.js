@@ -2,6 +2,8 @@
 
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
+var CardView = require('../../../src/views/payment-method-views/card-view');
+var CompletedView = require('../../../src/views/completed-view');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var strings = require('../../../src/translations/en');
@@ -303,7 +305,8 @@ describe('MainView', function () {
           }
         },
         setActiveView: this.sandbox.stub(),
-        showLoadingIndicator: this.sandbox.stub()
+        showLoadingIndicator: this.sandbox.stub(),
+        showAdditionalOptions: this.sandbox.stub()
       };
 
       MainView.prototype._initialize.call(this.context);
@@ -319,6 +322,62 @@ describe('MainView', function () {
       this.context.model._emit('loadEnd');
 
       expect(this.context.hideLoadingIndicator).to.be.calledOnce;
+    });
+  });
+
+  describe('additional options', function () {
+    it('has an click event listener that calls showAdditionalOptions', function () {
+      var mainView;
+      var wrapper = document.createElement('div');
+
+      wrapper.innerHTML = templateHTML;
+      this.sandbox.stub(MainView.prototype, 'showAdditionalOptions');
+
+      mainView = new MainView({
+        dropinWrapper: wrapper,
+        model: new DropinModel(),
+        options: {
+          authorization: 'a_test_key',
+          client: {
+            getConfiguration: fake.configuration
+          }
+        }
+      });
+
+      mainView.additionalOptions.click();
+
+      expect(mainView.showAdditionalOptions).to.have.been.called;
+    });
+
+    describe('in vaulted', function () {
+      describe('card only', function () {
+        it('sets the CardView as the active view from the CompletedView', function () {
+          var completedView = 'completed-view';
+          var context = {
+            activeView: completedView,
+            completedView: completedView,
+            setActiveView: this.sandbox.stub()
+          };
+
+          MainView.prototype.showAdditionalOptions.call(context);
+
+          expect(context.setActiveView).to.have.been.calledWith(CardView.ID);
+        });
+
+        it('sets the CompletedView as the active view from the CardView', function () {
+          var context = {
+            activeView: 'card-view',
+            completedView: 'completed-view',
+            setActiveView: this.sandbox.stub()
+          };
+
+          this.sandbox.stub(MainView.prototype, 'setActiveView');
+
+          MainView.prototype.showAdditionalOptions.call(context);
+
+          expect(context.setActiveView).to.have.been.calledWith(CompletedView.ID);
+        });
+      });
     });
   });
 

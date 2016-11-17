@@ -243,7 +243,7 @@ describe('CardView', function () {
       this.context = {
         mainView: {
           setActiveView: this.sandbox.spy(),
-          showAdditionalOptions: this.sandbox.stub()
+          showAdditionalOptionsButton: this.sandbox.stub()
         }
       };
     });
@@ -282,7 +282,7 @@ describe('CardView', function () {
       this.context.tokenize = this.sandbox.stub().yields(null, {foo: 'bar'});
 
       CardView.prototype.requestPaymentMethod.call(this.context, function () {
-        expect(this.context.mainView.showAdditionalOptions).to.have.been.called;
+        expect(this.context.mainView.showAdditionalOptionsButton).to.have.been.called;
         done();
       }.bind(this));
     });
