@@ -79,49 +79,122 @@ describe('MainView', function () {
 
   describe('setActiveView', function () {
     beforeEach(function () {
+      var wrapper = document.createElement('div');
+
+      wrapper.innerHTML = templateHTML;
+
       function FakeView(id) {
         this.ID = id;
       }
 
-      this.context = {
-        dropinWrapper: document.createElement('div'),
+      this.views = [
+        new FakeView('id1'),
+        new FakeView('id2'),
+        new FakeView('id3')
+      ];
+
+      this.mainViewOptions = {
+        dropinWrapper: wrapper,
         model: new DropinModel(),
-        views: {
-          id1: new FakeView('id1'),
-          id2: new FakeView('id2'),
-          id3: new FakeView('id3')
+        options: {
+          authorization: 'fake_tokenization_key',
+          client: {
+            getConfiguration: fake.configuration
+          }
         }
       };
     });
 
     it('shows the selected view', function () {
-      MainView.prototype.setActiveView.call(this.context, 'id1');
+      var mainView = new MainView(this.mainViewOptions);
 
-      expect(this.context.dropinWrapper.className).to.contain('id1');
+      mainView.views = this.views;
+      mainView.setActiveView('id1');
+
+      expect(mainView.dropinWrapper.className).to.contain('id1');
+      expect(mainView.dropinWrapper.className).to.not.contain('id2');
+      expect(mainView.dropinWrapper.className).to.not.contain('id3');
     });
 
     it('clears any errors', function () {
+      var mainView = new MainView(this.mainViewOptions);
+
+      mainView.views = this.views;
       this.sandbox.stub(DropinModel.prototype, 'clearError');
 
-      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
+      mainView.setActiveView('id1');
 
       expect(DropinModel.prototype.clearError).to.have.been.calledOnce;
     });
 
     it('applies no-flexbox class when flexbox is not supported', function () {
-      this.context.supportsFlexbox = false;
+      var mainView = new MainView(this.mainViewOptions);
 
-      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
+      mainView.views = this.views;
+      mainView.supportsFlexbox = false;
 
-      expect(this.context.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
+      mainView.setActiveView('id1');
+
+      expect(mainView.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
     });
 
     it('does not apply no-flexbox class when flexbox is supported', function () {
-      this.context.supportsFlexbox = true;
+      var mainView = new MainView(this.mainViewOptions);
 
-      MainView.prototype.setActiveView.call(this.context, 'active-payment-method');
+      mainView.views = this.views;
+      mainView.supportsFlexbox = true;
 
-      expect(this.context.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
+      mainView.setActiveView('id1');
+
+      expect(mainView.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
+    });
+
+    describe('CardView', function () {
+      it('assigns the card view as the active view', function () {
+        var mainView = new MainView(this.mainViewOptions);
+
+        mainView.setActiveView(CardView.ID);
+
+        expect(mainView.activeView).to.equal(mainView.cardView);
+      });
+
+      context('in vaulted flow', function () {
+        it('shows the additional options button', function () {
+          var mainView;
+
+          this.mainViewOptions.options.authorization = fake.clientTokenWithCustomerID;
+
+          mainView = new MainView(this.mainViewOptions);
+
+          expect(mainView.additionalOptions.classList.contains('braintree-dropin__display--none')).to.be.false;
+        });
+      });
+
+      context('in guest checkout flow', function () {
+        it('does not show the additional options button', function () {
+          var mainView = new MainView(this.mainViewOptions);
+
+          expect(mainView.additionalOptions.classList.contains('braintree-dropin__display--none')).to.be.true;
+        });
+      });
+    });
+
+    describe('CompletedView', function () {
+      it('assigns the completed view as the active view', function () {
+        var mainView = new MainView(this.mainViewOptions);
+
+        mainView.setActiveView(CompletedView.ID);
+
+        expect(mainView.activeView).to.equal(mainView.completedView);
+      });
+
+      it('shows the additional options button', function () {
+        var mainView = new MainView(this.mainViewOptions);
+
+        mainView.setActiveView(CompletedView.ID);
+
+        expect(mainView.additionalOptions.classList.contains('braintree-dropin__display--none')).to.be.false;
+      });
     });
   });
 
