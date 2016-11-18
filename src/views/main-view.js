@@ -5,6 +5,7 @@ var classlist = require('../lib/classlist');
 var CardView = require('./payment-method-views/card-view');
 var CompletedView = require('./completed-view');
 var isGuestCheckout = require('../lib/is-guest-checkout');
+var PaymentOptionsView = require('./payment-options-view');
 var PayPalView = require('./payment-method-views/paypal-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
@@ -27,7 +28,7 @@ MainView.prototype._initialize = function () {
   // If vaulted:
   //  - show CompletedView
   var paymentMethods = this.model.getPaymentMethods();
-  var paymentMethodViews;
+  var paymentMethodViews, paymentOptionsView;
 
   this.additionalOptions = this.getElementById('additional-options');
   this.alert = this.getElementById('alert');
@@ -53,6 +54,8 @@ MainView.prototype._initialize = function () {
     }
     return views;
   }.bind(this), []);
+
+  this.hasMultiplePaymentOptions = paymentMethodViews.length > 1;
 
   this.completedView = new CompletedView({
     element: this.getElementById(CompletedView.ID),
@@ -80,9 +83,19 @@ MainView.prototype._initialize = function () {
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
-  } else if (paymentMethodViews.length > 1) {
-    // create and show payment options view
+  }
 
+  if (!isGuestCheckout(this.options.authorization) && this.hasMultiplePaymentOptions) {
+    paymentOptionsView = new PaymentOptionsView({
+      element: this.getElementById(PaymentOptionsView.ID),
+      mainView: this,
+      model: this.model,
+      paymentOptionIDs: paymentMethodViews.map(function (paymentMethodView) { return paymentMethodView.ID; }),
+      strings: this.strings
+    });
+
+    this.addView(paymentOptionsView);
+    this.setActiveView(paymentOptionsView.ID);
   } else {
     this.setActiveView(paymentMethodViews[0].ID);
   }
@@ -103,7 +116,14 @@ MainView.prototype.setActiveView = function (id) {
   // TODO: make this better
   switch (id) {
     case CardView.ID:
-      if (!isGuestCheckout(this.options.authorization)) {
+      if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
+        this.showAdditionalOptionsButton();
+      } else {
+        this.hideAdditionalOptionsButton();
+      }
+      break;
+    case PayPalView.ID:
+      if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
         this.showAdditionalOptionsButton();
       } else {
         this.hideAdditionalOptionsButton();
@@ -111,6 +131,9 @@ MainView.prototype.setActiveView = function (id) {
       break;
     case CompletedView.ID:
       this.showAdditionalOptionsButton();
+      break;
+    case PaymentOptionsView.ID:
+      this.hideAdditionalOptionsButton();
       break;
     default:
       break;
@@ -148,12 +171,12 @@ function snakeCaseToCamelCase(s) {
 }
 
 MainView.prototype.showAdditionalOptions = function () {
-  if (this.activeView === this.completedView) {
-    // TODO: if there's only one payment method, make that the active view.
-    // If there are multiple, show the accordion.
+  if (this.hasMultiplePaymentOptions) {
+    this.setActiveView(PaymentOptionsView.ID);
+  } else if (this.activeView === this.completedView) {
+    // TODO: if vaulted flow, still show the CompletedView
+    // TODO: needs to change for PayPal only
     this.setActiveView(CardView.ID);
-  } else {
-    this.setActiveView(CompletedView.ID);
   }
 };
 

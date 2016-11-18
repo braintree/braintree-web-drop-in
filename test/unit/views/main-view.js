@@ -373,6 +373,7 @@ describe('MainView', function () {
         hideLoadingIndicator: this.sandbox.stub(),
         model: new DropinModel(),
         options: {
+          authorization: fake.tokenizationKey,
           client: {
             getConfiguration: fake.configuration
           }
