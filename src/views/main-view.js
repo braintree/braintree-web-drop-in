@@ -5,6 +5,7 @@ var classlist = require('../lib/classlist');
 var CardView = require('./payment-method-views/card-view');
 var CompletedView = require('./completed-view');
 var isGuestCheckout = require('../lib/is-guest-checkout');
+var PayPalView = require('./payment-method-views/paypal-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
 function MainView() {
@@ -26,17 +27,32 @@ MainView.prototype._initialize = function () {
   // If vaulted:
   //  - show CompletedView
   var paymentMethods = this.model.getPaymentMethods();
+  var paymentMethodViews;
 
   this.additionalOptions = this.getElementById('additional-options');
   this.alert = this.getElementById('alert');
+  this.views = {};
 
-  this.cardView = new CardView({
-    element: this.getElementById(CardView.ID),
-    mainView: this,
-    model: this.model,
-    options: this.options,
-    strings: this.strings
-  });
+  paymentMethodViews = [
+    CardView,
+    PayPalView
+  ].reduce(function (views, PaymentMethodView) {
+    var paymentMethodView;
+
+    if (PaymentMethodView.isEnabled(this.options)) {
+      paymentMethodView = new PaymentMethodView({
+        element: this.getElementById(PaymentMethodView.ID),
+        mainView: this,
+        model: this.model,
+        options: this.options,
+        strings: this.strings
+      });
+
+      this.addView(paymentMethodView);
+      views.push(paymentMethodView);
+    }
+    return views;
+  }.bind(this), []);
 
   this.completedView = new CompletedView({
     element: this.getElementById(CompletedView.ID),
@@ -44,12 +60,10 @@ MainView.prototype._initialize = function () {
     options: this.options,
     strings: this.strings
   });
+  this.addView(this.completedView);
 
-  this.setActiveView(CardView.ID);
   this.additionalOptions.addEventListener('click', this.showAdditionalOptions.bind(this));
 
-  this.views = {};
-  this.addView(this.cardView);
   this.loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
   this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
@@ -66,6 +80,11 @@ MainView.prototype._initialize = function () {
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
+  } else if (paymentMethodViews.length > 1) {
+    // create and show payment options view
+
+  } else {
+    this.setActiveView(paymentMethodViews[0].ID);
   }
 };
 
@@ -73,13 +92,17 @@ MainView.prototype.addView = function (view) {
   this.views[view.ID] = view;
 };
 
+MainView.prototype.getView = function (id) {
+  return this.views[id];
+};
+
 MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = 'braintree-dropin__' + id;
+  this.activeView = this.getView(id);
 
   // TODO: make this better
   switch (id) {
     case CardView.ID:
-      this.activeView = this.cardView;
       if (!isGuestCheckout(this.options.authorization)) {
         this.showAdditionalOptionsButton();
       } else {
@@ -87,7 +110,6 @@ MainView.prototype.setActiveView = function (id) {
       }
       break;
     case CompletedView.ID:
-      this.activeView = this.completedView;
       this.showAdditionalOptionsButton();
       break;
     default:

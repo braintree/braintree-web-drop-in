@@ -15,6 +15,7 @@ PayPalView.isEnabled = function (options) {
 
 PayPalView.prototype = Object.create(BasePaymentMethodView.prototype);
 PayPalView.prototype.constructor = PayPalView;
+PayPalView.ID = PayPalView.prototype.ID = 'paypal';
 
 PayPalView.prototype._initialize = function () {
   BasePaymentMethodView.prototype._initialize.apply(this, arguments);

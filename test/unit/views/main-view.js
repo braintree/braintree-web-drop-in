@@ -155,7 +155,7 @@ describe('MainView', function () {
 
         mainView.setActiveView(CardView.ID);
 
-        expect(mainView.activeView).to.equal(mainView.cardView);
+        expect(mainView.activeView).to.equal(mainView.getView(CardView.ID));
       });
 
       context('in vaulted flow', function () {
