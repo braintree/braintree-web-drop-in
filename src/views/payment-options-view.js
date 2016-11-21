@@ -23,6 +23,8 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   var div = document.createElement('div');
   var html = paymentMethodOptionHTML;
 
+  div.className = 'braintree-exposed__option option--is-closed';
+
   switch (paymentOptionID) {
     case 'pay-with-card':
       html = html.replace(/@ICON/g, 'iconCardFront');

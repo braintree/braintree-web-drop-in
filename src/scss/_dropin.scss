@@ -115,10 +115,7 @@
 
 .braintree-dropin__completed {
   display: none;
-}
-
-.braintree-dropin__paypal {
-  display: none;
+  margin: 0 auto 13px auto;
 }
 
 .braintree-dropin__completed .braintree-dropin__completed,
@@ -420,7 +417,7 @@
   color: #4F4F4F;
   cursor: pointer;
   font-size: 13px;
-  margin: 13px auto 0 auto;
+  margin: 0 auto 0 auto;
   padding: 18px;
   width: 98%;
   text-align: center;
