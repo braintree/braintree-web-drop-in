@@ -3,7 +3,6 @@
 var BasePaymentMethodView = require('./base-payment-method-view');
 var cardIconHTML = require('../../html/card-icons.html');
 var classlist = require('../../lib/classlist');
-var CompletedView = require('../completed-view');
 var configurationCardTypes = require('../../constants').configurationCardTypes;
 var hideUnsupportedCardIcons = require('../../lib/hide-unsupported-card-icons');
 var hostedFields = require('braintree-web/hosted-fields');
@@ -255,15 +254,7 @@ CardView.prototype._onValidityChangeEvent = function (event) {
 };
 
 CardView.prototype.requestPaymentMethod = function (callback) {
-  this.tokenize(function (err, payload) {
-    if (err) {
-      callback(err);
-    } else {
-      this.mainView.setActiveView(CompletedView.ID);
-      this.mainView.showAdditionalOptionsButton();
-      callback(null, payload);
-    }
-  }.bind(this));
+  this.tokenize(callback);
 };
 
 function camelCaseToSnakeCase(string) {

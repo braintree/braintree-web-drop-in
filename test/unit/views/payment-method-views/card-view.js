@@ -268,24 +268,6 @@ describe('CardView', function () {
         done();
       });
     });
-
-    it('sets the completed view as the active view', function (done) {
-      this.context.tokenize = this.sandbox.stub().yields(null, {foo: 'bar'});
-
-      CardView.prototype.requestPaymentMethod.call(this.context, function () {
-        expect(this.context.mainView.setActiveView).to.have.been.calledWith('completed');
-        done();
-      }.bind(this));
-    });
-
-    it('shows additional options', function (done) {
-      this.context.tokenize = this.sandbox.stub().yields(null, {foo: 'bar'});
-
-      CardView.prototype.requestPaymentMethod.call(this.context, function () {
-        expect(this.context.mainView.showAdditionalOptionsButton).to.have.been.called;
-        done();
-      }.bind(this));
-    });
   });
 
   describe('Hosted Fields events', function () {

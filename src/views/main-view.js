@@ -21,12 +21,6 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
-  // Make PaymentMethodViews for every enabled payment option
-  // If guest checkout:
-  //  - One payment method enabled: show that PaymentMethodView
-  //  - 1+ payment method enabled: show AccordionView
-  // If vaulted:
-  //  - show CompletedView
   var paymentMethods = this.model.getPaymentMethods();
   var paymentMethodViews, paymentOptionsView;
 
@@ -81,11 +75,7 @@ MainView.prototype._initialize = function () {
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  if (paymentMethods.length > 0) {
-    this.model.changeActivePaymentMethod(paymentMethods[0]);
-  }
-
-  if (!isGuestCheckout(this.options.authorization) && this.hasMultiplePaymentOptions) {
+  if (this.hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
@@ -99,6 +89,10 @@ MainView.prototype._initialize = function () {
   } else {
     this.setActiveView(paymentMethodViews[0].ID);
   }
+
+  if (paymentMethods.length > 0) {
+    this.model.changeActivePaymentMethod(paymentMethods[0]);
+  }
 };
 
 MainView.prototype.addView = function (view) {
@@ -110,8 +104,9 @@ MainView.prototype.getView = function (id) {
 };
 
 MainView.prototype.setActiveView = function (id) {
-  this.dropinWrapper.className = 'braintree-dropin__' + id;
+  this.dropinWrapper.className = prefixClass(id);
   this.activeView = this.getView(id);
+  this.activePaymentOption = id;
 
   // TODO: make this better
   switch (id) {
@@ -147,6 +142,19 @@ MainView.prototype.setActiveView = function (id) {
   this.model.endLoading();
 };
 
+MainView.prototype.requestPaymentMethod = function (callback) {
+  var activePaymentView = this.getView(this.activePaymentOption);
+
+  activePaymentView.requestPaymentMethod(function (err, payload) {
+    if (err) {
+      callback(err);
+      return;
+    }
+    this.setActiveView(CompletedView.ID);
+    callback(null, payload);
+  }.bind(this));
+};
+
 MainView.prototype.showLoadingIndicator = function () {
   classlist.remove(this.loadingIndicator, 'braintree-dropin__loading-indicator--inactive');
   classlist.remove(this.loadingContainer, 'braintree-dropin__loading-container--inactive');
@@ -164,20 +172,14 @@ MainView.prototype.hideLoadingIndicator = function () {
   }.bind(this), 1000);
 };
 
-function snakeCaseToCamelCase(s) {
-  return s.toLowerCase().replace(/(\_\w)/g, function (m) {
-    return m[1].toUpperCase();
-  });
-}
-
 MainView.prototype.showAdditionalOptions = function () {
-  if (this.hasMultiplePaymentOptions) {
-    this.setActiveView(PaymentOptionsView.ID);
-  } else if (this.activeView === this.completedView) {
-    // TODO: if vaulted flow, still show the CompletedView
-    // TODO: needs to change for PayPal only
-    this.setActiveView(CardView.ID);
+  if (!this.hasMultiplePaymentOptions && this.activeView === this.completedView) {
+    classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
+    this.activePaymentOption = CardView.ID;
+  } else {
+    classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
   }
+  this.hideAdditionalOptionsButton();
 };
 
 MainView.prototype.showAdditionalOptionsButton = function () {
@@ -224,5 +226,15 @@ MainView.prototype.teardown = function (callback) {
     });
   }.bind(this));
 };
+
+function snakeCaseToCamelCase(s) {
+  return s.toLowerCase().replace(/(\_\w)/g, function (m) {
+    return m[1].toUpperCase();
+  });
+}
+
+function prefixClass(classname) {
+  return 'braintree-dropin__' + classname;
+}
 
 module.exports = MainView;

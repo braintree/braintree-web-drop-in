@@ -6,6 +6,7 @@ var CardView = require('../../../src/views/payment-method-views/card-view');
 var CompletedView = require('../../../src/views/completed-view');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
+var PayPalView = require('../../../src/views/payment-method-views/paypal-view');
 var strings = require('../../../src/translations/en');
 var templateHTML = require('../../../src/html/main.html');
 
@@ -400,15 +401,18 @@ describe('MainView', function () {
   });
 
   describe('additional options', function () {
+    beforeEach(function () {
+      this.wrapper = document.createElement('div');
+      this.wrapper.innerHTML = templateHTML;
+    });
+
     it('has an click event listener that calls showAdditionalOptions', function () {
       var mainView;
-      var wrapper = document.createElement('div');
 
-      wrapper.innerHTML = templateHTML;
       this.sandbox.stub(MainView.prototype, 'showAdditionalOptions');
 
       mainView = new MainView({
-        dropinWrapper: wrapper,
+        dropinWrapper: this.wrapper,
         model: new DropinModel(),
         options: {
           authorization: 'a_test_key',
@@ -424,33 +428,138 @@ describe('MainView', function () {
     });
 
     describe('in vaulted', function () {
-      describe('card only', function () {
-        it('sets the CardView as the active view from the CompletedView', function () {
-          var completedView = 'completed-view';
-          var context = {
-            activeView: completedView,
-            completedView: completedView,
-            setActiveView: this.sandbox.stub()
-          };
-
-          MainView.prototype.showAdditionalOptions.call(context);
-
-          expect(context.setActiveView).to.have.been.calledWith(CardView.ID);
+      describe('card only flow', function () {
+        beforeEach(function () {
+          this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
+          this.sandbox.stub(CardView, 'isEnabled').returns(true);
+          this.mainView = new MainView({
+            dropinWrapper: this.wrapper,
+            model: new DropinModel(),
+            options: {
+              authorization: fake.clientTokenWithCustomerID,
+              client: {
+                getConfiguration: fake.configuration
+              }
+            }
+          });
         });
 
-        it('sets the CompletedView as the active view from the CardView', function () {
-          var context = {
-            activeView: 'card-view',
-            completedView: 'completed-view',
-            setActiveView: this.sandbox.stub()
-          };
+        it('shows the card form', function () {
+          this.mainView.showAdditionalOptions();
 
-          this.sandbox.stub(MainView.prototype, 'setActiveView');
-
-          MainView.prototype.showAdditionalOptions.call(context);
-
-          expect(context.setActiveView).to.have.been.calledWith(CompletedView.ID);
+          expect(this.wrapper.className).to.contain(CardView.ID);
         });
+
+        it('requests payment method from card view when showing card form', function () {
+          this.sandbox.stub(CardView.prototype, 'requestPaymentMethod');
+          this.mainView.showAdditionalOptions();
+
+          this.mainView.requestPaymentMethod(function () {});
+
+          expect(CardView.prototype.requestPaymentMethod).to.be.called;
+        });
+      });
+    });
+  });
+
+  describe('requestPaymentMethod', function () {
+    beforeEach(function () {
+      this.wrapper = document.createElement('div');
+      this.wrapper.innerHTML = templateHTML;
+      this.mainView = new MainView({
+        dropinWrapper: this.wrapper,
+        model: new DropinModel(),
+        options: {
+          authorization: 'fake_tokenization_key',
+          client: {
+            getConfiguration: fake.configuration
+          }
+        }
+      });
+    });
+
+    it('requests payment method from the active view', function () {
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod');
+
+      this.mainView.requestPaymentMethod();
+
+      expect(this.mainView.activeView.requestPaymentMethod).to.be.called;
+    });
+
+    it('calls back with error when error occurs', function (done) {
+      var fakeError = new Error('A bad thing happened');
+
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(fakeError);
+
+      this.mainView.requestPaymentMethod(function (err, payload) {
+        expect(payload).to.not.exist;
+        expect(err).to.equal(fakeError);
+        done();
+      });
+    });
+
+    it('calls back with payload when successful', function (done) {
+      var stubPaymentMethod = {foo: 'bar'};
+
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+
+      this.mainView.requestPaymentMethod(function (err, payload) {
+        expect(err).to.not.exist;
+        expect(payload).to.equal(stubPaymentMethod);
+        done();
+      });
+    });
+
+    it('sets the CompletedView as the active view when successful', function (done) {
+      var stubPaymentMethod = {foo: 'bar'};
+      var completedView = this.mainView.getView(CompletedView.ID);
+
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+
+      this.mainView.requestPaymentMethod(function () {
+        expect(this.mainView.activeView).to.equal(completedView);
+        done();
+      }.bind(this));
+    });
+
+    describe('with vaulted payment methods', function () {
+      beforeEach(function () {
+        this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
+        this.sandbox.stub(CardView, 'isEnabled').returns(true);
+        this.wrapper = document.createElement('div');
+        this.wrapper.innerHTML = templateHTML;
+        this.mainView = new MainView({
+          dropinWrapper: this.wrapper,
+          model: new DropinModel(),
+          options: {
+            authorization: fake.clientTokenWithCustomerID,
+            client: {
+              getConfiguration: fake.configuration
+            }
+          }
+        });
+      });
+
+      it('requests payment method from completed view', function () {
+        var completedView = this.mainView.getView(CompletedView.ID);
+
+        this.mainView.activePaymentOption = CompletedView.ID;
+        this.sandbox.stub(completedView, 'requestPaymentMethod');
+
+        this.mainView.requestPaymentMethod();
+
+        expect(completedView.requestPaymentMethod).to.be.called;
+      });
+
+      it('requests payment method from card view when additional options are shown', function () {
+        var cardView = this.mainView.getView(CardView.ID);
+
+        this.sandbox.stub(cardView, 'requestPaymentMethod');
+        this.mainView.showAdditionalOptions();
+
+        this.mainView.requestPaymentMethod();
+
+        expect(cardView.requestPaymentMethod).to.be.called;
       });
     });
   });

@@ -13,7 +13,6 @@ function CompletedPaymentMethodView() {
 
 CompletedPaymentMethodView.prototype = Object.create(BaseView.prototype);
 CompletedPaymentMethodView.prototype.constructor = CompletedPaymentMethodView;
-CompletedPaymentMethodView.ID = CompletedPaymentMethodView.prototype.ID = 'completed-payment-method';
 
 CompletedPaymentMethodView.prototype._initialize = function () {
   this.element = document.createElement('div');
