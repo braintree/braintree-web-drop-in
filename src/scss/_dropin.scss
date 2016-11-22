@@ -441,3 +441,23 @@
     margin: 0;
   }
 }
+
+[data-braintree-id="other-ways-to-pay"] {
+  display: none;
+}
+
+[data-braintree-id="choose-a-way-to-pay"] {
+  display: block;
+}
+
+.braintree-dropin__completed [data-braintree-id="other-ways-to-pay"],
+.braintree-dropin__paypal [data-braintree-id="other-ways-to-pay"],
+.braintree-dropin__pay-with-card [data-braintree-id="other-ways-to-pay"] {
+  display: block;
+}
+
+.braintree-dropin__completed [data-braintree-id="choose-a-way-to-pay"],
+.braintree-dropin__paypal [data-braintree-id="choose-a-way-to-pay"],
+.braintree-dropin__pay-with-card [data-braintree-id="choose-a-way-to-pay"] {
+  display: none;
+}

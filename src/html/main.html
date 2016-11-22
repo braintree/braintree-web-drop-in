@@ -9,7 +9,7 @@
 <div class="braintree-dropin braintree-dropin__hide">
   <div class="braintree-dropin__sheet-area">
     <div data-braintree-id="completed" class="braintree-container--vault braintree-dropin__completed">
-      <div data-braintree-id="braintree-dropin__completed-label" class="braintree-exposed__title">{{payingWith}}
+      <div data-braintree-id="completed-label" class="braintree-exposed__title">{{payingWith}}
       </div>
       <div data-braintree-id="completed-container">
       </div>
@@ -60,9 +60,12 @@
       </div>
     </div>
   </div>
-  <div data-braintree-id="payment-options" class="braintree-dropin__sheet braintree-dropin__payment-options braintree-exposed__option--container">
+  <div data-braintree-id="payment-options" class="braintree-dropin__sheet braintree-dropin__payment-options">
+    <div data-braintree-id="choose-a-way-to-pay" class="braintree-exposed__title">{{chooseAWayToPay}}</div>
+    <div data-braintree-id="other-ways-to-pay" class="braintree-exposed__title">{{otherWaysToPay}}</div>
+    <div data-braintree-id="payment-options-container" class="braintree-exposed__option--container"></div>
   </div>
-	<div data-braintree-id="additional-options" class="braintree-additional-options braintree-dropin__display--none">
+  <div data-braintree-id="additional-options" class="braintree-additional-options braintree-dropin__display--none">
     <span class="u-underline">{{chooseAnotherWayToPay}}</span>
 	</div>
 </div>

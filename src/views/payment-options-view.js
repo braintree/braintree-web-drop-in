@@ -14,6 +14,8 @@ PaymentOptionsView.prototype.constructor = PaymentOptionsView;
 PaymentOptionsView.ID = PaymentOptionsView.prototype.ID = 'payment-options';
 
 PaymentOptionsView.prototype._initialize = function () {
+  this.container = this.getElementById('payment-options-container');
+
   this.paymentOptionIDs.forEach(function (paymentOptionID) {
     this._addPaymentOption(paymentOptionID);
   }.bind(this));
@@ -42,7 +44,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   div.addEventListener('click', function () {
     this.mainView.setActiveView(paymentOptionID);
   }.bind(this));
-  this.element.appendChild(div);
+  this.container.appendChild(div);
 };
 
 module.exports = PaymentOptionsView;

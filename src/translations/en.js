@@ -7,6 +7,8 @@ module.exports = {
   payingWith: 'Paying with',
   savedPaymentMethods: 'Saved Payment Methods',
   chooseAnotherWayToPay: 'Choose another way to pay',
+  chooseAWayToPay: 'Choose a way to pay',
+  otherWaysToPay: 'Other ways to pay',
   // Errors
   fieldEmptyForCvv: 'Please fill out a CVV.',
   fieldEmptyForExpirationDate: 'Please fill out an expiration date.',
