@@ -9,3 +9,35 @@
 @import "tools";
 @import "media-queries";
 @import "no-flexbox";
+
+
+.braintree-heading {
+  font-size: 16px;
+  color: #4F4F4F;
+  margin-bottom: 5px;
+}
+
+.braintree-options-list {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.braintree-option {
+  cursor: pointer;
+  display: flex;
+  padding: 12px 10px;
+  align-items: center;
+
+  .braintree-option__logo {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    width: 50px
+  }
+
+  .braintree-option__label {
+    color: #4F4F4F;
+    font-size: 16px;
+    margin-left: 20px;
+  }
+}
