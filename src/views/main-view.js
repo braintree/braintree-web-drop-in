@@ -79,7 +79,6 @@ MainView.prototype._initialize = function () {
     paymentOptionsView = new PaymentOptionsView({
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
-      model: this.model,
       paymentOptionIDs: paymentMethodViews.map(function (paymentMethodView) { return paymentMethodView.ID; }),
       strings: this.strings
     });
