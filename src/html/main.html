@@ -14,7 +14,18 @@
       <div data-braintree-id="completed-container">
       </div>
     </div>
-    <div data-braintree-id="paypal" class="braintree-dropin__sheet braintree-dropin__paypal">
+    <div data-braintree-id="paypal" class="braintree-dropin__sheet braintree-dropin__paypal braintree-exposed__option option-is-open">
+      <div class="braintree-exposed__header">
+        <div class="braintree-exposed__acceptance_logo">
+          <svg height="28" width="48" class="braintree-icon">
+            <use xlink:href="#logoPayPal"></use>
+          </svg>
+        </div>
+        <label class="braintree-exposed__label" for="">{{PayPal}}</label>
+      </div>
+      <div class="braintree-exposed__content">
+        <div data-braintree-id="paypal-button"></div>
+      </div>
     </div>
     <div data-braintree-id="pay-with-card" class="braintree-dropin__sheet braintree-dropin__pay-with-card braintree-dropin__form">
       <div data-braintree-id="card-view-icons"></div>

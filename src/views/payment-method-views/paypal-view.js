@@ -19,7 +19,27 @@ PayPalView.ID = PayPalView.prototype.ID = 'paypal';
 
 PayPalView.prototype._initialize = function () {
   BasePaymentMethodView.prototype._initialize.apply(this, arguments);
-  this.element.innerHTML = 'PayPalView';
+  this._createPayPalButton();
+};
+
+PayPalView.prototype._createPayPalButton = function () {
+  var buttonContainer = this.getElementById('paypal-button');
+  var script = document.createElement('script');
+  var scriptAttrs = {
+    'data-merchant': 'braintree',
+    'data-button': 'checkout',
+    'data-button_type': 'button',
+    'data-color': 'gold'
+  };
+
+  script.src = 'https://www.paypalobjects.com/api/button.js';
+  script.async = true;
+
+  Object.keys(scriptAttrs).forEach(function (attr) {
+    script.setAttribute(attr, scriptAttrs[attr]);
+  });
+
+  buttonContainer.appendChild(script);
 };
 
 module.exports = PayPalView;
