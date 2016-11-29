@@ -84,11 +84,11 @@ CardView.prototype._initialize = function () {
   this.inlineErrors = {};
 
   if (!hasCVV) {
-    this.element.removeChild(this.getElementById('cvv-container'));
+    this.getElementById('cvv-container').remove();
     delete hfOptions.fields.cvv;
   }
   if (!hasPostal) {
-    this.element.removeChild(this.getElementById('postal-code-container'));
+    this.getElementById('postal-code-container').remove();
     delete hfOptions.fields.postalCode;
   }
 

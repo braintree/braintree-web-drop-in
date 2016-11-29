@@ -142,12 +142,6 @@
   width: 100%;
 }
 
-[data-braintree-id="card-view-icons"] {
-  text-align: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
 .braintree-dropin__header {
   display: none;
 }
@@ -310,12 +304,6 @@
       .braintree-form__label--relative {
         display: block;
         width: 100%;
-      }
-
-      .braintree-form__descriptor {
-        color: #C5C5C5;
-        margin-left: 6px;
-        font-size: 13px;
       }
 
       .flex .braintree-form__fieldset {

@@ -33,6 +33,7 @@ module.exports = {
   expirationDateLabel: 'Expiration Date',
   expirationDateLabelSubheading: '(MM/YY)',
   postalCodeLabel: 'Postal Code',
+  payWithCard: 'Pay with card',
   // Payment Method descriptions
   endingIn: 'Ending in ••',
   Card: 'Card',
