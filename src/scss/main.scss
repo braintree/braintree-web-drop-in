@@ -19,6 +19,77 @@ $green: #219653;
   min-width: 290px;
   margin: 0;
   padding: 0;
+
+  &.braintree-hidden {
+    height: 0;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all $time-faster linear;
+    visibility: hidden;
+  }
+}
+
+.braintree-loader__lock {
+  position: absolute;
+  top: 50%;
+  margin-top: -9px;
+  left: 50%;
+  margin-left: -7px;
+  fill: $black-40;
+}
+
+braintree-loader__container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  z-index: 2;
+  transition: opacity 500ms ease;
+}
+
+.braintree-loader__container--inactive {
+  z-index: -2;
+  height: 0;
+  opacity: 0;
+}
+
+.braintree-loader__indicator {
+  border: solid 2px $black-75;
+  border-radius: 50%;
+  height: 72px;
+  width: 72px;
+  position: relative;
+  transition: transform 300ms $curve-springy;
+  margin: 0 auto;
+
+  &:before {
+    animation: rotate 512ms infinite $curve-swing;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: solid 2px transparent;
+    border-top-color: $black-40;
+    margin-left: -2px;
+    margin-top: -2px;
+    content: "";
+    border-radius: 50%;
+  }
+
+  &.braintree-loader__indicator--inactive {
+    transform: scale(0);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .braintree-heading {
@@ -282,67 +353,6 @@ $green: #219653;
 .braintree-dropin__paypal [data-braintree-id="choose-a-way-to-pay"],
 .braintree-dropin__pay-with-card [data-braintree-id="choose-a-way-to-pay"] {
   display: none;
-}
-
-[data-braintree-id="loading-container"] {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  opacity: 1;
-  z-index: 2;
-  transition: opacity 500ms ease;
-}
-
-.braintree-dropin__loading-indicator--inactive {
-  transform: scale(0);
-}
-
-.braintree-dropin__loading-container--inactive {
-  z-index: -2;
-  height: 0;
-  opacity: 0;
-}
-
-[data-braintree-id="loading-indicator"] {
-  border: solid 2px $black-75;
-  border-radius: 50%;
-  height: 72px;
-  width: 72px;
-  position: relative;
-  transition: transform 300ms $curve-springy;
-
-  &:before {
-    animation: rotate 512ms infinite $curve-swing;
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: solid 2px transparent;
-    border-top-color: $black-40;
-    margin-left: -2px;
-    margin-top: -2px;
-    content: "";
-    border-radius: 50%;
-  }
-}
-
-.braintree-dropin__icon--lock {
-  position: absolute;
-  top: 50%;
-  margin-top: -9px;
-  left: 50%;
-  margin-left: -7px;
-  fill: $black-40;
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .braintree-completed {

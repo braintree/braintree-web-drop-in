@@ -281,6 +281,7 @@ describe('MainView', function () {
         },
         setActiveView: this.sandbox.stub(),
         showAlert: this.sandbox.stub(),
+        showAdditionalOptions: function () {},
         showLoadingIndicator: function () {}
       };
 
@@ -288,21 +289,21 @@ describe('MainView', function () {
     });
 
     // TODO: add these back in when error handling is ready
-    // it('calls showAlert when errorOccurred is emitted', function () {
-    //   var fakeError = {
-    //     code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
-    //   };
-    //
-    //   this.context.model._emit('errorOccurred', fakeError);
-    //
-    //   expect(this.context.showAlert).to.be.calledWith(fakeError);
-    // });
-    //
-    // it('calls hideAlert when errorCleared is emitted', function () {
-    //   this.context.model._emit('errorCleared');
-    //
-    //   expect(this.context.hideAlert).to.be.called;
-    // });
+    xit('calls showAlert when errorOccurred is emitted', function () {
+      var fakeError = {
+        code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
+      };
+
+      this.context.model._emit('errorOccurred', fakeError);
+
+      expect(this.context.showAlert).to.be.calledWith(fakeError);
+    });
+
+    xit('calls hideAlert when errorCleared is emitted', function () {
+      this.context.model._emit('errorCleared');
+
+      expect(this.context.hideAlert).to.be.called;
+    });
   });
 
   describe('showLoadingIndicator', function () {
@@ -316,14 +317,14 @@ describe('MainView', function () {
         loadingIndicator: loadingIndicator
       };
 
-      loadingContainer.className = 'braintree-dropin__loading-container--inactive';
+      loadingContainer.className = 'braintree-loader__container--inactive';
       loadingIndicator.className = 'braintree-dropin__loading_indicator--inactive';
 
       MainView.prototype.showLoadingIndicator.call(context);
 
-      expect(context.dropinContainer.classList.contains('braintree-dropin__hide')).to.be.true;
-      expect(context.loadingContainer.classList.contains('braintree-dropin__loading-container--inactive')).to.be.false;
-      expect(context.loadingIndicator.classList.contains('braintree-dropin__loading-indicator--inactive')).to.be.false;
+      expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.true;
+      expect(context.loadingContainer.classList.contains('braintree-loader__container--inactive')).to.be.false;
+      expect(context.loadingIndicator.classList.contains('braintree-loader__indicator--inactive')).to.be.false;
     });
   });
 
@@ -348,27 +349,26 @@ describe('MainView', function () {
         loadingIndicator: loadingIndicator
       };
 
-      dropinContainer.className = 'braintree-dropin__hide';
+      dropinContainer.className = 'braintree-dropin--hidden';
 
       MainView.prototype.hideLoadingIndicator.call(context);
       clock.tick(1001);
 
-      expect(context.dropinContainer.classList.contains('braintree-dropin__hide')).to.be.false;
-      expect(context.loadingContainer.classList.contains('braintree-dropin__loading-container--inactive')).to.be.true;
-      expect(context.loadingIndicator.classList.contains('braintree-dropin__loading-indicator--inactive')).to.be.true;
+      expect(context.dropinContainer.classList.contains('braintree-dropin__hidden')).to.be.false;
+      expect(context.loadingContainer.classList.contains('braintree-loader__container--inactive')).to.be.true;
+      expect(context.loadingIndicator.classList.contains('braintree-loader__indicator--inactive')).to.be.true;
     });
   });
 
   describe('DropinModel events', function () {
     beforeEach(function () {
-      var dropinWrapper = document.createElement('div');
-
-      dropinWrapper.innerHTML = templateHTML;
+      this.dropinWrapper = document.createElement('div');
+      this.dropinWrapper.innerHTML = templateHTML;
 
       this.context = {
         addView: this.sandbox.stub(),
-        dropinWrapper: dropinWrapper,
-        element: dropinWrapper,
+        dropinWrapper: this.dropinWrapper,
+        element: this.dropinWrapper,
         getElementById: BaseView.prototype.getElementById,
         hideAlert: function () {},
         hideLoadingIndicator: this.sandbox.stub(),
@@ -384,16 +384,20 @@ describe('MainView', function () {
         showAdditionalOptions: this.sandbox.stub()
       };
 
-      MainView.prototype._initialize.call(this.context);
+      this.sandbox.stub(CardView.prototype, '_initialize');
     });
 
     it('calls showLoadingIndicator on loadBegin', function () {
+      MainView.prototype._initialize.call(this.context);
+
       this.context.model._emit('loadBegin');
 
       expect(this.context.showLoadingIndicator).to.be.calledOnce;
     });
 
     it('calls hideLoadingIndicator on loadEnd', function () {
+      MainView.prototype._initialize.call(this.context);
+
       this.context.model._emit('loadEnd');
 
       expect(this.context.hideLoadingIndicator).to.be.calledOnce;

@@ -28,6 +28,15 @@ MainView.prototype._initialize = function () {
   this.alert = this.getElementById('alert');
   this.views = {};
 
+  this.loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
+  this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
+  this.dropinContainer = this.element.querySelector('.braintree-dropin');
+  this.supportsFlexbox = supportsFlexbox();
+
+  this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
+  this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
+  this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
+
   paymentMethodViews = [
     CardView,
     PayPalView
@@ -61,19 +70,9 @@ MainView.prototype._initialize = function () {
 
   this.additionalOptions.addEventListener('click', this.showAdditionalOptions.bind(this));
 
-  this.loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
-  this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
-  this.dropinContainer = this.element.querySelector('.braintree-dropin');
-  this.supportsFlexbox = supportsFlexbox();
-
-  this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
-
   this.model.on('changeActivePaymentMethod', function () {
     this.setActiveView(CompletedView.ID);
   }.bind(this));
-
-  this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
-  this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
   if (this.hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
@@ -155,19 +154,19 @@ MainView.prototype.requestPaymentMethod = function (callback) {
 };
 
 MainView.prototype.showLoadingIndicator = function () {
-  classlist.remove(this.loadingIndicator, 'braintree-dropin__loading-indicator--inactive');
-  classlist.remove(this.loadingContainer, 'braintree-dropin__loading-container--inactive');
-  classlist.add(this.dropinContainer, 'braintree-dropin__hide');
+  classlist.remove(this.loadingIndicator, 'braintree-loader__indicator--inactive');
+  classlist.remove(this.loadingContainer, 'braintree-loader__container--inactive');
+  classlist.add(this.dropinContainer, 'braintree-hidden');
 };
 
 MainView.prototype.hideLoadingIndicator = function () {
   setTimeout(function () {
-    classlist.add(this.loadingIndicator, 'braintree-dropin__loading-indicator--inactive');
+    classlist.add(this.loadingIndicator, 'braintree-loader__indicator--inactive');
   }.bind(this), 200);
 
   setTimeout(function () {
-    classlist.add(this.loadingContainer, 'braintree-dropin__loading-container--inactive');
-    classlist.remove(this.dropinContainer, 'braintree-dropin__hide');
+    classlist.add(this.loadingContainer, 'braintree-loader__container--inactive');
+    classlist.remove(this.dropinContainer, 'braintree-hidden');
   }.bind(this), 1000);
 };
 
