@@ -233,7 +233,7 @@ function snakeCaseToCamelCase(s) {
 }
 
 function prefixClass(classname) {
-  return 'braintree-dropin__' + classname;
+  return 'braintree-' + classname;
 }
 
 module.exports = MainView;

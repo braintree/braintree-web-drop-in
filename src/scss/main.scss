@@ -51,6 +51,11 @@ $green: #219653;
 .braintree-sheet {
   border: 1px solid $border-color;
   border-radius: 4px;
+  display: none;
+}
+
+.braintree-sheet__container {
+  margin: 0 auto 13px auto;
 }
 
 .braintree-sheet__header {
@@ -332,23 +337,19 @@ $green: #219653;
   }
 }
 
-.braintree-dropin__sheet {
-  display: none;
-}
-
-.braintree-dropin__sheet-area {
-  margin: 0 auto 13px auto;
-}
-
-.braintree-dropin__completed {
+.braintree-completed {
   display: none;
   margin: 0 auto 13px auto;
 }
 
-.braintree-dropin__completed .braintree-dropin__completed,
-.braintree-dropin__payment-options .braintree-dropin__payment-options,
-.braintree-dropin__paypal .braintree-dropin__paypal,
-.braintree-dropin__pay-with-card .braintree-dropin__pay-with-card {
+.braintree-payment-options {
+  display: none;
+}
+
+.braintree-completed .braintree-completed,
+.braintree-payment-options .braintree-payment-options,
+.braintree-paypal .braintree-paypal,
+.braintree-pay-with-card .braintree-pay-with-card {
   display: block;
 }
 
