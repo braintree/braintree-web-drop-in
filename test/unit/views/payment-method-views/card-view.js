@@ -198,9 +198,9 @@ describe('CardView', function () {
       CardView.prototype._initialize.call(this.context);
 
       supportedCardTypes.forEach(function (cardType) {
-        var cardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-' + cardType);
+        var cardIcon = this.context.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
-        expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.false;
+        expect(cardIcon.classList.contains('braintree-hidden')).to.be.false;
       }.bind(this));
     });
 
@@ -210,9 +210,9 @@ describe('CardView', function () {
       CardView.prototype._initialize.call(this.context);
 
       unsupportedCardTypes.forEach(function (cardType) {
-        var cardIcon = this.context.element.querySelector('.braintree-dropin__icon-card-' + cardType);
+        var cardIcon = this.context.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
-        expect(cardIcon.classList.contains('braintree-dropin__display--none')).to.be.true;
+        expect(cardIcon.classList.contains('braintree-hidden')).to.be.true;
       }.bind(this));
     });
 

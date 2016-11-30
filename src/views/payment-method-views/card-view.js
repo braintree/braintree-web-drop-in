@@ -4,7 +4,6 @@ var BasePaymentMethodView = require('./base-payment-method-view');
 var cardIconHTML = require('../../html/card-icons.html');
 var classlist = require('../../lib/classlist');
 var configurationCardTypes = require('../../constants').configurationCardTypes;
-var hideUnsupportedCardIcons = require('../../lib/hide-unsupported-card-icons');
 var hostedFields = require('braintree-web/hosted-fields');
 var isGuestCheckout = require('../../lib/is-guest-checkout');
 
@@ -74,7 +73,7 @@ CardView.prototype._initialize = function () {
   BasePaymentMethodView.prototype._initialize.apply(this, arguments);
 
   cardIcons.innerHTML = cardIconHTML;
-  hideUnsupportedCardIcons(this.element, supportedCardTypes);
+  this._hideUnsupportedCardIcons();
 
   this.cardNumberIcon = this.getElementById('card-number-icon');
   this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
@@ -255,6 +254,20 @@ CardView.prototype._onValidityChangeEvent = function (event) {
 
 CardView.prototype.requestPaymentMethod = function (callback) {
   this.tokenize(callback);
+};
+
+CardView.prototype._hideUnsupportedCardIcons = function () {
+  var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+
+  Object.keys(configurationCardTypes).forEach(function (paymentMethodCardType) {
+    var cardIcon;
+    var configurationCardType = configurationCardTypes[paymentMethodCardType];
+
+    if (supportedCardTypes.indexOf(configurationCardType) === -1) {
+      cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');
+      classlist.add(cardIcon, 'braintree-hidden');
+    }
+  }.bind(this));
 };
 
 function camelCaseToSnakeCase(string) {

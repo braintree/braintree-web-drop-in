@@ -9,6 +9,10 @@ $green: #219653;
   display: block !important;
 }
 
+.braintree-dropin__display--none {
+  display: none;
+}
+
 .braintree-dropin {
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
@@ -73,6 +77,10 @@ $green: #219653;
 
   .braintree-sheet__card-icon {
     display: inline-block;
+
+    &.braintree-hidden {
+      display: none;
+    }
   }
 
   .braintree-sheet__label {
@@ -351,8 +359,4 @@ $green: #219653;
 .braintree-paypal .braintree-paypal,
 .braintree-pay-with-card .braintree-pay-with-card {
   display: block;
-}
-
-.braintree-dropin__display--none {
-  display: none;
 }
