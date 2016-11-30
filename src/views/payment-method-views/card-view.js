@@ -194,7 +194,7 @@ CardView.prototype.teardown = function (callback) {
 };
 
 CardView.prototype._generateFieldSelector = function (field) {
-  return '#braintree--dropin__' + this.mainView.componentId + ' .braintree-dropin__form-' + field;
+  return '#braintree--dropin__' + this.mainView.componentId + ' .braintree-form-' + field;
 };
 
 CardView.prototype._onBlurEvent = function (event) {
