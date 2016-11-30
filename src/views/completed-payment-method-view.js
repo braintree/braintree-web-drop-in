@@ -16,7 +16,8 @@ CompletedPaymentMethodView.prototype.constructor = CompletedPaymentMethodView;
 
 CompletedPaymentMethodView.prototype._initialize = function () {
   this.element = document.createElement('div');
-  this.element.className = 'braintree-exposed__option option--is-open';
+  // this.element.className = 'braintree-exposed__option option--is-open';
+  this.element.className = 'braintree-method';
 
   this.element.addEventListener('click', function () {
     this.model.changeActivePaymentMethod(this.paymentMethod);
@@ -44,10 +45,10 @@ CompletedPaymentMethodView.prototype._initialize = function () {
 CompletedPaymentMethodView.prototype.setActive = function (isActive) {
   if (isActive) {
     // TODO rename this class to be more fitting
-    classlist.add(this.element, 'option--is-saved');
+    classlist.add(this.element, 'braintree-method--active');
     return;
   }
-  classlist.remove(this.element, 'option--is-saved');
+  classlist.remove(this.element, 'braintree-method--active');
 };
 
 module.exports = CompletedPaymentMethodView;

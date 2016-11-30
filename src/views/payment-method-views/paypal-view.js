@@ -48,7 +48,8 @@ PayPalView.prototype._createPayPalButton = function () {
     'data-merchant': 'braintree',
     'data-button': 'checkout',
     'data-button_type': 'button',
-    'data-color': 'gold'
+    'data-color': 'gold',
+    'data-size': 'small'
   };
 
   script.src = 'https://www.paypalobjects.com/api/button.js';

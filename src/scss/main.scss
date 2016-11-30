@@ -1,17 +1,21 @@
 @import "variables";
-@import "mixins";
-@import "generic";
-@import "list";
-@import "form";
-@import "credit-card";
-@import "dropin";
-@import "alerts";
-@import "tools";
-@import "media-queries";
-@import "no-flexbox";
 
 $border-color: #C5C5C5;
 $text-color: #4F4F4F;
+$background-color: #FAFAFA;
+$green: #219653;
+
+[data-braintree-id="wrapper"] {
+  display: block !important;
+}
+
+.braintree-dropin {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  min-width: 290px;
+  margin: 0;
+  padding: 0;
+}
 
 .braintree-heading {
   font-size: 16px;
@@ -60,6 +64,10 @@ $text-color: #4F4F4F;
     display: flex;
     text-align: center;
     width: 50px
+  }
+
+  .braintree-sheet__card-icon {
+    display: inline-block;
   }
 
   .braintree-sheet__label {
@@ -131,4 +139,219 @@ $text-color: #4F4F4F;
       flex-grow: 1;
     }
   }
+}
+
+.braintree-method {
+  border-color: $border-color;
+  border-style: solid;
+  border-width: 0 1px 1px 1px;
+  cursor: pointer;
+  padding: 14px 10px;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  width: 99%;
+  position: relative;
+  z-index: 0;
+
+  &:only-child {
+    border-radius: 4px;
+  }
+
+  &:first-child {
+    border-radius: 4px 4px 0 0;
+    border-top-width: 1px;
+  }
+
+  &:last-child {
+    border-radius: 0 0 4px 4px;
+  }
+
+  &.braintree-method--active {
+    border: 2px solid $green;
+    border-radius: 5px;
+    width: 100%;
+    margin-top: -2px;
+    margin-bottom: -2px;
+    z-index: 1;
+
+    &:nth-child(1) {
+      border-bottom: 2px solid $green;
+    }
+
+    .braintree-method__check {
+      background-color: $green;
+      fill: white;
+    }
+
+    .braintree-method__label {
+      font-weight: bold;
+    }
+  }
+
+  .braintree-method__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px
+  }
+
+  .braintree-method__label {
+    color: $text-color;
+    font-size: 16px;
+    margin-left: 20px;
+    text-align: left;
+    flex-grow: 1;
+
+    small {
+      font-weight: normal;
+      font-size: 11px;
+    }
+  }
+
+  .braintree-method__check {
+    margin-right: 7px;
+    height: 41px;
+    width: 41px;
+    border-radius: 100px;
+    padding: 11px;
+    background-color: $background-color;
+    fill: $background-color;
+  }
+}
+
+.braintree-additional-options {
+  background: #FAFAFA;
+  border-radius: 4px;
+  color: #4F4F4F;
+  cursor: pointer;
+  font-size: 13px;
+  margin: 0 auto 0 auto;
+  padding: 18px;
+  width: 98%;
+  text-align: center;
+
+  @media screen and (max-width: $break-small) {
+    &.flex {
+      display: block;
+    }
+  }
+
+  .braintree-additional-options-icons {
+    margin-bottom: 0;
+    transform: scale(0.8);
+
+    @media screen and (max-width: $break-small) {
+      display: none;
+    }
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+[data-braintree-id="other-ways-to-pay"] {
+  display: none;
+}
+
+[data-braintree-id="choose-a-way-to-pay"] {
+  display: block;
+}
+
+.braintree-dropin__completed [data-braintree-id="other-ways-to-pay"],
+.braintree-dropin__paypal [data-braintree-id="other-ways-to-pay"],
+.braintree-dropin__pay-with-card [data-braintree-id="other-ways-to-pay"] {
+  display: block;
+}
+
+.braintree-dropin__completed [data-braintree-id="choose-a-way-to-pay"],
+.braintree-dropin__paypal [data-braintree-id="choose-a-way-to-pay"],
+.braintree-dropin__pay-with-card [data-braintree-id="choose-a-way-to-pay"] {
+  display: none;
+}
+
+[data-braintree-id="loading-container"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  z-index: 2;
+  transition: opacity 500ms ease;
+}
+
+.braintree-dropin__loading-indicator--inactive {
+  transform: scale(0);
+}
+
+.braintree-dropin__loading-container--inactive {
+  z-index: -2;
+  height: 0;
+  opacity: 0;
+}
+
+[data-braintree-id="loading-indicator"] {
+  border: solid 2px $black-75;
+  border-radius: 50%;
+  height: 72px;
+  width: 72px;
+  position: relative;
+  transition: transform 300ms $curve-springy;
+
+  &:before {
+    animation: rotate 512ms infinite $curve-swing;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: solid 2px transparent;
+    border-top-color: $black-40;
+    margin-left: -2px;
+    margin-top: -2px;
+    content: "";
+    border-radius: 50%;
+  }
+}
+
+.braintree-dropin__icon--lock {
+  position: absolute;
+  top: 50%;
+  margin-top: -9px;
+  left: 50%;
+  margin-left: -7px;
+  fill: $black-40;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.braintree-dropin__sheet {
+  display: none;
+}
+
+.braintree-dropin__sheet-area {
+  margin: 0 auto 13px auto;
+}
+
+.braintree-dropin__completed {
+  display: none;
+  margin: 0 auto 13px auto;
+}
+
+.braintree-dropin__completed .braintree-dropin__completed,
+.braintree-dropin__payment-options .braintree-dropin__payment-options,
+.braintree-dropin__paypal .braintree-dropin__paypal,
+.braintree-dropin__pay-with-card .braintree-dropin__pay-with-card {
+  display: block;
+}
+
+.braintree-dropin__display--none {
+  display: none;
 }
