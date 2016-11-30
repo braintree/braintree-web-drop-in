@@ -44,7 +44,6 @@ CompletedPaymentMethodView.prototype._initialize = function () {
 
 CompletedPaymentMethodView.prototype.setActive = function (isActive) {
   if (isActive) {
-    // TODO rename this class to be more fitting
     classlist.add(this.element, 'braintree-method--active');
     return;
   }

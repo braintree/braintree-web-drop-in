@@ -13,7 +13,7 @@ describe('PayPalView', function () {
 
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
-    this.element = document.body.querySelector('.braintree-dropin__sheet.braintree-dropin__paypal');
+    this.element = document.body.querySelector('.braintree-sheet.braintree-paypal');
   });
 
   afterEach(function () {

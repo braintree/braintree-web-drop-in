@@ -51,9 +51,9 @@ describe('CompletedPaymentMethodView', function () {
 
       CompletedPaymentMethodView.prototype._initialize.call(this.context);
 
-      iconElement = this.context.element.querySelector('.braintree-icon');
-      labelElement = this.context.element.querySelector('.braintree-exposed__label');
-      expect(iconElement.querySelector('use').getAttribute('xlink:href')).to.equal('#icon-visa');
+      iconElement = this.context.element.querySelector('.braintree-method__logo use');
+      labelElement = this.context.element.querySelector('.braintree-method__label');
+      expect(iconElement.getAttribute('xlink:href')).to.equal('#icon-visa');
       expect(labelElement.textContent).to.contain('Ending in ••11');
       expect(labelElement.querySelector('small').textContent).to.equal('Visa');
     });
@@ -71,9 +71,9 @@ describe('CompletedPaymentMethodView', function () {
 
       CompletedPaymentMethodView.prototype._initialize.call(this.context);
 
-      iconElement = this.context.element.querySelector('.braintree-icon');
-      labelElement = this.context.element.querySelector('.braintree-exposed__label');
-      expect(iconElement.querySelector('use').getAttribute('xlink:href')).to.equal('#logoPayPal');
+      iconElement = this.context.element.querySelector('.braintree-method__logo use');
+      labelElement = this.context.element.querySelector('.braintree-method__label');
+      expect(iconElement.getAttribute('xlink:href')).to.equal('#logoPayPal');
       expect(labelElement.textContent).to.contain('test@example.com');
       expect(labelElement.querySelector('small').textContent).to.equal('PayPal');
     });
@@ -84,16 +84,16 @@ describe('CompletedPaymentMethodView', function () {
       this.context = {element: document.createElement('div')};
     });
 
-    it('adds option--is-saved if setting active payment method', function () {
+    it('adds braintree-method--active if setting active payment method', function () {
       CompletedPaymentMethodView.prototype.setActive.call(this.context, true);
 
-      expect(this.context.element.classList.contains('option--is-saved')).to.be.true;
+      expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
 
-    it('removes option--is-saved if setting active payment method', function () {
+    it('removes braintree-method--active if setting active payment method', function () {
       CompletedPaymentMethodView.prototype.setActive.call(this.context, false);
 
-      expect(this.context.element.classList.contains('option--is-saved')).to.be.false;
+      expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
     });
   });
 });

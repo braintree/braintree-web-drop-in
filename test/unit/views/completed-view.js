@@ -65,8 +65,8 @@ describe('CompletedView', function () {
       });
 
       expect(completedView.activeView).to.equal(completedView.views[0]);
-      expect(completedView.views[0].element.classList.contains('option--is-saved')).to.be.true;
-      expect(completedView.views[1].element.classList.contains('option--is-saved')).to.be.false;
+      expect(completedView.views[0].element.classList.contains('braintree-method--active')).to.be.true;
+      expect(completedView.views[1].element.classList.contains('braintree-method--active')).to.be.false;
     });
 
     it('does not add payment methods if there are none', function () {
@@ -105,8 +105,8 @@ describe('CompletedView', function () {
       model.changeActivePaymentMethod(stubPaymentMethod);
 
       expect(completedView.activeView).to.equal(completedView.views[1]);
-      expect(completedView.views[0].element.classList.contains('option--is-saved')).to.be.false;
-      expect(completedView.views[1].element.classList.contains('option--is-saved')).to.be.true;
+      expect(completedView.views[0].element.classList.contains('braintree-method--active')).to.be.false;
+      expect(completedView.views[1].element.classList.contains('braintree-method--active')).to.be.true;
     });
   });
 
