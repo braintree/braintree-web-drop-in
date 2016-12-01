@@ -318,7 +318,7 @@ describe('MainView', function () {
       };
 
       loadingContainer.className = 'braintree-loader__container--inactive';
-      loadingIndicator.className = 'braintree-dropin__loading_indicator--inactive';
+      loadingIndicator.className = 'braintree-loader__indicator--inactive';
 
       MainView.prototype.showLoadingIndicator.call(context);
 
@@ -349,12 +349,12 @@ describe('MainView', function () {
         loadingIndicator: loadingIndicator
       };
 
-      dropinContainer.className = 'braintree-dropin--hidden';
+      dropinContainer.className = 'braintree-hidden';
 
       MainView.prototype.hideLoadingIndicator.call(context);
       clock.tick(1001);
 
-      expect(context.dropinContainer.classList.contains('braintree-dropin__hidden')).to.be.false;
+      expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
       expect(context.loadingContainer.classList.contains('braintree-loader__container--inactive')).to.be.true;
       expect(context.loadingIndicator.classList.contains('braintree-loader__indicator--inactive')).to.be.true;
     });
@@ -572,7 +572,7 @@ describe('MainView', function () {
     beforeEach(function () {
       this.context = {
         views: {
-          'braintree-dropin__pay-with-card-view': {
+          'braintree-pay-with-card-view': {
             teardown: this.sandbox.stub().yields()
           }
         }
@@ -580,7 +580,7 @@ describe('MainView', function () {
     });
 
     it('calls teardown on each view', function (done) {
-      var payWithCardView = this.context.views['braintree-dropin__pay-with-card-view'];
+      var payWithCardView = this.context.views['braintree-pay-with-card-view'];
 
       MainView.prototype.teardown.call(this.context, function () {
         expect(payWithCardView.teardown).to.be.calledOnce;
@@ -589,7 +589,7 @@ describe('MainView', function () {
     });
 
     it('waits to call callback until asyncronous teardowns complete', function (done) {
-      var payWithCardView = this.context.views['braintree-dropin__pay-with-card-view'];
+      var payWithCardView = this.context.views['braintree-pay-with-card-view'];
 
       payWithCardView.teardown.yieldsAsync();
 
@@ -600,7 +600,7 @@ describe('MainView', function () {
     });
 
     it('calls callback with error from teardown function', function (done) {
-      var payWithCardView = this.context.views['braintree-dropin__pay-with-card-view'];
+      var payWithCardView = this.context.views['braintree-pay-with-card-view'];
       var error = new Error('pay with card teardown error');
 
       payWithCardView.teardown.yields(error);

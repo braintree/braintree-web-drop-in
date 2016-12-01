@@ -133,6 +133,7 @@ MainView.prototype.setActiveView = function (id) {
   }
 
   if (!this.supportsFlexbox) {
+    // TODO update no flex support
     this.dropinWrapper.className += ' braintree-dropin__no-flexbox';
   }
 
