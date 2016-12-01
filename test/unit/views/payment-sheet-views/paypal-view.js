@@ -5,7 +5,7 @@ var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var mainHTML = require('../../../../src/html/main.html');
 var PayPal = require('braintree-web/paypal');
-var PayPalView = require('../../../../src/views/payment-method-views/paypal-view');
+var PayPalView = require('../../../../src/views/payment-sheet-views/paypal-view');
 
 describe('PayPalView', function () {
   beforeEach(function () {

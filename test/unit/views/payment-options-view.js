@@ -1,10 +1,10 @@
 'use strict';
 
 var BaseView = require('../../../src/views/base-view');
-var CardView = require('../../../src/views/payment-method-views/card-view');
+var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var mainHTML = require('../../../src/html/main.html');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
-var PayPalView = require('../../../src/views/payment-method-views/paypal-view');
+var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var strings = require('../../../src/translations/en');
 
 describe('PaymentOptionsView', function () {

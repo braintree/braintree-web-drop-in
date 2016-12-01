@@ -2,11 +2,11 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
-var CardView = require('./payment-method-views/card-view');
+var CardView = require('./payment-sheet-views/card-view');
 var CompletedView = require('./completed-view');
 var isGuestCheckout = require('../lib/is-guest-checkout');
 var PaymentOptionsView = require('./payment-options-view');
-var PayPalView = require('./payment-method-views/paypal-view');
+var PayPalView = require('./payment-sheet-views/paypal-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
 function MainView() {
@@ -22,7 +22,7 @@ MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
   var paymentMethods = this.model.getPaymentMethods();
-  var paymentMethodViews, paymentOptionsView;
+  var paymentSheetViews, paymentOptionsView;
 
   this.additionalOptions = this.getElementById('additional-options');
   this.alert = this.getElementById('alert');
@@ -37,28 +37,28 @@ MainView.prototype._initialize = function () {
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  paymentMethodViews = [
+  paymentSheetViews = [
     CardView,
     PayPalView
-  ].reduce(function (views, PaymentMethodView) {
-    var paymentMethodView;
+  ].reduce(function (views, PaymentSheetView) {
+    var paymentSheetView;
 
-    if (PaymentMethodView.isEnabled(this.options)) {
-      paymentMethodView = new PaymentMethodView({
-        element: this.getElementById(PaymentMethodView.ID),
+    if (PaymentSheetView.isEnabled(this.options)) {
+      paymentSheetView = new PaymentSheetView({
+        element: this.getElementById(PaymentSheetView.ID),
         mainView: this,
         model: this.model,
         options: this.options,
         strings: this.strings
       });
 
-      this.addView(paymentMethodView);
-      views.push(paymentMethodView);
+      this.addView(paymentSheetView);
+      views.push(paymentSheetView);
     }
     return views;
   }.bind(this), []);
 
-  this.hasMultiplePaymentOptions = paymentMethodViews.length > 1;
+  this.hasMultiplePaymentOptions = paymentSheetViews.length > 1;
 
   this.completedView = new CompletedView({
     element: this.getElementById(CompletedView.ID),
@@ -78,14 +78,14 @@ MainView.prototype._initialize = function () {
     paymentOptionsView = new PaymentOptionsView({
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
-      paymentOptionIDs: paymentMethodViews.map(function (paymentMethodView) { return paymentMethodView.ID; }),
+      paymentOptionIDs: paymentSheetViews.map(function (paymentSheetView) { return paymentSheetView.ID; }),
       strings: this.strings
     });
 
     this.addView(paymentOptionsView);
     this.setActiveView(paymentOptionsView.ID);
   } else {
-    this.setActiveView(paymentMethodViews[0].ID);
+    this.setActiveView(paymentSheetViews[0].ID);
   }
 
   if (paymentMethods.length > 0) {

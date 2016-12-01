@@ -1,6 +1,6 @@
 'use strict';
 
-var BasePaymentMethodView = require('./base-payment-method-view');
+var BasePaymentSheetView = require('./base-payment-sheet-view');
 var cardIconHTML = require('../../html/card-icons.html');
 var classlist = require('../../lib/classlist');
 var configurationCardTypes = require('../../constants').configurationCardTypes;
@@ -8,7 +8,7 @@ var hostedFields = require('braintree-web/hosted-fields');
 var isGuestCheckout = require('../../lib/is-guest-checkout');
 
 function CardView() {
-  BasePaymentMethodView.apply(this, arguments);
+  BasePaymentSheetView.apply(this, arguments);
 }
 
 CardView.isEnabled = function () {
@@ -16,7 +16,7 @@ CardView.isEnabled = function () {
   return true;
 };
 
-CardView.prototype = Object.create(BasePaymentMethodView.prototype);
+CardView.prototype = Object.create(BasePaymentSheetView.prototype);
 CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = 'pay-with-card';
 
@@ -69,7 +69,7 @@ CardView.prototype._initialize = function () {
     }
   };
 
-  BasePaymentMethodView.prototype._initialize.apply(this, arguments);
+  BasePaymentSheetView.prototype._initialize.apply(this, arguments);
 
   cardIcons.innerHTML = cardIconHTML;
   this._hideUnsupportedCardIcons();

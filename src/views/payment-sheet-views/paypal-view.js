@@ -1,10 +1,10 @@
 'use strict';
 
-var BasePaymentMethodView = require('./base-payment-method-view');
+var BasePaymentSheetView = require('./base-payment-sheet-view');
 var PayPal = require('braintree-web/paypal');
 
 function PayPalView() {
-  BasePaymentMethodView.apply(this, arguments);
+  BasePaymentSheetView.apply(this, arguments);
 }
 
 PayPalView.isEnabled = function (options) {
@@ -14,14 +14,14 @@ PayPalView.isEnabled = function (options) {
   return isGatewayEnabled && isMerchantEnabled;
 };
 
-PayPalView.prototype = Object.create(BasePaymentMethodView.prototype);
+PayPalView.prototype = Object.create(BasePaymentSheetView.prototype);
 PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = 'paypal';
 
 PayPalView.prototype._initialize = function () {
   var paypalButton;
 
-  BasePaymentMethodView.prototype._initialize.apply(this, arguments);
+  BasePaymentSheetView.prototype._initialize.apply(this, arguments);
   this._createPayPalButton();
   this.model.asyncDependencyStarting();
 

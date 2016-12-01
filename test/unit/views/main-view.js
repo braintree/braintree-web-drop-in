@@ -2,11 +2,11 @@
 
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
-var CardView = require('../../../src/views/payment-method-views/card-view');
+var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var CompletedView = require('../../../src/views/completed-view');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
-var PayPalView = require('../../../src/views/payment-method-views/paypal-view');
+var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var strings = require('../../../src/translations/en');
 var templateHTML = require('../../../src/html/main.html');
 
