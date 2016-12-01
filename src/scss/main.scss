@@ -1,9 +1,7 @@
-@import "variables";
-
 $border-color: #C5C5C5;
 $text-color: #4F4F4F;
 $background-color: #FAFAFA;
-$green: #219653;
+$highlight-color: #219653;
 
 [data-braintree-id="wrapper"] {
   display: block !important;
@@ -252,7 +250,7 @@ braintree-loader__container {
   }
 
   &.braintree-method--active {
-    border: 2px solid $green;
+    border: 2px solid $highlight-color;
     border-radius: 5px;
     width: 100%;
     margin-top: -2px;
@@ -260,11 +258,11 @@ braintree-loader__container {
     z-index: 1;
 
     &:nth-child(1) {
-      border-bottom: 2px solid $green;
+      border-bottom: 2px solid $highlight-color;
     }
 
     .braintree-method__check {
-      background-color: $green;
+      background-color: $highlight-color;
       fill: white;
     }
 
