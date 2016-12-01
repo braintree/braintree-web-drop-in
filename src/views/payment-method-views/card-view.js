@@ -202,10 +202,10 @@ CardView.prototype._generateFieldSelector = function (field) {
 CardView.prototype._onBlurEvent = function (event) {
   if (event.emittedBy === 'number') {
     if (event.fields.number.isEmpty) {
-      classlist.add(this.cardNumberIcon, 'braintree-dropin__hide');
+      classlist.add(this.cardNumberIcon, 'braintree-hidden');
     }
   } else if (event.emittedBy === 'cvv') {
-    classlist.add(this.cvvIcon, 'braintree-dropin__hide');
+    classlist.add(this.cvvIcon, 'braintree-hidden');
   }
 };
 
@@ -234,9 +234,9 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 
 CardView.prototype._onFocusEvent = function (event) {
   if (event.emittedBy === 'number') {
-    classlist.remove(this.cardNumberIcon, 'braintree-dropin__hide');
+    classlist.remove(this.cardNumberIcon, 'braintree-hidden');
   } else if (event.emittedBy === 'cvv') {
-    classlist.remove(this.cvvIcon, 'braintree-dropin__hide');
+    classlist.remove(this.cvvIcon, 'braintree-hidden');
   }
 };
 

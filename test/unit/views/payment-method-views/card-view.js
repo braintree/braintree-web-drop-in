@@ -415,7 +415,7 @@ describe('CardView', function () {
         CardView.prototype._initialize.call(this.context);
         cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
 
-        expect(cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+        expect(cardNumberIcon.classList.contains('braintree-hidden')).to.be.false;
         expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
       });
 
@@ -430,7 +430,7 @@ describe('CardView', function () {
         CardView.prototype._initialize.call(this.context);
         cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
 
-        expect(cvvIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+        expect(cvvIcon.classList.contains('braintree-hidden')).to.be.false;
         expect(cvvIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCVVBack');
       });
     });
@@ -453,11 +453,11 @@ describe('CardView', function () {
         var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        classlist.remove(cardNumberIcon, 'braintree-dropin__hide');
+        classlist.remove(cardNumberIcon, 'braintree-hidden');
 
         CardView.prototype._initialize.call(this.context);
 
-        expect(this.context.cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.true;
+        expect(this.context.cardNumberIcon.classList.contains('braintree-hidden')).to.be.true;
       });
 
       it('does not hide the card number icon when the number field is blurred and not empty', function () {
@@ -473,11 +473,11 @@ describe('CardView', function () {
         var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        classlist.remove(cardNumberIcon, 'braintree-dropin__hide');
+        classlist.remove(cardNumberIcon, 'braintree-hidden');
 
         CardView.prototype._initialize.call(this.context);
 
-        expect(this.context.cardNumberIcon.classList.contains('braintree-dropin__hide')).to.be.false;
+        expect(this.context.cardNumberIcon.classList.contains('braintree-hidden')).to.be.false;
       });
 
       it('hides cvv icon in cvv field when blurred', function () {
@@ -486,12 +486,12 @@ describe('CardView', function () {
         };
         var cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
 
-        classlist.remove(cvvIcon, 'braintree-dropin__hide');
+        classlist.remove(cvvIcon, 'braintree-hidden');
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
 
         CardView.prototype._initialize.call(this.context);
 
-        expect(this.context.cvvIcon.classList.contains('braintree-dropin__hide')).to.be.true;
+        expect(this.context.cvvIcon.classList.contains('braintree-hidden')).to.be.true;
       });
     });
 

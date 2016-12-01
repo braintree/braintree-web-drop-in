@@ -213,6 +213,10 @@ braintree-loader__container {
         position: absolute;
         bottom: 5px;
         right: 5px;
+
+        &.braintree-hidden {
+          display: none;
+        }
       }
 
       .braintree-form__hosted-field {
