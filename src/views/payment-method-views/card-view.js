@@ -113,11 +113,10 @@ CardView.prototype._initialize = function () {
 };
 
 CardView.prototype.tokenize = function (callback) {
-  var cardTypeSupported;
+  var cardType, cardTypeSupported;
   var formValid = true;
   var state = this.hostedFieldsInstance.getState();
   var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
-  var cardType = configurationCardTypes[state.cards[0].type];
 
   this.model.clearError();
 
@@ -133,15 +132,16 @@ CardView.prototype.tokenize = function (callback) {
     }
   }.bind(this));
 
-  cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
-
-  if (!cardTypeSupported) {
-    this.showInlineError('number', this.strings.unsupportedCardTypeError);
-    callback(new Error('No payment method is available.'));
-    return;
-  }
-
   if (formValid) {
+    cardType = configurationCardTypes[state.cards[0].type];
+    cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
+
+    if (!cardTypeSupported) {
+      this.showInlineError('number', this.strings.unsupportedCardTypeError);
+      callback(new Error('No payment method is available.'));
+      return;
+    }
+
     this.model.beginLoading();
 
     this.hostedFieldsInstance.tokenize({

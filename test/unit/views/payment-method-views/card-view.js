@@ -798,6 +798,27 @@ describe('CardView', function () {
       };
     });
 
+    it('throws an error if there is no valid card type', function (done) {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: false
+          }
+        }
+      });
+
+      CardView.prototype.tokenize.call(this.context, function (err, payload) {
+        expect(err).to.exist;
+        expect(payload).to.not.exist;
+        expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
+        done();
+      }.bind(this));
+    });
+
     it('does not tokenize if form is not valid', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
