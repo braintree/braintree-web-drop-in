@@ -3,6 +3,7 @@
 var BaseView = require('../../../src/views/base-view');
 var CompletedView = require('../../../src/views/completed-view');
 var DropinModel = require('../../../src/dropin-model');
+var fake = require('../../helpers/fake');
 var mainHTML = require('../../../src/html/main.html');
 
 describe('CompletedView', function () {
@@ -39,7 +40,7 @@ describe('CompletedView', function () {
         element: this.element,
         model: stubModel,
         options: {
-          authorization: 'a_test_key'
+          authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
       });
@@ -59,7 +60,7 @@ describe('CompletedView', function () {
         element: this.element,
         model: stubModel,
         options: {
-          authorization: 'a_test_key'
+          authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
       });
@@ -78,7 +79,7 @@ describe('CompletedView', function () {
         element: this.element,
         model: stubModel,
         options: {
-          authorization: 'a_test_key'
+          authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
       });
@@ -88,25 +89,89 @@ describe('CompletedView', function () {
 
     it('changes the payment method view when the active payment method changes', function () {
       var model, completedView;
-      var stubPaymentMethod = {baz: 'qux'};
+      var fakePaymentMethod = {baz: 'qux'};
 
       model = new DropinModel({
-        paymentMethods: [{foo: 'bar'}, stubPaymentMethod]
+        paymentMethods: [{foo: 'bar'}, fakePaymentMethod]
       });
       completedView = new CompletedView({
         element: this.element,
         model: model,
         options: {
-          authorization: 'a_test_key'
+          authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
       });
 
-      model.changeActivePaymentMethod(stubPaymentMethod);
+      model.changeActivePaymentMethod(fakePaymentMethod);
 
       expect(completedView.activeView).to.equal(completedView.views[1]);
       expect(completedView.views[0].element.classList.contains('braintree-method--active')).to.be.false;
       expect(completedView.views[1].element.classList.contains('braintree-method--active')).to.be.true;
+    });
+  });
+
+  describe('_addPaymentMethod', function () {
+    beforeEach(function () {
+      var div = document.createElement('div');
+
+      div.innerHTML = mainHTML;
+      this.element = div.querySelector('[data-braintree-id="completed"]');
+      this.fakePaymentMethod = {bax: 'qux'};
+    });
+
+    it('does not remove other payment methods in non-guest checkout', function () {
+      var completedContainer = this.element.querySelector('[data-braintree-id="completed-container"]');
+      var model = new DropinModel({paymentMethods: [this.fakePaymentMethod]});
+      var completedView = new CompletedView({
+        element: this.element,
+        model: model,
+        options: {
+          authorization: fake.clientTokenWithCustomerID
+        },
+        strings: {}
+      });
+
+      model.addPaymentMethod({foo: 'bar'});
+
+      expect(completedView.views.length).to.equal(2);
+      expect(completedContainer.childElementCount).to.equal(2);
+    });
+
+    it('removes other payment methods in guest checkout', function () {
+      var completedContainer = this.element.querySelector('[data-braintree-id="completed-container"]');
+      var model = new DropinModel({paymentMethods: [this.fakePaymentMethod]});
+      var completedView = new CompletedView({
+        element: this.element,
+        model: model,
+        options: {
+          authorization: fake.clientToken
+        },
+        strings: {}
+      });
+
+      model.addPaymentMethod({foo: 'bar'});
+
+      expect(completedView.views.length).to.equal(1);
+      expect(completedContainer.childElementCount).to.equal(1);
+    });
+
+    it('does not try to remove a payment method if none exists in guest checkout', function () {
+      var completedContainer = this.element.querySelector('[data-braintree-id="completed-container"]');
+      var model = new DropinModel();
+      var completedView = new CompletedView({
+        element: this.element,
+        model: model,
+        options: {
+          authorization: fake.clientToken
+        },
+        strings: {}
+      });
+
+      model.addPaymentMethod({foo: 'bar'});
+
+      expect(completedView.views.length).to.equal(1);
+      expect(completedContainer.childElementCount).to.equal(1);
     });
   });
 
@@ -123,7 +188,7 @@ describe('CompletedView', function () {
         element: element,
         model: model,
         options: {
-          authorization: 'a_test_key'
+          authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
       });

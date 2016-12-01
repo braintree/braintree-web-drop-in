@@ -2,6 +2,7 @@
 
 var BaseView = require('./base-view');
 var CompletedPaymentMethodView = require('./completed-payment-method-view');
+var isGuestCheckout = require('../lib/is-guest-checkout');
 
 function CompletedView() {
   BaseView.apply(this, arguments);
@@ -18,15 +19,12 @@ CompletedView.prototype._initialize = function () {
 
   this.views = [];
   this.container = this.getElementById('completed-container');
-
-  // TODO find a better way to detect when in guest checkout, and only show one completed payment method view
-  //   - Possibly pass guestCheckout in options?
+  this.isGuestCheckout = isGuestCheckout(this.options.authorization);
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
 
   if (paymentMethods.length > 0) {
-    // Should this add payment methods using the model? I think no, to preserve which one is default
     paymentMethods.forEach(this._addPaymentMethod.bind(this));
     this._changeActivePaymentMethodView(paymentMethods[0]);
   }
@@ -38,6 +36,11 @@ CompletedView.prototype._addPaymentMethod = function (paymentMethod) {
     paymentMethod: paymentMethod,
     strings: this.strings
   });
+
+  if (this.isGuestCheckout && this.container.firstChild) {
+    this.container.removeChild(this.container.firstChild);
+    this.views.pop();
+  }
 
   this.container.appendChild(completedPaymentMethodView.element);
 
