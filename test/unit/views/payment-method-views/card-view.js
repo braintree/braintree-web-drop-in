@@ -712,7 +712,7 @@ describe('CardView', function () {
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
+        expect(numberInlineError.classList.contains('braintree-hidden')).to.be.false;
         expect(numberInlineError.textContent).to.equal('This card number is not valid.');
       });
 
@@ -734,7 +734,7 @@ describe('CardView', function () {
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.true;
+        expect(numberInlineError.classList.contains('braintree-hidden')).to.be.true;
         expect(numberInlineError.textContent).to.equal('');
       });
     });
@@ -751,12 +751,12 @@ describe('CardView', function () {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
 
-        classlist.remove(numberInlineError, 'braintree-dropin__display--none');
+        classlist.remove(numberInlineError, 'braintree-hidden');
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.true;
+        expect(numberInlineError.classList.contains('braintree-hidden')).to.be.true;
         expect(numberInlineError.textContent).to.equal('');
       });
     });
@@ -878,7 +878,7 @@ describe('CardView', function () {
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(numberInlineError.classList.contains('braintree-hidden')).to.be.false;
       expect(numberInlineError.textContent).to.equal('This card type is not supported. Please try another card.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
@@ -901,7 +901,7 @@ describe('CardView', function () {
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(numberInlineError.classList.contains('braintree-hidden')).to.be.false;
       expect(numberInlineError.textContent).to.equal('Please fill out a number.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
@@ -923,7 +923,7 @@ describe('CardView', function () {
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(numberInlineError.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(numberInlineError.classList.contains('braintree-hidden')).to.be.false;
       expect(numberInlineError.textContent).to.equal('This card number is not valid.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });

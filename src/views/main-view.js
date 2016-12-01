@@ -181,11 +181,11 @@ MainView.prototype.showAdditionalOptions = function () {
 };
 
 MainView.prototype.showAdditionalOptionsButton = function () {
-  classlist.remove(this.additionalOptions, 'braintree-dropin__display--none');
+  classlist.remove(this.additionalOptions, 'braintree-hidden');
 };
 
 MainView.prototype.hideAdditionalOptionsButton = function () {
-  classlist.add(this.additionalOptions, 'braintree-dropin__display--none');
+  classlist.add(this.additionalOptions, 'braintree-hidden');
 };
 
 MainView.prototype.showAlert = function (error) {
@@ -197,12 +197,12 @@ MainView.prototype.showAlert = function (error) {
     errorMessage = error.message || this.strings.genericError;
   }
 
-  classlist.remove(this.alert, 'braintree-dropin__display--none');
+  classlist.remove(this.alert, 'braintree-hidden');
   this.alert.textContent = errorMessage;
 };
 
 MainView.prototype.hideAlert = function () {
-  classlist.add(this.alert, 'braintree-dropin__display--none');
+  classlist.add(this.alert, 'braintree-hidden');
 };
 
 MainView.prototype.teardown = function (callback) {

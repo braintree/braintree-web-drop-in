@@ -176,7 +176,7 @@ CardView.prototype.showInlineError = function (field, errorMessage) {
 
   inlineError = this.inlineErrors[field];
   inlineError.textContent = errorMessage;
-  classlist.remove(inlineError, 'braintree-dropin__display--none');
+  classlist.remove(inlineError, 'braintree-hidden');
 };
 
 CardView.prototype.hideInlineError = function (field) {
@@ -187,7 +187,7 @@ CardView.prototype.hideInlineError = function (field) {
   }
 
   inlineError = this.inlineErrors[field];
-  classlist.add(inlineError, 'braintree-dropin__display--none');
+  classlist.add(inlineError, 'braintree-hidden');
   inlineError.textContent = '';
 };
 

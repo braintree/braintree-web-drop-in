@@ -167,7 +167,7 @@ describe('MainView', function () {
 
           mainView = new MainView(this.mainViewOptions);
 
-          expect(mainView.additionalOptions.classList.contains('braintree-dropin__display--none')).to.be.false;
+          expect(mainView.additionalOptions.classList.contains('braintree-hidden')).to.be.false;
         });
       });
 
@@ -175,7 +175,7 @@ describe('MainView', function () {
         it('does not show the additional options button', function () {
           var mainView = new MainView(this.mainViewOptions);
 
-          expect(mainView.additionalOptions.classList.contains('braintree-dropin__display--none')).to.be.true;
+          expect(mainView.additionalOptions.classList.contains('braintree-hidden')).to.be.true;
         });
       });
     });
@@ -194,7 +194,7 @@ describe('MainView', function () {
 
         mainView.setActiveView(CompletedView.ID);
 
-        expect(mainView.additionalOptions.classList.contains('braintree-dropin__display--none')).to.be.false;
+        expect(mainView.additionalOptions.classList.contains('braintree-hidden')).to.be.false;
       });
     });
   });
@@ -210,7 +210,7 @@ describe('MainView', function () {
     it('shows the alert', function () {
       MainView.prototype.showAlert.call(this.context, {});
 
-      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.false;
+      expect(this.context.alert.classList.contains('braintree-hidden')).to.be.false;
     });
 
     it('sets the alert to the expected message for the error code', function () {
@@ -256,7 +256,7 @@ describe('MainView', function () {
     it('hides the alert', function () {
       MainView.prototype.hideAlert.call(this.context);
 
-      expect(this.context.alert.classList.contains('braintree-dropin__display--none')).to.be.true;
+      expect(this.context.alert.classList.contains('braintree-hidden')).to.be.true;
     });
   });
 
