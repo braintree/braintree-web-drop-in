@@ -97,8 +97,14 @@ braintree-loader__container {
   margin: 5px 5px 10px 5px;
 }
 
+.braintree-options {
+  display: none;
+}
+
 .braintree-options-list {
   padding-bottom: 5px;
+  margin: 0 auto;
+  width: 99%;
 }
 
 .braintree-option {
@@ -138,6 +144,8 @@ braintree-loader__container {
   border: 1px solid $border-color;
   border-radius: 4px;
   display: none;
+  margin: 0 auto;
+  width: 99%;
 }
 
 .braintree-sheet__container {
@@ -148,7 +156,7 @@ braintree-loader__container {
   align-items: center;
   border-bottom: 1px solid $border-color;
   display: flex;
-  padding: 12px 10px;
+  padding: 12px 15px;
 
   .braintree-sheet__logo--header {
     align-items: center;
@@ -248,6 +256,7 @@ braintree-loader__container {
   padding: 14px 10px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin: 0 auto;
   width: 99%;
   position: relative;
@@ -313,25 +322,30 @@ braintree-loader__container {
     height: 41px;
     width: 41px;
     border-radius: 100px;
-    padding: 11px;
+    padding: 7px 10px 10px 10px;
     background-color: $background-color;
     fill: $background-color;
+
+    svg {
+      width: 100%;
+    }
   }
 }
 
-.braintree-additional-options {
+.braintree-toggle {
   background: $background-color;
   border-radius: 4px;
   color: $text-color;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   margin: 0 auto 0 auto;
   padding: 18px;
   text-align: center;
+  width: 99%;
 
   span {
-    border-bottom: 1px solid #dddddd;
-    padding-bottom: 3px;
+    border-bottom: 1px solid $border-color;
+    padding-bottom: 1px;
   }
 
   &.braintree-hidden {
@@ -355,12 +369,8 @@ braintree-loader__container {
   margin: 0 auto 13px auto;
 }
 
-.braintree-payment-options {
-  display: none;
-}
-
 .braintree-completed .braintree-completed,
-.braintree-payment-options .braintree-payment-options,
+.braintree-options .braintree-options,
 .braintree-paypal .braintree-paypal,
 .braintree-pay-with-card .braintree-pay-with-card {
   display: block;

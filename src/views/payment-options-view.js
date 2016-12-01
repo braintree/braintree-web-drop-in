@@ -11,7 +11,7 @@ function PaymentOptionsView() {
 
 PaymentOptionsView.prototype = Object.create(BaseView.prototype);
 PaymentOptionsView.prototype.constructor = PaymentOptionsView;
-PaymentOptionsView.ID = PaymentOptionsView.prototype.ID = 'payment-options';
+PaymentOptionsView.ID = PaymentOptionsView.prototype.ID = 'options';
 
 PaymentOptionsView.prototype._initialize = function () {
   this.container = this.getElementById('payment-options-container');
