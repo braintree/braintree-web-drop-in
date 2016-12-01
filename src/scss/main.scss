@@ -93,19 +93,31 @@ braintree-loader__container {
 .braintree-heading {
   font-size: 16px;
   color: $text-color;
-  margin-bottom: 5px;
+  margin: 5px 5px 10px 5px;
 }
 
 .braintree-options-list {
-  padding-top: 5px;
   padding-bottom: 5px;
 }
 
 .braintree-option {
+  background-color: $background-color;
+  border-color: $border-color;
+  border-style: solid;
+  border-width: 0 1px 1px 1px;
   cursor: pointer;
   display: flex;
   padding: 12px 10px;
   align-items: center;
+
+  &:first-child {
+    border-radius: 4px 4px 0 0;
+    border-top-width: 1px;
+  }
+
+  &:last-child {
+    border-radius: 0 0 4px 4px;
+  }
 
   .braintree-option__logo {
     display: flex;
@@ -303,54 +315,19 @@ braintree-loader__container {
 }
 
 .braintree-additional-options {
-  background: #FAFAFA;
+  background: $background-color;
   border-radius: 4px;
-  color: #4F4F4F;
+  color: $text-color;
   cursor: pointer;
   font-size: 13px;
   margin: 0 auto 0 auto;
   padding: 18px;
-  width: 98%;
   text-align: center;
 
-  @media screen and (max-width: $break-small) {
-    &.flex {
-      display: block;
-    }
+  span {
+    border-bottom: 1px solid #dddddd;
+    padding-bottom: 3px;
   }
-
-  .braintree-additional-options-icons {
-    margin-bottom: 0;
-    transform: scale(0.8);
-
-    @media screen and (max-width: $break-small) {
-      display: none;
-    }
-  }
-
-  p {
-    margin: 0;
-  }
-}
-
-[data-braintree-id="other-ways-to-pay"] {
-  display: none;
-}
-
-[data-braintree-id="choose-a-way-to-pay"] {
-  display: block;
-}
-
-.braintree-dropin__completed [data-braintree-id="other-ways-to-pay"],
-.braintree-dropin__paypal [data-braintree-id="other-ways-to-pay"],
-.braintree-dropin__pay-with-card [data-braintree-id="other-ways-to-pay"] {
-  display: block;
-}
-
-.braintree-dropin__completed [data-braintree-id="choose-a-way-to-pay"],
-.braintree-dropin__paypal [data-braintree-id="choose-a-way-to-pay"],
-.braintree-dropin__pay-with-card [data-braintree-id="choose-a-way-to-pay"] {
-  display: none;
 }
 
 .braintree-completed {
@@ -367,4 +344,24 @@ braintree-loader__container {
 .braintree-paypal .braintree-paypal,
 .braintree-pay-with-card .braintree-pay-with-card {
   display: block;
+}
+
+[data-braintree-id="other-ways-to-pay"] {
+  display: none;
+}
+
+[data-braintree-id="choose-a-way-to-pay"] {
+  display: block;
+}
+
+.braintree-completed [data-braintree-id="other-ways-to-pay"],
+.braintree-paypal [data-braintree-id="other-ways-to-pay"],
+.braintree-pay-with-card [data-braintree-id="other-ways-to-pay"] {
+  display: block;
+}
+
+.braintree-completed [data-braintree-id="choose-a-way-to-pay"],
+.braintree-paypal [data-braintree-id="choose-a-way-to-pay"],
+.braintree-pay-with-card [data-braintree-id="choose-a-way-to-pay"] {
+  display: none;
 }

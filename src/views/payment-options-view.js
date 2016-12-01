@@ -25,8 +25,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   var div = document.createElement('div');
   var html = paymentMethodOptionHTML;
 
-  // TODO replace with new classes
-  // div.className = 'braintree-exposed__option option--is-closed';
+  div.className = 'braintree-option';
 
   switch (paymentOptionID) {
     case 'pay-with-card':
