@@ -156,7 +156,15 @@ braintree-loader__container {
   align-items: center;
   border-bottom: 1px solid $border-color;
   display: flex;
-  padding: 12px 15px;
+  flex-wrap: wrap;
+  padding: 12px 15px 0 12px;
+
+  .braintree-sheet__header-label {
+    align-items: center;
+    display: flex;
+    flex-grow: 1;
+    padding-bottom: 12px;
+  }
 
   .braintree-sheet__logo--header {
     align-items: center;
@@ -167,21 +175,22 @@ braintree-loader__container {
 
   .braintree-sheet__card-icon {
     display: inline-block;
+    padding-left: 5px;
 
     &.braintree-hidden {
       display: none;
     }
   }
 
-  .braintree-sheet__label {
+  .braintree-sheet__text {
     color: $text-color;
     font-size: 16px;
     margin-left: 20px;
   }
 
   .braintree-sheet__icons {
-    flex-grow: 1;
-    text-align: right;
+    display: flex;
+    padding-bottom: 10px;
   }
 }
 
