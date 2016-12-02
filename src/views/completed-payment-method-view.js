@@ -16,7 +16,6 @@ CompletedPaymentMethodView.prototype.constructor = CompletedPaymentMethodView;
 
 CompletedPaymentMethodView.prototype._initialize = function () {
   this.element = document.createElement('div');
-  // this.element.className = 'braintree-exposed__option option--is-open';
   this.element.className = 'braintree-method';
 
   this.element.addEventListener('click', function () {

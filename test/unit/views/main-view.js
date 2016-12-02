@@ -6,7 +6,9 @@ var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var CompletedView = require('../../../src/views/completed-view');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
+var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
+var PayPal = require('braintree-web/paypal');
 var strings = require('../../../src/translations/en');
 var templateHTML = require('../../../src/html/main.html');
 
@@ -30,10 +32,9 @@ describe('MainView', function () {
   describe('initialize', function () {
     beforeEach(function () {
       var dropinWrapper = document.createElement('div');
+      var model = new DropinModel();
 
       dropinWrapper.innerHTML = templateHTML;
-
-      this.model = new DropinModel();
 
       this.context = {
         addView: this.sandbox.stub(),
@@ -43,7 +44,7 @@ describe('MainView', function () {
         getElementById: BaseView.prototype.getElementById,
         hideAlert: function () {},
         hideLoadingIndicator: function () {},
-        model: this.model,
+        model: model,
         options: {
           client: {
             getConfiguration: fake.configuration
@@ -55,6 +56,131 @@ describe('MainView', function () {
           foo: 'bar'
         }
       };
+    });
+  });
+
+  afterEach(function () {
+    document.body.innerHTML = '';
+  });
+
+  it('creates a PaymentOptionsView if there are multiple payment options', function () {
+    var mainView;
+    var dropinWrapper = document.createElement('div');
+    var model = new DropinModel({paymentMethods: [{foo: 'bar'}, {baz: 'qux'}]});
+
+    this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
+    this.sandbox.stub(CardView, 'isEnabled').returns(true);
+    this.sandbox.stub(PayPal, 'create').yields(null, {});
+
+    dropinWrapper.innerHTML = templateHTML;
+    mainView = new MainView({
+      dropinWrapper: dropinWrapper,
+      model: model,
+      options: {
+        authorization: 'fake_tokenization_key',
+        client: {
+          getConfiguration: fake.configuration
+        }
+      },
+      strings: strings
+    });
+
+    expect(Object.keys(mainView.views)).to.contain(PaymentOptionsView.ID);
+  });
+
+  describe('with vaulted payment methods', function () {
+    beforeEach(function () {
+      this.dropinWrapper = document.createElement('div');
+      this.dropinWrapper.innerHTML = templateHTML;
+      this.model = new DropinModel({paymentMethods: [{foo: 'bar'}, {baz: 'qux'}]});
+      this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
+      this.sandbox.stub(CardView, 'isEnabled').returns(true);
+      this.sandbox.stub(PayPal, 'create').yields(null, {});
+    });
+
+    it('sets the first payment method to be the active payment method', function () {
+      this.sandbox.spy(this.model, 'changeActivePaymentMethod');
+
+      new MainView({ // eslint-disable-line no-new
+        dropinWrapper: this.dropinWrapper,
+        model: this.model,
+        options: {
+          authorization: 'fake_tokenization_key',
+          client: {
+            getConfiguration: fake.configuration
+          }
+        },
+        strings: strings
+      });
+
+      expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({foo: 'bar'});
+    });
+
+    it('sets the CompletedView as the active view', function () {
+      var mainView = new MainView({ // eslint-disable-line no-new
+        dropinWrapper: this.dropinWrapper,
+        model: this.model,
+        options: {
+          authorization: 'fake_tokenization_key',
+          client: {
+            getConfiguration: fake.configuration
+          }
+        },
+        strings: strings
+      });
+
+      expect(mainView.activeView.ID).to.equal(CompletedView.ID);
+    });
+  });
+
+  describe('without vaulted payment methods', function () {
+    beforeEach(function () {
+      this.dropinWrapper = document.createElement('div');
+      this.dropinWrapper.innerHTML = templateHTML;
+      this.model = new DropinModel();
+      this.sandbox.stub(PayPal, 'create').yields(null, {});
+    });
+
+    it('sets PaymentOptionsViews as the active view if there are multiple payment methods', function () {
+      var mainView;
+
+      this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
+      this.sandbox.stub(CardView, 'isEnabled').returns(true);
+
+      mainView = new MainView({ // eslint-disable-line no-new
+        dropinWrapper: this.dropinWrapper,
+        model: this.model,
+        options: {
+          authorization: 'fake_tokenization_key',
+          client: {
+            getConfiguration: fake.configuration
+          }
+        },
+        strings: strings
+      });
+
+      expect(mainView.activeView.ID).to.equal(PaymentOptionsView.ID);
+    });
+
+    it('sets the sheet view as the active view if there is one payment method', function () {
+      var mainView;
+
+      this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
+      this.sandbox.stub(CardView, 'isEnabled').returns(true);
+
+      mainView = new MainView({ // eslint-disable-line no-new
+        dropinWrapper: this.dropinWrapper,
+        model: this.model,
+        options: {
+          authorization: 'fake_tokenization_key',
+          client: {
+            getConfiguration: fake.configuration
+          }
+        },
+        strings: strings
+      });
+
+      expect(mainView.activeView.ID).to.equal(CardView.ID);
     });
   });
 

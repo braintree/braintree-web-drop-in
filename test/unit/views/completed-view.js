@@ -5,6 +5,7 @@ var CompletedView = require('../../../src/views/completed-view');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var mainHTML = require('../../../src/html/main.html');
+var strings = require('../../../src/translations/en');
 
 describe('CompletedView', function () {
   describe('Constructor', function () {
@@ -30,15 +31,12 @@ describe('CompletedView', function () {
     });
 
     it('adds all vaulted payment methods', function () {
-      var stubModel = {
-        getPaymentMethods: function () {
-          return [{foo: 'bar'}, {baz: 'qux'}];
-        },
-        on: function () {}
-      };
+      var model = new DropinModel({
+        paymentMethods: [{foo: 'bar'}, {baz: 'qux'}]
+      });
       var completedView = new CompletedView({
         element: this.element,
-        model: stubModel,
+        model: model,
         options: {
           authorization: fake.clientTokenWithCustomerID
         },
@@ -49,35 +47,37 @@ describe('CompletedView', function () {
       expect(completedView.container.childElementCount).to.equal(2);
     });
 
-    it('sets the first payment method as the active payment method view', function () {
-      var stubModel = {
-        getPaymentMethods: function () {
-          return [{foo: 'bar'}, {baz: 'qux'}];
-        },
-        on: function () {}
+    it('puts default payment method as first item in list', function () {
+      var firstChildLabel;
+      var creditCard = {
+        details: {type: 'Visa'},
+        type: 'CreditCard'
       };
+      var paypalAccount = {
+        details: {email: 'wow@meow.com'},
+        type: 'PayPalAccount'
+      };
+      var model = new DropinModel({paymentMethods: [paypalAccount, creditCard]});
       var completedView = new CompletedView({
         element: this.element,
-        model: stubModel,
+        model: model,
         options: {
           authorization: fake.clientTokenWithCustomerID
         },
-        strings: {}
+        strings: strings
       });
 
-      expect(completedView.activeView).to.equal(completedView.views[0]);
-      expect(completedView.views[0].element.classList.contains('braintree-method--active')).to.be.true;
-      expect(completedView.views[1].element.classList.contains('braintree-method--active')).to.be.false;
+      firstChildLabel = completedView.container.firstChild.querySelector('.braintree-method__label small');
+
+      expect(firstChildLabel.textContent).to.equal(strings.PayPal);
     });
 
     it('does not add payment methods if there are none', function () {
-      var stubModel = {
-        getPaymentMethods: function () { return []; },
-        on: function () {}
-      };
+      var model = new DropinModel();
+      var completedContainer = this.element.querySelector('[data-braintree-id="completed-container"]');
       var completedView = new CompletedView({
         element: this.element,
-        model: stubModel,
+        model: model,
         options: {
           authorization: fake.clientTokenWithCustomerID
         },
@@ -85,6 +85,7 @@ describe('CompletedView', function () {
       });
 
       expect(completedView.views.length).to.equal(0);
+      expect(completedContainer.children.length).to.equal(0);
     });
 
     it('changes the payment method view when the active payment method changes', function () {
@@ -105,9 +106,8 @@ describe('CompletedView', function () {
 
       model.changeActivePaymentMethod(fakePaymentMethod);
 
-      expect(completedView.activeView).to.equal(completedView.views[1]);
-      expect(completedView.views[0].element.classList.contains('braintree-method--active')).to.be.false;
-      expect(completedView.views[1].element.classList.contains('braintree-method--active')).to.be.true;
+      expect(completedView.activeView.paymentMethod).to.equal(fakePaymentMethod);
+      expect(completedView.activeView.element.className).to.contain('braintree-method--active');
     });
   });
 

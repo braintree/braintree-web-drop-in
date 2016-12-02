@@ -15,6 +15,7 @@ CompletedView.prototype.constructor = CompletedView;
 CompletedView.ID = CompletedView.prototype.ID = 'completed';
 
 CompletedView.prototype._initialize = function () {
+  var i;
   var paymentMethods = this.model.getPaymentMethods();
 
   this.views = [];
@@ -25,8 +26,9 @@ CompletedView.prototype._initialize = function () {
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
 
   if (paymentMethods.length > 0) {
-    paymentMethods.forEach(this._addPaymentMethod.bind(this));
-    this._changeActivePaymentMethodView(paymentMethods[0]);
+    for (i = paymentMethods.length - 1; i >= 0; i--) {
+      this._addPaymentMethod(paymentMethods[i]);
+    }
   }
 };
 
@@ -42,7 +44,11 @@ CompletedView.prototype._addPaymentMethod = function (paymentMethod) {
     this.views.pop();
   }
 
-  this.container.appendChild(completedPaymentMethodView.element);
+  if (this.container.firstChild) {
+    this.container.insertBefore(completedPaymentMethodView.element, this.container.firstChild);
+  } else {
+    this.container.appendChild(completedPaymentMethodView.element);
+  }
 
   this.views.push(completedPaymentMethodView);
 };
