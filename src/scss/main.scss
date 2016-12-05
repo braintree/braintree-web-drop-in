@@ -287,16 +287,15 @@ braintree-loader__container {
   }
 
   &.braintree-method--active {
-    border: 2px solid $highlight-color;
+    -webkit-box-shadow: 0px 0px 0px 2px #219653;
+    -moz-box-shadow: 0px 0px 0px 2px #219653;
+    box-shadow: 0px 0px 0px 2px #219653;
     border-radius: 5px;
+    border-color: rgba(0,0,0,0);
     width: 100%;
-    margin-top: -2px;
-    margin-bottom: -2px;
+    margin-top: -1px;
+    margin-bottom: -1px;
     z-index: 1;
-
-    &:nth-child(1) {
-      border-bottom: 2px solid $highlight-color;
-    }
 
     .braintree-method__check {
       background-color: $highlight-color;
