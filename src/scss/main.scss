@@ -320,7 +320,7 @@ braintree-loader__container {
     text-align: left;
     flex-grow: 1;
 
-    small {
+    .braintree-method__label--small {
       font-weight: normal;
       font-size: 11px;
     }

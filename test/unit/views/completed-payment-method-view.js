@@ -55,7 +55,7 @@ describe('CompletedPaymentMethodView', function () {
       labelElement = this.context.element.querySelector('.braintree-method__label');
       expect(iconElement.getAttribute('xlink:href')).to.equal('#icon-visa');
       expect(labelElement.textContent).to.contain('Ending in ••11');
-      expect(labelElement.querySelector('small').textContent).to.equal('Visa');
+      expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('Visa');
     });
 
     it('sets the inner HTML correctly when the paymentMethod is a PayPal account', function () {
@@ -75,7 +75,7 @@ describe('CompletedPaymentMethodView', function () {
       labelElement = this.context.element.querySelector('.braintree-method__label');
       expect(iconElement.getAttribute('xlink:href')).to.equal('#logoPayPal');
       expect(labelElement.textContent).to.contain('test@example.com');
-      expect(labelElement.querySelector('small').textContent).to.equal('PayPal');
+      expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('PayPal');
     });
   });
 

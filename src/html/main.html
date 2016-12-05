@@ -22,7 +22,7 @@
               <use xlink:href="#logoPayPal"></use>
             </svg>
           </div>
-          <label class="braintree-sheet__label" for="">{{PayPal}}</label>
+          <div class="braintree-sheet__label">{{PayPal}}</div>
         </div>
       </div>
       <div class="braintree-sheet__content--button">
@@ -37,13 +37,13 @@
               <use xlink:href="#iconCardFront"></use>
             </svg>
           </div>
-          <label class="braintree-sheet__text" for="">{{payWithCard}}</label>
+          <div class="braintree-sheet__text">{{payWithCard}}</div>
         </div>
         <div data-braintree-id="card-view-icons" class="braintree-sheet__icons"></div>
       </div>
       <div class="braintree-sheet__content--form">
         <div class="braintree-form__field-group">
-          <label class="braintree-form__label">{{cardNumberLabel}}</label>
+          <div class="braintree-form__label">{{cardNumberLabel}}</div>
           <div class="braintree-form__field">
             <div class="braintree-form-number braintree-form__hosted-field"></div>
             <div data-braintree-id="card-number-icon" class="braintree-form__icon braintree-hidden">
@@ -57,9 +57,9 @@
 
         <div class="braintree-form__flexible-fields">
           <div class="braintree-form__field-group">
-            <label class="braintree-form__label">{{expirationDateLabel}}
+            <div class="braintree-form__label">{{expirationDateLabel}}
               <span class="braintree-form__descriptor">{{expirationDateLabelSubheading}}</span>
-            </label>
+            </div>
             <div class="braintree-form__field">
               <div class="braintree-form__hosted-field braintree-form-expiration"></div>
             </div>
@@ -68,9 +68,9 @@
           </div>
 
           <div data-braintree-id="cvv-container" class="braintree-form__field-group">
-            <label class="braintree-form__label">{{cvvLabel}}
+            <div class="braintree-form__label">{{cvvLabel}}
               <span data-braintree-id="cvv-label-descriptor" class="braintree-form__descriptor">{{cvvThreeDigitLabelSubheading}}</span>
-            </label>
+            </div>
             <div class="braintree-form__field">
               <div class="braintree-form__hosted-field braintree-form-cvv"></div>
               <div data-braintree-id="cvv-icon" class="braintree-form__icon braintree-hidden">
@@ -85,7 +85,7 @@
           <div data-braintree-id="postal-code-container" class="braintree-form__field-group">
 
             <div class="braintree-form__field">
-              <label class="braintree-form__label">{{postalCodeLabel}}</label>
+              <div class="braintree-form__label">{{postalCodeLabel}}</div>
               <div class="braintree-form__hosted-field braintree-form-postal-code"></div>
             </div>
             <div data-braintree-id="postal-code-inline-error" class="braintree-inline-error braintree-hidden"></div>
@@ -100,6 +100,6 @@
     <div data-braintree-id="payment-options-container" class="braintree-options-list"></div>
   </div>
   <div data-braintree-id="toggle" class="braintree-toggle braintree-hidden">
-    <span class="u-underline">{{chooseAnotherWayToPay}}</span>
+    <span>{{chooseAnotherWayToPay}}</span>
   </div>
 </div>

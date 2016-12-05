@@ -67,7 +67,7 @@ describe('CompletedView', function () {
         strings: strings
       });
 
-      firstChildLabel = completedView.container.firstChild.querySelector('.braintree-method__label small');
+      firstChildLabel = completedView.container.firstChild.querySelector('.braintree-method__label .braintree-method__label--small');
 
       expect(firstChildLabel.textContent).to.equal(strings.PayPal);
     });
