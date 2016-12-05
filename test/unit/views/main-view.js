@@ -293,7 +293,7 @@ describe('MainView', function () {
 
           mainView = new MainView(this.mainViewOptions);
 
-          expect(mainView.additionalOptions.classList.contains('braintree-hidden')).to.be.false;
+          expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
         });
       });
 
@@ -301,7 +301,7 @@ describe('MainView', function () {
         it('does not show the additional options button', function () {
           var mainView = new MainView(this.mainViewOptions);
 
-          expect(mainView.additionalOptions.classList.contains('braintree-hidden')).to.be.true;
+          expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
         });
       });
     });
@@ -320,7 +320,7 @@ describe('MainView', function () {
 
         mainView.setActiveView(CompletedView.ID);
 
-        expect(mainView.additionalOptions.classList.contains('braintree-hidden')).to.be.false;
+        expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
       });
     });
   });
@@ -407,7 +407,7 @@ describe('MainView', function () {
         },
         setActiveView: this.sandbox.stub(),
         showAlert: this.sandbox.stub(),
-        showAdditionalOptions: function () {},
+        toggleAdditionalOptions: function () {},
         showLoadingIndicator: function () {}
       };
 
@@ -507,7 +507,7 @@ describe('MainView', function () {
         },
         setActiveView: this.sandbox.stub(),
         showLoadingIndicator: this.sandbox.stub(),
-        showAdditionalOptions: this.sandbox.stub()
+        toggleAdditionalOptions: this.sandbox.stub()
       };
 
       this.sandbox.stub(CardView.prototype, '_initialize');
@@ -530,18 +530,11 @@ describe('MainView', function () {
     });
   });
 
-  describe('additional options', function () {
+  describe('additional options toggle', function () {
     beforeEach(function () {
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
-    });
-
-    it('has an click event listener that calls showAdditionalOptions', function () {
-      var mainView;
-
-      this.sandbox.stub(MainView.prototype, 'showAdditionalOptions');
-
-      mainView = new MainView({
+      this.mainViewOptions = {
         dropinWrapper: this.wrapper,
         model: new DropinModel(),
         options: {
@@ -549,44 +542,89 @@ describe('MainView', function () {
           client: {
             getConfiguration: fake.configuration
           }
-        }
-      });
-
-      mainView.additionalOptions.click();
-
-      expect(mainView.showAdditionalOptions).to.have.been.called;
+        },
+        strings: strings
+      };
+      this.sandbox.stub(PayPal, 'create').yields(null, {});
     });
 
-    describe('in vaulted', function () {
-      describe('card only flow', function () {
+    it('has an click event listener that calls toggleAdditionalOptions', function () {
+      var mainView;
+
+      this.sandbox.stub(MainView.prototype, 'toggleAdditionalOptions');
+
+      mainView = new MainView(this.mainViewOptions);
+
+      mainView.toggle.click();
+
+      expect(mainView.toggleAdditionalOptions).to.have.been.called;
+    });
+
+    it('hides toggle', function () {
+      var mainView = new MainView(this.mainViewOptions);
+
+      mainView.toggle.click();
+
+      expect(mainView.toggle.className).to.contain('braintree-hidden');
+    });
+
+    describe('when there is one payment option and the CompletedView is active', function () {
+      beforeEach(function () {
+        this.sandbox.stub(CardView, 'isEnabled').returns(true);
+        this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
+        this.mainView = new MainView(this.mainViewOptions);
+
+        this.mainView.setActiveView(CompletedView.ID);
+        this.mainView.toggle.click();
+      });
+
+      it('sets the CardView as the active payment option', function () {
+        expect(this.mainView.activePaymentOption).to.equal(CardView.ID);
+      });
+
+      it('exposes the CardView', function () {
+        expect(this.wrapper.className).to.contain('braintree-' + CardView.ID);
+      });
+    });
+
+    describe('when there are multiple payment options and a payment sheet view is active', function () {
+      beforeEach(function () {
+        this.sandbox.stub(CardView, 'isEnabled').returns(true);
+        this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
+      });
+
+      describe('and there are no payment methods available', function () {
+        it('sets the PaymentOptionsView as the active view', function () {
+          var mainView = new MainView(this.mainViewOptions);
+
+          this.sandbox.spy(mainView, 'setActiveView');
+          mainView.setActiveView(CardView.ID);
+          mainView.toggle.click();
+
+          expect(mainView.setActiveView).to.have.been.calledWith(PaymentOptionsView.ID);
+          expect(this.wrapper.className).to.contain('braintree-' + PaymentOptionsView.ID);
+        });
+      });
+
+      describe('and there are payment methods available', function () {
         beforeEach(function () {
-          this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
-          this.sandbox.stub(CardView, 'isEnabled').returns(true);
-          this.mainView = new MainView({
-            dropinWrapper: this.wrapper,
-            model: new DropinModel(),
-            options: {
-              authorization: fake.clientTokenWithCustomerID,
-              client: {
-                getConfiguration: fake.configuration
-              }
-            }
-          });
+          this.mainViewOptions.model = new DropinModel({paymentMethods: [{foo: 'bar'}]});
+          this.mainView = new MainView(this.mainViewOptions);
+
+          this.sandbox.spy(this.mainView, 'setActiveView');
+
+          this.mainView.setActiveView(CardView.ID);
+          this.mainView.toggle.click();
         });
 
-        it('shows the card form', function () {
-          this.mainView.showAdditionalOptions();
-
-          expect(this.wrapper.className).to.contain(CardView.ID);
+        it('sets the CompletedView as the active view', function () {
+          expect(this.mainView.setActiveView).to.have.been.calledWith(CompletedView.ID);
+          expect(this.wrapper.className).to.contain('braintree-' + CompletedView.ID);
+          expect(this.mainView.activePaymentOption).to.equal(CompletedView.ID);
         });
 
-        it('requests payment method from card view when showing card form', function () {
-          this.sandbox.stub(CardView.prototype, 'requestPaymentMethod');
-          this.mainView.showAdditionalOptions();
-
-          this.mainView.requestPaymentMethod(function () {});
-
-          expect(CardView.prototype.requestPaymentMethod).to.be.called;
+        it('exposes the PaymentOptionsView', function () {
+          expect(this.wrapper.className).to.contain('braintree-' + PaymentOptionsView.ID);
         });
       });
     });
@@ -685,7 +723,7 @@ describe('MainView', function () {
         var cardView = this.mainView.getView(CardView.ID);
 
         this.sandbox.stub(cardView, 'requestPaymentMethod');
-        this.mainView.showAdditionalOptions();
+        this.mainView.toggleAdditionalOptions();
 
         this.mainView.requestPaymentMethod();
 

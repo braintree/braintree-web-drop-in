@@ -22,9 +22,9 @@ MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
   var paymentMethods = this.model.getPaymentMethods();
-  var paymentSheetViews, paymentOptionsView;
+  var paymentOptionsView;
 
-  this.additionalOptions = this.getElementById('additional-options');
+  this.toggle = this.getElementById('toggle');
   this.alert = this.getElementById('alert');
   this.views = {};
 
@@ -37,7 +37,7 @@ MainView.prototype._initialize = function () {
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  paymentSheetViews = [
+  this.paymentSheetViewIDs = [
     CardView,
     PayPalView
   ].reduce(function (views, PaymentSheetView) {
@@ -53,12 +53,12 @@ MainView.prototype._initialize = function () {
       });
 
       this.addView(paymentSheetView);
-      views.push(paymentSheetView);
+      views.push(paymentSheetView.ID);
     }
     return views;
   }.bind(this), []);
 
-  this.hasMultiplePaymentOptions = paymentSheetViews.length > 1;
+  this.hasMultiplePaymentOptions = this.paymentSheetViewIDs.length > 1;
 
   this.completedView = new CompletedView({
     element: this.getElementById(CompletedView.ID),
@@ -68,7 +68,7 @@ MainView.prototype._initialize = function () {
   });
   this.addView(this.completedView);
 
-  this.additionalOptions.addEventListener('click', this.showAdditionalOptions.bind(this));
+  this.toggle.addEventListener('click', this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
     this.setActiveView(CompletedView.ID);
@@ -78,14 +78,14 @@ MainView.prototype._initialize = function () {
     paymentOptionsView = new PaymentOptionsView({
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
-      paymentOptionIDs: paymentSheetViews.map(function (paymentSheetView) { return paymentSheetView.ID; }),
+      paymentOptionIDs: this.paymentSheetViewIDs,
       strings: this.strings
     });
 
     this.addView(paymentOptionsView);
     this.setActiveView(paymentOptionsView.ID);
   } else {
-    this.setActiveView(paymentSheetViews[0].ID);
+    this.setActiveView(this.paymentSheetViewIDs[0]);
   }
 
   if (paymentMethods.length > 0) {
@@ -110,23 +110,23 @@ MainView.prototype.setActiveView = function (id) {
   switch (id) {
     case CardView.ID:
       if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
-        this.showAdditionalOptionsButton();
+        this.showToggle();
       } else {
-        this.hideAdditionalOptionsButton();
+        this.hideToggle();
       }
       break;
     case PayPalView.ID:
       if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
-        this.showAdditionalOptionsButton();
+        this.showToggle();
       } else {
-        this.hideAdditionalOptionsButton();
+        this.hideToggle();
       }
       break;
     case CompletedView.ID:
-      this.showAdditionalOptionsButton();
+      this.showToggle();
       break;
     case PaymentOptionsView.ID:
-      this.hideAdditionalOptionsButton();
+      this.hideToggle();
       break;
     default:
       break;
@@ -171,22 +171,29 @@ MainView.prototype.hideLoadingIndicator = function () {
   }.bind(this), 1000);
 };
 
-MainView.prototype.showAdditionalOptions = function () {
-  if (!this.hasMultiplePaymentOptions && this.activeView === this.completedView) {
+MainView.prototype.toggleAdditionalOptions = function () {
+  this.hideToggle();
+  if (!this.hasMultiplePaymentOptions && this.activeView.ID === CompletedView.ID) {
     classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
     this.activePaymentOption = CardView.ID;
+  } else if (this.hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.activeView.ID) !== -1) {
+    if (this.model.getPaymentMethods().length === 0) {
+      this.setActiveView(PaymentOptionsView.ID);
+    } else {
+      this.setActiveView(CompletedView.ID);
+      this.toggleAdditionalOptions();
+    }
   } else {
     classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
   }
-  this.hideAdditionalOptionsButton();
 };
 
-MainView.prototype.showAdditionalOptionsButton = function () {
-  classlist.remove(this.additionalOptions, 'braintree-hidden');
+MainView.prototype.showToggle = function () {
+  classlist.remove(this.toggle, 'braintree-hidden');
 };
 
-MainView.prototype.hideAdditionalOptionsButton = function () {
-  classlist.add(this.additionalOptions, 'braintree-hidden');
+MainView.prototype.hideToggle = function () {
+  classlist.add(this.toggle, 'braintree-hidden');
 };
 
 MainView.prototype.showAlert = function (error) {
