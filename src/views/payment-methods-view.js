@@ -1,7 +1,7 @@
 'use strict';
 
 var BaseView = require('./base-view');
-var CompletedPaymentMethodView = require('./completed-payment-method-view');
+var PaymentMethodView = require('./payment-method-view');
 var isGuestCheckout = require('../lib/is-guest-checkout');
 
 function PaymentMethodsView() {
@@ -33,7 +33,7 @@ PaymentMethodsView.prototype._initialize = function () {
 };
 
 PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
-  var completedPaymentMethodView = new CompletedPaymentMethodView({
+  var paymentMethodView = new PaymentMethodView({
     model: this.model,
     paymentMethod: paymentMethod,
     strings: this.strings
@@ -45,12 +45,12 @@ PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
   }
 
   if (this.container.firstChild) {
-    this.container.insertBefore(completedPaymentMethodView.element, this.container.firstChild);
+    this.container.insertBefore(paymentMethodView.element, this.container.firstChild);
   } else {
-    this.container.appendChild(completedPaymentMethodView.element);
+    this.container.appendChild(paymentMethodView.element);
   }
 
-  this.views.push(completedPaymentMethodView);
+  this.views.push(paymentMethodView);
 };
 
 PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentMethod) {

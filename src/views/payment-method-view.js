@@ -3,18 +3,18 @@
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
 var paymentMethodCardTypes = require('../constants').paymentMethodCardTypes;
-var paymentMethodHTML = require('../html/completed-payment-method.html');
+var paymentMethodHTML = require('../html/payment-method.html');
 
-function CompletedPaymentMethodView() {
+function PaymentMethodView() {
   BaseView.apply(this, arguments);
 
   this._initialize();
 }
 
-CompletedPaymentMethodView.prototype = Object.create(BaseView.prototype);
-CompletedPaymentMethodView.prototype.constructor = CompletedPaymentMethodView;
+PaymentMethodView.prototype = Object.create(BaseView.prototype);
+PaymentMethodView.prototype.constructor = PaymentMethodView;
 
-CompletedPaymentMethodView.prototype._initialize = function () {
+PaymentMethodView.prototype._initialize = function () {
   this.element = document.createElement('div');
   this.element.className = 'braintree-method';
 
@@ -41,7 +41,7 @@ CompletedPaymentMethodView.prototype._initialize = function () {
   this.element.innerHTML = this.html;
 };
 
-CompletedPaymentMethodView.prototype.setActive = function (isActive) {
+PaymentMethodView.prototype.setActive = function (isActive) {
   if (isActive) {
     classlist.add(this.element, 'braintree-method--active');
     return;
@@ -49,4 +49,4 @@ CompletedPaymentMethodView.prototype.setActive = function (isActive) {
   classlist.remove(this.element, 'braintree-method--active');
 };
 
-module.exports = CompletedPaymentMethodView;
+module.exports = PaymentMethodView;

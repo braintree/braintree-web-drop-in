@@ -1,38 +1,36 @@
 'use strict';
 
 var BaseView = require('../../../src/views/base-view');
-var CompletedPaymentMethodView = require('../../../src/views/completed-payment-method-view');
-var completedPaymentMethodHTML = require('../../../src/html/completed-payment-method.html');
+var PaymentMethodView = require('../../../src/views/payment-method-view');
+var paymentMethodHTML = require('../../../src/html/payment-method.html');
 var strings = require('../../../src/translations/en');
 
-describe('CompletedPaymentMethodView', function () {
+describe('PaymentMethodView', function () {
   beforeEach(function () {
     this.div = document.createElement('div');
-    this.div.innerHTML = completedPaymentMethodHTML;
+    this.div.innerHTML = paymentMethodHTML;
     document.body.appendChild(this.div);
-    this.element = document.body.querySelector('.braintree-exposed__option');
   });
 
   describe('Constructor', function () {
     beforeEach(function () {
-      this.sandbox.stub(CompletedPaymentMethodView.prototype, '_initialize');
+      this.sandbox.stub(PaymentMethodView.prototype, '_initialize');
     });
 
     it('inherits from BaseView', function () {
-      expect(new CompletedPaymentMethodView({})).to.be.an.instanceof(BaseView);
+      expect(new PaymentMethodView({})).to.be.an.instanceof(BaseView);
     });
 
     it('calls _initialize', function () {
-      new CompletedPaymentMethodView({}); // eslint-disable-line no-new
+      new PaymentMethodView({}); // eslint-disable-line no-new
 
-      expect(CompletedPaymentMethodView.prototype._initialize).to.have.been.calledOnce;
+      expect(PaymentMethodView.prototype._initialize).to.have.been.calledOnce;
     });
   });
 
   describe('_initialize', function () {
     beforeEach(function () {
       this.context = {
-        element: this.element,
         strings: strings
       };
     });
@@ -49,7 +47,7 @@ describe('CompletedPaymentMethodView', function () {
 
       this.context.paymentMethod = paymentMethod;
 
-      CompletedPaymentMethodView.prototype._initialize.call(this.context);
+      PaymentMethodView.prototype._initialize.call(this.context);
 
       iconElement = this.context.element.querySelector('.braintree-method__logo use');
       labelElement = this.context.element.querySelector('.braintree-method__label');
@@ -69,7 +67,7 @@ describe('CompletedPaymentMethodView', function () {
 
       this.context.paymentMethod = paymentMethod;
 
-      CompletedPaymentMethodView.prototype._initialize.call(this.context);
+      PaymentMethodView.prototype._initialize.call(this.context);
 
       iconElement = this.context.element.querySelector('.braintree-method__logo use');
       labelElement = this.context.element.querySelector('.braintree-method__label');
@@ -85,13 +83,13 @@ describe('CompletedPaymentMethodView', function () {
     });
 
     it('adds braintree-method--active if setting active payment method', function () {
-      CompletedPaymentMethodView.prototype.setActive.call(this.context, true);
+      PaymentMethodView.prototype.setActive.call(this.context, true);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
 
     it('removes braintree-method--active if setting active payment method', function () {
-      CompletedPaymentMethodView.prototype.setActive.call(this.context, false);
+      PaymentMethodView.prototype.setActive.call(this.context, false);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
     });
