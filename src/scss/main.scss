@@ -50,9 +50,10 @@ braintree-loader__container {
 }
 
 .braintree-loader__container--inactive {
-  z-index: -2;
+  display: none;
   height: 0;
   opacity: 0;
+  z-index: -2;
 }
 
 .braintree-loader__indicator {
