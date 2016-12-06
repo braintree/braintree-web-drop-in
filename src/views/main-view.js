@@ -21,16 +21,20 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
+  var completedView, paymentOptionsView, sheetContainer;
   var paymentMethods = this.model.getPaymentMethods();
-  var paymentOptionsView;
+
+  this.views = {};
+
+  sheetContainer = this.getElementById('sheet-container');
 
   this.toggle = this.getElementById('toggle');
   this.alert = this.getElementById('alert');
-  this.views = {};
 
-  this.loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
-  this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
+  this.loadingContainer = this.getElementById('loading-container');
+  this.loadingIndicator = this.getElementById('loading-indicator');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
+
   this.supportsFlexbox = supportsFlexbox();
 
   this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
@@ -60,19 +64,29 @@ MainView.prototype._initialize = function () {
 
   this.hasMultiplePaymentOptions = this.paymentSheetViewIDs.length > 1;
 
-  this.completedView = new CompletedView({
+  completedView = new CompletedView({
     element: this.getElementById(CompletedView.ID),
     model: this.model,
     options: this.options,
     strings: this.strings
   });
-  this.addView(this.completedView);
+  this.addView(completedView);
 
   this.toggle.addEventListener('click', this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
     this.setActiveView(CompletedView.ID);
   }.bind(this));
+
+  this.model.on('changeActivePaymentOption', function (id) {
+    if (id === CompletedView.ID) {
+      classlist.add(completedView.element, 'braintree-completed--active');
+      classlist.remove(sheetContainer, 'braintree-sheet--active');
+    } else {
+      classlist.add(sheetContainer, 'braintree-sheet--active');
+      classlist.remove(completedView.element, 'braintree-completed--active');
+    }
+  });
 
   if (this.hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
@@ -104,7 +118,8 @@ MainView.prototype.getView = function (id) {
 MainView.prototype.setActiveView = function (id) {
   this.dropinWrapper.className = prefixClass(id);
   this.activeView = this.getView(id);
-  this.activePaymentOption = id;
+
+  this.model.changeActivePaymentOption(id);
 
   // TODO: make this better
   switch (id) {
@@ -142,7 +157,7 @@ MainView.prototype.setActiveView = function (id) {
 };
 
 MainView.prototype.requestPaymentMethod = function (callback) {
-  var activePaymentView = this.getView(this.activePaymentOption);
+  var activePaymentView = this.getView(this.model.getActivePaymentOption());
 
   activePaymentView.requestPaymentMethod(function (err, payload) {
     if (err) {
@@ -175,7 +190,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
   this.hideToggle();
   if (!this.hasMultiplePaymentOptions && this.activeView.ID === CompletedView.ID) {
     classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
-    this.activePaymentOption = CardView.ID;
+    this.model.changeActivePaymentOption(CardView.ID);
   } else if (this.hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.activeView.ID) !== -1) {
     if (this.model.getPaymentMethods().length === 0) {
       this.setActiveView(PaymentOptionsView.ID);

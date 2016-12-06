@@ -153,6 +153,16 @@ braintree-loader__container {
   margin: 0 auto 13px auto;
 }
 
+.braintree-completed {
+  .braintree-sheet--active .braintree-sheet {
+    -webkit-box-shadow: 0px 0px 0px 2px #219653;
+    -moz-box-shadow: 0px 0px 0px 2px #219653;
+    box-shadow: 0px 0px 0px 2px #219653;
+    border-radius: 5px;
+    border-color: rgba(0,0,0,0);
+  }
+}
+
 .braintree-sheet__header {
   align-items: center;
   border-bottom: 1px solid $border-color;
@@ -273,10 +283,6 @@ braintree-loader__container {
   position: relative;
   z-index: 0;
 
-  &:only-child {
-    border-radius: 4px;
-  }
-
   &:first-child {
     border-radius: 4px 4px 0 0;
     border-top-width: 1px;
@@ -286,25 +292,8 @@ braintree-loader__container {
     border-radius: 0 0 4px 4px;
   }
 
-  &.braintree-method--active {
-    -webkit-box-shadow: 0px 0px 0px 2px #219653;
-    -moz-box-shadow: 0px 0px 0px 2px #219653;
-    box-shadow: 0px 0px 0px 2px #219653;
-    border-radius: 5px;
-    border-color: rgba(0,0,0,0);
-    width: 100%;
-    margin-top: -1px;
-    margin-bottom: -1px;
-    z-index: 1;
-
-    .braintree-method__check {
-      background-color: $highlight-color;
-      fill: white;
-    }
-
-    .braintree-method__label {
-      font-weight: bold;
-    }
+  &:only-child {
+    border-radius: 4px;
   }
 
   .braintree-method__logo {
@@ -339,6 +328,27 @@ braintree-loader__container {
     svg {
       width: 100%;
     }
+  }
+}
+
+.braintree-completed--active .braintree-method--active {
+  -webkit-box-shadow: 0px 0px 0px 2px #219653;
+  -moz-box-shadow: 0px 0px 0px 2px #219653;
+  box-shadow: 0px 0px 0px 2px #219653;
+  border-radius: 5px;
+  border-color: rgba(0,0,0,0);
+  width: 100%;
+  margin-top: -1px;
+  margin-bottom: -1px;
+  z-index: 1;
+
+  .braintree-method__check {
+    background-color: $highlight-color;
+    fill: white;
+  }
+
+  .braintree-method__label {
+    font-weight: bold;
   }
 }
 
