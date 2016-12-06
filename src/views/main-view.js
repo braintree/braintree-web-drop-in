@@ -3,7 +3,7 @@
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
 var CardView = require('./payment-sheet-views/card-view');
-var CompletedView = require('./completed-view');
+var PaymentMethodsView = require('./payment-methods-view');
 var isGuestCheckout = require('../lib/is-guest-checkout');
 var PaymentOptionsView = require('./payment-options-view');
 var PayPalView = require('./payment-sheet-views/paypal-view');
@@ -21,7 +21,7 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
-  var completedView, paymentOptionsView, sheetContainer;
+  var paymentMethodsViews, paymentOptionsView, sheetContainer;
   var paymentMethods = this.model.getPaymentMethods();
 
   this.views = {};
@@ -64,27 +64,27 @@ MainView.prototype._initialize = function () {
 
   this.hasMultiplePaymentOptions = this.paymentSheetViewIDs.length > 1;
 
-  completedView = new CompletedView({
-    element: this.getElementById(CompletedView.ID),
+  paymentMethodsViews = new PaymentMethodsView({
+    element: this.getElementById(PaymentMethodsView.ID),
     model: this.model,
     options: this.options,
     strings: this.strings
   });
-  this.addView(completedView);
+  this.addView(paymentMethodsViews);
 
   this.toggle.addEventListener('click', this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
-    this.setPrimaryView(CompletedView.ID);
+    this.setPrimaryView(PaymentMethodsView.ID);
   }.bind(this));
 
   this.model.on('changeActivePaymentOption', function (id) {
-    if (id === CompletedView.ID) {
-      classlist.add(completedView.element, 'braintree-completed--active');
+    if (id === PaymentMethodsView.ID) {
+      classlist.add(paymentMethodsViews.element, 'braintree-methods--active');
       classlist.remove(sheetContainer, 'braintree-sheet--active');
     } else {
       classlist.add(sheetContainer, 'braintree-sheet--active');
-      classlist.remove(completedView.element, 'braintree-completed--active');
+      classlist.remove(paymentMethodsViews.element, 'braintree-methods--active');
     }
   });
 
@@ -126,7 +126,7 @@ MainView.prototype.setPrimaryView = function (id) {
     } else {
       this.hideToggle();
     }
-  } else if (id === CompletedView.ID) {
+  } else if (id === PaymentMethodsView.ID) {
     this.showToggle();
   } else if (id === PaymentOptionsView.ID) {
     this.hideToggle();
@@ -149,7 +149,7 @@ MainView.prototype.requestPaymentMethod = function (callback) {
       callback(err);
       return;
     }
-    this.setPrimaryView(CompletedView.ID);
+    this.setPrimaryView(PaymentMethodsView.ID);
     callback(null, payload);
   }.bind(this));
 };
@@ -173,14 +173,14 @@ MainView.prototype.hideLoadingIndicator = function () {
 
 MainView.prototype.toggleAdditionalOptions = function () {
   this.hideToggle();
-  if (!this.hasMultiplePaymentOptions && this.primaryView.ID === CompletedView.ID) {
+  if (!this.hasMultiplePaymentOptions && this.primaryView.ID === PaymentMethodsView.ID) {
     classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
     this.model.changeActivePaymentOption(CardView.ID);
   } else if (this.hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1) {
     if (this.model.getPaymentMethods().length === 0) {
       this.setPrimaryView(PaymentOptionsView.ID);
     } else {
-      this.setPrimaryView(CompletedView.ID);
+      this.setPrimaryView(PaymentMethodsView.ID);
       this.toggleAdditionalOptions();
     }
   } else {

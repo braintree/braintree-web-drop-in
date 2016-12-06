@@ -4,22 +4,22 @@ var BaseView = require('./base-view');
 var CompletedPaymentMethodView = require('./completed-payment-method-view');
 var isGuestCheckout = require('../lib/is-guest-checkout');
 
-function CompletedView() {
+function PaymentMethodsView() {
   BaseView.apply(this, arguments);
 
   this._initialize();
 }
 
-CompletedView.prototype = Object.create(BaseView.prototype);
-CompletedView.prototype.constructor = CompletedView;
-CompletedView.ID = CompletedView.prototype.ID = 'completed';
+PaymentMethodsView.prototype = Object.create(BaseView.prototype);
+PaymentMethodsView.prototype.constructor = PaymentMethodsView;
+PaymentMethodsView.ID = PaymentMethodsView.prototype.ID = 'methods';
 
-CompletedView.prototype._initialize = function () {
+PaymentMethodsView.prototype._initialize = function () {
   var i;
   var paymentMethods = this.model.getPaymentMethods();
 
   this.views = [];
-  this.container = this.getElementById('completed-container');
+  this.container = this.getElementById('methods-container');
   this.isGuestCheckout = isGuestCheckout(this.options.authorization);
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
@@ -32,7 +32,7 @@ CompletedView.prototype._initialize = function () {
   }
 };
 
-CompletedView.prototype._addPaymentMethod = function (paymentMethod) {
+PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
   var completedPaymentMethodView = new CompletedPaymentMethodView({
     model: this.model,
     paymentMethod: paymentMethod,
@@ -53,7 +53,7 @@ CompletedView.prototype._addPaymentMethod = function (paymentMethod) {
   this.views.push(completedPaymentMethodView);
 };
 
-CompletedView.prototype._changeActivePaymentMethodView = function (paymentMethod) {
+PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentMethod) {
   var activeMethodView, i;
   var previousActiveMethodView = this.activeMethodView;
 
@@ -71,8 +71,8 @@ CompletedView.prototype._changeActivePaymentMethodView = function (paymentMethod
   this.activeMethodView.setActive(true);
 };
 
-CompletedView.prototype.requestPaymentMethod = function (callback) {
+PaymentMethodsView.prototype.requestPaymentMethod = function (callback) {
   callback(null, this.model.getActivePaymentMethod());
 };
 
-module.exports = CompletedView;
+module.exports = PaymentMethodsView;

@@ -154,7 +154,7 @@ braintree-loader__container {
   margin: 0 auto 13px auto;
 }
 
-.braintree-completed {
+.braintree-methods {
   .braintree-sheet--active .braintree-sheet {
     -webkit-box-shadow: 0px 0px 0px 2px #219653;
     -moz-box-shadow: 0px 0px 0px 2px #219653;
@@ -332,7 +332,7 @@ braintree-loader__container {
   }
 }
 
-.braintree-completed--active .braintree-method--active {
+.braintree-methods--active .braintree-method--active {
   -webkit-box-shadow: 0px 0px 0px 2px #219653;
   -moz-box-shadow: 0px 0px 0px 2px #219653;
   box-shadow: 0px 0px 0px 2px #219653;
@@ -385,12 +385,12 @@ braintree-loader__container {
   }
 }
 
-.braintree-completed {
+.braintree-methods {
   display: none;
   margin: 0 auto 13px auto;
 }
 
-.braintree-completed .braintree-completed,
+.braintree-methods .braintree-methods,
 .braintree-options .braintree-options,
 .braintree-paypal .braintree-paypal,
 .braintree-pay-with-card .braintree-pay-with-card {
@@ -405,13 +405,13 @@ braintree-loader__container {
   display: block;
 }
 
-.braintree-completed [data-braintree-id="other-ways-to-pay"],
+.braintree-methods [data-braintree-id="other-ways-to-pay"],
 .braintree-paypal [data-braintree-id="other-ways-to-pay"],
 .braintree-pay-with-card [data-braintree-id="other-ways-to-pay"] {
   display: block;
 }
 
-.braintree-completed [data-braintree-id="choose-a-way-to-pay"],
+.braintree-methods [data-braintree-id="choose-a-way-to-pay"],
 .braintree-paypal [data-braintree-id="choose-a-way-to-pay"],
 .braintree-pay-with-card [data-braintree-id="choose-a-way-to-pay"] {
   display: none;
