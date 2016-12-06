@@ -60,8 +60,7 @@ describe('PaymentOptionsView', function () {
       expect(icon.href.baseVal).to.equal('#logoPayPal');
     });
 
-    // TODO fix when the payment options view css is cleaned up
-    xit('sets the primary view to the payment option when clicked', function () {
+    it('sets the primary view to the payment option when clicked', function () {
       var mainViewStub = {setPrimaryView: this.sandbox.stub()};
       var paymentOptionsView = new PaymentOptionsView({
         element: this.element,
