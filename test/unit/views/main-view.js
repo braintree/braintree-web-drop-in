@@ -52,7 +52,7 @@ describe('MainView', function () {
             getConfiguration: fake.configuration
           }
         },
-        setActiveView: this.sandbox.stub(),
+        setPrimaryView: this.sandbox.stub(),
         showLoadingIndicator: function () {},
         strings: {
           foo: 'bar'
@@ -118,7 +118,7 @@ describe('MainView', function () {
       expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({foo: 'bar'});
     });
 
-    it('sets the CompletedView as the active view', function () {
+    it('sets the CompletedView as the primary view', function () {
       var mainView = new MainView({ // eslint-disable-line no-new
         dropinWrapper: this.dropinWrapper,
         model: this.model,
@@ -131,7 +131,7 @@ describe('MainView', function () {
         strings: strings
       });
 
-      expect(mainView.activeView.ID).to.equal(CompletedView.ID);
+      expect(mainView.primaryView.ID).to.equal(CompletedView.ID);
     });
   });
 
@@ -143,7 +143,7 @@ describe('MainView', function () {
       this.sandbox.stub(PayPal, 'create').yields(null, {});
     });
 
-    it('sets PaymentOptionsViews as the active view if there are multiple payment methods', function () {
+    it('sets PaymentOptionsViews as the primary view if there are multiple payment methods', function () {
       var mainView;
 
       this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
@@ -161,10 +161,10 @@ describe('MainView', function () {
         strings: strings
       });
 
-      expect(mainView.activeView.ID).to.equal(PaymentOptionsView.ID);
+      expect(mainView.primaryView.ID).to.equal(PaymentOptionsView.ID);
     });
 
-    it('sets the sheet view as the active view if there is one payment method', function () {
+    it('sets the sheet view as the primary view if there is one payment method', function () {
       var mainView;
 
       this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
@@ -182,7 +182,7 @@ describe('MainView', function () {
         strings: strings
       });
 
-      expect(mainView.activeView.ID).to.equal(CardView.ID);
+      expect(mainView.primaryView.ID).to.equal(CardView.ID);
     });
   });
 
@@ -206,123 +206,166 @@ describe('MainView', function () {
     });
   });
 
-  describe('setActiveView', function () {
+  describe('setPrimaryView', function () {
     beforeEach(function () {
       var wrapper = document.createElement('div');
 
       wrapper.innerHTML = templateHTML;
 
-      function FakeView(id) {
-        this.ID = id;
-      }
-
-      this.views = [
-        new FakeView('id1'),
-        new FakeView('id2'),
-        new FakeView('id3')
-      ];
-
       this.mainViewOptions = {
         dropinWrapper: wrapper,
         model: new DropinModel(),
         options: {
-          authorization: 'fake_tokenization_key',
+          authorization: fake.tokenizationKey,
           client: {
             getConfiguration: fake.configuration
           }
-        }
+        },
+        strings: strings
       };
+
+      this.sandbox.stub(CardView, 'isEnabled').returns(true);
+      this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
+      this.sandbox.stub(PayPal, 'create').yields(null, {});
     });
 
-    it('shows the selected view', function () {
-      var mainView = new MainView(this.mainViewOptions);
+    [
+      CardView,
+      CompletedView,
+      PaymentOptionsView,
+      PayPalView
+    ].forEach(function (View) {
+      describe('when given a ' + View.ID + 'view', function () {
+        it('shows the selected view by updating the classname of the drop-in wrapper', function () {
+          var mainView = new MainView(this.mainViewOptions);
 
-      mainView.views = this.views;
-      mainView.setActiveView('id1');
+          mainView.setPrimaryView(View.ID);
 
-      expect(mainView.dropinWrapper.className).to.contain('id1');
-      expect(mainView.dropinWrapper.className).to.not.contain('id2');
-      expect(mainView.dropinWrapper.className).to.not.contain('id3');
+          expect(mainView.dropinWrapper.className).to.equal('braintree-' + View.ID);
+        });
+      });
+
+      it('sets the view as the primary view', function () {
+        var mainView = new MainView(this.mainViewOptions);
+
+        mainView.setPrimaryView(View.ID);
+
+        expect(mainView.primaryView).to.equal(mainView.getView(View.ID));
+      });
+
+      it('changes the active payment option', function () {
+        var mainView = new MainView(this.mainViewOptions);
+
+        mainView.setPrimaryView(View.ID);
+
+        expect(mainView.model.getActivePaymentOption()).to.equal(View.ID);
+      });
     });
 
-    it('clears any errors', function () {
+    // TODO: Pending until we update errors
+    xit('clears any errors', function () {
       var mainView = new MainView(this.mainViewOptions);
 
       mainView.views = this.views;
       this.sandbox.stub(DropinModel.prototype, 'clearError');
 
-      mainView.setActiveView('id1');
+      mainView.setPrimaryView('id1');
 
       expect(DropinModel.prototype.clearError).to.have.been.calledOnce;
     });
 
-    it('applies no-flexbox class when flexbox is not supported', function () {
+    // TODO: Pending until we update to support no flexbox
+    xit('applies no-flexbox class when flexbox is not supported', function () {
       var mainView = new MainView(this.mainViewOptions);
 
       mainView.views = this.views;
       mainView.supportsFlexbox = false;
 
-      mainView.setActiveView('id1');
+      mainView.setPrimaryView('id1');
 
       expect(mainView.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
     });
 
-    it('does not apply no-flexbox class when flexbox is supported', function () {
+    // TODO: Pending until we update to support no flexbox
+    xit('does not apply no-flexbox class when flexbox is supported', function () {
       var mainView = new MainView(this.mainViewOptions);
 
       mainView.views = this.views;
       mainView.supportsFlexbox = true;
 
-      mainView.setActiveView('id1');
+      mainView.setPrimaryView('id1');
 
       expect(mainView.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
     });
 
-    describe('CardView', function () {
-      it('assigns the card view as the active view', function () {
-        var mainView = new MainView(this.mainViewOptions);
+    describe('when given a ', function () {
+      var paymentSheetViews = [CardView, PayPalView];
 
-        mainView.setActiveView(CardView.ID);
+      paymentSheetViews.forEach(function (PaymentSheetView) {
+        describe(PaymentSheetView.ID + ' view', function () {
+          describe('in a non-guest checkout flow', function () {
+            it('shows the additional options button', function () {
+              var mainView;
 
-        expect(mainView.activeView).to.equal(mainView.getView(CardView.ID));
-      });
+              this.mainViewOptions.options.authorization = fake.clientTokenWithCustomerID;
 
-      context('in vaulted flow', function () {
-        it('shows the additional options button', function () {
-          var mainView;
+              mainView = new MainView(this.mainViewOptions);
+              mainView.setPrimaryView(PaymentSheetView.ID);
 
-          this.mainViewOptions.options.authorization = fake.clientTokenWithCustomerID;
+              expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
+            });
+          });
 
-          mainView = new MainView(this.mainViewOptions);
+          describe('in a guest checkout flow', function () {
+            it('shows the additional options button if there are multiple payment options', function () {
+              var mainView;
 
-          expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
-        });
-      });
+              this.mainViewOptions.options.authorization = fake.clientTokenWithCustomerID;
 
-      context('in guest checkout flow', function () {
-        it('does not show the additional options button', function () {
-          var mainView = new MainView(this.mainViewOptions);
+              mainView = new MainView(this.mainViewOptions);
+              mainView.setPrimaryView(PaymentSheetView.ID);
 
-          expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
+              expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
+            });
+
+            it('does not show the additional options button if there is only one payment option', function () {
+              var mainView;
+
+              paymentSheetViews.forEach(function (View) {
+                if (View.ID !== PaymentSheetView.ID) {
+                  View.isEnabled.returns(false);
+                }
+              });
+
+              this.mainViewOptions.options.authorization = fake.tokenizationKey;
+
+              mainView = new MainView(this.mainViewOptions);
+              mainView.setPrimaryView(PaymentSheetView.ID);
+
+              expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
+            });
+          });
         });
       });
     });
 
-    describe('CompletedView', function () {
-      it('assigns the completed view as the active view', function () {
-        var mainView = new MainView(this.mainViewOptions);
-
-        mainView.setActiveView(CompletedView.ID);
-
-        expect(mainView.activeView).to.equal(mainView.getView(CompletedView.ID));
-      });
-
+    describe('when given a CompletedView', function () {
       it('shows the additional options button', function () {
         var mainView = new MainView(this.mainViewOptions);
 
-        mainView.setActiveView(CompletedView.ID);
+        mainView.setPrimaryView(CompletedView.ID);
 
         expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
+      });
+    });
+
+    describe('when given a PaymentOptionsView', function () {
+      it('hides the additional options button', function () {
+        var mainView = new MainView(this.mainViewOptions);
+
+        mainView.setPrimaryView(PaymentOptionsView.ID);
+
+        expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
       });
     });
   });
@@ -407,7 +450,7 @@ describe('MainView', function () {
             getConfiguration: fake.configuration
           }
         },
-        setActiveView: this.sandbox.stub(),
+        setPrimaryView: this.sandbox.stub(),
         showAlert: this.sandbox.stub(),
         toggleAdditionalOptions: function () {},
         showLoadingIndicator: function () {}
@@ -416,7 +459,7 @@ describe('MainView', function () {
       MainView.prototype._initialize.call(this.context);
     });
 
-    // TODO: add these back in when error handling is ready
+    // TODO: Pending until we update errors
     xit('calls showAlert when errorOccurred is emitted', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
@@ -427,6 +470,7 @@ describe('MainView', function () {
       expect(this.context.showAlert).to.be.calledWith(fakeError);
     });
 
+    // TODO: Pending until we update errors
     xit('calls hideAlert when errorCleared is emitted', function () {
       this.context.model._emit('errorCleared');
 
@@ -616,7 +660,7 @@ describe('MainView', function () {
         this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
         this.mainView = new MainView(this.mainViewOptions);
 
-        this.mainView.setActiveView(CompletedView.ID);
+        this.mainView.setPrimaryView(CompletedView.ID);
         this.mainView.toggle.click();
       });
 
@@ -636,14 +680,14 @@ describe('MainView', function () {
       });
 
       describe('and there are no payment methods available', function () {
-        it('sets the PaymentOptionsView as the active view', function () {
+        it('sets the PaymentOptionsView as the primary view', function () {
           var mainView = new MainView(this.mainViewOptions);
 
-          this.sandbox.spy(mainView, 'setActiveView');
-          mainView.setActiveView(CardView.ID);
+          this.sandbox.spy(mainView, 'setPrimaryView');
+          mainView.setPrimaryView(CardView.ID);
           mainView.toggle.click();
 
-          expect(mainView.setActiveView).to.have.been.calledWith(PaymentOptionsView.ID);
+          expect(mainView.setPrimaryView).to.have.been.calledWith(PaymentOptionsView.ID);
           expect(this.wrapper.className).to.contain('braintree-' + PaymentOptionsView.ID);
         });
       });
@@ -653,14 +697,14 @@ describe('MainView', function () {
           this.mainViewOptions.model = new DropinModel({paymentMethods: [{foo: 'bar'}]});
           this.mainView = new MainView(this.mainViewOptions);
 
-          this.sandbox.spy(this.mainView, 'setActiveView');
+          this.sandbox.spy(this.mainView, 'setPrimaryView');
 
-          this.mainView.setActiveView(CardView.ID);
+          this.mainView.setPrimaryView(CardView.ID);
           this.mainView.toggle.click();
         });
 
-        it('sets the CompletedView as the active view', function () {
-          expect(this.mainView.setActiveView).to.have.been.calledWith(CompletedView.ID);
+        it('sets the CompletedView as the primary view', function () {
+          expect(this.mainView.setPrimaryView).to.have.been.calledWith(CompletedView.ID);
           expect(this.wrapper.className).to.contain('braintree-' + CompletedView.ID);
           expect(this.mainView.model.getActivePaymentOption()).to.equal(CompletedView.ID);
         });
@@ -688,12 +732,12 @@ describe('MainView', function () {
       });
     });
 
-    it('requests payment method from the active view', function () {
+    it('requests payment method from the primary view', function () {
       this.sandbox.stub(CardView.prototype, 'requestPaymentMethod');
 
       this.mainView.requestPaymentMethod();
 
-      expect(this.mainView.activeView.requestPaymentMethod).to.be.called;
+      expect(this.mainView.primaryView.requestPaymentMethod).to.be.called;
     });
 
     it('calls back with error when error occurs', function (done) {
@@ -720,14 +764,14 @@ describe('MainView', function () {
       });
     });
 
-    it('sets the CompletedView as the active view when successful', function (done) {
+    it('sets the CompletedView as the primary view when successful', function (done) {
       var stubPaymentMethod = {foo: 'bar'};
       var completedView = this.mainView.getView(CompletedView.ID);
 
       this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
 
       this.mainView.requestPaymentMethod(function () {
-        expect(this.mainView.activeView).to.equal(completedView);
+        expect(this.mainView.primaryView).to.equal(completedView);
         done();
       }.bind(this));
     });

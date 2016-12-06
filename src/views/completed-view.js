@@ -54,21 +54,21 @@ CompletedView.prototype._addPaymentMethod = function (paymentMethod) {
 };
 
 CompletedView.prototype._changeActivePaymentMethodView = function (paymentMethod) {
-  var activeView, i;
-  var previousActiveView = this.activeView;
+  var activeMethodView, i;
+  var previousActiveMethodView = this.activeMethodView;
 
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
-      activeView = this.views[i];
+      activeMethodView = this.views[i];
       break;
     }
   }
 
-  if (previousActiveView) {
-    previousActiveView.setActive(false);
+  if (previousActiveMethodView) {
+    previousActiveMethodView.setActive(false);
   }
-  this.activeView = activeView;
-  this.activeView.setActive(true);
+  this.activeMethodView = activeMethodView;
+  this.activeMethodView.setActive(true);
 };
 
 CompletedView.prototype.requestPaymentMethod = function (callback) {

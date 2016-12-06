@@ -106,8 +106,8 @@ describe('CompletedView', function () {
 
       model.changeActivePaymentMethod(fakePaymentMethod);
 
-      expect(completedView.activeView.paymentMethod).to.equal(fakePaymentMethod);
-      expect(completedView.activeView.element.className).to.contain('braintree-method--active');
+      expect(completedView.activeMethodView.paymentMethod).to.equal(fakePaymentMethod);
+      expect(completedView.activeMethodView.element.className).to.contain('braintree-method--active');
     });
   });
 

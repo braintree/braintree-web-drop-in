@@ -75,7 +75,7 @@ MainView.prototype._initialize = function () {
   this.toggle.addEventListener('click', this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
-    this.setActiveView(CompletedView.ID);
+    this.setPrimaryView(CompletedView.ID);
   }.bind(this));
 
   this.model.on('changeActivePaymentOption', function (id) {
@@ -97,9 +97,9 @@ MainView.prototype._initialize = function () {
     });
 
     this.addView(paymentOptionsView);
-    this.setActiveView(paymentOptionsView.ID);
+    this.setPrimaryView(paymentOptionsView.ID);
   } else {
-    this.setActiveView(this.paymentSheetViewIDs[0]);
+    this.setPrimaryView(this.paymentSheetViewIDs[0]);
   }
 
   if (paymentMethods.length > 0) {
@@ -115,36 +115,21 @@ MainView.prototype.getView = function (id) {
   return this.views[id];
 };
 
-MainView.prototype.setActiveView = function (id) {
+MainView.prototype.setPrimaryView = function (id) {
   this.dropinWrapper.className = prefixClass(id);
-  this.activeView = this.getView(id);
-
+  this.primaryView = this.getView(id);
   this.model.changeActivePaymentOption(id);
 
-  // TODO: make this better
-  switch (id) {
-    case CardView.ID:
-      if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
-        this.showToggle();
-      } else {
-        this.hideToggle();
-      }
-      break;
-    case PayPalView.ID:
-      if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
-        this.showToggle();
-      } else {
-        this.hideToggle();
-      }
-      break;
-    case CompletedView.ID:
+  if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
+    if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
       this.showToggle();
-      break;
-    case PaymentOptionsView.ID:
+    } else {
       this.hideToggle();
-      break;
-    default:
-      break;
+    }
+  } else if (id === CompletedView.ID) {
+    this.showToggle();
+  } else if (id === PaymentOptionsView.ID) {
+    this.hideToggle();
   }
 
   if (!this.supportsFlexbox) {
@@ -164,7 +149,7 @@ MainView.prototype.requestPaymentMethod = function (callback) {
       callback(err);
       return;
     }
-    this.setActiveView(CompletedView.ID);
+    this.setPrimaryView(CompletedView.ID);
     callback(null, payload);
   }.bind(this));
 };
@@ -188,14 +173,14 @@ MainView.prototype.hideLoadingIndicator = function () {
 
 MainView.prototype.toggleAdditionalOptions = function () {
   this.hideToggle();
-  if (!this.hasMultiplePaymentOptions && this.activeView.ID === CompletedView.ID) {
+  if (!this.hasMultiplePaymentOptions && this.primaryView.ID === CompletedView.ID) {
     classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
     this.model.changeActivePaymentOption(CardView.ID);
-  } else if (this.hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.activeView.ID) !== -1) {
+  } else if (this.hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1) {
     if (this.model.getPaymentMethods().length === 0) {
-      this.setActiveView(PaymentOptionsView.ID);
+      this.setPrimaryView(PaymentOptionsView.ID);
     } else {
-      this.setActiveView(CompletedView.ID);
+      this.setPrimaryView(CompletedView.ID);
       this.toggleAdditionalOptions();
     }
   } else {

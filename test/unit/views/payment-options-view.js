@@ -61,8 +61,8 @@ describe('PaymentOptionsView', function () {
     });
 
     // TODO fix when the payment options view css is cleaned up
-    xit('sets the active view to the payment option when clicked', function () {
-      var mainViewStub = {setActiveView: this.sandbox.stub()};
+    xit('sets the primary view to the payment option when clicked', function () {
+      var mainViewStub = {setPrimaryView: this.sandbox.stub()};
       var paymentOptionsView = new PaymentOptionsView({
         element: this.element,
         mainView: mainViewStub,
@@ -73,7 +73,7 @@ describe('PaymentOptionsView', function () {
 
       option.click();
 
-      expect(mainViewStub.setActiveView).to.have.been.calledWith(CardView.ID);
+      expect(mainViewStub.setPrimaryView).to.have.been.calledWith(CardView.ID);
     });
   });
 });
