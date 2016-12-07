@@ -243,7 +243,8 @@ braintree-loader__container {
 
       .braintree-form__icon {
         position: absolute;
-        bottom: 5px;
+        top: 50%;
+        margin-top: -14px;
         right: 5px;
 
         &.braintree-hidden {
