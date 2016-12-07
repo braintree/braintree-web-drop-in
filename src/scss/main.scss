@@ -12,8 +12,11 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   display: block !important;
 }
 
-.braintree-dropin {
+.braintree-dropin * {
   box-sizing: border-box;
+}
+
+.braintree-dropin {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   min-width: 290px;
   margin: 0;
