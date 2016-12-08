@@ -25,9 +25,9 @@ DropinModel.prototype.changeActivePaymentMethod = function (paymentMethod) {
   this._emit('changeActivePaymentMethod', paymentMethod);
 };
 
-DropinModel.prototype.changeActivePaymentOption = function (paymentOptionID) {
-  this._activePaymentOption = paymentOptionID;
-  this._emit('changeActivePaymentOption', paymentOptionID);
+DropinModel.prototype.changeActivePaymentView = function (paymentViewID) {
+  this._activePaymentView = paymentViewID;
+  this._emit('changeActivePaymentView', paymentViewID);
 };
 
 DropinModel.prototype.getPaymentMethods = function () {
@@ -38,8 +38,8 @@ DropinModel.prototype.getActivePaymentMethod = function () {
   return this._activePaymentMethod;
 };
 
-DropinModel.prototype.getActivePaymentOption = function () {
-  return this._activePaymentOption;
+DropinModel.prototype.getActivePaymentView = function () {
+  return this._activePaymentView;
 };
 
 DropinModel.prototype.asyncDependencyStarting = function () {

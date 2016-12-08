@@ -258,7 +258,7 @@ describe('MainView', function () {
 
         mainView.setPrimaryView(View.ID);
 
-        expect(mainView.model.getActivePaymentOption()).to.equal(View.ID);
+        expect(mainView.model.getActivePaymentView()).to.equal(View.ID);
       });
     });
 
@@ -571,7 +571,7 @@ describe('MainView', function () {
       expect(MainView.prototype.hideLoadingIndicator).to.be.calledOnce;
     });
 
-    describe('for changeActivePaymentOption', function () {
+    describe('for changeActivePaymentView', function () {
       beforeEach(function () {
         this.paymentMethodsElement = this.dropinWrapper.querySelector('[data-braintree-id="' + PaymentMethodsView.ID + '"]');
         this.sheetElement = this.dropinWrapper.querySelector('[data-braintree-id="sheet-container"]');
@@ -581,7 +581,7 @@ describe('MainView', function () {
         beforeEach(function () {
           classlist.remove(this.paymentMethodsElement, 'braintree-methods--active');
           classlist.add(this.sheetElement, 'braintree-sheet--active');
-          this.model._emit('changeActivePaymentOption', PaymentMethodsView.ID);
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
         });
 
         it('adds braintree-methods--active to the payment methods view element', function () {
@@ -601,7 +601,7 @@ describe('MainView', function () {
 
         [CardView, PayPalView].forEach(function (PaymentSheetView) {
           beforeEach(function () {
-            this.model._emit('changeActivePaymentOption', PaymentSheetView.ID);
+            this.model._emit('changeActivePaymentView', PaymentSheetView.ID);
           });
 
           it('adds braintree-sheet--active to the payment sheet', function () {
@@ -665,7 +665,7 @@ describe('MainView', function () {
       });
 
       it('sets the CardView as the active payment option', function () {
-        expect(this.mainView.model.getActivePaymentOption()).to.equal(CardView.ID);
+        expect(this.mainView.model.getActivePaymentView()).to.equal(CardView.ID);
       });
 
       it('exposes the CardView', function () {
@@ -706,7 +706,7 @@ describe('MainView', function () {
         it('sets the PaymentMethodsView as the primary view', function () {
           expect(this.mainView.setPrimaryView).to.have.been.calledWith(PaymentMethodsView.ID);
           expect(this.wrapper.className).to.contain('braintree-' + PaymentMethodsView.ID);
-          expect(this.mainView.model.getActivePaymentOption()).to.equal(PaymentMethodsView.ID);
+          expect(this.mainView.model.getActivePaymentView()).to.equal(PaymentMethodsView.ID);
         });
 
         it('exposes the PaymentOptionsView', function () {
@@ -811,7 +811,7 @@ describe('MainView', function () {
       it('requests payment method from payment methods view', function () {
         var paymentMethodsViews = this.mainView.getView(PaymentMethodsView.ID);
 
-        this.mainView.model.changeActivePaymentOption(PaymentMethodsView.ID);
+        this.mainView.model.changeActivePaymentView(PaymentMethodsView.ID);
         this.sandbox.stub(paymentMethodsViews, 'requestPaymentMethod');
 
         this.mainView.requestPaymentMethod();

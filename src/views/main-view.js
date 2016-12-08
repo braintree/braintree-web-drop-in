@@ -78,7 +78,7 @@ MainView.prototype._initialize = function () {
     this.setPrimaryView(PaymentMethodsView.ID);
   }.bind(this));
 
-  this.model.on('changeActivePaymentOption', function (id) {
+  this.model.on('changeActivePaymentView', function (id) {
     if (id === PaymentMethodsView.ID) {
       classlist.add(paymentMethodsViews.element, 'braintree-methods--active');
       classlist.remove(sheetContainer, 'braintree-sheet--active');
@@ -118,7 +118,7 @@ MainView.prototype.getView = function (id) {
 MainView.prototype.setPrimaryView = function (id) {
   this.dropinWrapper.className = prefixClass(id);
   this.primaryView = this.getView(id);
-  this.model.changeActivePaymentOption(id);
+  this.model.changeActivePaymentView(id);
 
   if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
     if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
@@ -142,7 +142,7 @@ MainView.prototype.setPrimaryView = function (id) {
 };
 
 MainView.prototype.requestPaymentMethod = function (callback) {
-  var activePaymentView = this.getView(this.model.getActivePaymentOption());
+  var activePaymentView = this.getView(this.model.getActivePaymentView());
 
   activePaymentView.requestPaymentMethod(function (err, payload) {
     if (err) {
@@ -175,7 +175,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
   this.hideToggle();
   if (!this.hasMultiplePaymentOptions && this.primaryView.ID === PaymentMethodsView.ID) {
     classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
-    this.model.changeActivePaymentOption(CardView.ID);
+    this.model.changeActivePaymentView(CardView.ID);
   } else if (this.hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1) {
     if (this.model.getPaymentMethods().length === 0) {
       this.setPrimaryView(PaymentOptionsView.ID);
