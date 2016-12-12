@@ -305,20 +305,6 @@ describe('Dropin', function () {
     });
   });
 
-  describe('getActivePaymentMethod', function () {
-    it('returns the active payment method', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var fakePaymentMethod = {foo: 'bar'};
-
-      this.sandbox.stub(DropinModel.prototype, 'getActivePaymentMethod').returns(fakePaymentMethod);
-
-      instance.initialize(function () {
-        expect(instance.getActivePaymentMethod()).to.equal(fakePaymentMethod);
-        done();
-      });
-    });
-  });
-
   describe('teardown', function () {
     beforeEach(function () {
       this.instance = new Dropin(this.dropinOptions);
@@ -350,22 +336,6 @@ describe('Dropin', function () {
       this.instance.teardown(function (err) {
         expect(err).to.equal(error);
         done();
-      });
-    });
-  });
-
-  describe('event handling', function () {
-    it('emits a paymentMethodAvailable event when the model emits a changeActivePaymentMethod event', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var fakePaymentMethod = {foo: 'bar'};
-
-      instance.initialize(function () {
-        instance.on('paymentMethodAvailable', function (paymentMethod) {
-          expect(paymentMethod).to.deep.equal(fakePaymentMethod);
-          done();
-        });
-
-        instance._model._emit('changeActivePaymentMethod', fakePaymentMethod);
       });
     });
   });

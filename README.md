@@ -12,46 +12,28 @@ Because we're still in beta, the API and designs are subject to change. If you h
 
 ## Basic usage
 
-Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. There are two ways to get this payment method object:
+Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function. For credit cards, this attempts to validate the card form and will call the supplied callback with a payload, including the payment method nonce, if successful. If not successful, an error will be shown in the UI and the callback will be called with an error.
 
-1. Use `getActivePaymentMethod()` to get the payment method object at any time, such as a button click. This example assumes you want to get a payment method object when a `submitButton` is clicked.
+```js
+var submitButton = document.querySelector('#submit-button');
 
-  ```js
-  braintree.dropin.create({
-    authorization: 'CLIENT_AUTHORIZATION',
-    selector: '#dropin-container'
-  }, function (err, dropinInstance) {
-    submitButton.addEventListener('click', function () {
-      var paymentMethod = dropinInstance.getActivePaymentMethod();
-
-      if (paymentMethod) {
-        // Submit paymentMethod.nonce to your server
+braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  selector: '#dropin-container'
+}, function (err, dropinInstance) {
+  submitButton.addEventListener('click', function () {
+    dropinInstance.requestPaymentMethod(function (err, payload) {
+      if (err) {
+       // Handle errors in requesting payment method
+       // This includes invalid card form or no payment method available
+       // Errors relevant to users will be show in the UI as well
       }
-    }
-  });
-  ```
 
-2. Use `paymentMethodAvailable` events to get the payment method object as soon as it becomes available, such as when a customer adds a new payment method or selects an existing one from the dropdown menu. If you are using the [Braintree Vault](https://articles.braintreepayments.com/control-panel/vault/overview), please note that this event will _not_ fire when Drop-in initially loads the vaulted payment methods.
-
-  ```js
-  braintree.dropin.create({
-    authorization: 'CLIENT_AUTHORIZATION',
-    selector: '#dropin-container',
-  }, function (err, dropinInstance) {
-    // If using the Braintree vault, get the active payment method first
-    var activePaymentMethod = dropinInstance.getActivePaymentMethod();
-
-    dropinInstance.on('paymentMethodAvailable', function (paymentMethod) {
-      activePaymentMethod = paymentMethod;
+      // Send payload.nonce to your server
     });
-
-    submitButton.addEventListener('click', function () {
-      if (activePaymentMethod) {
-        // Submit activePaymentMethod.nonce to your server
-      }
-    }
   });
-  ```
+});
+```
 
 The structure of the credit card payment method objects that will be returned from Drop-in can be found [here](http://braintree.github.io/braintree-web/current/HostedFields.html#~tokenizePayload);
 
@@ -78,41 +60,41 @@ The structure of the PayPal payment method objects that will be returned from Dr
 This is a full example of a Drop-in integration only accepting credit cards.
 
  ```html
- <!DOCTYPE html>
- <html lang="en">
-   <head>
-     <meta charset="UTF-8">
-     <title>Checkout</title>
-   </head>
-   <body>
-     <div id="dropin-container"></div>
-     <button id="submit-button">Purchase</button>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Checkout</title>
+	</head>
+	<body>
+		<div id="dropin-container"></div>
+		<button id="submit-button">Purchase</button>
 
-     <script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.1/js/dropin.min.js"></script>
+		<script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.1/js/dropin.min.js"></script>
 
-     <script>
-       var submitButton = document.querySelector('#submit-button');
+		<script>
+			var submitButton = document.querySelector('#submit-button');
 
-       braintree.dropin.create({
-         authorization: 'CLIENT_AUTHORIZATION',
-         selector: '#dropin-container'
-       }, function (err, dropinInstance) {
-         if (err) {
-           // Handle any errors that might've occured when creating Drop-in
-           console.error(err);
-           return;
-         }
+			braintree.dropin.create({
+				authorization: 'CLIENT_AUTHORIZATION',
+				selector: '#dropin-container'
+			}, function (err, dropinInstance) {
+				if (err) {
+					// Handle any errors that might've occured when creating Drop-in
+					console.error(err);
+					return;
+				}
+				submitButton.addEventListener('click', function () {
+					dropinInstance.requestPaymentMethod(function (err, payload) {
+						if (err) {
+							// Handle errors in requesting payment method
+						}
 
-         submitButton.addEventListener('click', function (event) {
-           event.preventDefault();
-           var paymentMethod = dropinInstance.getActivePaymentMethod();
-
-           if (paymentMethod) {
-             // Submit paymentMethod.nonce to your server
-           }
-         }, false);
-       });
-     </script>
-   </body>
- </html>
- ```
+						// Send payload.nonce to your server
+					});
+				});
+			});
+		</script>
+	</body>
+</html>
+```
