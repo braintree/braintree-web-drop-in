@@ -178,10 +178,13 @@ describe('PaymentMethodsView', function () {
   describe('requestPaymentMethod', function () {
     it('calls the callback with the active payment method', function (done) {
       var paymentMethodsViews;
+      var fakePaymentMethod = {foo: 'bar'};
       var element = document.createElement('div');
       var model = new DropinModel({
-        paymentMethods: [{foo: 'bar'}, {baz: 'qux'}]
+        paymentMethods: [fakePaymentMethod, {baz: 'qux'}]
       });
+
+      model.changeActivePaymentMethod(fakePaymentMethod);
 
       element.innerHTML = mainHTML;
       paymentMethodsViews = new PaymentMethodsView({
@@ -195,7 +198,7 @@ describe('PaymentMethodsView', function () {
 
       paymentMethodsViews.requestPaymentMethod(function (err, payload) {
         expect(err).to.not.exist;
-        expect(payload.foo).to.equal('bar');
+        expect(payload).to.equal(fakePaymentMethod);
         done();
       });
     });
