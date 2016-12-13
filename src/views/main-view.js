@@ -2,8 +2,11 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
-var PaymentMethodPickerView = require('./payment-method-picker-view');
-var PayWithCardView = require('./pay-with-card-view');
+var CardView = require('./payment-sheet-views/card-view');
+var PaymentMethodsView = require('./payment-methods-view');
+var isGuestCheckout = require('../lib/is-guest-checkout');
+var PaymentOptionsView = require('./payment-options-view');
+var PayPalView = require('./payment-sheet-views/paypal-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
 function MainView() {
@@ -18,57 +21,89 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
+  var paymentMethodsViews, paymentOptionsView, sheetContainer;
   var paymentMethods = this.model.getPaymentMethods();
-  var payWithCardView;
-
-  this.alert = this.getElementById('alert');
-
-  payWithCardView = new PayWithCardView({
-    element: this.getElementById(PayWithCardView.ID),
-    mainView: this,
-    model: this.model,
-    options: this.options,
-    strings: this.strings
-  });
-
-  this.paymentMethodPickerView = new PaymentMethodPickerView({
-    element: this.getElementById(PaymentMethodPickerView.ID),
-    model: this.model,
-    mainView: this,
-    options: this.options,
-    strings: this.strings
-  });
 
   this.views = {};
-  this.addView(payWithCardView);
-  this.addView(this.paymentMethodPickerView);
-  this.loadingContainer = this.element.querySelector('[data-braintree-id="loading-container"]');
-  this.loadingIndicator = this.element.querySelector('[data-braintree-id="loading-indicator"]');
+
+  sheetContainer = this.getElementById('sheet-container');
+
+  this.toggle = this.getElementById('toggle');
+  this.alert = this.getElementById('alert');
+
+  this.loadingContainer = this.getElementById('loading-container');
+  this.loadingIndicator = this.getElementById('loading-indicator');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
+
   this.supportsFlexbox = supportsFlexbox();
 
   this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
-
-  this.model.on('changeActivePaymentMethod', function () {
-    this.setActiveView('active-payment-method');
-  }.bind(this));
-
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  this.model.on('errorOccurred', function (errorCode) {
-    this.showAlert(errorCode);
+  this.paymentSheetViewIDs = [
+    CardView,
+    PayPalView
+  ].reduce(function (views, PaymentSheetView) {
+    var paymentSheetView;
+
+    if (PaymentSheetView.isEnabled(this.options)) {
+      paymentSheetView = new PaymentSheetView({
+        element: this.getElementById(PaymentSheetView.ID),
+        mainView: this,
+        model: this.model,
+        options: this.options,
+        strings: this.strings
+      });
+
+      this.addView(paymentSheetView);
+      views.push(paymentSheetView.ID);
+    }
+    return views;
+  }.bind(this), []);
+
+  this.hasMultiplePaymentOptions = this.paymentSheetViewIDs.length > 1;
+
+  paymentMethodsViews = new PaymentMethodsView({
+    element: this.getElementById(PaymentMethodsView.ID),
+    model: this.model,
+    options: this.options,
+    strings: this.strings
+  });
+  this.addView(paymentMethodsViews);
+
+  this.toggle.addEventListener('click', this.toggleAdditionalOptions.bind(this));
+
+  this.model.on('changeActivePaymentMethod', function () {
+    this.setPrimaryView(PaymentMethodsView.ID);
   }.bind(this));
 
-  this.model.on('errorCleared', this.hideAlert.bind(this));
+  this.model.on('changeActivePaymentView', function (id) {
+    if (id === PaymentMethodsView.ID) {
+      classlist.add(paymentMethodsViews.element, 'braintree-methods--active');
+      classlist.remove(sheetContainer, 'braintree-sheet--active');
+    } else {
+      classlist.add(sheetContainer, 'braintree-sheet--active');
+      classlist.remove(paymentMethodsViews.element, 'braintree-methods--active');
+    }
+  });
+
+  if (this.hasMultiplePaymentOptions) {
+    paymentOptionsView = new PaymentOptionsView({
+      element: this.getElementById(PaymentOptionsView.ID),
+      mainView: this,
+      paymentOptionIDs: this.paymentSheetViewIDs,
+      strings: this.strings
+    });
+
+    this.addView(paymentOptionsView);
+    this.setPrimaryView(paymentOptionsView.ID);
+  } else {
+    this.setPrimaryView(this.paymentSheetViewIDs[0]);
+  }
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
-  } else if (this.paymentMethodPickerView.views.length === 1) {
-    this.setActiveView(PayWithCardView.ID);
-    classlist.add(this.getElementById('payment-method-picker'), 'braintree-dropin__hide');
-  } else {
-    this.setActiveView('choose-payment-method');
   }
 };
 
@@ -76,43 +111,90 @@ MainView.prototype.addView = function (view) {
   this.views[view.ID] = view;
 };
 
-MainView.prototype.setActiveView = function (id) {
-  this.dropinWrapper.className = 'braintree-dropin__' + id;
+MainView.prototype.getView = function (id) {
+  return this.views[id];
+};
+
+MainView.prototype.setPrimaryView = function (id) {
+  this.dropinWrapper.className = prefixClass(id);
+  this.primaryView = this.getView(id);
+  this.model.changeActivePaymentView(id);
+
+  if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
+    if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
+      this.showToggle();
+    } else {
+      this.hideToggle();
+    }
+  } else if (id === PaymentMethodsView.ID) {
+    this.showToggle();
+  } else if (id === PaymentOptionsView.ID) {
+    this.hideToggle();
+  }
 
   if (!this.supportsFlexbox) {
+    // TODO update no flex support
     this.dropinWrapper.className += ' braintree-dropin__no-flexbox';
   }
 
   this.model.clearError();
-
-  if (id !== 'active-payment-method') {
-    this.paymentMethodPickerView.hideCheckMarks();
-  }
   this.model.endLoading();
 };
 
+MainView.prototype.requestPaymentMethod = function (callback) {
+  var activePaymentView = this.getView(this.model.getActivePaymentView());
+
+  activePaymentView.requestPaymentMethod(function (err, payload) {
+    if (err) {
+      callback(err);
+      return;
+    }
+    this.setPrimaryView(PaymentMethodsView.ID);
+    callback(null, payload);
+  }.bind(this));
+};
+
 MainView.prototype.showLoadingIndicator = function () {
-  classlist.remove(this.loadingIndicator, 'braintree-dropin__loading-indicator--inactive');
-  classlist.remove(this.loadingContainer, 'braintree-dropin__loading-container--inactive');
-  classlist.add(this.dropinContainer, 'braintree-dropin__hide');
+  classlist.remove(this.loadingIndicator, 'braintree-loader__indicator--inactive');
+  classlist.remove(this.loadingContainer, 'braintree-loader__container--inactive');
+  classlist.add(this.dropinContainer, 'braintree-hidden');
 };
 
 MainView.prototype.hideLoadingIndicator = function () {
   setTimeout(function () {
-    classlist.add(this.loadingIndicator, 'braintree-dropin__loading-indicator--inactive');
+    classlist.add(this.loadingIndicator, 'braintree-loader__indicator--inactive');
   }.bind(this), 200);
 
   setTimeout(function () {
-    classlist.add(this.loadingContainer, 'braintree-dropin__loading-container--inactive');
-    classlist.remove(this.dropinContainer, 'braintree-dropin__hide');
+    classlist.add(this.loadingContainer, 'braintree-loader__container--inactive');
+    classlist.remove(this.dropinContainer, 'braintree-hidden');
   }.bind(this), 1000);
 };
 
-function snakeCaseToCamelCase(s) {
-  return s.toLowerCase().replace(/(\_\w)/g, function (m) {
-    return m[1].toUpperCase();
-  });
-}
+MainView.prototype.toggleAdditionalOptions = function () {
+  this.hideToggle();
+  if (!this.hasMultiplePaymentOptions && this.primaryView.ID === PaymentMethodsView.ID) {
+    classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
+    this.model.changeActivePaymentView(CardView.ID);
+  } else if (this.hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1) {
+    if (this.model.getPaymentMethods().length === 0) {
+      this.setPrimaryView(PaymentOptionsView.ID);
+    } else {
+      this.setPrimaryView(PaymentMethodsView.ID);
+      this.toggleAdditionalOptions();
+    }
+  } else {
+    classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
+  }
+};
+
+MainView.prototype.showToggle = function () {
+  classlist.remove(this.toggle, 'braintree-hidden');
+};
+
+MainView.prototype.hideToggle = function () {
+  classlist.add(this.toggle, 'braintree-hidden');
+};
 
 MainView.prototype.showAlert = function (error) {
   var errorMessage;
@@ -123,12 +205,12 @@ MainView.prototype.showAlert = function (error) {
     errorMessage = error.message || this.strings.genericError;
   }
 
-  classlist.remove(this.alert, 'braintree-dropin__display--none');
+  classlist.remove(this.alert, 'braintree-hidden');
   this.alert.textContent = errorMessage;
 };
 
 MainView.prototype.hideAlert = function () {
-  classlist.add(this.alert, 'braintree-dropin__display--none');
+  classlist.add(this.alert, 'braintree-hidden');
 };
 
 MainView.prototype.teardown = function (callback) {
@@ -150,5 +232,15 @@ MainView.prototype.teardown = function (callback) {
     });
   }.bind(this));
 };
+
+function snakeCaseToCamelCase(s) {
+  return s.toLowerCase().replace(/(\_\w)/g, function (m) {
+    return m[1].toUpperCase();
+  });
+}
+
+function prefixClass(classname) {
+  return 'braintree-' + classname;
+}
 
 module.exports = MainView;

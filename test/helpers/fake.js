@@ -1,6 +1,6 @@
 'use strict';
 
-var clientToken;
+var clientToken, clientTokenWithCustomerID;
 var tokenizationKey = 'development_testing_merchant_id';
 
 function configuration() {
@@ -35,8 +35,13 @@ clientToken = configuration().gatewayConfiguration;
 clientToken.authorizationFingerprint = 'encoded_auth_fingerprint';
 clientToken = btoa(JSON.stringify(clientToken));
 
+clientTokenWithCustomerID = configuration().gatewayConfiguration;
+clientTokenWithCustomerID.authorizationFingerprint = 'encoded_auth_fingerprint&customer_id=abc123';
+clientTokenWithCustomerID = btoa(JSON.stringify(clientTokenWithCustomerID));
+
 module.exports = {
   tokenizationKey: tokenizationKey,
   clientToken: clientToken,
+  clientTokenWithCustomerID: clientTokenWithCustomerID,
   configuration: configuration
 };

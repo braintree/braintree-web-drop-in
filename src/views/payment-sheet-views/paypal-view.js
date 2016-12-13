@@ -1,51 +1,55 @@
 'use strict';
 
-var BasePickerView = require('./base-picker-view');
-var classlist = require('../../lib/classlist');
-var paypal = require('braintree-web/paypal');
-var paypalHTML = require('../../html/paypal-picker.html');
+var BasePaymentSheetView = require('./base-payment-sheet-view');
+var PayPal = require('braintree-web/paypal');
 
-function PayPalPickerView() {
-  BasePickerView.apply(this, arguments);
+function PayPalView() {
+  BasePaymentSheetView.apply(this, arguments);
 }
 
-PayPalPickerView.isEnabled = function (options) {
+PayPalView.isEnabled = function (options) {
   var isGatewayEnabled = options.client.getConfiguration().gatewayConfiguration.paypalEnabled;
   var isMerchantEnabled = Boolean(options.paypal);
 
   return isGatewayEnabled && isMerchantEnabled;
 };
 
-PayPalPickerView.prototype = Object.create(BasePickerView.prototype);
-PayPalPickerView.prototype.constructor = PayPalPickerView;
+PayPalView.prototype = Object.create(BasePaymentSheetView.prototype);
+PayPalView.prototype.constructor = PayPalView;
+PayPalView.ID = PayPalView.prototype.ID = 'paypal';
 
-PayPalPickerView.prototype._initialize = function () {
-  BasePickerView.prototype._initialize.apply(this, arguments);
+PayPalView.prototype._initialize = function () {
+  var paypalButton;
 
-  this.element.innerHTML = paypalHTML.replace(/{{PayPal}}/g, this.strings.PayPal);
-  this.model.asyncDependencyStarting();
+  BasePaymentSheetView.prototype._initialize.apply(this, arguments);
   this._createPayPalButton();
+  this.model.asyncDependencyStarting();
 
-  paypal.create({client: this.options.client}, function (err, paypalInstance) {
+  PayPal.create({client: this.options.client}, function (err, paypalInstance) {
     if (err) {
-      classlist.add(this.element, 'braintree-dropin__display--none');
+      // TODO: handle errors in PayPal creation
       console.error(err);
       return;
     }
 
     this.paypalInstance = paypalInstance;
 
+    paypalButton = this.getElementById('paypal-button');
+    paypalButton.addEventListener('click', this._tokenize.bind(this));
+
     this.model.asyncDependencyReady();
   }.bind(this));
 };
 
-PayPalPickerView.prototype._createPayPalButton = function () {
+PayPalView.prototype._createPayPalButton = function () {
+  var buttonContainer = this.getElementById('paypal-button');
   var script = document.createElement('script');
   var scriptAttrs = {
     'data-merchant': 'braintree',
     'data-button': 'checkout',
     'data-button_type': 'button',
-    'data-color': 'blue'
+    'data-color': 'gold',
+    'data-size': 'small'
   };
 
   script.src = 'https://www.paypalobjects.com/api/button.js';
@@ -55,14 +59,10 @@ PayPalPickerView.prototype._createPayPalButton = function () {
     script.setAttribute(attr, scriptAttrs[attr]);
   });
 
-  this.getElementById('paypal-button').appendChild(script);
+  buttonContainer.appendChild(script);
 };
 
-PayPalPickerView.prototype.teardown = function (callback) {
-  this.paypalInstance.teardown(callback);
-};
-
-PayPalPickerView.prototype._onSelect = function (event) {
+PayPalView.prototype._tokenize = function () {
   event.preventDefault();
 
   this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
@@ -70,6 +70,7 @@ PayPalPickerView.prototype._onSelect = function (event) {
       if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
         this.model.reportError(tokenizeErr);
         if (tokenizeErr.code === 'PAYPAL_INVALID_PAYMENT_OPTION' || tokenizeErr.code === 'PAYPAL_FLOW_OPTION_REQUIRED') {
+					// TODO: handle tokenization errors
           console.error(tokenizeErr);
         }
       }
@@ -80,4 +81,4 @@ PayPalPickerView.prototype._onSelect = function (event) {
   }.bind(this));
 };
 
-module.exports = PayPalPickerView;
+module.exports = PayPalView;

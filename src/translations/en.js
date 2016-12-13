@@ -4,7 +4,11 @@ module.exports = {
   addPaymentMethod: 'Add A Payment Method',
   changePaymentMethod: 'Change Payment Method',
   choosePaymentMethod: 'Choose a payment method',
+  payingWith: 'Paying with',
   savedPaymentMethods: 'Saved Payment Methods',
+  chooseAnotherWayToPay: 'Choose another way to pay',
+  chooseAWayToPay: 'Choose a way to pay',
+  otherWaysToPay: 'Other ways to pay',
   // Errors
   fieldEmptyForCvv: 'Please fill out a CVV.',
   fieldEmptyForExpirationDate: 'Please fill out an expiration date.',
@@ -29,6 +33,7 @@ module.exports = {
   expirationDateLabel: 'Expiration Date',
   expirationDateLabelSubheading: '(MM/YY)',
   postalCodeLabel: 'Postal Code',
+  payWithCard: 'Pay with card',
   // Payment Method descriptions
   endingIn: 'Ending in ••',
   Card: 'Card',

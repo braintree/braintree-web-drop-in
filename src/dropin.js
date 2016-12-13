@@ -92,6 +92,10 @@ Dropin.prototype.getActivePaymentMethod = function () {
   return this._model.getActivePaymentMethod();
 };
 
+Dropin.prototype.requestPaymentMethod = function (callback) {
+  this.mainView.requestPaymentMethod(callback);
+};
+
 Dropin.prototype.removeStylesheet = function () {
   var stylesheet = document.getElementById(constants.STYLESHEET_ID);
 

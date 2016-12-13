@@ -184,7 +184,7 @@ gulp.task('development', [
 gulp.task('watch', function () {
   gulp.watch([config.src.js.watch, config.src.html.watch], ['build:js']);
   gulp.watch([config.src.css.watch], ['build:css']);
-  gulp.watch([config.src.js.watch, config.jsdoc.watch], ['jsdoc']);
+  gulp.watch([config.src.js.watch, config.jsdoc.watch], ['build:jsdoc']);
 });
 
 gulp.task('watch:integration', ['watch']);
