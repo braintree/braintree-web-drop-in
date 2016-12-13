@@ -21,7 +21,9 @@ module.exports = {
     unionpay: 'UnionPay',
     maestro: 'Maestro'
   },
+  errors: {
+    NO_PAYMENT_METHOD_ERROR: 'No payment method is available.'
+  },
   INTEGRATION: 'dropin',
-  STYLESHEET_ID: 'braintree-dropin-stylesheet',
-  NO_PAYMENT_METHOD_ERROR: 'No payment method is available.'
+  STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };

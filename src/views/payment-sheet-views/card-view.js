@@ -138,7 +138,7 @@ CardView.prototype.tokenize = function (callback) {
 
     if (!cardTypeSupported) {
       this.showInlineError('number', this.strings.unsupportedCardTypeError);
-      callback(new Error(constants.NO_PAYMENT_METHOD_ERROR));
+      callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
       return;
     }
 
@@ -151,7 +151,7 @@ CardView.prototype.tokenize = function (callback) {
 
       if (err) {
         this.model.reportError(err);
-        callback(new Error(constants.NO_PAYMENT_METHOD_ERROR));
+        callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
         return;
       }
 
@@ -163,7 +163,7 @@ CardView.prototype.tokenize = function (callback) {
       callback(null, payload);
     }.bind(this));
   } else {
-    callback(new Error(constants.NO_PAYMENT_METHOD_ERROR));
+    callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
   }
 };
 

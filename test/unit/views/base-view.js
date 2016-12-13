@@ -33,7 +33,7 @@ describe('BaseView', function () {
 
       view.requestPaymentMethod(function (err, payload) {
         expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal(constants.NO_PAYMENT_METHOD_ERROR);
+        expect(err.message).to.equal(constants.errors.NO_PAYMENT_METHOD_ERROR);
         expect(payload).to.not.exist;
         done();
       });
