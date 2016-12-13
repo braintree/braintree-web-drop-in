@@ -25,7 +25,7 @@ describe('Dropin', function () {
     };
 
     this.sandbox.stub(hostedFields, 'create', function (options, cb) {
-      deferred(cb)(null, {on: function () {}});
+      deferred(cb)(null, fake.hostedFieldsInstance);
     });
   });
 
@@ -337,6 +337,22 @@ describe('Dropin', function () {
         expect(err).to.equal(error);
         done();
       });
+    });
+  });
+
+  describe('requestPaymentMethod', function () {
+    it('calls the requestPaymentMethod function of the MainView', function (done) {
+      var instance;
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance.initialize(function () {
+        this.sandbox.spy(instance.mainView, 'requestPaymentMethod');
+        instance.requestPaymentMethod(function () {
+          expect(instance.mainView.requestPaymentMethod).to.have.been.calledOnce;
+          done();
+        });
+      }.bind(this));
     });
   });
 });

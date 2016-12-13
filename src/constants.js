@@ -22,5 +22,6 @@ module.exports = {
     maestro: 'Maestro'
   },
   INTEGRATION: 'dropin',
-  STYLESHEET_ID: 'braintree-dropin-stylesheet'
+  STYLESHEET_ID: 'braintree-dropin-stylesheet',
+  NO_PAYMENT_METHOD_ERROR: 'No payment method is available.'
 };
