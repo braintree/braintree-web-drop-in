@@ -62,39 +62,39 @@ This is a full example of a Drop-in integration only accepting credit cards.
  ```html
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>Checkout</title>
-	</head>
-	<body>
-		<div id="dropin-container"></div>
-		<button id="submit-button">Purchase</button>
+  <head>
+    <meta charset="UTF-8">
+    <title>Checkout</title>
+  </head>
+  <body>
+    <div id="dropin-container"></div>
+    <button id="submit-button">Purchase</button>
 
-		<script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.1/js/dropin.min.js"></script>
+    <script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.1/js/dropin.min.js"></script>
 
-		<script>
-			var submitButton = document.querySelector('#submit-button');
+      <script>
+      var submitButton = document.querySelector('#submit-button');
 
-			braintree.dropin.create({
-				authorization: 'CLIENT_AUTHORIZATION',
-				selector: '#dropin-container'
-			}, function (err, dropinInstance) {
-				if (err) {
-					// Handle any errors that might've occured when creating Drop-in
-					console.error(err);
-					return;
-				}
-				submitButton.addEventListener('click', function () {
-					dropinInstance.requestPaymentMethod(function (err, payload) {
-						if (err) {
-							// Handle errors in requesting payment method
-						}
+      braintree.dropin.create({
+        authorization: 'CLIENT_AUTHORIZATION',
+        selector: '#dropin-container'
+      }, function (err, dropinInstance) {
+        if (err) {
+          // Handle any errors that might've occured when creating Drop-in
+          console.error(err);
+          return;
+        }
+        submitButton.addEventListener('click', function () {
+          dropinInstance.requestPaymentMethod(function (err, payload) {
+            if (err) {
+              // Handle errors in requesting payment method
+            }
 
-						// Send payload.nonce to your server
-					});
-				});
-			});
-		</script>
-	</body>
+            // Send payload.nonce to your server
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
 ```
