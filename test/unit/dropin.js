@@ -342,9 +342,7 @@ describe('Dropin', function () {
 
   describe('requestPaymentMethod', function () {
     it('calls the requestPaymentMethod function of the MainView', function (done) {
-      var instance;
-
-      instance = new Dropin(this.dropinOptions);
+      var instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
         this.sandbox.spy(instance.mainView, 'requestPaymentMethod');

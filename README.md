@@ -12,7 +12,11 @@ Because we're still in beta, the API and designs are subject to change. If you h
 
 ## Basic usage
 
-Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function. For credit cards, this attempts to validate the card form and will call the supplied callback with a payload, including the payment method nonce, if successful. If not successful, an error will be shown in the UI and the callback will be called with an error.
+Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function.
+
+For credit cards, this attempts to validate the card form and will call the supplied callback with a payload, including the payment method nonce, if successful. If not successful, an error will be shown in the UI and the callback will be called with an error.
+
+Other payment methods may behave differently. Refer to their documentation for details.
 
 ```js
 var submitButton = document.querySelector('#submit-button');
@@ -26,7 +30,9 @@ braintree.dropin.create({
       if (err) {
        // Handle errors in requesting payment method
        // This includes invalid card form or no payment method available
-       // Errors relevant to users will be show in the UI as well
+       // Errors relevant to customers will be show in the UI as well
+
+       return;
       }
 
       // Send payload.nonce to your server
