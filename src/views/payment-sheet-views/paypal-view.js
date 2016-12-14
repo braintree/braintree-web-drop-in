@@ -21,6 +21,7 @@ PayPalView.ID = PayPalView.prototype.ID = 'paypal';
 PayPalView.prototype._initialize = function () {
   BasePaymentSheetView.prototype._initialize.apply(this, arguments);
   this._createPayPalButton();
+  this._authInProgress = false;
   this.model.asyncDependencyStarting();
 
   paypal.create({client: this.options.client}, function (err, paypalInstance) {
@@ -33,7 +34,7 @@ PayPalView.prototype._initialize = function () {
     this.paypalInstance = paypalInstance;
 
     this.paypalButton = this.getElementById('paypal-button');
-    this.paypalButton.addEventListener('click', this._tokenize.bind(this));
+    this.paypalButton.addEventListener('click', this._onSelect.bind(this));
 
     this.model.asyncDependencyReady();
   }.bind(this));
@@ -64,8 +65,10 @@ PayPalView.prototype._tokenize = function () {
   var tokenizeReturn;
 
   event.preventDefault();
+  this._authInProgress = true;
 
   tokenizeReturn = this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
+    this._authInProgress = false;
     if (tokenizeErr) {
       if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
         this.model.reportError(tokenizeErr);
@@ -80,11 +83,16 @@ PayPalView.prototype._tokenize = function () {
     this.model.addPaymentMethod(tokenizePayload);
   }.bind(this));
 
-  this.paypalButton.addEventListener('click', function () {
-    tokenizeReturn.focus();
-  });
-
+  this._focusFrame = tokenizeReturn.focus;
   this.closeFrame = tokenizeReturn.close;
+};
+
+PayPalView.prototype._onSelect = function () {
+  if (this._authInProgress) {
+    this._focusFrame();
+  } else {
+    this._tokenize();
+  }
 };
 
 module.exports = PayPalView;

@@ -53,7 +53,7 @@ describe('PayPalView', function () {
       this.tokenizeStub = this.sandbox.stub().returns({
         focus: this.focusStub,
         close: this.closeStub
-      }).yields(null, {foo: 'bar'});
+      });
 
       this.paypalInstance = {tokenize: this.tokenizeStub};
 
@@ -172,6 +172,7 @@ describe('PayPalView', function () {
       var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
 
       this.sandbox.stub(DropinModel.prototype, 'addPaymentMethod');
+      this.tokenizeStub.yields(null, {foo: 'bar'});
 
       new PayPalView({ // eslint-disable-line no-new
         element: this.element,
@@ -182,6 +183,26 @@ describe('PayPalView', function () {
       button.click();
 
       expect(this.model.addPaymentMethod).to.be.calledWith({foo: 'bar'});
+    });
+
+    it('sets _authInProgress appropriately', function () {
+      var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
+
+      var paypalView = new PayPalView({
+        element: this.element,
+        model: this.model,
+        options: this.options
+      });
+
+      expect(paypalView._authInProgress).to.be.false;
+
+      button.click();
+
+      expect(paypalView._authInProgress).to.be.true;
+
+      this.tokenizeStub.yield(null, {foo: 'bar'});
+
+      expect(paypalView._authInProgress).to.be.false;
     });
   });
 });
