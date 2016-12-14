@@ -229,6 +229,21 @@ describe('MainView', function () {
       this.sandbox.stub(PayPal, 'create').yields(null, {});
     });
 
+    it('calls the close frame function of the primary view if one exists', function () {
+      var mainView;
+
+      PayPalView.prototype.closeFrame = this.sandbox.stub();
+
+      mainView = new MainView(this.mainViewOptions);
+
+      mainView.setPrimaryView(PayPalView.ID);
+      mainView.setPrimaryView(PaymentOptionsView.ID);
+
+      expect(PayPalView.prototype.closeFrame).to.have.been.calledOnce;
+
+      delete PayPalView.prototype.closeFrame;
+    });
+
     [
       CardView,
       PaymentMethodsView,

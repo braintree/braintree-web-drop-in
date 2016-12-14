@@ -116,6 +116,10 @@ MainView.prototype.getView = function (id) {
 };
 
 MainView.prototype.setPrimaryView = function (id) {
+  if (this.primaryView && this.primaryView.closeFrame) {
+    this.primaryView.closeFrame();
+  }
+
   this.dropinWrapper.className = prefixClass(id);
   this.primaryView = this.getView(id);
   this.model.changeActivePaymentView(id);
