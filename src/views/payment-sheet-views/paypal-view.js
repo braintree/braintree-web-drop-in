@@ -1,7 +1,7 @@
 'use strict';
 
 var BasePaymentSheetView = require('./base-payment-sheet-view');
-var PayPal = require('braintree-web/paypal');
+var paypal = require('braintree-web/paypal');
 
 function PayPalView() {
   BasePaymentSheetView.apply(this, arguments);
@@ -19,13 +19,12 @@ PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = 'paypal';
 
 PayPalView.prototype._initialize = function () {
-  var paypalButton;
-
   BasePaymentSheetView.prototype._initialize.apply(this, arguments);
   this._createPayPalButton();
+  this._authInProgress = false;
   this.model.asyncDependencyStarting();
 
-  PayPal.create({client: this.options.client}, function (err, paypalInstance) {
+  paypal.create({client: this.options.client}, function (err, paypalInstance) {
     if (err) {
       // TODO: handle errors in PayPal creation
       console.error(err);
@@ -34,8 +33,8 @@ PayPalView.prototype._initialize = function () {
 
     this.paypalInstance = paypalInstance;
 
-    paypalButton = this.getElementById('paypal-button');
-    paypalButton.addEventListener('click', this._tokenize.bind(this));
+    this.paypalButton = this.getElementById('paypal-button');
+    this.paypalButton.addEventListener('click', this._onSelect.bind(this));
 
     this.model.asyncDependencyReady();
   }.bind(this));
@@ -63,9 +62,13 @@ PayPalView.prototype._createPayPalButton = function () {
 };
 
 PayPalView.prototype._tokenize = function () {
-  event.preventDefault();
+  var tokenizeReturn;
 
-  this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
+  event.preventDefault();
+  this._authInProgress = true;
+
+  tokenizeReturn = this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
+    this._authInProgress = false;
     if (tokenizeErr) {
       if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
         this.model.reportError(tokenizeErr);
@@ -79,6 +82,17 @@ PayPalView.prototype._tokenize = function () {
 
     this.model.addPaymentMethod(tokenizePayload);
   }.bind(this));
+
+  this._focusFrame = tokenizeReturn.focus;
+  this.closeFrame = tokenizeReturn.close;
+};
+
+PayPalView.prototype._onSelect = function () {
+  if (this._authInProgress) {
+    this._focusFrame();
+  } else {
+    this._tokenize();
+  }
 };
 
 module.exports = PayPalView;

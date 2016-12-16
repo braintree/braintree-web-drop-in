@@ -11,7 +11,6 @@ function BasePaymentSheetView() {
 BasePaymentSheetView.prototype = Object.create(BaseView.prototype);
 BasePaymentSheetView.prototype.constructor = BasePaymentSheetView;
 
-BasePaymentSheetView.prototype._initialize = function () {
-};
+BasePaymentSheetView.prototype._initialize = function () {};
 
 module.exports = BasePaymentSheetView;
