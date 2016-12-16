@@ -1,6 +1,6 @@
 'use strict';
 
-var clientToken, clientTokenWithCustomerID;
+var clientToken, clientTokenWithCustomerID, hostedFieldsInstance;
 var tokenizationKey = 'development_testing_merchant_id';
 
 function configuration() {
@@ -31,6 +31,20 @@ function configuration() {
   };
 }
 
+function getState() {
+  return {
+    cards: [{type: 'visa'}],
+    fields: {
+      number: {
+        isValid: true
+      },
+      expirationDate: {
+        isValid: false
+      }
+    }
+  };
+}
+
 clientToken = configuration().gatewayConfiguration;
 clientToken.authorizationFingerprint = 'encoded_auth_fingerprint';
 clientToken = btoa(JSON.stringify(clientToken));
@@ -39,9 +53,17 @@ clientTokenWithCustomerID = configuration().gatewayConfiguration;
 clientTokenWithCustomerID.authorizationFingerprint = 'encoded_auth_fingerprint&customer_id=abc123';
 clientTokenWithCustomerID = btoa(JSON.stringify(clientTokenWithCustomerID));
 
+hostedFieldsInstance = {
+  getState: getState,
+  on: function () {},
+  setPlaceholder: function () {},
+  tokenize: function () {}
+};
+
 module.exports = {
-  tokenizationKey: tokenizationKey,
   clientToken: clientToken,
   clientTokenWithCustomerID: clientTokenWithCustomerID,
-  configuration: configuration
+  configuration: configuration,
+  hostedFieldsInstance: hostedFieldsInstance,
+  tokenizationKey: tokenizationKey
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 var assign = require('../lib/assign').assign;
+var errors = require('../constants').errors;
 
 function BaseView(options) {
   options = options || {};
@@ -15,7 +16,7 @@ BaseView.prototype.getElementById = function (id) {
 };
 
 BaseView.prototype.requestPaymentMethod = function (callback) {
-  callback(new Error('No payment method is available.'));
+  callback(new Error(errors.NO_PAYMENT_METHOD_ERROR));
 };
 
 BaseView.prototype.teardown = function (cb) {

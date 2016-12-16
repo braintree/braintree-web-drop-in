@@ -3,7 +3,7 @@
 var BasePaymentSheetView = require('./base-payment-sheet-view');
 var cardIconHTML = require('../../html/card-icons.html');
 var classlist = require('../../lib/classlist');
-var configurationCardTypes = require('../../constants').configurationCardTypes;
+var constants = require('../../constants');
 var hostedFields = require('braintree-web/hosted-fields');
 var isGuestCheckout = require('../../lib/is-guest-checkout');
 
@@ -133,12 +133,12 @@ CardView.prototype.tokenize = function (callback) {
   }.bind(this));
 
   if (formValid) {
-    cardType = configurationCardTypes[state.cards[0].type];
+    cardType = constants.configurationCardTypes[state.cards[0].type];
     cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
 
     if (!cardTypeSupported) {
       this.showInlineError('number', this.strings.unsupportedCardTypeError);
-      callback(new Error('No payment method is available.'));
+      callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
       return;
     }
 
@@ -151,7 +151,7 @@ CardView.prototype.tokenize = function (callback) {
 
       if (err) {
         this.model.reportError(err);
-        callback(new Error('No payment method is available.'));
+        callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
         return;
       }
 
@@ -163,7 +163,7 @@ CardView.prototype.tokenize = function (callback) {
       callback(null, payload);
     }.bind(this));
   } else {
-    callback(new Error('No payment method is available.'));
+    callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
   }
 };
 
@@ -261,9 +261,9 @@ CardView.prototype.requestPaymentMethod = function (callback) {
 CardView.prototype._hideUnsupportedCardIcons = function () {
   var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
-  Object.keys(configurationCardTypes).forEach(function (paymentMethodCardType) {
+  Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
     var cardIcon;
-    var configurationCardType = configurationCardTypes[paymentMethodCardType];
+    var configurationCardType = constants.configurationCardTypes[paymentMethodCardType];
 
     if (supportedCardTypes.indexOf(configurationCardType) === -1) {
       cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');

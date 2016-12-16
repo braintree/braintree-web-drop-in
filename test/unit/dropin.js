@@ -25,7 +25,7 @@ describe('Dropin', function () {
     };
 
     this.sandbox.stub(hostedFields, 'create', function (options, cb) {
-      deferred(cb)(null, {on: function () {}});
+      deferred(cb)(null, fake.hostedFieldsInstance);
     });
   });
 
@@ -305,20 +305,6 @@ describe('Dropin', function () {
     });
   });
 
-  describe('getActivePaymentMethod', function () {
-    it('returns the active payment method', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var fakePaymentMethod = {foo: 'bar'};
-
-      this.sandbox.stub(DropinModel.prototype, 'getActivePaymentMethod').returns(fakePaymentMethod);
-
-      instance.initialize(function () {
-        expect(instance.getActivePaymentMethod()).to.equal(fakePaymentMethod);
-        done();
-      });
-    });
-  });
-
   describe('teardown', function () {
     beforeEach(function () {
       this.instance = new Dropin(this.dropinOptions);
@@ -354,19 +340,17 @@ describe('Dropin', function () {
     });
   });
 
-  describe('event handling', function () {
-    it('emits a paymentMethodAvailable event when the model emits a changeActivePaymentMethod event', function (done) {
+  describe('requestPaymentMethod', function () {
+    it('calls the requestPaymentMethod function of the MainView', function (done) {
       var instance = new Dropin(this.dropinOptions);
-      var fakePaymentMethod = {foo: 'bar'};
 
       instance.initialize(function () {
-        instance.on('paymentMethodAvailable', function (paymentMethod) {
-          expect(paymentMethod).to.deep.equal(fakePaymentMethod);
+        this.sandbox.spy(instance.mainView, 'requestPaymentMethod');
+        instance.requestPaymentMethod(function () {
+          expect(instance.mainView.requestPaymentMethod).to.have.been.calledOnce;
           done();
         });
-
-        instance._model._emit('changeActivePaymentMethod', fakePaymentMethod);
-      });
+      }.bind(this));
     });
   });
 });

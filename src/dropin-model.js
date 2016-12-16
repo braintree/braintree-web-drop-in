@@ -4,7 +4,6 @@ var EventEmitter = require('./lib/event-emitter');
 
 function DropinModel(options) {
   this._paymentMethods = options && options.paymentMethods ? options.paymentMethods : [];
-  this._activePaymentMethod = this._paymentMethods[0];
   this.dependenciesInitializing = 0;
 
   EventEmitter.call(this);

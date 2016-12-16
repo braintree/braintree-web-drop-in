@@ -20,19 +20,6 @@ describe('DropinModel', function () {
 
       expect(model._paymentMethods).to.deep.equal([]);
     });
-
-    it('sets active payment method if there are existing payment methods', function () {
-      var paymentMethods = [{foo: 'bar'}, {boo: 'far'}];
-      var model = new DropinModel({paymentMethods: paymentMethods});
-
-      expect(model._activePaymentMethod).to.deep.equal(paymentMethods[0]);
-    });
-
-    it('does not set active payment method if there are no existing payment methods', function () {
-      var model = new DropinModel();
-
-      expect(model._activePaymentMethod).to.not.exist;
-    });
   });
 
   describe('addPaymentMethod', function () {

@@ -296,10 +296,7 @@ describe('CardView', function () {
 
   describe('requestPaymentMethod', function () {
     beforeEach(function () {
-      this.hostedFieldsInstance = {
-        on: this.sandbox.spy()
-      };
-      this.sandbox.stub(hostedFields, 'create').yields(null, this.hostedFieldsInstance);
+      this.sandbox.stub(hostedFields, 'create').yields(null, fake.hostedFieldsInstance);
 
       this.options = {
         client: {

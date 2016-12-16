@@ -72,10 +72,6 @@ Dropin.prototype.initialize = function (callback) {
       callback(null, dropinInstance);
     });
 
-    this._model.on('changeActivePaymentMethod', function (paymentMethod) {
-      this._emit('paymentMethodAvailable', paymentMethod);
-    }.bind(this));
-
     mainViewOptions = {
       componentId: this._componentId,
       dropinWrapper: this._dropinWrapper,
@@ -86,10 +82,6 @@ Dropin.prototype.initialize = function (callback) {
 
     this.mainView = new MainView(mainViewOptions);
   }.bind(this));
-};
-
-Dropin.prototype.getActivePaymentMethod = function () {
-  return this._model.getActivePaymentMethod();
 };
 
 Dropin.prototype.requestPaymentMethod = function (callback) {

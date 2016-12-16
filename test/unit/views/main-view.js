@@ -740,7 +740,7 @@ describe('MainView', function () {
       expect(this.mainView.primaryView.requestPaymentMethod).to.be.called;
     });
 
-    it('calls back with error when error occurs', function (done) {
+    it('calls callback with error when error occurs', function (done) {
       var fakeError = new Error('A bad thing happened');
 
       this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(fakeError);
@@ -752,7 +752,7 @@ describe('MainView', function () {
       });
     });
 
-    it('calls back with payload when successful', function (done) {
+    it('calls callback with payload when successful', function (done) {
       var stubPaymentMethod = {foo: 'bar'};
 
       this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
@@ -782,20 +782,7 @@ describe('MainView', function () {
         this.sandbox.stub(CardView, 'isEnabled').returns(true);
         this.wrapper = document.createElement('div');
         this.wrapper.innerHTML = templateHTML;
-        this.fakeHostedFieldsInstance = {
-          getState: this.sandbox.stub().returns({
-            cards: [{type: 'visa'}],
-            fields: {
-              number: {
-                isValid: true
-              },
-              expirationDate: {
-                isValid: true
-              }
-            }
-          })
-        };
-        this.sandbox.stub(HostedFields, 'create').returns(null, this.fakeHostedFieldsInstance);
+        this.sandbox.stub(HostedFields, 'create').returns(null, fake.HostedFieldsInstance);
         this.mainView = new MainView({
           dropinWrapper: this.wrapper,
           model: new DropinModel(),
