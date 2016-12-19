@@ -74,7 +74,7 @@ MainView.prototype._initialize = function () {
 
   this.toggle.addEventListener('click', this.toggleAdditionalOptions.bind(this));
 
-  this.model.on('changeActivePaymentMethod', function () {
+  this.model.on('addPaymentMethod', function () {
     this.setPrimaryView(PaymentMethodsView.ID);
   }.bind(this));
 
@@ -104,6 +104,7 @@ MainView.prototype._initialize = function () {
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
+    this.setPrimaryView(PaymentMethodsView.ID);
   }
 };
 
