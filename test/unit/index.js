@@ -83,7 +83,7 @@ describe('dropin.create', function () {
     });
   });
 
-  it('returns an error to callback if Drop-in initilization fails', function (done) {
+  it('returns an error to callback if Drop-in initialization fails', function (done) {
     var fakeClient = {
       getConfiguration: fake.configuration
     };
@@ -96,8 +96,9 @@ describe('dropin.create', function () {
     dropin.create({
       authorization: 'tokenization_key',
       selector: '#foo'
-    }, function (err) {
+    }, function (err, instance) {
       expect(err).to.equal(dropinError);
+      expect(instance).not.to.exist;
 
       done();
     });
