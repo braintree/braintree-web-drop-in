@@ -586,14 +586,6 @@ describe('MainView', function () {
       expect(MainView.prototype.hideLoadingIndicator).to.be.calledOnce;
     });
 
-    it('sets the primary view to be the PaymentMethodsView on addPaymentMethod', function () {
-      this.sandbox.stub(this.mainView, 'setPrimaryView');
-
-      this.model._emit('addPaymentMethod', {type: 'foo', nonce: 'bar'});
-
-      expect(this.mainView.setPrimaryView).to.be.calledWith(PaymentMethodsView.ID);
-    });
-
     describe('for changeActivePaymentView', function () {
       beforeEach(function () {
         this.paymentMethodsElement = this.dropinWrapper.querySelector('[data-braintree-id="' + PaymentMethodsView.ID + '"]');
