@@ -15,7 +15,7 @@ describe('CardView', function () {
 
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
-    this.element = document.body.querySelector('.braintree-sheet.braintree-pay-with-card');
+    this.element = document.body.querySelector('.braintree-sheet.braintree-card');
   });
 
   afterEach(function () {

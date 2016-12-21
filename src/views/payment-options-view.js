@@ -2,6 +2,7 @@
 
 var BaseView = require('./base-view');
 var paymentMethodOptionHTML = require('../html/payment-option.html');
+var paymentOptionIDs = require('../constants').paymentOptionIDs;
 
 function PaymentOptionsView() {
   BaseView.apply(this, arguments);
@@ -28,11 +29,11 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   div.className = 'braintree-option';
 
   switch (paymentOptionID) {
-    case 'pay-with-card':
+    case paymentOptionIDs.card:
       html = html.replace(/@ICON/g, 'iconCardFront');
       html = html.replace(/@OPTION_TITLE/g, this.strings.Card);
       break;
-    case 'paypal':
+    case paymentOptionIDs.paypal:
       html = html.replace(/@ICON/g, 'logoPayPal');
       html = html.replace(/@OPTION_TITLE/g, this.strings.PayPal);
       break;

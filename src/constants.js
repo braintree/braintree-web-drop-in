@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = {
+  paymentOptionIDs: {
+    card: 'card',
+    paypal: 'paypal'
+  },
   paymentMethodCardTypes: {
     Visa: 'visa',
     MasterCard: 'master-card',

@@ -13,7 +13,7 @@ function CardView() {
 
 CardView.prototype = Object.create(BasePaymentSheetView.prototype);
 CardView.prototype.constructor = CardView;
-CardView.ID = CardView.prototype.ID = 'pay-with-card';
+CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
 CardView.prototype._initialize = function () {
   var cardIcons = this.getElementById('card-view-icons');

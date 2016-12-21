@@ -1,6 +1,10 @@
 'use strict';
 
-module.exports = {
-  card: require('./card-view'),
-  paypal: require('./paypal-view')
-};
+var paymentOptionIDs = require('../../constants').paymentOptionIDs;
+
+var result = {};
+
+result[paymentOptionIDs.card] = require('./card-view');
+result[paymentOptionIDs.paypal] = require('./paypal-view');
+
+module.exports = result;
