@@ -11,6 +11,7 @@ var HostedFields = require('braintree-web/hosted-fields');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPal = require('braintree-web/paypal');
+var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en');
 var templateHTML = require('../../../src/html/main.html');
 
@@ -65,6 +66,8 @@ describe('MainView', function () {
     document.body.innerHTML = '';
   });
 
+  // TODO: is there a "only one payment option" version of this test?
+
   it('creates a PaymentOptionsView if there are multiple payment options', function () {
     var model, mainView;
     var dropinWrapper = document.createElement('div');
@@ -72,9 +75,8 @@ describe('MainView', function () {
 
     modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
     model = new DropinModel(modelOptions);
+    model.supportedPaymentOptions = ['card', 'paypal'];
 
-    this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
-    this.sandbox.stub(CardView, 'isEnabled').returns(true);
     this.sandbox.stub(PayPal, 'create').yields(null, {});
 
     dropinWrapper.innerHTML = templateHTML;
@@ -97,13 +99,13 @@ describe('MainView', function () {
     beforeEach(function () {
       var modelOptions = fake.modelOptions();
 
-      modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
-
       this.dropinWrapper = document.createElement('div');
       this.dropinWrapper.innerHTML = templateHTML;
+
+      modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
       this.model = new DropinModel(modelOptions);
-      this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
-      this.sandbox.stub(CardView, 'isEnabled').returns(true);
+      this.model.supportedPaymentOptions = ['card', 'paypal'];
+
       this.sandbox.stub(PayPal, 'create').yields(null, {});
     });
 
@@ -153,8 +155,7 @@ describe('MainView', function () {
     it('sets PaymentOptionsViews as the primary view if there are multiple payment methods', function () {
       var mainView;
 
-      this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
-      this.sandbox.stub(CardView, 'isEnabled').returns(true);
+      this.model.supportedPaymentOptions = ['card', 'paypal'];
 
       mainView = new MainView({ // eslint-disable-line no-new
         dropinWrapper: this.dropinWrapper,
@@ -174,8 +175,7 @@ describe('MainView', function () {
     it('sets the sheet view as the primary view if there is one payment method', function () {
       var mainView;
 
-      this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
-      this.sandbox.stub(CardView, 'isEnabled').returns(true);
+      this.model.supportedPaymentOptions = ['card'];
 
       mainView = new MainView({ // eslint-disable-line no-new
         dropinWrapper: this.dropinWrapper,
@@ -215,13 +215,16 @@ describe('MainView', function () {
 
   describe('setPrimaryView', function () {
     beforeEach(function () {
+      var model = new DropinModel(fake.modelOptions());
       var wrapper = document.createElement('div');
+
+      model.supportedPaymentOptions = ['card', 'paypal'];
 
       wrapper.innerHTML = templateHTML;
 
       this.mainViewOptions = {
         dropinWrapper: wrapper,
-        model: new DropinModel(fake.modelOptions()),
+        model: model,
         options: {
           authorization: fake.tokenizationKey,
           client: {
@@ -231,8 +234,6 @@ describe('MainView', function () {
         strings: strings
       };
 
-      this.sandbox.stub(CardView, 'isEnabled').returns(true);
-      this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
       this.sandbox.stub(PayPal, 'create').yields(null, {});
     });
 
@@ -321,10 +322,12 @@ describe('MainView', function () {
     });
 
     describe('when given a ', function () {
-      var paymentSheetViews = [CardView, PayPalView];
+      var SheetView;
 
-      paymentSheetViews.forEach(function (PaymentSheetView) {
-        describe(PaymentSheetView.ID + ' view', function () {
+      Object.keys(sheetViews).forEach(function (sheetViewKey) {
+        SheetView = sheetViews[sheetViewKey];
+
+        describe(SheetView.ID + ' view', function () {
           describe('in a non-guest checkout flow', function () {
             it('shows the additional options button', function () {
               var mainView;
@@ -332,7 +335,7 @@ describe('MainView', function () {
               this.mainViewOptions.options.authorization = fake.clientTokenWithCustomerID;
 
               mainView = new MainView(this.mainViewOptions);
-              mainView.setPrimaryView(PaymentSheetView.ID);
+              mainView.setPrimaryView(SheetView.ID);
 
               expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
             });
@@ -345,24 +348,19 @@ describe('MainView', function () {
               this.mainViewOptions.options.authorization = fake.clientTokenWithCustomerID;
 
               mainView = new MainView(this.mainViewOptions);
-              mainView.setPrimaryView(PaymentSheetView.ID);
+              mainView.setPrimaryView(SheetView.ID);
 
               expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
             });
 
-            it('does not show the additional options button if there is only one payment option', function () {
+            it('does not show the additional options button if there is one payment option', function () {
               var mainView;
 
-              paymentSheetViews.forEach(function (View) {
-                if (View.ID !== PaymentSheetView.ID) {
-                  View.isEnabled.returns(false);
-                }
-              });
-
+              this.mainViewOptions.model.supportedPaymentOptions = [sheetViewKey];
               this.mainViewOptions.options.authorization = fake.tokenizationKey;
 
               mainView = new MainView(this.mainViewOptions);
-              mainView.setPrimaryView(PaymentSheetView.ID);
+              mainView.setPrimaryView(SheetView.ID);
 
               expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
             });
@@ -678,8 +676,7 @@ describe('MainView', function () {
 
     describe('when there is one payment option and the PaymentMethodsView is active', function () {
       beforeEach(function () {
-        this.sandbox.stub(CardView, 'isEnabled').returns(true);
-        this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
+        this.mainViewOptions.model.supportedPaymentOptions = ['card'];
         this.mainView = new MainView(this.mainViewOptions);
 
         this.mainView.setPrimaryView(PaymentMethodsView.ID);
@@ -697,8 +694,7 @@ describe('MainView', function () {
 
     describe('when there are multiple payment options and a payment sheet view is active', function () {
       beforeEach(function () {
-        this.sandbox.stub(CardView, 'isEnabled').returns(true);
-        this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
+        this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
       });
 
       describe('and there are no payment methods available', function () {
@@ -721,6 +717,7 @@ describe('MainView', function () {
           modelOptions.paymentMethods = [{foo: 'bar'}];
 
           this.mainViewOptions.model = new DropinModel(modelOptions);
+          this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
           this.mainView = new MainView(this.mainViewOptions);
 
           this.sandbox.spy(this.mainView, 'setPrimaryView');
@@ -804,8 +801,10 @@ describe('MainView', function () {
 
     describe('with vaulted payment methods', function () {
       beforeEach(function () {
-        this.sandbox.stub(PayPalView, 'isEnabled').returns(false);
-        this.sandbox.stub(CardView, 'isEnabled').returns(true);
+        var model = new DropinModel(fake.modelOptions());
+
+        model.supportedPaymentOptions = ['card'];
+
         this.wrapper = document.createElement('div');
         this.wrapper.innerHTML = templateHTML;
         this.sandbox.stub(HostedFields, 'create').returns(null, fake.HostedFieldsInstance);

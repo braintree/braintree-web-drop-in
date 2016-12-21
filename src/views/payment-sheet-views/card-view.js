@@ -11,11 +11,6 @@ function CardView() {
   BasePaymentSheetView.apply(this, arguments);
 }
 
-CardView.isEnabled = function () {
-  // TODO make card optional
-  return true;
-};
-
 CardView.prototype = Object.create(BasePaymentSheetView.prototype);
 CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = 'pay-with-card';

@@ -7,13 +7,6 @@ function PayPalView() {
   BasePaymentSheetView.apply(this, arguments);
 }
 
-PayPalView.isEnabled = function (options) {
-  var isGatewayEnabled = options.client.getConfiguration().gatewayConfiguration.paypalEnabled;
-  var isMerchantEnabled = Boolean(options.paypal);
-
-  return isGatewayEnabled && isMerchantEnabled;
-};
-
 PayPalView.prototype = Object.create(BasePaymentSheetView.prototype);
 PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = 'paypal';
