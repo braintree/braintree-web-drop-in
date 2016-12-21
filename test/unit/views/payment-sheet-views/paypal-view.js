@@ -38,7 +38,7 @@ describe('PayPalView', function () {
 
   describe('_initialize', function () {
     beforeEach(function () {
-      this.model = new DropinModel();
+      this.model = new DropinModel(fake.modelOptions());
       this.options = {
         client: {
           getConfiguration: fake.configuration,

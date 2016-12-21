@@ -2,29 +2,67 @@
 
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
+var fake = require('../helpers/fake');
 
 describe('DropinModel', function () {
+  beforeEach(function () {
+    this.configuration = fake.configuration();
+
+    this.modelOptions = {
+      client: {
+        getConfiguration: function () {
+          return this.configuration;
+        }.bind(this)
+      },
+      merchantOptions: {}
+    };
+  });
+
   describe('Constructor', function () {
     it('inherits from EventEmitter', function () {
-      expect(new DropinModel({})).to.be.an.instanceOf(EventEmitter);
+      expect(new DropinModel(this.modelOptions)).to.be.an.instanceOf(EventEmitter);
     });
 
-    it('sets existing payment methods as _paymentMethods', function () {
-      var model = new DropinModel({paymentMethods: ['foo']});
+    describe('payment methods', function () {
+      it('sets existing payment methods as _paymentMethods', function () {
+        var model;
 
-      expect(model._paymentMethods).to.deep.equal(['foo']);
+        this.modelOptions.paymentMethods = ['foo'];
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model._paymentMethods).to.deep.equal(['foo']);
+      });
+
+      it('_paymentMethods is null if no existing payment methods', function () {
+        var model = new DropinModel(this.modelOptions);
+
+        expect(model._paymentMethods).to.deep.equal([]);
+      });
     });
 
-    it('_paymentMethods is null if no existing payment methods', function () {
-      var model = new DropinModel();
+    describe('supported payment options', function () {
+      it('supports cards', function () {
+        expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.deep.equal([
+          'card'
+        ]);
+      });
 
-      expect(model._paymentMethods).to.deep.equal([]);
+      it('supports credit cards and PayPal if PayPal is enabled by merchant and gateway', function () {
+        this.configuration.gatewayConfiguration.paypalEnabled = true;
+        this.modelOptions.merchantOptions.paypal = true;
+
+        expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.have.members([
+          'card',
+          'paypal'
+        ]);
+      });
     });
   });
 
   describe('addPaymentMethod', function () {
     beforeEach(function () {
-      this.model = new DropinModel();
+      this.model = new DropinModel(this.modelOptions);
     });
 
     it('adds a new payment method to _paymentMethods', function () {
@@ -57,7 +95,7 @@ describe('DropinModel', function () {
 
   describe('getPaymentMethods', function () {
     it('returns _paymentMethods', function () {
-      var model = new DropinModel();
+      var model = new DropinModel(this.modelOptions);
 
       model._paymentMethods = 'these are my payment methods';
 
@@ -67,7 +105,7 @@ describe('DropinModel', function () {
 
   describe('changeActivePaymentMethod', function () {
     beforeEach(function () {
-      this.model = new DropinModel();
+      this.model = new DropinModel(this.modelOptions);
     });
 
     it('sets new payment method to _activePaymentMethod', function () {
@@ -92,7 +130,7 @@ describe('DropinModel', function () {
 
   describe('getActivePaymentMethod', function () {
     it('returns _activePaymentMethod', function () {
-      var model = new DropinModel();
+      var model = new DropinModel(this.modelOptions);
 
       model._activePaymentMethod = 'this is my active payment method';
 
@@ -128,7 +166,7 @@ describe('DropinModel', function () {
     });
 
     it('emits asyncDependenciesReady event when there are no dependencies initializing', function (done) {
-      var model = new DropinModel();
+      var model = new DropinModel(this.modelOptions);
 
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
 
@@ -144,7 +182,7 @@ describe('DropinModel', function () {
 
   describe('beginLoading', function () {
     it('emits a loadBegin event', function (done) {
-      var model = new DropinModel();
+      var model = new DropinModel(this.modelOptions);
 
       model.on('loadBegin', function () {
         done();
@@ -156,7 +194,7 @@ describe('DropinModel', function () {
 
   describe('endLoading', function () {
     it('emits a loadEnd event', function (done) {
-      var model = new DropinModel();
+      var model = new DropinModel(this.modelOptions);
 
       model.on('loadEnd', function () {
         done();
@@ -168,7 +206,7 @@ describe('DropinModel', function () {
 
   describe('reportError', function () {
     it('emits an errorOccurred event with the error', function (done) {
-      var dropinModel = new DropinModel();
+      var dropinModel = new DropinModel(this.modelOptions);
       var fakeError = {foo: 'boo'};
 
       dropinModel.on('errorOccurred', function (error) {
@@ -182,7 +220,7 @@ describe('DropinModel', function () {
 
   describe('clearError', function () {
     it('emits an errorCleared event', function (done) {
-      var dropinModel = new DropinModel();
+      var dropinModel = new DropinModel(this.modelOptions);
 
       dropinModel.on('errorCleared', function () {
         done();

@@ -60,10 +60,20 @@ hostedFieldsInstance = {
   tokenize: function () {}
 };
 
+function modelOptions() {
+  return {
+    client: {
+      getConfiguration: configuration
+    },
+    merchantOptions: {}
+  };
+}
+
 module.exports = {
   clientToken: clientToken,
   clientTokenWithCustomerID: clientTokenWithCustomerID,
   configuration: configuration,
   hostedFieldsInstance: hostedFieldsInstance,
+  modelOptions: modelOptions,
   tokenizationKey: tokenizationKey
 };

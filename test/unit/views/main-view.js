@@ -34,7 +34,7 @@ describe('MainView', function () {
   describe('initialize', function () {
     beforeEach(function () {
       var dropinWrapper = document.createElement('div');
-      var model = new DropinModel();
+      var model = new DropinModel(fake.modelOptions());
 
       dropinWrapper.innerHTML = templateHTML;
 
@@ -66,9 +66,12 @@ describe('MainView', function () {
   });
 
   it('creates a PaymentOptionsView if there are multiple payment options', function () {
-    var mainView;
+    var model, mainView;
     var dropinWrapper = document.createElement('div');
-    var model = new DropinModel({paymentMethods: [{foo: 'bar'}, {baz: 'qux'}]});
+    var modelOptions = fake.modelOptions();
+
+    modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
+    model = new DropinModel(modelOptions);
 
     this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
     this.sandbox.stub(CardView, 'isEnabled').returns(true);
@@ -92,9 +95,13 @@ describe('MainView', function () {
 
   describe('with vaulted payment methods', function () {
     beforeEach(function () {
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
+
       this.dropinWrapper = document.createElement('div');
       this.dropinWrapper.innerHTML = templateHTML;
-      this.model = new DropinModel({paymentMethods: [{foo: 'bar'}, {baz: 'qux'}]});
+      this.model = new DropinModel(modelOptions);
       this.sandbox.stub(PayPalView, 'isEnabled').returns(true);
       this.sandbox.stub(CardView, 'isEnabled').returns(true);
       this.sandbox.stub(PayPal, 'create').yields(null, {});
@@ -139,7 +146,7 @@ describe('MainView', function () {
     beforeEach(function () {
       this.dropinWrapper = document.createElement('div');
       this.dropinWrapper.innerHTML = templateHTML;
-      this.model = new DropinModel();
+      this.model = new DropinModel(fake.modelOptions());
       this.sandbox.stub(PayPal, 'create').yields(null, {});
     });
 
@@ -214,7 +221,7 @@ describe('MainView', function () {
 
       this.mainViewOptions = {
         dropinWrapper: wrapper,
-        model: new DropinModel(),
+        model: new DropinModel(fake.modelOptions()),
         options: {
           authorization: fake.tokenizationKey,
           client: {
@@ -459,7 +466,7 @@ describe('MainView', function () {
         getElementById: BaseView.prototype.getElementById,
         hideAlert: this.sandbox.stub(),
         hideLoadingIndicator: function () {},
-        model: new DropinModel(),
+        model: new DropinModel(fake.modelOptions()),
         options: {
           client: {
             getConfiguration: fake.configuration
@@ -551,7 +558,7 @@ describe('MainView', function () {
     beforeEach(function () {
       this.dropinWrapper = document.createElement('div');
       this.dropinWrapper.innerHTML = templateHTML;
-      this.model = new DropinModel();
+      this.model = new DropinModel(fake.modelOptions());
 
       this.mainViewOptions = {
         dropinWrapper: this.dropinWrapper,
@@ -637,7 +644,7 @@ describe('MainView', function () {
       this.wrapper.innerHTML = templateHTML;
       this.mainViewOptions = {
         dropinWrapper: this.wrapper,
-        model: new DropinModel(),
+        model: new DropinModel(fake.modelOptions()),
         options: {
           authorization: fake.tokenizationKey,
           client: {
@@ -709,7 +716,11 @@ describe('MainView', function () {
 
       describe('and there are payment methods available', function () {
         beforeEach(function () {
-          this.mainViewOptions.model = new DropinModel({paymentMethods: [{foo: 'bar'}]});
+          var modelOptions = fake.modelOptions();
+
+          modelOptions.paymentMethods = [{foo: 'bar'}];
+
+          this.mainViewOptions.model = new DropinModel(modelOptions);
           this.mainView = new MainView(this.mainViewOptions);
 
           this.sandbox.spy(this.mainView, 'setPrimaryView');
@@ -737,7 +748,7 @@ describe('MainView', function () {
       this.wrapper.innerHTML = templateHTML;
       this.mainView = new MainView({
         dropinWrapper: this.wrapper,
-        model: new DropinModel(),
+        model: new DropinModel(fake.modelOptions()),
         options: {
           authorization: 'fake_tokenization_key',
           client: {
@@ -800,7 +811,7 @@ describe('MainView', function () {
         this.sandbox.stub(HostedFields, 'create').returns(null, fake.HostedFieldsInstance);
         this.mainView = new MainView({
           dropinWrapper: this.wrapper,
-          model: new DropinModel(),
+          model: new DropinModel(fake.modelOptions()),
           options: {
             authorization: fake.clientTokenWithCustomerID,
             client: {

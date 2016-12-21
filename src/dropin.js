@@ -66,7 +66,11 @@ Dropin.prototype.initialize = function (callback) {
   this.getVaultedPaymentMethods(function (paymentMethods) {
     var mainViewOptions;
 
-    this._model = new DropinModel({paymentMethods: paymentMethods});
+    this._model = new DropinModel({
+      client: this._options.client,
+      merchantOptions: this._options, // TODO: update to merchantOptions
+      paymentMethods: paymentMethods
+    });
 
     this._model.on('asyncDependenciesReady', function () {
       callback(null, dropinInstance);
