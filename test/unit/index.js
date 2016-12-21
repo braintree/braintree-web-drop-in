@@ -8,12 +8,13 @@ var dropinConstants = require('../../src/constants');
 
 describe('dropin.create', function () {
   beforeEach(function () {
+    var container = document.createElement('div');
+
     this.form = document.createElement('form');
 
-    this.container = document.createElement('div');
-    this.container.id = 'foo';
+    container.id = 'foo';
 
-    this.form.appendChild(this.container);
+    this.form.appendChild(container);
     document.body.appendChild(this.form);
 
     this.sandbox.stub(client, 'create');
