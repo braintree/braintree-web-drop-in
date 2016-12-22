@@ -43,7 +43,7 @@ function create(options, callback) {
     new Dropin({
       merchantConfiguration: options,
       client: clientInstance
-    }).initialize(callback);
+    })._initialize(callback);
   });
 }
 

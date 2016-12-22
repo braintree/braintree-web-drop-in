@@ -28,12 +28,11 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
   constructor: Dropin
 });
 
-// TODO: initialize -> _initialize
-Dropin.prototype.initialize = function (callback) {
+Dropin.prototype._initialize = function (callback) {
   var container, strings, localizedStrings, localizedHTML;
   var dropinInstance = this; // eslint-disable-line consistent-this
 
-  this.injectStylesheet();
+  this._injectStylesheet();
 
   if (!this._merchantConfiguration.selector) {
     callback(new Error('options.selector is required.'));
@@ -65,7 +64,7 @@ Dropin.prototype.initialize = function (callback) {
   this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(this._dropinWrapper);
 
-  this.getVaultedPaymentMethods(function (paymentMethods) {
+  this._getVaultedPaymentMethods(function (paymentMethods) {
     var mainViewOptions;
 
     this._model = new DropinModel({
@@ -87,15 +86,15 @@ Dropin.prototype.initialize = function (callback) {
       strings: strings
     };
 
-    this.mainView = new MainView(mainViewOptions);
+    this._mainView = new MainView(mainViewOptions);
   }.bind(this));
 };
 
 Dropin.prototype.requestPaymentMethod = function (callback) {
-  this.mainView.requestPaymentMethod(callback);
+  this._mainView.requestPaymentMethod(callback);
 };
 
-Dropin.prototype.removeStylesheet = function () {
+Dropin.prototype._removeStylesheet = function () {
   var stylesheet = document.getElementById(constants.STYLESHEET_ID);
 
   if (stylesheet) {
@@ -103,7 +102,7 @@ Dropin.prototype.removeStylesheet = function () {
   }
 };
 
-Dropin.prototype.injectStylesheet = function () {
+Dropin.prototype._injectStylesheet = function () {
   var stylesheet, stylesheetUrl, head, assetsUrl;
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
@@ -124,7 +123,7 @@ Dropin.prototype.injectStylesheet = function () {
   }
 };
 
-Dropin.prototype.getVaultedPaymentMethods = function (callback) {
+Dropin.prototype._getVaultedPaymentMethods = function (callback) {
   if (isGuestCheckout(this._merchantConfiguration.authorization)) {
     callback();
   } else {
@@ -146,9 +145,9 @@ Dropin.prototype.getVaultedPaymentMethods = function (callback) {
 };
 
 Dropin.prototype.teardown = function (callback) {
-  this.removeStylesheet();
+  this._removeStylesheet();
 
-  this.mainView.teardown(function (err) {
+  this._mainView.teardown(function (err) {
     this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
     callback(err);
   }.bind(this));
