@@ -5,7 +5,6 @@ var classlist = require('../lib/classlist');
 var sheetViews = require('./payment-sheet-views');
 var CardView = require('./payment-sheet-views/card-view');
 var PaymentMethodsView = require('./payment-methods-view');
-var isGuestCheckout = require('../lib/is-guest-checkout');
 var PaymentOptionsView = require('./payment-options-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
@@ -124,7 +123,7 @@ MainView.prototype.setPrimaryView = function (id) {
   this.model.changeActivePaymentView(id);
 
   if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
-    if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
+    if (!this.model.isGuestCheckout || this.getView(PaymentOptionsView.ID)) {
       this.showToggle();
     } else {
       this.hideToggle();

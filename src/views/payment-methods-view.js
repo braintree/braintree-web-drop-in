@@ -2,7 +2,6 @@
 
 var BaseView = require('./base-view');
 var PaymentMethodView = require('./payment-method-view');
-var isGuestCheckout = require('../lib/is-guest-checkout');
 
 function PaymentMethodsView() {
   BaseView.apply(this, arguments);
@@ -20,7 +19,6 @@ PaymentMethodsView.prototype._initialize = function () {
 
   this.views = [];
   this.container = this.getElementById('methods-container');
-  this.isGuestCheckout = isGuestCheckout(this.options.authorization);
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
@@ -39,7 +37,7 @@ PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
     strings: this.strings
   });
 
-  if (this.isGuestCheckout && this.container.firstChild) {
+  if (this.model.isGuestCheckout && this.container.firstChild) {
     this.container.removeChild(this.container.firstChild);
     this.views.pop();
   }
