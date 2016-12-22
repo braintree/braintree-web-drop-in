@@ -1,22 +1,16 @@
 'use strict';
 
 var BasePaymentSheetView = require('./base-payment-sheet-view');
+var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 var paypal = require('braintree-web/paypal');
 
 function PayPalView() {
   BasePaymentSheetView.apply(this, arguments);
 }
 
-PayPalView.isEnabled = function (options) {
-  var isGatewayEnabled = options.client.getConfiguration().gatewayConfiguration.paypalEnabled;
-  var isMerchantEnabled = Boolean(options.paypal);
-
-  return isGatewayEnabled && isMerchantEnabled;
-};
-
 PayPalView.prototype = Object.create(BasePaymentSheetView.prototype);
 PayPalView.prototype.constructor = PayPalView;
-PayPalView.ID = PayPalView.prototype.ID = 'paypal';
+PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
 
 PayPalView.prototype._initialize = function () {
   BasePaymentSheetView.prototype._initialize.apply(this, arguments);

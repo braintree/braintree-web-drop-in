@@ -2,11 +2,11 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
+var sheetViews = require('./payment-sheet-views');
 var CardView = require('./payment-sheet-views/card-view');
 var PaymentMethodsView = require('./payment-methods-view');
 var isGuestCheckout = require('../lib/is-guest-checkout');
 var PaymentOptionsView = require('./payment-options-view');
-var PayPalView = require('./payment-sheet-views/paypal-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
 function MainView() {
@@ -41,13 +41,12 @@ MainView.prototype._initialize = function () {
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  this.paymentSheetViewIDs = [
-    CardView,
-    PayPalView
-  ].reduce(function (views, PaymentSheetView) {
-    var paymentSheetView;
+  this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (views, sheetViewKey) {
+    var PaymentSheetView, paymentSheetView;
 
-    if (PaymentSheetView.isEnabled(this.options)) {
+    if (this.model.supportedPaymentOptions.indexOf(sheetViewKey) !== -1) {
+      PaymentSheetView = sheetViews[sheetViewKey];
+
       paymentSheetView = new PaymentSheetView({
         element: this.getElementById(PaymentSheetView.ID),
         mainView: this,
@@ -62,7 +61,7 @@ MainView.prototype._initialize = function () {
     return views;
   }.bind(this), []);
 
-  this.hasMultiplePaymentOptions = this.paymentSheetViewIDs.length > 1;
+  this.hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
 
   paymentMethodsViews = new PaymentMethodsView({
     element: this.getElementById(PaymentMethodsView.ID),

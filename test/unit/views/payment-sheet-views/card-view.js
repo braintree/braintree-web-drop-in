@@ -15,7 +15,7 @@ describe('CardView', function () {
 
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
-    this.element = document.body.querySelector('.braintree-sheet.braintree-pay-with-card');
+    this.element = document.body.querySelector('.braintree-sheet.braintree-card');
   });
 
   afterEach(function () {
@@ -54,7 +54,7 @@ describe('CardView', function () {
       this.mainView = {
         componentId: 'component-id'
       };
-      this.model = new DropinModel();
+      this.model = new DropinModel(fake.modelOptions());
     });
 
     it('has cvv if supplied in challenges', function () {
@@ -307,7 +307,7 @@ describe('CardView', function () {
       this.mainView = {
         componentId: 'component-id'
       };
-      this.model = new DropinModel();
+      this.model = new DropinModel(fake.modelOptions());
     });
 
     it('calls the callback with an error when tokenize fails', function (done) {
@@ -357,7 +357,7 @@ describe('CardView', function () {
         mainView: {
           componentId: 'component-id'
         },
-        model: new DropinModel(),
+        model: new DropinModel(fake.modelOptions()),
         options: {
           client: {
             getConfiguration: function () {
@@ -393,7 +393,7 @@ describe('CardView', function () {
       this.mainView = {
         componentId: 'component-id'
       };
-      this.model = new DropinModel();
+      this.model = new DropinModel(fake.modelOptions());
     });
 
     describe('onFocusEvent', function () {
@@ -776,7 +776,7 @@ describe('CardView', function () {
         }),
         tokenize: this.sandbox.stub()
       };
-      this.model = new DropinModel();
+      this.model = new DropinModel(fake.modelOptions());
 
       this.context = {
         element: this.element,

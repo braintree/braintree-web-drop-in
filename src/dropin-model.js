@@ -1,10 +1,13 @@
 'use strict';
 
 var EventEmitter = require('./lib/event-emitter');
+var paymentOptionIDs = require('./constants').paymentOptionIDs;
 
 function DropinModel(options) {
   this._paymentMethods = options && options.paymentMethods ? options.paymentMethods : [];
   this.dependenciesInitializing = 0;
+
+  this.supportedPaymentOptions = getSupportedPaymentOptions(options);
 
   EventEmitter.call(this);
 }
@@ -69,3 +72,16 @@ DropinModel.prototype.clearError = function () {
 };
 
 module.exports = DropinModel;
+
+function getSupportedPaymentOptions(options) {
+  var result = [paymentOptionIDs.card];
+
+  var isPayPalGatewayEnabled = options.client.getConfiguration().gatewayConfiguration.paypalEnabled;
+  var isPayPalMerchantEnabled = Boolean(options.merchantOptions.paypal);
+
+  if (isPayPalGatewayEnabled && isPayPalMerchantEnabled) {
+    result.push(paymentOptionIDs.paypal);
+  }
+
+  return result;
+}

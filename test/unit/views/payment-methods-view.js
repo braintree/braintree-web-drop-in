@@ -31,10 +31,13 @@ describe('PaymentMethodsView', function () {
     });
 
     it('adds all vaulted payment methods', function () {
-      var model = new DropinModel({
-        paymentMethods: [{foo: 'bar'}, {baz: 'qux'}]
-      });
-      var paymentMethodsViews = new PaymentMethodsView({
+      var model, paymentMethodsViews;
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
+
+      model = new DropinModel(modelOptions);
+      paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
         options: {
@@ -48,7 +51,7 @@ describe('PaymentMethodsView', function () {
     });
 
     it('puts default payment method as first item in list', function () {
-      var firstChildLabel;
+      var firstChildLabel, model, paymentMethodsViews;
       var creditCard = {
         details: {type: 'Visa'},
         type: 'CreditCard'
@@ -57,8 +60,12 @@ describe('PaymentMethodsView', function () {
         details: {email: 'wow@meow.com'},
         type: 'PayPalAccount'
       };
-      var model = new DropinModel({paymentMethods: [paypalAccount, creditCard]});
-      var paymentMethodsViews = new PaymentMethodsView({
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.paymentMethods = [paypalAccount, creditCard];
+
+      model = new DropinModel(modelOptions);
+      paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
         options: {
@@ -73,7 +80,7 @@ describe('PaymentMethodsView', function () {
     });
 
     it('does not add payment methods if there are none', function () {
-      var model = new DropinModel();
+      var model = new DropinModel(fake.modelOptions());
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
       var paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
@@ -91,10 +98,10 @@ describe('PaymentMethodsView', function () {
     it('changes the payment method view when the active payment method changes', function () {
       var model, paymentMethodsViews;
       var fakePaymentMethod = {baz: 'qux'};
+      var modelOptions = fake.modelOptions();
 
-      model = new DropinModel({
-        paymentMethods: [{foo: 'bar'}, fakePaymentMethod]
-      });
+      modelOptions.paymentMethods = [{foo: 'bar'}, fakePaymentMethod];
+      model = new DropinModel(modelOptions);
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
@@ -121,9 +128,13 @@ describe('PaymentMethodsView', function () {
     });
 
     it('does not remove other payment methods in non-guest checkout', function () {
+      var model, paymentMethodsViews;
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
-      var model = new DropinModel({paymentMethods: [this.fakePaymentMethod]});
-      var paymentMethodsViews = new PaymentMethodsView({
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.paymentMethods = [this.fakePaymentMethod];
+      model = new DropinModel(modelOptions);
+      paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
         options: {
@@ -139,9 +150,13 @@ describe('PaymentMethodsView', function () {
     });
 
     it('removes other payment methods in guest checkout', function () {
+      var model, paymentMethodsViews;
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
-      var model = new DropinModel({paymentMethods: [this.fakePaymentMethod]});
-      var paymentMethodsViews = new PaymentMethodsView({
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.paymentMethods = [this.fakePaymentMethod];
+      model = new DropinModel(modelOptions);
+      paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
         options: {
@@ -158,7 +173,7 @@ describe('PaymentMethodsView', function () {
 
     it('does not try to remove a payment method if none exists in guest checkout', function () {
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
-      var model = new DropinModel();
+      var model = new DropinModel(fake.modelOptions());
       var paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
@@ -177,12 +192,13 @@ describe('PaymentMethodsView', function () {
 
   describe('requestPaymentMethod', function () {
     it('calls the callback with the active payment method', function (done) {
-      var paymentMethodsViews;
+      var model, paymentMethodsViews;
       var fakePaymentMethod = {foo: 'bar'};
       var element = document.createElement('div');
-      var model = new DropinModel({
-        paymentMethods: [fakePaymentMethod, {baz: 'qux'}]
-      });
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.paymentMethods = [fakePaymentMethod, {baz: 'qux'}];
+      model = new DropinModel(modelOptions);
 
       model.changeActivePaymentMethod(fakePaymentMethod);
 

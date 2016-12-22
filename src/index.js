@@ -41,6 +41,7 @@ function create(options, callback) {
 
     clientInstance = setAnalyticsIntegration(clientInstance);
 
+    // TODO: separate merchant options and client
     new Dropin(assign({}, options, {
       client: clientInstance
     })).initialize(callback);
