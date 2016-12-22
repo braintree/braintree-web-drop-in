@@ -2,10 +2,12 @@
 
 var EventEmitter = require('./lib/event-emitter');
 var paymentOptionIDs = require('./constants').paymentOptionIDs;
+var isGuestCheckout = require('./lib/is-guest-checkout');
 
 function DropinModel(options) {
   this._paymentMethods = options && options.paymentMethods ? options.paymentMethods : [];
   this.dependenciesInitializing = 0;
+  this.isGuestCheckout = isGuestCheckout(options.merchantOptions.authorization);
 
   this.supportedPaymentOptions = getSupportedPaymentOptions(options);
 
