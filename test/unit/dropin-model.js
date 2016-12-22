@@ -14,7 +14,9 @@ describe('DropinModel', function () {
           return this.configuration;
         }.bind(this)
       },
-      merchantOptions: {}
+      merchantOptions: {
+        authorization: fake.clientToken
+      }
     };
   });
 
@@ -56,6 +58,38 @@ describe('DropinModel', function () {
           'card',
           'paypal'
         ]);
+      });
+    });
+
+    describe('isGuestCheckout', function () {
+      it('is true when given a tokenization key', function () {
+        var model;
+
+        this.modelOptions.merchantOptions.authorization = fake.tokenizationKey;
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.isGuestCheckout).to.equal(true);
+      });
+
+      it('is true when given a client token without a customer ID', function () {
+        var model;
+
+        this.modelOptions.merchantOptions.authorization = fake.clientToken;
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.isGuestCheckout).to.equal(true);
+      });
+
+      it('is false when given a client token with a customer ID', function () {
+        var model;
+
+        this.modelOptions.merchantOptions.authorization = fake.clientTokenWithCustomerID;
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.isGuestCheckout).to.equal(false);
       });
     });
   });

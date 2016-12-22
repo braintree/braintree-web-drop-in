@@ -974,11 +974,7 @@ describe('CardView', function () {
     });
 
     it('vaults on tokenization if not using guest checkout', function () {
-      var fakeClientToken = fake.configuration().gatewayConfiguration;
-
-      fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
-      fakeClientToken = btoa(JSON.stringify(fakeClientToken));
-      this.context.options.authorization = fakeClientToken;
+      this.context.model.isGuestCheckout = false;
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
@@ -986,7 +982,7 @@ describe('CardView', function () {
     });
 
     it('does not vault on tokenization if using guest checkout', function () {
-      this.context.options.authorization = 'fake_tokenization_key';
+      this.context.model.isGuestCheckout = true;
 
       CardView.prototype.tokenize.call(this.context, function () {});
 

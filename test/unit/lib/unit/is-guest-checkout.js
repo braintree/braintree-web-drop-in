@@ -5,7 +5,7 @@ var isGuestCheckout = require('../../../../src/lib/is-guest-checkout');
 
 describe('isGuestCheckout', function () {
   it('returns true when given a tokenization key', function () {
-    var auth = 'fake_tokenization_key';
+    var auth = fake.tokenizationKey;
 
     expect(isGuestCheckout(auth)).to.be.true;
   });
@@ -17,11 +17,8 @@ describe('isGuestCheckout', function () {
   });
 
   it('returns false when given a client token with a customer ID', function () {
-    var fakeClientToken = fake.configuration().gatewayConfiguration;
+    var auth = fake.clientTokenWithCustomerID;
 
-    fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
-    fakeClientToken = btoa(JSON.stringify(fakeClientToken));
-
-    expect(isGuestCheckout(fakeClientToken)).to.be.false;
+    expect(isGuestCheckout(auth)).to.be.false;
   });
 });
