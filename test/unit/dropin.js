@@ -41,7 +41,7 @@ describe('Dropin', function () {
     });
   });
 
-  describe('initialize', function () {
+  describe('_initialize', function () {
     it('errors out if no selector given', function (done) {
       var instance;
 
@@ -49,7 +49,7 @@ describe('Dropin', function () {
 
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function (err) {
+      instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector is required.');
         done();
@@ -63,7 +63,7 @@ describe('Dropin', function () {
 
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function (err) {
+      instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector must reference a valid DOM node.');
         done();
@@ -78,7 +78,7 @@ describe('Dropin', function () {
 
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function (err) {
+      instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector must reference an empty DOM node.');
         done();
@@ -92,7 +92,7 @@ describe('Dropin', function () {
 
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
+      instance._initialize(function () {
         expect(this.container.innerHTML).to.include('class="braintree-dropin');
 
         done();
@@ -102,7 +102,7 @@ describe('Dropin', function () {
     it('inserts dropin into container', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
+      instance._initialize(function () {
         expect(this.container.innerHTML).to.include('class="braintree-dropin');
 
         done();
@@ -112,7 +112,7 @@ describe('Dropin', function () {
     it('inserts svgs into container', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
+      instance._initialize(function () {
         expect(this.container.innerHTML).to.include('data-braintree-id="svgs"');
 
         done();
@@ -132,7 +132,7 @@ describe('Dropin', function () {
 
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
+      instance._initialize(function () {
         expect(this.client.request).to.have.been.calledOnce;
         expect(this.client.request).to.have.been.calledWith(this.sandbox.match({
           endpoint: 'payment_methods',
@@ -149,7 +149,7 @@ describe('Dropin', function () {
     it('does not request payment methods if a customerId is not provided', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
+      instance._initialize(function () {
         expect(this.client.request).to.not.have.been.called;
 
         done();
@@ -168,7 +168,7 @@ describe('Dropin', function () {
 
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
+      instance._initialize(function () {
         expect(hostedFields.create).to.be.called;
         expect(instance._model.getPaymentMethods()).to.have.a.lengthOf(0);
 
@@ -195,7 +195,7 @@ describe('Dropin', function () {
 
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
+      instance._initialize(function () {
         var existingPaymentMethod = instance._model.getPaymentMethods()[0];
 
         expect(existingPaymentMethod.nonce).to.equal('nonce');
@@ -219,8 +219,8 @@ describe('Dropin', function () {
 
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
-        expect(instance.mainView).to.exist;
+      instance._initialize(function () {
+        expect(instance._mainView).to.exist;
         done();
       });
     });
@@ -228,8 +228,8 @@ describe('Dropin', function () {
     it('creates a MainView a customerId does not exist', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
-        expect(instance.mainView).to.exist;
+      instance._initialize(function () {
+        expect(instance._mainView).to.exist;
         done();
       });
     });
@@ -240,7 +240,7 @@ describe('Dropin', function () {
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
 
-      instance.initialize(function () {
+      instance._initialize(function () {
         done();
       });
 
@@ -250,8 +250,8 @@ describe('Dropin', function () {
     it('loads strings by default', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
-        expect(instance.mainView.strings.postalCodeLabel).to.equal('Postal Code');
+      instance._initialize(function () {
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Postal Code');
         done();
       });
     });
@@ -262,8 +262,8 @@ describe('Dropin', function () {
       this.dropinOptions.locale = 'es';
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
-        expect(instance.mainView.strings.postalCodeLabel).to.equal('Código Postal');
+      instance._initialize(function () {
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Código Postal');
         done();
       });
     });
@@ -274,8 +274,8 @@ describe('Dropin', function () {
       this.dropinOptions.locale = 'en_GB';
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
-        expect(instance.mainView.strings.postalCodeLabel).to.equal('Postcode');
+      instance._initialize(function () {
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Postcode');
         done();
       });
     });
@@ -286,8 +286,8 @@ describe('Dropin', function () {
       this.dropinOptions.locale = 'en_NA';
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
-        expect(instance.mainView.strings.postalCodeLabel).to.equal('Postal Code');
+      instance._initialize(function () {
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Postal Code');
         done();
       });
     });
@@ -298,8 +298,8 @@ describe('Dropin', function () {
       this.dropinOptions.locale = 'foo';
       instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
-        expect(instance.mainView.strings.postalCodeLabel).to.equal('Postal Code');
+      instance._initialize(function () {
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Postal Code');
         done();
       });
     });
@@ -309,7 +309,7 @@ describe('Dropin', function () {
     beforeEach(function () {
       this.instance = new Dropin(this.dropinOptions);
       this.container.appendChild(this.instance._dropinWrapper);
-      this.instance.mainView = {
+      this.instance._mainView = {
         teardown: this.sandbox.stub().yields()
       };
     });
@@ -323,7 +323,7 @@ describe('Dropin', function () {
 
     it('calls teardown on the mainView', function (done) {
       this.instance.teardown(function () {
-        expect(this.instance.mainView.teardown).to.be.calledOnce;
+        expect(this.instance._mainView.teardown).to.be.calledOnce;
         done();
       }.bind(this));
     });
@@ -331,7 +331,7 @@ describe('Dropin', function () {
     it('passes errors in mainView teardown to callback', function (done) {
       var error = new Error('Teardown Error');
 
-      this.instance.mainView.teardown.yields(error);
+      this.instance._mainView.teardown.yields(error);
 
       this.instance.teardown(function (err) {
         expect(err).to.equal(error);
@@ -344,10 +344,10 @@ describe('Dropin', function () {
     it('calls the requestPaymentMethod function of the MainView', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
-      instance.initialize(function () {
-        this.sandbox.spy(instance.mainView, 'requestPaymentMethod');
+      instance._initialize(function () {
+        this.sandbox.spy(instance._mainView, 'requestPaymentMethod');
         instance.requestPaymentMethod(function () {
-          expect(instance.mainView.requestPaymentMethod).to.have.been.calledOnce;
+          expect(instance._mainView.requestPaymentMethod).to.have.been.calledOnce;
           done();
         });
       }.bind(this));

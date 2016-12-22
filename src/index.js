@@ -44,7 +44,7 @@ function create(options, callback) {
     // TODO: separate merchant options and client
     new Dropin(assign({}, options, {
       client: clientInstance
-    })).initialize(callback);
+    }))._initialize(callback);
   });
 }
 

@@ -67,7 +67,7 @@ describe('dropin.create', function () {
       getConfiguration: fake.configuration
     };
 
-    this.sandbox.stub(Dropin.prototype, 'initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
       callback(null, this);
     });
 
@@ -90,7 +90,7 @@ describe('dropin.create', function () {
     };
     var dropinError = new Error('Dropin Error');
 
-    this.sandbox.stub(Dropin.prototype, 'initialize').yields(dropinError);
+    this.sandbox.stub(Dropin.prototype, '_initialize').yields(dropinError);
 
     client.create.yields(null, fakeClient);
 
@@ -110,7 +110,7 @@ describe('dropin.create', function () {
       getConfiguration: fake.configuration
     };
 
-    this.sandbox.stub(Dropin.prototype, 'initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
       callback(null, this);
     });
 
