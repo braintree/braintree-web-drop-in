@@ -7,7 +7,7 @@ var isGuestCheckout = require('./lib/is-guest-checkout');
 function DropinModel(options) {
   this._paymentMethods = options && options.paymentMethods ? options.paymentMethods : [];
   this.dependenciesInitializing = 0;
-  this.isGuestCheckout = isGuestCheckout(options.merchantOptions.authorization);
+  this.isGuestCheckout = isGuestCheckout(options.merchantConfiguration.authorization);
 
   this.supportedPaymentOptions = getSupportedPaymentOptions(options);
 
@@ -79,7 +79,7 @@ function getSupportedPaymentOptions(options) {
   var result = [paymentOptionIDs.card];
 
   var isPayPalGatewayEnabled = options.client.getConfiguration().gatewayConfiguration.paypalEnabled;
-  var isPayPalMerchantEnabled = Boolean(options.merchantOptions.paypal);
+  var isPayPalMerchantEnabled = Boolean(options.merchantConfiguration.paypal);
 
   if (isPayPalGatewayEnabled && isPayPalMerchantEnabled) {
     result.push(paymentOptionIDs.paypal);

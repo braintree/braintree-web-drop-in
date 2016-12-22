@@ -8,7 +8,6 @@ var packageVersion = require('package.version');
 var Dropin = require('./dropin');
 var client = require('braintree-web/client');
 var deferred = require('./lib/deferred');
-var assign = require('./lib/assign').assign;
 var constants = require('./constants');
 
 /**
@@ -41,10 +40,10 @@ function create(options, callback) {
 
     clientInstance = setAnalyticsIntegration(clientInstance);
 
-    // TODO: separate merchant options and client
-    new Dropin(assign({}, options, {
+    new Dropin({
+      merchantConfiguration: options,
       client: clientInstance
-    }))._initialize(callback);
+    })._initialize(callback);
   });
 }
 

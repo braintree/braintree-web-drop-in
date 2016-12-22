@@ -50,7 +50,8 @@ MainView.prototype._initialize = function () {
         element: this.getElementById(PaymentSheetView.ID),
         mainView: this,
         model: this.model,
-        options: this.options,
+        client: this.client,
+        merchantConfiguration: this.merchantConfiguration,
         strings: this.strings
       });
 
@@ -65,7 +66,7 @@ MainView.prototype._initialize = function () {
   paymentMethodsViews = new PaymentMethodsView({
     element: this.getElementById(PaymentMethodsView.ID),
     model: this.model,
-    options: this.options,
+    merchantConfiguration: this.merchantConfiguration,
     strings: this.strings
   });
   this.addView(paymentMethodsViews);

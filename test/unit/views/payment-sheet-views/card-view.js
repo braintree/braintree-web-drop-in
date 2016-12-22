@@ -16,6 +16,10 @@ describe('CardView', function () {
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
     this.element = document.body.querySelector('.braintree-sheet.braintree-card');
+
+    this.client = {
+      getConfiguration: fake.configuration
+    };
   });
 
   afterEach(function () {
@@ -45,12 +49,6 @@ describe('CardView', function () {
       };
       this.sandbox.stub(hostedFields, 'create').yields(null, this.hostedFieldsInstance);
 
-      this.options = {
-        client: {
-          getConfiguration: fake.configuration,
-          request: this.sandbox.spy()
-        }
-      };
       this.mainView = {
         componentId: 'component-id'
       };
@@ -58,7 +56,7 @@ describe('CardView', function () {
     });
 
     it('has cvv if supplied in challenges', function () {
-      this.options.client.getConfiguration = function () {
+      this.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
             challenges: ['cvv'],
@@ -73,7 +71,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       expect(this.element.querySelector('[data-braintree-id="cvv-container"]')).to.exist;
@@ -84,14 +82,14 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       expect(this.element.querySelector('[data-braintree-id="cvv-container"]')).not.to.exist;
     });
 
     it('has postal code if supplied in challenges', function () {
-      this.options.client.getConfiguration = function () {
+      this.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
             challenges: ['postal_code'],
@@ -106,7 +104,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       expect(this.element.querySelector('[data-braintree-id="postal-code-container"]')).to.exist;
@@ -117,7 +115,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       expect(this.element.querySelector('[data-braintree-id="postal-code-container"]')).not.to.exist;
@@ -130,7 +128,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
@@ -145,7 +143,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
@@ -156,11 +154,11 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       expect(hostedFields.create).to.be.calledWith(this.sandbox.match({
-        client: this.options.client,
+        client: this.client,
         fields: {
           number: {},
           expirationDate: {}
@@ -171,7 +169,7 @@ describe('CardView', function () {
     });
 
     it('creates Hosted Fields with cvv if included in challenges', function () {
-      this.options.client.getConfiguration = function () {
+      this.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
             challenges: ['cvv'],
@@ -186,14 +184,17 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client,
+        merchantConfiguration: {
+          authorization: fake.clientToken
+        }
       });
 
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.cvv');
     });
 
     it('creates Hosted Fields with postal code if included in challenges', function () {
-      this.options.client.getConfiguration = function () {
+      this.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
             challenges: ['postal_code'],
@@ -208,7 +209,10 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client,
+        merchantConfiguration: {
+          authorization: fake.clientToken
+        }
       });
 
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
@@ -227,7 +231,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       expect(this.model.reportError).to.be.calledWith(fakeError);
@@ -240,7 +244,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       supportedCardTypes.forEach(function (cardType) {
@@ -257,7 +261,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       unsupportedCardTypes.forEach(function (cardType) {
@@ -270,7 +274,7 @@ describe('CardView', function () {
     it('does not show UnionPay icon even if it is supported', function () {
       var unionPayCardIcon;
 
-      this.options.client.getConfiguration = function () {
+      this.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
             challenges: [],
@@ -285,7 +289,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       unionPayCardIcon = this.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
@@ -298,12 +302,6 @@ describe('CardView', function () {
     beforeEach(function () {
       this.sandbox.stub(hostedFields, 'create').yields(null, fake.hostedFieldsInstance);
 
-      this.options = {
-        client: {
-          getConfiguration: fake.configuration,
-          request: this.sandbox.spy()
-        }
-      };
       this.mainView = {
         componentId: 'component-id'
       };
@@ -315,7 +313,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       this.sandbox.stub(cardView, 'tokenize').yields(new Error('foo'));
@@ -333,7 +331,7 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        options: this.options
+        client: this.client
       });
 
       this.sandbox.stub(cardView, 'tokenize').yields(null, {foo: 'bar'});
@@ -358,20 +356,16 @@ describe('CardView', function () {
           componentId: 'component-id'
         },
         model: new DropinModel(fake.modelOptions()),
-        options: {
-          client: {
-            getConfiguration: function () {
-              return {
-                gatewayConfiguration: {
-                  challenges: ['cvv'],
-                  creditCards: {
-                    supportedCardTypes: []
-                  }
+        client: {
+          getConfiguration: function () {
+            return {
+              gatewayConfiguration: {
+                challenges: ['cvv'],
+                creditCards: {
+                  supportedCardTypes: []
                 }
-              };
-            },
-            request: this.sandbox.spy()
-
+              }
+            };
           }
         },
         strings: strings,
@@ -384,12 +378,6 @@ describe('CardView', function () {
         _onValidityChangeEvent: function () {}
       };
 
-      this.options = {
-        client: {
-          getConfiguration: fake.configuration,
-          request: this.sandbox.spy()
-        }
-      };
       this.mainView = {
         componentId: 'component-id'
       };
@@ -784,10 +772,10 @@ describe('CardView', function () {
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
         inlineErrors: {},
         model: this.model,
-        options: {
-          client: {
-            getConfiguration: fake.configuration
-          },
+        client: {
+          getConfiguration: fake.configuration
+        },
+        merchantConfiguration: {
           authorization: fake.configuration().authorization
         },
         showInlineError: CardView.prototype.showInlineError,
@@ -884,7 +872,7 @@ describe('CardView', function () {
     it('shows unsupported card inline error when attempting to use an unsupported card', function () {
       var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
 
-      this.context.options.client.getConfiguration = function () {
+      this.context.client.getConfiguration = function () {
         return {
           gatewayConfiguration: {
             creditCards: {

@@ -65,7 +65,7 @@ function modelOptions() {
     client: {
       getConfiguration: configuration
     },
-    merchantOptions: {
+    merchantConfiguration: {
       authorization: clientToken
     }
   };

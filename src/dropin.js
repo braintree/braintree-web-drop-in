@@ -13,12 +13,13 @@ var uuid = require('./lib/uuid');
 var VERSION = require('package.version');
 
 function Dropin(options) {
+  this._client = options.client;
   this._componentId = uuid();
-  this._options = options;
   this._dropinWrapper = document.createElement('div');
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentId;
   this._dropinWrapper.setAttribute('data-braintree-id', 'wrapper');
   this._dropinWrapper.style.display = 'none';
+  this._merchantConfiguration = options.merchantConfiguration;
 
   EventEmitter.call(this);
 }
@@ -33,12 +34,12 @@ Dropin.prototype._initialize = function (callback) {
 
   this._injectStylesheet();
 
-  if (!this._options.selector) {
+  if (!this._merchantConfiguration.selector) {
     callback(new Error('options.selector is required.'));
     return;
   }
 
-  container = document.querySelector(this._options.selector);
+  container = document.querySelector(this._merchantConfiguration.selector);
 
   if (!container) {
     callback(new Error('options.selector must reference a valid DOM node.'));
@@ -49,8 +50,8 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   strings = assign({}, translations.en);
-  if (this._options.locale) {
-    localizedStrings = translations[this._options.locale] || translations[this._options.locale.split('_')[0]];
+  if (this._merchantConfiguration.locale) {
+    localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
     strings = assign(strings, localizedStrings);
   }
 
@@ -67,8 +68,8 @@ Dropin.prototype._initialize = function (callback) {
     var mainViewOptions;
 
     this._model = new DropinModel({
-      client: this._options.client,
-      merchantOptions: this._options, // TODO: update to merchantOptions
+      client: this._client,
+      merchantConfiguration: this._merchantConfiguration,
       paymentMethods: paymentMethods
     });
 
@@ -77,10 +78,11 @@ Dropin.prototype._initialize = function (callback) {
     });
 
     mainViewOptions = {
+      client: this._client,
       componentId: this._componentId,
       dropinWrapper: this._dropinWrapper,
       model: this._model,
-      options: this._options,
+      merchantConfiguration: this._merchantConfiguration,
       strings: strings
     };
 
@@ -105,7 +107,7 @@ Dropin.prototype._injectStylesheet = function () {
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
-  assetsUrl = this._options.client.getConfiguration().gatewayConfiguration.assetsUrl;
+  assetsUrl = this._client.getConfiguration().gatewayConfiguration.assetsUrl;
   stylesheetUrl = assetsUrl + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
   stylesheet = document.createElement('link');
   head = document.head;
@@ -122,10 +124,10 @@ Dropin.prototype._injectStylesheet = function () {
 };
 
 Dropin.prototype._getVaultedPaymentMethods = function (callback) {
-  if (isGuestCheckout(this._options.authorization)) {
+  if (isGuestCheckout(this._merchantConfiguration.authorization)) {
     callback();
   } else {
-    this._options.client.request({
+    this._client.request({
       endpoint: 'payment_methods',
       method: 'get',
       data: {

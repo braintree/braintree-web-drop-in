@@ -14,7 +14,7 @@ describe('DropinModel', function () {
           return this.configuration;
         }.bind(this)
       },
-      merchantOptions: {
+      merchantConfiguration: {
         authorization: fake.clientToken
       }
     };
@@ -52,7 +52,7 @@ describe('DropinModel', function () {
 
       it('supports credit cards and PayPal if PayPal is enabled by merchant and gateway', function () {
         this.configuration.gatewayConfiguration.paypalEnabled = true;
-        this.modelOptions.merchantOptions.paypal = true;
+        this.modelOptions.merchantConfiguration.paypal = true;
 
         expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.have.members([
           'card',
@@ -65,7 +65,7 @@ describe('DropinModel', function () {
       it('is true when given a tokenization key', function () {
         var model;
 
-        this.modelOptions.merchantOptions.authorization = fake.tokenizationKey;
+        this.modelOptions.merchantConfiguration.authorization = fake.tokenizationKey;
 
         model = new DropinModel(this.modelOptions);
 
@@ -75,7 +75,7 @@ describe('DropinModel', function () {
       it('is true when given a client token without a customer ID', function () {
         var model;
 
-        this.modelOptions.merchantOptions.authorization = fake.clientToken;
+        this.modelOptions.merchantConfiguration.authorization = fake.clientToken;
 
         model = new DropinModel(this.modelOptions);
 
@@ -85,7 +85,7 @@ describe('DropinModel', function () {
       it('is false when given a client token with a customer ID', function () {
         var model;
 
-        this.modelOptions.merchantOptions.authorization = fake.clientTokenWithCustomerID;
+        this.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
 
         model = new DropinModel(this.modelOptions);
 

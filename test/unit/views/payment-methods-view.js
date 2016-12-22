@@ -34,14 +34,14 @@ describe('PaymentMethodsView', function () {
       var model, paymentMethodsViews;
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantOptions.authorization = fake.clientTokenWithCustomerID;
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
 
       model = new DropinModel(modelOptions);
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
@@ -63,14 +63,14 @@ describe('PaymentMethodsView', function () {
       };
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantOptions.authorization = fake.clientTokenWithCustomerID;
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [paypalAccount, creditCard];
 
       model = new DropinModel(modelOptions);
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: strings
@@ -87,7 +87,7 @@ describe('PaymentMethodsView', function () {
       var paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
@@ -102,7 +102,7 @@ describe('PaymentMethodsView', function () {
       var fakePaymentMethod = {baz: 'qux'};
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantOptions.authorization = fake.clientTokenWithCustomerID;
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [{foo: 'bar'}, fakePaymentMethod];
       model = new DropinModel(modelOptions);
       model.changeActivePaymentMethod({foo: 'bar'});
@@ -110,7 +110,7 @@ describe('PaymentMethodsView', function () {
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
@@ -137,13 +137,13 @@ describe('PaymentMethodsView', function () {
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantOptions.authorization = fake.clientTokenWithCustomerID;
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [this.fakePaymentMethod];
       model = new DropinModel(modelOptions);
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
@@ -160,13 +160,13 @@ describe('PaymentMethodsView', function () {
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantOptions.authorization = fake.clientToken;
+      modelOptions.merchantConfiguration.authorization = fake.clientToken;
       modelOptions.paymentMethods = [this.fakePaymentMethod];
       model = new DropinModel(modelOptions);
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientToken
         },
         strings: {}
@@ -183,12 +183,12 @@ describe('PaymentMethodsView', function () {
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantOptions.authorization = fake.clientToken;
+      modelOptions.merchantConfiguration.authorization = fake.clientToken;
       model = new DropinModel(modelOptions);
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientToken
         },
         strings: {}
@@ -208,7 +208,7 @@ describe('PaymentMethodsView', function () {
       var element = document.createElement('div');
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantOptions.authorization = fake.clientTokenWithCustomerID;
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [fakePaymentMethod, {baz: 'qux'}];
       model = new DropinModel(modelOptions);
 
@@ -218,7 +218,7 @@ describe('PaymentMethodsView', function () {
       paymentMethodsViews = new PaymentMethodsView({
         element: element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}

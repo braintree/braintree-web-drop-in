@@ -16,6 +16,12 @@ var strings = require('../../../src/translations/en');
 var templateHTML = require('../../../src/html/main.html');
 
 describe('MainView', function () {
+  beforeEach(function () {
+    this.client = {
+      getConfiguration: fake.configuration
+    };
+  });
+
   describe('Constructor', function () {
     beforeEach(function () {
       this.sandbox.stub(MainView.prototype, '_initialize');
@@ -35,161 +41,123 @@ describe('MainView', function () {
   describe('initialize', function () {
     beforeEach(function () {
       var dropinWrapper = document.createElement('div');
-      var model = new DropinModel(fake.modelOptions());
 
       dropinWrapper.innerHTML = templateHTML;
 
-      this.context = {
-        addView: this.sandbox.stub(),
-        dependenciesInitializing: 0,
+      this.mainViewOptions = {
+        client: this.client,
         dropinWrapper: dropinWrapper,
-        element: dropinWrapper,
-        getElementById: BaseView.prototype.getElementById,
-        hideAlert: function () {},
-        hideLoadingIndicator: function () {},
-        model: model,
-        options: {
-          client: {
-            getConfiguration: fake.configuration
-          }
+        merchantConfiguration: {
+          authorization: fake.tokenizationKey
         },
-        setPrimaryView: this.sandbox.stub(),
-        showLoadingIndicator: function () {},
-        strings: {
-          foo: 'bar'
-        }
+        strings: strings
       };
     });
-  });
 
-  afterEach(function () {
-    document.body.innerHTML = '';
-  });
-
-  // TODO: is there a "only one payment option" version of this test?
-
-  it('creates a PaymentOptionsView if there are multiple payment options', function () {
-    var model, mainView;
-    var dropinWrapper = document.createElement('div');
-    var modelOptions = fake.modelOptions();
-
-    modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
-    model = new DropinModel(modelOptions);
-    model.supportedPaymentOptions = ['card', 'paypal'];
-
-    this.sandbox.stub(PayPal, 'create').yields(null, {});
-
-    dropinWrapper.innerHTML = templateHTML;
-    mainView = new MainView({
-      dropinWrapper: dropinWrapper,
-      model: model,
-      options: {
-        authorization: 'fake_tokenization_key',
-        client: {
-          getConfiguration: fake.configuration
-        }
-      },
-      strings: strings
+    afterEach(function () {
+      document.body.innerHTML = '';
     });
 
-    expect(Object.keys(mainView.views)).to.contain(PaymentOptionsView.ID);
-  });
+    // TODO: is there a "only one payment option" version of this test?
 
-  describe('with vaulted payment methods', function () {
-    beforeEach(function () {
+    it('creates a PaymentOptionsView if there are multiple payment options', function () {
+      var model, mainView;
       var modelOptions = fake.modelOptions();
 
-      this.dropinWrapper = document.createElement('div');
-      this.dropinWrapper.innerHTML = templateHTML;
-
       modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
-      this.model = new DropinModel(modelOptions);
-      this.model.supportedPaymentOptions = ['card', 'paypal'];
+      model = new DropinModel(modelOptions);
+      model.supportedPaymentOptions = ['card', 'paypal'];
+
+      this.mainViewOptions.model = model;
 
       this.sandbox.stub(PayPal, 'create').yields(null, {});
+
+      mainView = new MainView(this.mainViewOptions);
+
+      expect(Object.keys(mainView.views)).to.contain(PaymentOptionsView.ID);
     });
 
-    it('sets the first payment method to be the active payment method', function () {
-      this.sandbox.spy(this.model, 'changeActivePaymentMethod');
+    context('with vaulted payment methods', function () {
+      beforeEach(function () {
+        var modelOptions = fake.modelOptions();
+        var dropinWrapper = document.createElement('div');
 
-      new MainView({ // eslint-disable-line no-new
-        dropinWrapper: this.dropinWrapper,
-        model: this.model,
-        options: {
-          authorization: 'fake_tokenization_key',
+        dropinWrapper.innerHTML = templateHTML;
+
+        modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
+        this.model = new DropinModel(modelOptions);
+        this.model.supportedPaymentOptions = ['card', 'paypal'];
+
+        this.mainViewOptions = {
           client: {
             getConfiguration: fake.configuration
-          }
-        },
-        strings: strings
+          },
+          dropinWrapper: dropinWrapper,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: this.model,
+          strings: strings
+        };
+
+        this.sandbox.stub(PayPal, 'create').yields(null, {});
       });
 
-      expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({foo: 'bar'});
-    });
+      it('sets the first payment method to be the active payment method', function () {
+        this.sandbox.spy(this.model, 'changeActivePaymentMethod');
 
-    it('sets the PaymentMethodsView as the primary view', function () {
-      var mainView = new MainView({ // eslint-disable-line no-new
-        dropinWrapper: this.dropinWrapper,
-        model: this.model,
-        options: {
-          authorization: 'fake_tokenization_key',
-          client: {
-            getConfiguration: fake.configuration
-          }
-        },
-        strings: strings
+        new MainView(this.mainViewOptions); // eslint-disable-line no-new
+
+        expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({foo: 'bar'});
       });
 
-      expect(mainView.primaryView.ID).to.equal(PaymentMethodsView.ID);
-    });
-  });
+      it('sets the PaymentMethodsView as the primary view', function () {
+        var mainView = new MainView(this.mainViewOptions);
 
-  describe('without vaulted payment methods', function () {
-    beforeEach(function () {
-      this.dropinWrapper = document.createElement('div');
-      this.dropinWrapper.innerHTML = templateHTML;
-      this.model = new DropinModel(fake.modelOptions());
-      this.sandbox.stub(PayPal, 'create').yields(null, {});
+        expect(mainView.primaryView.ID).to.equal(PaymentMethodsView.ID);
+      });
     });
 
-    it('sets PaymentOptionsViews as the primary view if there are multiple payment methods', function () {
-      var mainView;
+    describe('without vaulted payment methods', function () {
+      beforeEach(function () {
+        var dropinWrapper = document.createElement('div');
 
-      this.model.supportedPaymentOptions = ['card', 'paypal'];
+        dropinWrapper.innerHTML = templateHTML;
 
-      mainView = new MainView({ // eslint-disable-line no-new
-        dropinWrapper: this.dropinWrapper,
-        model: this.model,
-        options: {
-          authorization: 'fake_tokenization_key',
-          client: {
-            getConfiguration: fake.configuration
-          }
-        },
-        strings: strings
+        this.model = new DropinModel(fake.modelOptions());
+
+        this.mainViewOptions = {
+          client: this.client,
+          dropinWrapper: dropinWrapper,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: this.model,
+          strings: strings
+        };
+
+        this.sandbox.stub(PayPal, 'create').yields(null, {});
       });
 
-      expect(mainView.primaryView.ID).to.equal(PaymentOptionsView.ID);
-    });
+      it('sets PaymentOptionsViews as the primary view if there are multiple payment methods', function () {
+        var mainView;
 
-    it('sets the sheet view as the primary view if there is one payment method', function () {
-      var mainView;
+        this.model.supportedPaymentOptions = ['card', 'paypal'];
 
-      this.model.supportedPaymentOptions = ['card'];
+        mainView = new MainView(this.mainViewOptions);
 
-      mainView = new MainView({ // eslint-disable-line no-new
-        dropinWrapper: this.dropinWrapper,
-        model: this.model,
-        options: {
-          authorization: 'fake_tokenization_key',
-          client: {
-            getConfiguration: fake.configuration
-          }
-        },
-        strings: strings
+        expect(mainView.primaryView.ID).to.equal(PaymentOptionsView.ID);
       });
 
-      expect(mainView.primaryView.ID).to.equal(CardView.ID);
+      it('sets the sheet view as the primary view if there is one payment method', function () {
+        var mainView;
+
+        this.model.supportedPaymentOptions = ['card'];
+
+        mainView = new MainView(this.mainViewOptions);
+
+        expect(mainView.primaryView.ID).to.equal(CardView.ID);
+      });
     });
   });
 
@@ -225,11 +193,9 @@ describe('MainView', function () {
       this.mainViewOptions = {
         dropinWrapper: wrapper,
         model: model,
-        options: {
-          authorization: fake.tokenizationKey,
-          client: {
-            getConfiguration: fake.configuration
-          }
+        client: this.client,
+        merchantConfiguration: {
+          authorization: fake.tokenizationKey
         },
         strings: strings
       };
@@ -332,7 +298,7 @@ describe('MainView', function () {
             it('shows the additional options button', function () {
               var mainView;
 
-              this.mainViewOptions.options.authorization = fake.clientTokenWithCustomerID;
+              this.mainViewOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
 
               mainView = new MainView(this.mainViewOptions);
               mainView.setPrimaryView(SheetView.ID);
@@ -345,7 +311,7 @@ describe('MainView', function () {
             it('shows the additional options button if there are multiple payment options', function () {
               var mainView;
 
-              this.mainViewOptions.options.authorization = fake.clientTokenWithCustomerID;
+              this.mainViewOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
 
               mainView = new MainView(this.mainViewOptions);
               mainView.setPrimaryView(SheetView.ID);
@@ -357,7 +323,7 @@ describe('MainView', function () {
               var mainView;
 
               this.mainViewOptions.model.supportedPaymentOptions = [sheetViewKey];
-              this.mainViewOptions.options.authorization = fake.tokenizationKey;
+              this.mainViewOptions.merchantConfiguration.authorization = fake.tokenizationKey;
 
               mainView = new MainView(this.mainViewOptions);
               mainView.setPrimaryView(SheetView.ID);
@@ -561,11 +527,9 @@ describe('MainView', function () {
       this.mainViewOptions = {
         dropinWrapper: this.dropinWrapper,
         model: this.model,
-        options: {
-          authorization: fake.tokenizationKey,
-          client: {
-            getConfiguration: fake.configuration
-          }
+        client: this.client,
+        merchantConfiguration: {
+          authorization: fake.tokenizationKey
         },
         strings: strings
       };
@@ -642,12 +606,10 @@ describe('MainView', function () {
       this.wrapper.innerHTML = templateHTML;
       this.mainViewOptions = {
         dropinWrapper: this.wrapper,
+        client: this.client,
         model: new DropinModel(fake.modelOptions()),
-        options: {
-          authorization: fake.tokenizationKey,
-          client: {
-            getConfiguration: fake.configuration
-          }
+        merchantConfiguration: {
+          authorization: fake.tokenizationKey
         },
         strings: strings
       };
@@ -743,14 +705,13 @@ describe('MainView', function () {
     beforeEach(function () {
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
+
       this.mainView = new MainView({
         dropinWrapper: this.wrapper,
         model: new DropinModel(fake.modelOptions()),
-        options: {
-          authorization: 'fake_tokenization_key',
-          client: {
-            getConfiguration: fake.configuration
-          }
+        client: this.client,
+        merchantConfiguration: {
+          authorization: 'fake_tokenization_key'
         }
       });
     });
@@ -810,12 +771,10 @@ describe('MainView', function () {
         this.sandbox.stub(HostedFields, 'create').returns(null, fake.HostedFieldsInstance);
         this.mainView = new MainView({
           dropinWrapper: this.wrapper,
+          client: this.client,
           model: new DropinModel(fake.modelOptions()),
-          options: {
-            authorization: fake.clientTokenWithCustomerID,
-            client: {
-              getConfiguration: fake.configuration
-            }
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
           }
         });
       });

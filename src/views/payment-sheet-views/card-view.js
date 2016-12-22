@@ -16,11 +16,11 @@ CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
 CardView.prototype._initialize = function () {
   var cardIcons = this.getElementById('card-view-icons');
-  var challenges = this.options.client.getConfiguration().gatewayConfiguration.challenges;
+  var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
   var hasCVV = challenges.indexOf('cvv') !== -1;
   var hasPostal = challenges.indexOf('postal_code') !== -1;
   var hfOptions = {
-    client: this.options.client,
+    client: this.client,
     fields: {
       number: {
         selector: this._generateFieldSelector('number'),
@@ -110,7 +110,7 @@ CardView.prototype.tokenize = function (callback) {
   var cardType, cardTypeSupported;
   var formValid = true;
   var state = this.hostedFieldsInstance.getState();
-  var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   this.model.clearError();
 
@@ -253,7 +253,7 @@ CardView.prototype.requestPaymentMethod = function (callback) {
 };
 
 CardView.prototype._hideUnsupportedCardIcons = function () {
-  var supportedCardTypes = this.options.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
     var cardIcon;
