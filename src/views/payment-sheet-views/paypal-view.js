@@ -18,7 +18,7 @@ PayPalView.prototype._initialize = function () {
   this._authInProgress = false;
   this.model.asyncDependencyStarting();
 
-  paypal.create({client: this.options.client}, function (err, paypalInstance) {
+  paypal.create({client: this.client}, function (err, paypalInstance) {
     if (err) {
       // TODO: handle errors in PayPal creation
       console.error(err);
@@ -61,7 +61,7 @@ PayPalView.prototype._tokenize = function () {
   event.preventDefault();
   this._authInProgress = true;
 
-  tokenizeReturn = this.paypalInstance.tokenize(this.options.paypal, function (tokenizeErr, tokenizePayload) {
+  tokenizeReturn = this.paypalInstance.tokenize(this.merchantConfiguration.paypal, function (tokenizeErr, tokenizePayload) {
     this._authInProgress = false;
     if (tokenizeErr) {
       if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {

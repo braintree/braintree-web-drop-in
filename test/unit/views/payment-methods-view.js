@@ -40,7 +40,7 @@ describe('PaymentMethodsView', function () {
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
@@ -68,7 +68,7 @@ describe('PaymentMethodsView', function () {
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: strings
@@ -85,7 +85,7 @@ describe('PaymentMethodsView', function () {
       var paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
@@ -105,7 +105,7 @@ describe('PaymentMethodsView', function () {
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
@@ -137,7 +137,7 @@ describe('PaymentMethodsView', function () {
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}
@@ -159,7 +159,7 @@ describe('PaymentMethodsView', function () {
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientToken
         },
         strings: {}
@@ -177,7 +177,7 @@ describe('PaymentMethodsView', function () {
       var paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientToken
         },
         strings: {}
@@ -206,7 +206,7 @@ describe('PaymentMethodsView', function () {
       paymentMethodsViews = new PaymentMethodsView({
         element: element,
         model: model,
-        options: {
+        merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
         strings: {}

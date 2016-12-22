@@ -20,7 +20,7 @@ PaymentMethodsView.prototype._initialize = function () {
 
   this.views = [];
   this.container = this.getElementById('methods-container');
-  this.isGuestCheckout = isGuestCheckout(this.options.authorization);
+  this.isGuestCheckout = isGuestCheckout(this.merchantConfiguration.authorization);
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));

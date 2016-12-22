@@ -77,7 +77,7 @@ function getSupportedPaymentOptions(options) {
   var result = [paymentOptionIDs.card];
 
   var isPayPalGatewayEnabled = options.client.getConfiguration().gatewayConfiguration.paypalEnabled;
-  var isPayPalMerchantEnabled = Boolean(options.merchantOptions.paypal);
+  var isPayPalMerchantEnabled = Boolean(options.merchantConfiguration.paypal);
 
   if (isPayPalGatewayEnabled && isPayPalMerchantEnabled) {
     result.push(paymentOptionIDs.paypal);

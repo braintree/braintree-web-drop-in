@@ -20,8 +20,10 @@ describe('Dropin', function () {
 
     this.dropinOptions = {
       client: this.client,
-      selector: '#foo',
-      authorization: fake.tokenizationKey
+      merchantConfiguration: {
+        selector: '#foo',
+        authorization: fake.tokenizationKey
+      }
     };
 
     this.sandbox.stub(hostedFields, 'create', function (options, cb) {
@@ -45,7 +47,7 @@ describe('Dropin', function () {
     it('errors out if no selector given', function (done) {
       var instance;
 
-      delete this.dropinOptions.selector;
+      delete this.dropinOptions.merchantConfiguration.selector;
 
       instance = new Dropin(this.dropinOptions);
 
@@ -59,7 +61,7 @@ describe('Dropin', function () {
     it('throws an error with a selector that points to a nonexistent DOM node', function (done) {
       var instance;
 
-      this.dropinOptions.selector = '#garbage';
+      this.dropinOptions.merchantConfiguration.selector = '#garbage';
 
       instance = new Dropin(this.dropinOptions);
 
@@ -127,7 +129,7 @@ describe('Dropin', function () {
       fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
       fakeClientToken = btoa(JSON.stringify(fakeClientToken));
 
-      this.dropinOptions.authorization = fakeClientToken;
+      this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
       this.client.request.yields(null, paymentMethodsPayload);
 
       instance = new Dropin(this.dropinOptions);
@@ -163,7 +165,7 @@ describe('Dropin', function () {
       fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
       fakeClientToken = btoa(JSON.stringify(fakeClientToken));
 
-      this.dropinOptions.authorization = fakeClientToken;
+      this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
       this.client.request.yields(new Error('This failed'));
 
       instance = new Dropin(this.dropinOptions);
@@ -190,7 +192,7 @@ describe('Dropin', function () {
       fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
       fakeClientToken = btoa(JSON.stringify(fakeClientToken));
 
-      this.dropinOptions.authorization = fakeClientToken;
+      this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
       this.client.request.yields(null, paymentMethodsPayload);
 
       instance = new Dropin(this.dropinOptions);
@@ -214,7 +216,7 @@ describe('Dropin', function () {
       fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
       fakeClientToken = btoa(JSON.stringify(fakeClientToken));
 
-      this.dropinOptions.authorization = fakeClientToken;
+      this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
       this.client.request.yields(null, paymentMethodsPayload);
 
       instance = new Dropin(this.dropinOptions);
@@ -259,7 +261,7 @@ describe('Dropin', function () {
     it('loads localized strings into mainView when options.locale is specified', function (done) {
       var instance;
 
-      this.dropinOptions.locale = 'es';
+      this.dropinOptions.merchantConfiguration.locale = 'es';
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
@@ -271,7 +273,7 @@ describe('Dropin', function () {
     it('loads localized strings into mainView when options.locale is a supported locale ID', function (done) {
       var instance;
 
-      this.dropinOptions.locale = 'en_GB';
+      this.dropinOptions.merchantConfiguration.locale = 'en_GB';
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
@@ -283,7 +285,7 @@ describe('Dropin', function () {
     it('loads supported localized strings into mainView when options.locale is a locale ID with an unsupported country', function (done) {
       var instance;
 
-      this.dropinOptions.locale = 'en_NA';
+      this.dropinOptions.merchantConfiguration.locale = 'en_NA';
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {
@@ -295,7 +297,7 @@ describe('Dropin', function () {
     it('loads default strings into mainView when options.locale is unknown', function (done) {
       var instance;
 
-      this.dropinOptions.locale = 'foo';
+      this.dropinOptions.merchantConfiguration.locale = 'foo';
       instance = new Dropin(this.dropinOptions);
 
       instance.initialize(function () {

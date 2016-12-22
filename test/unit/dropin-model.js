@@ -14,7 +14,7 @@ describe('DropinModel', function () {
           return this.configuration;
         }.bind(this)
       },
-      merchantOptions: {}
+      merchantConfiguration: {}
     };
   });
 
@@ -50,7 +50,7 @@ describe('DropinModel', function () {
 
       it('supports credit cards and PayPal if PayPal is enabled by merchant and gateway', function () {
         this.configuration.gatewayConfiguration.paypalEnabled = true;
-        this.modelOptions.merchantOptions.paypal = true;
+        this.modelOptions.merchantConfiguration.paypal = true;
 
         expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.have.members([
           'card',

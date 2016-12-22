@@ -51,7 +51,8 @@ MainView.prototype._initialize = function () {
         element: this.getElementById(PaymentSheetView.ID),
         mainView: this,
         model: this.model,
-        options: this.options,
+        client: this.client,
+        merchantConfiguration: this.merchantConfiguration,
         strings: this.strings
       });
 
@@ -66,7 +67,7 @@ MainView.prototype._initialize = function () {
   paymentMethodsViews = new PaymentMethodsView({
     element: this.getElementById(PaymentMethodsView.ID),
     model: this.model,
-    options: this.options,
+    merchantConfiguration: this.merchantConfiguration,
     strings: this.strings
   });
   this.addView(paymentMethodsViews);
@@ -124,7 +125,7 @@ MainView.prototype.setPrimaryView = function (id) {
   this.model.changeActivePaymentView(id);
 
   if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
-    if (!isGuestCheckout(this.options.authorization) || this.getView(PaymentOptionsView.ID)) {
+    if (!isGuestCheckout(this.merchantConfiguration.authorization) || this.getView(PaymentOptionsView.ID)) {
       this.showToggle();
     } else {
       this.hideToggle();

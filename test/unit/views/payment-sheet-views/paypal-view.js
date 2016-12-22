@@ -9,11 +9,25 @@ var PayPalView = require('../../../../src/views/payment-sheet-views/paypal-view'
 
 describe('PayPalView', function () {
   beforeEach(function () {
-    this.div = document.createElement('div');
+    var model = new DropinModel(fake.modelOptions());
 
+    this.div = document.createElement('div');
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
     this.element = document.body.querySelector('.braintree-sheet.braintree-paypal');
+
+    model.supportedPaymentOptions = ['card', 'paypal'];
+
+    this.paypalViewOptions = {
+      element: this.element,
+      model: model,
+      client: {
+        getConfiguration: fake.configuration
+      },
+      merchantConfiguration: {
+        paypal: {flow: 'vault'}
+      }
+    };
   });
 
   afterEach(function () {
@@ -26,13 +40,13 @@ describe('PayPalView', function () {
     });
 
     it('calls _initialize', function () {
-      new PayPalView({element: this.element}); // eslint-disable-line no-new
+      new PayPalView(); // eslint-disable-line no-new
 
       expect(PayPalView.prototype._initialize).to.have.been.calledOnce;
     });
 
     it('inherits from BaseView', function () {
-      expect(new PayPalView({element: this.element})).to.be.an.instanceOf(BaseView);
+      expect(new PayPalView()).to.be.an.instanceOf(BaseView);
     });
   });
 
@@ -65,11 +79,7 @@ describe('PayPalView', function () {
 
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
 
-      payPalView = new PayPalView({
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      payPalView = new PayPalView(this.paypalViewOptions);
 
       expect(payPalView.model.asyncDependencyStarting).to.be.calledOnce;
     });
@@ -79,24 +89,16 @@ describe('PayPalView', function () {
 
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
 
-      payPalView = new PayPalView({
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      payPalView = new PayPalView(this.paypalViewOptions);
 
       expect(payPalView.model.asyncDependencyReady).to.be.calledOnce;
     });
 
     it('creates a PayPal component', function () {
-      var payPalView = new PayPalView({
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      var payPalView = new PayPalView(this.paypalViewOptions);
 
       expect(PayPal.create).to.be.calledWith(this.sandbox.match({
-        client: this.options.client
+        client: this.paypalViewOptions.client
       }), this.sandbox.match.func);
 
       expect(payPalView.paypalInstance).to.equal(this.paypalInstance);
@@ -105,11 +107,7 @@ describe('PayPalView', function () {
     it('creates a PayPal button', function () {
       var paypalButton;
 
-      new PayPalView({ // eslint-disable-line no-new
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      new PayPalView(this.paypalViewOptions); // eslint-disable-line no-new
 
       paypalButton = this.element.querySelector('[data-braintree-id="paypal-button"] script');
 
@@ -123,11 +121,7 @@ describe('PayPalView', function () {
     it('tokenizes when PayPal button is selected', function () {
       var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
 
-      new PayPalView({ // eslint-disable-line no-new
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      new PayPalView(this.paypalViewOptions); // eslint-disable-line no-new
 
       button.click();
 
@@ -137,11 +131,7 @@ describe('PayPalView', function () {
     it('sets a closeFrame function', function () {
       var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
 
-      var paypalView = new PayPalView({
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      var paypalView = new PayPalView(this.paypalViewOptions);
 
       expect(paypalView.closeFrame).to.not.exist;
 
@@ -153,11 +143,7 @@ describe('PayPalView', function () {
     it('focuses the PayPal popup if the button is clicked after tokenization has started', function () {
       var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
 
-      new PayPalView({ // eslint-disable-line no-new
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      new PayPalView(this.paypalViewOptions); // eslint-disable-line no-new
 
       button.click();
 
@@ -174,11 +160,7 @@ describe('PayPalView', function () {
       this.sandbox.stub(DropinModel.prototype, 'addPaymentMethod');
       this.tokenizeStub.yields(null, {foo: 'bar'});
 
-      new PayPalView({ // eslint-disable-line no-new
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      new PayPalView(this.paypalViewOptions); // eslint-disable-line no-new
 
       button.click();
 
@@ -188,11 +170,7 @@ describe('PayPalView', function () {
     it('sets _authInProgress appropriately', function () {
       var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
 
-      var paypalView = new PayPalView({
-        element: this.element,
-        model: this.model,
-        options: this.options
-      });
+      var paypalView = new PayPalView(this.paypalViewOptions);
 
       expect(paypalView._authInProgress).to.be.false;
 
