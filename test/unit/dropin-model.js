@@ -29,7 +29,13 @@ describe('DropinModel', function () {
     it('sets componentID', function () {
       var model = new DropinModel(this.modelOptions);
 
-      expect(model.componentID).to.equal('foo123');
+      expect(model.componentID).to.equal(this.modelOptions.componentID);
+    });
+
+    it('sets merchantConfiguration', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      expect(model.merchantConfiguration).to.equal(this.modelOptions.merchantConfiguration);
     });
 
     describe('payment methods', function () {
