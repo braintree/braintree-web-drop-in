@@ -36,9 +36,10 @@ MainView.prototype._initialize = function () {
 
   this.supportsFlexbox = supportsFlexbox();
 
-  this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
+
+  this.model.on('asyncDependenciesReady', this.model.endLoading.bind(this.model));
 
   this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (views, sheetViewKey) {
     var PaymentSheetView, paymentSheetView;
