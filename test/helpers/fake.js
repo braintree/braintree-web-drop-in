@@ -67,7 +67,8 @@ function modelOptions() {
     },
     merchantConfiguration: {
       authorization: clientToken
-    }
+    },
+    paymentMethods: []
   };
 }
 
