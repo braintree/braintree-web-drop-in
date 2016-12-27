@@ -61,8 +61,6 @@ MainView.prototype._initialize = function () {
     return views;
   }.bind(this), []);
 
-  this.hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
-
   paymentMethodsViews = new PaymentMethodsView({
     element: this.getElementById(PaymentMethodsView.ID),
     model: this.model,
@@ -87,7 +85,7 @@ MainView.prototype._initialize = function () {
     }
   });
 
-  if (this.hasMultiplePaymentOptions) {
+  if (this.model.supportedPaymentOptions.length > 1) {
     paymentOptionsView = new PaymentOptionsView({
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
@@ -175,11 +173,13 @@ MainView.prototype.hideLoadingIndicator = function () {
 };
 
 MainView.prototype.toggleAdditionalOptions = function () {
+  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
+
   this.hideToggle();
-  if (!this.hasMultiplePaymentOptions && this.primaryView.ID === PaymentMethodsView.ID) {
+  if (!hasMultiplePaymentOptions && this.primaryView.ID === PaymentMethodsView.ID) {
     classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
     this.model.changeActivePaymentView(CardView.ID);
-  } else if (this.hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1) {
+  } else if (hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1) {
     if (this.model.getPaymentMethods().length === 0) {
       this.setPrimaryView(PaymentOptionsView.ID);
     } else {
