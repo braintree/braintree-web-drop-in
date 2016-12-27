@@ -6,6 +6,7 @@ var isGuestCheckout = require('./lib/is-guest-checkout');
 
 function DropinModel(options) {
   this._paymentMethods = options && options.paymentMethods ? options.paymentMethods : [];
+  this.componentID = options.componentID;
   this.dependenciesInitializing = 0;
   this.isGuestCheckout = isGuestCheckout(options.merchantConfiguration.authorization);
 
