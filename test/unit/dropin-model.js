@@ -213,6 +213,20 @@ describe('DropinModel', function () {
       model.asyncDependencyStarting();
       model.asyncDependencyReady();
     });
+
+    it('emits loadEnd event when there are no dependencies initializing', function (done) {
+      var model = new DropinModel(this.modelOptions);
+
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
+
+      model.on('loadEnd', function () {
+        expect(DropinModel.prototype.asyncDependencyReady).to.have.been.calledOnce;
+        done();
+      });
+
+      model.asyncDependencyStarting();
+      model.asyncDependencyReady();
+    });
   });
 
   describe('beginLoading', function () {

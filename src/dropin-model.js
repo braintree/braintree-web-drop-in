@@ -53,6 +53,7 @@ DropinModel.prototype.asyncDependencyStarting = function () {
 DropinModel.prototype.asyncDependencyReady = function () {
   this.dependenciesInitializing--;
   if (this.dependenciesInitializing === 0) {
+    this._emit('loadEnd');
     this._emit('asyncDependenciesReady');
   }
 };
