@@ -17,7 +17,8 @@ describe('DropinModel', function () {
       componentID: 'foo123',
       merchantConfiguration: {
         authorization: fake.clientToken
-      }
+      },
+      paymentMethods: []
     };
   });
 
@@ -49,7 +50,7 @@ describe('DropinModel', function () {
         expect(model._paymentMethods).to.deep.equal(['foo']);
       });
 
-      it('_paymentMethods is null if no existing payment methods', function () {
+      it('_paymentMethods is empty if no existing payment methods', function () {
         var model = new DropinModel(this.modelOptions);
 
         expect(model._paymentMethods).to.deep.equal([]);

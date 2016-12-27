@@ -124,7 +124,7 @@ Dropin.prototype._injectStylesheet = function () {
 
 Dropin.prototype._getVaultedPaymentMethods = function (callback) {
   if (isGuestCheckout(this._merchantConfiguration.authorization)) {
-    callback();
+    callback([]);
   } else {
     this._client.request({
       endpoint: 'payment_methods',
@@ -135,9 +135,12 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
     }, function (err, paymentMethodsPayload) {
       var paymentMethods;
 
-      if (!err) {
+      if (err) {
+        paymentMethods = [];
+      } else {
         paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
       }
+
       callback(paymentMethods);
     });
   }
