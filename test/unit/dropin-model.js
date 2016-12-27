@@ -14,6 +14,7 @@ describe('DropinModel', function () {
           return this.configuration;
         }.bind(this)
       },
+      componentID: 'foo123',
       merchantConfiguration: {
         authorization: fake.clientToken
       },
@@ -24,6 +25,18 @@ describe('DropinModel', function () {
   describe('Constructor', function () {
     it('inherits from EventEmitter', function () {
       expect(new DropinModel(this.modelOptions)).to.be.an.instanceOf(EventEmitter);
+    });
+
+    it('sets componentID', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      expect(model.componentID).to.equal(this.modelOptions.componentID);
+    });
+
+    it('sets merchantConfiguration', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      expect(model.merchantConfiguration).to.equal(this.modelOptions.merchantConfiguration);
     });
 
     describe('payment methods', function () {

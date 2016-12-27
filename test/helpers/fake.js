@@ -65,6 +65,7 @@ function modelOptions() {
     client: {
       getConfiguration: configuration
     },
+    componentID: 'foo123',
     merchantConfiguration: {
       authorization: clientToken
     },

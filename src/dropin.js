@@ -14,9 +14,9 @@ var VERSION = require('package.version');
 
 function Dropin(options) {
   this._client = options.client;
-  this._componentId = uuid();
+  this._componentID = uuid();
   this._dropinWrapper = document.createElement('div');
-  this._dropinWrapper.id = 'braintree--dropin__' + this._componentId;
+  this._dropinWrapper.id = 'braintree--dropin__' + this._componentID;
   this._dropinWrapper.setAttribute('data-braintree-id', 'wrapper');
   this._dropinWrapper.style.display = 'none';
   this._merchantConfiguration = options.merchantConfiguration;
@@ -69,6 +69,7 @@ Dropin.prototype._initialize = function (callback) {
 
     this._model = new DropinModel({
       client: this._client,
+      componentID: this._componentID,
       merchantConfiguration: this._merchantConfiguration,
       paymentMethods: paymentMethods
     });
@@ -79,10 +80,8 @@ Dropin.prototype._initialize = function (callback) {
 
     mainViewOptions = {
       client: this._client,
-      componentId: this._componentId,
       dropinWrapper: this._dropinWrapper,
       model: this._model,
-      merchantConfiguration: this._merchantConfiguration,
       strings: strings
     };
 

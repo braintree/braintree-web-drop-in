@@ -49,9 +49,6 @@ describe('CardView', function () {
       };
       this.sandbox.stub(hostedFields, 'create').yields(null, this.hostedFieldsInstance);
 
-      this.mainView = {
-        componentId: 'component-id'
-      };
       this.model = new DropinModel(fake.modelOptions());
     });
 
@@ -302,9 +299,6 @@ describe('CardView', function () {
     beforeEach(function () {
       this.sandbox.stub(hostedFields, 'create').yields(null, fake.hostedFieldsInstance);
 
-      this.mainView = {
-        componentId: 'component-id'
-      };
       this.model = new DropinModel(fake.modelOptions());
     });
 
@@ -352,9 +346,6 @@ describe('CardView', function () {
         getElementById: BaseView.prototype.getElementById,
         hideInlineError: CardView.prototype.hideInlineError,
         showInlineError: CardView.prototype.showInlineError,
-        mainView: {
-          componentId: 'component-id'
-        },
         model: new DropinModel(fake.modelOptions()),
         client: {
           getConfiguration: function () {
@@ -378,9 +369,6 @@ describe('CardView', function () {
         _onValidityChangeEvent: function () {}
       };
 
-      this.mainView = {
-        componentId: 'component-id'
-      };
       this.model = new DropinModel(fake.modelOptions());
     });
 
