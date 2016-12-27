@@ -23,10 +23,8 @@ PaymentMethodsView.prototype._initialize = function () {
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
 
-  if (paymentMethods.length > 0) {
-    for (i = paymentMethods.length - 1; i >= 0; i--) {
-      this._addPaymentMethod(paymentMethods[i]);
-    }
+  for (i = paymentMethods.length - 1; i >= 0; i--) {
+    this._addPaymentMethod(paymentMethods[i]);
   }
 };
 
@@ -70,7 +68,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
 };
 
 PaymentMethodsView.prototype.requestPaymentMethod = function (callback) {
-  callback(null, this.model.getActivePaymentMethod());
+  callback(null, this.activeMethodView.paymentMethod);
 };
 
 module.exports = PaymentMethodsView;

@@ -58,7 +58,19 @@ describe('MainView', function () {
       document.body.innerHTML = '';
     });
 
-    // TODO: is there a "only one payment option" version of this test?
+    it('creates a CardView if it is the only payment option', function () {
+      var mainView;
+      var model = new DropinModel(fake.modelOptions());
+
+      model.supportedPaymentOptions = ['card'];
+
+      this.mainViewOptions.model = model;
+
+      mainView = new MainView(this.mainViewOptions);
+
+      expect(Object.keys(mainView.views)).to.contain(CardView.ID);
+      expect(mainView.primaryView.ID).to.equal(CardView.ID);
+    });
 
     it('creates a PaymentOptionsView if there are multiple payment options', function () {
       var model, mainView;
