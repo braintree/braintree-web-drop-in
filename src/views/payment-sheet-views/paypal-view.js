@@ -61,7 +61,7 @@ PayPalView.prototype._tokenize = function () {
   event.preventDefault();
   this._authInProgress = true;
 
-  tokenizeReturn = this.paypalInstance.tokenize(this.merchantConfiguration.paypal, function (tokenizeErr, tokenizePayload) {
+  tokenizeReturn = this.paypalInstance.tokenize(this.model.merchantConfiguration.paypal, function (tokenizeErr, tokenizePayload) {
     this._authInProgress = false;
     if (tokenizeErr) {
       if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {

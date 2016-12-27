@@ -17,15 +17,13 @@ describe('PayPalView', function () {
     this.element = document.body.querySelector('.braintree-sheet.braintree-paypal');
 
     model.supportedPaymentOptions = ['card', 'paypal'];
+    model.merchantConfiguration.paypal = {flow: 'vault'};
 
     this.paypalViewOptions = {
       element: this.element,
       model: model,
       client: {
         getConfiguration: fake.configuration
-      },
-      merchantConfiguration: {
-        paypal: {flow: 'vault'}
       }
     };
   });

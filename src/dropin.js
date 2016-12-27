@@ -82,7 +82,6 @@ Dropin.prototype._initialize = function (callback) {
       client: this._client,
       dropinWrapper: this._dropinWrapper,
       model: this._model,
-      merchantConfiguration: this._merchantConfiguration,
       strings: strings
     };
 
