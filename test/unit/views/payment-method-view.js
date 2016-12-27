@@ -83,12 +83,32 @@ describe('PaymentMethodView', function () {
     });
 
     it('adds braintree-method--active if setting active payment method', function () {
+      this.context.element.className = '';
+
+      PaymentMethodView.prototype.setActive.call(this.context, true);
+
+      expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
+    });
+
+    it("doesn't change the class if braintree-method--active is already there", function () {
+      this.context.element.className = 'braintree-method--active';
+
       PaymentMethodView.prototype.setActive.call(this.context, true);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
 
     it('removes braintree-method--active if setting active payment method', function () {
+      this.context.element.className = 'braintree-method--active';
+
+      PaymentMethodView.prototype.setActive.call(this.context, false);
+
+      expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
+    });
+
+    it("doesn't remove the class if it wasn't there", function () {
+      this.context.element.className = '';
+
       PaymentMethodView.prototype.setActive.call(this.context, false);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;

@@ -43,11 +43,7 @@ PaymentMethodView.prototype._initialize = function () {
 };
 
 PaymentMethodView.prototype.setActive = function (isActive) {
-  if (isActive) {
-    classlist.add(this.element, 'braintree-method--active');
-    return;
-  }
-  classlist.remove(this.element, 'braintree-method--active');
+  classlist.toggle(this.element, 'braintree-method--active', isActive);
 };
 
 module.exports = PaymentMethodView;
