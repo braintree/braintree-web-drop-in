@@ -202,17 +202,13 @@ describe('PaymentMethodsView', function () {
   });
 
   describe('requestPaymentMethod', function () {
-    it('calls the callback with the active payment method', function (done) {
-      var model, paymentMethodsViews;
-      var fakePaymentMethod = {foo: 'bar'};
+    it('calls the callback with the active payment method from the active method view', function (done) {
+      var paymentMethodsViews;
+      var fakeActiveMethodView = {
+        paymentMethod: {foo: 'bar'}
+      };
       var element = document.createElement('div');
-      var modelOptions = fake.modelOptions();
-
-      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-      modelOptions.paymentMethods = [fakePaymentMethod, {baz: 'qux'}];
-      model = new DropinModel(modelOptions);
-
-      model.changeActivePaymentMethod(fakePaymentMethod);
+      var model = new DropinModel(fake.modelOptions());
 
       element.innerHTML = mainHTML;
       paymentMethodsViews = new PaymentMethodsView({
@@ -224,9 +220,11 @@ describe('PaymentMethodsView', function () {
         strings: {}
       });
 
+      paymentMethodsViews.activeMethodView = fakeActiveMethodView;
+
       paymentMethodsViews.requestPaymentMethod(function (err, payload) {
         expect(err).to.not.exist;
-        expect(payload).to.equal(fakePaymentMethod);
+        expect(payload).to.equal(fakeActiveMethodView.paymentMethod);
         done();
       });
     });
