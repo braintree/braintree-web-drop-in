@@ -7,6 +7,7 @@ var CardView = require('./payment-sheet-views/card-view');
 var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
+var prefixClass = require('../lib/prefix-class');
 
 function MainView() {
   BaseView.apply(this, arguments);
@@ -240,10 +241,6 @@ function snakeCaseToCamelCase(s) {
   return s.toLowerCase().replace(/(\_\w)/g, function (m) {
     return m[1].toUpperCase();
   });
-}
-
-function prefixClass(classname) {
-  return 'braintree-' + classname;
 }
 
 module.exports = MainView;
