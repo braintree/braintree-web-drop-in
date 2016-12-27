@@ -20,6 +20,7 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
+  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var paymentMethodsViews, paymentOptionsView, sheetContainer;
   var paymentMethods = this.model.getPaymentMethods();
 
@@ -85,7 +86,7 @@ MainView.prototype._initialize = function () {
     }
   });
 
-  if (this.model.supportedPaymentOptions.length > 1) {
+  if (hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
@@ -98,7 +99,7 @@ MainView.prototype._initialize = function () {
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
-  } else if (this.hasMultiplePaymentOptions) {
+  } else if (hasMultiplePaymentOptions) {
     this.setPrimaryView(paymentOptionsView.ID);
   } else {
     this.setPrimaryView(this.paymentSheetViewIDs[0]);
