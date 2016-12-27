@@ -70,7 +70,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
 };
 
 PaymentMethodsView.prototype.requestPaymentMethod = function (callback) {
-  callback(null, this.model.getActivePaymentMethod());
+  callback(null, this.activeMethodView.paymentMethod);
 };
 
 module.exports = PaymentMethodsView;
