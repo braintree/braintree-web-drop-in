@@ -96,13 +96,14 @@ MainView.prototype._initialize = function () {
     });
 
     this.addView(paymentOptionsView);
-    this.setPrimaryView(paymentOptionsView.ID);
-  } else {
-    this.setPrimaryView(this.paymentSheetViewIDs[0]);
   }
 
   if (paymentMethods.length > 0) {
     this.model.changeActivePaymentMethod(paymentMethods[0]);
+  } else if (this.hasMultiplePaymentOptions) {
+    this.setPrimaryView(paymentOptionsView.ID);
+  } else {
+    this.setPrimaryView(this.paymentSheetViewIDs[0]);
   }
 };
 
