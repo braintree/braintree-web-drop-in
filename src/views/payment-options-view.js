@@ -17,7 +17,7 @@ PaymentOptionsView.ID = PaymentOptionsView.prototype.ID = 'options';
 PaymentOptionsView.prototype._initialize = function () {
   this.container = this.getElementById('payment-options-container');
 
-  this.paymentOptionIDs.forEach(function (paymentOptionID) {
+  this.model.supportedPaymentOptions.forEach(function (paymentOptionID) {
     this._addPaymentOption(paymentOptionID);
   }.bind(this));
 };
