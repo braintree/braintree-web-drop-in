@@ -39,7 +39,7 @@ MainView.prototype._initialize = function () {
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (views, sheetViewKey) {
+  this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (ids, sheetViewKey) {
     var PaymentSheetView, paymentSheetView;
 
     if (this.model.supportedPaymentOptions.indexOf(sheetViewKey) !== -1) {
@@ -54,9 +54,10 @@ MainView.prototype._initialize = function () {
       });
 
       this.addView(paymentSheetView);
-      views.push(paymentSheetView.ID);
+      ids.push(paymentSheetView.ID);
     }
-    return views;
+
+    return ids;
   }.bind(this), []);
 
   paymentMethodsViews = new PaymentMethodsView({
