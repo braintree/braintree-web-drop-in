@@ -317,6 +317,24 @@ describe('MainView', function () {
 
               expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
             });
+
+            it('does not show the additional options button if there are no vaulted payment methods', function () {
+              var mainView, model;
+              var modelOptions = fake.modelOptions();
+
+              modelOptions.paymentMethods = [];
+              modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+              model = new DropinModel(modelOptions);
+              model.supportedPaymentOptions = [sheetViewKey];
+
+              this.mainViewOptions.model = model;
+
+              mainView = new MainView(this.mainViewOptions);
+
+              mainView.setPrimaryView(SheetView.ID);
+
+              expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
+            });
           });
 
           describe('in a guest checkout flow', function () {

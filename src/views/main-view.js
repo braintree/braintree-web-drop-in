@@ -120,7 +120,7 @@ MainView.prototype.setPrimaryView = function (id) {
   this.model.changeActivePaymentView(id);
 
   if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
-    if (!this.model.isGuestCheckout || this.getView(PaymentOptionsView.ID)) {
+    if (this.model.getPaymentMethods().length > 0 || this.getView(PaymentOptionsView.ID)) {
       this.showToggle();
     } else {
       this.hideToggle();
