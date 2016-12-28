@@ -11,7 +11,7 @@ function MainView() {
   BaseView.apply(this, arguments);
 
   this.dependenciesInitializing = 0;
-  this.element = this.dropinWrapper;
+
   this._initialize();
 }
 
@@ -115,7 +115,7 @@ MainView.prototype.setPrimaryView = function (id) {
     this.primaryView.closeFrame();
   }
 
-  this.dropinWrapper.className = prefixClass(id);
+  this.element.className = prefixClass(id);
   this.primaryView = this.getView(id);
   this.model.changeActivePaymentView(id);
 
@@ -133,7 +133,7 @@ MainView.prototype.setPrimaryView = function (id) {
 
   if (!this.supportsFlexbox) {
     // TODO update no flex support
-    this.dropinWrapper.className += ' braintree-dropin__no-flexbox';
+    this.element.className += ' braintree-dropin__no-flexbox';
   }
 
   this.model.clearError();
@@ -180,7 +180,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
   if (!hasMultiplePaymentOptions) {
     sheetViewID = this.paymentSheetViewIDs[0];
 
-    classlist.add(this.dropinWrapper, prefixClass(sheetViewID));
+    classlist.add(this.element, prefixClass(sheetViewID));
     this.model.changeActivePaymentView(sheetViewID);
   } else if (isPaymentSheetView) {
     if (this.model.getPaymentMethods().length === 0) {
@@ -188,10 +188,10 @@ MainView.prototype.toggleAdditionalOptions = function () {
     } else {
       this.setPrimaryView(PaymentMethodsView.ID);
       this.hideToggle();
-      classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
+      classlist.add(this.element, prefixClass(PaymentOptionsView.ID));
     }
   } else {
-    classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
+    classlist.add(this.element, prefixClass(PaymentOptionsView.ID));
   }
 };
 

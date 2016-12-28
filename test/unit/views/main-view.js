@@ -40,13 +40,13 @@ describe('MainView', function () {
 
   describe('initialize', function () {
     beforeEach(function () {
-      var dropinWrapper = document.createElement('div');
+      var element = document.createElement('div');
 
-      dropinWrapper.innerHTML = templateHTML;
+      element.innerHTML = templateHTML;
 
       this.mainViewOptions = {
         client: this.client,
-        dropinWrapper: dropinWrapper,
+        element: element,
         merchantConfiguration: {
           authorization: fake.tokenizationKey
         },
@@ -92,9 +92,9 @@ describe('MainView', function () {
     context('with vaulted payment methods', function () {
       beforeEach(function () {
         var modelOptions = fake.modelOptions();
-        var dropinWrapper = document.createElement('div');
+        var element = document.createElement('div');
 
-        dropinWrapper.innerHTML = templateHTML;
+        element.innerHTML = templateHTML;
 
         modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
         this.model = new DropinModel(modelOptions);
@@ -104,7 +104,7 @@ describe('MainView', function () {
           client: {
             getConfiguration: fake.configuration
           },
-          dropinWrapper: dropinWrapper,
+          element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
           },
@@ -132,15 +132,15 @@ describe('MainView', function () {
 
     describe('without vaulted payment methods', function () {
       beforeEach(function () {
-        var dropinWrapper = document.createElement('div');
+        var element = document.createElement('div');
 
-        dropinWrapper.innerHTML = templateHTML;
+        element.innerHTML = templateHTML;
 
         this.model = new DropinModel(fake.modelOptions());
 
         this.mainViewOptions = {
           client: this.client,
-          dropinWrapper: dropinWrapper,
+          element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
           },
@@ -203,7 +203,7 @@ describe('MainView', function () {
       wrapper.innerHTML = templateHTML;
 
       this.mainViewOptions = {
-        dropinWrapper: wrapper,
+        element: wrapper,
         model: model,
         client: this.client,
         merchantConfiguration: {
@@ -242,7 +242,7 @@ describe('MainView', function () {
 
           mainView.setPrimaryView(View.ID);
 
-          expect(mainView.dropinWrapper.className).to.equal('braintree-' + View.ID);
+          expect(mainView.element.className).to.equal('braintree-' + View.ID);
         });
       });
 
@@ -284,7 +284,7 @@ describe('MainView', function () {
 
       mainView.setPrimaryView('id1');
 
-      expect(mainView.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
+      expect(mainView.element.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
     });
 
     // TODO: Pending until we update to support no flexbox
@@ -296,7 +296,7 @@ describe('MainView', function () {
 
       mainView.setPrimaryView('id1');
 
-      expect(mainView.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
+      expect(mainView.element.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
     });
 
     describe('when given a ', function () {
@@ -449,14 +449,13 @@ describe('MainView', function () {
 
   describe('dropinErrorState events', function () {
     beforeEach(function () {
-      var dropinWrapper = document.createElement('div');
+      var element = document.createElement('div');
 
-      dropinWrapper.innerHTML = templateHTML;
+      element.innerHTML = templateHTML;
 
       this.context = {
         addView: this.sandbox.stub(),
-        dropinWrapper: dropinWrapper,
-        element: dropinWrapper,
+        element: element,
         getElementById: BaseView.prototype.getElementById,
         hideAlert: this.sandbox.stub(),
         hideLoadingIndicator: function () {},
@@ -550,12 +549,12 @@ describe('MainView', function () {
 
   describe('DropinModel events', function () {
     beforeEach(function () {
-      this.dropinWrapper = document.createElement('div');
-      this.dropinWrapper.innerHTML = templateHTML;
+      this.element = document.createElement('div');
+      this.element.innerHTML = templateHTML;
       this.model = new DropinModel(fake.modelOptions());
 
       this.mainViewOptions = {
-        dropinWrapper: this.dropinWrapper,
+        element: this.element,
         model: this.model,
         client: this.client,
         merchantConfiguration: {
@@ -587,8 +586,8 @@ describe('MainView', function () {
 
     describe('for changeActivePaymentView', function () {
       beforeEach(function () {
-        this.paymentMethodsElement = this.dropinWrapper.querySelector('[data-braintree-id="' + PaymentMethodsView.ID + '"]');
-        this.sheetElement = this.dropinWrapper.querySelector('[data-braintree-id="sheet-container"]');
+        this.paymentMethodsElement = this.element.querySelector('[data-braintree-id="' + PaymentMethodsView.ID + '"]');
+        this.sheetElement = this.element.querySelector('[data-braintree-id="sheet-container"]');
       });
 
       describe('when the PaymentMethodsView is active', function () {
@@ -635,7 +634,7 @@ describe('MainView', function () {
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
       this.mainViewOptions = {
-        dropinWrapper: this.wrapper,
+        element: this.wrapper,
         client: this.client,
         model: new DropinModel(fake.modelOptions()),
         merchantConfiguration: {
@@ -741,7 +740,7 @@ describe('MainView', function () {
       this.wrapper.innerHTML = templateHTML;
 
       this.mainView = new MainView({
-        dropinWrapper: this.wrapper,
+        element: this.wrapper,
         model: new DropinModel(fake.modelOptions()),
         client: this.client,
         merchantConfiguration: {
@@ -804,7 +803,7 @@ describe('MainView', function () {
         this.wrapper.innerHTML = templateHTML;
         this.sandbox.stub(HostedFields, 'create').returns(null, fake.HostedFieldsInstance);
         this.mainView = new MainView({
-          dropinWrapper: this.wrapper,
+          element: this.wrapper,
           client: this.client,
           model: new DropinModel(fake.modelOptions()),
           merchantConfiguration: {

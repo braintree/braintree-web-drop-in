@@ -80,7 +80,7 @@ Dropin.prototype._initialize = function (callback) {
 
     mainViewOptions = {
       client: this._client,
-      dropinWrapper: this._dropinWrapper,
+      element: this._dropinWrapper,
       model: this._model,
       strings: strings
     };
