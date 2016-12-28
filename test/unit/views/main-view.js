@@ -648,7 +648,7 @@ describe('MainView', function () {
       expect(mainView.toggle.className).to.contain('braintree-hidden');
     });
 
-    describe('when there is one payment option and the PaymentMethodsView is active', function () {
+    describe('when there is one payment option', function () {
       beforeEach(function () {
         this.mainViewOptions.model.supportedPaymentOptions = ['card'];
         this.mainView = new MainView(this.mainViewOptions);
@@ -657,11 +657,11 @@ describe('MainView', function () {
         this.mainView.toggle.click();
       });
 
-      it('sets the CardView as the active payment option', function () {
+      it('sets the payment option as the active payment view', function () {
         expect(this.mainView.model.getActivePaymentView()).to.equal(CardView.ID);
       });
 
-      it('exposes the CardView', function () {
+      it('exposes the payment sheet view', function () {
         expect(this.wrapper.className).to.contain('braintree-' + CardView.ID);
       });
     });
@@ -708,6 +708,10 @@ describe('MainView', function () {
 
         it('exposes the PaymentOptionsView', function () {
           expect(this.wrapper.className).to.contain('braintree-' + PaymentOptionsView.ID);
+        });
+
+        it('hides the toggle', function () {
+          expect(this.mainView.toggle.className).to.contain('braintree-hidden');
         });
       });
     });

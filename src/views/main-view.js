@@ -171,22 +171,24 @@ MainView.prototype.hideLoadingIndicator = function () {
 };
 
 MainView.prototype.toggleAdditionalOptions = function () {
-  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var sheetViewID;
+  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
+  var isPaymentSheetView = this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1;
 
   this.hideToggle();
 
-  if (!hasMultiplePaymentOptions && this.primaryView.ID === PaymentMethodsView.ID) {
+  if (!hasMultiplePaymentOptions) {
     sheetViewID = this.paymentSheetViewIDs[0];
 
     classlist.add(this.dropinWrapper, prefixClass(sheetViewID));
     this.model.changeActivePaymentView(sheetViewID);
-  } else if (hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1) {
+  } else if (isPaymentSheetView) {
     if (this.model.getPaymentMethods().length === 0) {
       this.setPrimaryView(PaymentOptionsView.ID);
     } else {
       this.setPrimaryView(PaymentMethodsView.ID);
-      this.toggleAdditionalOptions();
+      this.hideToggle();
+      classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
     }
   } else {
     classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
