@@ -11,7 +11,7 @@ function MainView() {
   BaseView.apply(this, arguments);
 
   this.dependenciesInitializing = 0;
-  this.element = this.dropinWrapper;
+
   this._initialize();
 }
 
@@ -23,7 +23,7 @@ MainView.prototype._initialize = function () {
   var paymentMethodsViews, paymentOptionsView, sheetContainer;
   var paymentMethods = this.model.getPaymentMethods();
 
-  this.views = {};
+  this._views = {};
 
   sheetContainer = this.getElementById('sheet-container');
 
@@ -39,7 +39,7 @@ MainView.prototype._initialize = function () {
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
-  this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (views, sheetViewKey) {
+  this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (ids, sheetViewKey) {
     var PaymentSheetView, paymentSheetView;
 
     if (this.model.supportedPaymentOptions.indexOf(sheetViewKey) !== -1) {
@@ -54,9 +54,10 @@ MainView.prototype._initialize = function () {
       });
 
       this.addView(paymentSheetView);
-      views.push(paymentSheetView.ID);
+      ids.push(paymentSheetView.ID);
     }
-    return views;
+
+    return ids;
   }.bind(this), []);
 
   paymentMethodsViews = new PaymentMethodsView({
@@ -86,7 +87,7 @@ MainView.prototype._initialize = function () {
     paymentOptionsView = new PaymentOptionsView({
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
-      paymentOptionIDs: this.paymentSheetViewIDs,
+      model: this.model,
       strings: this.strings
     });
 
@@ -103,11 +104,11 @@ MainView.prototype._initialize = function () {
 };
 
 MainView.prototype.addView = function (view) {
-  this.views[view.ID] = view;
+  this._views[view.ID] = view;
 };
 
 MainView.prototype.getView = function (id) {
-  return this.views[id];
+  return this._views[id];
 };
 
 MainView.prototype.setPrimaryView = function (id) {
@@ -115,12 +116,12 @@ MainView.prototype.setPrimaryView = function (id) {
     this.primaryView.closeFrame();
   }
 
-  this.dropinWrapper.className = prefixClass(id);
+  this.element.className = prefixClass(id);
   this.primaryView = this.getView(id);
   this.model.changeActivePaymentView(id);
 
   if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
-    if (!this.model.isGuestCheckout || this.getView(PaymentOptionsView.ID)) {
+    if (this.model.getPaymentMethods().length > 0 || this.getView(PaymentOptionsView.ID)) {
       this.showToggle();
     } else {
       this.hideToggle();
@@ -133,7 +134,7 @@ MainView.prototype.setPrimaryView = function (id) {
 
   if (!this.supportsFlexbox) {
     // TODO update no flex support
-    this.dropinWrapper.className += ' braintree-dropin__no-flexbox';
+    this.element.className += ' braintree-dropin__no-flexbox';
   }
 
   this.model.clearError();
@@ -180,7 +181,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
   if (!hasMultiplePaymentOptions) {
     sheetViewID = this.paymentSheetViewIDs[0];
 
-    classlist.add(this.dropinWrapper, prefixClass(sheetViewID));
+    classlist.add(this.element, prefixClass(sheetViewID));
     this.model.changeActivePaymentView(sheetViewID);
   } else if (isPaymentSheetView) {
     if (this.model.getPaymentMethods().length === 0) {
@@ -188,10 +189,10 @@ MainView.prototype.toggleAdditionalOptions = function () {
     } else {
       this.setPrimaryView(PaymentMethodsView.ID);
       this.hideToggle();
-      classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
+      classlist.add(this.element, prefixClass(PaymentOptionsView.ID));
     }
   } else {
-    classlist.add(this.dropinWrapper, prefixClass(PaymentOptionsView.ID));
+    classlist.add(this.element, prefixClass(PaymentOptionsView.ID));
   }
 };
 
@@ -221,13 +222,13 @@ MainView.prototype.hideAlert = function () {
 };
 
 MainView.prototype.teardown = function (callback) {
-  var viewNames = Object.keys(this.views);
+  var viewNames = Object.keys(this._views);
   var numberOfViews = viewNames.length;
   var viewsTornDown = 0;
   var error;
 
   viewNames.forEach(function (view) {
-    this.views[view].teardown(function (err) {
+    this._views[view].teardown(function (err) {
       if (err) {
         error = err;
       }

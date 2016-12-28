@@ -4,8 +4,9 @@ var BaseView = require('../../../src/views/base-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var mainHTML = require('../../../src/html/main.html');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
-var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
+var DropinModel = require('../../../src/dropin-model');
 var strings = require('../../../src/translations/en');
+var fake = require('../../helpers/fake');
 
 describe('PaymentOptionsView', function () {
   describe('Constructor', function () {
@@ -36,7 +37,7 @@ describe('PaymentOptionsView', function () {
       var paymentOptionsView = new PaymentOptionsView({
         element: this.element,
         mainView: {},
-        paymentOptionIDs: [CardView.ID],
+        model: modelThatSupports(['card']),
         strings: strings
       });
       var label = paymentOptionsView.container.querySelector('.braintree-option__label');
@@ -50,7 +51,7 @@ describe('PaymentOptionsView', function () {
       var paymentOptionsView = new PaymentOptionsView({
         element: this.element,
         mainView: {},
-        paymentOptionIDs: [PayPalView.ID],
+        model: modelThatSupports(['paypal']),
         strings: strings
       });
       var label = paymentOptionsView.container.querySelector('.braintree-option__label');
@@ -65,7 +66,7 @@ describe('PaymentOptionsView', function () {
       var paymentOptionsView = new PaymentOptionsView({
         element: this.element,
         mainView: mainViewStub,
-        paymentOptionIDs: [CardView.ID],
+        model: modelThatSupports(['card']),
         strings: strings
       });
       var option = paymentOptionsView.container.querySelector('.braintree-option');
@@ -76,3 +77,11 @@ describe('PaymentOptionsView', function () {
     });
   });
 });
+
+function modelThatSupports(supportedPaymentOptions) {
+  var result = new DropinModel(fake.modelOptions());
+
+  result.supportedPaymentOptions = supportedPaymentOptions;
+
+  return result;
+}

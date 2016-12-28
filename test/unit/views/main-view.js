@@ -40,13 +40,13 @@ describe('MainView', function () {
 
   describe('initialize', function () {
     beforeEach(function () {
-      var dropinWrapper = document.createElement('div');
+      var element = document.createElement('div');
 
-      dropinWrapper.innerHTML = templateHTML;
+      element.innerHTML = templateHTML;
 
       this.mainViewOptions = {
         client: this.client,
-        dropinWrapper: dropinWrapper,
+        element: element,
         merchantConfiguration: {
           authorization: fake.tokenizationKey
         },
@@ -68,7 +68,7 @@ describe('MainView', function () {
 
       mainView = new MainView(this.mainViewOptions);
 
-      expect(Object.keys(mainView.views)).to.contain(CardView.ID);
+      expect(Object.keys(mainView._views)).to.contain(CardView.ID);
       expect(mainView.primaryView.ID).to.equal(CardView.ID);
     });
 
@@ -86,15 +86,15 @@ describe('MainView', function () {
 
       mainView = new MainView(this.mainViewOptions);
 
-      expect(Object.keys(mainView.views)).to.contain(PaymentOptionsView.ID);
+      expect(Object.keys(mainView._views)).to.contain(PaymentOptionsView.ID);
     });
 
     context('with vaulted payment methods', function () {
       beforeEach(function () {
         var modelOptions = fake.modelOptions();
-        var dropinWrapper = document.createElement('div');
+        var element = document.createElement('div');
 
-        dropinWrapper.innerHTML = templateHTML;
+        element.innerHTML = templateHTML;
 
         modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
         this.model = new DropinModel(modelOptions);
@@ -104,7 +104,7 @@ describe('MainView', function () {
           client: {
             getConfiguration: fake.configuration
           },
-          dropinWrapper: dropinWrapper,
+          element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
           },
@@ -132,15 +132,15 @@ describe('MainView', function () {
 
     describe('without vaulted payment methods', function () {
       beforeEach(function () {
-        var dropinWrapper = document.createElement('div');
+        var element = document.createElement('div');
 
-        dropinWrapper.innerHTML = templateHTML;
+        element.innerHTML = templateHTML;
 
         this.model = new DropinModel(fake.modelOptions());
 
         this.mainViewOptions = {
           client: this.client,
-          dropinWrapper: dropinWrapper,
+          element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
           },
@@ -182,14 +182,14 @@ describe('MainView', function () {
 
       this.context = {
         element: document.createElement('div'),
-        views: []
+        _views: []
       };
     });
 
     it('adds the argument to the array of views', function () {
       MainView.prototype.addView.call(this.context, this.fakeView);
 
-      expect(this.context.views[this.fakeView.ID]).to.equal(this.fakeView);
+      expect(this.context._views[this.fakeView.ID]).to.equal(this.fakeView);
     });
   });
 
@@ -203,7 +203,7 @@ describe('MainView', function () {
       wrapper.innerHTML = templateHTML;
 
       this.mainViewOptions = {
-        dropinWrapper: wrapper,
+        element: wrapper,
         model: model,
         client: this.client,
         merchantConfiguration: {
@@ -242,7 +242,7 @@ describe('MainView', function () {
 
           mainView.setPrimaryView(View.ID);
 
-          expect(mainView.dropinWrapper.className).to.equal('braintree-' + View.ID);
+          expect(mainView.element.className).to.equal('braintree-' + View.ID);
         });
       });
 
@@ -267,7 +267,7 @@ describe('MainView', function () {
     xit('clears any errors', function () {
       var mainView = new MainView(this.mainViewOptions);
 
-      mainView.views = this.views;
+      mainView._views = this.views;
       this.sandbox.stub(DropinModel.prototype, 'clearError');
 
       mainView.setPrimaryView('id1');
@@ -279,24 +279,24 @@ describe('MainView', function () {
     xit('applies no-flexbox class when flexbox is not supported', function () {
       var mainView = new MainView(this.mainViewOptions);
 
-      mainView.views = this.views;
+      mainView._views = this.views;
       mainView.supportsFlexbox = false;
 
       mainView.setPrimaryView('id1');
 
-      expect(mainView.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
+      expect(mainView.element.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
     });
 
     // TODO: Pending until we update to support no flexbox
     xit('does not apply no-flexbox class when flexbox is supported', function () {
       var mainView = new MainView(this.mainViewOptions);
 
-      mainView.views = this.views;
+      mainView._views = this.views;
       mainView.supportsFlexbox = true;
 
       mainView.setPrimaryView('id1');
 
-      expect(mainView.dropinWrapper.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
+      expect(mainView.element.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
     });
 
     describe('when given a ', function () {
@@ -316,6 +316,24 @@ describe('MainView', function () {
               mainView.setPrimaryView(SheetView.ID);
 
               expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.false;
+            });
+
+            it('does not show the additional options button if there are no vaulted payment methods', function () {
+              var mainView, model;
+              var modelOptions = fake.modelOptions();
+
+              modelOptions.paymentMethods = [];
+              modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+              model = new DropinModel(modelOptions);
+              model.supportedPaymentOptions = [sheetViewKey];
+
+              this.mainViewOptions.model = model;
+
+              mainView = new MainView(this.mainViewOptions);
+
+              mainView.setPrimaryView(SheetView.ID);
+
+              expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
             });
           });
 
@@ -431,14 +449,13 @@ describe('MainView', function () {
 
   describe('dropinErrorState events', function () {
     beforeEach(function () {
-      var dropinWrapper = document.createElement('div');
+      var element = document.createElement('div');
 
-      dropinWrapper.innerHTML = templateHTML;
+      element.innerHTML = templateHTML;
 
       this.context = {
         addView: this.sandbox.stub(),
-        dropinWrapper: dropinWrapper,
-        element: dropinWrapper,
+        element: element,
         getElementById: BaseView.prototype.getElementById,
         hideAlert: this.sandbox.stub(),
         hideLoadingIndicator: function () {},
@@ -532,12 +549,12 @@ describe('MainView', function () {
 
   describe('DropinModel events', function () {
     beforeEach(function () {
-      this.dropinWrapper = document.createElement('div');
-      this.dropinWrapper.innerHTML = templateHTML;
+      this.element = document.createElement('div');
+      this.element.innerHTML = templateHTML;
       this.model = new DropinModel(fake.modelOptions());
 
       this.mainViewOptions = {
-        dropinWrapper: this.dropinWrapper,
+        element: this.element,
         model: this.model,
         client: this.client,
         merchantConfiguration: {
@@ -569,8 +586,8 @@ describe('MainView', function () {
 
     describe('for changeActivePaymentView', function () {
       beforeEach(function () {
-        this.paymentMethodsElement = this.dropinWrapper.querySelector('[data-braintree-id="' + PaymentMethodsView.ID + '"]');
-        this.sheetElement = this.dropinWrapper.querySelector('[data-braintree-id="sheet-container"]');
+        this.paymentMethodsElement = this.element.querySelector('[data-braintree-id="' + PaymentMethodsView.ID + '"]');
+        this.sheetElement = this.element.querySelector('[data-braintree-id="sheet-container"]');
       });
 
       describe('when the PaymentMethodsView is active', function () {
@@ -617,7 +634,7 @@ describe('MainView', function () {
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
       this.mainViewOptions = {
-        dropinWrapper: this.wrapper,
+        element: this.wrapper,
         client: this.client,
         model: new DropinModel(fake.modelOptions()),
         merchantConfiguration: {
@@ -723,7 +740,7 @@ describe('MainView', function () {
       this.wrapper.innerHTML = templateHTML;
 
       this.mainView = new MainView({
-        dropinWrapper: this.wrapper,
+        element: this.wrapper,
         model: new DropinModel(fake.modelOptions()),
         client: this.client,
         merchantConfiguration: {
@@ -786,7 +803,7 @@ describe('MainView', function () {
         this.wrapper.innerHTML = templateHTML;
         this.sandbox.stub(HostedFields, 'create').returns(null, fake.HostedFieldsInstance);
         this.mainView = new MainView({
-          dropinWrapper: this.wrapper,
+          element: this.wrapper,
           client: this.client,
           model: new DropinModel(fake.modelOptions()),
           merchantConfiguration: {
@@ -822,7 +839,7 @@ describe('MainView', function () {
   describe('teardown', function () {
     beforeEach(function () {
       this.context = {
-        views: {
+        _views: {
           'braintree-card-view': {
             teardown: this.sandbox.stub().yields()
           }
@@ -831,7 +848,7 @@ describe('MainView', function () {
     });
 
     it('calls teardown on each view', function (done) {
-      var payWithCardView = this.context.views['braintree-card-view'];
+      var payWithCardView = this.context._views['braintree-card-view'];
 
       MainView.prototype.teardown.call(this.context, function () {
         expect(payWithCardView.teardown).to.be.calledOnce;
@@ -840,7 +857,7 @@ describe('MainView', function () {
     });
 
     it('waits to call callback until asyncronous teardowns complete', function (done) {
-      var payWithCardView = this.context.views['braintree-card-view'];
+      var payWithCardView = this.context._views['braintree-card-view'];
 
       payWithCardView.teardown.yieldsAsync();
 
@@ -851,7 +868,7 @@ describe('MainView', function () {
     });
 
     it('calls callback with error from teardown function', function (done) {
-      var payWithCardView = this.context.views['braintree-card-view'];
+      var payWithCardView = this.context._views['braintree-card-view'];
       var error = new Error('pay with card teardown error');
 
       payWithCardView.teardown.yields(error);
