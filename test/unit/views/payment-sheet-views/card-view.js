@@ -344,8 +344,8 @@ describe('CardView', function () {
         element: this.element,
         _generateFieldSelector: CardView.prototype._generateFieldSelector,
         getElementById: BaseView.prototype.getElementById,
-        hideInlineError: CardView.prototype.hideInlineError,
-        showInlineError: CardView.prototype.showInlineError,
+        hideFieldError: CardView.prototype.hideFieldError,
+        showFieldError: CardView.prototype.showFieldError,
         model: new DropinModel(fake.modelOptions()),
         client: {
           getConfiguration: function () {
@@ -667,8 +667,8 @@ describe('CardView', function () {
         this.context._onValidityChangeEvent = CardView.prototype._onValidityChangeEvent;
       });
 
-      it('shows an inline error if a field is invalid', function () {
-        var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+      it('shows a error error if a field is invalid', function () {
+        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var fakeEvent = {
           emittedBy: 'number',
           fields: {
@@ -685,12 +685,12 @@ describe('CardView', function () {
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberInlineError.classList.contains('braintree-hidden')).to.be.false;
-        expect(numberInlineError.textContent).to.equal('This card number is not valid.');
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldError.textContent).to.equal('This card number is not valid.');
       });
 
-      it('hides the inline error if a field is potentially valid', function () {
-        var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+      it('hides the field error if a field is potentially valid', function () {
+        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var fakeEvent = {
           emittedBy: 'number',
           fields: {
@@ -707,8 +707,8 @@ describe('CardView', function () {
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberInlineError.classList.contains('braintree-hidden')).to.be.true;
-        expect(numberInlineError.textContent).to.equal('');
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.true;
+        expect(numberFieldError.textContent).to.equal('');
       });
     });
 
@@ -717,20 +717,20 @@ describe('CardView', function () {
         this.context._onNotEmptyEvent = CardView.prototype._onNotEmptyEvent;
       });
 
-      it('hides inline errors', function () {
-        var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+      it('hides field errors', function () {
+        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var fakeEvent = {emittedBy: 'number'};
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
 
-        classlist.remove(numberInlineError, 'braintree-hidden');
+        classlist.remove(numberFieldError, 'braintree-hidden');
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberInlineError.classList.contains('braintree-hidden')).to.be.true;
-        expect(numberInlineError.textContent).to.equal('');
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.true;
+        expect(numberFieldError.textContent).to.equal('');
       });
     });
   });
@@ -758,7 +758,7 @@ describe('CardView', function () {
         element: this.element,
         getElementById: BaseView.prototype.getElementById,
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
-        inlineErrors: {},
+        fieldErrors: {},
         model: this.model,
         client: {
           getConfiguration: fake.configuration
@@ -766,7 +766,7 @@ describe('CardView', function () {
         merchantConfiguration: {
           authorization: fake.configuration().authorization
         },
-        showInlineError: CardView.prototype.showInlineError,
+        showFieldError: CardView.prototype.showFieldError,
         strings: strings
       };
     });
@@ -857,8 +857,8 @@ describe('CardView', function () {
       expect(this.context.model.clearError).to.be.called;
     });
 
-    it('shows unsupported card inline error when attempting to use an unsupported card', function () {
-      var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+    it('shows unsupported card field error when attempting to use an unsupported card', function () {
+      var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
 
       this.context.client.getConfiguration = function () {
         return {
@@ -872,13 +872,13 @@ describe('CardView', function () {
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(numberInlineError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberInlineError.textContent).to.equal('This card type is not supported. Please try another card.');
+      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+      expect(numberFieldError.textContent).to.equal('This card type is not supported. Please try another card.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('shows empty inline error when attempting to sumbit an empty field', function () {
-      var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+    it('shows empty field error when attempting to sumbit an empty field', function () {
+      var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
 
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
@@ -895,13 +895,13 @@ describe('CardView', function () {
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(numberInlineError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberInlineError.textContent).to.equal('Please fill out a number.');
+      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+      expect(numberFieldError.textContent).to.equal('Please fill out a number.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('shows invalid inline error when attempting to sumbit an invalid field', function () {
-      var numberInlineError = this.element.querySelector('[data-braintree-id="number-inline-error"]');
+    it('shows invalid field error when attempting to sumbit an invalid field', function () {
+      var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
 
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
@@ -917,8 +917,8 @@ describe('CardView', function () {
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(numberInlineError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberInlineError.textContent).to.equal('This card number is not valid.');
+      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+      expect(numberFieldError.textContent).to.equal('This card number is not valid.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 

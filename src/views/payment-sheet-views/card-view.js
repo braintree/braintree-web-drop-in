@@ -73,7 +73,7 @@ CardView.prototype._initialize = function () {
   this.cvvIcon = this.getElementById('cvv-icon');
   this.cvvIconSvg = this.getElementById('cvv-icon-svg');
   this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
-  this.inlineErrors = {};
+  this.fieldErrors = {};
 
   if (!hasCVV) {
     this.getElementById('cvv-container').remove();
@@ -118,10 +118,10 @@ CardView.prototype.tokenize = function (callback) {
     var field = state.fields[key];
 
     if (field.isEmpty) {
-      this.showInlineError(key, this.strings['fieldEmptyFor' + capitalize(key)]);
+      this.showFieldError(key, this.strings['fieldEmptyFor' + capitalize(key)]);
       formValid = false;
     } else if (!field.isValid) {
-      this.showInlineError(key, this.strings['fieldInvalidFor' + capitalize(key)]);
+      this.showFieldError(key, this.strings['fieldInvalidFor' + capitalize(key)]);
       formValid = false;
     }
   }.bind(this));
@@ -131,7 +131,7 @@ CardView.prototype.tokenize = function (callback) {
     cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
 
     if (!cardTypeSupported) {
-      this.showInlineError('number', this.strings.unsupportedCardTypeError);
+      this.showFieldError('number', this.strings.unsupportedCardTypeError);
       callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
       return;
     }
@@ -161,28 +161,28 @@ CardView.prototype.tokenize = function (callback) {
   }
 };
 
-CardView.prototype.showInlineError = function (field, errorMessage) {
-  var inlineError;
+CardView.prototype.showFieldError = function (field, errorMessage) {
+  var fieldError;
 
-  if (!this.inlineErrors.hasOwnProperty(field)) {
-    this.inlineErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-inline-error');
+  if (!this.fieldErrors.hasOwnProperty(field)) {
+    this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
   }
 
-  inlineError = this.inlineErrors[field];
-  inlineError.textContent = errorMessage;
-  classlist.remove(inlineError, 'braintree-hidden');
+  fieldError = this.fieldErrors[field];
+  fieldError.textContent = errorMessage;
+  classlist.remove(fieldError, 'braintree-hidden');
 };
 
-CardView.prototype.hideInlineError = function (field) {
-  var inlineError;
+CardView.prototype.hideFieldError = function (field) {
+  var fieldError;
 
-  if (!this.inlineErrors.hasOwnProperty(field)) {
-    this.inlineErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-inline-error');
+  if (!this.fieldErrors.hasOwnProperty(field)) {
+    this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
   }
 
-  inlineError = this.inlineErrors[field];
-  classlist.add(inlineError, 'braintree-hidden');
-  inlineError.textContent = '';
+  fieldError = this.fieldErrors[field];
+  classlist.add(fieldError, 'braintree-hidden');
+  fieldError.textContent = '';
 };
 
 CardView.prototype.teardown = function (callback) {
@@ -235,16 +235,16 @@ CardView.prototype._onFocusEvent = function (event) {
 };
 
 CardView.prototype._onNotEmptyEvent = function (event) {
-  this.hideInlineError(event.emittedBy);
+  this.hideFieldError(event.emittedBy);
 };
 
 CardView.prototype._onValidityChangeEvent = function (event) {
   var field = event.fields[event.emittedBy];
 
   if (field.isPotentiallyValid) {
-    this.hideInlineError(event.emittedBy);
+    this.hideFieldError(event.emittedBy);
   } else {
-    this.showInlineError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
+    this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
   }
 };
 
