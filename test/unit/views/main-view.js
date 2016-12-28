@@ -68,7 +68,7 @@ describe('MainView', function () {
 
       mainView = new MainView(this.mainViewOptions);
 
-      expect(Object.keys(mainView.views)).to.contain(CardView.ID);
+      expect(Object.keys(mainView._views)).to.contain(CardView.ID);
       expect(mainView.primaryView.ID).to.equal(CardView.ID);
     });
 
@@ -86,7 +86,7 @@ describe('MainView', function () {
 
       mainView = new MainView(this.mainViewOptions);
 
-      expect(Object.keys(mainView.views)).to.contain(PaymentOptionsView.ID);
+      expect(Object.keys(mainView._views)).to.contain(PaymentOptionsView.ID);
     });
 
     context('with vaulted payment methods', function () {
@@ -182,14 +182,14 @@ describe('MainView', function () {
 
       this.context = {
         element: document.createElement('div'),
-        views: []
+        _views: []
       };
     });
 
     it('adds the argument to the array of views', function () {
       MainView.prototype.addView.call(this.context, this.fakeView);
 
-      expect(this.context.views[this.fakeView.ID]).to.equal(this.fakeView);
+      expect(this.context._views[this.fakeView.ID]).to.equal(this.fakeView);
     });
   });
 
@@ -267,7 +267,7 @@ describe('MainView', function () {
     xit('clears any errors', function () {
       var mainView = new MainView(this.mainViewOptions);
 
-      mainView.views = this.views;
+      mainView._views = this.views;
       this.sandbox.stub(DropinModel.prototype, 'clearError');
 
       mainView.setPrimaryView('id1');
@@ -279,7 +279,7 @@ describe('MainView', function () {
     xit('applies no-flexbox class when flexbox is not supported', function () {
       var mainView = new MainView(this.mainViewOptions);
 
-      mainView.views = this.views;
+      mainView._views = this.views;
       mainView.supportsFlexbox = false;
 
       mainView.setPrimaryView('id1');
@@ -291,7 +291,7 @@ describe('MainView', function () {
     xit('does not apply no-flexbox class when flexbox is supported', function () {
       var mainView = new MainView(this.mainViewOptions);
 
-      mainView.views = this.views;
+      mainView._views = this.views;
       mainView.supportsFlexbox = true;
 
       mainView.setPrimaryView('id1');
@@ -839,7 +839,7 @@ describe('MainView', function () {
   describe('teardown', function () {
     beforeEach(function () {
       this.context = {
-        views: {
+        _views: {
           'braintree-card-view': {
             teardown: this.sandbox.stub().yields()
           }
@@ -848,7 +848,7 @@ describe('MainView', function () {
     });
 
     it('calls teardown on each view', function (done) {
-      var payWithCardView = this.context.views['braintree-card-view'];
+      var payWithCardView = this.context._views['braintree-card-view'];
 
       MainView.prototype.teardown.call(this.context, function () {
         expect(payWithCardView.teardown).to.be.calledOnce;
@@ -857,7 +857,7 @@ describe('MainView', function () {
     });
 
     it('waits to call callback until asyncronous teardowns complete', function (done) {
-      var payWithCardView = this.context.views['braintree-card-view'];
+      var payWithCardView = this.context._views['braintree-card-view'];
 
       payWithCardView.teardown.yieldsAsync();
 
@@ -868,7 +868,7 @@ describe('MainView', function () {
     });
 
     it('calls callback with error from teardown function', function (done) {
-      var payWithCardView = this.context.views['braintree-card-view'];
+      var payWithCardView = this.context._views['braintree-card-view'];
       var error = new Error('pay with card teardown error');
 
       payWithCardView.teardown.yields(error);
