@@ -3,7 +3,6 @@
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
 var sheetViews = require('./payment-sheet-views');
-var CardView = require('./payment-sheet-views/card-view');
 var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
@@ -173,11 +172,15 @@ MainView.prototype.hideLoadingIndicator = function () {
 
 MainView.prototype.toggleAdditionalOptions = function () {
   var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
+  var sheetViewID;
 
   this.hideToggle();
+
   if (!hasMultiplePaymentOptions && this.primaryView.ID === PaymentMethodsView.ID) {
-    classlist.add(this.dropinWrapper, prefixClass(CardView.ID));
-    this.model.changeActivePaymentView(CardView.ID);
+    sheetViewID = this.paymentSheetViewIDs[0];
+
+    classlist.add(this.dropinWrapper, prefixClass(sheetViewID));
+    this.model.changeActivePaymentView(sheetViewID);
   } else if (hasMultiplePaymentOptions && this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1) {
     if (this.model.getPaymentMethods().length === 0) {
       this.setPrimaryView(PaymentOptionsView.ID);
