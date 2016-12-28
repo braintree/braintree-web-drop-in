@@ -87,7 +87,7 @@ MainView.prototype._initialize = function () {
     paymentOptionsView = new PaymentOptionsView({
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
-      paymentOptionIDs: this.paymentSheetViewIDs,
+      model: this.model,
       strings: this.strings
     });
 
