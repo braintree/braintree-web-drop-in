@@ -23,7 +23,7 @@ MainView.prototype._initialize = function () {
   var paymentMethodsViews, paymentOptionsView, sheetContainer;
   var paymentMethods = this.model.getPaymentMethods();
 
-  this.views = {};
+  this._views = {};
 
   sheetContainer = this.getElementById('sheet-container');
 
@@ -103,11 +103,11 @@ MainView.prototype._initialize = function () {
 };
 
 MainView.prototype.addView = function (view) {
-  this.views[view.ID] = view;
+  this._views[view.ID] = view;
 };
 
 MainView.prototype.getView = function (id) {
-  return this.views[id];
+  return this._views[id];
 };
 
 MainView.prototype.setPrimaryView = function (id) {
@@ -221,13 +221,13 @@ MainView.prototype.hideAlert = function () {
 };
 
 MainView.prototype.teardown = function (callback) {
-  var viewNames = Object.keys(this.views);
+  var viewNames = Object.keys(this._views);
   var numberOfViews = viewNames.length;
   var viewsTornDown = 0;
   var error;
 
   viewNames.forEach(function (view) {
-    this.views[view].teardown(function (err) {
+    this._views[view].teardown(function (err) {
       if (err) {
         error = err;
       }
