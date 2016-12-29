@@ -76,11 +76,11 @@ CardView.prototype._initialize = function () {
   this.fieldErrors = {};
 
   if (!hasCVV) {
-    this.getElementById('cvv-container').remove();
+    this.getElementById('cvv-field-group').remove();
     delete hfOptions.fields.cvv;
   }
   if (!hasPostal) {
-    this.getElementById('postal-code-container').remove();
+    this.getElementById('postal-code-field-group').remove();
     delete hfOptions.fields.postalCode;
   }
 
@@ -163,25 +163,29 @@ CardView.prototype.tokenize = function (callback) {
 
 CardView.prototype.showFieldError = function (field, errorMessage) {
   var fieldError;
+  var fieldGroup = this.getElementById(camelCaseToSnakeCase(field) + '-field-group');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
   }
 
+  classlist.add(fieldGroup, 'braintree-form__field-group--has-errors');
+
   fieldError = this.fieldErrors[field];
   fieldError.textContent = errorMessage;
-  classlist.remove(fieldError, 'braintree-hidden');
 };
 
 CardView.prototype.hideFieldError = function (field) {
   var fieldError;
+  var fieldGroup = this.getElementById(camelCaseToSnakeCase(field) + '-field-group');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
   }
 
+  classlist.remove(fieldGroup, 'braintree-form__field-group--has-errors');
+
   fieldError = this.fieldErrors[field];
-  classlist.add(fieldError, 'braintree-hidden');
   fieldError.textContent = '';
 };
 

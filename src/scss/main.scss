@@ -241,15 +241,11 @@ braintree-loader__container {
     .braintree-form__field {
       position: relative;
 
-      .braintree-form__icon {
+      .braintree-form__icon-container {
         position: absolute;
         top: 50%;
         margin-top: -14px;
         right: 5px;
-
-        &.braintree-hidden {
-          display: none;
-        }
       }
 
       .braintree-form__hosted-field {
@@ -264,17 +260,30 @@ braintree-loader__container {
       }
     }
 
+    &.braintree-form__field-group--has-errors .braintree-form__card-number-icon,
+    &.braintree-form__field-group--has-errors .braintree-form__cvv-icon {
+      display: none;
+    }
+
+    .braintree-form__field-error-icon {
+      display: none;
+    }
+    &.braintree-form__field-group--has-errors .braintree-form__field-error-icon {
+      display: block;
+    }
+
     .braintree-form__field-error {
       color: $error-color;
       font-size: 13px;
-      margin: 3px 0 3px 0;
+      margin: 3px 0 10px 0;
       padding: 0;
       line-height: 1.4;
+      opacity: none;
+    }
 
-      &.braintree-hidden {
-        opacity: none;
-        margin-bottom: 10px;
-      }
+    &.braintree-form__field-group--has-errors .braintree-form__field-error {
+      opacity: 1;
+      margin-bottom: 3px;
     }
   }
 
