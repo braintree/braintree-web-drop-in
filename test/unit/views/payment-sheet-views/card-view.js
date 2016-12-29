@@ -667,12 +667,14 @@ describe('CardView', function () {
         this.context._onValidityChangeEvent = CardView.prototype._onValidityChangeEvent;
       });
 
-      it('shows a error error if a field is invalid', function () {
+      it('shows an error if a field is invalid', function () {
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var fakeEvent = {
+          cards: [{type: 'Visa'}],
           emittedBy: 'number',
           fields: {
             number: {
+              container: document.createElement('div'),
               isValid: false,
               isPotentiallyValid: false
             }
@@ -692,9 +694,11 @@ describe('CardView', function () {
       it('hides the field error if a field is potentially valid', function () {
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var fakeEvent = {
+          cards: [{type: 'Visa'}],
           emittedBy: 'number',
           fields: {
             number: {
+              container: document.createElement('div'),
               isValid: false,
               isPotentiallyValid: true
             }
@@ -709,6 +713,172 @@ describe('CardView', function () {
 
         expect(numberFieldError.classList.contains('braintree-hidden')).to.be.true;
         expect(numberFieldError.textContent).to.equal('');
+      });
+
+      it('adds braintree-form__field--valid class to valid expiration date field', function () {
+        var expirationElement = this.element.querySelector('.braintree-form-expiration');
+        var fakeEvent = {
+          emittedBy: 'expirationDate',
+          fields: {
+            expirationDate: {
+              container: expirationElement,
+              isValid: true,
+              isPotentiallyValid: true
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: function (event, callback) {
+            if (event === 'validityChange') {
+              callback(fakeEvent);
+            }
+          }
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(expirationElement.classList.contains('braintree-form__field--valid')).to.equal(true);
+      });
+
+      it('removes braintree-form__field--valid class to invalid expiration date field', function () {
+        var expirationElement = this.element.querySelector('.braintree-form-expiration');
+        var fakeEvent = {
+          emittedBy: 'expirationDate',
+          fields: {
+            expirationDate: {
+              container: expirationElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: function (event, callback) {
+            if (event === 'validityChange') {
+              callback(fakeEvent);
+            }
+          }
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(expirationElement.classList.contains('braintree-form__field--valid')).to.equal(false);
+      });
+
+      it('adds braintree-form__field--valid class to valid number with card type supported', function () {
+        var numberElement = this.element.querySelector('.braintree-form-number');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: true,
+              isPotentiallyValid: true
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: function (event, callback) {
+            if (event === 'validityChange') {
+              callback(fakeEvent);
+            }
+          }
+        };
+
+        this.context.client.getConfiguration = function () {
+          return {
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: ['Visa']
+              }
+            }
+          };
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(true);
+      });
+
+      it('removes braintree-form__field--valid class to valid number without card type supported', function () {
+        var numberElement = this.element.querySelector('.braintree-form-number');
+        var fakeEvent = {
+          cards: [{type: 'foo'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: true,
+              isPotentiallyValid: true
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: function (event, callback) {
+            if (event === 'validityChange') {
+              callback(fakeEvent);
+            }
+          }
+        };
+
+        this.context.client.getConfiguration = function () {
+          return {
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: ['Visa']
+              }
+            }
+          };
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(false);
+      });
+
+      it('removes braintree-form__field--valid class to not valid number with card type supported', function () {
+        var numberElement = this.element.querySelector('.braintree-form-number');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: function (event, callback) {
+            if (event === 'validityChange') {
+              callback(fakeEvent);
+            }
+          }
+        };
+
+        this.context.client.getConfiguration = function () {
+          return {
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: ['Visa']
+              }
+            }
+          };
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(false);
       });
     });
 

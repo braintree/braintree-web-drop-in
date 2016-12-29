@@ -4,6 +4,7 @@ $background-color: #FAFAFA;
 $highlight-color: #219653;
 $error-color: #CC0000;
 $black-40: lighten(#000000, 40%);
+$black-45: lighten(#000000, 45%);
 $black-75: lighten(#000000, 75%);
 $curve-swing: cubic-bezier(0.645, 0.045, 0.355, 1);
 $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
@@ -257,6 +258,10 @@ braintree-loader__container {
         height: 44px;
         margin: 4px 0 0;
         padding: 0px 8px 0px 8px;
+
+        &.braintree-form__field--valid {
+          border-color: $black-45;
+        }
       }
     }
   }

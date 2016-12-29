@@ -239,7 +239,18 @@ CardView.prototype._onNotEmptyEvent = function (event) {
 };
 
 CardView.prototype._onValidityChangeEvent = function (event) {
+  var cardType, isValid;
   var field = event.fields[event.emittedBy];
+  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+
+  if (event.emittedBy === 'number' && event.cards[0]) {
+    cardType = constants.configurationCardTypes[event.cards[0].type];
+    isValid = field.isValid && supportedCardTypes.indexOf(cardType) !== -1;
+  } else {
+    isValid = field.isValid;
+  }
+
+  classlist.toggle(field.container, 'braintree-form__field--valid', isValid);
 
   if (field.isPotentiallyValid) {
     this.hideFieldError(event.emittedBy);
