@@ -454,8 +454,17 @@ describe('CardView', function () {
       });
 
       it('hides cvv icon in cvv field when blurred', function () {
+        var fakeEvent = {
+          emittedBy: 'cvv',
+          fields: {
+            cvv: {
+              isEmpty: false,
+              isValid: false
+            }
+          }
+        };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'cvv'})
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
         var cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
 
@@ -465,6 +474,53 @@ describe('CardView', function () {
         CardView.prototype._initialize.call(this.context);
 
         expect(this.context.cvvIcon.classList.contains('braintree-hidden')).to.be.true;
+      });
+
+      it('shows field error if field is not valid and is not empty', function () {
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: false,
+              isValid: false
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
+
+        classlist.add(numberFieldError, 'braintree-hidden');
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldError.textContent).to.equal('This card number is not valid.');
+      });
+
+      it('does not show field error if field is not valid but is empty', function () {
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: true,
+              isValid: false
+            }
+          }
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
+
+        classlist.add(numberFieldError, 'braintree-hidden');
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.true;
       });
     });
 
@@ -665,30 +721,6 @@ describe('CardView', function () {
     describe('onValidityChangeEvent', function () {
       beforeEach(function () {
         this.context._onValidityChangeEvent = CardView.prototype._onValidityChangeEvent;
-      });
-
-      it('shows an error if a field is invalid', function () {
-        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
-        var fakeEvent = {
-          cards: [{type: 'Visa'}],
-          emittedBy: 'number',
-          fields: {
-            number: {
-              container: document.createElement('div'),
-              isValid: false,
-              isPotentiallyValid: false
-            }
-          }
-        };
-        var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
-        };
-
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
-        expect(numberFieldError.textContent).to.equal('This card number is not valid.');
       });
 
       it('hides the field error if a field is potentially valid', function () {

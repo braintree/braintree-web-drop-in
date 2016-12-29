@@ -194,12 +194,18 @@ CardView.prototype._generateFieldSelector = function (field) {
 };
 
 CardView.prototype._onBlurEvent = function (event) {
+  var field = event.fields[event.emittedBy];
+
   if (event.emittedBy === 'number') {
     if (event.fields.number.isEmpty) {
       classlist.add(this.cardNumberIcon, 'braintree-hidden');
     }
   } else if (event.emittedBy === 'cvv') {
     classlist.add(this.cvvIcon, 'braintree-hidden');
+  }
+
+  if (!field.isValid && !field.isEmpty) {
+    this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
   }
 };
 
@@ -254,8 +260,6 @@ CardView.prototype._onValidityChangeEvent = function (event) {
 
   if (field.isPotentiallyValid) {
     this.hideFieldError(event.emittedBy);
-  } else {
-    this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
   }
 };
 
