@@ -224,6 +224,10 @@ braintree-loader__container {
 
     &.braintree-form__field-group--has-error {
       margin-bottom: 3px;
+
+      .braintree-form__field .braintree-form__hosted-field {
+        border-color: $error-color;
+      }
     }
 
     .braintree-form__label {
