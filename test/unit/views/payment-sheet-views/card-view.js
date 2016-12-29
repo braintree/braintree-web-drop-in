@@ -71,7 +71,7 @@ describe('CardView', function () {
         client: this.client
       });
 
-      expect(this.element.querySelector('[data-braintree-id="cvv-container"]')).to.exist;
+      expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).to.exist;
     });
 
     it('does not have cvv if not supplied in challenges', function () {
@@ -82,7 +82,7 @@ describe('CardView', function () {
         client: this.client
       });
 
-      expect(this.element.querySelector('[data-braintree-id="cvv-container"]')).not.to.exist;
+      expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).not.to.exist;
     });
 
     it('has postal code if supplied in challenges', function () {
@@ -104,7 +104,7 @@ describe('CardView', function () {
         client: this.client
       });
 
-      expect(this.element.querySelector('[data-braintree-id="postal-code-container"]')).to.exist;
+      expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).to.exist;
     });
 
     it('does not have postal code if not supplied in challenges', function () {
@@ -115,7 +115,7 @@ describe('CardView', function () {
         client: this.client
       });
 
-      expect(this.element.querySelector('[data-braintree-id="postal-code-container"]')).not.to.exist;
+      expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
     });
 
     it('starts async dependency', function () {
@@ -406,6 +406,30 @@ describe('CardView', function () {
         expect(cvvIcon.classList.contains('braintree-hidden')).to.be.false;
         expect(cvvIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCVVBack');
       });
+
+      it('adds braintree-form__field-group--is-focused', function () {
+        var fakeEvent = {
+          emittedBy: 'number',
+          fields: {
+            number: {isEmpty: true}
+          }
+        };
+        var hostedFieldsInstance = {
+          on: function (event, callback) {
+            if (event === 'focus') {
+              callback(fakeEvent);
+            }
+          }
+        };
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        classlist.remove(numberFieldGroup, 'braintree-form__field-group--is-focused');
+
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.true;
+      });
     });
 
     describe('onBlurEvent', function () {
@@ -413,7 +437,7 @@ describe('CardView', function () {
         this.context._onBlurEvent = CardView.prototype._onBlurEvent;
       });
 
-      it('hides the card number icon when the number field is blurred and empty', function () {
+      it('removes braintree-form__field-group--is-focused class when blurred', function () {
         var fakeEvent = {
           emittedBy: 'number',
           fields: {
@@ -423,14 +447,14 @@ describe('CardView', function () {
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
-        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        classlist.remove(cardNumberIcon, 'braintree-hidden');
+        classlist.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
 
         CardView.prototype._initialize.call(this.context);
 
-        expect(this.context.cardNumberIcon.classList.contains('braintree-hidden')).to.be.true;
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.false;
       });
 
       it('does not hide the card number icon when the number field is blurred and not empty', function () {
@@ -453,30 +477,7 @@ describe('CardView', function () {
         expect(this.context.cardNumberIcon.classList.contains('braintree-hidden')).to.be.false;
       });
 
-      it('hides cvv icon in cvv field when blurred', function () {
-        var fakeEvent = {
-          emittedBy: 'cvv',
-          fields: {
-            cvv: {
-              isEmpty: false,
-              isValid: false
-            }
-          }
-        };
-        var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
-        };
-        var cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
-
-        classlist.remove(cvvIcon, 'braintree-hidden');
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-
-        CardView.prototype._initialize.call(this.context);
-
-        expect(this.context.cvvIcon.classList.contains('braintree-hidden')).to.be.true;
-      });
-
-      it('shows field error if field is not valid and is not empty', function () {
+      it('applies error class if field is not valid and is not empty', function () {
         var fakeEvent = {
           emittedBy: 'number',
           fields: {
@@ -487,20 +488,26 @@ describe('CardView', function () {
           }
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: function (event, callback) {
+            if (event === 'blur') {
+              callback(fakeEvent);
+            }
+          }
         };
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        classlist.add(numberFieldError, 'braintree-hidden');
+        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
 
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.true;
         expect(numberFieldError.textContent).to.equal('This card number is not valid.');
       });
 
-      it('does not show field error if field is not valid but is empty', function () {
+      // TODO determine desired behavior if empty
+      xit('does not apply error class if field is not valid but is empty', function () {
         var fakeEvent = {
           emittedBy: 'number',
           fields: {
@@ -513,14 +520,14 @@ describe('CardView', function () {
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
-        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        classlist.add(numberFieldError, 'braintree-hidden');
+        classlist.add(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
 
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.true;
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
       });
     });
 
@@ -616,7 +623,7 @@ describe('CardView', function () {
       });
 
       it('updates the cvv label descriptor to four digits when card type is amex', function () {
-        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
         var fakeEvent = {
           cards: [{type: 'american-express'}],
           emittedBy: 'number'
@@ -634,7 +641,7 @@ describe('CardView', function () {
       });
 
       it('updates the cvv label descriptor to three digits when card type is non-amex', function () {
-        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
         var fakeEvent = {
           cards: [{type: 'visa'}],
           emittedBy: 'number'
@@ -652,7 +659,7 @@ describe('CardView', function () {
       });
 
       it('updates the cvv label descriptor to three digits when multiple card types', function () {
-        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-container"]').querySelector('.braintree-form__descriptor');
+        var cvvLabelDescriptor = this.element.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
         var fakeEvent = {
           cards: [{type: 'american-express'}, {type: 'visa'}],
           emittedBy: 'number'
@@ -723,14 +730,14 @@ describe('CardView', function () {
         this.context._onValidityChangeEvent = CardView.prototype._onValidityChangeEvent;
       });
 
-      it('hides the field error if a field is potentially valid', function () {
-        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
+      it('removes the braintree-form__field-group--has-error class if a field is potentially valid', function () {
         var fakeEvent = {
-          cards: [{type: 'Visa'}],
           emittedBy: 'number',
+          cards: [{type: 'visa'}],
           fields: {
             number: {
               container: document.createElement('div'),
+              isEmpty: false,
               isValid: false,
               isPotentiallyValid: true
             }
@@ -739,12 +746,14 @@ describe('CardView', function () {
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
+        classlist.add(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.true;
-        expect(numberFieldError.textContent).to.equal('');
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
       });
 
       it('adds braintree-form__field--valid class to valid expiration date field', function () {
@@ -919,20 +928,30 @@ describe('CardView', function () {
         this.context._onNotEmptyEvent = CardView.prototype._onNotEmptyEvent;
       });
 
-      it('hides field errors', function () {
-        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
-        var fakeEvent = {emittedBy: 'number'};
+      it('removes the braintree-form__field-group--has-error class', function () {
+        var fakeEvent = {
+          emittedBy: 'number',
+          cards: [{type: 'visa'}],
+          fields: {
+            number: {
+              container: document.createElement('div'),
+              isEmpty: false,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        classlist.remove(numberFieldError, 'braintree-hidden');
-
+        classlist.add(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.true;
-        expect(numberFieldError.textContent).to.equal('');
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
       });
     });
   });

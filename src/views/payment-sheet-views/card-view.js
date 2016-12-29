@@ -169,24 +169,20 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
     this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
   }
 
-  classlist.add(fieldGroup, 'braintree-form__field-group--has-errors');
+  classlist.add(fieldGroup, 'braintree-form__field-group--has-error');
 
   fieldError = this.fieldErrors[field];
   fieldError.textContent = errorMessage;
 };
 
 CardView.prototype.hideFieldError = function (field) {
-  var fieldError;
   var fieldGroup = this.getElementById(camelCaseToSnakeCase(field) + '-field-group');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
   }
 
-  classlist.remove(fieldGroup, 'braintree-form__field-group--has-errors');
-
-  fieldError = this.fieldErrors[field];
-  fieldError.textContent = '';
+  classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
 };
 
 CardView.prototype.teardown = function (callback) {
@@ -199,14 +195,9 @@ CardView.prototype._generateFieldSelector = function (field) {
 
 CardView.prototype._onBlurEvent = function (event) {
   var field = event.fields[event.emittedBy];
+  var fieldGroup = this.getElementById(camelCaseToSnakeCase(event.emittedBy) + '-field-group');
 
-  if (event.emittedBy === 'number') {
-    if (event.fields.number.isEmpty) {
-      classlist.add(this.cardNumberIcon, 'braintree-hidden');
-    }
-  } else if (event.emittedBy === 'cvv') {
-    classlist.add(this.cvvIcon, 'braintree-hidden');
-  }
+  classlist.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
   if (!field.isValid && !field.isEmpty) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
@@ -237,6 +228,10 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 };
 
 CardView.prototype._onFocusEvent = function (event) {
+  var fieldGroup = this.getElementById(camelCaseToSnakeCase(event.emittedBy) + '-field-group');
+
+  classlist.add(fieldGroup, 'braintree-form__field-group--is-focused');
+
   if (event.emittedBy === 'number') {
     classlist.remove(this.cardNumberIcon, 'braintree-hidden');
   } else if (event.emittedBy === 'cvv') {
