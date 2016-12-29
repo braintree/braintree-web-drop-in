@@ -2,7 +2,7 @@ $border-color: #C5C5C5;
 $text-color: #4F4F4F;
 $background-color: #FAFAFA;
 $highlight-color: #219653;
-$error-color: #CC0000;
+$error-color: #EB5757;
 $black-40: lighten(#000000, 40%);
 $black-45: lighten(#000000, 45%);
 $black-75: lighten(#000000, 75%);
@@ -219,7 +219,6 @@ braintree-loader__container {
   padding: 10px 15px 10px 10px;
 
   .braintree-form__field-group {
-    margin-bottom: 10px;
     padding-left: 5px;
 
     .braintree-form__label {
@@ -262,6 +261,19 @@ braintree-loader__container {
         &.braintree-form__field--valid {
           border-color: $black-45;
         }
+      }
+    }
+
+    .braintree-form__field-error {
+      color: $error-color;
+      font-size: 13px;
+      margin: 3px 0 3px 0;
+      padding: 0;
+      line-height: 1.4;
+
+      &.braintree-hidden {
+        opacity: none;
+        margin-bottom: 10px;
       }
     }
   }
@@ -377,17 +389,6 @@ braintree-loader__container {
     border-bottom: 1px solid $border-color;
     padding-bottom: 1px;
   }
-
-  &.braintree-hidden {
-    display: none;
-  }
-}
-
-.braintree-field-error {
-  color: $error-color;
-  margin: 0;
-  padding: 0;
-  line-height: 1.4;
 
   &.braintree-hidden {
     display: none;
