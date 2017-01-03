@@ -290,6 +290,10 @@ braintree-loader__container {
       display: none;
     }
 
+    .braintree-form__field-error-icon use {
+      fill: $error-color;
+    }
+
     &.braintree-form__field-group--has-error .braintree-form__field-error {
       display: block;
     }
