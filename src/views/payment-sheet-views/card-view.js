@@ -201,6 +201,8 @@ CardView.prototype._onBlurEvent = function (event) {
 
   if (!field.isValid && !field.isEmpty) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
+  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
+    this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
 };
 
@@ -244,13 +246,11 @@ CardView.prototype._onNotEmptyEvent = function (event) {
 };
 
 CardView.prototype._onValidityChangeEvent = function (event) {
-  var cardType, isValid;
+  var isValid;
   var field = event.fields[event.emittedBy];
-  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   if (event.emittedBy === 'number' && event.cards[0]) {
-    cardType = constants.configurationCardTypes[event.cards[0].type];
-    isValid = field.isValid && supportedCardTypes.indexOf(cardType) !== -1;
+    isValid = field.isValid && this._isCardTypeSupported(event.cards[0].type);
   } else {
     isValid = field.isValid;
   }
@@ -278,6 +278,13 @@ CardView.prototype._hideUnsupportedCardIcons = function () {
       classlist.add(cardIcon, 'braintree-hidden');
     }
   }.bind(this));
+};
+
+CardView.prototype._isCardTypeSupported = function (cardType) {
+  var configurationCardType = constants.configurationCardTypes[cardType];
+  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+
+  return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
 
 function camelCaseToSnakeCase(string) {

@@ -362,6 +362,7 @@ describe('CardView', function () {
         strings: strings,
         tokenize: CardView.prototype.tokenize,
         _hideUnsupportedCardIcons: function () {},
+        _isCardTypeSupported: CardView.prototype._isCardTypeSupported,
         _onBlurEvent: function () {},
         _onCardTypeChangeEvent: function () {},
         _onFocusEvent: function () {},
@@ -439,6 +440,7 @@ describe('CardView', function () {
 
       it('removes braintree-form__field-group--is-focused class when blurred', function () {
         var fakeEvent = {
+          cards: [{type: 'visa'}],
           emittedBy: 'number',
           fields: {
             number: {isEmpty: true}
@@ -459,6 +461,7 @@ describe('CardView', function () {
 
       it('does not hide the card number icon when the number field is blurred and not empty', function () {
         var fakeEvent = {
+          cards: [{type: 'visa'}],
           emittedBy: 'number',
           fields: {
             number: {isEmpty: false}
@@ -497,6 +500,17 @@ describe('CardView', function () {
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
+        this.context.client.getConfiguration = function () {
+          return {
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: ['Visa']
+              }
+            }
+          };
+        };
+
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
 
@@ -506,9 +520,9 @@ describe('CardView', function () {
         expect(numberFieldError.textContent).to.equal('This card number is not valid.');
       });
 
-      // TODO determine desired behavior if empty
-      xit('does not apply error class if field is not valid but is empty', function () {
+      it('does not apply error class if field is not valid but is empty', function () {
         var fakeEvent = {
+          cards: [{type: 'visa'}],
           emittedBy: 'number',
           fields: {
             number: {
@@ -517,12 +531,28 @@ describe('CardView', function () {
             }
           }
         };
+        var modelOptions = fake.modelOptions();
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        classlist.add(numberFieldGroup, 'braintree-form__field-group--has-error');
+        this.context.client.getConfiguration = function () {
+          return {
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: ['Visa']
+              }
+            }
+          };
+        };
+
+        modelOptions.client.getConfiguration = this.context.client.getConfiguration;
+
+        this.context.model = new DropinModel(modelOptions);
+
+        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
 
         CardView.prototype._initialize.call(this.context);
@@ -759,6 +789,7 @@ describe('CardView', function () {
       it('adds braintree-form__field--valid class to valid expiration date field', function () {
         var expirationElement = this.element.querySelector('.braintree-form-expiration');
         var fakeEvent = {
+          cards: [{type: 'visa'}],
           emittedBy: 'expirationDate',
           fields: {
             expirationDate: {
@@ -785,6 +816,7 @@ describe('CardView', function () {
       it('removes braintree-form__field--valid class to invalid expiration date field', function () {
         var expirationElement = this.element.querySelector('.braintree-form-expiration');
         var fakeEvent = {
+          cards: [{type: 'visa'}],
           emittedBy: 'expirationDate',
           fields: {
             expirationDate: {
