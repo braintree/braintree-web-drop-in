@@ -41,7 +41,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   fill: $black-40;
 }
 
-braintree-loader__container {
+.braintree-loader__container {
   display: flex;
   align-items: center;
   justify-content: center;
