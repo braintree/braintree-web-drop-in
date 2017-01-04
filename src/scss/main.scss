@@ -154,8 +154,48 @@ braintree-loader__container {
   width: 99%;
 }
 
+.braintree-sheet--has-error .braintree-sheet {
+  border: 2px solid $error-color;
+  border-radius: 4px 4px 0 0;
+}
+
 .braintree-sheet__container {
   margin: 0 auto 13px auto;
+
+}
+
+.braintree-sheet__error {
+  display: none;
+  margin: 0 auto;
+  width: 99%;
+}
+
+.braintree-sheet--has-error .braintree-sheet__error {
+  background-color: $error-color;
+  border-width: 0 0 1px 0;
+  border-color: $error-color;
+  border-style: solid;
+  border-radius: 0 0 4px 4px;
+  display: flex;
+  align-items: center;
+  padding: 11px;
+
+  .braintree-sheet__error-icon {
+    position: absolute;
+    left: 5px;
+    padding-top: 4px;
+
+    use {
+      fill: white;
+    }
+  }
+
+  .braintree-sheet__error-text {
+    color: white;
+    font-weight: bold;
+    margin: 0 auto;
+    padding: 0 30px 0 30px; // Prevent text from overlapping with icon
+  }
 }
 
 .braintree-methods {
