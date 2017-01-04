@@ -21,7 +21,7 @@ module.exports = {
   genericError: 'Something went wrong on our end.',
   hostedFieldsFailedTokenizationError: 'Please check your information and try again.',
   hostedFieldsFieldsInvalidError: 'Please check your information and try again.',
-  paypalAccountTokenizationFailed: 'Something went wrong adding the PayPal account. Please try again.',
+  paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
   paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
