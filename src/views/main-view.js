@@ -20,15 +20,15 @@ MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
   var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
-  var paymentMethodsViews, paymentOptionsView, sheetContainer;
+  var paymentMethodsViews, paymentOptionsView;
   var paymentMethods = this.model.getPaymentMethods();
 
   this._views = {};
 
-  sheetContainer = this.getElementById('sheet-container');
+  this.sheetContainer = this.getElementById('sheet-container');
+  this.sheetErrorText = this.getElementById('sheet-error-text');
 
   this.toggle = this.getElementById('toggle');
-  this.alert = this.getElementById('alert');
 
   this.loadingContainer = this.getElementById('loading-container');
   this.loadingIndicator = this.getElementById('loading-indicator');
@@ -76,12 +76,12 @@ MainView.prototype._initialize = function () {
   this.model.on('changeActivePaymentView', function (id) {
     if (id === PaymentMethodsView.ID) {
       classlist.add(paymentMethodsViews.element, 'braintree-methods--active');
-      classlist.remove(sheetContainer, 'braintree-sheet--active');
+      classlist.remove(this.sheetContainer, 'braintree-sheet--active');
     } else {
-      classlist.add(sheetContainer, 'braintree-sheet--active');
+      classlist.add(this.sheetContainer, 'braintree-sheet--active');
       classlist.remove(paymentMethodsViews.element, 'braintree-methods--active');
     }
-  });
+  }.bind(this));
 
   if (hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
@@ -204,7 +204,7 @@ MainView.prototype.hideToggle = function () {
   classlist.add(this.toggle, 'braintree-hidden');
 };
 
-MainView.prototype.showAlert = function (error) {
+MainView.prototype.showSheetError = function (error) {
   var errorMessage;
 
   if (error && error.code && this.strings[snakeCaseToCamelCase(error.code) + 'Error']) {
@@ -213,12 +213,12 @@ MainView.prototype.showAlert = function (error) {
     errorMessage = error.message || this.strings.genericError;
   }
 
-  classlist.remove(this.alert, 'braintree-hidden');
-  this.alert.textContent = errorMessage;
+  classlist.add(this.sheetContainer, 'braintree-sheet--has-error');
+  this.sheetErrorText.textContent = errorMessage;
 };
 
-MainView.prototype.hideAlert = function () {
-  classlist.add(this.alert, 'braintree-hidden');
+MainView.prototype.hideSheetError = function () {
+  classlist.remove(this.sheetContainer, 'braintree-sheet--has-error');
 };
 
 MainView.prototype.teardown = function (callback) {

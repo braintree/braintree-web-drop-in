@@ -386,29 +386,30 @@ describe('MainView', function () {
     });
   });
 
-  describe('showAlert', function () {
+  describe('showSheetError', function () {
     beforeEach(function () {
       this.context = {
-        alert: document.createElement('div'),
+        sheetContainer: document.createElement('div'),
+        sheetErrorText: document.createElement('div'),
         strings: strings
       };
     });
 
-    it('shows the alert', function () {
-      MainView.prototype.showAlert.call(this.context, {});
+    it('applies the braintree-sheet--has-error class to sheet container', function () {
+      MainView.prototype.showSheetError.call(this.context, {});
 
-      expect(this.context.alert.classList.contains('braintree-hidden')).to.be.false;
+      expect(this.context.sheetContainer.classList.contains('braintree-sheet--has-error')).to.be.true;
     });
 
-    it('sets the alert to the expected message for the error code', function () {
+    it('sets the error text to the expected message for the error code', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FAILED_TOKENIZATION',
         message: 'Some text we do not use'
       };
 
-      MainView.prototype.showAlert.call(this.context, fakeError);
+      MainView.prototype.showSheetError.call(this.context, fakeError);
 
-      expect(this.context.alert.textContent).to.equal('Please check your information and try again.');
+      expect(this.context.sheetErrorText.textContent).to.equal('Please check your information and try again.');
     });
 
     it('shows the raw error message when the error has an unknown error code', function () {
@@ -417,9 +418,9 @@ describe('MainView', function () {
         message: 'Some text we will use because we do not know this error code'
       };
 
-      MainView.prototype.showAlert.call(this.context, fakeError);
+      MainView.prototype.showSheetError.call(this.context, fakeError);
 
-      expect(this.context.alert.textContent).to.equal('Some text we will use because we do not know this error code');
+      expect(this.context.sheetErrorText.textContent).to.equal('Some text we will use because we do not know this error code');
     });
 
     it('shows a fallback error message when the error code is unknown and the error is missing a message', function () {
@@ -427,23 +428,25 @@ describe('MainView', function () {
         code: 'AN_UNKNOWN_ERROR'
       };
 
-      MainView.prototype.showAlert.call(this.context, fakeError);
+      MainView.prototype.showSheetError.call(this.context, fakeError);
 
-      expect(this.context.alert.textContent).to.equal('Something went wrong on our end.');
+      expect(this.context.sheetErrorText.textContent).to.equal('Something went wrong on our end.');
     });
   });
 
-  describe('hideAlert', function () {
+  describe('hideSheetError', function () {
     beforeEach(function () {
       this.context = {
-        alert: document.createElement('div')
+        sheetContainer: document.createElement('div')
       };
     });
 
-    it('hides the alert', function () {
-      MainView.prototype.hideAlert.call(this.context);
+    it('removes the braintree-sheet--has-error class from sheet container', function () {
+      classlist.add(this.context.sheetContainer, 'braintree-sheet--has-error');
 
-      expect(this.context.alert.classList.contains('braintree-hidden')).to.be.true;
+      MainView.prototype.hideSheetError.call(this.context);
+
+      expect(this.context.sheetContainer.classList.contains('braintree-sheet--has-error')).to.be.false;
     });
   });
 
