@@ -20,7 +20,6 @@ PayPalView.prototype._initialize = function () {
 
   paypal.create({client: this.client}, function (err, paypalInstance) {
     if (err) {
-      // TODO: handle errors in PayPal creation
       console.error(err);
       return;
     }
@@ -65,10 +64,11 @@ PayPalView.prototype._tokenize = function () {
     this._authInProgress = false;
     if (tokenizeErr) {
       if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
-        this.model.reportError(tokenizeErr);
-        if (tokenizeErr.code === 'PAYPAL_INVALID_PAYMENT_OPTION' || tokenizeErr.code === 'PAYPAL_FLOW_OPTION_REQUIRED') {
-					// TODO: handle tokenization errors
+        if (tokenizeErr.type === 'MERCHANT') {
           console.error(tokenizeErr);
+          this.model.reportError(null);
+        } else {
+          this.model.reportError(tokenizeErr);
         }
       }
       return;

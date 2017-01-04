@@ -39,6 +39,9 @@ MainView.prototype._initialize = function () {
   this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
+  this.model.on('errorOccurred', this.showSheetError.bind(this));
+  this.model.on('errorCleared', this.hideSheetError.bind(this));
+
   this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (ids, sheetViewKey) {
     var PaymentSheetView, paymentSheetView;
 
@@ -205,12 +208,12 @@ MainView.prototype.hideToggle = function () {
 };
 
 MainView.prototype.showSheetError = function (error) {
-  var errorMessage;
+  var errorMessage = this.strings.genericError;
 
   if (error && error.code && this.strings[snakeCaseToCamelCase(error.code) + 'Error']) {
     errorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
-  } else {
-    errorMessage = error.message || this.strings.genericError;
+  } else if (error && error.message) {
+    errorMessage = error.message;
   }
 
   classlist.add(this.sheetContainer, 'braintree-sheet--has-error');

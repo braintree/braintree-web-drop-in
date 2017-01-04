@@ -89,7 +89,8 @@ CardView.prototype._initialize = function () {
 
   hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
     if (err) {
-      this.model.reportError(err);
+      // TODO add back in when adding sheet errors to CardView
+      // this.model.reportError(err);
       this.model.endLoading();
       return;
     }
@@ -112,7 +113,7 @@ CardView.prototype.tokenize = function (callback) {
   var state = this.hostedFieldsInstance.getState();
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
-  this.model.clearError();
+  // this.model.clearError();
 
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
@@ -144,7 +145,7 @@ CardView.prototype.tokenize = function (callback) {
       this.model.endLoading();
 
       if (err) {
-        this.model.reportError(err);
+        // this.model.reportError(err);
         callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
         return;
       }
