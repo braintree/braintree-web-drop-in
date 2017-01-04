@@ -481,7 +481,7 @@ describe('CardView', function () {
         expect(this.context.cardNumberIcon.classList.contains('braintree-hidden')).to.be.false;
       });
 
-      it('applies error class if field is not valid and is not empty', function () {
+      it('applies error class if field is not valid', function () {
         var fakeEvent = {
           emittedBy: 'number',
           fields: {
@@ -521,7 +521,7 @@ describe('CardView', function () {
         expect(numberFieldError.textContent).to.equal('This card number is not valid.');
       });
 
-      it('does not apply error class if field is not valid but is empty', function () {
+      it('does apply error class if field is empty', function () {
         var fakeEvent = {
           cards: [{type: 'visa'}],
           emittedBy: 'number',
@@ -537,6 +537,7 @@ describe('CardView', function () {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent)
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
+        var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
 
         this.context.client.getConfiguration = function () {
           return {
@@ -558,7 +559,8 @@ describe('CardView', function () {
 
         CardView.prototype._initialize.call(this.context);
 
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.true;
+        expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
       });
     });
 
@@ -1150,7 +1152,7 @@ describe('CardView', function () {
       CardView.prototype.tokenize.call(this.context, function () {});
 
       expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberFieldError.textContent).to.equal('Please fill out a number.');
+      expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
