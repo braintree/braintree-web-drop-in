@@ -73,14 +73,14 @@ CardView.prototype._initialize = function () {
   this.cvvIcon = this.getElementById('cvv-icon');
   this.cvvIconSvg = this.getElementById('cvv-icon-svg');
   this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
-  this.inlineErrors = {};
+  this.fieldErrors = {};
 
   if (!hasCVV) {
-    this.getElementById('cvv-container').remove();
+    this.getElementById('cvv-field-group').remove();
     delete hfOptions.fields.cvv;
   }
   if (!hasPostal) {
-    this.getElementById('postal-code-container').remove();
+    this.getElementById('postal-code-field-group').remove();
     delete hfOptions.fields.postalCode;
   }
 
@@ -118,10 +118,10 @@ CardView.prototype.tokenize = function (callback) {
     var field = state.fields[key];
 
     if (field.isEmpty) {
-      this.showInlineError(key, this.strings['fieldEmptyFor' + capitalize(key)]);
+      this.showFieldError(key, this.strings['fieldEmptyFor' + capitalize(key)]);
       formValid = false;
     } else if (!field.isValid) {
-      this.showInlineError(key, this.strings['fieldInvalidFor' + capitalize(key)]);
+      this.showFieldError(key, this.strings['fieldInvalidFor' + capitalize(key)]);
       formValid = false;
     }
   }.bind(this));
@@ -131,7 +131,7 @@ CardView.prototype.tokenize = function (callback) {
     cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
 
     if (!cardTypeSupported) {
-      this.showInlineError('number', this.strings.unsupportedCardTypeError);
+      this.showFieldError('number', this.strings.unsupportedCardTypeError);
       callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
       return;
     }
@@ -161,28 +161,28 @@ CardView.prototype.tokenize = function (callback) {
   }
 };
 
-CardView.prototype.showInlineError = function (field, errorMessage) {
-  var inlineError;
+CardView.prototype.showFieldError = function (field, errorMessage) {
+  var fieldError;
+  var fieldGroup = this.getElementById(camelCaseToSnakeCase(field) + '-field-group');
 
-  if (!this.inlineErrors.hasOwnProperty(field)) {
-    this.inlineErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-inline-error');
+  if (!this.fieldErrors.hasOwnProperty(field)) {
+    this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
   }
 
-  inlineError = this.inlineErrors[field];
-  inlineError.textContent = errorMessage;
-  classlist.remove(inlineError, 'braintree-hidden');
+  classlist.add(fieldGroup, 'braintree-form__field-group--has-error');
+
+  fieldError = this.fieldErrors[field];
+  fieldError.textContent = errorMessage;
 };
 
-CardView.prototype.hideInlineError = function (field) {
-  var inlineError;
+CardView.prototype.hideFieldError = function (field) {
+  var fieldGroup = this.getElementById(camelCaseToSnakeCase(field) + '-field-group');
 
-  if (!this.inlineErrors.hasOwnProperty(field)) {
-    this.inlineErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-inline-error');
+  if (!this.fieldErrors.hasOwnProperty(field)) {
+    this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
   }
 
-  inlineError = this.inlineErrors[field];
-  classlist.add(inlineError, 'braintree-hidden');
-  inlineError.textContent = '';
+  classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
 };
 
 CardView.prototype.teardown = function (callback) {
@@ -194,12 +194,17 @@ CardView.prototype._generateFieldSelector = function (field) {
 };
 
 CardView.prototype._onBlurEvent = function (event) {
-  if (event.emittedBy === 'number') {
-    if (event.fields.number.isEmpty) {
-      classlist.add(this.cardNumberIcon, 'braintree-hidden');
-    }
-  } else if (event.emittedBy === 'cvv') {
-    classlist.add(this.cvvIcon, 'braintree-hidden');
+  var field = event.fields[event.emittedBy];
+  var fieldGroup = this.getElementById(camelCaseToSnakeCase(event.emittedBy) + '-field-group');
+
+  classlist.remove(fieldGroup, 'braintree-form__field-group--is-focused');
+
+  if (field.isEmpty) {
+    this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
+  } else if (!field.isValid) {
+    this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
+  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
+    this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
 };
 
@@ -227,6 +232,10 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 };
 
 CardView.prototype._onFocusEvent = function (event) {
+  var fieldGroup = this.getElementById(camelCaseToSnakeCase(event.emittedBy) + '-field-group');
+
+  classlist.add(fieldGroup, 'braintree-form__field-group--is-focused');
+
   if (event.emittedBy === 'number') {
     classlist.remove(this.cardNumberIcon, 'braintree-hidden');
   } else if (event.emittedBy === 'cvv') {
@@ -235,16 +244,23 @@ CardView.prototype._onFocusEvent = function (event) {
 };
 
 CardView.prototype._onNotEmptyEvent = function (event) {
-  this.hideInlineError(event.emittedBy);
+  this.hideFieldError(event.emittedBy);
 };
 
 CardView.prototype._onValidityChangeEvent = function (event) {
+  var isValid;
   var field = event.fields[event.emittedBy];
 
-  if (field.isPotentiallyValid) {
-    this.hideInlineError(event.emittedBy);
+  if (event.emittedBy === 'number' && event.cards[0]) {
+    isValid = field.isValid && this._isCardTypeSupported(event.cards[0].type);
   } else {
-    this.showInlineError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
+    isValid = field.isValid;
+  }
+
+  classlist.toggle(field.container, 'braintree-form__field--valid', isValid);
+
+  if (field.isPotentiallyValid) {
+    this.hideFieldError(event.emittedBy);
   }
 };
 
@@ -264,6 +280,13 @@ CardView.prototype._hideUnsupportedCardIcons = function () {
       classlist.add(cardIcon, 'braintree-hidden');
     }
   }.bind(this));
+};
+
+CardView.prototype._isCardTypeSupported = function (cardType) {
+  var configurationCardType = constants.configurationCardTypes[cardType];
+  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+
+  return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
 
 function camelCaseToSnakeCase(string) {

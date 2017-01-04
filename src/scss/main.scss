@@ -2,8 +2,9 @@ $border-color: #B5B5B5;
 $text-color: #000000;
 $background-color: #FAFAFA;
 $highlight-color: #219653;
-$error-color: #CC0000;
+$error-color: #EB5757;
 $black-40: lighten(#000000, 40%);
+$black-45: lighten(#000000, 45%);
 $black-75: lighten(#000000, 75%);
 $curve-swing: cubic-bezier(0.645, 0.045, 0.355, 1);
 $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
@@ -218,8 +219,16 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   padding: 10px 15px 10px 10px;
 
   .braintree-form__field-group {
-    margin-bottom: 10px;
     padding-left: 5px;
+    margin-bottom: 10px;
+
+    &.braintree-form__field-group--has-error {
+      margin-bottom: 3px;
+
+      .braintree-form__field .braintree-form__hosted-field {
+        border-color: $error-color;
+      }
+    }
 
     .braintree-form__label {
       color: $text-color;
@@ -241,15 +250,11 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     .braintree-form__field {
       position: relative;
 
-      .braintree-form__icon {
+      .braintree-form__icon-container {
         position: absolute;
         top: 50%;
         margin-top: -14px;
         right: 5px;
-
-        &.braintree-hidden {
-          display: none;
-        }
       }
 
       .braintree-form__hosted-field {
@@ -257,7 +262,36 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
         height: 44px;
         margin: 4px 0 0;
         padding: 0px 8px 0px 8px;
+
+        &.braintree-form__field--valid {
+          border-color: $black-45;
+        }
       }
+    }
+
+    .braintree-form__field-error-icon,
+    .braintree-form__field-secondary-icon,
+    &.braintree-form__field-group--has-error .braintree-form__field-secondary-icon,
+    &.braintree-form__field-group--has-error.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon {
+      display: none;
+    }
+
+    &.braintree-form__field-group--has-error .braintree-form__field-error-icon,
+    &.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon {
+      display: block;
+    }
+
+    .braintree-form__field-error {
+      color: $error-color;
+      font-size: 13px;
+      margin: 3px 0 3px 0;
+      padding: 0;
+      line-height: 1.4;
+      display: none;
+    }
+
+    &.braintree-form__field-group--has-error .braintree-form__field-error {
+      display: block;
     }
   }
 
@@ -372,17 +406,6 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     border-bottom: 1px solid $border-color;
     padding-bottom: 1px;
   }
-
-  &.braintree-hidden {
-    display: none;
-  }
-}
-
-.braintree-inline-error {
-  color: $error-color;
-  margin: 0;
-  padding: 0;
-  line-height: 1.4;
 
   &.braintree-hidden {
     display: none;

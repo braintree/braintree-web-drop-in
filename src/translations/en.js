@@ -12,7 +12,7 @@ module.exports = {
   // Errors
   fieldEmptyForCvv: 'Please fill out a CVV.',
   fieldEmptyForExpirationDate: 'Please fill out an expiration date.',
-  fieldEmptyForNumber: 'Please fill out a number.',
+  fieldEmptyForNumber: 'Please fill out a card number.',
   fieldEmptyForPostalCode: 'Please fill out a postal code.',
   fieldInvalidForCvv: 'This security code is not valid.',
   fieldInvalidForExpirationDate: 'This expiration date is not valid.',
