@@ -86,7 +86,7 @@ This is a full example of a Drop-in integration only accepting credit cards.
         selector: '#dropin-container'
       }, function (err, dropinInstance) {
         if (err) {
-          // Handle any errors that might've occured when creating Drop-in
+          // Handle any errors that might've occurred when creating Drop-in
           console.error(err);
           return;
         }
