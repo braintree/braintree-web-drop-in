@@ -230,6 +230,16 @@ describe('MainView', function () {
       delete PayPalView.prototype.closeFrame;
     });
 
+    it('clears any errors', function () {
+      var mainView = new MainView(this.mainViewOptions);
+
+      this.sandbox.stub(mainView.model, 'clearError');
+
+      mainView.setPrimaryView(CardView.ID);
+
+      expect(mainView.model.clearError).to.have.been.calledOnce;
+    });
+
     [
       CardView,
       PaymentMethodsView,
@@ -261,18 +271,6 @@ describe('MainView', function () {
 
         expect(mainView.model.getActivePaymentView()).to.equal(View.ID);
       });
-    });
-
-    // TODO: Pending until we update errors
-    xit('clears any errors', function () {
-      var mainView = new MainView(this.mainViewOptions);
-
-      mainView._views = this.views;
-      this.sandbox.stub(DropinModel.prototype, 'clearError');
-
-      mainView.setPrimaryView('id1');
-
-      expect(DropinModel.prototype.clearError).to.have.been.calledOnce;
     });
 
     // TODO: Pending until we update to support no flexbox
@@ -460,16 +458,14 @@ describe('MainView', function () {
         addView: this.sandbox.stub(),
         element: element,
         getElementById: BaseView.prototype.getElementById,
-        hideAlert: this.sandbox.stub(),
+        hideSheetError: this.sandbox.stub(),
         hideLoadingIndicator: function () {},
         model: new DropinModel(fake.modelOptions()),
-        options: {
-          client: {
-            getConfiguration: fake.configuration
-          }
+        client: {
+          getConfiguration: fake.configuration
         },
         setPrimaryView: this.sandbox.stub(),
-        showAlert: this.sandbox.stub(),
+        showSheetError: this.sandbox.stub(),
         toggleAdditionalOptions: function () {},
         showLoadingIndicator: function () {}
       };
@@ -477,22 +473,20 @@ describe('MainView', function () {
       MainView.prototype._initialize.call(this.context);
     });
 
-    // TODO: Pending until we update errors
-    xit('calls showAlert when errorOccurred is emitted', function () {
+    it('calls showSheetError when errorOccurred is emitted', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
       };
 
       this.context.model._emit('errorOccurred', fakeError);
 
-      expect(this.context.showAlert).to.be.calledWith(fakeError);
+      expect(this.context.showSheetError).to.be.calledWith(fakeError);
     });
 
-    // TODO: Pending until we update errors
-    xit('calls hideAlert when errorCleared is emitted', function () {
+    it('calls hideSheetError when errorCleared is emitted', function () {
       this.context.model._emit('errorCleared');
 
-      expect(this.context.hideAlert).to.be.called;
+      expect(this.context.hideSheetError).to.be.called;
     });
   });
 
