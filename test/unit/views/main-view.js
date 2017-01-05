@@ -859,7 +859,7 @@ describe('MainView', function () {
       });
     });
 
-    it('waits to call callback until asyncronous teardowns complete', function (done) {
+    it('waits to call callback until asynchronous teardowns complete', function (done) {
       var payWithCardView = this.context._views['braintree-card-view'];
 
       payWithCardView.teardown.yieldsAsync();

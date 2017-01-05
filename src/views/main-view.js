@@ -6,6 +6,7 @@ var sheetViews = require('./payment-sheet-views');
 var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
+var strings = require('../translations/en'); // todo: locale support
 
 function MainView() {
   BaseView.apply(this, arguments);
@@ -22,6 +23,8 @@ MainView.prototype._initialize = function () {
   var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var paymentMethodsViews, paymentOptionsView;
   var paymentMethods = this.model.getPaymentMethods();
+
+  this.strings = strings;
 
   this._views = {};
 

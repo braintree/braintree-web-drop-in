@@ -215,8 +215,7 @@ describe('CardView', function () {
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
     });
 
-    // TODO: unskip error tests when we add sheet errors to the CardView
-    xit('reports an error to DropinModel when Hosted Fields creation fails', function () {
+    it('reports an error to DropinModel when Hosted Fields creation fails', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
@@ -1048,7 +1047,7 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('does not tokenize if form is not valid', function () {
+    it('calls callback with error and reports error to DropinModel if form is not valid', function (done) {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1061,12 +1060,18 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function () {});
+      this.sandbox.stub(this.context.model, 'reportError');
 
-      expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
+      CardView.prototype.tokenize.call(this.context, function (err, payload) {
+        expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
+        expect(this.context.model.reportError).to.be.calledWith({message: 'Please check your information and try again.'});
+        expect(err.message).to.equal('No payment method is available.');
+        expect(payload).to.not.exist;
+        done();
+      }.bind(this));
     });
 
-    xit('reports an error to DropinModel when Hosted Fields tokenization returns an error', function () {
+    it('reports an error to DropinModel when Hosted Fields tokenization returns an error', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
@@ -1079,42 +1084,10 @@ describe('CardView', function () {
       expect(this.context.model.reportError).to.be.calledWith(fakeError);
     });
 
-    xit('reports an error to DropinModel when Hosted Fields returns a tokenization failure error', function () {
-      var fakeError = {
-        code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
-      };
-
-      this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
-      this.sandbox.stub(this.context.model, 'reportError');
-
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.model.reportError).to.be.calledWith(fakeError);
-    });
-
-    xit('reports an error to DropinModel when Hosted Fields returns a fields invalid error', function () {
-      var fakeError = {
-        code: 'HOSTED_FIELDS_FIELDS_INVALID'
-      };
-
-      this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
-      this.sandbox.stub(this.context.model, 'reportError');
-
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.model.reportError).to.be.calledWith(fakeError);
-    });
-
-    xit('clears previous errors', function () {
-      this.sandbox.stub(this.context.model, 'clearError');
-
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.model.clearError).to.be.called;
-    });
-
-    it('shows unsupported card field error when attempting to use an unsupported card', function () {
+    it('shows unsupported card field error when attempting to use an unsupported card and reports an error', function () {
       var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
+
+      this.sandbox.stub(this.context.model, 'reportError');
 
       this.context.client.getConfiguration = function () {
         return {
@@ -1130,6 +1103,7 @@ describe('CardView', function () {
 
       expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
       expect(numberFieldError.textContent).to.equal('This card type is not supported. Please try another card.');
+      expect(this.context.model.reportError).to.be.calledWith({message: 'Please check your information and try again.'});
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
