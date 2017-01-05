@@ -179,10 +179,15 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   display: flex;
   align-items: center;
   padding: 6px;
+  position: relative;
 
   .braintree-sheet__error-icon {
     position: absolute;
-    padding-top: 4px;
+    top: 50%;
+    margin-top: -12px;
+    height: 24px;
+    width: 24px;
+    left: 13px;
 
     use {
       fill: white;
@@ -193,7 +198,9 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     color: white;
     font-weight: bold;
     margin: 0 auto;
-    padding: 0 30px 0 30px; // Prevent text from overlapping with icon
+    padding: 0 42px; // Prevent text from overlapping with icon
+    text-align: center;
+    font-size: 14px;
   }
 }
 
@@ -300,8 +307,8 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
       .braintree-form__icon-container {
         position: absolute;
         top: 50%;
-        margin-top: -14px;
-        right: 5px;
+        margin-top: -12px;
+        right: 11px;
       }
 
       .braintree-form__hosted-field {
