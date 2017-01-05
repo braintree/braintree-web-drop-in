@@ -258,7 +258,7 @@ describe('Dropin', function () {
       });
     });
 
-    xit('loads localized strings into mainView when options.locale is specified', function (done) {
+    it('loads localized strings into mainView when options.locale is specified', function (done) {
       var instance;
 
       this.dropinOptions.merchantConfiguration.locale = 'es';
@@ -270,7 +270,7 @@ describe('Dropin', function () {
       });
     });
 
-    xit('loads localized strings into mainView when options.locale is a supported locale ID', function (done) {
+    it('loads localized strings into mainView when options.locale is a supported locale ID', function (done) {
       var instance;
 
       this.dropinOptions.merchantConfiguration.locale = 'en_GB';

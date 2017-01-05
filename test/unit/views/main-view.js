@@ -748,7 +748,8 @@ describe('MainView', function () {
         client: this.client,
         merchantConfiguration: {
           authorization: 'fake_tokenization_key'
-        }
+        },
+        strings: strings
       });
     });
 
