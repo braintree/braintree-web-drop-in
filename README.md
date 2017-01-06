@@ -59,7 +59,7 @@ braintree.dropin.create({
 
 You can find more PayPal configuration options in the [Braintree JS client SDK v3 reference](https://braintree.github.io/braintree-web/current/PayPal.html#tokenize).
 
-The structure of the PayPal payment method objects that will be returned from Drop-in can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizeReturn);
+The structure of the PayPal payment method objects that will be returned from Drop-in can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizePayload);
 
 ## Full example
 
