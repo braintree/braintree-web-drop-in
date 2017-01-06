@@ -459,27 +459,6 @@ describe('CardView', function () {
         expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.false;
       });
 
-      it('does not hide the card number icon when the number field is blurred and not empty', function () {
-        var fakeEvent = {
-          cards: [{type: 'visa'}],
-          emittedBy: 'number',
-          fields: {
-            number: {isEmpty: false}
-          }
-        };
-        var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
-        };
-        var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
-
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        classlist.remove(cardNumberIcon, 'braintree-hidden');
-
-        CardView.prototype._initialize.call(this.context);
-
-        expect(this.context.cardNumberIcon.classList.contains('braintree-hidden')).to.be.false;
-      });
-
       it('applies error class if field is not valid', function () {
         var fakeEvent = {
           emittedBy: 'number',
@@ -566,6 +545,61 @@ describe('CardView', function () {
     describe('onCardTypeChange event', function () {
       beforeEach(function () {
         this.context._onCardTypeChangeEvent = CardView.prototype._onCardTypeChangeEvent;
+      });
+
+      it('adds the card-type-known class when there is one possible card type', function () {
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
+        var fakeEvent = {
+          cards: [{type: 'master-card'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.true;
+      });
+
+      it('removes the card-type-known class when there is no possible card type', function () {
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
+        var fakeEvent = {
+          cards: [],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.false;
+      });
+
+      it('removes the card-type-known class when there are many possible card types', function () {
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
+        var fakeEvent = {
+          cards: [{type: 'master-card'}, {type: 'foo-pay'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setPlaceholder: function () {}
+        };
+
+        classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.false;
       });
 
       it('updates the card number icon to the card type if there is one possible card type', function () {
@@ -1155,7 +1189,7 @@ describe('CardView', function () {
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('shows invalid field error when attempting to sumbit an invalid field', function () {
+    it('shows invalid field error when attempting to submit an invalid field', function () {
       var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
 
       this.context.hostedFieldsInstance.getState.returns({
