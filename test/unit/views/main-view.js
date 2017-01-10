@@ -230,6 +230,16 @@ describe('MainView', function () {
       delete PayPalView.prototype.closeFrame;
     });
 
+    it('clears any errors', function () {
+      var mainView = new MainView(this.mainViewOptions);
+
+      this.sandbox.stub(mainView.model, 'clearError');
+
+      mainView.setPrimaryView(CardView.ID);
+
+      expect(mainView.model.clearError).to.have.been.calledOnce;
+    });
+
     [
       CardView,
       PaymentMethodsView,
@@ -261,18 +271,6 @@ describe('MainView', function () {
 
         expect(mainView.model.getActivePaymentView()).to.equal(View.ID);
       });
-    });
-
-    // TODO: Pending until we update errors
-    xit('clears any errors', function () {
-      var mainView = new MainView(this.mainViewOptions);
-
-      mainView._views = this.views;
-      this.sandbox.stub(DropinModel.prototype, 'clearError');
-
-      mainView.setPrimaryView('id1');
-
-      expect(DropinModel.prototype.clearError).to.have.been.calledOnce;
     });
 
     // TODO: Pending until we update to support no flexbox
@@ -386,29 +384,30 @@ describe('MainView', function () {
     });
   });
 
-  describe('showAlert', function () {
+  describe('showSheetError', function () {
     beforeEach(function () {
       this.context = {
-        alert: document.createElement('div'),
+        sheetContainer: document.createElement('div'),
+        sheetErrorText: document.createElement('div'),
         strings: strings
       };
     });
 
-    it('shows the alert', function () {
-      MainView.prototype.showAlert.call(this.context, {});
+    it('applies the braintree-sheet--has-error class to sheet container', function () {
+      MainView.prototype.showSheetError.call(this.context, {});
 
-      expect(this.context.alert.classList.contains('braintree-hidden')).to.be.false;
+      expect(this.context.sheetContainer.classList.contains('braintree-sheet--has-error')).to.be.true;
     });
 
-    it('sets the alert to the expected message for the error code', function () {
+    it('sets the error text to the expected message for the error code', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FAILED_TOKENIZATION',
         message: 'Some text we do not use'
       };
 
-      MainView.prototype.showAlert.call(this.context, fakeError);
+      MainView.prototype.showSheetError.call(this.context, fakeError);
 
-      expect(this.context.alert.textContent).to.equal('Please check your information and try again.');
+      expect(this.context.sheetErrorText.textContent).to.equal('Please check your information and try again.');
     });
 
     it('shows the raw error message when the error has an unknown error code', function () {
@@ -417,9 +416,9 @@ describe('MainView', function () {
         message: 'Some text we will use because we do not know this error code'
       };
 
-      MainView.prototype.showAlert.call(this.context, fakeError);
+      MainView.prototype.showSheetError.call(this.context, fakeError);
 
-      expect(this.context.alert.textContent).to.equal('Some text we will use because we do not know this error code');
+      expect(this.context.sheetErrorText.textContent).to.equal('Some text we will use because we do not know this error code');
     });
 
     it('shows a fallback error message when the error code is unknown and the error is missing a message', function () {
@@ -427,23 +426,25 @@ describe('MainView', function () {
         code: 'AN_UNKNOWN_ERROR'
       };
 
-      MainView.prototype.showAlert.call(this.context, fakeError);
+      MainView.prototype.showSheetError.call(this.context, fakeError);
 
-      expect(this.context.alert.textContent).to.equal('Something went wrong on our end.');
+      expect(this.context.sheetErrorText.textContent).to.equal('Something went wrong on our end.');
     });
   });
 
-  describe('hideAlert', function () {
+  describe('hideSheetError', function () {
     beforeEach(function () {
       this.context = {
-        alert: document.createElement('div')
+        sheetContainer: document.createElement('div')
       };
     });
 
-    it('hides the alert', function () {
-      MainView.prototype.hideAlert.call(this.context);
+    it('removes the braintree-sheet--has-error class from sheet container', function () {
+      classlist.add(this.context.sheetContainer, 'braintree-sheet--has-error');
 
-      expect(this.context.alert.classList.contains('braintree-hidden')).to.be.true;
+      MainView.prototype.hideSheetError.call(this.context);
+
+      expect(this.context.sheetContainer.classList.contains('braintree-sheet--has-error')).to.be.false;
     });
   });
 
@@ -457,16 +458,14 @@ describe('MainView', function () {
         addView: this.sandbox.stub(),
         element: element,
         getElementById: BaseView.prototype.getElementById,
-        hideAlert: this.sandbox.stub(),
+        hideSheetError: this.sandbox.stub(),
         hideLoadingIndicator: function () {},
         model: new DropinModel(fake.modelOptions()),
-        options: {
-          client: {
-            getConfiguration: fake.configuration
-          }
+        client: {
+          getConfiguration: fake.configuration
         },
         setPrimaryView: this.sandbox.stub(),
-        showAlert: this.sandbox.stub(),
+        showSheetError: this.sandbox.stub(),
         toggleAdditionalOptions: function () {},
         showLoadingIndicator: function () {}
       };
@@ -474,22 +473,20 @@ describe('MainView', function () {
       MainView.prototype._initialize.call(this.context);
     });
 
-    // TODO: Pending until we update errors
-    xit('calls showAlert when errorOccurred is emitted', function () {
+    it('calls showSheetError when errorOccurred is emitted', function () {
       var fakeError = {
         code: 'HOSTED_FIELDS_FAILED_TOKENIZATION'
       };
 
       this.context.model._emit('errorOccurred', fakeError);
 
-      expect(this.context.showAlert).to.be.calledWith(fakeError);
+      expect(this.context.showSheetError).to.be.calledWith(fakeError);
     });
 
-    // TODO: Pending until we update errors
-    xit('calls hideAlert when errorCleared is emitted', function () {
+    it('calls hideSheetError when errorCleared is emitted', function () {
       this.context.model._emit('errorCleared');
 
-      expect(this.context.hideAlert).to.be.called;
+      expect(this.context.hideSheetError).to.be.called;
     });
   });
 
@@ -745,7 +742,8 @@ describe('MainView', function () {
         client: this.client,
         merchantConfiguration: {
           authorization: 'fake_tokenization_key'
-        }
+        },
+        strings: strings
       });
     });
 
@@ -856,7 +854,7 @@ describe('MainView', function () {
       });
     });
 
-    it('waits to call callback until asyncronous teardowns complete', function (done) {
+    it('waits to call callback until asynchronous teardowns complete', function (done) {
       var payWithCardView = this.context._views['braintree-card-view'];
 
       payWithCardView.teardown.yieldsAsync();

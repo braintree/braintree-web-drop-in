@@ -112,8 +112,6 @@ CardView.prototype.tokenize = function (callback) {
   var state = this.hostedFieldsInstance.getState();
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
-  this.model.clearError();
-
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
 
@@ -132,6 +130,7 @@ CardView.prototype.tokenize = function (callback) {
 
     if (!cardTypeSupported) {
       this.showFieldError('number', this.strings.unsupportedCardTypeError);
+      this.model.reportError({message: this.strings.hostedFieldsFieldsInvalidError});
       callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
       return;
     }
@@ -157,6 +156,7 @@ CardView.prototype.tokenize = function (callback) {
       callback(null, payload);
     }.bind(this));
   } else {
+    this.model.reportError({message: this.strings.hostedFieldsFieldsInvalidError});
     callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
   }
 };
