@@ -10,7 +10,7 @@ function _millisToSeconds(millis) {
 
 function sendAnalyticsEvent(client, kind, callback) {
   var configuration = client.getConfiguration();
-  var request = client._request;
+  var analyticsRequest = client._request;
   var timestamp = _millisToSeconds(Date.now());
   var url = configuration.gatewayConfiguration.analytics.url;
   var data = {
@@ -28,7 +28,7 @@ function sendAnalyticsEvent(client, kind, callback) {
     data.authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
   }
 
-  request({
+  analyticsRequest({
     url: url,
     method: 'post',
     data: data,

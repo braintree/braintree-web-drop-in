@@ -5,6 +5,7 @@ var Dropin = require('../../src/dropin');
 var client = require('braintree-web/client');
 var fake = require('../helpers/fake');
 var dropinConstants = require('../../src/constants');
+var analytics = require('../../src/lib/analytics');
 
 describe('dropin.create', function () {
   beforeEach(function () {
@@ -64,7 +65,9 @@ describe('dropin.create', function () {
 
   it('returns a Dropin instance if client.create returns successfully', function (done) {
     var fakeClient = {
-      getConfiguration: fake.configuration
+      getConfiguration: fake.configuration,
+      request: function () {},
+      _request: function () {}
     };
 
     this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
@@ -86,7 +89,9 @@ describe('dropin.create', function () {
 
   it('returns an error to callback if Drop-in initialization fails', function (done) {
     var fakeClient = {
-      getConfiguration: fake.configuration
+      getConfiguration: fake.configuration,
+      request: function () {},
+      _request: function () {}
     };
     var dropinError = new Error('Dropin Error');
 
@@ -107,7 +112,9 @@ describe('dropin.create', function () {
 
   it('sets the correct analytics metadata', function (done) {
     var fakeClient = {
-      getConfiguration: fake.configuration
+      getConfiguration: fake.configuration,
+      request: function () {},
+      _request: function () {}
     };
 
     this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
@@ -125,6 +132,58 @@ describe('dropin.create', function () {
       expect(configuration.analyticsMetadata.integration).to.equal(dropinConstants.INTEGRATION);
       expect(configuration.analyticsMetadata.integrationType).to.equal(dropinConstants.INTEGRATION);
 
+      done();
+    });
+  });
+
+  it('sends web.dropin.started.tokenization-key event when using a tokenization key', function (done) {
+    var fakeClient = {
+      getConfiguration: fake.configuration,
+      request: function () {},
+      _request: function () {}
+    };
+
+    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+      callback(null, this);
+    });
+    this.sandbox.stub(analytics, 'sendEvent');
+
+    client.create.yields(null, fakeClient);
+
+    dropin.create({
+      authorization: fake.tokenizationKey,
+      selector: '#foo'
+    }, function () {
+      expect(analytics.sendEvent).to.be.calledWith(fakeClient, 'started.tokenization-key');
+      done();
+    });
+  });
+
+  it('sends web.dropin.started.client-token event when using a client token', function (done) {
+    var fakeConfiguration, fakeClient;
+
+    fakeConfiguration = fake.configuration();
+    fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
+    fakeConfiguration.authorization = fake.clientToken;
+
+    fakeClient = {
+      getConfiguration: function () { return fakeConfiguration; },
+      request: function () {},
+      _request: function () {}
+    };
+
+    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+      callback(null, this);
+    });
+    this.sandbox.stub(analytics, 'sendEvent');
+
+    client.create.yields(null, fakeClient);
+
+    dropin.create({
+      authorization: fake.clientToken,
+      selector: '#foo'
+    }, function () {
+      expect(analytics.sendEvent).to.be.calledWith(fakeClient, 'started.client-token');
       done();
     });
   });

@@ -4,6 +4,7 @@ var Dropin = require('../../src/dropin/');
 var deferred = require('../../src/lib/deferred');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
+var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 
@@ -11,6 +12,7 @@ describe('Dropin', function () {
   beforeEach(function () {
     this.client = {
       request: this.sandbox.stub(),
+      _request: this.sandbox.stub(),
       getConfiguration: fake.configuration
     };
 
@@ -132,6 +134,8 @@ describe('Dropin', function () {
       this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
       this.client.request.yields(null, paymentMethodsPayload);
 
+      this.sandbox.stub(analytics, 'sendEvent');
+
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
@@ -151,8 +155,10 @@ describe('Dropin', function () {
     it('does not request payment methods if a customerId is not provided', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
+      this.sandbox.stub(analytics, 'sendEvent');
+
       instance._initialize(function () {
-        expect(this.client.request).to.not.have.been.called;
+        expect(this.client.request).to.not.have.been.calledWith(this.sandbox.match({endpoint: 'payment_methods'}));
 
         done();
       }.bind(this));
@@ -163,10 +169,13 @@ describe('Dropin', function () {
       var fakeClientToken = fake.configuration().gatewayConfiguration;
 
       fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
+
       fakeClientToken = btoa(JSON.stringify(fakeClientToken));
 
       this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
       this.client.request.yields(new Error('This failed'));
+
+      this.sandbox.stub(analytics, 'sendEvent');
 
       instance = new Dropin(this.dropinOptions);
 
@@ -195,6 +204,8 @@ describe('Dropin', function () {
       this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
       this.client.request.yields(null, paymentMethodsPayload);
 
+      this.sandbox.stub(analytics, 'sendEvent');
+
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
@@ -218,6 +229,8 @@ describe('Dropin', function () {
 
       this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
       this.client.request.yields(null, paymentMethodsPayload);
+
+      this.sandbox.stub(analytics, 'sendEvent');
 
       instance = new Dropin(this.dropinOptions);
 
@@ -243,6 +256,21 @@ describe('Dropin', function () {
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
 
       instance._initialize(function () {
+        done();
+      });
+
+      instance._model._emit('asyncDependenciesReady');
+    });
+
+    it('sends web.dropin.appeared event when async dependencies are ready', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+      this.sandbox.stub(analytics, 'sendEvent');
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'appeared');
         done();
       });
 

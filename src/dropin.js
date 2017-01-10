@@ -1,6 +1,7 @@
 'use strict';
 
 var assign = require('./lib/assign').assign;
+var analytics = require('./lib/analytics');
 var MainView = require('./views/main-view');
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
@@ -75,8 +76,9 @@ Dropin.prototype._initialize = function (callback) {
     });
 
     this._model.on('asyncDependenciesReady', function () {
+      analytics.sendEvent(this._client, 'appeared');
       callback(null, dropinInstance);
-    });
+    }.bind(this));
 
     mainViewOptions = {
       client: this._client,
