@@ -28,6 +28,8 @@ module.exports = {
   errors: {
     NO_PAYMENT_METHOD_ERROR: 'No payment method is available.'
   },
+  ANALYTICS_REQUEST_TIMEOUT_MS: 2000,
+  ANALYTICS_PREFIX: 'web.dropin.',
   INTEGRATION: 'dropin',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
