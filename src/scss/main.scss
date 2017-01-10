@@ -154,12 +154,66 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   width: 99%;
 }
 
-.braintree-sheet__container {
-  margin: 0 auto 13px auto;
+.braintree-sheet--has-error .braintree-sheet {
+  border: 2px solid $error-color;
+  border-radius: 4px 4px 0 0;
 }
 
-.braintree-methods {
-  .braintree-sheet--active .braintree-sheet {
+.braintree-sheet__container {
+  margin: 0 auto 13px auto;
+
+}
+
+.braintree-sheet__error {
+  display: none;
+  margin: 0 auto;
+  width: 99%;
+}
+
+.braintree-sheet--has-error .braintree-sheet__error {
+  background-color: $error-color;
+  border-width: 0 0 1px 0;
+  border-color: $error-color;
+  border-style: solid;
+  border-radius: 0 0 4px 4px;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  position: relative;
+
+  .braintree-sheet__error-icon {
+    position: absolute;
+    top: 50%;
+    margin-top: -12px;
+    height: 24px;
+    width: 24px;
+    left: 13px;
+
+    use {
+      fill: white;
+    }
+  }
+
+  .braintree-sheet__error-text {
+    color: white;
+    font-weight: bold;
+    margin: 0 auto;
+    padding: 0 42px; // Prevent text from overlapping with icon
+    text-align: center;
+    font-size: 14px;
+  }
+}
+
+.braintree-methods .braintree-sheet--active {
+  &.braintree-sheet--has-error .braintree-sheet {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    border-radius: 5px 5px 0 0;
+    border-color: $error-color;
+  }
+
+  .braintree-sheet {
     -webkit-box-shadow: 0px 0px 0px 2px #219653;
     -moz-box-shadow: 0px 0px 0px 2px #219653;
     box-shadow: 0px 0px 0px 2px #219653;
@@ -249,8 +303,8 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
       .braintree-form__icon-container {
         position: absolute;
         top: 50%;
-        margin-top: -14px;
-        right: 5px;
+        margin-top: -12px;
+        right: 11px;
       }
 
       .braintree-form__hosted-field {
@@ -286,6 +340,10 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
       padding: 0;
       line-height: 1.4;
       display: none;
+    }
+
+    .braintree-form__field-error-icon use {
+      fill: $error-color;
     }
 
     &.braintree-form__field-group--has-error .braintree-form__field-error {

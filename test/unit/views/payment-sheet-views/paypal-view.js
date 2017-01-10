@@ -102,6 +102,20 @@ describe('PayPalView', function () {
       expect(payPalView.paypalInstance).to.equal(this.paypalInstance);
     });
 
+    it('console errors when PayPal component creation fails', function () {
+      var paypalView;
+      var fakeError = {type: 'MERCHANT'};
+
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      PayPal.create.yields(fakeError);
+      this.sandbox.stub(console, 'error');
+
+      paypalView = new PayPalView(this.paypalViewOptions);
+
+      expect(console.error).to.be.calledWith(fakeError);
+      expect(paypalView.model.asyncDependencyStarting).to.be.calledOnce;
+    });
+
     it('creates a PayPal button', function () {
       var paypalButton;
 
@@ -179,6 +193,59 @@ describe('PayPalView', function () {
       this.tokenizeStub.yield(null, {foo: 'bar'});
 
       expect(paypalView._authInProgress).to.be.false;
+    });
+
+    it('reports MERCHANT errors without error payload and console errors', function () {
+      var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
+      var fakeError = {type: 'MERCHANT'};
+      var paypalView = new PayPalView(this.paypalViewOptions);
+
+      this.sandbox.stub(paypalView.model, 'reportError');
+      this.sandbox.stub(console, 'error');
+      this.paypalInstance.tokenize.yields(fakeError);
+
+      button.click();
+
+      expect(paypalView.model.reportError).to.be.calledWith(null);
+      expect(console.error).to.be.calledWith(fakeError);
+    });
+
+    it('reports non-MERCHANT errors with error payload', function () {
+      var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
+      var fakeError = {
+        code: 'PAYPAL_FAKE_ERROR_CODE',
+        message: 'Sorry friend',
+        type: 'NETWORK'
+      };
+      var paypalView = new PayPalView(this.paypalViewOptions);
+
+      this.sandbox.stub(paypalView.model, 'reportError');
+      this.sandbox.stub(console, 'error');
+      this.paypalInstance.tokenize.yields(fakeError);
+
+      button.click();
+
+      expect(paypalView.model.reportError).to.be.calledWith(fakeError);
+      expect(console.error).to.not.be.called;
+    });
+
+    it('does not report PAYPAL_POPUP_CLOSED errors', function () {
+      var button = this.element.querySelector('[data-braintree-id="paypal-button"]');
+      var fakeError = {
+        code: 'PAYPAL_POPUP_CLOSED',
+        message: 'Sorry friend',
+        type: 'CUSTOMER'
+      };
+      var paypalView = new PayPalView(this.paypalViewOptions);
+
+      this.sandbox.stub(paypalView.model, 'reportError');
+      this.sandbox.stub(console, 'error');
+      this.paypalInstance.tokenize.yields(fakeError);
+
+      button.click();
+
+      expect(paypalView.model.reportError).to.be.not.be.called;
+      expect(console.error).to.not.be.called;
     });
   });
 });
