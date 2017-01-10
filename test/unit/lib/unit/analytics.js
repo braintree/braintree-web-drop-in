@@ -91,6 +91,7 @@ describe('analytics.sendEvent', function () {
     var fakeConfiguration = fake.configuration();
 
     fakeConfiguration.authorization = fake.clientToken;
+    fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
     fingerprint = JSON.parse(atob(fakeConfiguration.authorization)).authorizationFingerprint;
     client = {
       _request: this.sandbox.stub(),

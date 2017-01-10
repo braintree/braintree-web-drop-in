@@ -2,7 +2,6 @@
 
 var atob = require('./polyfill').atob;
 var constants = require('../constants');
-var isTokenizationKey = require('./is-tokenization-key');
 var braintreeClientVersion = require('braintree-web/client').VERSION;
 
 function _millisToSeconds(millis) {
@@ -23,7 +22,7 @@ function sendAnalyticsEvent(client, kind, callback) {
     braintreeLibraryVersion: braintreeClientVersion
   };
 
-  if (isTokenizationKey(configuration.authorization)) {
+  if (configuration.authorizationType === 'TOKENIZATION_KEY') {
     data.tokenizationKey = configuration.authorization;
   } else {
     data.authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
