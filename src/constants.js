@@ -38,6 +38,6 @@ module.exports = {
   },
   ANALYTICS_REQUEST_TIMEOUT_MS: 2000,
   ANALYTICS_PREFIX: 'web.dropin.',
-  INTEGRATION: 'dropin',
+  INTEGRATION: 'dropin2',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
