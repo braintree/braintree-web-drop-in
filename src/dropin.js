@@ -1,6 +1,7 @@
 'use strict';
 
 var assign = require('./lib/assign').assign;
+var analytics = require('./lib/analytics');
 var MainView = require('./views/main-view');
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
@@ -35,6 +36,7 @@ Dropin.prototype._initialize = function (callback) {
   this._injectStylesheet();
 
   if (!this._merchantConfiguration.selector) {
+    analytics.sendEvent(this.client, 'configuration-error');
     callback(new Error('options.selector is required.'));
     return;
   }
@@ -42,9 +44,11 @@ Dropin.prototype._initialize = function (callback) {
   container = document.querySelector(this._merchantConfiguration.selector);
 
   if (!container) {
+    analytics.sendEvent(this.client, 'configuration-error');
     callback(new Error('options.selector must reference a valid DOM node.'));
     return;
   } else if (container.innerHTML.trim()) {
+    analytics.sendEvent(this.client, 'configuration-error');
     callback(new Error('options.selector must reference an empty DOM node.'));
     return;
   }
@@ -75,8 +79,9 @@ Dropin.prototype._initialize = function (callback) {
     });
 
     this._model.on('asyncDependenciesReady', function () {
+      analytics.sendEvent(this._client, 'appeared');
       callback(null, dropinInstance);
-    });
+    }.bind(this));
 
     mainViewOptions = {
       client: this._client,
@@ -162,7 +167,7 @@ function formatPaymentMethodPayload(paymentMethod) {
     type: paymentMethod.type
   };
 
-  if (paymentMethod.type === 'CreditCard') {
+  if (paymentMethod.type === constants.paymentMethodTypes.card) {
     formattedPaymentMethod.description = paymentMethod.description;
   }
 

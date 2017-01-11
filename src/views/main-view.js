@@ -1,5 +1,7 @@
 'use strict';
 
+var analytics = require('../lib/analytics');
+var analyticsKinds = require('../constants').analyticsKinds;
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
 var sheetViews = require('./payment-sheet-views');
@@ -88,6 +90,7 @@ MainView.prototype._initialize = function () {
 
   if (hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
+      client: this.client,
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
       model: this.model,
@@ -149,10 +152,14 @@ MainView.prototype.requestPaymentMethod = function (callback) {
 
   activePaymentView.requestPaymentMethod(function (err, payload) {
     if (err) {
+      analytics.sendEvent(this.client, 'request-payment-method.error');
       callback(err);
       return;
     }
+
     this.setPrimaryView(PaymentMethodsView.ID);
+
+    analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
     callback(null, payload);
   }.bind(this));
 };

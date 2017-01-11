@@ -5,6 +5,14 @@ module.exports = {
     card: 'card',
     paypal: 'paypal'
   },
+  paymentMethodTypes: {
+    card: 'CreditCard',
+    paypal: 'PayPalAccount'
+  },
+  analyticsKinds: {
+    CreditCard: 'card',
+    PayPalAccount: 'paypal'
+  },
   paymentMethodCardTypes: {
     Visa: 'visa',
     MasterCard: 'master-card',
@@ -28,6 +36,8 @@ module.exports = {
   errors: {
     NO_PAYMENT_METHOD_ERROR: 'No payment method is available.'
   },
-  INTEGRATION: 'dropin',
+  ANALYTICS_REQUEST_TIMEOUT_MS: 2000,
+  ANALYTICS_PREFIX: 'web.dropin.',
+  INTEGRATION: 'dropin2',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };

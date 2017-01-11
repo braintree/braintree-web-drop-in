@@ -1,10 +1,7 @@
 'use strict';
 
 var atob = require('./polyfill').atob;
-
-function isTokenizationKey(str) {
-  return /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_[a-zA-Z0-9_]+$/.test(str);
-}
+var isTokenizationKey = require('./is-tokenization-key');
 
 module.exports = function (authorization) {
   var authorizationFingerprint;

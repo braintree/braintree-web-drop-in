@@ -27,7 +27,8 @@ function configuration() {
       integration: 'custom',
       integrationType: 'custom'
     },
-    authorization: tokenizationKey
+    authorization: tokenizationKey,
+    authorizationType: 'TOKENIZATION_KEY'
   };
 }
 

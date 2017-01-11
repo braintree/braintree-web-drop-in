@@ -9,6 +9,7 @@ var Dropin = require('./dropin');
 var client = require('braintree-web/client');
 var deferred = require('./lib/deferred');
 var constants = require('./constants');
+var analytics = require('./lib/analytics');
 
 /**
  * @static
@@ -39,6 +40,12 @@ function create(options, callback) {
     }
 
     clientInstance = setAnalyticsIntegration(clientInstance);
+
+    if (clientInstance.getConfiguration().authorizationType === 'TOKENIZATION_KEY') {
+      analytics.sendEvent(clientInstance, 'started.tokenization-key');
+    } else {
+      analytics.sendEvent(clientInstance, 'started.client-token');
+    }
 
     new Dropin({
       merchantConfiguration: options,

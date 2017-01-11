@@ -1,5 +1,6 @@
 'use strict';
 
+var analytics = require('../lib/analytics');
 var BaseView = require('./base-view');
 var paymentMethodOptionHTML = require('../html/payment-option.html');
 var paymentOptionIDs = require('../constants').paymentOptionIDs;
@@ -44,6 +45,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   div.innerHTML = html;
   div.addEventListener('click', function () {
     this.mainView.setPrimaryView(paymentOptionID);
+    analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
   }.bind(this));
   this.container.appendChild(div);
 };
