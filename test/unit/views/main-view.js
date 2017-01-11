@@ -4,6 +4,7 @@ var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
+var analytics = require('../../../src/lib/analytics');
 var classlist = require('../../../src/lib/classlist');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
@@ -736,6 +737,8 @@ describe('MainView', function () {
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
 
+      this.sandbox.stub(analytics, 'sendEvent');
+
       this.mainView = new MainView({
         element: this.wrapper,
         model: new DropinModel(fake.modelOptions()),
@@ -763,8 +766,9 @@ describe('MainView', function () {
       this.mainView.requestPaymentMethod(function (err, payload) {
         expect(payload).to.not.exist;
         expect(err).to.equal(fakeError);
+        expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.error');
         done();
-      });
+      }.bind(this));
     });
 
     it('calls callback with payload when successful', function (done) {
@@ -777,6 +781,28 @@ describe('MainView', function () {
         expect(payload).to.equal(stubPaymentMethod);
         done();
       });
+    });
+
+    it('sends analytics event for successful CreditCard', function (done) {
+      var stubPaymentMethod = {type: 'CreditCard'};
+
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+
+      this.mainView.requestPaymentMethod(function () {
+        expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.card');
+        done();
+      }.bind(this));
+    });
+
+    it('sends analytics event for successful PayPalAccount', function (done) {
+      var stubPaymentMethod = {type: 'PayPalAccount'};
+
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+
+      this.mainView.requestPaymentMethod(function () {
+        expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.paypal');
+        done();
+      }.bind(this));
     });
 
     it('sets the PaymentMethodsView as the primary view when successful', function (done) {

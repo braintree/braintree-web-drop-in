@@ -1,9 +1,11 @@
 'use strict';
 
+var analytics = require('../lib/analytics');
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
 var sheetViews = require('./payment-sheet-views');
 var PaymentMethodsView = require('./payment-methods-view');
+var paymentOptionIDs = require('../constants').paymentOptionIDs;
 var PaymentOptionsView = require('./payment-options-view');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
@@ -146,14 +148,24 @@ MainView.prototype.setPrimaryView = function (id) {
 };
 
 MainView.prototype.requestPaymentMethod = function (callback) {
+  var paymentMethodType;
   var activePaymentView = this.getView(this.model.getActivePaymentView());
 
   activePaymentView.requestPaymentMethod(function (err, payload) {
     if (err) {
+      analytics.sendEvent(this.client, 'request-payment-method.error');
       callback(err);
       return;
     }
+
+    if (payload.type === 'CreditCard') {
+      paymentMethodType = paymentOptionIDs.card;
+    } else if (payload.type === 'PayPalAccount') {
+      paymentMethodType = paymentOptionIDs.paypal;
+    }
+
     this.setPrimaryView(PaymentMethodsView.ID);
+    analytics.sendEvent(this.client, 'request-payment-method.' + paymentMethodType);
     callback(null, payload);
   }.bind(this));
 };
