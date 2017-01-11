@@ -114,7 +114,7 @@ describe('PaymentOptionsView', function () {
 
       option.click();
 
-      expect(analytics.sendEvent).to.have.been.calledWith(paymentOptionsView.client, 'card.selected');
+      expect(analytics.sendEvent).to.have.been.calledWith(paymentOptionsView.client, 'selected.card');
     });
 
     it('when the PayPal option is selected', function () {
@@ -130,7 +130,7 @@ describe('PaymentOptionsView', function () {
 
       option.click();
 
-      expect(analytics.sendEvent).to.have.been.calledWith(paymentOptionsView.client, 'paypal.selected');
+      expect(analytics.sendEvent).to.have.been.calledWith(paymentOptionsView.client, 'selected.paypal');
     });
   });
 });

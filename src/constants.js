@@ -5,6 +5,14 @@ module.exports = {
     card: 'card',
     paypal: 'paypal'
   },
+  paymentMethodTypes: {
+    card: 'CreditCard',
+    paypal: 'PayPalAccount'
+  },
+  analyticsKinds: {
+    CreditCard: 'card',
+    PayPalAccount: 'paypal'
+  },
   paymentMethodCardTypes: {
     Visa: 'visa',
     MasterCard: 'master-card',

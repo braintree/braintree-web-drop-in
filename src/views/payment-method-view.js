@@ -2,7 +2,7 @@
 
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
-var paymentMethodCardTypes = require('../constants').paymentMethodCardTypes;
+var constants = require('../constants');
 var paymentMethodHTML = require('../html/payment-method.html');
 
 function PaymentMethodView() {
@@ -16,6 +16,8 @@ PaymentMethodView.prototype.constructor = PaymentMethodView;
 
 PaymentMethodView.prototype._initialize = function () {
   var html = paymentMethodHTML;
+  var paymentMethodCardTypes = constants.paymentMethodCardTypes;
+  var paymentMethodTypes = constants.paymentMethodTypes;
 
   this.element = document.createElement('div');
   this.element.className = 'braintree-method';
@@ -25,12 +27,12 @@ PaymentMethodView.prototype._initialize = function () {
   }.bind(this));
 
   switch (this.paymentMethod.type) {
-    case 'CreditCard':
+    case paymentMethodTypes.card:
       html = html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType])
         .replace(/@TITLE/g, this.strings.endingIn + this.paymentMethod.details.lastTwo)
         .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
       break;
-    case 'PayPalAccount':
+    case paymentMethodTypes.paypal:
       html = html.replace(/@ICON/g, 'logoPayPal')
         .replace(/@TITLE/g, this.paymentMethod.details.email)
         .replace(/@SUBTITLE/g, this.strings.PayPal);

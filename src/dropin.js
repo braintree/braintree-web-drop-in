@@ -167,7 +167,7 @@ function formatPaymentMethodPayload(paymentMethod) {
     type: paymentMethod.type
   };
 
-  if (paymentMethod.type === 'CreditCard') {
+  if (paymentMethod.type === constants.paymentMethodTypes.card) {
     formattedPaymentMethod.description = paymentMethod.description;
   }
 

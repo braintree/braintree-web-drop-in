@@ -45,7 +45,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   div.innerHTML = html;
   div.addEventListener('click', function () {
     this.mainView.setPrimaryView(paymentOptionID);
-    analytics.sendEvent(this.client, paymentOptionIDs[paymentOptionID] + '.selected');
+    analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
   }.bind(this));
   this.container.appendChild(div);
 };
