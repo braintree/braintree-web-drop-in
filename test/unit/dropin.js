@@ -51,11 +51,14 @@ describe('Dropin', function () {
 
       delete this.dropinOptions.merchantConfiguration.selector;
 
+      this.sandbox.stub(analytics, 'sendEvent');
+
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector is required.');
+        expect(analytics.sendEvent).to.be.calledWith(instance.client, 'configuration-error');
         done();
       });
     });
@@ -65,11 +68,14 @@ describe('Dropin', function () {
 
       this.dropinOptions.merchantConfiguration.selector = '#garbage';
 
+      this.sandbox.stub(analytics, 'sendEvent');
+
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector must reference a valid DOM node.');
+        expect(analytics.sendEvent).to.be.calledWith(instance.client, 'configuration-error');
         done();
       });
     });
@@ -80,11 +86,14 @@ describe('Dropin', function () {
 
       this.container.appendChild(div);
 
+      this.sandbox.stub(analytics, 'sendEvent');
+
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector must reference an empty DOM node.');
+        expect(analytics.sendEvent).to.be.calledWith(instance.client, 'configuration-error');
         done();
       });
     });

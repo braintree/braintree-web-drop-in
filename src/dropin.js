@@ -36,6 +36,7 @@ Dropin.prototype._initialize = function (callback) {
   this._injectStylesheet();
 
   if (!this._merchantConfiguration.selector) {
+    analytics.sendEvent(this.client, 'configuration-error');
     callback(new Error('options.selector is required.'));
     return;
   }
@@ -43,9 +44,11 @@ Dropin.prototype._initialize = function (callback) {
   container = document.querySelector(this._merchantConfiguration.selector);
 
   if (!container) {
+    analytics.sendEvent(this.client, 'configuration-error');
     callback(new Error('options.selector must reference a valid DOM node.'));
     return;
   } else if (container.innerHTML.trim()) {
+    analytics.sendEvent(this.client, 'configuration-error');
     callback(new Error('options.selector must reference an empty DOM node.'));
     return;
   }
