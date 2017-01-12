@@ -246,6 +246,10 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   .braintree-sheet__card-icon {
     display: inline-block;
     padding-left: 5px;
+    
+    &.braintree-hidden {
+      display: none;
+    }
   }
 
   .braintree-sheet__text {
