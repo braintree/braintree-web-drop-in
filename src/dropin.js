@@ -69,8 +69,6 @@ Dropin.prototype._initialize = function (callback) {
   container.appendChild(this._dropinWrapper);
 
   this._getVaultedPaymentMethods(function (paymentMethods) {
-    var mainViewOptions;
-
     this._model = new DropinModel({
       client: this._client,
       componentID: this._componentID,
@@ -83,14 +81,12 @@ Dropin.prototype._initialize = function (callback) {
       callback(null, dropinInstance);
     }.bind(this));
 
-    mainViewOptions = {
+    this._mainView = new MainView({
       client: this._client,
       element: this._dropinWrapper,
       model: this._model,
       strings: strings
-    };
-
-    this._mainView = new MainView(mainViewOptions);
+    });
   }.bind(this));
 };
 
