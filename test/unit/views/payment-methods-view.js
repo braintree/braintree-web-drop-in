@@ -34,7 +34,13 @@ describe('PaymentMethodsView', function () {
       var model, paymentMethodsViews;
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      modelOptions.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
       modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
 
       model = new DropinModel(modelOptions);
@@ -63,7 +69,13 @@ describe('PaymentMethodsView', function () {
       };
       var modelOptions = fake.modelOptions();
 
-      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      modelOptions.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
       modelOptions.paymentMethods = [paypalAccount, creditCard];
 
       model = new DropinModel(modelOptions);
@@ -82,9 +94,20 @@ describe('PaymentMethodsView', function () {
     });
 
     it('does not add payment methods if there are none', function () {
-      var model = new DropinModel(fake.modelOptions());
-      var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
-      var paymentMethodsViews = new PaymentMethodsView({
+      var model, methodsContainer, paymentMethodsViews;
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
+
+      model = new DropinModel(modelOptions);
+      methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
+      paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
         merchantConfiguration: {
@@ -116,6 +139,8 @@ describe('PaymentMethodsView', function () {
         strings: {}
       });
 
+      paymentMethodsViews._addPaymentMethod(fakePaymentMethod);
+
       model.changeActivePaymentMethod(fakePaymentMethod);
 
       expect(paymentMethodsViews.activeMethodView.paymentMethod).to.equal(fakePaymentMethod);
@@ -136,6 +161,14 @@ describe('PaymentMethodsView', function () {
       var model, paymentMethodsViews;
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
       var modelOptions = fake.modelOptions();
+
+      modelOptions.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
 
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [this.fakePaymentMethod];

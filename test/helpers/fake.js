@@ -68,7 +68,7 @@ function modelOptions() {
     },
     componentID: 'foo123',
     merchantConfiguration: {
-      authorization: clientToken
+      authorization: tokenizationKey
     },
     paymentMethods: []
   };
