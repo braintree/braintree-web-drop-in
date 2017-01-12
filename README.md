@@ -12,11 +12,17 @@ Because we're still in beta, the API and designs are subject to change. If you h
 
 ## Basic usage
 
-Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function.
+Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function as shown below.
 
 For credit cards, this attempts to validate the card form and will call the supplied callback with a payload, including the payment method nonce, if successful. If not successful, an error will be shown in the UI and the callback will be called with an error.
 
 Other payment methods may behave differently. Refer to their documentation for details.
+
+In your `create` call, provide an `authorization` and a `selector`:
+
+- `authorization`: Your [client authorization](https://developers.braintreepayments.com/guides/authorization/overview) should be a [client token](https://developers.braintreepayments.com/guides/authorization/client-token) from your server or a [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key) that can be found in the Braintree Control Panel. If you [pass a customer ID](https://developers.braintreepayments.com/reference/request/client-token/generate#specify-a-customer-id) when generating the client token, Drop-in will display that customer's saved payment methods and automatically store any newly-added payment methods in their Vault record.
+
+- `selector`: This must be the selector for an empty element, such as a `<div>`, where Drop-in will be included on your page.
 
 ```js
 var submitButton = document.querySelector('#submit-button');
@@ -41,29 +47,31 @@ braintree.dropin.create({
 });
 ```
 
-The structure of the credit card payment method objects that will be returned from Drop-in can be found [here](http://braintree.github.io/braintree-web/current/HostedFields.html#~tokenizePayload);
+The structure of the credit card payment method object returned in the callback of `requestPaymentMethod` can be found [here](http://braintree.github.io/braintree-web/current/HostedFields.html#~tokenizePayload).
 
 ## Using PayPal
 
-If your merchant account is configured to use PayPal, simply include a PayPal configuration object in your create call to have the PayPal button option included in your dropdown. The following example uses the [PayPal Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3).
+If PayPal is enabled for your merchant account, include PayPal configuration options in the `create` call. The required `flow` property can be either `vault` or `checkout`, depending on whether you want to use the PayPal [Vault](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3) or [Checkout](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow.
 
 ```js
 braintree.dropin.create({
   authorization: 'CLIENT_AUTHORIZATION',
   selector: '#dropin-container',
   paypal: {
-    flow: 'vault'
+    flow: 'checkout',
+    amount: 10.00,
+    currency: 'USD'
   }
 }, callback);
 ```
 
 You can find more PayPal configuration options in the [Braintree JS client SDK v3 reference](https://braintree.github.io/braintree-web/current/PayPal.html#tokenize).
 
-The structure of the PayPal payment method objects that will be returned from Drop-in can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizePayload);
+The structure of the PayPal payment method object returned in the callback of `requestPaymentMethod` can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizePayload).
 
 ## Full example
 
-This is a full example of a Drop-in integration only accepting credit cards.
+This is a full example of a Drop-in integration that only accepts credit cards.
 
  ```html
 <!DOCTYPE html>
@@ -76,7 +84,7 @@ This is a full example of a Drop-in integration only accepting credit cards.
     <div id="dropin-container"></div>
     <button id="submit-button">Purchase</button>
 
-    <script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.1/js/dropin.min.js"></script>
+    <script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.2/js/dropin.min.js"></script>
 
       <script>
       var submitButton = document.querySelector('#submit-button');
@@ -104,3 +112,19 @@ This is a full example of a Drop-in integration only accepting credit cards.
   </body>
 </html>
 ```
+
+## Beta notes
+
+While in beta, we're still actively working on Drop-in. This means you might have to change your integration when upgrading your Drop-in version.
+
+Browser support will be limited during beta and will not include Internet Explorer 9 or 10, but will eventually include [all browsers supported by Braintree.js](http://braintree.github.io/braintree-web/current/#browser-support).
+
+Much of the behavior in this version of Drop-in differs from the [previous version](https://developers.braintreepayments.com/guides/drop-in/javascript/v2). At this point, adding the hidden `payment_method_nonce` input and automatic form submission (the default behavior in the previous version) are not available.
+
+Here are some of the features we're still working on:
+
+ - Event API: An event system to indicate when a payment method can be requested
+ - Localization and internationalization
+ - Full documentation in the [Braintree developer docs](https://developers.braintreepayments.com/guides/overview) and an API reference
+ - Support for additional types of payment methods
+ - Support for Internet Explorer 9 and 10
