@@ -18,9 +18,9 @@ For credit cards, this attempts to validate the card form and will call the supp
 
 Other payment methods may behave differently. Refer to their documentation for details.
 
-In your create call, provide an `authorization` and a `selector`:
+In your `create` call, provide an `authorization` and a `selector`:
 
-- `authorization`: This should be a [client token](https://developers.braintreepayments.com/guides/authorization/client-token) from your server or a [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key) that can be found in the Braintree Control Panel. If you [pass a customer ID](https://developers.braintreepayments.com/reference/request/client-token/generate#specify-a-customer-id) when generating the client token, Drop-in will display that customer's saved payment methods and automatically store any newly-added payment methods in their Vault record.
+- `authorization`: Your [client authorization](https://developers.braintreepayments.com/guides/authorization/overview) should be a [client token](https://developers.braintreepayments.com/guides/authorization/client-token) from your server or a [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key) that can be found in the Braintree Control Panel. If you [pass a customer ID](https://developers.braintreepayments.com/reference/request/client-token/generate#specify-a-customer-id) when generating the client token, Drop-in will display that customer's saved payment methods and automatically store any newly-added payment methods in their Vault record.
 
 - `selector`: This must be the selector for an empty element, such as a `<div>`, where Drop-in will be included on your page.
 
@@ -51,7 +51,7 @@ The structure of the credit card payment method object returned in the callback 
 
 ## Using PayPal
 
-If PayPal is enabled for your merchant account, include PayPal configuration options in the create call. The required `flow` property can be either `vault` or `checkout`, depending on whether you want to use the PayPal [Vault](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3) or [Checkout](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow.
+If PayPal is enabled for your merchant account, include PayPal configuration options in the `create` call. The required `flow` property can be either `vault` or `checkout`, depending on whether you want to use the PayPal [Vault](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3) or [Checkout](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow.
 
 ```js
 braintree.dropin.create({
@@ -125,5 +125,6 @@ Here are some of the features we're still working on:
 
  - Event API: An event system to indicate when a payment method can be requested
  - Localization and internationalization
- - Full documentation in the [Braintree developer docs](https://developers.braintreepayments.com/guides/overview) and a client reference
+ - Full documentation in the [Braintree developer docs](https://developers.braintreepayments.com/guides/overview) and an API reference
  - Support for additional types of payment methods
+ - Support for Internet Explorer 9 and 10
