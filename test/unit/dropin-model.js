@@ -79,7 +79,8 @@ describe('DropinModel', function () {
       it('is true when given a tokenization key', function () {
         var model;
 
-        this.modelOptions.merchantConfiguration.authorization = fake.tokenizationKey;
+        this.configuration.authorization = fake.tokenizationKey;
+        this.configuration.authorizationType = 'TOKENIZATION_KEY';
 
         model = new DropinModel(this.modelOptions);
 
@@ -89,7 +90,8 @@ describe('DropinModel', function () {
       it('is true when given a client token without a customer ID', function () {
         var model;
 
-        this.modelOptions.merchantConfiguration.authorization = fake.clientToken;
+        this.configuration.authorization = fake.clientToken;
+        this.configuration.authorizationType = 'CLIENT_TOKEN';
 
         model = new DropinModel(this.modelOptions);
 
@@ -99,7 +101,8 @@ describe('DropinModel', function () {
       it('is false when given a client token with a customer ID', function () {
         var model;
 
-        this.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+        this.configuration.authorization = fake.clientTokenWithCustomerID;
+        this.configuration.authorizationType = 'CLIENT_TOKEN';
 
         model = new DropinModel(this.modelOptions);
 

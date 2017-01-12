@@ -1,13 +1,13 @@
 'use strict';
 
 var atob = require('./polyfill').atob;
-var isTokenizationKey = require('./is-tokenization-key');
 
-module.exports = function (authorization) {
+module.exports = function (client) {
   var authorizationFingerprint;
+  var configuration = client.getConfiguration();
 
-  if (!isTokenizationKey(authorization)) {
-    authorizationFingerprint = JSON.parse(atob(authorization)).authorizationFingerprint;
+  if (configuration.authorizationType !== 'TOKENIZATION_KEY') {
+    authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
     return !authorizationFingerprint || authorizationFingerprint.indexOf('customer_id=') === -1;
   }
   return true;

@@ -519,6 +519,8 @@ describe('CardView', function () {
 
         this.context.client.getConfiguration = function () {
           return {
+            authorization: fake.clientToken,
+            authorizationType: 'CLIENT_TOKEN',
             gatewayConfiguration: {
               challenges: ['cvv'],
               creditCards: {

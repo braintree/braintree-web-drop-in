@@ -9,7 +9,7 @@ function DropinModel(options) {
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
 
-  this.isGuestCheckout = isGuestCheckout(options.merchantConfiguration.authorization);
+  this.isGuestCheckout = isGuestCheckout(options.client);
 
   this.dependenciesInitializing = 0;
 

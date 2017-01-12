@@ -128,7 +128,7 @@ Dropin.prototype._injectStylesheet = function () {
 };
 
 Dropin.prototype._getVaultedPaymentMethods = function (callback) {
-  if (isGuestCheckout(this._merchantConfiguration.authorization)) {
+  if (isGuestCheckout(this._client)) {
     callback([]);
   } else {
     this._client.request({

@@ -4,21 +4,42 @@ var fake = require('../../../helpers/fake');
 var isGuestCheckout = require('../../../../src/lib/is-guest-checkout');
 
 describe('isGuestCheckout', function () {
-  it('returns true when given a tokenization key', function () {
-    var auth = fake.tokenizationKey;
+  it('returns true when given a client with a tokenization key', function () {
+    var fakeClient = {
+      getConfiguration: function () {
+        return {
+          authorizationType: 'TOKENIZATION_KEY',
+          authorization: fake.tokenizationKey
+        };
+      }
+    };
 
-    expect(isGuestCheckout(auth)).to.be.true;
+    expect(isGuestCheckout(fakeClient)).to.be.true;
   });
 
-  it('returns true when given a client token without a customer ID', function () {
-    var auth = fake.clientToken;
+  it('returns true when given a client with a client token without a customer ID', function () {
+    var fakeClient = {
+      getConfiguration: function () {
+        return {
+          authorizationType: 'CLIENT_TOKEN',
+          authorization: fake.clientToken
+        };
+      }
+    };
 
-    expect(isGuestCheckout(auth)).to.be.true;
+    expect(isGuestCheckout(fakeClient)).to.be.true;
   });
 
-  it('returns false when given a client token with a customer ID', function () {
-    var auth = fake.clientTokenWithCustomerID;
+  it('returns false when given a client with a client token with a customer ID', function () {
+    var fakeClient = {
+      getConfiguration: function () {
+        return {
+          authorizationType: 'CLIENT_TOKEN',
+          authorization: fake.clientTokenWithCustomerID
+        };
+      }
+    };
 
-    expect(isGuestCheckout(auth)).to.be.false;
+    expect(isGuestCheckout(fakeClient)).to.be.false;
   });
 });

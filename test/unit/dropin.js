@@ -134,13 +134,15 @@ describe('Dropin', function () {
 
     it('requests payment methods if a customerId is provided', function (done) {
       var instance;
-      var fakeClientToken = fake.configuration().gatewayConfiguration;
       var paymentMethodsPayload = {paymentMethods: []};
 
-      fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
-      fakeClientToken = btoa(JSON.stringify(fakeClientToken));
-
-      this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
+      this.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
       this.client.request.yields(null, paymentMethodsPayload);
 
       this.sandbox.stub(analytics, 'sendEvent');
@@ -175,13 +177,14 @@ describe('Dropin', function () {
 
     it('does not fail if there is an error getting existing payment methods', function (done) {
       var instance;
-      var fakeClientToken = fake.configuration().gatewayConfiguration;
 
-      fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
-
-      fakeClientToken = btoa(JSON.stringify(fakeClientToken));
-
-      this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
+      this.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
       this.client.request.yields(new Error('This failed'));
 
       this.sandbox.stub(analytics, 'sendEvent');
@@ -198,7 +201,6 @@ describe('Dropin', function () {
 
     it('formats existing payment method payload', function (done) {
       var instance;
-      var fakeClientToken = fake.configuration().gatewayConfiguration;
       var fakePaymentMethod = {
         nonce: 'nonce',
         details: {},
@@ -207,10 +209,13 @@ describe('Dropin', function () {
       };
       var paymentMethodsPayload = {paymentMethods: [fakePaymentMethod]};
 
-      fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
-      fakeClientToken = btoa(JSON.stringify(fakeClientToken));
-
-      this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
+      this.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
       this.client.request.yields(null, paymentMethodsPayload);
 
       this.sandbox.stub(analytics, 'sendEvent');
@@ -230,13 +235,15 @@ describe('Dropin', function () {
 
     it('creates a MainView a customerId exists', function (done) {
       var instance;
-      var fakeClientToken = fake.configuration().gatewayConfiguration;
       var paymentMethodsPayload = {paymentMethods: []};
 
-      fakeClientToken.authorizationFingerprint = 'auth_fingerprint&customer_id=abc123';
-      fakeClientToken = btoa(JSON.stringify(fakeClientToken));
-
-      this.dropinOptions.merchantConfiguration.authorization = fakeClientToken;
+      this.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
       this.client.request.yields(null, paymentMethodsPayload);
 
       this.sandbox.stub(analytics, 'sendEvent');
