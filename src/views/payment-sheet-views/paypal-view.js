@@ -1,19 +1,20 @@
 'use strict';
 
-var BasePaymentSheetView = require('./base-payment-sheet-view');
+var BaseView = require('../base-view');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 var paypal = require('braintree-web/paypal');
 
 function PayPalView() {
-  BasePaymentSheetView.apply(this, arguments);
+  BaseView.apply(this, arguments);
+
+  this._initialize();
 }
 
-PayPalView.prototype = Object.create(BasePaymentSheetView.prototype);
+PayPalView.prototype = Object.create(BaseView.prototype);
 PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
 
 PayPalView.prototype._initialize = function () {
-  BasePaymentSheetView.prototype._initialize.apply(this, arguments);
   this._createPayPalButton();
   this._authInProgress = false;
   this.model.asyncDependencyStarting();

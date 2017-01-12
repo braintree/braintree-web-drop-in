@@ -1,16 +1,18 @@
 'use strict';
 
-var BasePaymentSheetView = require('./base-payment-sheet-view');
+var BaseView = require('../base-view');
 var cardIconHTML = require('../../html/card-icons.html');
 var classlist = require('../../lib/classlist');
 var constants = require('../../constants');
 var hostedFields = require('braintree-web/hosted-fields');
 
 function CardView() {
-  BasePaymentSheetView.apply(this, arguments);
+  BaseView.apply(this, arguments);
+
+  this._initialize();
 }
 
-CardView.prototype = Object.create(BasePaymentSheetView.prototype);
+CardView.prototype = Object.create(BaseView.prototype);
 CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
@@ -62,8 +64,6 @@ CardView.prototype._initialize = function () {
       }
     }
   };
-
-  BasePaymentSheetView.prototype._initialize.apply(this, arguments);
 
   cardIcons.innerHTML = cardIconHTML;
   this._hideUnsupportedCardIcons();
