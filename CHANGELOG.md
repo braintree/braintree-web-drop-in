@@ -5,6 +5,9 @@ unreleased
 ----------
 
 - Fix "insufficient privileges" error when using tokenization keys with cards
+- Update UI
+- Add analytics events
+- Use version 3.6.3 of braintree-web
 
 1.0.0-beta.1
 ------------
