@@ -29,11 +29,13 @@ PaymentMethodView.prototype._initialize = function () {
   switch (this.paymentMethod.type) {
     case paymentMethodTypes.card:
       html = html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType])
+        .replace(/@CLASSNAME/g, ' braintree-icon--bordered')
         .replace(/@TITLE/g, this.strings.endingIn + this.paymentMethod.details.lastTwo)
         .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
       break;
     case paymentMethodTypes.paypal:
       html = html.replace(/@ICON/g, 'logoPayPal')
+        .replace(/@CLASSNAME/g, '')
         .replace(/@TITLE/g, this.paymentMethod.details.email)
         .replace(/@SUBTITLE/g, this.strings.PayPal);
       break;
