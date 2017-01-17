@@ -96,6 +96,13 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   }
 }
 
+.braintree-icon--bordered {
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  box-sizing: content-box;
+}
+
 .braintree-heading {
   font-size: 16px;
   color: $text-color;
@@ -269,6 +276,12 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   text-align: center;
 }
 
+.braintree-form__field-group--has-error {
+  .braintree-form__icon-container {
+    margin-top: -12px;
+  }
+}
+
 .braintree-sheet__content--form {
   padding: 10px 15px 10px 10px;
 
@@ -307,7 +320,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
       .braintree-form__icon-container {
         position: absolute;
         top: 50%;
-        margin-top: -12px;
+        margin-top: -14px;
         right: 11px;
       }
 
@@ -346,8 +359,12 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
       display: none;
     }
 
-    .braintree-form__field-error-icon use {
-      fill: $error-color;
+    .braintree-form__field-error-icon {
+      margin-top: 2px;
+
+      use {
+        fill: $error-color;
+      }
     }
 
     &.braintree-form__field-group--has-error .braintree-form__field-error {
