@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.0.0-beta.2
+------------
 
 - Fix "insufficient privileges" error when using tokenization keys with cards
 - Update UI
