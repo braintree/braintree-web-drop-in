@@ -36,7 +36,7 @@ describe('PaymentMethodView', function () {
     });
 
     it('sets the inner HTML correctly when the paymentMethod is a credit card', function () {
-      var iconElement, labelElement;
+      var iconElement, iconContainer, labelElement;
       var paymentMethod = {
         type: 'CreditCard',
         details: {
@@ -50,14 +50,17 @@ describe('PaymentMethodView', function () {
       PaymentMethodView.prototype._initialize.call(this.context);
 
       iconElement = this.context.element.querySelector('.braintree-method__logo use');
+      iconContainer = this.context.element.querySelector('.braintree-method__logo');
       labelElement = this.context.element.querySelector('.braintree-method__label');
+
       expect(iconElement.getAttribute('xlink:href')).to.equal('#icon-visa');
       expect(labelElement.textContent).to.contain('Ending in ••11');
       expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('Visa');
+      expect(iconContainer.classList.contains('braintree-icon--bordered')).to.be.true;
     });
 
     it('sets the inner HTML correctly when the paymentMethod is a PayPal account', function () {
-      var iconElement, labelElement;
+      var iconElement, iconContainer, labelElement;
       var paymentMethod = {
         type: 'PayPalAccount',
         details: {
@@ -70,10 +73,13 @@ describe('PaymentMethodView', function () {
       PaymentMethodView.prototype._initialize.call(this.context);
 
       iconElement = this.context.element.querySelector('.braintree-method__logo use');
+      iconContainer = this.context.element.querySelector('.braintree-method__logo');
       labelElement = this.context.element.querySelector('.braintree-method__label');
+
       expect(iconElement.getAttribute('xlink:href')).to.equal('#logoPayPal');
       expect(labelElement.textContent).to.contain('test@example.com');
       expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('PayPal');
+      expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).to.be.false;
     });
   });
 
