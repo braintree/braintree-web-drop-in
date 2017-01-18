@@ -33,10 +33,12 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
     case paymentOptionIDs.card:
       html = html.replace(/@ICON/g, 'iconCardFront');
       html = html.replace(/@OPTION_TITLE/g, this.strings.Card);
+      html = html.replace(/@CLASSNAME/g, ' braintree-icon--bordered');
       break;
     case paymentOptionIDs.paypal:
       html = html.replace(/@ICON/g, 'logoPayPal');
       html = html.replace(/@OPTION_TITLE/g, this.strings.PayPal);
+      html = html.replace(/@CLASSNAME/g, '');
       break;
     default:
       break;

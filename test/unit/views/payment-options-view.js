@@ -49,9 +49,11 @@ describe('PaymentOptionsView', function () {
       });
       var label = paymentOptionsView.container.querySelector('.braintree-option__label');
       var icon = paymentOptionsView.container.querySelector('use');
+      var iconContainer = icon.parentElement.parentElement;
 
       expect(label.innerHTML).to.equal(strings.Card);
       expect(icon.href.baseVal).to.equal('#iconCardFront');
+      expect(iconContainer.classList.contains('braintree-icon--bordered')).to.be.true;
     });
 
     it('adds a PayPal option', function () {
@@ -64,9 +66,11 @@ describe('PaymentOptionsView', function () {
       });
       var label = paymentOptionsView.container.querySelector('.braintree-option__label');
       var icon = paymentOptionsView.container.querySelector('use');
+      var iconContainer = icon.parentElement.parentElement;
 
       expect(label.innerHTML).to.equal(strings.PayPal);
       expect(icon.href.baseVal).to.equal('#logoPayPal');
+      expect(iconContainer.classList.contains('braintree-option__logo@CLASSNAME')).to.be.false;
     });
 
     it('sets the primary view to the payment option when clicked', function () {
