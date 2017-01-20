@@ -1188,15 +1188,15 @@ describe('CardView', function () {
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
-    it('calls beginLoading when form is valid', function () {
-      this.context.model.beginLoading = this.sandbox.stub();
+    it('calls hostedFieldsInstance.tokenize when form is valid', function () {
+      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(this.context.model.beginLoading).to.have.been.calledOnce;
+      expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
     });
 
-    it('does not call beginLoading if form is invalid', function () {
+    it('does not call hostedFieldsInstance.tokenize if form is invalid', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1208,11 +1208,11 @@ describe('CardView', function () {
           }
         }
       });
-      this.context.model.beginLoading = this.sandbox.stub();
+      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(this.context.model.beginLoading).to.not.be.called;
+      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
     it('vaults on tokenization if not using guest checkout', function () {
@@ -1242,24 +1242,24 @@ describe('CardView', function () {
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
     });
 
-    it('calls endLoading after successful tokenization', function () {
+    it('removes braintree-sheet--loading class after successful tokenization', function () {
       var stubPayload = {};
 
-      this.sandbox.stub(this.context.model, 'endLoading');
+      this.sandbox.stub(classlist, 'remove');
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(this.context.model.endLoading).to.have.been.calledOnce;
+      expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
     });
 
-    it('calls endLoading after tokenization fails', function () {
-      this.sandbox.stub(this.context.model, 'endLoading');
+    it('removes braintree-sheet--loading class after tokenization fails', function () {
+      this.sandbox.stub(classlist, 'remove');
       this.context.hostedFieldsInstance.tokenize.yields(new Error('foo'));
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
-      expect(this.context.model.endLoading).to.have.been.calledOnce;
+      expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
     });
 
     it('adds a new payment method when tokenize is successful', function () {
