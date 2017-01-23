@@ -50,7 +50,7 @@ describe('PaymentMethodView', function () {
       PaymentMethodView.prototype._initialize.call(this.context);
 
       iconElement = this.context.element.querySelector('.braintree-method__logo use');
-      iconContainer = this.context.element.querySelector('.braintree-method__logo');
+      iconContainer = this.context.element.querySelector('.braintree-method__logo svg');
       labelElement = this.context.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).to.equal('#icon-visa');
@@ -73,7 +73,7 @@ describe('PaymentMethodView', function () {
       PaymentMethodView.prototype._initialize.call(this.context);
 
       iconElement = this.context.element.querySelector('.braintree-method__logo use');
-      iconContainer = this.context.element.querySelector('.braintree-method__logo');
+      iconContainer = this.context.element.querySelector('.braintree-method__logo svg');
       labelElement = this.context.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).to.equal('#logoPayPal');
