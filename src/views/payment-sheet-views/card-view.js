@@ -118,6 +118,8 @@ CardView.prototype.tokenize = function (callback) {
   var state = self.hostedFieldsInstance.getState();
   var supportedCardTypes = self.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
+  this.model.clearError();
+
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
 

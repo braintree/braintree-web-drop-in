@@ -1062,6 +1062,26 @@ describe('CardView', function () {
       };
     });
 
+    it('clears the error on the model', function (done) {
+      this.sandbox.stub(this.model, 'clearError');
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: false
+          }
+        }
+      });
+
+      CardView.prototype.tokenize.call(this.context, function () {
+        expect(this.model.clearError).to.be.called;
+        done();
+      }.bind(this));
+    });
+
     it('throws an error if there is no valid card type', function (done) {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [],
