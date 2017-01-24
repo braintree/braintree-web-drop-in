@@ -49,7 +49,7 @@ describe('PaymentOptionsView', function () {
       });
       var label = paymentOptionsView.container.querySelector('.braintree-option__label');
       var icon = paymentOptionsView.container.querySelector('use');
-      var iconContainer = icon.parentElement.parentElement;
+      var iconContainer = icon.parentElement;
 
       expect(label.innerHTML).to.equal(strings.Card);
       expect(icon.href.baseVal).to.equal('#iconCardFront');
