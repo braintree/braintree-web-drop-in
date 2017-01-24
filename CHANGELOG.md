@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix bug where PayPal button could not be clicked in some browsers
+
 1.0.0-beta.3
 ------------
 
