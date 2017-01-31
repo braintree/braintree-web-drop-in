@@ -127,7 +127,7 @@ describe('dropin.create', function () {
       authorization: 'tokenization_key',
       selector: '#foo'
     }, function () {
-      var configuration = fakeClient.toJSON();
+      var configuration = fakeClient.getConfiguration();
 
       expect(configuration.analyticsMetadata.integration).to.equal(dropinConstants.INTEGRATION);
       expect(configuration.analyticsMetadata.integrationType).to.equal(dropinConstants.INTEGRATION);
