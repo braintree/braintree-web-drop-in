@@ -60,7 +60,7 @@ function setAnalyticsIntegration(clientInstance) {
   configuration.analyticsMetadata.integration = constants.INTEGRATION;
   configuration.analyticsMetadata.integrationType = constants.INTEGRATION;
 
-  clientInstance.toJSON = function () {
+  clientInstance.getConfiguration = function () {
     return configuration;
   };
 
