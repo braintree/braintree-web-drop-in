@@ -17,6 +17,7 @@ CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
 CardView.prototype._initialize = function () {
+  var cvvFieldGroup, postalCodeFieldGroup;
   var cardIcons = this.getElementById('card-view-icons');
   var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
   var hasCVV = challenges.indexOf('cvv') !== -1;
@@ -76,11 +77,15 @@ CardView.prototype._initialize = function () {
   this.fieldErrors = {};
 
   if (!hasCVV) {
-    this.getElementById('cvv-field-group').remove();
+    cvvFieldGroup = this.getElementById('cvv-field-group');
+
+    cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
     delete hfOptions.fields.cvv;
   }
   if (!hasPostal) {
-    this.getElementById('postal-code-field-group').remove();
+    postalCodeFieldGroup = this.getElementById('postal-code-field-group');
+
+    postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
     delete hfOptions.fields.postalCode;
   }
 
