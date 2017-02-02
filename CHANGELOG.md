@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.0.0-beta.4
+------------
 - Fix bug where PayPal button could not be clicked in some browsers
 - Fix bug where SVGs did not render correctly in Edge
 - Fix bug in some browsers that prevented form from appearing with certain configurations
