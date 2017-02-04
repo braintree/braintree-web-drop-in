@@ -110,6 +110,10 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   transition: transform 0.2s ease;
 }
 
+.braintree-heading--inactive {
+  transform: translateY(30px);
+}
+
 .braintree-options {
   display: none;
 }
@@ -225,6 +229,27 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     box-shadow: 0px 0px 0px 2px #219653;
     border-radius: 5px;
     border-color: rgba(0,0,0,0);
+  }
+}
+
+.braintree-sheet {
+  /* Get height of sheet through JS  */
+  height: 300px;
+  transition: transform 300ms, height 300ms, opacity 300ms 100ms;
+}
+
+.braintree-sheet--tokenized {
+  height: 71px;
+  overflow: hidden;
+  opacity: 0.1;
+  transform: translateY(20px);
+
+  .braintree-sheet__header {
+    opacity: 0.1;
+  }
+
+  .braintree-sheet__content {
+    opacity: 0.1;
   }
 }
 
@@ -431,6 +456,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   border-color: $border-color;
   border-style: solid;
   border-width: 0 1px 1px 1px;
+  box-shadow: none;
   cursor: pointer;
   padding: 14px 10px;
   display: flex;
@@ -440,7 +466,8 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   width: 99%;
   position: relative;
   z-index: 0;
-
+  transition: opacity 300ms, box-shadow 300ms, width 300ms;
+ 
   &:first-child {
     border-radius: 4px 4px 0 0;
     border-top-width: 1px;
@@ -465,6 +492,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     font-size: 16px;
     margin-left: 20px;
     text-align: left;
+    transition: font-weight 300;
     flex-grow: 1;
 
     .braintree-method__label--small {
@@ -481,6 +509,8 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     padding: 7px 10px 10px 10px;
     background-color: $background-color;
     fill: $background-color;
+    transform: scale(0);
+    transition: transform 300ms;
 
     svg {
       width: 100%;
@@ -497,11 +527,14 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   width: 100%;
   margin-top: -1px;
   margin-bottom: -1px;
+  opacity: 1;
+  transition: opacity 300ms, box-shadow 300ms, width 300ms;
   z-index: 1;
 
   .braintree-method__check {
     background-color: $highlight-color;
     fill: white;
+    transform: scale(1);
   }
 
   .braintree-method__label {
@@ -540,6 +573,19 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 .braintree-paypal .braintree-paypal,
 .braintree-card .braintree-card {
   display: block;
+}
+
+[data-braintree-id="methods-container"] {
+  &.braintree-methods-container--inactive {
+    .braintree-method {
+      box-shadow: 0 0 0 0 #fff;
+      opacity: 0.1;
+    }
+
+    .braintree-method__check {
+      transform: scale(0);
+    }      
+  }
 }
 
 [data-braintree-id="other-ways-to-pay"] {

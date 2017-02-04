@@ -20,7 +20,7 @@ PaymentMethodView.prototype._initialize = function () {
   var paymentMethodTypes = constants.paymentMethodTypes;
 
   this.element = document.createElement('div');
-  this.element.className = 'braintree-method';
+  this.element.className = 'braintree-method braintree-method--inactive';
 
   this.element.addEventListener('click', function () {
     this.model.changeActivePaymentMethod(this.paymentMethod);
@@ -47,6 +47,12 @@ PaymentMethodView.prototype._initialize = function () {
 };
 
 PaymentMethodView.prototype.setActive = function (isActive) {
+  if (isActive) {
+    classlist.remove(this.element, 'braintree-method--inactive');
+  } else {
+    classlist.add(this.element, 'braintree-method--inactive');
+  }
+
   classlist.toggle(this.element, 'braintree-method--active', isActive);
 };
 

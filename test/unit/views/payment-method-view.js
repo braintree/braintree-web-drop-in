@@ -4,6 +4,7 @@ var BaseView = require('../../../src/views/base-view');
 var PaymentMethodView = require('../../../src/views/payment-method-view');
 var paymentMethodHTML = require('../../../src/html/payment-method.html');
 var strings = require('../../../src/translations/en');
+var transitionHelper = require('../../../src/lib/transition-helper');
 
 describe('PaymentMethodView', function () {
   beforeEach(function () {
@@ -86,6 +87,9 @@ describe('PaymentMethodView', function () {
   describe('setActive', function () {
     beforeEach(function () {
       this.context = {element: document.createElement('div')};
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd', function (element, callback) {
+        callback();
+      });
     });
 
     it('adds braintree-method--active if setting active payment method', function () {

@@ -5,6 +5,7 @@ var cardIconHTML = require('../../html/card-icons.html');
 var classlist = require('../../lib/classlist');
 var constants = require('../../constants');
 var hostedFields = require('braintree-web/hosted-fields');
+var transitionHelper = require('../../lib/transition-helper');
 
 function CardView() {
   BaseView.apply(this, arguments);
@@ -112,7 +113,7 @@ CardView.prototype._initialize = function () {
 };
 
 CardView.prototype.tokenize = function (callback) {
-  var cardType, cardTypeSupported;
+  var cardType, cardTypeSupported, transitionCallback;
   var formValid = true;
   var self = this;
   var state = self.hostedFieldsInstance.getState();
@@ -157,9 +158,17 @@ CardView.prototype.tokenize = function (callback) {
         self.hostedFieldsInstance.clear(field);
       });
 
-      self.model.addPaymentMethod(payload);
-      callback(null, payload);
+      transitionCallback = function () {
+        self.model.addPaymentMethod(payload);
+        callback(null, payload);
+        classlist.remove(self.element, 'braintree-sheet--tokenized');
+        self.element.removeEventListener('transitionend', transitionCallback);
+      };
+
+      transitionHelper.onTransitionEnd(self.element, transitionCallback);
+
       classlist.remove(self.element, 'braintree-sheet--loading');
+      classlist.add(self.element, 'braintree-sheet--tokenized');
     });
   } else {
     self.model.reportError({message: self.strings.hostedFieldsFieldsInvalidError});

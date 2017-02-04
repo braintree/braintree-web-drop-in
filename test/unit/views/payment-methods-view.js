@@ -6,6 +6,7 @@ var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var mainHTML = require('../../../src/html/main.html');
 var strings = require('../../../src/translations/en');
+var transitionHelper = require('../../../src/lib/transition-helper');
 
 describe('PaymentMethodsView', function () {
   describe('Constructor', function () {
@@ -124,6 +125,10 @@ describe('PaymentMethodsView', function () {
       var model, paymentMethodsViews;
       var fakePaymentMethod = {baz: 'qux'};
       var modelOptions = fake.modelOptions();
+
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd', function (element, callback) {
+        callback();
+      });
 
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [{foo: 'bar'}, fakePaymentMethod];

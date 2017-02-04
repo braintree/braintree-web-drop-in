@@ -8,6 +8,7 @@ var fake = require('../../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var mainHTML = require('../../../../src/html/main.html');
 var strings = require('../../../../src/translations/en');
+var transitionHelper = require('../../../../src/lib/transition-helper');
 
 describe('CardView', function () {
   beforeEach(function () {
@@ -1287,6 +1288,9 @@ describe('CardView', function () {
 
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
       this.sandbox.stub(this.model, 'addPaymentMethod');
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd', function (element, callback) {
+        callback();
+      });
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
