@@ -8,6 +8,7 @@ $black-45: lighten(#000000, 45%);
 $black-75: lighten(#000000, 75%);
 $curve-swing: cubic-bezier(0.645, 0.045, 0.355, 1);
 $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
+$curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
 [data-braintree-id="wrapper"] {
   display: block !important;
@@ -233,13 +234,13 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 }
 
 .braintree-sheet {
-  /* Get height of sheet through JS  */
-  height: 300px;
-  transition: transform 300ms, height 300ms, opacity 300ms 100ms;
+  /*TODO Get height of sheet through JS  */
+  max-height: 1000px;
+  transition: transform 300ms, opacity 300ms 200ms, max-height 300ms ease;
 }
 
 .braintree-sheet--tokenized {
-  height: 71px;
+  max-height: 71px;
   overflow: hidden;
   opacity: 0.1;
   transform: translateY(20px);
@@ -349,6 +350,10 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   }
 }
 
+.braintree-form__hosted-field {
+  transition: border-color 100ms;
+}
+
 .braintree-sheet__content--form {
   padding: 10px 15px 10px 10px;
 
@@ -408,6 +413,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     &.braintree-form__field-group--has-error .braintree-form__field-secondary-icon,
     &.braintree-form__field-group--has-error.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon,
     &.braintree-form__field-group--has-error.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon {
+      transform: scale(0);
       display: none;
     }
 
@@ -466,7 +472,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   width: 99%;
   position: relative;
   z-index: 0;
-  transition: opacity 300ms, box-shadow 300ms, width 300ms;
+  transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutBack, border-width 300ms;
  
   &:first-child {
     border-radius: 4px 4px 0 0;
@@ -510,7 +516,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     background-color: $background-color;
     fill: $background-color;
     transform: scale(0);
-    transition: transform 300ms;
+    transition: transform 300ms $curve-easeOutBack;
 
     svg {
       width: 100%;
@@ -528,7 +534,6 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   margin-top: -1px;
   margin-bottom: -1px;
   opacity: 1;
-  transition: opacity 300ms, box-shadow 300ms, width 300ms;
   z-index: 1;
 
   .braintree-method__check {
@@ -560,6 +565,20 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 
   &.braintree-hidden {
     display: none;
+  }
+}
+
+.braintree-method__check-container {
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    width: 41px;
+    height: 41px;
+    background: $background-color;
+    border-radius: 100px;
+    transform: scale(0.9);
   }
 }
 
