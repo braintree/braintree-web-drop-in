@@ -85,7 +85,9 @@ MainView.prototype._initialize = function () {
       classlist.remove(this.getElementById('methods-container'), 'braintree-methods-container--inactive');
       classlist.remove(this.sheetContainer, 'braintree-sheet--active');
     } else {
-      classlist.add(this.sheetContainer, 'braintree-sheet--active');
+      setTimeout(function () {
+        classlist.add(this.sheetContainer, 'braintree-sheet--active');
+      }.bind(this), 0);
       classlist.remove(paymentMethodsViews.element, 'braintree-methods--active');
     }
   }.bind(this));

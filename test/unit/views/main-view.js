@@ -605,9 +605,17 @@ describe('MainView', function () {
       });
 
       describe('when a payment sheet is active', function () {
+        var clock;
+
         beforeEach(function () {
+          clock = sinon.useFakeTimers();
+
           classlist.add(this.paymentMethodsElement, 'braintree-methods--active');
           classlist.remove(this.sheetElement, 'braintree-sheet--active');
+        });
+
+        afterEach(function () {
+          clock.restore();
         });
 
         [CardView, PayPalView].forEach(function (PaymentSheetView) {
@@ -616,10 +624,12 @@ describe('MainView', function () {
           });
 
           it('adds braintree-sheet--active to the payment sheet', function () {
+            clock.tick(1001);
             expect(this.sheetElement.className).to.contain('braintree-sheet--active');
           });
 
           it('removes braintree-methods--active from the payment methods view', function () {
+            clock.tick(1001);
             expect(this.paymentMethodsElement.className).to.not.contain('braintree-methods--active');
           });
         });
