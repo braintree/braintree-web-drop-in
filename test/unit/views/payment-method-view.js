@@ -4,7 +4,6 @@ var BaseView = require('../../../src/views/base-view');
 var PaymentMethodView = require('../../../src/views/payment-method-view');
 var paymentMethodHTML = require('../../../src/html/payment-method.html');
 var strings = require('../../../src/translations/en');
-var transitionHelper = require('../../../src/lib/transition-helper');
 
 describe('PaymentMethodView', function () {
   beforeEach(function () {
@@ -85,17 +84,22 @@ describe('PaymentMethodView', function () {
   });
 
   describe('setActive', function () {
+    var clock;
+
     beforeEach(function () {
       this.context = {element: document.createElement('div')};
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd', function (element, callback) {
-        callback();
-      });
+      clock = sinon.useFakeTimers();
+    });
+
+    afterEach(function () {
+      clock.restore();
     });
 
     it('adds braintree-method--active if setting active payment method', function () {
       this.context.element.className = '';
 
       PaymentMethodView.prototype.setActive.call(this.context, true);
+      clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
@@ -104,6 +108,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = 'braintree-method--active';
 
       PaymentMethodView.prototype.setActive.call(this.context, true);
+      clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
@@ -112,6 +117,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = 'braintree-method--active';
 
       PaymentMethodView.prototype.setActive.call(this.context, false);
+      clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
     });
@@ -120,6 +126,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = '';
 
       PaymentMethodView.prototype.setActive.call(this.context, false);
+      clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
     });
