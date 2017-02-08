@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Use version 3.8.0 of braintree-web
+
 1.0.0-beta.4
 ------------
 - Fix bug where PayPal button could not be clicked in some browsers
