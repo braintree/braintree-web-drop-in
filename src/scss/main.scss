@@ -421,6 +421,7 @@ $border-transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutB
     &.braintree-form__field-group--has-error .braintree-form__field-error-icon,
     &.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon,
     &.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon {
+      transform: scale(1);
       display: block;
     }
 
