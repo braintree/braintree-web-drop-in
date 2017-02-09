@@ -78,13 +78,16 @@ DropinModel.prototype.clearError = function () {
   this._emit('errorCleared');
 };
 
-module.exports = DropinModel;
-
 function getSupportedPaymentOptions(options) {
-  var result = [paymentOptionIDs.card];
-
-  var isPayPalGatewayEnabled = options.client.getConfiguration().gatewayConfiguration.paypalEnabled;
+  var result = [];
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var isCardGatewayEnabled = gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
+  var isPayPalGatewayEnabled = gatewayConfiguration.paypalEnabled;
   var isPayPalMerchantEnabled = Boolean(options.merchantConfiguration.paypal);
+
+  if (isCardGatewayEnabled) {
+    result.push(paymentOptionIDs.card);
+  }
 
   if (isPayPalGatewayEnabled && isPayPalMerchantEnabled) {
     result.push(paymentOptionIDs.paypal);
@@ -92,3 +95,5 @@ function getSupportedPaymentOptions(options) {
 
   return result;
 }
+
+module.exports = DropinModel;
