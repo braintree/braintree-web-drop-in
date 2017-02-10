@@ -58,7 +58,6 @@ PayPalView.prototype._createPayPalButton = function () {
 PayPalView.prototype._tokenize = function () {
   var tokenizeReturn;
 
-  event.preventDefault();
   this._authInProgress = true;
 
   tokenizeReturn = this.paypalInstance.tokenize(this.model.merchantConfiguration.paypal, function (tokenizeErr, tokenizePayload) {
@@ -83,7 +82,8 @@ PayPalView.prototype._tokenize = function () {
   this.closeFrame = tokenizeReturn.close;
 };
 
-PayPalView.prototype._onSelect = function () {
+PayPalView.prototype._onSelect = function (event) {
+  event.preventDefault();
   if (this._authInProgress) {
     this._focusFrame();
   } else {
