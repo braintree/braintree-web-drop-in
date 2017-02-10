@@ -2,7 +2,8 @@
 
 var BaseView = require('../base-view');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
-var paypal = require('braintree-web/paypal');
+var btPayPal = require('braintree-web/paypal-checkout');
+var paypal = require('paypal-checkout');
 
 function PayPalView() {
   BaseView.apply(this, arguments);
@@ -15,23 +16,41 @@ PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
 
 PayPalView.prototype._initialize = function () {
-  this._createPayPalButton();
-  this._authInProgress = false;
+  var self = this;
+
   this.model.asyncDependencyStarting();
 
-  paypal.create({client: this.client}, function (err, paypalInstance) {
+  btPayPal.create({client: this.client}, function (err, paypalInstance) {
+    var paypalCheckoutConfig;
+    var merchantConfig = self.model.merchantConfiguration.paypal;
+    var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
+
     if (err) {
       console.error(err);
       return;
     }
+    self.paypalInstance = paypalInstance;
 
-    this.paypalInstance = paypalInstance;
+    paypalCheckoutConfig = {
+      env: environment,
+      locale: merchantConfig.locale,
+      payment: function () {
+        return paypalInstance.createPayment(merchantConfig);
+      },
+      onAuthorize: function (data) {
+        return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
+          self.model.addPaymentMethod(tokenizePayload);
+        });
+      },
+      onError: function (paypalCheckoutErr) {
+        self.model.reportError(paypalCheckoutErr);
+      }
+    };
 
-    this.paypalButton = this.getElementById('paypal-button');
-    this.paypalButton.addEventListener('click', this._onSelect.bind(this));
-
-    this.model.asyncDependencyReady();
-  }.bind(this));
+    paypal.Button.render(paypalCheckoutConfig, '[data-braintree-id="paypal-button"]').then(function () {
+      self.model.asyncDependencyReady();
+    });
+  });
 };
 
 PayPalView.prototype._createPayPalButton = function () {
@@ -53,42 +72,6 @@ PayPalView.prototype._createPayPalButton = function () {
   });
 
   buttonContainer.appendChild(script);
-};
-
-PayPalView.prototype._tokenize = function () {
-  var tokenizeReturn;
-
-  this._authInProgress = true;
-
-  tokenizeReturn = this.paypalInstance.tokenize(this.model.merchantConfiguration.paypal, function (tokenizeErr, tokenizePayload) {
-    this._authInProgress = false;
-
-    if (tokenizeErr) {
-      if (tokenizeErr.code !== 'PAYPAL_POPUP_CLOSED') {
-        if (tokenizeErr.type === 'MERCHANT') {
-          console.error(tokenizeErr);
-          this.model.reportError(null);
-        } else {
-          this.model.reportError(tokenizeErr);
-        }
-      }
-      return;
-    }
-
-    this.model.addPaymentMethod(tokenizePayload);
-  }.bind(this));
-
-  this._focusFrame = tokenizeReturn.focus;
-  this.closeFrame = tokenizeReturn.close;
-};
-
-PayPalView.prototype._onSelect = function (event) {
-  event.preventDefault();
-  if (this._authInProgress) {
-    this._focusFrame();
-  } else {
-    this._tokenize();
-  }
 };
 
 module.exports = PayPalView;

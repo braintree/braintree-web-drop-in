@@ -51,7 +51,9 @@
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
-    "braintree-web": "3.8.0"
+    "braintree-web": "3.8.0",
+    "paypal-checkout": "4.0.40",
+    "promise-polyfill": "6.0.2"
   },
   "browserify": {
     "transform": [
