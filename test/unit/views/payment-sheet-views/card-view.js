@@ -1,12 +1,12 @@
 'use strict';
 
 var BaseView = require('../../../../src/views/base-view');
+var CardView = require('../../../../src/views/payment-sheet-views/card-view');
 var classlist = require('../../../../src/lib/classlist');
 var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var mainHTML = require('../../../../src/html/main.html');
-var CardView = require('../../../../src/views/payment-sheet-views/card-view');
 var strings = require('../../../../src/translations/en');
 
 describe('CardView', function () {
