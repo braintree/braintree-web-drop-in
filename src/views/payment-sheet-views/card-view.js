@@ -64,7 +64,7 @@ CardView.prototype._initialize = function () {
         color: 'rgba(0,0,0,0.25)'
       },
       'input::-ms-clear': {
-        color: 'white'
+        color: 'transparent'
       }
     }
   };
