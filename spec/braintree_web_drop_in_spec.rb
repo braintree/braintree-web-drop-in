@@ -10,6 +10,7 @@ describe "Drop-in" do
     visit "http://#{HOSTNAME}:#{PORT}"
   end
 
+  # TODO: Figure out how to focus to Hosted Fields in Drop-in.
   # it "tokenizes a card" do
   #   click_on('Card')
   #
