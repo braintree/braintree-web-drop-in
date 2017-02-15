@@ -9,7 +9,6 @@ $black-75: lighten(#000000, 75%);
 $curve-swing: cubic-bezier(0.645, 0.045, 0.355, 1);
 $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-$border-transition: box-shadow 300ms, width 200ms $curve-easeOutBack, border-color 300ms;
 
 [data-braintree-id="wrapper"] {
   display: block !important;
@@ -231,13 +230,12 @@ $border-transition: box-shadow 300ms, width 200ms $curve-easeOutBack, border-col
     box-shadow: 0px 0px 0px 2px #219653;
     border-radius: 5px;
     border-color: rgba(0,0,0,0);
-    transition: $border-transition;
   }
 }
 
 .braintree-sheet {
-  max-height: 1000px;
-  transition: transform 300ms, opacity 300ms 200ms, max-height 300ms ease;
+  max-height: 500px;
+  transition: transform 300ms, opacity 300ms, max-height 300ms ease;
 }
 
 .braintree-sheet--tokenized {
@@ -474,7 +472,7 @@ $border-transition: box-shadow 300ms, width 200ms $curve-easeOutBack, border-col
   width: 99%;
   position: relative;
   z-index: 0;
-  transition: $border-transition;
+  transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutBack, border-color 300ms, border-radius 300ms;
 
   &:first-child {
     border-radius: 4px 4px 0 0;
