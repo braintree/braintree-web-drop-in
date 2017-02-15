@@ -1,42 +1,43 @@
 require_relative "helpers/paypal_helper"
+require_relative "helpers/drop_in_helper"
 
 HOSTNAME = `hostname`.chomp
 PORT = 4567
 
 describe "Drop-in" do
   include PayPal
+  include DropIn
 
   before :each do
     visit "http://#{HOSTNAME}:#{PORT}"
   end
 
-  # TODO: Figure out how to focus to Hosted Fields in Drop-in.
-  # it "tokenizes a card" do
-  #   click_on('Card')
-  #
-  #   find('label[for="credit-card-number"]').click()
-  #   find('iframe[name="braintree-hosted-field-number"]').send_keys('4111111111111111')
-  #
-  #   find('label[for="expiration"]').click()
-  #   find('iframe[name="braintree-hosted-field-expirationDate"]').send_keys('12' + (Time.new.year + 2).to_s[-2..-1])
-  #
-  #   click_button('Pay')
-  #
-  #   # Drop-in Details
-  #   expect(page).to have_content('Ending in ••11')
-  #
-  #   # Nonce Details
-  #   expect(page).to have_content('CreditCard')
-  #   expect(page).to have_content('ending in 11')
-  #   expect(page).to have_content('Visa')
-  # end
+  describe "tokenizes" do
+    it "a card" do
+      click_option("Card")
+      hosted_field_send_input("number", "4111111111111111")
+      hosted_field_send_input("expirationDate", "1019")
+      submit_pay
 
-  it "tokenizes PayPal" do
-    find(".braintree-option__label", :text => "PayPal").click
+      expect(find(".braintree-heading")).to have_content("Paying with")
 
-    open_popup_and_complete_login
+      # Drop-in Details
+      expect(page).to have_content('Ending in ••11')
 
-    expect(page).to have_content('bt_buyer_us@paypal.com')
+      # Nonce Details
+      expect(page).to have_content('CreditCard')
+      expect(page).to have_content('ending in 11')
+      expect(page).to have_content('Visa')
+    end
+
+    it "PayPal" do
+      click_option("PayPal")
+
+      open_popup_and_complete_login
+
+      expect(find(".braintree-heading")).to have_content("Paying with")
+
+      expect(page).to have_content('bt_buyer_us@paypal.com')
+    end
   end
-
 end
