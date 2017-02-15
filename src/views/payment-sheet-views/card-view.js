@@ -239,7 +239,11 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   this.cardNumberIconSvg.setAttribute('xlink:href', cardNumberHrefLink);
   this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
   this.cvvLabelDescriptor.textContent = cvvDescriptor;
-  this.hostedFieldsInstance.setPlaceholder('cvv', cvvPlaceholder);
+  this.hostedFieldsInstance.setAttribute({
+    field: 'cvv',
+    attribute: 'placeholder',
+    value: cvvPlaceholder
+  });
 };
 
 CardView.prototype._onFocusEvent = function (event) {
