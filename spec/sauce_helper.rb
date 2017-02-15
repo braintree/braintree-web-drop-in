@@ -16,8 +16,7 @@ def select_browsers
   if !PLATFORM || PLATFORM == "desktop"
     browsers += [
       ["Windows 10", "chrome", nil],
-      # Firefox >= 48 on Sauce is failing all tests
-      ["Windows 10", "firefox", 47],
+      ["Windows 10", "firefox", nil],
       ["OS X 10.11", "safari", nil],
       ["Windows 7", "internet explorer", "9"],
       ["Windows 8", "internet explorer", "10"],
