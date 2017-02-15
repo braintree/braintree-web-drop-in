@@ -1283,18 +1283,44 @@ describe('CardView', function () {
       expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
     });
 
-    it('adds a new payment method when tokenize is successful', function () {
+    it('adds a new payment method when tokenize is successful and transition ends', function () {
       var stubPayload = {};
 
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
       this.sandbox.stub(this.model, 'addPaymentMethod');
       this.sandbox.stub(transitionHelper, 'onTransitionEnd', function (element, callback) {
-        callback();
+        callback({
+          propertyName: 'max-height'
+        });
       });
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
       expect(this.model.addPaymentMethod).to.have.been.calledWith(stubPayload);
+    });
+
+    it('waits for "max-height" transition end before adding payment method', function () {
+      var stubPayload = {};
+
+      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
+      this.sandbox.stub(this.model, 'addPaymentMethod');
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd', function (element, callback) {
+        callback({
+          propertyName: 'foo'
+        });
+
+        callback({
+          propertyName: 'baz'
+        });
+
+        callback({
+          propertyName: 'max-height'
+        });
+      });
+
+      CardView.prototype.tokenize.call(this.context, function () {});
+
+      expect(this.model.addPaymentMethod).to.have.been.calledOnce;
     });
 
     it('does not update the active payment method when tokenize fails', function () {

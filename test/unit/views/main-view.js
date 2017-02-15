@@ -584,19 +584,21 @@ describe('MainView', function () {
 
     describe('for changeActivePaymentView', function () {
       beforeEach(function () {
-        this.paymentMethodsElement = this.element.querySelector('[data-braintree-id="' + PaymentMethodsView.ID + '"]');
+        this.paymentMethodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
         this.sheetElement = this.element.querySelector('[data-braintree-id="sheet-container"]');
       });
 
       describe('when the PaymentMethodsView is active', function () {
         beforeEach(function () {
-          classlist.remove(this.paymentMethodsElement, 'braintree-methods--active');
+          classlist.remove(this.paymentMethodsContainer, 'braintree-methods--active');
+          classlist.add(this.paymentMethodsContainer, 'braintree-methods-container--inactive');
           classlist.add(this.sheetElement, 'braintree-sheet--active');
           this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
         });
 
         it('adds braintree-methods--active to the payment methods view element', function () {
-          expect(this.paymentMethodsElement.className).to.contain('braintree-methods--active');
+          expect(this.paymentMethodsContainer.className).to.contain('braintree-methods--active');
+          expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods-container--inactive');
         });
 
         it('removes braintree-sheet--active from the payment sheet element', function () {
@@ -610,7 +612,7 @@ describe('MainView', function () {
         beforeEach(function () {
           clock = sinon.useFakeTimers();
 
-          classlist.add(this.paymentMethodsElement, 'braintree-methods--active');
+          classlist.add(this.paymentMethodsContainer, 'braintree-methods--active');
           classlist.remove(this.sheetElement, 'braintree-sheet--active');
         });
 
@@ -630,7 +632,7 @@ describe('MainView', function () {
 
           it('removes braintree-methods--active from the payment methods view', function () {
             clock.tick(1001);
-            expect(this.paymentMethodsElement.className).to.not.contain('braintree-methods--active');
+            expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods--active');
           });
         });
       });

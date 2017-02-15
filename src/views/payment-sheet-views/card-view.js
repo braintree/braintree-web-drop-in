@@ -158,11 +158,13 @@ CardView.prototype.tokenize = function (callback) {
         self.hostedFieldsInstance.clear(field);
       });
 
-      transitionCallback = function () {
-        self.model.addPaymentMethod(payload);
-        callback(null, payload);
-        classlist.remove(self.element, 'braintree-sheet--tokenized');
-        self.element.removeEventListener('transitionend', transitionCallback);
+      transitionCallback = function (event) {
+        if (event.propertyName === 'max-height') {
+          self.model.addPaymentMethod(payload);
+          callback(null, payload);
+          classlist.remove(self.element, 'braintree-sheet--tokenized');
+          self.element.removeEventListener('transitionend', transitionCallback);
+        }
       };
 
       transitionHelper.onTransitionEnd(self.element, transitionCallback);

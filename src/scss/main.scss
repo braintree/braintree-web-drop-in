@@ -9,7 +9,7 @@ $black-75: lighten(#000000, 75%);
 $curve-swing: cubic-bezier(0.645, 0.045, 0.355, 1);
 $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-$border-transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutBack, border-width 300ms;
+$border-transition: box-shadow 300ms, width 200ms $curve-easeOutBack, border-color 300ms;
 
 [data-braintree-id="wrapper"] {
   display: block !important;
@@ -475,7 +475,7 @@ $border-transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutB
   position: relative;
   z-index: 0;
   transition: $border-transition;
- 
+
   &:first-child {
     border-radius: 4px 4px 0 0;
     border-top-width: 1px;
@@ -600,7 +600,6 @@ $border-transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutB
   &.braintree-methods-container--inactive {
     .braintree-method {
       box-shadow: 0 0 0 0 #fff;
-      opacity: 0.1;
     }
 
     .braintree-method__check {
