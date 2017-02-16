@@ -235,7 +235,7 @@ $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
 .braintree-sheet {
   max-height: 500px;
-  transition: transform 300ms, opacity 300ms, max-height 300ms ease;
+  transition: box-shadow 300ms, transform 300ms, opacity 300ms, max-height 300ms ease;
 }
 
 .braintree-sheet--tokenized {
