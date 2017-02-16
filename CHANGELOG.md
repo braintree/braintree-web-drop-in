@@ -5,6 +5,9 @@ unreleased
 ----------
 - Use version 3.8.0 of braintree-web
 - Doesn't show Card payment option for merchants without cards enabled
+- Animate payment entry to tokenization
+- Animate choosing other saved payment methods
+- Animate choosing a different way to pay
 
 1.0.0-beta.4
 ------------
