@@ -1,0 +1,4 @@
+--color
+--default-path spec
+--format progress
+--require spec_helper
