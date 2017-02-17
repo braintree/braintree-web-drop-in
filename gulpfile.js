@@ -3,7 +3,7 @@
 /* globals __dirname */
 
 var browserify = require('browserify');
-var stringify = require('stringify');
+var brfs = require('gulp-brfs');
 var cleanCSS = require('gulp-clean-css');
 var del = require('del');
 var fs = require('fs');
@@ -22,9 +22,11 @@ var connect = require('connect');
 var serveStatic = require('serve-static');
 var finalhandler = require('finalhandler');
 var gutil = require('gulp-util');
+var mkdirp = require('mkdirp');
 var VERSION = require('./package.json').version;
 
 var DIST_PATH = 'dist/web/dropin/' + VERSION;
+var NPM_PATH = 'dist/npm';
 
 var config = {
   namespace: 'braintree',
@@ -65,10 +67,6 @@ gulp.task('build:js', ['build:js:unmin', 'build:js:min']);
 
 gulp.task('build:js:unmin', function () {
   return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
-    .transform(stringify, {
-      appliesTo: { includeExtensions: ['.html'] },
-      minify: false
-    })
     .bundle()
     .pipe(source(config.src.js.output))
     .pipe(replace('@DOT_MIN', ''))
@@ -78,10 +76,6 @@ gulp.task('build:js:unmin', function () {
 
 gulp.task('build:js:min', function () {
   return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
-    .transform(stringify, {
-      appliesTo: { includeExtensions: ['.html'] },
-      minify: true
-    })
     .bundle()
     .pipe(source(config.src.js.output))
     .pipe(replace('@DOT_MIN', '.min'))
@@ -107,6 +101,39 @@ gulp.task('build:link-latest', function (done) {
   fs.symlink(VERSION, 'dist/web/dropin/dev', done);
 });
 
+gulp.task('build:npm:statics', function () {
+  return gulp.src([
+    './.gitignore',
+    './CHANGELOG.md',
+    './LICENSE',
+    './README.md'
+  ]).pipe(gulp.dest(NPM_PATH));
+});
+
+gulp.task('build:npm:package.json', function (done) {
+  var pkg = Object.assign({}, require('./package.json'));
+
+  delete pkg.browserify;
+
+  mkdirp.sync(NPM_PATH);
+
+  fs.writeFile(NPM_PATH + '/' + 'package.json', JSON.stringify(pkg, null, 2), done);
+});
+
+gulp.task('build:npm:src', function () {
+  return gulp.src([
+    'src/**/*.js'
+  ])
+  .pipe(brfs())
+  .pipe(gulp.dest(NPM_PATH));
+});
+
+gulp.task('build:npm', [
+  'build:npm:statics',
+  'build:npm:package.json',
+  'build:npm:src'
+]);
+
 gulp.task('clean', function () {
   return del(['./dist']);
 });
@@ -114,7 +141,7 @@ gulp.task('clean', function () {
 gulp.task('build', function (done) {
   runSequence(
   'clean',
-  ['build:js', 'build:css', 'build:jsdoc'],
+  ['build:js', 'build:css', 'build:jsdoc', 'build:npm'],
   'build:link-latest',
   done);
 });

@@ -4,8 +4,10 @@ var BaseView = require('../../../src/views/base-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
-var mainHTML = require('../../../src/html/main.html');
+var fs = require('fs');
 var strings = require('../../../src/translations/en');
+
+var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
 describe('PaymentMethodsView', function () {
   describe('Constructor', function () {

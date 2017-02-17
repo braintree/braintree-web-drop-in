@@ -1,10 +1,12 @@
 'use strict';
 
+var fs = require('fs');
 var BaseView = require('../base-view');
-var cardIconHTML = require('../../html/card-icons.html');
 var classlist = require('../../lib/classlist');
 var constants = require('../../constants');
 var hostedFields = require('braintree-web/hosted-fields');
+
+var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
 function CardView() {
   BaseView.apply(this, arguments);

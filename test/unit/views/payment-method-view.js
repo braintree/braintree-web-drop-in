@@ -1,9 +1,11 @@
 'use strict';
 
 var BaseView = require('../../../src/views/base-view');
+var fs = require('fs');
 var PaymentMethodView = require('../../../src/views/payment-method-view');
-var paymentMethodHTML = require('../../../src/html/payment-method.html');
 var strings = require('../../../src/translations/en');
+
+var paymentMethodHTML = fs.readFileSync(__dirname + '/../../../src/html/payment-method.html', 'utf8');
 
 describe('PaymentMethodView', function () {
   beforeEach(function () {
