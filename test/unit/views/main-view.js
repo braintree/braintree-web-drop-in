@@ -514,14 +514,12 @@ describe('MainView', function () {
   });
 
   describe('hideLoadingIndicator', function () {
-    var clock;
-
     beforeEach(function () {
-      clock = sinon.useFakeTimers();
+      this.clock = sinon.useFakeTimers();
     });
 
     afterEach(function () {
-      clock.restore();
+      this.clock.restore();
     });
 
     it('hides the loading indicator', function () {
@@ -537,7 +535,7 @@ describe('MainView', function () {
       dropinContainer.className = 'braintree-hidden';
 
       MainView.prototype.hideLoadingIndicator.call(context);
-      clock.tick(1001);
+      this.clock.tick(1001);
 
       expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
       expect(context.loadingContainer.classList.contains('braintree-loader__container--inactive')).to.be.true;
@@ -607,17 +605,15 @@ describe('MainView', function () {
       });
 
       describe('when a payment sheet is active', function () {
-        var clock;
-
         beforeEach(function () {
-          clock = sinon.useFakeTimers();
+          this.clock = sinon.useFakeTimers();
 
           classlist.add(this.paymentMethodsContainer, 'braintree-methods--active');
           classlist.remove(this.sheetElement, 'braintree-sheet--active');
         });
 
         afterEach(function () {
-          clock.restore();
+          this.clock.restore();
         });
 
         [CardView, PayPalView].forEach(function (PaymentSheetView) {
@@ -626,12 +622,12 @@ describe('MainView', function () {
           });
 
           it('adds braintree-sheet--active to the payment sheet', function () {
-            clock.tick(1001);
+            this.clock.tick(1001);
             expect(this.sheetElement.className).to.contain('braintree-sheet--active');
           });
 
           it('removes braintree-methods--active from the payment methods view', function () {
-            clock.tick(1001);
+            this.clock.tick(1001);
             expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods--active');
           });
         });
