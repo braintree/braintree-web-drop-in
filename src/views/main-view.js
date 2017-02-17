@@ -81,7 +81,6 @@ MainView.prototype._initialize = function () {
   this.model.on('changeActivePaymentView', function (id) {
     if (id === PaymentMethodsView.ID) {
       classlist.add(paymentMethodsViews.container, 'braintree-methods--active');
-      classlist.remove(paymentMethodsViews.container, 'braintree-methods-container--inactive');
       classlist.remove(this.sheetContainer, 'braintree-sheet--active');
     } else {
       setTimeout(function () {

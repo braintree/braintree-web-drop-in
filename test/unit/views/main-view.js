@@ -589,14 +589,12 @@ describe('MainView', function () {
       describe('when the PaymentMethodsView is active', function () {
         beforeEach(function () {
           classlist.remove(this.paymentMethodsContainer, 'braintree-methods--active');
-          classlist.add(this.paymentMethodsContainer, 'braintree-methods-container--inactive');
           classlist.add(this.sheetElement, 'braintree-sheet--active');
           this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
         });
 
         it('adds braintree-methods--active to the payment methods view element', function () {
           expect(this.paymentMethodsContainer.className).to.contain('braintree-methods--active');
-          expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods-container--inactive');
         });
 
         it('removes braintree-sheet--active from the payment sheet element', function () {
