@@ -252,7 +252,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   .braintree-sheet__card-icon {
     display: inline-block;
     padding-left: 5px;
-    
+
     &.braintree-hidden {
       display: none;
     }
@@ -271,8 +271,15 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 }
 
 .braintree-sheet__content--button {
-  padding: 20px;
+  padding-top: 20px;
+  padding-bottom: 10px;
   text-align: center;
+
+  .braintree-sheet__button--paypal {
+    iframe {
+      display: inline-block !important;
+    }
+  }
 }
 
 .braintree-form__field-group--has-error {
