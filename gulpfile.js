@@ -3,6 +3,7 @@
 /* globals __dirname */
 
 var browserify = require('browserify');
+var envify = require('gulp-envify');
 var brfs = require('gulp-brfs');
 var cleanCSS = require('gulp-clean-css');
 var del = require('del');
@@ -114,6 +115,7 @@ gulp.task('build:npm:package.json', function (done) {
   var pkg = Object.assign({}, require('./package.json'));
 
   delete pkg.browserify;
+  pkg.main = 'index.js';
 
   mkdirp.sync(NPM_PATH);
 
@@ -124,6 +126,8 @@ gulp.task('build:npm:src', function () {
   return gulp.src([
     'src/**/*.js'
   ])
+  .pipe(replace('@DOT_MIN', ''))
+  .pipe(envify(process.env))
   .pipe(brfs())
   .pipe(gulp.dest(NPM_PATH));
 });
