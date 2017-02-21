@@ -12,3 +12,4 @@
 
   globals:
     __dirname: true
+    process: true
