@@ -4,12 +4,13 @@
  * @description This is the Drop-in module.
  */
 
-var packageVersion = require('package.version');
 var Dropin = require('./dropin');
 var client = require('braintree-web/client');
 var deferred = require('./lib/deferred');
 var constants = require('./constants');
 var analytics = require('./lib/analytics');
+
+var VERSION = process.env.npm_package_version;
 
 /**
  * @static
@@ -73,5 +74,5 @@ module.exports = {
    * @description The current version of Drop-in, i.e. `{@pkg version}`.
    * @type {string}
    */
-  VERSION: packageVersion
+  VERSION: VERSION
 };

@@ -2,8 +2,10 @@
 
 var analytics = require('../lib/analytics');
 var BaseView = require('./base-view');
-var paymentMethodOptionHTML = require('../html/payment-option.html');
+var fs = require('fs');
 var paymentOptionIDs = require('../constants').paymentOptionIDs;
+
+var paymentMethodOptionHTML = fs.readFileSync(__dirname + '/../html/payment-option.html', 'utf8');
 
 function PaymentOptionsView() {
   BaseView.apply(this, arguments);

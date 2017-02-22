@@ -8,6 +8,7 @@ unreleased
 - Animate payment entry to tokenization
 - Animate choosing other saved payment methods
 - Animate choosing a different way to pay
+- Publish to npm
 
 1.0.0-beta.4
 ------------

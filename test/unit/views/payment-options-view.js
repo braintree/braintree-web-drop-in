@@ -2,12 +2,14 @@
 
 var BaseView = require('../../../src/views/base-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
-var mainHTML = require('../../../src/html/main.html');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var DropinModel = require('../../../src/dropin-model');
 var strings = require('../../../src/translations/en');
 var fake = require('../../helpers/fake');
+var fs = require('fs');
 var analytics = require('../../../src/lib/analytics');
+
+var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
 describe('PaymentOptionsView', function () {
   describe('Constructor', function () {
