@@ -80,11 +80,13 @@ MainView.prototype._initialize = function () {
 
   this.model.on('changeActivePaymentView', function (id) {
     if (id === PaymentMethodsView.ID) {
-      classlist.add(paymentMethodsViews.element, 'braintree-methods--active');
+      classlist.add(paymentMethodsViews.container, 'braintree-methods--active');
       classlist.remove(this.sheetContainer, 'braintree-sheet--active');
     } else {
-      classlist.add(this.sheetContainer, 'braintree-sheet--active');
-      classlist.remove(paymentMethodsViews.element, 'braintree-methods--active');
+      setTimeout(function () {
+        classlist.add(this.sheetContainer, 'braintree-sheet--active');
+      }.bind(this), 0);
+      classlist.remove(paymentMethodsViews.container, 'braintree-methods--active');
     }
   }.bind(this));
 

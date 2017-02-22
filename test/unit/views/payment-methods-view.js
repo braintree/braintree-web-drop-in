@@ -127,6 +127,8 @@ describe('PaymentMethodsView', function () {
       var fakePaymentMethod = {baz: 'qux'};
       var modelOptions = fake.modelOptions();
 
+      this.clock = sinon.useFakeTimers();
+
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [{foo: 'bar'}, fakePaymentMethod];
       model = new DropinModel(modelOptions);
@@ -146,7 +148,9 @@ describe('PaymentMethodsView', function () {
       model.changeActivePaymentMethod(fakePaymentMethod);
 
       expect(paymentMethodsViews.activeMethodView.paymentMethod).to.equal(fakePaymentMethod);
+      this.clock.tick(1001);
       expect(paymentMethodsViews.activeMethodView.element.className).to.contain('braintree-method--active');
+      this.clock.restore();
     });
   });
 

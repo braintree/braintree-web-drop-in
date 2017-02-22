@@ -516,14 +516,12 @@ describe('MainView', function () {
   });
 
   describe('hideLoadingIndicator', function () {
-    var clock;
-
     beforeEach(function () {
-      clock = sinon.useFakeTimers();
+      this.clock = sinon.useFakeTimers();
     });
 
     afterEach(function () {
-      clock.restore();
+      this.clock.restore();
     });
 
     it('hides the loading indicator', function () {
@@ -539,7 +537,7 @@ describe('MainView', function () {
       dropinContainer.className = 'braintree-hidden';
 
       MainView.prototype.hideLoadingIndicator.call(context);
-      clock.tick(1001);
+      this.clock.tick(1001);
 
       expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
       expect(context.loadingContainer.classList.contains('braintree-loader__container--inactive')).to.be.true;
@@ -586,19 +584,19 @@ describe('MainView', function () {
 
     describe('for changeActivePaymentView', function () {
       beforeEach(function () {
-        this.paymentMethodsElement = this.element.querySelector('[data-braintree-id="' + PaymentMethodsView.ID + '"]');
+        this.paymentMethodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
         this.sheetElement = this.element.querySelector('[data-braintree-id="sheet-container"]');
       });
 
       describe('when the PaymentMethodsView is active', function () {
         beforeEach(function () {
-          classlist.remove(this.paymentMethodsElement, 'braintree-methods--active');
+          classlist.remove(this.paymentMethodsContainer, 'braintree-methods--active');
           classlist.add(this.sheetElement, 'braintree-sheet--active');
           this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
         });
 
         it('adds braintree-methods--active to the payment methods view element', function () {
-          expect(this.paymentMethodsElement.className).to.contain('braintree-methods--active');
+          expect(this.paymentMethodsContainer.className).to.contain('braintree-methods--active');
         });
 
         it('removes braintree-sheet--active from the payment sheet element', function () {
@@ -608,8 +606,14 @@ describe('MainView', function () {
 
       describe('when a payment sheet is active', function () {
         beforeEach(function () {
-          classlist.add(this.paymentMethodsElement, 'braintree-methods--active');
+          this.clock = sinon.useFakeTimers();
+
+          classlist.add(this.paymentMethodsContainer, 'braintree-methods--active');
           classlist.remove(this.sheetElement, 'braintree-sheet--active');
+        });
+
+        afterEach(function () {
+          this.clock.restore();
         });
 
         [CardView, PayPalView].forEach(function (PaymentSheetView) {
@@ -618,11 +622,13 @@ describe('MainView', function () {
           });
 
           it('adds braintree-sheet--active to the payment sheet', function () {
+            this.clock.tick(1001);
             expect(this.sheetElement.className).to.contain('braintree-sheet--active');
           });
 
           it('removes braintree-methods--active from the payment methods view', function () {
-            expect(this.paymentMethodsElement.className).to.not.contain('braintree-methods--active');
+            this.clock.tick(1001);
+            expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods--active');
           });
         });
       });

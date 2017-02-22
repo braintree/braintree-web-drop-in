@@ -88,12 +88,18 @@ describe('PaymentMethodView', function () {
   describe('setActive', function () {
     beforeEach(function () {
       this.context = {element: document.createElement('div')};
+      this.clock = sinon.useFakeTimers();
+    });
+
+    afterEach(function () {
+      this.clock.restore();
     });
 
     it('adds braintree-method--active if setting active payment method', function () {
       this.context.element.className = '';
 
       PaymentMethodView.prototype.setActive.call(this.context, true);
+      this.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
@@ -102,6 +108,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = 'braintree-method--active';
 
       PaymentMethodView.prototype.setActive.call(this.context, true);
+      this.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
@@ -110,6 +117,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = 'braintree-method--active';
 
       PaymentMethodView.prototype.setActive.call(this.context, false);
+      this.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
     });
@@ -118,6 +126,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = '';
 
       PaymentMethodView.prototype.setActive.call(this.context, false);
+      this.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
     });
