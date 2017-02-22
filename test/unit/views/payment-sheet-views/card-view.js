@@ -1,12 +1,12 @@
 'use strict';
 
 var BaseView = require('../../../../src/views/base-view');
+var CardView = require('../../../../src/views/payment-sheet-views/card-view');
 var classlist = require('../../../../src/lib/classlist');
 var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var mainHTML = require('../../../../src/html/main.html');
-var CardView = require('../../../../src/views/payment-sheet-views/card-view');
 var strings = require('../../../../src/translations/en');
 
 describe('CardView', function () {
@@ -557,7 +557,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -574,7 +574,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
@@ -593,7 +593,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
@@ -612,7 +612,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -629,7 +629,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -646,7 +646,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -663,7 +663,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         use.setAttribute('xlink:href', '#iconCVVFront');
@@ -681,7 +681,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -698,7 +698,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         cvvLabelDescriptor.textContent = 'some value';
@@ -716,7 +716,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         cvvLabelDescriptor.textContent = 'some value';
@@ -734,7 +734,7 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: function () {}
+          setAttribute: function () {}
         };
 
         cvvLabelDescriptor.textContent = 'some value';
@@ -751,13 +751,13 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: this.sandbox.spy()
+          setAttribute: this.sandbox.spy()
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '••••');
+        expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '••••'});
       });
 
       it('updates the cvv field placeholder when card type is non-amex', function () {
@@ -767,13 +767,13 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: this.sandbox.spy()
+          setAttribute: this.sandbox.spy()
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '•••');
+        expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
       });
 
       it('updates the cvv field placeholder when multiple card types', function () {
@@ -783,13 +783,13 @@ describe('CardView', function () {
         };
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, fakeEvent),
-          setPlaceholder: this.sandbox.spy()
+          setAttribute: this.sandbox.spy()
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
         CardView.prototype._initialize.call(this.context);
 
-        expect(hostedFieldsInstance.setPlaceholder).to.have.been.calledWith('cvv', '•••');
+        expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
       });
     });
 

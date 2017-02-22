@@ -57,7 +57,7 @@ clientTokenWithCustomerID = btoa(JSON.stringify(clientTokenWithCustomerID));
 hostedFieldsInstance = {
   getState: getState,
   on: function () {},
-  setPlaceholder: function () {},
+  setAttribute: function () {},
   tokenize: function () {}
 };
 

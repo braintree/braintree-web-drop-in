@@ -7,7 +7,6 @@
 <style>
 
   html {
-    line-height: 1.5em;
     font-family: sans-serif;
     font-size: 16pt;
     background: #f9f9f9;
@@ -68,15 +67,15 @@
     }
 
     form.addEventListener('submit', function (event) {
-      var paymentMethod = dropinInstance.getActivePaymentMethod();
-
       event.preventDefault();
 
-      if (paymentMethod) {
-        results.textContent = JSON.stringify(paymentMethod, null, 2);
-      } else {
-        results.textContent = 'No payment method nonce available.';
-      }
+      dropinInstance.requestPaymentMethod(function (err, payload) {
+        if (err) {
+          results.textContent = err.message;
+        } else {
+          results.textContent = JSON.stringify(payload, null, 2);
+        }
+      });
     }, false);
   });
 

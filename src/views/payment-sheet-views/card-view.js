@@ -62,6 +62,9 @@ CardView.prototype._initialize = function () {
       },
       ':-ms-input-placeholder ': {
         color: 'rgba(0,0,0,0.25)'
+      },
+      'input::-ms-clear': {
+        color: 'transparent'
       }
     }
   };
@@ -239,7 +242,11 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   this.cardNumberIconSvg.setAttribute('xlink:href', cardNumberHrefLink);
   this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
   this.cvvLabelDescriptor.textContent = cvvDescriptor;
-  this.hostedFieldsInstance.setPlaceholder('cvv', cvvPlaceholder);
+  this.hostedFieldsInstance.setAttribute({
+    field: 'cvv',
+    attribute: 'placeholder',
+    value: cvvPlaceholder
+  });
 };
 
 CardView.prototype._onFocusEvent = function (event) {

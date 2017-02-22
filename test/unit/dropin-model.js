@@ -58,6 +58,12 @@ describe('DropinModel', function () {
     });
 
     describe('supported payment options', function () {
+      it('supports nothing', function () {
+        this.configuration.gatewayConfiguration.creditCards.supportedCardTypes = [];
+
+        expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.deep.equal([]);
+      });
+
       it('supports cards', function () {
         expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.deep.equal([
           'card'
