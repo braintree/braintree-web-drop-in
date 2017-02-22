@@ -1288,39 +1288,11 @@ describe('CardView', function () {
 
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
       this.sandbox.stub(this.model, 'addPaymentMethod');
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd', function (element, callback) {
-        callback({
-          propertyName: 'max-height'
-        });
-      });
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
       CardView.prototype.tokenize.call(this.context, function () {});
 
       expect(this.model.addPaymentMethod).to.have.been.calledWith(stubPayload);
-    });
-
-    it('waits for "max-height" transition end before adding payment method', function () {
-      var stubPayload = {};
-
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
-      this.sandbox.stub(this.model, 'addPaymentMethod');
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd', function (element, callback) {
-        callback({
-          propertyName: 'foo'
-        });
-
-        callback({
-          propertyName: 'baz'
-        });
-
-        callback({
-          propertyName: 'max-height'
-        });
-      });
-
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.model.addPaymentMethod).to.have.been.calledOnce;
     });
 
     it('does not update the active payment method when tokenize fails', function () {
