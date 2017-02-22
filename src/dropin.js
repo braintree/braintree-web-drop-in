@@ -7,11 +7,14 @@ var constants = require('./constants');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
-var mainHTML = require('./html/main.html');
+var fs = require('fs');
 var translations = require('./translations');
-var svgHTML = require('./html/svgs.html');
 var uuid = require('./lib/uuid');
-var VERSION = require('package.version');
+
+var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
+var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
+
+var VERSION = process.env.npm_package_version;
 
 function Dropin(options) {
   this._client = options.client;

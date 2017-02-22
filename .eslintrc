@@ -9,3 +9,7 @@
         requireReturn: true
         requireParamDescription: true
         requireReturnDescription: true
+
+  globals:
+    __dirname: true
+    process: true

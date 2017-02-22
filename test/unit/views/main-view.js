@@ -8,13 +8,15 @@ var analytics = require('../../../src/lib/analytics');
 var classlist = require('../../../src/lib/classlist');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
+var fs = require('fs');
 var HostedFields = require('braintree-web/hosted-fields');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPal = require('braintree-web/paypal');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en');
-var templateHTML = require('../../../src/html/main.html');
+
+var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
 describe('MainView', function () {
   beforeEach(function () {

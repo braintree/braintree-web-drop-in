@@ -5,9 +5,11 @@ var CardView = require('../../../../src/views/payment-sheet-views/card-view');
 var classlist = require('../../../../src/lib/classlist');
 var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
+var fs = require('fs');
 var hostedFields = require('braintree-web/hosted-fields');
-var mainHTML = require('../../../../src/html/main.html');
 var strings = require('../../../../src/translations/en');
+
+var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 
 describe('CardView', function () {
   beforeEach(function () {
