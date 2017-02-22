@@ -3,7 +3,9 @@
 var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
 var constants = require('../constants');
-var paymentMethodHTML = require('../html/payment-method.html');
+var fs = require('fs');
+
+var paymentMethodHTML = fs.readFileSync(__dirname + '/../html/payment-method.html', 'utf8');
 
 function PaymentMethodView() {
   BaseView.apply(this, arguments);
@@ -47,7 +49,10 @@ PaymentMethodView.prototype._initialize = function () {
 };
 
 PaymentMethodView.prototype.setActive = function (isActive) {
-  classlist.toggle(this.element, 'braintree-method--active', isActive);
+  // setTimeout required to animate addition of new payment methods
+  setTimeout(function () {
+    classlist.toggle(this.element, 'braintree-method--active', isActive);
+  }.bind(this), 0);
 };
 
 module.exports = PaymentMethodView;

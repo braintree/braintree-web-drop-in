@@ -4,33 +4,51 @@ var browserDetection = require('../../../../src/lib/browser-detection');
 var onTransitionEnd = require('../../../../src/lib/transition-helper').onTransitionEnd;
 
 describe('onTransitionEnd', function () {
+  beforeEach(function () {
+    this.fakePropertyName = 'fake-property-name';
+    this.fakeEvent = {propertyName: this.fakePropertyName};
+  });
+
   it('immediately calls callback when IE9', function (done) {
     var element = document.createElement('div');
 
     this.sandbox.stub(browserDetection, 'isIe9').returns(true);
 
-    onTransitionEnd(element, function () {
+    onTransitionEnd(element, this.fakePropertyName, done);
+  });
+
+  it('calls callback after onTransitionEnd end when the event propertyName matches', function (done) {
+    var element = document.createElement('div');
+
+    this.sandbox.stub(element, 'addEventListener').yields(this.fakeEvent);
+    this.sandbox.stub(browserDetection, 'isIe9').returns(false);
+
+    onTransitionEnd(element, this.fakePropertyName, function () {
+      expect(element.addEventListener).to.have.been.calledOnce;
+      expect(element.addEventListener).to.have.been.calledWith('transitionend');
+
       done();
     });
   });
 
-  it('calls callback after onTransitionEnd end', function (done) {
+  it('does not call callback after onTransitionEnd end when the event propertyName does not match', function () {
+    var callbackSpy = this.sandbox.spy();
     var element = document.createElement('div');
-    var eventListenerSpy = this.sandbox.spy(function (eventName, callback) {
-      if (eventName === 'transitionend') {
-        callback();
-      }
-    });
+    var handler;
 
-    element.addEventListener = eventListenerSpy;
-
+    this.sandbox.stub(element, 'addEventListener').yields(this.fakeEvent);
     this.sandbox.stub(browserDetection, 'isIe9').returns(false);
 
-    onTransitionEnd(element, function () {
-      expect(eventListenerSpy).to.be.calledOnce;
+    onTransitionEnd(element, 'rogue-property-name', callbackSpy);
 
-      done();
-    });
+    expect(element.addEventListener).to.have.been.calledOnce;
+    expect(element.addEventListener).to.have.been.calledWith('transitionend');
+
+    handler = element.addEventListener.getCall(0).args[1];
+
+    handler(this.fakeEvent);
+
+    expect(callbackSpy).not.to.be.called;
   });
 });
 

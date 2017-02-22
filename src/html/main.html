@@ -15,7 +15,7 @@
   </div>
   <div data-braintree-id="sheet-container" class="braintree-sheet__container">
     <div data-braintree-id="paypal" class="braintree-paypal braintree-sheet">
-      <div class="braintree-sheet__header">
+      <div data-braintree-id="paypal-sheet-header" class="braintree-sheet__header">
         <div class="braintree-sheet__header-label">
           <div class="braintree-sheet__logo--header">
             <svg height="24" width="40">
@@ -25,12 +25,12 @@
           <div class="braintree-sheet__label">{{PayPal}}</div>
         </div>
       </div>
-      <div class="braintree-sheet__content--button">
+      <div class="braintree-sheet__content braintree-sheet__content--button">
         <div data-braintree-id="paypal-button" class="braintree-sheet__button--paypal"></div>
       </div>
     </div>
     <div data-braintree-id="card" class="braintree-card braintree-form braintree-sheet">
-      <div class="braintree-sheet__header">
+      <div data-braintree-id="card-sheet-header" class="braintree-sheet__header">
         <div class="braintree-sheet__header-label">
           <div class="braintree-sheet__logo--header">
             <svg height="24" width="40" class="braintree-icon--bordered">
@@ -41,7 +41,7 @@
         </div>
         <div data-braintree-id="card-view-icons" class="braintree-sheet__icons"></div>
       </div>
-      <div class="braintree-sheet__content--form">
+      <div class="braintree-sheet__content braintree-sheet__content--form">
         <div data-braintree-id="number-field-group" class="braintree-form__field-group">
           <div class="braintree-form__label">{{cardNumberLabel}}</div>
           <div class="braintree-form__field">

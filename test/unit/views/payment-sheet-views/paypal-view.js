@@ -5,10 +5,12 @@ var Promise = require('../../../../src/lib/promise');
 var BaseView = require('../../../../src/views/base-view');
 var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
-var mainHTML = require('../../../../src/html/main.html');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
 var paypal = require('paypal-checkout');
+var fs = require('fs');
 var PayPalView = require('../../../../src/views/payment-sheet-views/paypal-view');
+
+var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 
 describe('PayPalView', function () {
   beforeEach(function () {

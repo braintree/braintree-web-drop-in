@@ -8,6 +8,7 @@ $black-45: lighten(#000000, 45%);
 $black-75: lighten(#000000, 75%);
 $curve-swing: cubic-bezier(0.645, 0.045, 0.355, 1);
 $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
+$curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
 [data-braintree-id="wrapper"] {
   display: block !important;
@@ -107,6 +108,11 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   font-size: 16px;
   color: $text-color;
   margin: 5px 5px 10px 5px;
+  transition: transform 0.2s ease;
+}
+
+.braintree-heading--inactive {
+  transform: translateY(30px);
 }
 
 .braintree-options {
@@ -167,7 +173,6 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 
 .braintree-sheet__container {
   margin: 0 auto 13px auto;
-
 }
 
 .braintree-sheet__error {
@@ -228,12 +233,33 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   }
 }
 
+.braintree-sheet {
+  max-height: 500px;
+  transition: box-shadow 300ms, transform 300ms, opacity 300ms, max-height 300ms ease;
+}
+
+.braintree-sheet--tokenized {
+  max-height: 71px;
+  overflow: hidden;
+  opacity: 0.1;
+  transform: translateY(20px);
+
+  .braintree-sheet__header {
+    opacity: 0.1;
+  }
+
+  .braintree-sheet__content {
+    opacity: 0.1;
+  }
+}
+
 .braintree-sheet__header {
   align-items: center;
   border-bottom: 1px solid $border-color;
   display: flex;
   flex-wrap: wrap;
   padding: 12px 15px 0 12px;
+  position: relative;
 
   .braintree-sheet__header-label {
     align-items: center;
@@ -270,6 +296,48 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   }
 }
 
+.braintree-sheet--loading {
+  .braintree-sheet__content {
+    opacity: 0.3;
+  }
+
+  .braintree-sheet__header::after {
+    animation: loader-scale 1s infinite, loader-origin 1s steps(1) infinite;
+    background: green;
+    bottom: -2px;
+    content: '';
+    height: 2px;
+    left: -1px;
+    position: absolute;
+    width: 100%;
+  }
+}
+
+
+@keyframes loader-scale {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes loader-origin {
+  0% {
+    transform-origin: 0 0;
+  }
+  50% {
+    transform-origin: 100% 0;
+  }
+  100% {
+    transform-origin: 0 0;
+  }
+}
+
 .braintree-sheet__content--button {
   padding-top: 20px;
   padding-bottom: 10px;
@@ -286,6 +354,10 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   .braintree-form__icon-container {
     margin-top: -12px;
   }
+}
+
+.braintree-form__hosted-field {
+  transition: border-color 100ms;
 }
 
 .braintree-sheet__content--form {
@@ -347,12 +419,14 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     &.braintree-form__field-group--has-error .braintree-form__field-secondary-icon,
     &.braintree-form__field-group--has-error.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon,
     &.braintree-form__field-group--has-error.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon {
+      transform: scale(0);
       display: none;
     }
 
     &.braintree-form__field-group--has-error .braintree-form__field-error-icon,
     &.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon,
     &.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon {
+      transform: scale(1);
       display: block;
     }
 
@@ -395,6 +469,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   border-color: $border-color;
   border-style: solid;
   border-width: 0 1px 1px 1px;
+  box-shadow: none;
   cursor: pointer;
   padding: 14px 10px;
   display: flex;
@@ -404,6 +479,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   width: 99%;
   position: relative;
   z-index: 0;
+  transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutBack, border-color 300ms, border-radius 300ms;
 
   &:first-child {
     border-radius: 4px 4px 0 0;
@@ -429,6 +505,7 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     font-size: 16px;
     margin-left: 20px;
     text-align: left;
+    transition: font-weight 300;
     flex-grow: 1;
 
     .braintree-method__label--small {
@@ -445,6 +522,8 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
     padding: 7px 10px 10px 10px;
     background-color: $background-color;
     fill: $background-color;
+    transform: scale(0);
+    transition: transform 300ms $curve-easeOutBack;
 
     svg {
       width: 100%;
@@ -461,11 +540,13 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
   width: 100%;
   margin-top: -1px;
   margin-bottom: -1px;
+  opacity: 1;
   z-index: 1;
 
   .braintree-method__check {
     background-color: $highlight-color;
     fill: white;
+    transform: scale(1);
   }
 
   .braintree-method__label {
@@ -491,6 +572,20 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 
   &.braintree-hidden {
     display: none;
+  }
+}
+
+.braintree-method__check-container {
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    width: 41px;
+    height: 41px;
+    background: $background-color;
+    border-radius: 100px;
+    transform: scale(0.9);
   }
 }
 

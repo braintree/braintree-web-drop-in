@@ -16,15 +16,19 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "brfs": "1.4.3",
     "browserify": "12.0.1",
     "chai": "3.4.1",
     "connect": "3.5.0",
     "del": "2.2.2",
+    "envify": "4.0.0",
     "eslint": "2.7.0",
     "eslint-config-braintree": "1.0.2",
     "finalhandler": "0.5.0",
     "gulp": "3.9.1",
+    "gulp-brfs": "0.1.0",
     "gulp-clean-css": "2.0.13",
+    "gulp-envify": "1.0.0",
     "gulp-rename": "1.2.2",
     "gulp-replace": "0.5.4",
     "gulp-sass": "2.3.2",
@@ -41,15 +45,14 @@
     "karma-mocha": "1.1.1",
     "karma-mocha-reporter": "2.0.3",
     "karma-phantomjs-launcher": "1.0.0",
+    "mkdirp": "0.5.1",
     "mocha": "3.0.0",
-    "packageify": "0.2.3",
     "phantomjs-prebuilt": "2.1.13",
     "run-sequence": "1.2.2",
     "sauce-connect-launcher": "0.14.0",
     "serve-static": "1.11.1",
     "sinon": "1.17.4",
     "sinon-chai": "2.8.0",
-    "stringify": "5.1.0",
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
@@ -59,7 +62,13 @@
   },
   "browserify": {
     "transform": [
-      "packageify"
+      "brfs",
+      [
+        "envify",
+        {
+          "_": "purge"
+        }
+      ]
     ]
   }
 }

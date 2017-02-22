@@ -1,9 +1,11 @@
 'use strict';
 
 var BaseView = require('../../../src/views/base-view');
+var fs = require('fs');
 var PaymentMethodView = require('../../../src/views/payment-method-view');
-var paymentMethodHTML = require('../../../src/html/payment-method.html');
 var strings = require('../../../src/translations/en');
+
+var paymentMethodHTML = fs.readFileSync(__dirname + '/../../../src/html/payment-method.html', 'utf8');
 
 describe('PaymentMethodView', function () {
   beforeEach(function () {
@@ -86,12 +88,18 @@ describe('PaymentMethodView', function () {
   describe('setActive', function () {
     beforeEach(function () {
       this.context = {element: document.createElement('div')};
+      this.clock = sinon.useFakeTimers();
+    });
+
+    afterEach(function () {
+      this.clock.restore();
     });
 
     it('adds braintree-method--active if setting active payment method', function () {
       this.context.element.className = '';
 
       PaymentMethodView.prototype.setActive.call(this.context, true);
+      this.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
@@ -100,6 +108,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = 'braintree-method--active';
 
       PaymentMethodView.prototype.setActive.call(this.context, true);
+      this.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.true;
     });
@@ -108,6 +117,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = 'braintree-method--active';
 
       PaymentMethodView.prototype.setActive.call(this.context, false);
+      this.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
     });
@@ -116,6 +126,7 @@ describe('PaymentMethodView', function () {
       this.context.element.className = '';
 
       PaymentMethodView.prototype.setActive.call(this.context, false);
+      this.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
     });
