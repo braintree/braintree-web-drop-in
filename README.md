@@ -10,6 +10,14 @@ Because we're still in beta, the API and designs are subject to change. If you h
 - Not in an iframe; feel free to style Drop-in to blend in with your website
 - Open source and open development
 
+## Setup
+
+Drop-in is currently available directly from our servers, which you can save locally or include in your project through a script tag:
+
+```
+<script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.4/js/dropin.min.js"></script>
+```
+
 ## Basic usage
 
 Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function as shown below.
