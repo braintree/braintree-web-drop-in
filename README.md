@@ -14,7 +14,7 @@ Because we're still in beta, the API and designs are subject to change. If you h
 
 Drop-in is currently available directly from our servers, which you can save locally or include in your project through a script tag:
 
-```
+```html
 <script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.4/js/dropin.min.js"></script>
 ```
 
