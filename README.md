@@ -115,7 +115,7 @@ This is a full example of a Drop-in integration that only accepts credit cards.
 
 ## Beta notes
 
-While in beta, we're still actively working on Drop-in. This means you might have to change your integration when upgrading your Drop-in version.
+While in beta, we're still actively working on Drop-in. This means you might have to change your integration when upgrading your Drop-in version. This includes any custom CSS styling applied to `data-braintree-id` attributes.
 
 Browser support will be limited during beta and will not include Internet Explorer 9 or 10, but will eventually include [all browsers supported by Braintree.js](http://braintree.github.io/braintree-web/current/#browser-support).
 
