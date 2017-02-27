@@ -1,6 +1,6 @@
 ### General information
 
-* SDK/Library version: <!-- Example: 4.7.2 -->
+* SDK/Library version: <!-- Example: 1.2.3 -->
 * Environment: <!-- Is this issue in Sandbox or Production? -->
 * Browser and OS <!-- Example: Chrome 56.0.2924.87 (64-bit) on MacOS 10.12.3 -->
 
