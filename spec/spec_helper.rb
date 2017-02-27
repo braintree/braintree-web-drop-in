@@ -11,7 +11,7 @@ PORT = 4567
 
 Capybara.default_driver = :selenium
 Capybara.app_host = "https://#{HOSTNAME}:#{PORT}"
-Capybara.default_max_wait_time = 20
+Capybara.default_max_wait_time = 2000000
 
 require_relative "sauce_helper"
 
