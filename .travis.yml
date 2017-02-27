@@ -1,0 +1,25 @@
+language: node_js
+before_install:
+# See https://github.com/travis-ci/travis-ci/issues/5092#issuecomment-171777646
+# Dirty hack for https://github.com/travis-ci/travis-ci/issues/5092
+- |
+  PATH=`echo $PATH | sed "s/\.\/node_modules\/\.bin//g"`; export PATH=$PATH:./node_modules/.bin; touch .env; if [ $IS_INTEGRATION_TEST ]; then rvm install ruby-2.3.0 --binary && rvm use ruby-2.3.0 && bundle install; else echo "Not an integration test. Skipping Ruby setup"; fi
+script: npm run $TEST
+addons:
+  sauce_connect: true
+notifications:
+  email: false
+  slack:
+    on_success: change
+    on_failure: always
+    secure: cVafioxYjLxi6RkGvgt1iSvKyz0c6IpC3JkfXSwd63LiSzX82ZyGmeCMZpUzeLVOc/jCrcTCQL6bPcMUrgyBtibpVti9rZwi7c1FzWjTEXvVB8nO7Daa43sa5zFe3Bf61xgA+2O3mzgVxOsoTx7y/9ptNoCt5ViIFGwWIEGSOmGSR4U0CLN/sAg7tlaa6xIif7oePsZId/6lbweKhrvxCKscio4ZUw8L6HhTQgTl2Hi2jf9/kpYbQY4NpyvKNIPygX4yZAGVZQDA14qhz9HAz0np4Xj5iKQVM468LDiexkP8ZeM+gdoAjHzyrPKtKnxfWB2CCYSEb5BaP7e6M4nwchcsYJ8YZdVJXiorthqh/oYojI54AKdUgz/ii+pnOmIFG0hAHPGL8s5Vw07QoQzM93XJFSuJ4ZhUzcsx5SeATtjXps8T3IZK7/9AwRzLvMqny5i6iUw1ZaVftrihIfX41vDkZMomsOpoZzCyhKK3g/xXsTbHwAj/ZiliUeadxJp+KApaMSphyTx6Soht4MYR/aSxZ1VFreNYD7PChmlne8MqwMYQ5vdjES2BDvD6Xhp1CL3MkHnCtkxAFzziGLOmhkqGnt84CQhPAVZQOxE7kIUY+Gq7ENrNIrz7vSv6aYQ6wTEnsynjR8EIF2An0fO+evqHhXPnGJaEFV4Mcw7TMxI=
+env:
+  matrix:
+  - TEST="lint"
+  - TEST="test"
+  - TEST="test:integration" PLATFORM="desktop" IS_INTEGRATION_TEST=true
+  # iOS tests on Travis are flaky. Run these manually before merging something in
+  # - TEST="test:integration" PLATFORM="ios" IS_INTEGRATION_TEST=true
+  global:
+  - secure: pfvOEN9aF5XRvDONyOvV+ljVCQdVTb/RM1yCPPyqpEBMjKXzVwR3o4Cj+DS4lM8Q7y+Ek10w9cdIN4xnm/sDMEMEwL3KrNxP7+Aw9UqFnDJkKZSnvX4jhjQ0E/zSwgMf8D1PNP+Vlr/NTEsRQrYtIbemACSmBH7Tz2L1fKi9I3nUymrHEXamcuAQYY5Q6RqsU5r8RCbxdQriBTQgHpTdZtDtHnBCfE1OV/ypVIGeWBnhDkxI/FuB91PU6KEfl576lggrcAr6ToP38pGAjySRdy6F/7sqymR0yX8XuYoYryJM3eiJOBRoJJUVIR1smmZ/TNghDbf4rjDIqNBXOd4XjGHG+t75pnN/f/dmrqXIACVVoH1Vk0ip+QQ79q3YInPcdG4bWqVli+WZPVT1m7/40Oxeg+QeP3YgJNLfWJdH4TpKLoBhYWBiWMBz8eD+ScW0znQ1FB3Ze7dWWC0hnYhQ+jH3BW9RqCiU+qMcZBFwxkQlkaOSHDkVIn9k0ysbfi+vz9aA1YMMP+2kZjFZ/te0peFDtJ/AR3bUT4vgiLkP9ZyThPsi55tS2QeEQQ98Qq0jHokTyUg91q9U0Fs4JngJzpR8JEE+FnP5fh2wLdT1cccdvWBF7lgdeBUljPVtnVC86HUyCIriUGLbAjoooH093iRM1uDWwOKDppjqnkYFkD8=
+  - secure: O1EDfG/cUrSuPx977tgouSi91gR4WxceDqRYtodEzBqOTvQ8dqHOx9OHcEZLeFiyhc7CpRNh14/DrVrpInnh5g/QaNiYtyKeYUSkJNGBSA+HvyPOXVucK7wgQfVDLirUVgQuiC/zeYI7KdfZlJXzeHyp4D+lLwboqV1pCNkVMcqqC4+URrzc2SAtMiXFdYEMBp6hYvK0b8GrvT4UjJrEbvlfu77BrFSDc7+x9aHNOQYP6014qlNl3Kj82oL1iqxDhHE16+bwIe/fdI7KxhAzIwmDDW0sKkTLT3sTD2ZY4c7CTqggvwEOsDFb/qcqI5lw297xNljCxIbOK6owCEsCIqERDMGwTaB8HEK3zyWu1RtOYg+gSxByHRtZlHXLBKYygxj2xO8AT0kIAEnaBDgqLhGTNjmYbK3D3VsSq4AP5I5CegFOMXZstoazQm5gRTxufMVZ6jqNqUjbkmKBj+u5y4dva+36RU3ygoYB8YS7dsi4a7RbwDH53SRRTDneTRTrrZGZLqb45AAHl+YxfSkx3l1IoFp5OXb4B/iJm169olQfRnd3WpH6Ojbaip3VaVD1eOFDXQv/0AHopcbixoef65aGCi9C8KD4XY02yDb4O0P2S7w2MAsldGMghwyTFSzVhRwfVbPEzPVtDGfLdKXdn5IyeddWZAs6bTQDjFOo6Q4=
