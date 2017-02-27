@@ -6,11 +6,6 @@
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="IE=Edge"/>
 <title>Drop-in demo</title>
-<script>
-var results = document.querySelector('#results');
-
-results.textContent = 'Head';
-</script>
 <style>
 
   html {
@@ -67,11 +62,8 @@ results.textContent = 'Head';
 <script src="/web/dropin/dev/js/dropin.min.js"></script>
 
 <script>
-  var authorization = 'sandbox_g42y39zw_348pk9cgf3bgyw2b';
-  var results = document.querySelector('#results');
-  var error = document.querySelector('#error');
 
-  results.textContent = 'about to create drop-in';
+  var authorization = 'sandbox_g42y39zw_348pk9cgf3bgyw2b';
 
   braintree.dropin.create({
     authorization: authorization,
@@ -81,8 +73,8 @@ results.textContent = 'Head';
     }
   }, function (err, dropinInstance) {
     var form = document.querySelector('#checkout-form');
-
-    results.textContent = 'Finished creating';
+    var results = document.querySelector('#results');
+    var error = document.querySelector('#error');
 
     if (err) {
       console.error('There was an error creating Drop-in.');
