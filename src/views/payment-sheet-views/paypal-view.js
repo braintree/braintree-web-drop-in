@@ -35,22 +35,24 @@ PayPalView.prototype._initialize = function () {
       env: environment,
       locale: merchantConfig.locale,
       payment: function () {
-        return paypalInstance.createPayment(merchantConfig);
+        return paypalInstance.createPayment(merchantConfig).catch(reportError);
       },
       onAuthorize: function (data) {
         return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
           self.model.addPaymentMethod(tokenizePayload);
-        });
+        }).catch(reportError);
       },
-      onError: function (paypalCheckoutErr) {
-        self.model.reportError(paypalCheckoutErr);
-      }
+      onError: reportError
     };
 
     paypal.Button.render(paypalCheckoutConfig, '[data-braintree-id="paypal-button"]').then(function () {
       self.model.asyncDependencyReady();
     });
   });
+
+  function reportError(err) {
+    self.model.reportError(err);
+  }
 };
 
 PayPalView.prototype._createPayPalButton = function () {

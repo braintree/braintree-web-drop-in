@@ -23,6 +23,7 @@ describe('PayPalView', function () {
 
     this.model.supportedPaymentOptions = ['card', 'paypal'];
     this.model.merchantConfiguration.paypal = {flow: 'vault'};
+    this.sandbox.stub(this.model, 'reportError');
 
     this.configuration = fake.configuration();
     this.paypalViewOptions = {
@@ -58,8 +59,8 @@ describe('PayPalView', function () {
   describe('_initialize', function () {
     beforeEach(function () {
       this.paypalInstance = {
-        createPayment: this.sandbox.stub(),
-        tokenizePayment: this.sandbox.stub()
+        createPayment: this.sandbox.stub().returns(Promise.resolve()),
+        tokenizePayment: this.sandbox.stub().returns(Promise.resolve())
       };
 
       this.sandbox.stub(PayPalCheckout, 'create').yields(null, this.paypalInstance);
@@ -165,6 +166,29 @@ describe('PayPalView', function () {
       new PayPalView(this.paypalViewOptions);
     });
 
+    it('reports errors from createPayment', function (done) {
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+      var error = new Error('create payment error');
+
+      paypalInstance.createPayment.returns(Promise.reject(error));
+
+      paypal.Button.render.returns(Promise.resolve().then(function () {
+        // for some reason, this needs to be in a set timeout to grab the args from render
+        setTimeout(function () {
+          var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
+
+          paymentFunction().then(function () {
+            expect(model.reportError).to.be.calledOnce;
+            expect(model.reportError).to.be.calledWith(error);
+            done();
+          });
+        }, 0);
+      }));
+
+      new PayPalView(this.paypalViewOptions);
+    });
+
     it('calls addPaymentMethod when paypal is tokenized', function (done) {
       var paypalInstance = this.paypalInstance;
       var model = this.model;
@@ -198,10 +222,36 @@ describe('PayPalView', function () {
       new PayPalView(this.paypalViewOptions);
     });
 
+    it('reports errors from tokenizePayment', function (done) {
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+      var error = new Error('tokenize error');
+
+      paypalInstance.tokenizePayment.returns(Promise.reject(error));
+      this.sandbox.stub(model, 'addPaymentMethod');
+
+      paypal.Button.render.returns(Promise.resolve().then(function () {
+        // for some reason, this needs to be in a set timeout to grab the args from render
+        setTimeout(function () {
+          var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
+          var tokenizeOptions = {
+            foo: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          expect(model.reportError).to.be.calledOnce;
+          expect(model.reportError).to.be.calledWith(error);
+
+          done();
+        }, 0);
+      }));
+
+      new PayPalView(this.paypalViewOptions);
+    });
+
     it('reports errors from paypal-checkout', function (done) {
       var model = this.model;
-
-      this.sandbox.stub(model, 'reportError');
 
       paypal.Button.render.returns(Promise.resolve().then(function () {
         // for some reason, this needs to be in a set timeout to grab the args from render
