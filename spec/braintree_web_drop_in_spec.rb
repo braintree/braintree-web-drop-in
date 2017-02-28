@@ -39,9 +39,12 @@ describe "Drop-in" do
 
       open_popup_and_complete_login
 
+      submit_pay
+
       expect(find(".braintree-heading")).to have_content("Paying with")
 
-      expect(page).to have_content('bt_buyer_us@paypal.com')
+      expect(page).to have_content('PayPalAccount')
+      expect(page).to have_content(ENV['PAYPAL_USERNAME'])
     end
   end
 end
