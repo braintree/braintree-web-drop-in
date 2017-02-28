@@ -19,6 +19,8 @@ describe "Drop-in" do
       click_option("Card")
       hosted_field_send_input("number", "4111111111111111")
       hosted_field_send_input("expirationDate", "1019")
+      hosted_field_send_input("cvv", "123")
+
       submit_pay
 
       expect(find(".braintree-heading")).to have_content("Paying with")
