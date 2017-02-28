@@ -16,11 +16,17 @@ def select_browsers
   if !PLATFORM || PLATFORM == "desktop"
     browsers += [
       ["Windows 10", "chrome", nil],
-      ["Windows 10", "firefox", nil],
+      ["Windows 10", "firefox", 47],
       ["OS X 10.11", "safari", nil],
       ["Windows 7", "internet explorer", "9"],
       ["Windows 8", "internet explorer", "10"],
       ["Windows 10", "internet explorer", "11"],
+    ]
+  end
+
+  if !PLATFORM || PLATFORM == "ios"
+    browsers += [
+      ["OS X 10.10", "iphone", "9.2"],
     ]
   end
 

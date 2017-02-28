@@ -4,6 +4,7 @@
 
 <link rel="stylesheet" type="text/css" href="/web/dropin/dev/css/dropin.min.css">
 <meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="IE=Edge"/>
 <title>Drop-in demo</title>
 <style>
 
@@ -23,6 +24,16 @@
     margin-bottom: 1em;
   }
 
+  #error {
+    background: #fee;
+    color: tomato;
+    padding: 15px;
+  }
+
+  #error:empty {
+    display: none;
+  }
+
   input[type="submit"] {
     font: inherit;
     padding: 0.5em 1em;
@@ -37,6 +48,8 @@
 <body>
 
 <h1>Braintree Drop-in demo</h1>
+
+<pre id="error"></pre>
 
 <form id="checkout-form">
   <div id="dropin-container"></div>
@@ -61,9 +74,11 @@
   }, function (err, dropinInstance) {
     var form = document.querySelector('#checkout-form');
     var results = document.querySelector('#results');
+    var error = document.querySelector('#error');
 
     if (err) {
       console.error('There was an error creating Drop-in.');
+      error.textContent = err.message;
       throw err;
     }
 
@@ -72,7 +87,7 @@
 
       dropinInstance.requestPaymentMethod(function (err, payload) {
         if (err) {
-          results.textContent = err.message;
+          error.textContent = err.message;
         } else {
           results.textContent = JSON.stringify(payload, null, 2);
         }
