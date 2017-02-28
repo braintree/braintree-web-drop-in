@@ -45,6 +45,9 @@ PayPalView.prototype._initialize = function () {
       onError: reportError
     };
 
+    paypal.setup({
+      logLevel: 'warn'
+    });
     paypal.Button.render(paypalCheckoutConfig, '[data-braintree-id="paypal-button"]').then(function () {
       self.model.asyncDependencyReady();
     });
