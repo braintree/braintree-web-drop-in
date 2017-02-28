@@ -16,8 +16,6 @@ describe "Drop-in" do
 
   describe "tokenizes" do
     it "a card" do
-      browser_skip("safari", "Testing iframes in WebKit does not work")
-
       click_option("Card")
       hosted_field_send_input("number", "4111111111111111")
       hosted_field_send_input("expirationDate", "1019")

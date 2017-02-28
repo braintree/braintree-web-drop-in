@@ -29,7 +29,9 @@ def select_browsers
 
   if !PLATFORM || PLATFORM == "ios"
     browsers += [
-      ["OS X 10.10", "iphone", "9.2"],
+      # Same reason as Desktop Safari
+      # for not running these tests
+      # ["OS X 10.10", "iphone", "9.2"],
     ]
   end
 
