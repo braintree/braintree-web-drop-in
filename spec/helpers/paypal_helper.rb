@@ -30,28 +30,4 @@ module PayPal
 
     expect(page).to have_selector('#confirmButtonTop')
   end
-
-
-  def wait_for_checkout_js_iframe
-    iframe = ""
-    (0..150).each do
-      iframe = page.find("#paypal-button iframe", :visible => false)
-      break unless iframe == ""
-      sleep 0.1
-    end
-
-    return iframe
-  end
-
-  def click_checkout_js_button
-    paypal_button = wait_for_checkout_js_iframe
-
-    within_frame(paypal_button) do
-      return window_opened_by do
-        execute_with_retry do
-          find("button[type='submit']").click
-        end
-      end
-    end
-  end
 end
