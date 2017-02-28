@@ -16,7 +16,7 @@ def select_browsers
   if !PLATFORM || PLATFORM == "desktop"
     browsers += [
       ["Windows 10", "chrome", nil],
-      ["Windows 10", "firefox", nil],
+      ["Windows 10", "firefox", 47],
       # the Safari driver can't send keys
       # to inputs in iframes. Both hosted
       # fields and paypal use iframe inputs
@@ -24,6 +24,12 @@ def select_browsers
       ["Windows 7", "internet explorer", "9"],
       ["Windows 8", "internet explorer", "10"],
       ["Windows 10", "internet explorer", "11"],
+    ]
+  end
+
+  if !PLATFORM || PLATFORM == "ios"
+    browsers += [
+      ["OS X 10.10", "iphone", "9.2"],
     ]
   end
 
