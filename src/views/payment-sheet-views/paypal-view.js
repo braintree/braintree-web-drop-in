@@ -3,7 +3,8 @@
 var BaseView = require('../base-view');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 var btPayPal = require('braintree-web/paypal-checkout');
-var paypal = require('paypal-checkout');
+
+var DEFAULT_LOG_LEVEL = 'warn';
 
 function PayPalView() {
   BaseView.apply(this, arguments);
@@ -15,9 +16,21 @@ PayPalView.prototype = Object.create(BaseView.prototype);
 PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
 
+PayPalView.prototype.setLogLevel = function (paypal) {
+  var level = this.model.merchantConfiguration.paypal.logLevel;
+
+  paypal.setup({
+    logLevel: level || DEFAULT_LOG_LEVEL
+  });
+};
+
 PayPalView.prototype._initialize = function () {
   var self = this;
+  // We wait to require paypal-checkout here in order to respect the
+  // merchant's configured log level immediately upon instantiation.
+  var paypal = require('paypal-checkout');
 
+  this.setLogLevel(paypal);
   this.model.asyncDependencyStarting();
 
   btPayPal.create({client: this.client}, function (err, paypalInstance) {
@@ -45,9 +58,6 @@ PayPalView.prototype._initialize = function () {
       onError: reportError
     };
 
-    paypal.setup({
-      logLevel: 'warn'
-    });
     paypal.Button.render(paypalCheckoutConfig, '[data-braintree-id="paypal-button"]').then(function () {
       self.model.asyncDependencyReady();
     });

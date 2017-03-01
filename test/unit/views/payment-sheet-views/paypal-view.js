@@ -12,6 +12,10 @@ var PayPalView = require('../../../../src/views/payment-sheet-views/paypal-view'
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 
+function waitForInitialize(func) {
+  setTimeout(func, 100);
+}
+
 describe('PayPalView', function () {
   beforeEach(function () {
     this.model = new DropinModel(fake.modelOptions());
@@ -63,38 +67,56 @@ describe('PayPalView', function () {
         tokenizePayment: this.sandbox.stub().returns(Promise.resolve())
       };
 
-      this.sandbox.stub(PayPalCheckout, 'create').yields(null, this.paypalInstance);
+      this.sandbox.stub(PayPalCheckout, 'create').yieldsAsync(null, this.paypalInstance);
       this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
     });
 
-    it('starts async dependency', function () {
+    it('starts async dependency', function (done) {
       var payPalView;
 
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
 
       payPalView = new PayPalView(this.paypalViewOptions);
 
-      expect(payPalView.model.asyncDependencyStarting).to.be.calledOnce;
+      waitForInitialize(function () {
+        expect(payPalView.model.asyncDependencyStarting).to.be.calledOnce;
+        done();
+      });
     });
 
-    it('notifies async dependency', function () {
+    it('notifies async dependency', function (done) {
       var payPalView;
 
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
 
       payPalView = new PayPalView(this.paypalViewOptions);
 
-      expect(payPalView.model.asyncDependencyReady).to.be.calledOnce;
+      waitForInitialize(function () {
+        expect(payPalView.model.asyncDependencyReady).to.be.calledOnce;
+        done();
+      });
     });
 
-    it('creates a PayPal component', function () {
+    it('calls setLogLevel', function () {
+      this.sandbox.stub(PayPalView.prototype, 'setLogLevel');
+
+      new PayPalView(this.paypalViewOptions);
+
+      expect(PayPalView.prototype.setLogLevel).to.be.calledOnce;
+      expect(PayPalView.prototype.setLogLevel).to.be.calledWith(paypal);
+    });
+
+    it('creates a PayPal component', function (done) {
       var payPalView = new PayPalView(this.paypalViewOptions);
 
-      expect(PayPalCheckout.create).to.be.calledWith(this.sandbox.match({
-        client: this.paypalViewOptions.client
-      }), this.sandbox.match.func);
+      waitForInitialize(function () {
+        expect(PayPalCheckout.create).to.be.calledWith(this.sandbox.match({
+          client: this.paypalViewOptions.client
+        }), this.sandbox.match.func);
 
-      expect(payPalView.paypalInstance).to.equal(this.paypalInstance);
+        expect(payPalView.paypalInstance).to.equal(this.paypalInstance);
+        done();
+      }.bind(this));
     });
 
     it('console errors when PayPal component creation fails', function () {
@@ -111,37 +133,49 @@ describe('PayPalView', function () {
       expect(paypalView.model.asyncDependencyStarting).to.be.calledOnce;
     });
 
-    it('calls paypal.Button.render', function () {
+    it('calls paypal.Button.render', function (done) {
       new PayPalView(this.paypalViewOptions);
 
-      expect(paypal.Button.render).to.be.calledOnce;
-      expect(paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-button"]');
+      waitForInitialize(function () {
+        expect(paypal.Button.render).to.be.calledOnce;
+        expect(paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-button"]');
+        done();
+      }.bind(this));
     });
 
-    it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function () {
+    it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function (done) {
       this.configuration.gatewayConfiguration.environment = 'production';
       new PayPalView(this.paypalViewOptions);
 
-      expect(paypal.Button.render).to.be.calledWithMatch({
-        env: 'production'
+      waitForInitialize(function () {
+        expect(paypal.Button.render).to.be.calledWithMatch({
+          env: 'production'
+        });
+        done();
       });
     });
 
-    it('sets paypal-checkout.js environment to sandbox when gatewayConfiguration is not production', function () {
+    it('sets paypal-checkout.js environment to sandbox when gatewayConfiguration is not production', function (done) {
       this.configuration.gatewayConfiguration.environment = 'development';
       new PayPalView(this.paypalViewOptions);
 
-      expect(paypal.Button.render).to.be.calledWithMatch({
-        env: 'sandbox'
+      waitForInitialize(function () {
+        expect(paypal.Button.render).to.be.calledWithMatch({
+          env: 'sandbox'
+        });
+        done();
       });
     });
 
-    it('sets locale from merchantConfig.paypal passed into Drop-in', function () {
+    it('sets locale from merchantConfig.paypal passed into Drop-in', function (done) {
       this.model.merchantConfiguration.paypal.locale = 'LOCALE_VALUE';
       new PayPalView(this.paypalViewOptions);
 
-      expect(paypal.Button.render).to.be.calledWithMatch({
-        locale: 'LOCALE_VALUE'
+      waitForInitialize(function () {
+        expect(paypal.Button.render).to.be.calledWithMatch({
+          locale: 'LOCALE_VALUE'
+        });
+        done();
       });
     });
 
@@ -156,10 +190,12 @@ describe('PayPalView', function () {
 
           paymentFunction();
 
-          expect(paypalInstance.createPayment).to.be.calledOnce;
-          expect(paypalInstance.createPayment).to.be.calledWith(model.merchantConfiguration.paypal);
+          waitForInitialize(function () {
+            expect(paypalInstance.createPayment).to.be.calledOnce;
+            expect(paypalInstance.createPayment).to.be.calledWith(model.merchantConfiguration.paypal);
 
-          done();
+            done();
+          });
         }, 0);
       }));
 
@@ -167,11 +203,10 @@ describe('PayPalView', function () {
     });
 
     it('reports errors from createPayment', function (done) {
-      var paypalInstance = this.paypalInstance;
       var model = this.model;
       var error = new Error('create payment error');
 
-      paypalInstance.createPayment.returns(Promise.reject(error));
+      this.paypalInstance.createPayment.returns(Promise.reject(error));
 
       paypal.Button.render.returns(Promise.resolve().then(function () {
         // for some reason, this needs to be in a set timeout to grab the args from render
@@ -179,9 +214,11 @@ describe('PayPalView', function () {
           var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
 
           paymentFunction().then(function () {
-            expect(model.reportError).to.be.calledOnce;
-            expect(model.reportError).to.be.calledWith(error);
-            done();
+            waitForInitialize(function () {
+              expect(model.reportError).to.be.calledOnce;
+              expect(model.reportError).to.be.calledWith(error);
+              done();
+            });
           });
         }, 0);
       }));
@@ -209,13 +246,15 @@ describe('PayPalView', function () {
 
           onAuthFunction(tokenizeOptions);
 
-          expect(paypalInstance.tokenizePayment).to.be.calledOnce;
-          expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
+          waitForInitialize(function () {
+            expect(paypalInstance.tokenizePayment).to.be.calledOnce;
+            expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
 
-          expect(model.addPaymentMethod).to.be.calledOnce;
-          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
+            expect(model.addPaymentMethod).to.be.calledOnce;
+            expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
 
-          done();
+            done();
+          });
         }, 0);
       }));
 
@@ -240,10 +279,12 @@ describe('PayPalView', function () {
 
           onAuthFunction(tokenizeOptions);
 
-          expect(model.reportError).to.be.calledOnce;
-          expect(model.reportError).to.be.calledWith(error);
+          waitForInitialize(function () {
+            expect(model.reportError).to.be.calledOnce;
+            expect(model.reportError).to.be.calledWith(error);
 
-          done();
+            done();
+          });
         }, 0);
       }));
 
@@ -261,14 +302,50 @@ describe('PayPalView', function () {
 
           onErrorFunction(err);
 
-          expect(model.reportError).to.be.calledOnce;
-          expect(model.reportError).to.be.calledWith(err);
+          waitForInitialize(function () {
+            expect(model.reportError).to.be.calledOnce;
+            expect(model.reportError).to.be.calledWith(err);
 
-          done();
+            done();
+          });
         }, 0);
       }));
 
       new PayPalView(this.paypalViewOptions);
+    });
+  });
+
+  describe('setLogLevel', function () {
+    beforeEach(function () {
+      this.context = {
+        model: {
+          merchantConfiguration: {
+            paypal: {}
+          }
+        }
+      };
+      this.fakePayPal = {
+        setup: this.sandbox.stub()
+      };
+    });
+
+    it('sets log level to a default value of "warn"', function () {
+      PayPalView.prototype.setLogLevel.call(this.context, this.fakePayPal);
+
+      expect(this.fakePayPal.setup).to.be.calledOnce;
+      expect(this.fakePayPal.setup).to.be.calledWith({
+        logLevel: 'warn'
+      });
+    });
+
+    it('sets log level to value set in merchant configuration', function () {
+      this.context.model.merchantConfiguration.paypal.logLevel = 'debug';
+      PayPalView.prototype.setLogLevel.call(this.context, this.fakePayPal);
+
+      expect(this.fakePayPal.setup).to.be.calledOnce;
+      expect(this.fakePayPal.setup).to.be.calledWith({
+        logLevel: 'debug'
+      });
     });
   });
 });
