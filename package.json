@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "braintree-web": "3.8.0",
-    "paypal-checkout": "4.0.40",
+    "paypal-checkout": "4.0.45",
     "promise-polyfill": "6.0.2"
   },
   "browserify": {
