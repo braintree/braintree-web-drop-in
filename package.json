@@ -35,7 +35,7 @@
     "gulp-size": "2.1.0",
     "gulp-streamify": "1.0.2",
     "gulp-uglify": "2.0.0",
-    "gulp-util": "^3.0.7",
+    "gulp-util": "3.0.7",
     "is-uuid": "1.0.2",
     "jsdoc": "3.4.0",
     "jsdoc-template": "braintree/jsdoc-template#1.2.6",
@@ -56,7 +56,9 @@
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
-    "braintree-web": "3.8.0"
+    "braintree-web": "3.8.0",
+    "paypal-checkout": "4.0.45",
+    "promise-polyfill": "6.0.2"
   },
   "browserify": {
     "transform": [

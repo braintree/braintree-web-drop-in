@@ -49,6 +49,8 @@
 
 <h1>Braintree Drop-in demo</h1>
 
+<p>You can create a <a href="https://developer.paypal.com/docs/classic/lifecycle/sb_about-accounts/#creating-sandbox-test-accounts" target="_blank" rel="nofollow">PayPal Sandbox account</a> to test the PayPal flow.</p>
+
 <pre id="error"></pre>
 
 <form id="checkout-form">
@@ -62,14 +64,17 @@
 <script src="/web/dropin/dev/js/dropin.min.js"></script>
 
 <script>
-
-  var authorization = 'sandbox_g42y39zw_348pk9cgf3bgyw2b';
+  // If you are copying this demo app for your integration,
+  // use your own client token or tokenization key
+  var authorization = 'sandbox_f252zhq7_hh4cpc39zq4rgjcg';
 
   braintree.dropin.create({
     authorization: authorization,
     selector: '#dropin-container',
     paypal: {
-      flow: 'vault'
+      flow: 'checkout',
+      amount: '10.00', // be sure to validate this amount on your server
+      currency: 'USD'
     }
   }, function (err, dropinInstance) {
     var form = document.querySelector('#checkout-form');
