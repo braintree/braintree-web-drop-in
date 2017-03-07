@@ -23,7 +23,7 @@ function Dropin(options) {
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentID;
   this._dropinWrapper.setAttribute('data-braintree-id', 'wrapper');
   this._dropinWrapper.style.display = 'none';
-  this._merchantConfiguration = options.merchantConfiguration;
+  this._merchantConfiguration = assign({}, options.merchantConfiguration);
 
   EventEmitter.call(this);
 }

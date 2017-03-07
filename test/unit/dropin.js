@@ -43,6 +43,14 @@ describe('Dropin', function () {
     it('inherits from EventEmitter', function () {
       expect(new Dropin(this.dropinOptions)).to.be.an.instanceOf(EventEmitter);
     });
+
+    it('clones merchant configuration', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.dropinOptions.merchantConfiguration.selector = '#bar';
+
+      expect(instance._merchantConfiguration.selector).to.equal('#foo');
+    });
   });
 
   describe('_initialize', function () {
