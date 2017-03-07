@@ -80,7 +80,11 @@ The structure of the PayPal payment method object returned in the callback of `r
 If you need to update a field (such as the amount) after creation, you can do so with the `setPayPalOption` method.
 
 ```js
+// set amount to 20.00
 dropinInstance.setPayPalOption('amount', '20.00');
+
+// remove intent from options
+dropinInstance.setPayPalOption('intent', null);
 ```
 
 ## Full example
