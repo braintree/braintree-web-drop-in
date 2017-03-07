@@ -150,6 +150,17 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
   }
 };
 
+Dropin.prototype.setPayPalOption = function (option, value) {
+  if (!this._merchantConfiguration.paypal) {
+    throw new Error('PayPal not enabled.');
+  }
+  if (value == null) {
+    delete this._merchantConfiguration.paypal[option];
+  } else {
+    this._merchantConfiguration.paypal[option] = value;
+  }
+};
+
 Dropin.prototype.teardown = function (callback) {
   this._removeStylesheet();
 

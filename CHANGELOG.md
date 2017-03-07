@@ -10,6 +10,7 @@ unreleased
 - Animate choosing a different way to pay
 - Switch PayPal component for PayPal Checkout component
 - Publish to npm
+- Add `setPayPalOption` method to dynamically change PayPal config options. Closes #87
 
 1.0.0-beta.4
 ------------

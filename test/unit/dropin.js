@@ -386,6 +386,51 @@ describe('Dropin', function () {
     });
   });
 
+  describe('setPayPalOption', function () {
+    beforeEach(function () {
+      this.dropinOptions.merchantConfiguration.paypal = {
+        flow: 'checkout',
+        amount: '28.00',
+        currency: 'USD'
+      };
+    });
+
+    it('throws an error if PayPal is not enabled', function () {
+      var instance;
+
+      delete this.dropinOptions.merchantConfiguration.paypal;
+      instance = new Dropin(this.dropinOptions);
+
+      expect(function () {
+        instance.setPayPalOption('amount', '10.00');
+      }).to.throw('PayPal not enabled.');
+    });
+
+    it('sets PayPal option to provided value', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.setPayPalOption('amount', '10.00');
+
+      expect(instance._merchantConfiguration.paypal.amount).to.equal('10.00');
+    });
+
+    it('removes PayPal option when value provided is null', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.setPayPalOption('amount', null);
+
+      expect(instance._merchantConfiguration.paypal.amount).to.be.undefined;
+    });
+
+    it('removes PayPal option when value provided is undefined', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.setPayPalOption('amount');
+
+      expect(instance._merchantConfiguration.paypal.amount).to.be.undefined;
+    });
+  });
+
   describe('requestPaymentMethod', function () {
     it('calls the requestPaymentMethod function of the MainView', function (done) {
       var instance = new Dropin(this.dropinOptions);
