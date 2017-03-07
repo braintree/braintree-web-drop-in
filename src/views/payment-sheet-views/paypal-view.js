@@ -68,25 +68,4 @@ PayPalView.prototype._initialize = function () {
   }
 };
 
-PayPalView.prototype._createPayPalButton = function () {
-  var buttonContainer = this.getElementById('paypal-button');
-  var script = document.createElement('script');
-  var scriptAttrs = {
-    'data-merchant': 'braintree',
-    'data-button': 'checkout',
-    'data-button_type': 'button',
-    'data-color': 'gold',
-    'data-size': 'small'
-  };
-
-  script.src = 'https://www.paypalobjects.com/api/button.js';
-  script.async = true;
-
-  Object.keys(scriptAttrs).forEach(function (attr) {
-    script.setAttribute(attr, scriptAttrs[attr]);
-  });
-
-  buttonContainer.appendChild(script);
-};
-
 module.exports = PayPalView;
