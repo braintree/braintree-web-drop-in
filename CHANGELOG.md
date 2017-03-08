@@ -11,6 +11,7 @@ unreleased
 - Switch PayPal component for PayPal Checkout component
 - Publish to npm
 - Add `setPayPalOption` method to dynamically change PayPal config options. Closes #87
+- Fix #85 where the Drop-in would overflow in a small container
 
 1.0.0-beta.4
 ------------
