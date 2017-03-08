@@ -3,6 +3,7 @@
 var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
 var MainView = require('./views/main-view');
+var PayPalView = require('./views/payment-sheet-views/paypal-view');
 var constants = require('./constants');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
@@ -23,7 +24,7 @@ function Dropin(options) {
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentID;
   this._dropinWrapper.setAttribute('data-braintree-id', 'wrapper');
   this._dropinWrapper.style.display = 'none';
-  this._merchantConfiguration = options.merchantConfiguration;
+  this._merchantConfiguration = assign({}, options.merchantConfiguration);
 
   EventEmitter.call(this);
 }
@@ -148,6 +149,27 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
       callback(paymentMethods);
     });
   }
+};
+
+Dropin.prototype.setPayPalOption = function (option, value) {
+  if (!this._merchantConfiguration.paypal) {
+    throw new Error('PayPal not enabled.');
+  } else if (this._paypalAuthInProgress()) {
+    throw new Error('PayPal auth in progress.');
+  }
+
+  if (value == null) {
+    delete this._merchantConfiguration.paypal[option];
+  } else {
+    this._merchantConfiguration.paypal[option] = value;
+  }
+};
+
+Dropin.prototype._paypalAuthInProgress = function () {
+  var activeView = this._mainView.primaryView;
+  var paypalIsActiveView = activeView instanceof PayPalView;
+
+  return Boolean(paypalIsActiveView && activeView.authInProgress);
 };
 
 Dropin.prototype.teardown = function (callback) {

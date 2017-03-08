@@ -77,6 +77,18 @@ You can find more PayPal configuration options in the [Braintree JS client SDK v
 
 The structure of the PayPal payment method object returned in the callback of `requestPaymentMethod` can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizePayload).
 
+If you need to update a field (such as the amount) after creation, you can do so with the `setPayPalOption` method.
+
+```js
+// set amount to 20.00
+dropinInstance.setPayPalOption('amount', '20.00');
+
+// remove intent from options
+dropinInstance.setPayPalOption('intent', null);
+```
+
+Note: if your customer has already authenticated their PayPal account, using `setPayPalOption` will not make any changes for this session. If the customer chooses to pick another way to pay and authenticates with PayPal again, the changes you make to the PayPal options will be used.
+
 ## Full example
 
 This is a full example of a Drop-in integration that only accepts credit cards.

@@ -3,6 +3,7 @@
 var Dropin = require('../../src/dropin/');
 var deferred = require('../../src/lib/deferred');
 var DropinModel = require('../../src/dropin-model');
+var PayPalView = require('../../src/views/payment-sheet-views/paypal-view');
 var EventEmitter = require('../../src/lib/event-emitter');
 var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
@@ -42,6 +43,14 @@ describe('Dropin', function () {
   describe('Constructor', function () {
     it('inherits from EventEmitter', function () {
       expect(new Dropin(this.dropinOptions)).to.be.an.instanceOf(EventEmitter);
+    });
+
+    it('clones merchant configuration', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.dropinOptions.merchantConfiguration.selector = '#bar';
+
+      expect(instance._merchantConfiguration.selector).to.equal('#foo');
     });
   });
 
@@ -383,6 +392,57 @@ describe('Dropin', function () {
         expect(err).to.equal(error);
         done();
       });
+    });
+  });
+
+  describe('setPayPalOption', function () {
+    beforeEach(function () {
+      this.dropinOptions.merchantConfiguration.paypal = {
+        flow: 'checkout',
+        amount: '28.00',
+        currency: 'USD'
+      };
+      this.instance = new Dropin(this.dropinOptions);
+      this.instance._mainView = {};
+    });
+
+    it('throws an error if PayPal is not enabled', function () {
+      var instance;
+
+      delete this.dropinOptions.merchantConfiguration.paypal;
+      instance = new Dropin(this.dropinOptions);
+
+      expect(function () {
+        instance.setPayPalOption('amount', '10.00');
+      }).to.throw('PayPal not enabled.');
+    });
+
+    it('throws an error if PayPal auth is in progress', function () {
+      this.sandbox.stub(PayPalView.prototype, '_initialize');
+      this.instance._mainView.primaryView = new PayPalView();
+      this.instance._mainView.primaryView.authInProgress = true;
+
+      expect(function () {
+        this.instance.setPayPalOption('amount', '10.00');
+      }.bind(this)).to.throw('PayPal auth in progress.');
+    });
+
+    it('sets PayPal option to provided value', function () {
+      this.instance.setPayPalOption('amount', '10.00');
+
+      expect(this.instance._merchantConfiguration.paypal.amount).to.equal('10.00');
+    });
+
+    it('removes PayPal option when value provided is null', function () {
+      this.instance.setPayPalOption('amount', null);
+
+      expect(this.instance._merchantConfiguration.paypal.amount).to.be.undefined;
+    });
+
+    it('removes PayPal option when value provided is undefined', function () {
+      this.instance.setPayPalOption('amount');
+
+      expect(this.instance._merchantConfiguration.paypal.amount).to.be.undefined;
     });
   });
 
