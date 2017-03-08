@@ -87,6 +87,8 @@ dropinInstance.setPayPalOption('amount', '20.00');
 dropinInstance.setPayPalOption('intent', null);
 ```
 
+Note: if your customer has already authenticated their PayPal account, using `setPayPalOption` will not make any changes for this session. If the customer chooses to pick another way to pay and authenticates with PayPal again, the changes you make to the PayPal options will be used.
+
 ## Full example
 
 This is a full example of a Drop-in integration that only accepts credit cards.
