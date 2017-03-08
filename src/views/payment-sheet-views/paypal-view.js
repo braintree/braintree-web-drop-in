@@ -48,11 +48,13 @@ PayPalView.prototype._initialize = function () {
       env: environment,
       locale: merchantConfig.locale,
       payment: function () {
+        self.authInProgress = true;
         return paypalInstance.createPayment(merchantConfig).catch(reportError);
       },
       onAuthorize: function (data) {
         return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
           self.model.addPaymentMethod(tokenizePayload);
+          self.authInProgress = false;
         }).catch(reportError);
       },
       onError: reportError
@@ -64,6 +66,7 @@ PayPalView.prototype._initialize = function () {
   });
 
   function reportError(err) {
+    self.authInProgress = false;
     self.model.reportError(err);
   }
 };

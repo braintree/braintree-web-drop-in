@@ -3,6 +3,7 @@
 var Dropin = require('../../src/dropin/');
 var deferred = require('../../src/lib/deferred');
 var DropinModel = require('../../src/dropin-model');
+var PayPalView = require('../../src/views/payment-sheet-views/paypal-view');
 var EventEmitter = require('../../src/lib/event-emitter');
 var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
@@ -401,6 +402,8 @@ describe('Dropin', function () {
         amount: '28.00',
         currency: 'USD'
       };
+      this.instance = new Dropin(this.dropinOptions);
+      this.instance._mainView = {};
     });
 
     it('throws an error if PayPal is not enabled', function () {
@@ -414,28 +417,32 @@ describe('Dropin', function () {
       }).to.throw('PayPal not enabled.');
     });
 
+    it('throws an error if PayPal auth is in progress', function () {
+      this.sandbox.stub(PayPalView.prototype, '_initialize');
+      this.instance._mainView.primaryView = new PayPalView();
+      this.instance._mainView.primaryView.authInProgress = true;
+
+      expect(function () {
+        this.instance.setPayPalOption('amount', '10.00');
+      }.bind(this)).to.throw('PayPal auth in progress.');
+    });
+
     it('sets PayPal option to provided value', function () {
-      var instance = new Dropin(this.dropinOptions);
+      this.instance.setPayPalOption('amount', '10.00');
 
-      instance.setPayPalOption('amount', '10.00');
-
-      expect(instance._merchantConfiguration.paypal.amount).to.equal('10.00');
+      expect(this.instance._merchantConfiguration.paypal.amount).to.equal('10.00');
     });
 
     it('removes PayPal option when value provided is null', function () {
-      var instance = new Dropin(this.dropinOptions);
+      this.instance.setPayPalOption('amount', null);
 
-      instance.setPayPalOption('amount', null);
-
-      expect(instance._merchantConfiguration.paypal.amount).to.be.undefined;
+      expect(this.instance._merchantConfiguration.paypal.amount).to.be.undefined;
     });
 
     it('removes PayPal option when value provided is undefined', function () {
-      var instance = new Dropin(this.dropinOptions);
+      this.instance.setPayPalOption('amount');
 
-      instance.setPayPalOption('amount');
-
-      expect(instance._merchantConfiguration.paypal.amount).to.be.undefined;
+      expect(this.instance._merchantConfiguration.paypal.amount).to.be.undefined;
     });
   });
 

@@ -202,6 +202,27 @@ describe('PayPalView', function () {
       new PayPalView(this.paypalViewOptions);
     });
 
+    it('sets authInProgress to true when payment is created', function (done) {
+      var view;
+
+      paypal.Button.render.returns(Promise.resolve().then(function () {
+        // for some reason, this needs to be in a set timeout to grab the args from render
+        setTimeout(function () {
+          var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
+
+          paymentFunction();
+
+          waitForInitialize(function () {
+            expect(view.authInProgress).to.equal(true);
+
+            done();
+          });
+        }, 0);
+      }));
+
+      view = new PayPalView(this.paypalViewOptions);
+    });
+
     it('reports errors from createPayment', function (done) {
       var model = this.model;
       var error = new Error('create payment error');
@@ -224,6 +245,28 @@ describe('PayPalView', function () {
       }));
 
       new PayPalView(this.paypalViewOptions);
+    });
+
+    it('sets authInProgress to false when createPayment errors', function (done) {
+      var view;
+
+      this.paypalInstance.createPayment.returns(Promise.reject(new Error('create payment error')));
+
+      paypal.Button.render.returns(Promise.resolve().then(function () {
+        // for some reason, this needs to be in a set timeout to grab the args from render
+        setTimeout(function () {
+          var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
+
+          paymentFunction().then(function () {
+            waitForInitialize(function () {
+              expect(view.authInProgress).to.equal(false);
+              done();
+            });
+          });
+        }, 0);
+      }));
+
+      view = new PayPalView(this.paypalViewOptions);
     });
 
     it('calls addPaymentMethod when paypal is tokenized', function (done) {
@@ -261,6 +304,34 @@ describe('PayPalView', function () {
       new PayPalView(this.paypalViewOptions);
     });
 
+    it('sets authInProgress to false when paypal is tokenized', function (done) {
+      var view;
+
+      this.paypalInstance.tokenizePayment.returns(Promise.resolve({
+        foo: 'bar'
+      }));
+
+      paypal.Button.render.returns(Promise.resolve().then(function () {
+        // for some reason, this needs to be in a set timeout to grab the args from render
+        setTimeout(function () {
+          var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
+          var tokenizeOptions = {
+            foo: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          waitForInitialize(function () {
+            expect(view.authInProgress).to.equal(false);
+
+            done();
+          });
+        }, 0);
+      }));
+
+      view = new PayPalView(this.paypalViewOptions);
+    });
+
     it('reports errors from tokenizePayment', function (done) {
       var paypalInstance = this.paypalInstance;
       var model = this.model;
@@ -289,6 +360,31 @@ describe('PayPalView', function () {
       }));
 
       new PayPalView(this.paypalViewOptions);
+    });
+
+    it('sets authInProgress to false if an error occurs in tokenizePayment', function (done) {
+      var view;
+
+      this.paypalInstance.tokenizePayment.returns(Promise.reject(new Error('tokenize error')));
+
+      paypal.Button.render.returns(Promise.resolve().then(function () {
+        // for some reason, this needs to be in a set timeout to grab the args from render
+        setTimeout(function () {
+          var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
+
+          onAuthFunction({
+            foo: 'bar'
+          });
+
+          waitForInitialize(function () {
+            expect(view.authInProgress).to.equal(false);
+
+            done();
+          });
+        }, 0);
+      }));
+
+      view = new PayPalView(this.paypalViewOptions);
     });
 
     it('reports errors from paypal-checkout', function (done) {
