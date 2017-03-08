@@ -3,7 +3,7 @@ CHANGELOG
 
 unreleased
 ----------
-- Use version 3.9.0 of braintree-web
+- Use version 3.10.0 of braintree-web
 - Doesn't show Card payment option for merchants without cards enabled
 - Animate payment entry to tokenization
 - Animate choosing other saved payment methods
