@@ -12,6 +12,7 @@ function DropinModel(options) {
   this.isGuestCheckout = isGuestCheckout(options.client);
 
   this.dependenciesInitializing = 0;
+  this.dependencySuccessCount = 0;
   this.dependencyErrors = [];
 
   this.supportedPaymentOptions = getSupportedPaymentOptions(options);
@@ -56,16 +57,22 @@ DropinModel.prototype.asyncDependencyStarting = function () {
 };
 
 DropinModel.prototype.asyncDependencyReady = function () {
+  this.dependencySuccessCount++;
   this.dependenciesInitializing--;
-  if (this.dependenciesInitializing === 0) {
-    this.endLoading();
-    this._emit('asyncDependenciesReady', {errors: this.dependencyErrors});
-  }
+  this._checkAsyncDependencyFinished();
 };
 
 DropinModel.prototype.asyncDependencyFailed = function (err) {
   this.dependencyErrors.push(err);
-  this.asyncDependencyReady();
+  this.dependenciesInitializing--;
+  this._checkAsyncDependencyFinished();
+};
+
+DropinModel.prototype._checkAsyncDependencyFinished = function () {
+  if (this.dependenciesInitializing === 0) {
+    this.endLoading();
+    this._emit('asyncDependenciesReady', {errors: this.dependencyErrors});
+  }
 };
 
 DropinModel.prototype.beginLoading = function () {

@@ -220,12 +220,25 @@ describe('DropinModel', function () {
       expect(this.model.dependencyErrors).to.deep.equal([err]);
     });
 
-    it('calls asyncDependencyReady', function () {
-      this.sandbox.spy(this.model, 'asyncDependencyReady');
-      this.model.dependenciesInitializing = 1;
-      this.model.asyncDependencyFailed(new Error('a dependency failed'));
+    it('emits asyncDependenciesReady event when there are no dependencies initializing', function (done) {
+      var model = new DropinModel(this.modelOptions);
 
-      expect(this.model.asyncDependencyReady).to.be.called;
+      model.on('asyncDependenciesReady', function () {
+        done();
+      });
+
+      model.asyncDependencyStarting();
+      model.asyncDependencyFailed();
+    });
+
+    it('calls endLoading when there are no dependencies initializing', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      this.sandbox.spy(model, 'endLoading');
+      model.dependenciesInitializing = 1;
+      model.asyncDependencyFailed();
+
+      expect(model.endLoading).to.have.been.called;
     });
   });
 
@@ -235,12 +248,13 @@ describe('DropinModel', function () {
     });
 
     it('decrements dependenciesInitializing by one', function () {
-      this.context.dependenciesInitializing = 2;
+      var model = new DropinModel(this.modelOptions);
 
-      DropinModel.prototype.asyncDependencyReady.call(this.context);
+      model.dependenciesInitializing = 2;
 
-      expect(this.context.dependenciesInitializing).to.equal(1);
-      expect(this.context.callback).to.not.be.called;
+      model.asyncDependencyReady();
+
+      expect(model.dependenciesInitializing).to.equal(1);
     });
 
     it('emits asyncDependenciesReady event when there are no dependencies initializing', function (done) {

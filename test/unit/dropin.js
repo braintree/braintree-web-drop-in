@@ -1,12 +1,12 @@
 'use strict';
 
 var Dropin = require('../../src/dropin/');
-var deferred = require('../../src/lib/deferred');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
 var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
+var paypal = require('braintree-web/paypal');
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -28,9 +28,7 @@ describe('Dropin', function () {
       }
     };
 
-    this.sandbox.stub(hostedFields, 'create', function (options, cb) {
-      deferred(cb)(null, fake.hostedFieldsInstance);
-    });
+    this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
   });
 
   afterEach(function () {
@@ -59,6 +57,27 @@ describe('Dropin', function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector is required.');
         expect(analytics.sendEvent).to.be.calledWith(instance.client, 'configuration-error');
+        done();
+      });
+    });
+
+    it('errors out if all async dependencies fail', function (done) {
+      var instance;
+      var paypalError = new Error('PayPal Error');
+      var hostedFieldsError = new Error('HostedFields Error');
+
+      hostedFields.create.yields(hostedFieldsError);
+      this.sandbox.stub(paypal, 'create').yields(paypalError);
+
+      this.sandbox.stub(analytics, 'sendEvent');
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('All payment options failed to load.');
+        expect(instance._dropinWrapper.innerHTML).to.equal('');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'load-error');
         done();
       });
     });
@@ -286,10 +305,12 @@ describe('Dropin', function () {
       this.sandbox.stub(analytics, 'sendEvent');
 
       instance._initialize(function () {
+        expect(analytics.sendEvent).to.be.calledOnce;
         expect(analytics.sendEvent).to.be.calledWith(instance._client, 'appeared');
         done();
       });
 
+      instance._model.dependencySuccessCount = 2;
       instance._model._emit('asyncDependenciesReady');
     });
 

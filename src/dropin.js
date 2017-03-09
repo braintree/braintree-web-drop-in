@@ -80,8 +80,14 @@ Dropin.prototype._initialize = function (callback) {
     });
 
     this._model.on('asyncDependenciesReady', function () {
-      analytics.sendEvent(this._client, 'appeared');
-      callback(null, dropinInstance);
+      if (this._model.dependencySuccessCount >= 1) {
+        analytics.sendEvent(this._client, 'appeared');
+        callback(null, dropinInstance);
+      } else {
+        analytics.sendEvent(this._client, 'load-error');
+        this._dropinWrapper.innerHTML = '';
+        callback(new Error('All payment options failed to load.'));
+      }
     }.bind(this));
 
     this._mainView = new MainView({
