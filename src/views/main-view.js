@@ -38,7 +38,6 @@ MainView.prototype._initialize = function () {
 
   this.supportsFlexbox = supportsFlexbox();
 
-  this.model.on('loadBegin', this.showLoadingIndicator.bind(this));
   this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
   this.model.on('errorOccurred', this.showSheetError.bind(this));
@@ -146,7 +145,6 @@ MainView.prototype.setPrimaryView = function (id) {
   }
 
   this.model.clearError();
-  this.model.endLoading();
 };
 
 MainView.prototype.requestPaymentMethod = function (callback) {
@@ -164,12 +162,6 @@ MainView.prototype.requestPaymentMethod = function (callback) {
     analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
     callback(null, payload);
   }.bind(this));
-};
-
-MainView.prototype.showLoadingIndicator = function () {
-  classlist.remove(this.loadingIndicator, 'braintree-loader__indicator--inactive');
-  classlist.remove(this.loadingContainer, 'braintree-loader__container--inactive');
-  classlist.add(this.dropinContainer, 'braintree-hidden');
 };
 
 MainView.prototype.hideLoadingIndicator = function () {
