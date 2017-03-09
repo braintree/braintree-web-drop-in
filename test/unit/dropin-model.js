@@ -208,6 +208,27 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('asyncDependencyFailed', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+    });
+
+    it('adds an error to the dependencyErrors array', function () {
+      var err = new Error('a bad error');
+
+      this.model.asyncDependencyFailed(err);
+      expect(this.model.dependencyErrors).to.deep.equal([err]);
+    });
+
+    it('calls asyncDependencyReady', function () {
+      this.sandbox.spy(this.model, 'asyncDependencyReady');
+      this.model.dependenciesInitializing = 1;
+      this.model.asyncDependencyFailed(new Error('a dependency failed'));
+
+      expect(this.model.asyncDependencyReady).to.be.called;
+    });
+  });
+
   describe('asyncDependencyReady', function () {
     beforeEach(function () {
       this.context = {callback: this.sandbox.stub()};
@@ -236,6 +257,20 @@ describe('DropinModel', function () {
       model.asyncDependencyReady();
     });
 
+    it('emits asyncDependenciesReady event with prior errors', function () {
+      var model = new DropinModel(this.modelOptions);
+      var err = new Error('an earlier dependency failed');
+
+      this.sandbox.spy(model, '_emit');
+
+      model.asyncDependencyStarting();
+      model.asyncDependencyStarting();
+      model.asyncDependencyFailed(err);
+      model.asyncDependencyReady();
+
+      expect(model._emit).to.have.been.calledWith('asyncDependenciesReady', {errors: [err]});
+    });
+
     it('emits loadEnd event when there are no dependencies initializing', function (done) {
       var model = new DropinModel(this.modelOptions);
 
@@ -248,6 +283,16 @@ describe('DropinModel', function () {
 
       model.asyncDependencyStarting();
       model.asyncDependencyReady();
+    });
+
+    it('calls endLoading when there are no dependencies initializing', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      this.sandbox.spy(model, 'endLoading');
+      model.dependenciesInitializing = 1;
+      model.asyncDependencyReady();
+
+      expect(model.endLoading).to.have.been.called;
     });
   });
 

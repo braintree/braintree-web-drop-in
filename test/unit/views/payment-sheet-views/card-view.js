@@ -218,14 +218,13 @@ describe('CardView', function () {
       expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
     });
 
-    it('reports an error to DropinModel when Hosted Fields creation fails', function () {
+    it('calls asyncDependencyFailed with an error when Hosted Fields creation fails', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
 
-      hostedFields.create.restore();
-      this.sandbox.stub(hostedFields, 'create').yields(fakeError, null);
-      this.sandbox.stub(this.model, 'reportError');
+      hostedFields.create.yields(fakeError);
+      this.sandbox.stub(this.model, 'asyncDependencyFailed');
 
       new CardView({ // eslint-disable-line no-new
         element: this.element,
@@ -234,7 +233,7 @@ describe('CardView', function () {
         client: this.client
       });
 
-      expect(this.model.reportError).to.be.calledWith(fakeError);
+      expect(this.model.asyncDependencyFailed).to.be.calledWith(fakeError);
     });
 
     it('shows supported card icons', function () {

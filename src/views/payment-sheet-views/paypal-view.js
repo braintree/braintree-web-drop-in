@@ -39,7 +39,7 @@ PayPalView.prototype._initialize = function () {
     var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
 
     if (err) {
-      console.error(err);
+      this.model.asyncDependencyFailed(err);
       return;
     }
     self.paypalInstance = paypalInstance;
@@ -61,7 +61,7 @@ PayPalView.prototype._initialize = function () {
     paypal.Button.render(paypalCheckoutConfig, '[data-braintree-id="paypal-button"]').then(function () {
       self.model.asyncDependencyReady();
     });
-  });
+  }.bind(this));
 
   function reportError(err) {
     self.model.reportError(err);

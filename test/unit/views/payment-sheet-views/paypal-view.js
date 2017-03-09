@@ -119,18 +119,32 @@ describe('PayPalView', function () {
       }.bind(this));
     });
 
-    it('console errors when PayPal component creation fails', function () {
+    it('calls asyncDependencyFailed with an error when PayPal component creation fails', function (done) {
+      var fakeError = {
+        code: 'A_REAL_ERROR_CODE'
+      };
+
+      PayPalCheckout.create.yields(fakeError);
+      this.sandbox.stub(this.model, 'asyncDependencyFailed');
+
+      new PayPalView(this.paypalViewOptions);
+
+      waitForInitialize(function () {
+        expect(this.model.asyncDependencyFailed).to.be.calledWith(fakeError);
+        done();
+      }.bind(this));
+    });
+
+    it('calls asyncDependencyStarting when initializing', function (done) {
       var paypalView;
-      var fakeError = {type: 'MERCHANT'};
 
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
-      PayPalCheckout.create.yields(fakeError);
-      this.sandbox.stub(console, 'error');
-
       paypalView = new PayPalView(this.paypalViewOptions);
 
-      expect(console.error).to.be.calledWith(fakeError);
-      expect(paypalView.model.asyncDependencyStarting).to.be.calledOnce;
+      waitForInitialize(function () {
+        expect(paypalView.model.asyncDependencyStarting).to.be.calledOnce;
+        done();
+      });
     });
 
     it('calls paypal.Button.render', function (done) {
