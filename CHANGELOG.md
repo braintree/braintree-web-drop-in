@@ -8,7 +8,6 @@ unreleased
 - Animate payment entry to tokenization
 - Animate choosing other saved payment methods
 - Animate choosing a different way to pay
-- Switch PayPal component for PayPal Checkout component
 - Publish to npm
 - Fix #85 where the Drop-in would overflow in a small container
 

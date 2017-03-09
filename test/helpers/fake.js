@@ -1,6 +1,5 @@
 'use strict';
 
-var braintreeVersion = require('braintree-web').VERSION;
 var clientToken, clientTokenWithCustomerID, hostedFieldsInstance;
 var tokenizationKey = 'development_testing_merchant_id';
 
@@ -20,7 +19,7 @@ function configuration() {
       }
     },
     analyticsMetadata: {
-      sdkVersion: braintreeVersion,
+      sdkVersion: '1.2.3',
       merchantAppId: 'http://fakeDomain.com',
       sessionId: 'fakeSessionId',
       platform: 'web',
