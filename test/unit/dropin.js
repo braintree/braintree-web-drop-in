@@ -58,7 +58,7 @@ describe('Dropin', function () {
       instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector is required.');
-        expect(analytics.sendEvent).to.be.calledWith(instance.client, 'configuration-error');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
         done();
       });
     });
@@ -75,7 +75,7 @@ describe('Dropin', function () {
       instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector must reference a valid DOM node.');
-        expect(analytics.sendEvent).to.be.calledWith(instance.client, 'configuration-error');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
         done();
       });
     });
@@ -93,7 +93,7 @@ describe('Dropin', function () {
       instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector must reference an empty DOM node.');
-        expect(analytics.sendEvent).to.be.calledWith(instance.client, 'configuration-error');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
         done();
       });
     });
