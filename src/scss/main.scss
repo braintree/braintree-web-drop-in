@@ -72,6 +72,7 @@ $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   &:before {
     animation: rotate 512ms infinite $curve-swing;
+    box-sizing: content-box;
     display: block;
     width: 100%;
     height: 100%;
