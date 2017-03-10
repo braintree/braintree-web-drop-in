@@ -88,8 +88,10 @@
       dropinInstance.requestPaymentMethod(function (err, payload) {
         if (err) {
           error.textContent = err.message;
+          results.textContent = '';
         } else {
           results.textContent = JSON.stringify(payload, null, 2);
+          error.textContent = '';
         }
       });
     }, false);
