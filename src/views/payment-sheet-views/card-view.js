@@ -99,7 +99,10 @@ CardView.prototype._initialize = function () {
 
   hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
     if (err) {
-      this.model.asyncDependencyFailed(err);
+      this.model.asyncDependencyFailed({
+        view: this.ID,
+        error: err
+      });
       return;
     }
 

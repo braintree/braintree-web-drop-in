@@ -874,4 +874,19 @@ describe('MainView', function () {
       });
     });
   });
+
+  describe('getOptionsElements', function () {
+    it('returns options view elements property', function () {
+      var elements = {};
+      var context = {
+        _views: {
+          options: {
+            elements: elements
+          }
+        }
+      };
+
+      expect(MainView.prototype.getOptionsElements.call(context)).to.equal(elements);
+    });
+  });
 });

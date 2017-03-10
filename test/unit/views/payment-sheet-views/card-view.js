@@ -233,7 +233,10 @@ describe('CardView', function () {
         client: this.client
       });
 
-      expect(this.model.asyncDependencyFailed).to.be.calledWith(fakeError);
+      expect(this.model.asyncDependencyFailed).to.be.calledWith({
+        view: 'card',
+        error: fakeError
+      });
     });
 
     it('shows supported card icons', function () {

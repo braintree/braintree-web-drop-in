@@ -1,7 +1,8 @@
 'use strict';
 
-var clientToken, clientTokenWithCustomerID, hostedFieldsInstance;
+var clientToken, clientTokenWithCustomerID, hostedFieldsInstance, paypalInstance;
 var tokenizationKey = 'development_testing_merchant_id';
+var braintreeVersion = require('braintree-web').VERSION;
 
 function configuration() {
   return {
@@ -10,6 +11,7 @@ function configuration() {
       configUrl: 'https://braintreegateway.com/config',
       clientApiUrl: 'https://braintreegateway.com',
       assetsUrl: 'https://assets.braintreegateway.com',
+      paypalEnabled: true,
       analytics: {
         url: 'https://braintreegateway.com/analytics'
       },
@@ -19,7 +21,7 @@ function configuration() {
       }
     },
     analyticsMetadata: {
-      sdkVersion: '1.2.3',
+      sdkVersion: braintreeVersion,
       merchantAppId: 'http://fakeDomain.com',
       sessionId: 'fakeSessionId',
       platform: 'web',
@@ -61,6 +63,10 @@ hostedFieldsInstance = {
   tokenize: function () {}
 };
 
+paypalInstance = {
+  tokenize: function () {}
+};
+
 function modelOptions() {
   return {
     client: {
@@ -79,6 +85,7 @@ module.exports = {
   clientTokenWithCustomerID: clientTokenWithCustomerID,
   configuration: configuration,
   hostedFieldsInstance: hostedFieldsInstance,
+  paypalInstance: paypalInstance,
   modelOptions: modelOptions,
   tokenizationKey: tokenizationKey
 };

@@ -22,6 +22,7 @@ describe('PayPalView', function () {
     model.merchantConfiguration.paypal = {flow: 'vault'};
 
     this.paypalViewOptions = {
+      strings: {},
       element: this.element,
       model: model,
       client: {
@@ -104,6 +105,19 @@ describe('PayPalView', function () {
       expect(payPalView.paypalInstance).to.equal(this.paypalInstance);
     });
 
+    it('calls asyncDependencyFailed with an error when PayPal is not supported', function () {
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
+      this.sandbox.stub(PayPal, 'isSupported').returns(false);
+
+      new PayPalView(this.paypalViewOptions); // eslint-disable-line no-new
+
+      expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith({
+        view: 'paypal',
+        error: new Error('Browser not supported.')
+      });
+    });
+
     it('calls asyncDependencyFailed with an error when PayPal component creation fails', function () {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
@@ -115,7 +129,10 @@ describe('PayPalView', function () {
       new PayPalView(this.paypalViewOptions); // eslint-disable-line no-new
 
       expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
-      expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith(fakeError);
+      expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith({
+        view: 'paypal',
+        error: fakeError
+      });
     });
 
     it('calls asyncDependencyStarting when initializing', function () {

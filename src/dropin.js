@@ -82,6 +82,7 @@ Dropin.prototype._initialize = function (callback) {
     this._model.on('asyncDependenciesReady', function () {
       if (this._model.dependencySuccessCount >= 1) {
         analytics.sendEvent(this._client, 'appeared');
+        this._disableErroredPaymentMethods();
         callback(null, dropinInstance);
       } else {
         analytics.sendEvent(this._client, 'load-error');
@@ -96,6 +97,28 @@ Dropin.prototype._initialize = function (callback) {
       model: this._model,
       strings: strings
     });
+  }.bind(this));
+};
+
+Dropin.prototype._disableErroredPaymentMethods = function () {
+  var paymentMethodOptionsElements;
+  var failedDependencies = Object.keys(this._model.failedDependencies);
+
+  if (failedDependencies.length === 0) {
+    return;
+  }
+
+  paymentMethodOptionsElements = this._mainView.getOptionsElements();
+
+  failedDependencies.forEach(function (paymentMethodId) {
+    var element = paymentMethodOptionsElements[paymentMethodId];
+    var div = element.div;
+    var clickHandler = element.clickHandler;
+    var error = this._model.failedDependencies[paymentMethodId].message;
+
+    div.classList.add('braintree-disabled');
+    div.removeEventListener('click', clickHandler);
+    div.querySelector('.braintree-option__disabled-message').textContent = error;
   }.bind(this));
 };
 

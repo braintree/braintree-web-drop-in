@@ -213,11 +213,14 @@ describe('DropinModel', function () {
       this.model = new DropinModel(this.modelOptions);
     });
 
-    it('adds an error to the dependencyErrors array', function () {
+    it('adds an error to the failedDependencies object', function () {
       var err = new Error('a bad error');
 
-      this.model.asyncDependencyFailed(err);
-      expect(this.model.dependencyErrors).to.deep.equal([err]);
+      this.model.asyncDependencyFailed({
+        view: 'id',
+        error: err
+      });
+      expect(this.model.failedDependencies.id).to.equal(err);
     });
 
     it('emits asyncDependenciesReady event when there are no dependencies initializing', function (done) {
@@ -228,7 +231,10 @@ describe('DropinModel', function () {
       });
 
       model.asyncDependencyStarting();
-      model.asyncDependencyFailed();
+      model.asyncDependencyFailed({
+        view: 'id',
+        error: new Error('fake error')
+      });
     });
   });
 
@@ -269,10 +275,13 @@ describe('DropinModel', function () {
 
       model.asyncDependencyStarting();
       model.asyncDependencyStarting();
-      model.asyncDependencyFailed(err);
+      model.asyncDependencyFailed({
+        view: 'id',
+        error: err
+      });
       model.asyncDependencyReady();
 
-      expect(model._emit).to.have.been.calledWith('asyncDependenciesReady', {errors: [err]});
+      expect(model._emit).to.have.been.calledWith('asyncDependenciesReady');
     });
   });
 

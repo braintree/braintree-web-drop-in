@@ -135,6 +135,20 @@ $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   padding: 12px 10px;
   align-items: center;
 
+  &.braintree-disabled {
+    background: #EAEAEA;
+    cursor: not-allowed;
+
+    .braintree-option__label {
+      color: #787878;
+    }
+
+    .braintree-option__disabled-message {
+      float: right;
+      font-size: 14px;
+    }
+  }
+
   &:first-child {
     border-radius: 4px 4px 0 0;
     border-top-width: 1px;
@@ -154,6 +168,7 @@ $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     color: $text-color;
     font-size: 16px;
     margin-left: 20px;
+    width: 100%;
   }
 }
 

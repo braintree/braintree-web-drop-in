@@ -13,7 +13,7 @@ function DropinModel(options) {
 
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
-  this.dependencyErrors = [];
+  this.failedDependencies = {};
 
   this.supportedPaymentOptions = getSupportedPaymentOptions(options);
 
@@ -62,8 +62,8 @@ DropinModel.prototype.asyncDependencyReady = function () {
   this._checkAsyncDependencyFinished();
 };
 
-DropinModel.prototype.asyncDependencyFailed = function (err) {
-  this.dependencyErrors.push(err);
+DropinModel.prototype.asyncDependencyFailed = function (options) {
+  this.failedDependencies[options.view] = options.error;
   this.dependenciesInitializing--;
   this._checkAsyncDependencyFinished();
 };
@@ -71,7 +71,7 @@ DropinModel.prototype.asyncDependencyFailed = function (err) {
 DropinModel.prototype._checkAsyncDependencyFinished = function () {
   if (this.dependenciesInitializing === 0) {
     this._emit('loadEnd');
-    this._emit('asyncDependenciesReady', {errors: this.dependencyErrors});
+    this._emit('asyncDependenciesReady');
   }
 };
 
