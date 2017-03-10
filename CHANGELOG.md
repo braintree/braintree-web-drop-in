@@ -1,8 +1,12 @@
 CHANGELOG
 =========
 
+## UNRELEASED
+-------------
+- Disable payment methods if they error when creating
+
 1.0.0-beta.5
-----------
+------------
 - Use version 3.10.0 of braintree-web
 - Doesn't show Card payment option for merchants without cards enabled
 - Animate payment entry to tokenization
