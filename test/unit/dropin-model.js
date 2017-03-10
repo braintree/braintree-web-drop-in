@@ -208,18 +208,49 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('asyncDependencyFailed', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+    });
+
+    it('adds an error to the failedDependencies object', function () {
+      var err = new Error('a bad error');
+
+      this.model.asyncDependencyFailed({
+        view: 'id',
+        error: err
+      });
+      expect(this.model.failedDependencies.id).to.equal(err);
+    });
+
+    it('emits asyncDependenciesReady event when there are no dependencies initializing', function (done) {
+      var model = new DropinModel(this.modelOptions);
+
+      model.on('asyncDependenciesReady', function () {
+        done();
+      });
+
+      model.asyncDependencyStarting();
+      model.asyncDependencyFailed({
+        view: 'id',
+        error: new Error('fake error')
+      });
+    });
+  });
+
   describe('asyncDependencyReady', function () {
     beforeEach(function () {
       this.context = {callback: this.sandbox.stub()};
     });
 
     it('decrements dependenciesInitializing by one', function () {
-      this.context.dependenciesInitializing = 2;
+      var model = new DropinModel(this.modelOptions);
 
-      DropinModel.prototype.asyncDependencyReady.call(this.context);
+      model.dependenciesInitializing = 2;
 
-      expect(this.context.dependenciesInitializing).to.equal(1);
-      expect(this.context.callback).to.not.be.called;
+      model.asyncDependencyReady();
+
+      expect(model.dependenciesInitializing).to.equal(1);
     });
 
     it('emits asyncDependenciesReady event when there are no dependencies initializing', function (done) {
@@ -236,18 +267,21 @@ describe('DropinModel', function () {
       model.asyncDependencyReady();
     });
 
-    it('emits loadEnd event when there are no dependencies initializing', function (done) {
+    it('emits asyncDependenciesReady event with prior errors', function () {
       var model = new DropinModel(this.modelOptions);
+      var err = new Error('an earlier dependency failed');
 
-      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
-
-      model.on('loadEnd', function () {
-        expect(DropinModel.prototype.asyncDependencyReady).to.have.been.calledOnce;
-        done();
-      });
+      this.sandbox.spy(model, '_emit');
 
       model.asyncDependencyStarting();
+      model.asyncDependencyStarting();
+      model.asyncDependencyFailed({
+        view: 'id',
+        error: err
+      });
       model.asyncDependencyReady();
+
+      expect(model._emit).to.have.been.calledWith('asyncDependenciesReady');
     });
   });
 

@@ -19,9 +19,20 @@ PayPalView.prototype._initialize = function () {
   this._authInProgress = false;
   this.model.asyncDependencyStarting();
 
+  if (!paypal.isSupported()) {
+    this.model.asyncDependencyFailed({
+      view: this.ID,
+      error: new Error(this.strings.browserNotSupported)
+    });
+    return;
+  }
+
   paypal.create({client: this.client}, function (err, paypalInstance) {
     if (err) {
-      console.error(err);
+      this.model.asyncDependencyFailed({
+        view: this.ID,
+        error: err
+      });
       return;
     }
 

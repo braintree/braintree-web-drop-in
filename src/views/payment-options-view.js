@@ -19,6 +19,7 @@ PaymentOptionsView.ID = PaymentOptionsView.prototype.ID = 'options';
 
 PaymentOptionsView.prototype._initialize = function () {
   this.container = this.getElementById('payment-options-container');
+  this.elements = {};
 
   this.model.supportedPaymentOptions.forEach(function (paymentOptionID) {
     this._addPaymentOption(paymentOptionID);
@@ -28,8 +29,12 @@ PaymentOptionsView.prototype._initialize = function () {
 PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   var div = document.createElement('div');
   var html = paymentMethodOptionHTML;
+  var clickHandler = function clickHandler() {
+    this.mainView.setPrimaryView(paymentOptionID);
+    analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
+  }.bind(this);
 
-  div.className = 'braintree-option';
+  div.className = 'braintree-option braintree-option__' + paymentOptionID;
 
   switch (paymentOptionID) {
     case paymentOptionIDs.card:
@@ -47,11 +52,13 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   }
 
   div.innerHTML = html;
-  div.addEventListener('click', function () {
-    this.mainView.setPrimaryView(paymentOptionID);
-    analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
-  }.bind(this));
+
+  div.addEventListener('click', clickHandler);
   this.container.appendChild(div);
+  this.elements[paymentOptionID] = {
+    div: div,
+    clickHandler: clickHandler
+  };
 };
 
 module.exports = PaymentOptionsView;

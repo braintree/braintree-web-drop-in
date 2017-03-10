@@ -225,6 +225,10 @@ MainView.prototype.hideSheetError = function () {
   classlist.remove(this.sheetContainer, 'braintree-sheet--has-error');
 };
 
+MainView.prototype.getOptionsElements = function () {
+  return this._views.options.elements;
+};
+
 MainView.prototype.teardown = function (callback) {
   var viewNames = Object.keys(this._views);
   var numberOfViews = viewNames.length;

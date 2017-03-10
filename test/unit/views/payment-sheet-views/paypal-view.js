@@ -22,6 +22,7 @@ describe('PayPalView', function () {
     model.merchantConfiguration.paypal = {flow: 'vault'};
 
     this.paypalViewOptions = {
+      strings: {},
       element: this.element,
       model: model,
       client: {
@@ -104,17 +105,47 @@ describe('PayPalView', function () {
       expect(payPalView.paypalInstance).to.equal(this.paypalInstance);
     });
 
-    it('console errors when PayPal component creation fails', function () {
+    it('calls asyncDependencyFailed with an error when PayPal is not supported', function () {
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
+      this.sandbox.stub(PayPal, 'isSupported').returns(false);
+
+      new PayPalView(this.paypalViewOptions); // eslint-disable-line no-new
+
+      expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith({
+        view: 'paypal',
+        error: new Error('Browser not supported.')
+      });
+    });
+
+    it('calls asyncDependencyFailed with an error when PayPal component creation fails', function () {
+      var fakeError = {
+        code: 'A_REAL_ERROR_CODE'
+      };
+
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
+      PayPal.create.yields(fakeError);
+
+      new PayPalView(this.paypalViewOptions); // eslint-disable-line no-new
+
+      expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
+      expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith({
+        view: 'paypal',
+        error: fakeError
+      });
+    });
+
+    it('calls asyncDependencyStarting when initializing', function () {
       var paypalView;
-      var fakeError = {type: 'MERCHANT'};
+      var fakeError = {
+        code: 'A_REAL_ERROR_CODE'
+      };
+
+      PayPal.create.yields(fakeError);
 
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
-      PayPal.create.yields(fakeError);
-      this.sandbox.stub(console, 'error');
-
       paypalView = new PayPalView(this.paypalViewOptions);
 
-      expect(console.error).to.be.calledWith(fakeError);
       expect(paypalView.model.asyncDependencyStarting).to.be.calledOnce;
     });
 

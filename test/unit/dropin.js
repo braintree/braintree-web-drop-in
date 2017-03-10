@@ -1,12 +1,12 @@
 'use strict';
 
 var Dropin = require('../../src/dropin/');
-var deferred = require('../../src/lib/deferred');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
 var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
+var paypal = require('braintree-web/paypal');
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -28,9 +28,8 @@ describe('Dropin', function () {
       }
     };
 
-    this.sandbox.stub(hostedFields, 'create', function (options, cb) {
-      deferred(cb)(null, fake.hostedFieldsInstance);
-    });
+    this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
+    this.sandbox.stub(paypal, 'create').yieldsAsync(null, fake.paypalInstance);
   });
 
   afterEach(function () {
@@ -61,6 +60,61 @@ describe('Dropin', function () {
         expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
         done();
       });
+    });
+
+    it('errors out if all async dependencies fail', function (done) {
+      var instance;
+      var paypalError = new Error('PayPal Error');
+      var hostedFieldsError = new Error('HostedFields Error');
+
+      hostedFields.create.yieldsAsync(hostedFieldsError);
+      paypal.create.yieldsAsync(paypalError);
+
+      this.sandbox.stub(analytics, 'sendEvent');
+      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('All payment options failed to load.');
+        expect(instance._dropinWrapper.innerHTML).to.equal('');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'load-error');
+        done();
+      });
+    });
+
+    it('does not error if at least one dependency is available', function (done) {
+      var instance;
+      var hostedFieldsError = new Error('HostedFields Error');
+
+      hostedFields.create.yieldsAsync(hostedFieldsError);
+      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function (err) {
+        expect(err).to.not.exist;
+        done();
+      });
+    });
+
+    it('presents payment option as disabled if it fails', function (done) {
+      var instance;
+      var paypalError = new Error('PayPal Error');
+
+      paypal.create.yieldsAsync(paypalError);
+      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        var paypalOption = this.container.querySelector('.braintree-option__paypal');
+
+        expect(paypalOption.className).to.include('braintree-disabled');
+        expect(paypalOption.innerHTML).to.include('PayPal Error');
+        done();
+      }.bind(this));
     });
 
     it('throws an error with a selector that points to a nonexistent DOM node', function (done) {
@@ -286,10 +340,12 @@ describe('Dropin', function () {
       this.sandbox.stub(analytics, 'sendEvent');
 
       instance._initialize(function () {
+        expect(analytics.sendEvent).to.be.calledOnce;
         expect(analytics.sendEvent).to.be.calledWith(instance._client, 'appeared');
         done();
       });
 
+      instance._model.dependencySuccessCount = 2;
       instance._model._emit('asyncDependenciesReady');
     });
 
