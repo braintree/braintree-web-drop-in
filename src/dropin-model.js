@@ -70,17 +70,9 @@ DropinModel.prototype.asyncDependencyFailed = function (err) {
 
 DropinModel.prototype._checkAsyncDependencyFinished = function () {
   if (this.dependenciesInitializing === 0) {
-    this.endLoading();
+    this._emit('loadEnd');
     this._emit('asyncDependenciesReady', {errors: this.dependencyErrors});
   }
-};
-
-DropinModel.prototype.beginLoading = function () {
-  this._emit('loadBegin');
-};
-
-DropinModel.prototype.endLoading = function () {
-  this._emit('loadEnd');
 };
 
 DropinModel.prototype.reportError = function (error) {

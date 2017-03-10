@@ -10,6 +10,7 @@ unreleased
 - Animate choosing a different way to pay
 - Publish to npm
 - Fix #85 where the Drop-in would overflow in a small container
+- Show loading indicator until all components have finished loading
 
 1.0.0-beta.4
 ------------

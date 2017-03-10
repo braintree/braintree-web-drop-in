@@ -493,28 +493,6 @@ describe('MainView', function () {
     });
   });
 
-  describe('showLoadingIndicator', function () {
-    it('shows the loading indicator', function () {
-      var dropinContainer = document.createElement('div');
-      var loadingContainer = document.createElement('div');
-      var loadingIndicator = document.createElement('div');
-      var context = {
-        dropinContainer: dropinContainer,
-        loadingContainer: loadingContainer,
-        loadingIndicator: loadingIndicator
-      };
-
-      loadingContainer.className = 'braintree-loader__container--inactive';
-      loadingIndicator.className = 'braintree-loader__indicator--inactive';
-
-      MainView.prototype.showLoadingIndicator.call(context);
-
-      expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.true;
-      expect(context.loadingContainer.classList.contains('braintree-loader__container--inactive')).to.be.false;
-      expect(context.loadingIndicator.classList.contains('braintree-loader__indicator--inactive')).to.be.false;
-    });
-  });
-
   describe('hideLoadingIndicator', function () {
     beforeEach(function () {
       this.clock = sinon.useFakeTimers();
@@ -562,24 +540,9 @@ describe('MainView', function () {
       };
 
       this.sandbox.stub(CardView.prototype, '_initialize');
-      this.sandbox.stub(this.model, 'beginLoading');
-      this.sandbox.stub(this.model, 'endLoading');
-      this.sandbox.spy(MainView.prototype, 'showLoadingIndicator');
       this.sandbox.spy(MainView.prototype, 'hideLoadingIndicator');
 
       this.mainView = new MainView(this.mainViewOptions);
-    });
-
-    it('calls showLoadingIndicator on loadBegin', function () {
-      this.model._emit('loadBegin');
-
-      expect(MainView.prototype.showLoadingIndicator).to.be.calledOnce;
-    });
-
-    it('calls hideLoadingIndicator on loadEnd', function () {
-      this.model._emit('loadEnd');
-
-      expect(MainView.prototype.hideLoadingIndicator).to.be.calledOnce;
     });
 
     describe('for changeActivePaymentView', function () {

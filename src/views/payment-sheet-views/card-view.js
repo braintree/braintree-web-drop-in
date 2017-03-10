@@ -95,7 +95,6 @@ CardView.prototype._initialize = function () {
     delete hfOptions.fields.postalCode;
   }
 
-  this.model.beginLoading();
   this.model.asyncDependencyStarting();
 
   hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
@@ -112,7 +111,6 @@ CardView.prototype._initialize = function () {
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
 
     this.model.asyncDependencyReady();
-    this.model.endLoading();
   }.bind(this));
 };
 

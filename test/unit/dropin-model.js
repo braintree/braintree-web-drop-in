@@ -230,16 +230,6 @@ describe('DropinModel', function () {
       model.asyncDependencyStarting();
       model.asyncDependencyFailed();
     });
-
-    it('calls endLoading when there are no dependencies initializing', function () {
-      var model = new DropinModel(this.modelOptions);
-
-      this.sandbox.spy(model, 'endLoading');
-      model.dependenciesInitializing = 1;
-      model.asyncDependencyFailed();
-
-      expect(model.endLoading).to.have.been.called;
-    });
   });
 
   describe('asyncDependencyReady', function () {
@@ -283,54 +273,6 @@ describe('DropinModel', function () {
       model.asyncDependencyReady();
 
       expect(model._emit).to.have.been.calledWith('asyncDependenciesReady', {errors: [err]});
-    });
-
-    it('emits loadEnd event when there are no dependencies initializing', function (done) {
-      var model = new DropinModel(this.modelOptions);
-
-      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
-
-      model.on('loadEnd', function () {
-        expect(DropinModel.prototype.asyncDependencyReady).to.have.been.calledOnce;
-        done();
-      });
-
-      model.asyncDependencyStarting();
-      model.asyncDependencyReady();
-    });
-
-    it('calls endLoading when there are no dependencies initializing', function () {
-      var model = new DropinModel(this.modelOptions);
-
-      this.sandbox.spy(model, 'endLoading');
-      model.dependenciesInitializing = 1;
-      model.asyncDependencyReady();
-
-      expect(model.endLoading).to.have.been.called;
-    });
-  });
-
-  describe('beginLoading', function () {
-    it('emits a loadBegin event', function (done) {
-      var model = new DropinModel(this.modelOptions);
-
-      model.on('loadBegin', function () {
-        done();
-      });
-
-      model.beginLoading();
-    });
-  });
-
-  describe('endLoading', function () {
-    it('emits a loadEnd event', function (done) {
-      var model = new DropinModel(this.modelOptions);
-
-      model.on('loadEnd', function () {
-        done();
-      });
-
-      model.endLoading();
     });
   });
 
