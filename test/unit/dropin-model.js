@@ -251,30 +251,6 @@ describe('DropinModel', function () {
     });
   });
 
-  describe('beginLoading', function () {
-    it('emits a loadBegin event', function (done) {
-      var model = new DropinModel(this.modelOptions);
-
-      model.on('loadBegin', function () {
-        done();
-      });
-
-      model.beginLoading();
-    });
-  });
-
-  describe('endLoading', function () {
-    it('emits a loadEnd event', function (done) {
-      var model = new DropinModel(this.modelOptions);
-
-      model.on('loadEnd', function () {
-        done();
-      });
-
-      model.endLoading();
-    });
-  });
-
   describe('reportError', function () {
     it('emits an errorOccurred event with the error', function (done) {
       var dropinModel = new DropinModel(this.modelOptions);
