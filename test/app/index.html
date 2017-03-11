@@ -57,6 +57,9 @@
   <input type="submit" value="Pay">
 </form>
 
+<button id="create-button">Create</button>
+<button id="teardown-button">Teardown</button>
+
 <pre id="results"></pre>
 
 <script src="/web/dropin/dev/js/dropin.js"></script>
@@ -64,37 +67,51 @@
 <script>
 
   var authorization = 'sandbox_g42y39zw_348pk9cgf3bgyw2b';
+  var dropinInstance;
+  var createButton = document.querySelector('#create-button');
+  var teardownButton = document.querySelector('#teardown-button');
 
-  braintree.dropin.create({
-    authorization: authorization,
-    selector: '#dropin-container',
-    paypal: {
-      flow: 'vault'
-    }
-  }, function (err, dropinInstance) {
-    var form = document.querySelector('#checkout-form');
-    var results = document.querySelector('#results');
-    var error = document.querySelector('#error');
+  createButton.addEventListener('click', function () {
+    braintree.dropin.create({
+      authorization: authorization,
+      selector: '#dropin-container',
+      paypal: {
+        flow: 'vault'
+      }
+      }, function (err, instance) {
+      var form = document.querySelector('#checkout-form');
+      var results = document.querySelector('#results');
+      var error = document.querySelector('#error');
 
-    if (err) {
-      console.error('There was an error creating Drop-in.');
-      error.textContent = err.message;
-      throw err;
-    }
+      if (err) {
+        console.error('There was an error creating Drop-in.');
+        error.textContent = err.message;
+        throw err;
+      }
 
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
+      dropinInstance = instance;
 
-      dropinInstance.requestPaymentMethod(function (err, payload) {
-        if (err) {
-          error.textContent = err.message;
-          results.textContent = '';
-        } else {
-          results.textContent = JSON.stringify(payload, null, 2);
-          error.textContent = '';
-        }
-      });
-    }, false);
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        dropinInstance.requestPaymentMethod(function (err, payload) {
+          if (err) {
+            error.textContent = err.message;
+            results.textContent = '';
+          } else {
+            results.textContent = JSON.stringify(payload, null, 2);
+            error.textContent = '';
+          }
+        });
+      }, false);
+    });
+  });
+
+  teardownButton.addEventListener('click', function () {
+    dropinInstance.teardown(function (err) {
+      if (err) { console.error('Failed to tear down:', err); }
+      else { console.log('Teardown successful'); }
+    });
   });
 
 </script>

@@ -72,12 +72,19 @@ Dropin.prototype._initialize = function (callback) {
   container.appendChild(this._dropinWrapper);
 
   this._getVaultedPaymentMethods(function (paymentMethods) {
-    this._model = new DropinModel({
-      client: this._client,
-      componentID: this._componentID,
-      merchantConfiguration: this._merchantConfiguration,
-      paymentMethods: paymentMethods
-    });
+    try {
+      this._model = new DropinModel({
+        client: this._client,
+        componentID: this._componentID,
+        merchantConfiguration: this._merchantConfiguration,
+        paymentMethods: paymentMethods
+      });
+    } catch (err) {
+      dropinInstance.teardown(function (teardownErr) {
+        callback(teardownErr || err);
+      });
+      return;
+    }
 
     this._model.on('asyncDependenciesReady', function () {
       if (this._model.dependencySuccessCount >= 1) {
@@ -182,10 +189,18 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
 Dropin.prototype.teardown = function (callback) {
   this._removeStylesheet();
 
-  this._mainView.teardown(function (err) {
-    this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
-    callback(err);
-  }.bind(this));
+  if (this._mainView) {
+    this._mainView.teardown(function (err) {
+      this._removeDropinWrapper(err, callback);
+    }.bind(this));
+  } else {
+    this._removeDropinWrapper(null, callback);
+  }
+};
+
+Dropin.prototype._removeDropinWrapper = function (err, callback) {
+  this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
+  callback(err);
 };
 
 function formatPaymentMethodPayload(paymentMethod) {

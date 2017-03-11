@@ -61,7 +61,9 @@ describe('DropinModel', function () {
       it('supports nothing', function () {
         this.configuration.gatewayConfiguration.creditCards.supportedCardTypes = [];
 
-        expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.deep.equal([]);
+        expect(function () {
+          new DropinModel(this.modelOptions); // eslint-disable-line no-new
+        }.bind(this)).to.throw('No valid payment options available.');
       });
 
       it('supports cards', function () {
@@ -78,6 +80,18 @@ describe('DropinModel', function () {
           'card',
           'paypal'
         ]);
+      });
+
+      it('uses custom order of payment options', function () {
+        var model;
+
+        this.configuration.gatewayConfiguration.paypalEnabled = true;
+        this.modelOptions.merchantConfiguration.paypal = true;
+        this.modelOptions.merchantConfiguration.order = ['paypal', 'card'];
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
       });
     });
 
