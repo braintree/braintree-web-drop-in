@@ -30,6 +30,12 @@ describe "Drop-in" do
       expect(page).to have_content("Card Number")
       expect(page).to have_content("Expiration Date")
     end
+
+    it "supports locale" do
+      visit "http://#{HOSTNAME}:#{PORT}?locale=es_ES"
+
+      expect(page).to have_content("Tarjeta")
+    end
   end
 
   describe "payment option priority" do

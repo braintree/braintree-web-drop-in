@@ -5,6 +5,7 @@ CHANGELOG
 -------------
 - Disable payment methods if they error when creating
 - Add `paymentOptionPriority` option for specifying the ordering of payment options such as `card` and `paypal`
+- Add translations
 
 1.0.0-beta.5
 ------------
