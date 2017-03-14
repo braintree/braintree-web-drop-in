@@ -121,6 +121,27 @@ This is a full example of a Drop-in integration that only accepts credit cards.
 </html>
 ```
 
+## Teardown
+
+When you want to cleanly tear down anything set up by `dropin.create`, use `teardown()`. This may be useful in a single-page app.
+
+```js
+var dropinInstance;
+
+braintree.dropin.create({
+    // ...
+  }, function (err, dropin) {
+    // ...
+    dropinInstance = dropin;
+  });
+
+// ...
+dropinInstance.teardown(function (err) {
+  // Called once teardown is complete. No data is returned if teardown completes successfully.
+  if (err) { /* an error occurred during teardown */ }
+});
+```
+
 ## Beta notes
 
 While in beta, we're still actively working on Drop-in. This means you might have to change your integration when upgrading your Drop-in version. This includes any custom CSS styling applied to `data-braintree-id` attributes.
