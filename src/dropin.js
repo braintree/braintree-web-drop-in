@@ -79,9 +79,9 @@ Dropin.prototype._initialize = function (callback) {
         merchantConfiguration: this._merchantConfiguration,
         paymentMethods: paymentMethods
       });
-    } catch (err) {
-      dropinInstance.teardown(function (teardownErr) {
-        callback(teardownErr || err);
+    } catch (modelError) {
+      dropinInstance.teardown(function () {
+        callback(modelError);
       });
       return;
     }
