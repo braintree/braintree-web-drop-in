@@ -361,11 +361,11 @@ describe('Dropin', function () {
     it('loads localized strings into mainView when options.locale is specified', function (done) {
       var instance;
 
-      this.dropinOptions.merchantConfiguration.locale = 'es';
+      this.dropinOptions.merchantConfiguration.locale = 'es_ES';
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(instance._mainView.strings.postalCodeLabel).to.equal('Código Postal');
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Código postal');
         done();
       });
     });
