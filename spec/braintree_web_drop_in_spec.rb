@@ -14,13 +14,13 @@ describe "Drop-in" do
     it "requires a selector" do
       visit "http://#{HOSTNAME}:#{PORT}?mergeWithDefault=true&selector=null"
 
-      expect(find("#id")).to have_content("options.selector is required.")
+      expect(find("#error")).to have_content("options.selector is required.")
     end
 
     it "requires authorization" do
       visit "http://#{HOSTNAME}:#{PORT}?mergeWithDefault=true&authorization=null"
 
-      expect(find("#id")).to have_content("options.authorization is required.")
+      expect(find("#error")).to have_content("options.authorization is required.")
     end
 
     it "does not setup paypal when not configured" do

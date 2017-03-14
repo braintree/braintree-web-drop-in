@@ -126,7 +126,6 @@
 
     braintree.dropin.create(getDropinConfig(), function (err, instance) {
       if (err) {
-        console.error('There was an error creating Drop-in.');
         error.textContent = err.message;
         throw err;
       }
