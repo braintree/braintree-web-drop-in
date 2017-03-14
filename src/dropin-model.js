@@ -85,20 +85,37 @@ DropinModel.prototype.clearError = function () {
 
 function getSupportedPaymentOptions(options) {
   var result = [];
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var isCardGatewayEnabled = gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
-  var isPayPalGatewayEnabled = gatewayConfiguration.paypalEnabled;
-  var isPayPalMerchantEnabled = Boolean(options.merchantConfiguration.paypal);
+  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal'];
 
-  if (isCardGatewayEnabled) {
-    result.push(paymentOptionIDs.card);
+  if (!(paymentOptionPriority instanceof Array)) {
+    throw new Error('paymentOptionPriority must be an array.');
   }
 
-  if (isPayPalGatewayEnabled && isPayPalMerchantEnabled) {
-    result.push(paymentOptionIDs.paypal);
+  // Remove duplicates
+  paymentOptionPriority = paymentOptionPriority.filter(function (item, pos) { return paymentOptionPriority.indexOf(item) === pos; });
+
+  paymentOptionPriority.forEach(function (paymentOption) {
+    if (isPaymentOptionEnabled(paymentOption, options)) {
+      result.push(paymentOptionIDs[paymentOption]);
+    }
+  });
+
+  if (result.length === 0) {
+    throw new Error('No valid payment options available.');
   }
 
   return result;
+}
+
+function isPaymentOptionEnabled(paymentOption, options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+
+  if (paymentOption === 'card') {
+    return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
+  } else if (paymentOption === 'paypal') {
+    return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
+  }
+  throw new Error('paymentOptionPriority: Invalid payment option specified.');
 }
 
 module.exports = DropinModel;

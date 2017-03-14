@@ -121,6 +121,19 @@ This is a full example of a Drop-in integration that only accepts credit cards.
 </html>
 ```
 
+## Payment option priority
+
+By default, Drop-in displays the credit/debit card form first, followed by PayPal (if enabled). You can customize this ordering with `paymentOptionPriority` as shown in this example:
+
+```js
+braintree.dropin.create({
+  // ...
+  paymentOptionPriority: ['paypal', 'card'] // Display PayPal first
+}, /* ... */);
+```
+
+Payment options omitted from this array will not be offered to the customer.
+
 ## Teardown
 
 When you want to cleanly tear down anything set up by `dropin.create`, use `teardown()`. This may be useful in a single-page app.

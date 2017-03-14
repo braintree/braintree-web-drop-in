@@ -58,10 +58,22 @@ describe('DropinModel', function () {
     });
 
     describe('supported payment options', function () {
-      it('supports nothing', function () {
+      it('throws an error when there are no payment options', function () {
         this.configuration.gatewayConfiguration.creditCards.supportedCardTypes = [];
 
-        expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.deep.equal([]);
+        expect(function () {
+          new DropinModel(this.modelOptions); // eslint-disable-line no-new
+        }.bind(this)).to.throw('No valid payment options available.');
+      });
+
+      it('throws an error when paymentOptionPriority is an empty array', function () {
+        this.configuration.gatewayConfiguration.paypalEnabled = true;
+        this.modelOptions.merchantConfiguration.paypal = true;
+        this.modelOptions.merchantConfiguration.paymentOptionPriority = [];
+
+        expect(function () {
+          new DropinModel(this.modelOptions); // eslint-disable-line no-new
+        }.bind(this)).to.throw('No valid payment options available.');
       });
 
       it('supports cards', function () {
@@ -70,14 +82,49 @@ describe('DropinModel', function () {
         ]);
       });
 
-      it('supports credit cards and PayPal if PayPal is enabled by merchant and gateway', function () {
+      it('supports cards and paypal and defaults to showing them in correct paymentOptionPriority', function () {
+        var model;
+
         this.configuration.gatewayConfiguration.paypalEnabled = true;
         this.modelOptions.merchantConfiguration.paypal = true;
 
-        expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.have.members([
-          'card',
-          'paypal'
-        ]);
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal']);
+      });
+
+      it('uses custom paymentOptionPriority of payment options', function () {
+        var model;
+
+        this.configuration.gatewayConfiguration.paypalEnabled = true;
+        this.modelOptions.merchantConfiguration.paypal = true;
+        this.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'card'];
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
+      });
+
+      it('ignores duplicates', function () {
+        var model;
+
+        this.configuration.gatewayConfiguration.paypalEnabled = true;
+        this.modelOptions.merchantConfiguration.paypal = true;
+        this.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'paypal', 'card'];
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
+      });
+
+      it('throws an error when an unrecognized payment option is specified', function () {
+        this.configuration.gatewayConfiguration.paypalEnabled = true;
+        this.modelOptions.merchantConfiguration.paypal = true;
+        this.modelOptions.merchantConfiguration.paymentOptionPriority = ['foo', 'paypal', 'card'];
+
+        expect(function () {
+          new DropinModel(this.modelOptions); // eslint-disable-line no-new
+        }.bind(this)).to.throw('paymentOptionPriority: Invalid payment option specified.');
       });
     });
 

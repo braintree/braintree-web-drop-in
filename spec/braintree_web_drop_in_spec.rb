@@ -32,6 +32,36 @@ describe "Drop-in" do
     end
   end
 
+  describe "payment option priority" do
+    it "uses default priority of card, paypal" do
+      visit "http://#{HOSTNAME}:#{PORT}"
+
+      find(".braintree-heading")
+      payment_options = all(:css, ".braintree-option__label")
+
+      expect(payment_options[0]).to have_content("Card")
+      expect(payment_options[1]).to have_content("PayPal")
+    end
+
+    it "uses custom priority of paypal, card" do
+      options = '["paypal","card"]'
+      visit "http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}"
+
+      find(".braintree-heading")
+      payment_options = all(:css, ".braintree-option__label")
+
+      expect(payment_options[0]).to have_content("PayPal")
+      expect(payment_options[1]).to have_content("Card")
+    end
+
+    it "shows an error when an unrecognized payment option is specified" do
+      options = '["dummy","card"]'
+      visit "http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}"
+
+      expect(find("#error")).to have_content("paymentOptionPriority: Invalid payment option specified.")
+    end
+  end
+
   describe "tokenizes" do
     it "a card" do
       browser_skip("safari", "Testing iframes in WebKit does not work")
