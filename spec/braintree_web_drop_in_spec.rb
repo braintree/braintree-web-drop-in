@@ -12,19 +12,19 @@ describe "Drop-in" do
 
   describe "setup" do
     it "requires a selector" do
-      visit "http://#{HOSTNAME}:#{PORT}?mergeWithDefault=true&selector=null"
+      visit "http://#{HOSTNAME}:#{PORT}?selector=null"
 
       expect(find("#error")).to have_content("options.selector is required.")
     end
 
     it "requires authorization" do
-      visit "http://#{HOSTNAME}:#{PORT}?mergeWithDefault=true&authorization=null"
+      visit "http://#{HOSTNAME}:#{PORT}?authorization=null"
 
       expect(find("#error")).to have_content("options.authorization is required.")
     end
 
     it "does not setup paypal when not configured" do
-      visit "http://#{HOSTNAME}:#{PORT}?mergeWithDefault=true&paypal=null"
+      visit "http://#{HOSTNAME}:#{PORT}?paypal=null"
 
       expect(page).to_not have_content("PayPal")
       expect(page).to have_content("Card Number")

@@ -113,7 +113,7 @@
       return obj;
     }, {});
 
-    if (config.mergeWithDefault) {
+    if (config.mergeWithDefault !== false) {
       config = Object.assign({}, defaultCreateObject, config);
     }
 
