@@ -34,12 +34,16 @@
     display: none;
   }
 
-  input[type="submit"] {
+  input[type="submit"], button {
     font: inherit;
     padding: 0.5em 1em;
     border: 1px solid #d9d9d9;
     background: #f2f2f2;
     background-image: linear-gradient(-180deg,#f2f2f2 0,#e6e6e6 100%);
+  }
+
+  button[disabled] {
+    display: none;
   }
 
 </style>
@@ -55,10 +59,9 @@
   <div id="dropin-container"></div>
 
   <input type="submit" value="Pay">
+  <button id="create-button" disabled type="button">Create</button>
+  <button id="teardown-button" type="button">Teardown</button>
 </form>
-
-<button id="create-button">Create</button>
-<button id="teardown-button">Teardown</button>
 
 <pre id="results"></pre>
 
@@ -68,52 +71,64 @@
 
   var authorization = 'sandbox_g42y39zw_348pk9cgf3bgyw2b';
   var dropinInstance;
+  var form = document.querySelector('#checkout-form');
+  var results = document.querySelector('#results');
+  var error = document.querySelector('#error');
   var createButton = document.querySelector('#create-button');
   var teardownButton = document.querySelector('#teardown-button');
 
-  createButton.addEventListener('click', function () {
+  function createDropin () {
+    results.textContent = '';
+    error.textContent = '';
+
     braintree.dropin.create({
       authorization: authorization,
       selector: '#dropin-container',
       paypal: {
         flow: 'vault'
       }
-      }, function (err, instance) {
-      var form = document.querySelector('#checkout-form');
-      var results = document.querySelector('#results');
-      var error = document.querySelector('#error');
-
+    }, function (err, instance) {
       if (err) {
         console.error('There was an error creating Drop-in.');
         error.textContent = err.message;
         throw err;
       }
 
+      teardownButton.removeAttribute('disabled');
+      createButton.setAttribute('disabled', true);
+
       dropinInstance = instance;
-
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        dropinInstance.requestPaymentMethod(function (err, payload) {
-          if (err) {
-            error.textContent = err.message;
-            results.textContent = '';
-          } else {
-            results.textContent = JSON.stringify(payload, null, 2);
-            error.textContent = '';
-          }
-        });
-      }, false);
     });
-  });
+  }
+
+  createButton.addEventListener('click', createDropin);
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    dropinInstance.requestPaymentMethod(function (err, payload) {
+      if (err) {
+        error.textContent = err.message;
+        results.textContent = '';
+      } else {
+        results.textContent = JSON.stringify(payload, null, 2);
+        error.textContent = '';
+      }
+    });
+  }, false);
 
   teardownButton.addEventListener('click', function () {
+    teardownButton.setAttribute('disabled', true);
     dropinInstance.teardown(function (err) {
-      if (err) { console.error('Failed to tear down:', err); }
-      else { console.log('Teardown successful'); }
+      if (err) {
+        error.textContent = 'Failed to tear down:' + err;
+      } else {
+        results.textContent = 'Teardown successful';
+        createButton.removeAttribute('disabled');
+      }
     });
   });
 
+  createDropin();
 </script>
 
 </body>
