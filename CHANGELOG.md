@@ -4,6 +4,7 @@ CHANGELOG
 ## UNRELEASED
 -------------
 - Disable payment methods if they error when creating
+- Add `order` option for specifying the ordering of payment options such as `card` and `paypal`
 
 1.0.0-beta.5
 ------------
