@@ -65,11 +65,17 @@
 
 <pre id="results"></pre>
 
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Object.assign"></script>
 <script src="/web/dropin/dev/js/dropin.js"></script>
 
 <script>
-
-  var authorization = 'sandbox_g42y39zw_348pk9cgf3bgyw2b';
+  var defaultCreateObject = {
+    authorization: 'sandbox_g42y39zw_348pk9cgf3bgyw2b',
+    selector: '#dropin-container',
+    paypal: {
+      flow: 'vault'
+    }
+  };
   var dropinInstance;
   var form = document.querySelector('#checkout-form');
   var results = document.querySelector('#results');
@@ -77,17 +83,48 @@
   var createButton = document.querySelector('#create-button');
   var teardownButton = document.querySelector('#teardown-button');
 
+  function getDropinConfig () {
+    var query = window.location.search.substring(1);
+    var paramPairs, config;
+
+    if (!query) {
+      return defaultCreateObject;
+    }
+
+    paramPairs = query.split('&');
+
+    config = paramPairs.reduce(function (obj, queryParam) {
+      var jsonParsedValue;
+      var pair = queryParam.split('=');
+      var prop = decodeURIComponent(pair[0]);
+      var value = decodeURIComponent(pair[1]);
+
+      // this allows us to pass arrays, booleans, and objects in
+      // the query string. If the parsing fails, we fall back to
+      // a string value.
+      try {
+        jsonParsedValue = JSON.parse(value);
+        value = jsonParsedValue;
+
+      } catch (e) {}
+
+      obj[prop] = value;
+
+      return obj;
+    }, {});
+
+    if (config.mergeWithDefault) {
+      config = Object.assign({}, defaultCreateObject, config);
+    }
+
+    return config;
+  }
+
   function createDropin () {
     results.textContent = '';
     error.textContent = '';
 
-    braintree.dropin.create({
-      authorization: authorization,
-      selector: '#dropin-container',
-      paypal: {
-        flow: 'vault'
-      }
-    }, function (err, instance) {
+    braintree.dropin.create(getDropinConfig(), function (err, instance) {
       if (err) {
         console.error('There was an error creating Drop-in.');
         error.textContent = err.message;
