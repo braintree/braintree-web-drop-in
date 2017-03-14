@@ -121,6 +121,36 @@ This is a full example of a Drop-in integration that only accepts credit cards.
 </html>
 ```
 
+## Localization
+
+You can pass a `locale` property to translate the Drop-in into other languages. Possible values are:
+
+```
+da_DK
+de_DE
+en
+en_AU
+en_GB
+es_ES
+fr_CA
+fr_FR
+id_ID
+it_IT
+ja_JP
+ko_KR
+nl_NL
+no_NO
+pl_PL
+pt_BR
+pt_PT
+ru_RU
+sv_SE
+th_TH
+zh_CN
+zh_HK
+zh_TW
+```
+
 ## Payment option priority
 
 By default, Drop-in displays the credit/debit card form first, followed by PayPal (if enabled). You can customize this ordering with `paymentOptionPriority` as shown in this example:
@@ -166,7 +196,6 @@ Much of the behavior in this version of Drop-in differs from the [previous versi
 Here are some of the features we're still working on:
 
  - Event API: An event system to indicate when a payment method can be requested
- - Localization and internationalization
  - Full documentation in the [Braintree developer docs](https://developers.braintreepayments.com/guides/overview) and an API reference
  - Support for additional types of payment methods
  - Support for Internet Explorer 9 and 10
