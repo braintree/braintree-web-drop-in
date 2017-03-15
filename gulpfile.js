@@ -176,7 +176,12 @@ function jsdoc(options, done) {
   if (options.verbose === true) args.splice(1, 0, '--verbose');
   if (options.explain === true) args.splice(1, 0, '-X');
 
-  spawn('bash', ['-c', args.join(' ')], {
+  var command = 'bash', opt = '-c';
+  if (process.platform.indexOf('win')>=0) {
+    command = 'cmd';
+    opt = '/c';
+  }
+  spawn(command, [opt, args.join(' ')], {
     stdio: ['ignore', 1, 2]
   }).on('exit', function (code) {
     if (code === 0) {
