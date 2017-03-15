@@ -12,6 +12,9 @@ function configuration() {
       clientApiUrl: 'https://braintreegateway.com',
       assetsUrl: 'https://assets.braintreegateway.com',
       paypalEnabled: true,
+      paypal: {
+        clientId: 'client-id'
+      },
       analytics: {
         url: 'https://braintreegateway.com/analytics'
       },
@@ -64,7 +67,8 @@ hostedFieldsInstance = {
 };
 
 paypalInstance = {
-  tokenize: function () {}
+  createPayment: function () {},
+  tokenizePayment: function () {}
 };
 
 function modelOptions() {

@@ -355,8 +355,15 @@ $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .braintree-sheet__content--button {
-  padding: 20px;
+  padding-top: 20px;
+  padding-bottom: 10px;
   text-align: center;
+
+  .braintree-sheet__button--paypal {
+    iframe {
+      display: inline-block !important;
+    }
+  }
 }
 
 .braintree-form__field-group--has-error {
