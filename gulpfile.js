@@ -152,6 +152,13 @@ gulp.task('build', function (done) {
 
 function jsdoc(options, done) {
   var args = ['jsdoc', 'src'];
+  var command = 'bash';
+  var commandOption = '-c';
+  
+  if (process.platform.indexOf('win')>=0) {
+    command = 'cmd';
+    commandOption = '/c';
+  }
 
   options = options || {};
 
@@ -176,7 +183,7 @@ function jsdoc(options, done) {
   if (options.verbose === true) args.splice(1, 0, '--verbose');
   if (options.explain === true) args.splice(1, 0, '-X');
 
-  spawn('bash', ['-c', args.join(' ')], {
+  spawn(command, [commandOption, args.join(' ')], {
     stdio: ['ignore', 1, 2]
   }).on('exit', function (code) {
     if (code === 0) {
