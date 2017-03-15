@@ -22,6 +22,8 @@ dist
       └── dev -> 1.0.0
 ```
 
+**Note:** If you are developing on a Windows machine, you will need to run your command prompt as an administrator so the symlinking step suceeds.
+
 ## Testing
 
 ```
