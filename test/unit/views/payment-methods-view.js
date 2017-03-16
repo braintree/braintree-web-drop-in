@@ -52,7 +52,7 @@ describe('PaymentMethodsView', function () {
         merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
-        strings: {}
+        strings: strings
       });
 
       expect(paymentMethodsViews.views.length).to.equal(2);
@@ -115,7 +115,7 @@ describe('PaymentMethodsView', function () {
         merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
-        strings: {}
+        strings: strings
       });
 
       expect(paymentMethodsViews.views.length).to.equal(0);
@@ -140,7 +140,7 @@ describe('PaymentMethodsView', function () {
         merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
-        strings: {}
+        strings: strings
       });
 
       paymentMethodsViews._addPaymentMethod(fakePaymentMethod);
@@ -151,6 +151,36 @@ describe('PaymentMethodsView', function () {
       this.clock.tick(1001);
       expect(paymentMethodsViews.activeMethodView.element.className).to.contain('braintree-method--active');
       this.clock.restore();
+    });
+
+    it('updates the paying with label when the active payment method changes', function () {
+      var model, paymentMethodsViews;
+      var fakeCard = {type: 'CreditCard', details: {lastTwo: 22}};
+      var fakePayPal = {type: 'PayPalAccount', details: {email: 'buyer@braintreepayments.com'}};
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      modelOptions.paymentMethods = [fakePayPal, fakeCard];
+      model = new DropinModel(modelOptions);
+      model.isGuestCheckout = false;
+
+      paymentMethodsViews = new PaymentMethodsView({
+        element: this.element,
+        model: model,
+        merchantConfiguration: {
+          authorization: fake.clientTokenWithCustomerID
+        },
+        strings: strings
+      });
+
+      paymentMethodsViews._addPaymentMethod(fakePayPal);
+      paymentMethodsViews._addPaymentMethod(fakeCard);
+
+      model.changeActivePaymentMethod(fakeCard);
+      expect(paymentMethodsViews.getElementById('methods-label').textContent).to.equal('Paying with Card');
+
+      model.changeActivePaymentMethod(fakePayPal);
+      expect(paymentMethodsViews.getElementById('methods-label').textContent).to.equal('Paying with PayPal');
     });
   });
 
@@ -185,7 +215,7 @@ describe('PaymentMethodsView', function () {
         merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
-        strings: {}
+        strings: strings
       });
 
       model.addPaymentMethod({foo: 'bar'});
@@ -208,7 +238,7 @@ describe('PaymentMethodsView', function () {
         merchantConfiguration: {
           authorization: fake.clientToken
         },
-        strings: {}
+        strings: strings
       });
 
       model.addPaymentMethod({foo: 'bar'});
@@ -230,7 +260,7 @@ describe('PaymentMethodsView', function () {
         merchantConfiguration: {
           authorization: fake.clientToken
         },
-        strings: {}
+        strings: strings
       });
 
       model.addPaymentMethod({foo: 'bar'});
@@ -256,7 +286,7 @@ describe('PaymentMethodsView', function () {
         merchantConfiguration: {
           authorization: fake.clientTokenWithCustomerID
         },
-        strings: {}
+        strings: strings
       });
 
       paymentMethodsViews.activeMethodView = fakeActiveMethodView;

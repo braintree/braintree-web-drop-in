@@ -3,6 +3,11 @@
 var BaseView = require('./base-view');
 var PaymentMethodView = require('./payment-method-view');
 
+var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
+  CreditCard: 'Card',
+  PayPalAccount: 'PayPal'
+};
+
 function PaymentMethodsView() {
   BaseView.apply(this, arguments);
 
@@ -19,6 +24,7 @@ PaymentMethodsView.prototype._initialize = function () {
 
   this.views = [];
   this.container = this.getElementById('methods-container');
+  this._headingLabel = this.getElementById('methods-label');
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
@@ -26,6 +32,13 @@ PaymentMethodsView.prototype._initialize = function () {
   for (i = paymentMethods.length - 1; i >= 0; i--) {
     this._addPaymentMethod(paymentMethods[i]);
   }
+};
+
+PaymentMethodsView.prototype._getPaymentMethodString = function () {
+  var stringKey = PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING[this.activeMethodView.paymentMethod.type];
+  var paymentMethodTypeString = this.strings[stringKey];
+
+  return this.strings.payingWith.replace('{{paymentSource}}', paymentMethodTypeString);
 };
 
 PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
@@ -56,6 +69,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
       this.activeMethodView = this.views[i];
+      this._headingLabel.textContent = this._getPaymentMethodString();
       break;
     }
   }
