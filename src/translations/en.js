@@ -33,7 +33,7 @@ module.exports = {
   postalCodeLabel: 'Postal Code',
   payWithCard: 'Pay with card',
   // Payment Method descriptions
-  endingIn: 'Ending in ••',
+  endingIn: 'Ending in ••{{lastTwoCardDigits}}',
   Card: 'Card',
   PayPal: 'PayPal',
   'American Express': 'American Express',
