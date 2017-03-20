@@ -7,6 +7,7 @@ var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypal = require('braintree-web/paypal');
+var constants = require('../../src/constants');
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -184,6 +185,16 @@ describe('Dropin', function () {
 
         done();
       }.bind(this));
+    });
+
+    it('injects stylesheet with correct id', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(document.getElementById(constants.STYLESHEET_ID)).to.exist;
+
+        done();
+      });
     });
 
     it('requests payment methods if a customerId is provided', function (done) {
