@@ -329,6 +329,17 @@ $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 }
 
+.braintree-sheet--has-error .braintree-sheet--loading {
+  .braintree-sheet__content {
+    opacity: 1.0!important;
+  }
+
+  .braintree-sheet__header::after {
+    animation: none!important;
+    background: none!important;
+  }
+}
+
 
 @keyframes loader-scale {
   0% {
