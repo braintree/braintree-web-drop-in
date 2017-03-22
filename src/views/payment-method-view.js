@@ -17,6 +17,7 @@ PaymentMethodView.prototype = Object.create(BaseView.prototype);
 PaymentMethodView.prototype.constructor = PaymentMethodView;
 
 PaymentMethodView.prototype._initialize = function () {
+  var endingInText;
   var html = paymentMethodHTML;
   var paymentMethodCardTypes = constants.paymentMethodCardTypes;
   var paymentMethodTypes = constants.paymentMethodTypes;
@@ -30,9 +31,10 @@ PaymentMethodView.prototype._initialize = function () {
 
   switch (this.paymentMethod.type) {
     case paymentMethodTypes.card:
+      endingInText = this.strings.endingIn.replace('{{lastTwoCardDigits}}', this.paymentMethod.details.lastTwo);
       html = html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType])
         .replace(/@CLASSNAME/g, ' braintree-icon--bordered')
-        .replace(/@TITLE/g, this.strings.endingIn + this.paymentMethod.details.lastTwo)
+        .replace(/@TITLE/g, endingInText)
         .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
       break;
     case paymentMethodTypes.paypal:

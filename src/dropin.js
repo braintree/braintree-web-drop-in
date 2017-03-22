@@ -154,6 +154,7 @@ Dropin.prototype._injectStylesheet = function () {
   stylesheet.setAttribute('rel', 'stylesheet');
   stylesheet.setAttribute('type', 'text/css');
   stylesheet.setAttribute('href', stylesheetUrl);
+  stylesheet.setAttribute('id', constants.STYLESHEET_ID);
 
   if (head.firstChild) {
     head.insertBefore(stylesheet, head.firstChild);
