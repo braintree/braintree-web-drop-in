@@ -1,5 +1,6 @@
 'use strict';
 
+var Promise = require('../../src/lib/promise');
 var Dropin = require('../../src/dropin/');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
@@ -7,6 +8,7 @@ var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
+var paypal = require('paypal-checkout');
 var constants = require('../../src/constants');
 
 describe('Dropin', function () {
@@ -31,6 +33,7 @@ describe('Dropin', function () {
 
     this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
     this.sandbox.stub(paypalCheckout, 'create').yieldsAsync(null, fake.paypalInstance);
+    this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
   });
 
   afterEach(function () {
