@@ -7,6 +7,7 @@ var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypal = require('braintree-web/paypal');
+var constants = require('../../src/constants');
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -33,8 +34,14 @@ describe('Dropin', function () {
   });
 
   afterEach(function () {
+    var stylesheet = document.getElementById(constants.STYLESHEET_ID);
+
     if (document.body.querySelector('#foo')) {
       document.body.removeChild(this.container);
+    }
+
+    if (stylesheet) {
+      stylesheet.parentNode.removeChild(stylesheet);
     }
   });
 
@@ -184,6 +191,38 @@ describe('Dropin', function () {
 
         done();
       }.bind(this));
+    });
+
+    it('injects stylesheet with correct id', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        var stylesheet = document.getElementById(constants.STYLESHEET_ID);
+
+        expect(stylesheet).to.exist;
+        expect(stylesheet.href).to.match(/assets\.braintreegateway\.com/);
+
+        done();
+      });
+    });
+
+    it('does not inject stylesheet if it already exists on the page', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var stylesheetOnPage = document.createElement('link');
+
+      stylesheetOnPage.id = constants.STYLESHEET_ID;
+      stylesheetOnPage.href = '/customer/dropin.css';
+
+      document.body.appendChild(stylesheetOnPage);
+
+      instance._initialize(function () {
+        var stylesheet = document.getElementById(constants.STYLESHEET_ID);
+
+        expect(stylesheet).to.exist;
+        expect(stylesheet.href).to.match(/\/customer\/dropin\.css/);
+
+        done();
+      });
     });
 
     it('requests payment methods if a customerId is provided', function (done) {
