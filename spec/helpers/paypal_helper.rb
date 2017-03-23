@@ -11,6 +11,8 @@ module PayPal
     within_window paypal_popup do
       login_to_paypal
 
+      sleep 1
+
       click_button("confirmButtonTop", wait: 30)
     end
 
@@ -26,6 +28,7 @@ module PayPal
 		within_frame login_iframe do
 			fill_in("email", :with => ENV["PAYPAL_USERNAME"])
 			fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
+
 			click_button("btnLogin")
 		end
 
