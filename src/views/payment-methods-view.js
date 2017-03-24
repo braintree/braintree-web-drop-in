@@ -39,7 +39,7 @@ PaymentMethodsView.prototype._initialize = function () {
 
 PaymentMethodsView.prototype.hideMethodsLabel = function () {
   classlist.add(this._headingLabel, 'braintree-heading--inactive');
-}
+};
 
 PaymentMethodsView.prototype.showMethodsLabel = function () {
   setTimeout(function () {

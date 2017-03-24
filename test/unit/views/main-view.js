@@ -255,7 +255,7 @@ describe('MainView', function () {
 
           mainView.setPrimaryView(View.ID);
 
-          expect(mainView.element.className).to.equal('braintree-' + View.ID);
+          expect(mainView.element.className).to.equal('braintree-show-' + View.ID);
         });
       });
 
@@ -518,8 +518,7 @@ describe('MainView', function () {
       this.clock.tick(1001);
 
       expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
-      expect(context.loadingContainer.classList.contains('braintree-loader__container--inactive')).to.be.true;
-      expect(context.loadingIndicator.classList.contains('braintree-loader__indicator--inactive')).to.be.true;
+      expect(context.dropinContainer.classList.contains('braintree-loaded')).to.be.true;
     });
   });
 
@@ -648,7 +647,7 @@ describe('MainView', function () {
       });
 
       it('exposes the payment sheet view', function () {
-        expect(this.wrapper.className).to.contain('braintree-' + CardView.ID);
+        expect(this.wrapper.className).to.contain('braintree-show-' + CardView.ID);
       });
     });
 
@@ -666,7 +665,7 @@ describe('MainView', function () {
           mainView.toggle.click();
 
           expect(mainView.setPrimaryView).to.have.been.calledWith(PaymentOptionsView.ID);
-          expect(this.wrapper.className).to.contain('braintree-' + PaymentOptionsView.ID);
+          expect(this.wrapper.className).to.contain('braintree-show-' + PaymentOptionsView.ID);
         });
       });
 
@@ -688,12 +687,12 @@ describe('MainView', function () {
 
         it('sets the PaymentMethodsView as the primary view', function () {
           expect(this.mainView.setPrimaryView).to.have.been.calledWith(PaymentMethodsView.ID);
-          expect(this.wrapper.className).to.contain('braintree-' + PaymentMethodsView.ID);
+          expect(this.wrapper.className).to.contain('braintree-show-' + PaymentMethodsView.ID);
           expect(this.mainView.model.getActivePaymentView()).to.equal(PaymentMethodsView.ID);
         });
 
         it('exposes the PaymentOptionsView', function () {
-          expect(this.wrapper.className).to.contain('braintree-' + PaymentOptionsView.ID);
+          expect(this.wrapper.className).to.contain('braintree-show-' + PaymentOptionsView.ID);
         });
 
         it('hides the toggle', function () {
