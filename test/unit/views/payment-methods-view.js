@@ -189,7 +189,7 @@ describe('PaymentMethodsView', function () {
       var div = document.createElement('div');
 
       div.innerHTML = mainHTML;
-      this.element = div.querySelector('[data-braintree-id="methods"]');
+      this.element = div.querySelector('.braintree-dropin');
       this.fakePaymentMethod = {bax: 'qux'};
     });
 

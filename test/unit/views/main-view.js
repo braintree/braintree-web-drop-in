@@ -15,6 +15,7 @@ var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPal = require('braintree-web/paypal');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en');
+var transitionHelper = require('../../../src/lib/transition-helper');
 
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
@@ -250,11 +251,19 @@ describe('MainView', function () {
       PayPalView
     ].forEach(function (View) {
       describe('when given a ' + View.ID + 'view', function () {
+        beforeEach(function () {
+          this.clock = sinon.useFakeTimers();
+        });
+
+        afterEach(function () {
+          this.clock.restore();
+        });
+
         it('shows the selected view by updating the classname of the drop-in wrapper', function () {
           var mainView = new MainView(this.mainViewOptions);
 
           mainView.setPrimaryView(View.ID);
-
+          this.clock.tick(1);
           expect(mainView.element.className).to.equal('braintree-show-' + View.ID);
         });
       });
@@ -512,13 +521,14 @@ describe('MainView', function () {
         loadingIndicator: loadingIndicator
       };
 
-      dropinContainer.className = 'braintree-hidden';
+      this.sandbox.stub(loadingContainer, 'remove');
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
       MainView.prototype.hideLoadingIndicator.call(context);
-      this.clock.tick(1001);
 
       expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
       expect(context.dropinContainer.classList.contains('braintree-loaded')).to.be.true;
+      expect(loadingContainer.remove).to.have.been.called;
     });
   });
 
@@ -654,6 +664,11 @@ describe('MainView', function () {
     describe('when there are multiple payment options and a payment sheet view is active', function () {
       beforeEach(function () {
         this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
+        this.clock = sinon.useFakeTimers();
+      });
+
+      afterEach(function () {
+        this.clock.restore();
       });
 
       describe('and there are no payment methods available', function () {
@@ -663,6 +678,7 @@ describe('MainView', function () {
           this.sandbox.spy(mainView, 'setPrimaryView');
           mainView.setPrimaryView(CardView.ID);
           mainView.toggle.click();
+          this.clock.tick(1);
 
           expect(mainView.setPrimaryView).to.have.been.calledWith(PaymentOptionsView.ID);
           expect(this.wrapper.className).to.contain('braintree-show-' + PaymentOptionsView.ID);
@@ -683,10 +699,11 @@ describe('MainView', function () {
 
           this.mainView.setPrimaryView(CardView.ID);
           this.mainView.toggle.click();
+          this.clock.tick(1);
         });
 
         it('sets the PaymentMethodsView as the primary view', function () {
-          expect(this.mainView.setPrimaryView).to.have.been.calledWith(PaymentMethodsView.ID);
+          expect(this.mainView.setPrimaryView).to.have.been.calledWith(PaymentMethodsView.ID, sinon.match.any);
           expect(this.wrapper.className).to.contain('braintree-show-' + PaymentMethodsView.ID);
           expect(this.mainView.model.getActivePaymentView()).to.equal(PaymentMethodsView.ID);
         });
