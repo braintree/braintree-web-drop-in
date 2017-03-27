@@ -740,3 +740,45 @@ $loader-scale-duration: 300ms;
 .braintree-show-paypal [data-braintree-id='other-ways-to-pay'] {
   display: block;
 }
+
+/* fix janky container transition */
+.braintree-heading {
+  transform: none;
+}
+
+.braintree-upper-container {
+  transition: none;
+}
+
+.braintree-options.braintree-options-initial {
+  transition: none;
+}
+
+.braintree-show-options .braintree-upper-container {
+  min-height: 140px;
+}
+
+.braintree-loaded .braintree-upper-container {
+  min-height: auto; 
+}
+
+/* Fix for content jumps
+headings*/
+
+.braintree-loaded [data-braintree-id='methods'], .braintree-loaded [data-braintree-id='options'] {
+  transition: none;  
+}
+
+.braintree-options {
+  display: none;
+}
+
+// .braintree-toggle,
+// .braintree-methods, 
+// .braintree-options,
+// .braintree-test-class,
+// .braintree-heading,
+// .braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
+//   background-color: red !important;
+//   display: none;
+// }
