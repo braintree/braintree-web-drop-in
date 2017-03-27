@@ -182,7 +182,7 @@ MainView.prototype.requestPaymentMethod = function (callback) {
 MainView.prototype.hideLoadingIndicator = function () {
   classlist.add(this.dropinContainer, 'braintree-loaded');
   transitionHelper.onTransitionEnd(this.loadingIndicator, 'transform', function () {
-    this.loadingContainer.remove();
+    this.loadingContainer.parentNode.removeChild(this.loadingContainer);
   }.bind(this));
 };
 
