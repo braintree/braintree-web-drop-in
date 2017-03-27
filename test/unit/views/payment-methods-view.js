@@ -127,7 +127,7 @@ describe('PaymentMethodsView', function () {
       var fakePaymentMethod = {baz: 'qux'};
       var modelOptions = fake.modelOptions();
 
-      this.clock = sinon.useFakeTimers();
+      this.sandbox.useFakeTimers();
 
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [{foo: 'bar'}, fakePaymentMethod];
@@ -148,9 +148,9 @@ describe('PaymentMethodsView', function () {
       model.changeActivePaymentMethod(fakePaymentMethod);
 
       expect(paymentMethodsViews.activeMethodView.paymentMethod).to.equal(fakePaymentMethod);
-      this.clock.tick(1001);
+      this.sandbox.clock.tick(1001);
       expect(paymentMethodsViews.activeMethodView.element.className).to.contain('braintree-method--active');
-      this.clock.restore();
+      this.sandbox.clock.restore();
     });
 
     it('updates the paying with label when the active payment method changes', function () {
