@@ -501,6 +501,7 @@ describe('MainView', function () {
   describe('hideLoadingIndicator', function () {
     it('hides the loading indicator', function () {
       var dropinContainer = document.createElement('div');
+      var upperContainer = document.createElement('div');
       var loadingContainer = document.createElement('div');
       var loadingIndicator = document.createElement('div');
       var context = {
@@ -509,14 +510,15 @@ describe('MainView', function () {
         loadingIndicator: loadingIndicator
       };
 
-      this.sandbox.stub(loadingContainer, 'remove');
+      this.sandbox.stub(upperContainer, 'removeChild');
+      upperContainer.appendChild(loadingContainer);
       this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
       MainView.prototype.hideLoadingIndicator.call(context);
 
       expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
       expect(context.dropinContainer.classList.contains('braintree-loaded')).to.be.true;
-      expect(loadingContainer.remove).to.have.been.called;
+      expect(upperContainer.removeChild).to.have.been.called;
     });
   });
 
