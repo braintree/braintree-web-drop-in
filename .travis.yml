@@ -3,7 +3,7 @@ before_install:
 # See https://github.com/travis-ci/travis-ci/issues/5092#issuecomment-171777646
 # Dirty hack for https://github.com/travis-ci/travis-ci/issues/5092
 - |
-  PATH=`echo $PATH | sed "s/\.\/node_modules\/\.bin//g"`; export PATH=$PATH:./node_modules/.bin; touch .env; if [ $IS_INTEGRATION_TEST ]; then rvm install ruby-2.3.0 --binary && rvm use ruby-2.3.0 && bundle install; else echo "Not an integration test. Skipping Ruby setup"; fi
+  PATH=`echo $PATH | sed "s/\.\/node_modules\/\.bin//g"`; export PATH=$PATH:./node_modules/.bin; touch .env; if [ $IS_INTEGRATION_TEST ]; then rvm install ruby-2.3.0 && rvm use ruby-2.3.0 && bundle install; else echo "Not an integration test. Skipping Ruby setup"; fi
 script: npm run $TEST
 addons:
   sauce_connect: true
