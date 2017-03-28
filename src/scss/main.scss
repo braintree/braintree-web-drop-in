@@ -205,8 +205,8 @@ $loader-scale-duration: 300ms;
   }
 }
 
-.braintree-show-options .braintree-upper-container {
-  min-height: 70px;
+.braintree-loaded .braintree-upper-container {
+  min-height: auto; 
 }
 
 /* =========================================================================
@@ -677,28 +677,8 @@ $loader-scale-duration: 300ms;
 }
 
 /* =========================================================================
-   Javascript hooks
+   Dropin Visibility States
    ========================================================================= */
-.braintree-loaded [data-braintree-id='methods'],
-.braintree-loaded [data-braintree-id='options'] {
-  max-height: 1000px; // Must set specific value here in order to have animation
-  opacity: 1;
-  transition: max-height 250ms $curve-easeOutBack, opacity 300ms linear 100ms;
-  // opacity 3000ms linear 1000ms;
-  min-height: 0;
-}
-
-.braintree-loaded .braintree-upper-container {
-  min-height: 0;
-}
-
-// .braintree-loaded [data-braintree-id="options"] {
-//   max-height: 1000px;
-//   opacity: 1;
-//   transition: max-height 250ms $curve-easeOutBack,
-//     opacity 300ms linear 100ms;
-// }
-
 .braintree-show-card .braintree-card,
 .braintree-show-methods .braintree-methods,
 .braintree-show-options .braintree-options,
@@ -709,22 +689,40 @@ $loader-scale-duration: 300ms;
   visibility: visible;
 }
 
+/* =========================================================================
+   Javascript hooks
+   ========================================================================= */
+.braintree-loaded [data-braintree-id='methods'],
+.braintree-loaded [data-braintree-id='options'] {
+  max-height: 1000px; // Must set specific value here in order to have animation
+  opacity: 1;
+  transition: max-height 250ms $curve-easeOutBack, opacity 300ms linear 100ms;
+  min-height: 0;
+}
+
+
+/* =========================================================================
+   Javascript hooks
+   ========================================================================= */
+.braintree-loaded [data-braintree-id='methods'],
+.braintree-loaded [data-braintree-id='options'] {
+  max-height: 1000px; // Must set specific value here in order to have animation
+  opacity: 1;
+  transition: max-height 250ms $curve-easeOutBack, opacity 300ms linear 100ms;
+  min-height: 0;
+}
+
+
 .braintree-show-methods,
 .braintree-show-options {
   [data-braintree-id='placeholder-label'] {
     display: none;
   }
-}
-
-// .braintree-show-options .braintree-options {
-//   // braintree-options is hidden with max-height: 0px, so show it by setting max-height: none
-//   max-height: none;
-//   opacity: 1;
-// }
-
-[data-braintree-id='choose-a-way-to-pay'],
-[data-braintree-id='other-ways-to-pay'] {
-  display: none;
+  
+  [data-braintree-id='choose-a-way-to-pay'],
+  [data-braintree-id='other-ways-to-pay'] {
+    display: none;
+  }
 }
 
 .braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
@@ -741,44 +739,35 @@ $loader-scale-duration: 300ms;
   display: block;
 }
 
-/* fix janky container transition */
-.braintree-heading {
-  transform: none;
-}
-
-.braintree-upper-container {
-  transition: none;
-}
-
-.braintree-options.braintree-options-initial {
-  transition: none;
-}
-
-.braintree-show-options .braintree-upper-container {
-  min-height: 140px;
-}
-
-.braintree-loaded .braintree-upper-container {
-  min-height: auto; 
-}
-
-/* Fix for content jumps
-headings*/
-
-.braintree-loaded [data-braintree-id='methods'], .braintree-loaded [data-braintree-id='options'] {
-  transition: none;  
+/* =========================================================================
+   Remove this when we have a payment methods width 100%  width    
+   ========================================================================= */
+.braintree-loaded [data-braintree-id='methods'], 
+.braintree-loaded [data-braintree-id='options'] {
+   transition: none;  
 }
 
 .braintree-options {
   display: none;
 }
 
-// .braintree-toggle,
-// .braintree-methods, 
-// .braintree-options,
-// .braintree-test-class,
-// .braintree-heading,
-// .braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
-//   background-color: red !important;
-//   display: none;
-// }
+
+/* IE 9 Haxx */
+.clearfix {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+@media screen and (min-width:0\0) {
+  .braintree-option {
+   .clearfix;
+  }
+
+  .braintree-option__logo, 
+  .braintree-option__label,
+  .braintree-sheet__text
+  {
+    float: left;
+  }
+}
