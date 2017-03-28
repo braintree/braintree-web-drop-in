@@ -178,7 +178,6 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
       var paymentMethods;
 
       if (err) {
-        console.error('Failed to get vaulted payment methods:', err);
         paymentMethods = [];
       } else {
         paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
