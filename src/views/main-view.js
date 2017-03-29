@@ -190,7 +190,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
   if (!hasMultiplePaymentOptions) {
     sheetViewID = this.paymentSheetViewIDs[0];
 
-    this.element.className = prefixShowClass(sheetViewID);
+    classlist.add(this.element, prefixShowClass(sheetViewID));
     this.model.changeActivePaymentView(sheetViewID);
   } else if (isPaymentSheetView) {
     if (this.model.getPaymentMethods().length === 0) {

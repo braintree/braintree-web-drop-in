@@ -177,7 +177,6 @@ $loader-scale-duration: 300ms;
    ========================================================================= */
 .braintree-upper-container {
   border-radius: $radius-default;
-  // todo: uncomment once we have the growing animation working for options
   min-height: $initial-container-height;
   opacity: 1;
   position: relative;
@@ -202,6 +201,10 @@ $loader-scale-duration: 300ms;
 
 .braintree-loaded .braintree-upper-container {
   min-height: auto; 
+
+  &:before {
+    border: 0px;
+  }
 }
 
 /* =========================================================================
@@ -638,7 +641,7 @@ $loader-scale-duration: 300ms;
 
 .braintree-methods {
   display: none;
-  margin: 0 auto;
+  margin: 0 auto 13px auto;
 }
 
 .braintree-methods-initial {
