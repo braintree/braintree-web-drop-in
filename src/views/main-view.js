@@ -125,10 +125,12 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
     this.primaryView.closeFrame();
   }
 
-  this.element.className = prefixShowClass(id);
-  if (secondaryViewId) {
-    classlist.add(this.element, prefixShowClass(secondaryViewId));
-  }
+  setTimeout(function () {
+    this.element.className = prefixShowClass(id);
+    if (secondaryViewId) {
+      classlist.add(this.element, prefixShowClass(secondaryViewId));
+    }
+  }.bind(this), 0);
   this.primaryView = this.getView(id);
   this.model.changeActivePaymentView(id);
 
@@ -144,11 +146,6 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
     this.getElementById('lower-container').appendChild(this.getElementById('options'));
   } else if (id === PaymentOptionsView.ID) {
     this.hideToggle();
-
-    // Animation doesn't show without setTimeout
-    setTimeout(function () {
-      classlist.remove(this.getElementById('choose-a-way-to-pay'), 'braintree-heading--inactive');
-    }.bind(this), 1);
   }
 
   if (!this.supportsFlexbox) {

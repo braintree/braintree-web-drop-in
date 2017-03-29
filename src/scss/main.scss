@@ -163,11 +163,6 @@ $loader-scale-duration: 300ms;
   font-size: 16px;
   margin-bottom: 10px;
   margin-left: 5px;
-  transition: transform 200ms ease;
-
-  &.braintree-heading--inactive {
-    transform: translateY(30px);
-  }
 }
 
 .braintree-icon--bordered {
@@ -689,15 +684,22 @@ $loader-scale-duration: 300ms;
   visibility: visible;
 }
 
-[data-braintree-id='methods-label'] {
+[data-braintree-id='methods-label'],
+[data-braintree-id='choose-a-way-to-pay'] {
+  position: absolute;
   transform: translateY(30px);
   transition: transform 200ms ease;
 }
 
-.braintree-show-methods [data-braintree-id='methods-label'] {
+.braintree-show-methods [data-braintree-id='methods-label'],
+.braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
   transform: none;
 }
 
+.braintree-show-methods.braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
+  transform: translateY(30px);
+}
+
 /* =========================================================================
    Javascript hooks
    ========================================================================= */
@@ -720,26 +722,12 @@ $loader-scale-duration: 300ms;
   transition: max-height 250ms $curve-easeOutBack, opacity 300ms linear 100ms;
   min-height: 0;
 }
-
 
 .braintree-show-methods,
 .braintree-show-options {
-  [data-braintree-id='placeholder-label'] {
-    display: none;
-  }
-  
-  [data-braintree-id='choose-a-way-to-pay'],
   [data-braintree-id='other-ways-to-pay'] {
     display: none;
   }
-}
-
-.braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
-  display: block;
-}
-
-.braintree-show-methods [data-braintree-id='choose-a-way-to-pay'] {
-  display: none;
 }
 
 .braintree-show-card [data-braintree-id='other-ways-to-pay'],
