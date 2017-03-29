@@ -158,11 +158,16 @@ $loader-scale-duration: 300ms;
 /* =========================================================================
    Headings
    ========================================================================= */
+[data-braintree-id='placeholder-label'],
 .braintree-heading {
   color: $text-color;
   font-size: 16px;
   margin-bottom: 10px;
   margin-left: 5px;
+}
+
+[data-braintree-id='placeholder-label'] {
+  margin-bottom: 13px;
 }
 
 .braintree-icon--bordered {
@@ -692,15 +697,18 @@ $loader-scale-duration: 300ms;
   position: absolute;
   transform: translateY(30px);
   transition: transform 200ms ease;
+  visibility: hidden;
 }
 
 .braintree-show-methods [data-braintree-id='methods-label'],
 .braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
   transform: none;
+  visibility: visible;
 }
 
 .braintree-show-methods.braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
   transform: translateY(30px);
+  visibility: hidden;
 }
 
 /* =========================================================================
