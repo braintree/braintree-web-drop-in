@@ -1,7 +1,6 @@
 'use strict';
 
 var BaseView = require('./base-view');
-var classlist = require('../lib/classlist');
 var PaymentMethodView = require('./payment-method-view');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {

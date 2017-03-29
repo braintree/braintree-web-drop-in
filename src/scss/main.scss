@@ -711,18 +711,6 @@ $loader-scale-duration: 300ms;
   min-height: 0;
 }
 
-
-/* =========================================================================
-   Javascript hooks
-   ========================================================================= */
-.braintree-loaded [data-braintree-id='methods'],
-.braintree-loaded [data-braintree-id='options'] {
-  max-height: 1000px; // Must set specific value here in order to have animation
-  opacity: 1;
-  transition: max-height 250ms $curve-easeOutBack, opacity 300ms linear 100ms;
-  min-height: 0;
-}
-
 .braintree-show-methods,
 .braintree-show-options {
   [data-braintree-id='other-ways-to-pay'] {
@@ -747,24 +735,3 @@ $loader-scale-duration: 300ms;
 .braintree-options {
   display: none;
 }
-
-
-/* IE 9 Haxx */
-.clearfix {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-// @media screen and (min-width:0\0) {
-//   .braintree-option {
-//     clearfix;
-//   }
-//
-//   .braintree-option__logo, 
-//   .braintree-option__label,
-//   .braintree-sheet__text
-//   {
-//     float: left;
-//   }
-// }
