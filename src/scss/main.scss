@@ -756,15 +756,15 @@ $loader-scale-duration: 300ms;
   clear: both;
 }
 
-@media screen and (min-width:0\0) {
-  .braintree-option {
-   .clearfix;
-  }
-
-  .braintree-option__logo, 
-  .braintree-option__label,
-  .braintree-sheet__text
-  {
-    float: left;
-  }
-}
+// @media screen and (min-width:0\0) {
+//   .braintree-option {
+//     clearfix;
+//   }
+//
+//   .braintree-option__logo, 
+//   .braintree-option__label,
+//   .braintree-sheet__text
+//   {
+//     float: left;
+//   }
+// }
