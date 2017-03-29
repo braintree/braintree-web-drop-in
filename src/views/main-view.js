@@ -127,6 +127,9 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
 
   setTimeout(function () {
     this.element.className = prefixShowClass(id);
+    if (id === 'methods') {
+      this.paymentMethodsViews.showMethodsLabel();
+    }
     if (secondaryViewId) {
       classlist.add(this.element, prefixShowClass(secondaryViewId));
     }
