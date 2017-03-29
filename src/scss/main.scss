@@ -689,6 +689,15 @@ $loader-scale-duration: 300ms;
   visibility: visible;
 }
 
+[data-braintree-id='methods-label'] {
+  transform: translateY(30px);
+  transition: transform 200ms ease;
+}
+
+.braintree-show-methods [data-braintree-id='methods-label'] {
+  transform: none;
+}
+
 /* =========================================================================
    Javascript hooks
    ========================================================================= */

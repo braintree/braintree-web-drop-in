@@ -125,22 +125,16 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
     this.primaryView.closeFrame();
   }
 
-  setTimeout(function () {
-    this.element.className = prefixShowClass(id);
-    if (id === 'methods') {
-      this.paymentMethodsViews.showMethodsLabel();
-    }
-    if (secondaryViewId) {
-      classlist.add(this.element, prefixShowClass(secondaryViewId));
-    }
-  }.bind(this), 1);
+  this.element.className = prefixShowClass(id);
+  if (secondaryViewId) {
+    classlist.add(this.element, prefixShowClass(secondaryViewId));
+  }
   this.primaryView = this.getView(id);
   this.model.changeActivePaymentView(id);
 
   if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
     if (this.model.getPaymentMethods().length > 0 || this.getView(PaymentOptionsView.ID)) {
       this.showToggle();
-      this.paymentMethodsViews.hideMethodsLabel();
     } else {
       this.hideToggle();
     }
@@ -195,7 +189,6 @@ MainView.prototype.toggleAdditionalOptions = function () {
   var isPaymentSheetView = this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1;
 
   this.hideToggle();
-  this.paymentMethodsViews.showMethodsLabel();
 
   if (!hasMultiplePaymentOptions) {
     sheetViewID = this.paymentSheetViewIDs[0];

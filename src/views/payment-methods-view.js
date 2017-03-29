@@ -33,18 +33,6 @@ PaymentMethodsView.prototype._initialize = function () {
   for (i = paymentMethods.length - 1; i >= 0; i--) {
     this._addPaymentMethod(paymentMethods[i]);
   }
-
-  this.showMethodsLabel();
-};
-
-PaymentMethodsView.prototype.hideMethodsLabel = function () {
-  classlist.add(this._headingLabel, 'braintree-heading--inactive');
-};
-
-PaymentMethodsView.prototype.showMethodsLabel = function () {
-  setTimeout(function () {
-    classlist.remove(this._headingLabel, 'braintree-heading--inactive');
-  }.bind(this), 200);
 };
 
 PaymentMethodsView.prototype._getPaymentMethodString = function () {
