@@ -15,7 +15,7 @@ Because we're still in beta, the API and designs are subject to change. If you h
 Drop-in is currently available directly from our servers, which you can save locally or include in your project through a script tag:
 
 ```html
-<script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.5/js/dropin.min.js"></script>
+<script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.6/js/dropin.min.js"></script>
 ```
 
 ## Basic usage
@@ -92,7 +92,7 @@ This is a full example of a Drop-in integration that only accepts credit cards.
     <div id="dropin-container"></div>
     <button id="submit-button">Purchase</button>
 
-    <script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.5/js/dropin.min.js"></script>
+    <script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.6/js/dropin.min.js"></script>
 
       <script>
       var submitButton = document.querySelector('#submit-button');
