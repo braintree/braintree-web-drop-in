@@ -56,7 +56,7 @@
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
-    "braintree-web": "3.11.0"
+    "braintree-web": "3.11.1"
   },
   "browserify": {
     "transform": [
