@@ -493,12 +493,18 @@ $loader-scale-duration: 300ms;
       }
     }
 
-    &.braintree-form__field-group--has-error .braintree-form__field-secondary-icon, &.braintree-form__field-group--has-error.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon, &.braintree-form__field-group--has-error.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon, .braintree-form__field-error-icon, .braintree-form__field-secondary-icon {
+    &.braintree-form__field-group--has-error .braintree-form__field-secondary-icon,
+    &.braintree-form__field-group--has-error.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon,
+    &.braintree-form__field-group--has-error.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon,
+    .braintree-form__field-error-icon,
+    .braintree-form__field-secondary-icon {
       display: none;
       transform: scale(0);
     }
 
-    &.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon, &.braintree-form__field-group--has-error .braintree-form__field-error-icon, &.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon {
+    &.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon,
+    &.braintree-form__field-group--has-error .braintree-form__field-error-icon,
+    &.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon {
       display: block;
       transform: scale(1);
     }
