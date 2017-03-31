@@ -3,11 +3,14 @@ CHANGELOG
 
 ## UNRELEASED
 -------------
+- Improve loading transition
+
+1.0.0-beta.6
+------------
 - Disable payment methods if they error when creating
 - Add `paymentOptionPriority` option for specifying the ordering of payment options such as `card` and `paypal`
 - Add translations
 - Use version 3.11.0 of braintree-web
-- Improve loading transition
 
 1.0.0-beta.5
 ------------

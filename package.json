@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "main": "src/index.js",
   "scripts": {
     "build": "gulp build",
@@ -56,7 +56,7 @@
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
-    "braintree-web": "3.11.0"
+    "braintree-web": "3.11.1"
   },
   "browserify": {
     "transform": [

@@ -143,6 +143,8 @@ gulp.task('clean', function () {
 });
 
 gulp.task('build', function (done) {
+  process.env.npm_package_version = VERSION;
+
   runSequence(
   'clean',
   ['build:js', 'build:css', 'build:jsdoc', 'build:npm'],
@@ -154,7 +156,7 @@ function jsdoc(options, done) {
   var args = ['jsdoc', 'src'];
   var command = 'bash';
   var commandOption = '-c';
-  
+
   if (process.platform.indexOf('win')>=0) {
     command = 'cmd';
     commandOption = '/c';
@@ -220,6 +222,8 @@ gulp.task('development', [
 ]);
 
 gulp.task('watch', function () {
+  process.env.npm_package_version = VERSION;
+
   gulp.watch([config.src.js.watch, config.src.html.watch], ['build:js']);
   gulp.watch([config.src.css.watch], ['build:css']);
   gulp.watch([config.src.js.watch, config.jsdoc.watch], ['build:jsdoc']);
