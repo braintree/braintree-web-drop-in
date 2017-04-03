@@ -26,7 +26,6 @@ MainView.prototype._initialize = function () {
   var paymentOptionsView;
   var paymentMethods = this.model.getPaymentMethods();
 
-  this.initialPrimaryView = null;
   this._views = {};
 
   this.sheetContainer = this.getElementById('sheet-container');
@@ -41,7 +40,7 @@ MainView.prototype._initialize = function () {
 
   this.supportsFlexbox = supportsFlexbox();
 
-  this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
+  this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
 
   this.model.on('errorOccurred', this.showSheetError.bind(this));
   this.model.on('errorCleared', this.hideSheetError.bind(this));
@@ -122,20 +121,16 @@ MainView.prototype.getView = function (id) {
 };
 
 MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
-  if (!classlist.hasClass(this.dropinContainer, 'braintree-loaded')) {
-    this.initialPrimaryView = { id: id,
-      secondaryViewId: secondaryViewId };
-    return;
-  }
-
   if (this.primaryView && this.primaryView.closeFrame) {
     this.primaryView.closeFrame();
   }
 
-  this.element.className = prefixShowClass(id);
-  if (secondaryViewId) {
-    classlist.add(this.element, prefixShowClass(secondaryViewId));
-  }
+  setTimeout(function () {
+    this.element.className = prefixShowClass(id);
+    if (secondaryViewId) {
+      classlist.add(this.element, prefixShowClass(secondaryViewId));
+    }
+  }.bind(this), 0);
   this.primaryView = this.getView(id);
   this.model.changeActivePaymentView(id);
 
@@ -183,11 +178,6 @@ MainView.prototype.hideLoadingIndicator = function () {
   transitionHelper.onTransitionEnd(this.loadingIndicator, 'transform', function () {
     this.loadingContainer.parentNode.removeChild(this.loadingContainer);
   }.bind(this));
-
-  if (this.initialPrimaryView) {
-    this.setPrimaryView(this.initialPrimaryView.id, this.initialPrimaryView.secondaryViewId);
-    this.initialPrimaryView = null;
-  }
 };
 
 MainView.prototype.toggleAdditionalOptions = function () {

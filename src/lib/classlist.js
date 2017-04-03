@@ -4,7 +4,7 @@ function _classesOf(element) {
   return element.className.trim().split(/\s+/);
 }
 
-function hasClass(element, classname) {
+function _hasClass(element, classname) {
   return new RegExp('\\b' + classname + '\\b').test(element.className);
 }
 
@@ -28,7 +28,7 @@ function remove(element) {
 
 function toggle(element, classname, adding) {
   if (arguments.length < 3) {
-    if (hasClass(element, classname)) {
+    if (_hasClass(element, classname)) {
       remove(element, classname);
     } else {
       add(element, classname);
@@ -43,6 +43,5 @@ function toggle(element, classname, adding) {
 module.exports = {
   add: add,
   remove: remove,
-  toggle: toggle,
-  hasClass: hasClass
+  toggle: toggle
 };

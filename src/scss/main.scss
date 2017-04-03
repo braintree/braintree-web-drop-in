@@ -288,9 +288,9 @@ $loader-scale-duration: 300ms;
   background-color: white;
   border: 1px solid $border-color;
   border-radius: $radius-default;
-  opacity: 0;
+  display: none;
   margin: 0 auto;
-  max-height: 0px;
+  max-height: 500px;
   transition: transform 300ms, opacity 300ms, max-height 300ms ease;
   width: 99%;
 }
@@ -696,8 +696,6 @@ $loader-scale-duration: 300ms;
   height: auto;
   overflow: visible;
   visibility: visible;
-  opacity: 1;
-  max-height: 500px;
 }
 
 [data-braintree-id='methods-label'],
