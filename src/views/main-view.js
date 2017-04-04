@@ -40,7 +40,7 @@ MainView.prototype._initialize = function () {
 
   this.supportsFlexbox = supportsFlexbox();
 
-  this.model.on('loadEnd', this.hideLoadingIndicator.bind(this));
+  this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
 
   this.model.on('errorOccurred', this.showSheetError.bind(this));
   this.model.on('errorCleared', this.hideSheetError.bind(this));
