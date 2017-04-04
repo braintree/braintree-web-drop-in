@@ -1,12 +1,14 @@
 'use strict';
 
+var Promise = require('../../src/lib/promise');
 var Dropin = require('../../src/dropin/');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
 var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
-var paypal = require('braintree-web/paypal');
+var paypalCheckout = require('braintree-web/paypal-checkout');
+var paypal = require('paypal-checkout');
 var constants = require('../../src/constants');
 
 describe('Dropin', function () {
@@ -30,7 +32,8 @@ describe('Dropin', function () {
     };
 
     this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
-    this.sandbox.stub(paypal, 'create').yieldsAsync(null, fake.paypalInstance);
+    this.sandbox.stub(paypalCheckout, 'create').yieldsAsync(null, fake.paypalInstance);
+    this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
   });
 
   afterEach(function () {
@@ -75,7 +78,7 @@ describe('Dropin', function () {
       var hostedFieldsError = new Error('HostedFields Error');
 
       hostedFields.create.yieldsAsync(hostedFieldsError);
-      paypal.create.yieldsAsync(paypalError);
+      paypalCheckout.create.yieldsAsync(paypalError);
 
       this.sandbox.stub(analytics, 'sendEvent');
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
@@ -110,7 +113,7 @@ describe('Dropin', function () {
       var instance;
       var paypalError = new Error('PayPal Error');
 
-      paypal.create.yieldsAsync(paypalError);
+      paypalCheckout.create.yieldsAsync(paypalError);
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance = new Dropin(this.dropinOptions);
