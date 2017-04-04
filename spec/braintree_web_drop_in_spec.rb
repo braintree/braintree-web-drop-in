@@ -26,7 +26,7 @@ describe "Drop-in" do
     it "does not setup paypal when not configured" do
       visit "http://#{HOSTNAME}:#{PORT}?paypal=null"
 
-      expect(page).to_not have_content("PayPal")
+      expect(page).not_to have_selector(".braintree-option__paypal")
       expect(page).to have_content("Card Number")
       expect(page).to have_content("Expiration Date")
     end
@@ -70,13 +70,13 @@ describe "Drop-in" do
 
   describe "tokenizes" do
     it "a card" do
-      browser_skip("safari", "Testing iframes in WebKit does not work")
-
       visit "http://#{HOSTNAME}:#{PORT}"
 
       click_option("Card")
       hosted_field_send_input("number", "4111111111111111")
       hosted_field_send_input("expirationDate", "1019")
+      hosted_field_send_input("cvv", "123")
+
       submit_pay
 
       expect(find(".braintree-heading")).to have_content("Paying with")
@@ -97,9 +97,12 @@ describe "Drop-in" do
 
       open_popup_and_complete_login
 
-      expect(find(".braintree-heading")).to have_content("Paying with")
+      submit_pay
 
-      expect(page).to have_content("bt_buyer_us@paypal.com")
+      expect(find(".braintree-heading")).to have_content("Paying with PayPal")
+
+      expect(page).to have_content("PayPalAccount")
+      expect(page).to have_content(ENV["PAYPAL_USERNAME"])
     end
   end
 end

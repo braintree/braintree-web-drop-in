@@ -1,5 +1,6 @@
 'use strict';
 
+var Promise = require('../../../src/lib/promise');
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
@@ -12,7 +13,8 @@ var fs = require('fs');
 var HostedFields = require('braintree-web/hosted-fields');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
-var PayPal = require('braintree-web/paypal');
+var PayPalCheckout = require('braintree-web/paypal-checkout');
+var paypal = require('paypal-checkout');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en');
 
@@ -23,6 +25,8 @@ describe('MainView', function () {
     this.client = {
       getConfiguration: fake.configuration
     };
+    this.sandbox.stub(PayPalView.prototype, 'setLogLevel');
+    this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
   });
 
   describe('Constructor', function () {
@@ -85,7 +89,7 @@ describe('MainView', function () {
 
       this.mainViewOptions.model = model;
 
-      this.sandbox.stub(PayPal, 'create').yields(null, {});
+      this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
 
       mainView = new MainView(this.mainViewOptions);
 
@@ -115,7 +119,7 @@ describe('MainView', function () {
           strings: strings
         };
 
-        this.sandbox.stub(PayPal, 'create').yields(null, {});
+        this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
       });
 
       it('sets the first payment method to be the active payment method', function () {
@@ -151,7 +155,7 @@ describe('MainView', function () {
           strings: strings
         };
 
-        this.sandbox.stub(PayPal, 'create').yields(null, {});
+        this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
       });
 
       it('sets PaymentOptionsViews as the primary view if there are multiple payment methods', function () {
@@ -215,7 +219,7 @@ describe('MainView', function () {
         strings: strings
       };
 
-      this.sandbox.stub(PayPal, 'create').yields(null, {});
+      this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
     });
 
     it('calls the close frame function of the primary view if one exists', function () {
@@ -611,7 +615,7 @@ describe('MainView', function () {
         },
         strings: strings
       };
-      this.sandbox.stub(PayPal, 'create').yields(null, {});
+      this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
     });
 
     it('has an click event listener that calls toggleAdditionalOptions', function () {
