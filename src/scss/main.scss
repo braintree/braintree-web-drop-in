@@ -316,7 +316,10 @@ $loader-scale-duration: 300ms;
 }
 
 .braintree-sheet__container {
+  display: none;
   margin: 0 auto 13px;
+  max-height: 0;
+  opacity: 0;
 }
 
 .braintree-sheet__error {
@@ -706,6 +709,7 @@ $loader-scale-duration: 300ms;
   visibility: visible;
 }
 
+
 [data-braintree-id='methods-label'],
 [data-braintree-id='choose-a-way-to-pay'] {
   position: absolute;
@@ -729,11 +733,16 @@ $loader-scale-duration: 300ms;
    Javascript hooks
    ========================================================================= */
 .braintree-loaded [data-braintree-id='methods'],
-.braintree-loaded [data-braintree-id='options'] {
+.braintree-loaded [data-braintree-id='options'],
+.braintree-loaded [data-braintree-id='sheet-container'] {
   max-height: 1000px; // Must set specific value here in order to have animation
   opacity: 1;
   transition: max-height 250ms $curve-easeOutBack, opacity 300ms linear 100ms;
   min-height: 0;
+}
+
+.braintree-loaded .braintree-sheet__container {
+  display: block;
 }
 
 .braintree-show-methods,
