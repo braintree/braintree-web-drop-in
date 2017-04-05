@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "braintree-web": "3.12.0",
+    "browser-detection": "braintree/browser-detection#1.0.0",
     "paypal-checkout": "4.0.51",
     "promise-polyfill": "6.0.2"
   },

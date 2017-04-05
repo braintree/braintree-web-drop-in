@@ -1,9 +1,6 @@
 'use strict';
 
-function isIe9(userAgent) {
-  userAgent = userAgent || navigator.userAgent;
-  return userAgent.indexOf('MSIE 9') !== -1;
-}
+var isIe9 = require('browser-detection/is-ie9');
 
 module.exports = {
   isIe9: isIe9
