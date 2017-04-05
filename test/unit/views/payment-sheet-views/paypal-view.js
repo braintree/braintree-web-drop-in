@@ -149,6 +149,21 @@ describe('PayPalView', function () {
       }.bind(this));
     });
 
+    it('calls paypal.Button.render with a locale if one is present', function (done) {
+      var fakeLocaleCode = 'fake_LOCALE';
+      var configurationObject = {locale: fakeLocaleCode};
+
+      this.model.merchantConfiguration.locale = fakeLocaleCode;
+
+      new PayPalView(this.paypalViewOptions);
+
+      waitForInitialize(function () {
+        expect(paypal.Button.render).to.be.calledOnce;
+        expect(paypal.Button.render).to.be.calledWith(this.sandbox.match(configurationObject));
+        done();
+      }.bind(this));
+    });
+
     it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function (done) {
       this.configuration.gatewayConfiguration.environment = 'production';
       new PayPalView(this.paypalViewOptions);
@@ -173,7 +188,7 @@ describe('PayPalView', function () {
       });
     });
 
-    it('calls payalInstance.createPayment with merchant config when checkout.js payment function is called', function (done) {
+    it('calls paypalInstance.createPayment with merchant config when checkout.js payment function is called', function (done) {
       var paypalInstance = this.paypalInstance;
       var model = this.model;
 

@@ -34,8 +34,8 @@ PayPalView.prototype._initialize = function () {
   this.model.asyncDependencyStarting();
 
   btPaypal.create({client: this.client}, function (err, paypalInstance) {
-    var paypalCheckoutConfig;
-    var merchantConfig = self.model.merchantConfiguration.paypal;
+    var paypalCheckoutConfiguration;
+    var merchantConfiguration = self.model.merchantConfiguration;
     var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
 
     if (err) {
@@ -48,10 +48,10 @@ PayPalView.prototype._initialize = function () {
 
     self.paypalInstance = paypalInstance;
 
-    paypalCheckoutConfig = {
+    paypalCheckoutConfiguration = {
       env: environment,
       payment: function () {
-        return paypalInstance.createPayment(merchantConfig).catch(reportError);
+        return paypalInstance.createPayment(merchantConfiguration.paypal).catch(reportError);
       },
       onAuthorize: function (data) {
         return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
@@ -61,7 +61,11 @@ PayPalView.prototype._initialize = function () {
       onError: reportError
     };
 
-    paypal.Button.render(paypalCheckoutConfig, '[data-braintree-id="paypal-button"]').then(function () {
+    if (merchantConfiguration.locale) {
+      paypalCheckoutConfiguration.locale = merchantConfiguration.locale;
+    }
+
+    paypal.Button.render(paypalCheckoutConfiguration, '[data-braintree-id="paypal-button"]').then(function () {
       self.model.asyncDependencyReady();
     });
   });
