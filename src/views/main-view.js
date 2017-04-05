@@ -131,6 +131,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
       classlist.add(this.element, prefixShowClass(secondaryViewId));
     }
   }.bind(this), 0);
+
   this.primaryView = this.getView(id);
   this.model.changeActivePaymentView(id);
 
