@@ -14,15 +14,22 @@ This creates the following `dist` structure:
 
 ```
 dist
-└── web
-  └── dropin
-      ├── 1.0.0
-      │   ├── css
-      │   └── js
-      └── dev -> 1.0.0
+├── npm/
+└── web/
+    └── dropin/
+        ├── 1.0.0/
+        │   ├── css/
+        │   └── js/
+        └── dev -> 1.0.0/
 ```
 
-**Note:** If you are developing on a Windows machine, you will need to run your command prompt as an administrator so the symlinking step suceeds.
+`dist/npm` contains the pre-processed source files that are published to npm.
+
+`dist/web/` mirrors the structure of Drop-in assets available at https://assets.braintreegateway.com.
+
+`dist/web/dropin/dev` assets are available only in development and are never deployed.
+
+**Note:** If you are developing on a Windows machine, you will need to run your command prompt as an administrator so the symlinking step succeeds.
 
 ## Testing
 
