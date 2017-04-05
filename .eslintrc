@@ -1,15 +1,6 @@
 ---
   extends: braintree/client
 
-  rules:
-    valid-jsdoc:
-      - 2
-      - prefer:
-          return: returns
-        requireReturn: true
-        requireParamDescription: true
-        requireReturnDescription: true
-
   globals:
     __dirname: true
     process: true
