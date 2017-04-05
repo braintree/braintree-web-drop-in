@@ -17,6 +17,7 @@ var PayPalCheckout = require('braintree-web/paypal-checkout');
 var paypal = require('paypal-checkout');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en');
+var transitionHelper = require('../../../src/lib/transition-helper');
 
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
@@ -254,12 +255,16 @@ describe('MainView', function () {
       PayPalView
     ].forEach(function (View) {
       describe('when given a ' + View.ID + 'view', function () {
+        beforeEach(function () {
+          this.sandbox.useFakeTimers();
+        });
+
         it('shows the selected view by updating the classname of the drop-in wrapper', function () {
           var mainView = new MainView(this.mainViewOptions);
 
           mainView.setPrimaryView(View.ID);
-
-          expect(mainView.element.className).to.equal('braintree-' + View.ID);
+          this.sandbox.clock.tick(1);
+          expect(mainView.element.className).to.equal('braintree-show-' + View.ID);
         });
       });
 
@@ -498,16 +503,9 @@ describe('MainView', function () {
   });
 
   describe('hideLoadingIndicator', function () {
-    beforeEach(function () {
-      this.clock = sinon.useFakeTimers();
-    });
-
-    afterEach(function () {
-      this.clock.restore();
-    });
-
     it('hides the loading indicator', function () {
       var dropinContainer = document.createElement('div');
+      var upperContainer = document.createElement('div');
       var loadingContainer = document.createElement('div');
       var loadingIndicator = document.createElement('div');
       var context = {
@@ -516,14 +514,15 @@ describe('MainView', function () {
         loadingIndicator: loadingIndicator
       };
 
-      dropinContainer.className = 'braintree-hidden';
+      this.sandbox.stub(upperContainer, 'removeChild');
+      upperContainer.appendChild(loadingContainer);
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
       MainView.prototype.hideLoadingIndicator.call(context);
-      this.clock.tick(1001);
 
       expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
-      expect(context.loadingContainer.classList.contains('braintree-loader__container--inactive')).to.be.true;
-      expect(context.loadingIndicator.classList.contains('braintree-loader__indicator--inactive')).to.be.true;
+      expect(context.dropinContainer.classList.contains('braintree-loaded')).to.be.true;
+      expect(upperContainer.removeChild).to.have.been.called;
     });
   });
 
@@ -573,14 +572,10 @@ describe('MainView', function () {
 
       describe('when a payment sheet is active', function () {
         beforeEach(function () {
-          this.clock = sinon.useFakeTimers();
+          this.sandbox.useFakeTimers();
 
           classlist.add(this.paymentMethodsContainer, 'braintree-methods--active');
           classlist.remove(this.sheetElement, 'braintree-sheet--active');
-        });
-
-        afterEach(function () {
-          this.clock.restore();
         });
 
         [CardView, PayPalView].forEach(function (PaymentSheetView) {
@@ -589,12 +584,12 @@ describe('MainView', function () {
           });
 
           it('adds braintree-sheet--active to the payment sheet', function () {
-            this.clock.tick(1001);
+            this.sandbox.clock.tick(1001);
             expect(this.sheetElement.className).to.contain('braintree-sheet--active');
           });
 
           it('removes braintree-methods--active from the payment methods view', function () {
-            this.clock.tick(1001);
+            this.sandbox.clock.tick(1001);
             expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods--active');
           });
         });
@@ -652,13 +647,14 @@ describe('MainView', function () {
       });
 
       it('exposes the payment sheet view', function () {
-        expect(this.wrapper.className).to.contain('braintree-' + CardView.ID);
+        expect(this.wrapper.className).to.contain('braintree-show-' + CardView.ID);
       });
     });
 
     describe('when there are multiple payment options and a payment sheet view is active', function () {
       beforeEach(function () {
         this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
+        this.sandbox.useFakeTimers();
       });
 
       describe('and there are no payment methods available', function () {
@@ -668,9 +664,10 @@ describe('MainView', function () {
           this.sandbox.spy(mainView, 'setPrimaryView');
           mainView.setPrimaryView(CardView.ID);
           mainView.toggle.click();
+          this.sandbox.clock.tick(1);
 
           expect(mainView.setPrimaryView).to.have.been.calledWith(PaymentOptionsView.ID);
-          expect(this.wrapper.className).to.contain('braintree-' + PaymentOptionsView.ID);
+          expect(this.wrapper.className).to.contain('braintree-show-' + PaymentOptionsView.ID);
         });
       });
 
@@ -688,16 +685,17 @@ describe('MainView', function () {
 
           this.mainView.setPrimaryView(CardView.ID);
           this.mainView.toggle.click();
+          this.sandbox.clock.tick(1);
         });
 
         it('sets the PaymentMethodsView as the primary view', function () {
-          expect(this.mainView.setPrimaryView).to.have.been.calledWith(PaymentMethodsView.ID);
-          expect(this.wrapper.className).to.contain('braintree-' + PaymentMethodsView.ID);
+          expect(this.mainView.setPrimaryView).to.have.been.calledWith(PaymentMethodsView.ID, sinon.match.any);
+          expect(this.wrapper.className).to.contain('braintree-show-' + PaymentMethodsView.ID);
           expect(this.mainView.model.getActivePaymentView()).to.equal(PaymentMethodsView.ID);
         });
 
         it('exposes the PaymentOptionsView', function () {
-          expect(this.wrapper.className).to.contain('braintree-' + PaymentOptionsView.ID);
+          expect(this.wrapper.className).to.contain('braintree-show-' + PaymentOptionsView.ID);
         });
 
         it('hides the toggle', function () {
