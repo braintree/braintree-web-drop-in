@@ -45,6 +45,13 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
     case paymentOptionIDs.paypal:
       html = html.replace(/@ICON/g, 'logoPayPal');
       html = html.replace(/@OPTION_TITLE/g, this.strings.PayPal);
+      html = html.replace(/@OPTION_TITLE/g, this.strings.Card);
+      html = html.replace(/@CLASSNAME/g, '');
+      break;
+    case paymentOptionIDs.paypalCredit:
+      // TODO get PayPal Credit logo
+      html = html.replace(/@ICON/g, 'logoPayPal');
+      html = html.replace(/@OPTION_TITLE/g, this.strings.PayPalCredit);
       html = html.replace(/@CLASSNAME/g, '');
       break;
     default:

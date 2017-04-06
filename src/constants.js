@@ -3,7 +3,8 @@
 module.exports = {
   paymentOptionIDs: {
     card: 'card',
-    paypal: 'paypal'
+    paypal: 'paypal',
+    paypalCredit: 'paypalCredit'
   },
   paymentMethodTypes: {
     card: 'CreditCard',

@@ -82,15 +82,16 @@ describe('DropinModel', function () {
         ]);
       });
 
-      it('supports cards and paypal and defaults to showing them in correct paymentOptionPriority', function () {
+      it('supports cards, PayPal, and PayPal Credit and defaults to showing them in correct paymentOptionPriority', function () {
         var model;
 
         this.configuration.gatewayConfiguration.paypalEnabled = true;
         this.modelOptions.merchantConfiguration.paypal = true;
+        this.modelOptions.merchantConfiguration.paypalCredit = true;
 
         model = new DropinModel(this.modelOptions);
 
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal']);
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit']);
       });
 
       it('uses custom paymentOptionPriority of payment options', function () {

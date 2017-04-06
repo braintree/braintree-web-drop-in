@@ -11,7 +11,35 @@ var analytics = require('../../../src/lib/analytics');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
+var paymentOptionAttributes = {
+  card: {
+    className: 'braintree-icon--bordered',
+    icon: '#iconCardFront',
+    optionTitle: strings.Card,
+    paymentOptionID: 'card'
+  },
+  paypal: {
+    icon: '#logoPayPal',
+    optionTitle: strings.PayPal,
+    paymentOptionID: 'paypal'
+  },
+  // TODO update when we have PayPal credit logo
+  paypalCredit: {
+    icon: '#logoPayPal',
+    optionTitle: strings.PayPalCredit,
+    paymentOptionID: 'paypalCredit'
+  }
+};
+
 describe('PaymentOptionsView', function () {
+  beforeEach(function () {
+    this.client = {
+      getConfiguration: fake.configuration,
+      request: function () {},
+      _request: function () {}
+    };
+  });
+
   describe('Constructor', function () {
     beforeEach(function () {
       this.sandbox.stub(PaymentOptionsView.prototype, '_initialize');
@@ -34,49 +62,35 @@ describe('PaymentOptionsView', function () {
       this.wrapper.innerHTML = mainHTML;
 
       this.element = this.wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
-      this.client = {
-        getConfiguration: fake.configuration,
-        request: function () {},
-        _request: function () {}
-      };
     });
 
-    it('adds a Card option', function () {
-      var paymentOptionsView = new PaymentOptionsView({
-        client: this.client,
-        element: this.element,
-        mainView: {},
-        model: modelThatSupports(['card']),
-        strings: strings
+    Object.keys(paymentOptionAttributes).forEach(function (optionName) {
+      var option = paymentOptionAttributes[optionName];
+
+      it('adds a ' + option.paymentOptionID + ' option', function () {
+        var paymentOptionsView = new PaymentOptionsView({
+          client: this.client,
+          element: this.element,
+          mainView: {},
+          model: modelThatSupports([option.paymentOptionID]),
+          strings: strings
+        });
+        var label = paymentOptionsView.container.querySelector('.braintree-option__label');
+        var icon = paymentOptionsView.container.querySelector('use');
+        var iconContainer = icon.parentElement;
+        var optionElement = paymentOptionsView.elements[option.paymentOptionID];
+
+        expect(label.innerHTML).to.contain(option.optionTitle);
+        expect(icon.href.baseVal).to.equal(option.icon);
+        expect(optionElement.div).to.exist;
+        expect(optionElement.clickHandler).to.be.a('function');
+
+        if (option.className) {
+          expect(iconContainer.classList.contains(option.className)).to.be.true;
+        } else {
+          expect(iconContainer.classList.contains('braintree-option__logo@CLASSNAME')).to.be.false;
+        }
       });
-      var label = paymentOptionsView.container.querySelector('.braintree-option__label');
-      var icon = paymentOptionsView.container.querySelector('use');
-      var iconContainer = icon.parentElement;
-
-      expect(label.innerHTML).to.contain(strings.Card);
-      expect(icon.href.baseVal).to.equal('#iconCardFront');
-      expect(iconContainer.classList.contains('braintree-icon--bordered')).to.be.true;
-      expect(paymentOptionsView.elements.card.div).to.exist;
-      expect(paymentOptionsView.elements.card.clickHandler).to.be.a('function');
-    });
-
-    it('adds a PayPal option', function () {
-      var paymentOptionsView = new PaymentOptionsView({
-        client: this.client,
-        element: this.element,
-        mainView: {},
-        model: modelThatSupports(['paypal']),
-        strings: strings
-      });
-      var label = paymentOptionsView.container.querySelector('.braintree-option__label');
-      var icon = paymentOptionsView.container.querySelector('use');
-      var iconContainer = icon.parentElement.parentElement;
-
-      expect(label.innerHTML).to.contain(strings.PayPal);
-      expect(icon.href.baseVal).to.equal('#logoPayPal');
-      expect(iconContainer.classList.contains('braintree-option__logo@CLASSNAME')).to.be.false;
-      expect(paymentOptionsView.elements.paypal.div).to.exist;
-      expect(paymentOptionsView.elements.paypal.clickHandler).to.be.a('function');
     });
 
     it('sets the primary view to the payment option when clicked', function () {
@@ -105,42 +119,32 @@ describe('PaymentOptionsView', function () {
       this.element = wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
 
       this.viewConfiguration = {
+        client: this.client,
         element: this.element,
         mainView: {setPrimaryView: function () {}},
         strings: strings
       };
     });
 
-    it('when the Card option is selected', function () {
-      var option, paymentOptionsView;
-      var model = modelThatSupports(['card']);
-      var viewConfiguration = this.viewConfiguration;
+    Object.keys(paymentOptionAttributes).forEach(function (optionName) {
+      var option = paymentOptionAttributes[optionName];
 
-      this.sandbox.stub(analytics, 'sendEvent');
+      it('when the ' + option.paymentOptionID + ' option is selected', function () {
+        var optionElement, paymentOptionsView;
+        var model = modelThatSupports([option.paymentOptionID]);
+        var viewConfiguration = this.viewConfiguration;
+        var eventName = 'selected.' + option.paymentOptionID;
 
-      viewConfiguration.model = model;
-      paymentOptionsView = new PaymentOptionsView(viewConfiguration);
-      option = paymentOptionsView.container.querySelector('.braintree-option');
+        this.sandbox.stub(analytics, 'sendEvent');
 
-      option.click();
+        viewConfiguration.model = model;
+        paymentOptionsView = new PaymentOptionsView(viewConfiguration);
+        optionElement = paymentOptionsView.container.querySelector('.braintree-option');
 
-      expect(analytics.sendEvent).to.have.been.calledWith(paymentOptionsView.client, 'selected.card');
-    });
+        optionElement.click();
 
-    it('when the PayPal option is selected', function () {
-      var option, paymentOptionsView;
-      var model = modelThatSupports(['paypal']);
-      var viewConfiguration = this.viewConfiguration;
-
-      this.sandbox.stub(analytics, 'sendEvent');
-
-      viewConfiguration.model = model;
-      paymentOptionsView = new PaymentOptionsView(viewConfiguration);
-      option = paymentOptionsView.container.querySelector('.braintree-option');
-
-      option.click();
-
-      expect(analytics.sendEvent).to.have.been.calledWith(paymentOptionsView.client, 'selected.paypal');
+        expect(analytics.sendEvent).to.have.been.calledWith(paymentOptionsView.client, eventName);
+      });
     });
   });
 });
