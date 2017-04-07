@@ -771,10 +771,10 @@ $loader-scale-duration: 300ms;
 }
 
 /* =========================================================================
-   Flexbox-free styling 
+   Flexbox-free styling
    ========================================================================= */
 
-.braintree-dropin__no-flexbox {
+[data-braintree-no-flexbox='true'] {
   .braintree-option:after {
     content: "";
     display: table;
