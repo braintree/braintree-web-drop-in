@@ -23,9 +23,8 @@ var paymentOptionAttributes = {
     optionTitle: strings.PayPal,
     paymentOptionID: 'paypal'
   },
-  // TODO update when we have PayPal credit logo
   paypalCredit: {
-    icon: '#logoPayPal',
+    icon: '#logoPayPalCredit',
     optionTitle: strings.PayPalCredit,
     paymentOptionID: 'paypalCredit'
   }
