@@ -121,10 +121,6 @@ MainView.prototype.getView = function (id) {
 };
 
 MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
-  if (this.primaryView && this.primaryView.closeFrame) {
-    this.primaryView.closeFrame();
-  }
-
   setTimeout(function () {
     this.element.className = prefixShowClass(id);
     if (secondaryViewId) {
