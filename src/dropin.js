@@ -99,6 +99,14 @@ Dropin.prototype._initialize = function (callback) {
       }
     }.bind(this));
 
+    this._model.on('paymentMethodRequestable', function (event) {
+      this._emit('paymentMethodRequestable', event);
+    }.bind(this));
+
+    this._model.on('noPaymentMethodRequestable', function () {
+      this._emit('noPaymentMethodRequestable');
+    }.bind(this));
+
     this._mainView = new MainView({
       client: this._client,
       element: this._dropinWrapper,

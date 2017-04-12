@@ -511,7 +511,7 @@ describe('Dropin', function () {
   });
 
   describe('payment method requestable events', function () {
-    xit('emits paymentMethodRequestable event when the model emits paymentMethodRequestable', function (done) {
+    it('emits paymentMethodRequestable event when the model emits paymentMethodRequestable', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
       instance.on('paymentMethodRequestable', function (event) {
@@ -520,17 +520,21 @@ describe('Dropin', function () {
         done();
       });
 
-      instance._model.emit('paymentMethodRequestable', {type: 'Foo'});
+      instance._initialize(function () {
+        instance._model._emit('paymentMethodRequestable', {type: 'Foo'});
+      });
     });
 
-    xit('emits noPaymentMethodRequestable events when the model emits noPaymentMethodRequestable', function (done) {
+    it('emits noPaymentMethodRequestable events when the model emits noPaymentMethodRequestable', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
       instance.on('noPaymentMethodRequestable', function () {
         done();
       });
 
-      instance._model.emit('noPaymentMethodRequestable');
+      instance._initialize(function () {
+        instance._model._emit('noPaymentMethodRequestable');
+      });
     });
   });
 });
