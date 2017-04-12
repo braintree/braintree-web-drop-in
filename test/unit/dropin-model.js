@@ -357,4 +357,72 @@ describe('DropinModel', function () {
       dropinModel.clearError();
     });
   });
+
+  describe('isPaymentMethodRequestable', function () {
+    it('returns false initially if no payment methods are passed in', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      expect(model.isPaymentMethodRequestable()).to.equal(false);
+    });
+
+    it('returns true initially if payment methods are passed in', function () {
+      var model;
+
+      this.modelOptions.paymentMethods = [{foo: 'bar'}];
+      model = new DropinModel(this.modelOptions);
+
+      expect(model.isPaymentMethodRequestable()).to.equal(true);
+    });
+  });
+
+  describe('setPaymentMethodRequestable', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('sets isPaymentMethodRequestable to true when isRequestable is true', function () {
+      expect(this.model.isPaymentMethodRequestable()).to.equal(false);
+
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true
+      });
+
+      expect(this.model.isPaymentMethodRequestable()).to.equal(true);
+    });
+
+    it('emits paymentMethodRequestable with type when isRequestable is true', function () {
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'card'
+      });
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
+        type: 'card'
+      });
+    });
+
+    it('sets isPaymentMethodRequestable to false when isRequestable is false', function () {
+      this.model._paymentMethodIsRequestable = true;
+
+      expect(this.model.isPaymentMethodRequestable()).to.equal(true);
+
+      this.model.setPaymentMethodRequestable({
+        isRequestable: false
+      });
+
+      expect(this.model.isPaymentMethodRequestable()).to.equal(false);
+    });
+
+    it('emits noPaymentMethodRequestable with type when isRequestable is false', function () {
+      this.model.setPaymentMethodRequestable({
+        isRequestable: false
+      });
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('noPaymentMethodRequestable');
+    });
+  });
 });

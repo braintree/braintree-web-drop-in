@@ -200,6 +200,10 @@ Dropin.prototype.teardown = function (callback) {
   }
 };
 
+Dropin.prototype.isPaymentMethodRequestable = function () {
+  return this._model.isPaymentMethodRequestable();
+};
+
 Dropin.prototype._removeDropinWrapper = function (err, callback) {
   this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
   callback(err);

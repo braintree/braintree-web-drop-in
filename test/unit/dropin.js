@@ -497,4 +497,40 @@ describe('Dropin', function () {
       }.bind(this));
     });
   });
+
+  describe('isPaymentMethodRequestable', function () {
+    it('returns the value on model.isPaymentMethodRequestable', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._model = {
+        isPaymentMethodRequestable: this.sandbox.stub().returns('foo')
+      };
+
+      expect(instance.isPaymentMethodRequestable()).to.equal('foo');
+    });
+  });
+
+  describe('payment method requestable events', function () {
+    xit('emits paymentMethodRequestable event when the model emits paymentMethodRequestable', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.on('paymentMethodRequestable', function (event) {
+        expect(event.type).to.equal('Foo');
+
+        done();
+      });
+
+      instance._model.emit('paymentMethodRequestable', {type: 'Foo'});
+    });
+
+    xit('emits noPaymentMethodRequestable events when the model emits noPaymentMethodRequestable', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.on('noPaymentMethodRequestable', function () {
+        done();
+      });
+
+      instance._model.emit('noPaymentMethodRequestable');
+    });
+  });
 });
