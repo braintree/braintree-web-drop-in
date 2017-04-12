@@ -35,7 +35,7 @@ dist
 
 In sandbox and production environments, Drop-in injects a stylesheet onto the page retrieved from https://assets.braintreegateway.com/web/dropin/<VERSION>/css/dropin.css.
 
-To develop in a sandbox environment, include locally built CSS on the page that will override the hosted stylesheet:
+When developing, you can include a locally built CSS file on the page that will override the hosted stylesheet by giving it the id `braintree-dropin-stylesheet`:
 
 ```html
 <link rel="stylesheet" type="text/css" href="/path/to/local/dropin.css" id="braintree-dropin-stylesheet">
