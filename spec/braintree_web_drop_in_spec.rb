@@ -51,7 +51,7 @@ describe "Drop-in" do
 
     it "uses custom priority of paypal, card" do
       options = '["paypal","card"]'
-      visit "http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}"
+      visit URI.encode("http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}")
 
       find(".braintree-heading")
       payment_options = all(:css, ".braintree-option__label")
@@ -62,7 +62,7 @@ describe "Drop-in" do
 
     it "shows an error when an unrecognized payment option is specified" do
       options = '["dummy","card"]'
-      visit "http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}"
+      visit URI.encode("http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}")
 
       expect(find("#error")).to have_content("paymentOptionPriority: Invalid payment option specified.")
     end
