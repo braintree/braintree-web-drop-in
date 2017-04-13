@@ -205,11 +205,13 @@ dropinInstance.teardown(function (err) {
 });
 ```
 
+## Browser support
+
+Drop-in is supported in all browsers supported by the [Braintree JavaScript Client SDK](http://braintree.github.io/braintree-web/current/#browser-support).
+
 ## Beta notes
 
 While in beta, we're still actively working on Drop-in. This means you might have to change your integration when upgrading your Drop-in version. This includes any custom CSS styling applied to `data-braintree-id` attributes.
-
-Browser support will be limited during beta and will not include Internet Explorer 9 or 10, but will eventually include [all browsers supported by Braintree.js](http://braintree.github.io/braintree-web/current/#browser-support).
 
 Much of the behavior in this version of Drop-in differs from the [previous version](https://developers.braintreepayments.com/guides/drop-in/javascript/v2). At this point, adding the hidden `payment_method_nonce` input and automatic form submission (the default behavior in the previous version) are not available.
 
@@ -218,4 +220,3 @@ Here are some of the features we're still working on:
  - Event API: An event system to indicate when a payment method can be requested
  - Full documentation in the [Braintree developer docs](https://developers.braintreepayments.com/guides/overview) and an API reference
  - Support for additional types of payment methods
- - Support for Internet Explorer 9 and 10

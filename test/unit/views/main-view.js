@@ -268,28 +268,26 @@ describe('MainView', function () {
       });
     });
 
-    // TODO: Pending until we update to support no flexbox
-    xit('applies no-flexbox class when flexbox is not supported', function () {
+    it('applies no-flexbox data attribute when flexbox is not supported', function () {
       var mainView = new MainView(this.mainViewOptions);
+      var wrapper = mainView.element;
 
-      mainView._views = this.views;
       mainView.supportsFlexbox = false;
 
-      mainView.setPrimaryView('id1');
+      mainView.setPrimaryView(CardView.ID);
 
-      expect(mainView.element.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
+      expect(wrapper.dataset.braintreeNoFlexbox).to.equal('true');
     });
 
-    // TODO: Pending until we update to support no flexbox
-    xit('does not apply no-flexbox class when flexbox is supported', function () {
+    it('does not apply no-flexbox data attribute when flexbox is supported', function () {
       var mainView = new MainView(this.mainViewOptions);
+      var wrapper = mainView.element;
 
-      mainView._views = this.views;
       mainView.supportsFlexbox = true;
 
-      mainView.setPrimaryView('id1');
+      mainView.setPrimaryView(CardView.ID);
 
-      expect(mainView.element.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
+      expect(wrapper.dataset.braintreeNoFlexbox).to.not.exist;
     });
 
     describe('when given a ', function () {

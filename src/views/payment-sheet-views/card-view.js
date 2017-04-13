@@ -164,10 +164,14 @@ CardView.prototype.tokenize = function (callback) {
       });
 
       transitionCallback = function () {
-        self.model.addPaymentMethod(payload);
-        callback(null, payload);
-        classlist.remove(self.element, 'braintree-sheet--tokenized');
-        self.element.removeEventListener('transitionend', transitionCallback);
+        // Wait for braintree-sheet--tokenized class to be added in IE 9
+        // before attempting to remove it
+        setTimeout(function () {
+          self.model.addPaymentMethod(payload);
+          callback(null, payload);
+          classlist.remove(self.element, 'braintree-sheet--tokenized');
+          self.element.removeEventListener('transitionend', transitionCallback);
+        }, 0);
       };
 
       transitionHelper.onTransitionEnd(self.element, 'max-height', transitionCallback);

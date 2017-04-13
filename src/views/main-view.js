@@ -121,10 +121,6 @@ MainView.prototype.getView = function (id) {
 };
 
 MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
-  if (this.primaryView && this.primaryView.closeFrame) {
-    this.primaryView.closeFrame();
-  }
-
   setTimeout(function () {
     this.element.className = prefixShowClass(id);
     if (secondaryViewId) {
@@ -150,8 +146,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
   }
 
   if (!this.supportsFlexbox) {
-    // TODO update no flex support
-    this.element.className += ' braintree-dropin__no-flexbox';
+    this.element.setAttribute('data-braintree-no-flexbox', true);
   }
 
   this.model.clearError();
