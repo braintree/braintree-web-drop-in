@@ -117,7 +117,7 @@ CardView.prototype._initialize = function () {
   }.bind(this));
 };
 
-CardView.prototype._validateForm = function (showErrors) {
+CardView.prototype._validateForm = function (showFieldErrors) {
   var cardType, cardTypeSupported;
   var isValid = true;
   var state = this.hostedFieldsInstance.getState();
@@ -126,22 +126,22 @@ CardView.prototype._validateForm = function (showErrors) {
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
 
-    if (!showErrors && !isValid) {
+    if (!showFieldErrors && !isValid) {
       // return early if form is already invalid
-      // and we don't need to dipslay all field errors
+      // and we don't need to display all field errors
       return;
     }
 
     if (field.isEmpty) {
       isValid = false;
 
-      if (showErrors) {
+      if (showFieldErrors) {
         this.showFieldError(key, this.strings['fieldEmptyFor' + capitalize(key)]);
       }
     } else if (!field.isValid) {
       isValid = false;
 
-      if (showErrors) {
+      if (showFieldErrors) {
         this.showFieldError(key, this.strings['fieldInvalidFor' + capitalize(key)]);
       }
     }
@@ -154,7 +154,7 @@ CardView.prototype._validateForm = function (showErrors) {
     if (!cardTypeSupported) {
       isValid = false;
 
-      if (showErrors) {
+      if (showFieldErrors) {
         this.showFieldError('number', this.strings.unsupportedCardTypeError);
       }
     }
