@@ -24,7 +24,7 @@ describe "Drop-in" do
     end
 
     it "does not setup paypal when not configured" do
-      visit "http://#{HOSTNAME}:#{PORT}?paypal=null"
+      visit "http://#{HOSTNAME}:#{PORT}?paypal=null&paypalCredit=null"
 
       expect(page).not_to have_selector(".braintree-option__paypal")
       expect(page).to have_content("Card Number")
@@ -39,7 +39,7 @@ describe "Drop-in" do
   end
 
   describe "payment option priority" do
-    it "uses default priority of card, paypal" do
+    it "uses default priority of card, paypal, paypalCredit" do
       visit "http://#{HOSTNAME}:#{PORT}"
 
       find(".braintree-heading")
@@ -47,10 +47,11 @@ describe "Drop-in" do
 
       expect(payment_options[0]).to have_content("Card")
       expect(payment_options[1]).to have_content("PayPal")
+      expect(payment_options[2]).to have_content("PayPal Credit")
     end
 
-    it "uses custom priority of paypal, card" do
-      options = '["paypal","card"]'
+    it "uses custom priority of paypal, card, paypalCredit" do
+      options = '["paypal","card","paypalCredit"]'
       visit URI.encode("http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}")
 
       find(".braintree-heading")
@@ -58,6 +59,7 @@ describe "Drop-in" do
 
       expect(payment_options[0]).to have_content("PayPal")
       expect(payment_options[1]).to have_content("Card")
+      expect(payment_options[2]).to have_content("PayPal Credit")
     end
 
     it "shows an error when an unrecognized payment option is specified" do
@@ -72,7 +74,7 @@ describe "Drop-in" do
     it "a card" do
       visit "http://#{HOSTNAME}:#{PORT}"
 
-      click_option("Card")
+      click_option("card")
       hosted_field_send_input("number", "4111111111111111")
       hosted_field_send_input("expirationDate", "1019")
       hosted_field_send_input("cvv", "123")
@@ -93,9 +95,26 @@ describe "Drop-in" do
     it "PayPal" do
       visit "http://#{HOSTNAME}:#{PORT}"
 
-      click_option("PayPal")
+      click_option("paypal")
 
       open_popup_and_complete_login
+
+      submit_pay
+
+      expect(find(".braintree-heading")).to have_content("Paying with PayPal")
+
+      expect(page).to have_content("PayPalAccount")
+      expect(page).to have_content(ENV["PAYPAL_USERNAME"])
+    end
+
+    it "PayPal Credit" do
+      visit "http://#{HOSTNAME}:#{PORT}"
+
+      click_option("paypalCredit")
+
+      open_popup_and_complete_login do
+        expect(page).to have_content("PayPal Credit");
+      end
 
       submit_pay
 

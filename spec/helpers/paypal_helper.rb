@@ -5,13 +5,15 @@ module PayPal
     end
   end
 
-  def open_popup_and_complete_login
+  def open_popup_and_complete_login(&block)
     paypal_popup = open_popup
 
     within_window paypal_popup do
       login_to_paypal
 
       sleep 1
+
+      block.call if block
 
       click_button("confirmButtonTop", wait: 30)
     end

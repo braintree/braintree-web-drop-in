@@ -63,7 +63,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
     };
 
     if (locale) {
-      checkoutJSConfiguration.locale = locale;
+      self.paypalConfiguration.locale = locale;
     }
 
     if (isCredit) {
