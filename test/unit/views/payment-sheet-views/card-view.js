@@ -1056,6 +1056,7 @@ describe('CardView', function () {
         hostedFieldsInstance: this.fakeHostedFieldsInstance,
         fieldErrors: {},
         model: this.model,
+        _validateForm: CardView.prototype._validateForm,
         client: {
           getConfiguration: fake.configuration
         },
@@ -1070,7 +1071,7 @@ describe('CardView', function () {
     it('clears the error on the model', function (done) {
       this.sandbox.stub(this.model, 'clearError');
       this.context.hostedFieldsInstance.getState.returns({
-        cards: [],
+        cards: [{type: 'Card'}],
         fields: {
           number: {
             isValid: true
@@ -1089,7 +1090,7 @@ describe('CardView', function () {
 
     it('throws an error if there is no valid card type', function (done) {
       this.context.hostedFieldsInstance.getState.returns({
-        cards: [],
+        cards: [{type: 'Card'}],
         fields: {
           number: {
             isValid: true
