@@ -1287,16 +1287,17 @@ describe('CardView', function () {
       expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
     });
 
-    it('adds a new payment method when tokenize is successful and transition ends', function () {
+    it('adds a new payment method when tokenize is successful and transition ends', function (done) {
       var stubPayload = {};
 
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
       this.sandbox.stub(this.model, 'addPaymentMethod');
       this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.model.addPaymentMethod).to.have.been.calledWith(stubPayload);
+      CardView.prototype.tokenize.call(this.context, function () {
+        expect(this.model.addPaymentMethod).to.have.been.calledWith(stubPayload);
+        done();
+      }.bind(this));
     });
 
     it('does not update the active payment method when tokenize fails', function () {

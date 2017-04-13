@@ -17,7 +17,7 @@ $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 $loader-scale-duration: 300ms;
 
 /* =========================================================================
-   Genreral
+   General
    ========================================================================= */
 
 [data-braintree-id='wrapper'] {
@@ -768,4 +768,89 @@ $loader-scale-duration: 300ms;
 
 .braintree-options {
   display: none;
+}
+
+/* =========================================================================
+   Flexbox-free styling
+   ========================================================================= */
+
+[data-braintree-no-flexbox='true'] {
+  .braintree-option:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .braintree-option__label {
+    float: left;
+    width: auto;
+  }
+
+  .braintree-option__logo {
+    float: left;
+  }
+
+  .braintree-sheet__header {
+    display: table;
+    width: 100%;
+  }
+
+  .braintree-sheet__header:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .braintree-sheet__header-label {
+    float: left;
+  }
+
+  .braintree-sheet__header-label:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .braintree-sheet__logo--header {
+    float: left;
+  }
+
+  .braintree-sheet__text {
+    float: left;
+    width: auto;
+  }
+
+  .braintree-sheet__icons {
+    float: right;
+  }
+
+  .braintree-method__label {
+    float: left;
+    width: auto;
+  }
+
+  .braintree-method__logo {
+    float: left;
+  }
+
+  .braintree-method:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .braintree-method__check-container {
+    float: right;
+    position: relative;
+  }
+
+  .braintree-method__check-container:before {
+    right: 0;
+  }
+
+  .braintree-method__check {
+    margin-right: 0;
+    right: 0;
+    position: absolute;
+  }
 }
