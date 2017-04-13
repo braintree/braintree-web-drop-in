@@ -117,38 +117,60 @@ CardView.prototype._initialize = function () {
   }.bind(this));
 };
 
-CardView.prototype.tokenize = function (callback) {
-  var cardType, cardTypeSupported, transitionCallback;
-  var formValid = true;
-  var self = this;
-  var state = self.hostedFieldsInstance.getState();
-  var supportedCardTypes = self.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
-
-  this.model.clearError();
+CardView.prototype._validateForm = function (showErrors) {
+  var cardType, cardTypeSupported;
+  var isValid = true;
+  var state = this.hostedFieldsInstance.getState();
+  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
 
-    if (field.isEmpty) {
-      self.showFieldError(key, self.strings['fieldEmptyFor' + capitalize(key)]);
-      formValid = false;
-    } else if (!field.isValid) {
-      self.showFieldError(key, self.strings['fieldInvalidFor' + capitalize(key)]);
-      formValid = false;
-    }
-  });
-
-  if (formValid) {
-    cardType = constants.configurationCardTypes[state.cards[0].type];
-    cardTypeSupported = formValid ? supportedCardTypes.indexOf(cardType) !== -1 : true;
-
-    if (!cardTypeSupported) {
-      self.showFieldError('number', self.strings.unsupportedCardTypeError);
-      self.model.reportError({message: self.strings.hostedFieldsFieldsInvalidError});
-      callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
+    if (!showErrors && !isValid) {
+      // return early if form is already invalid
+      // and we don't need to dipslay all field errors
       return;
     }
 
+    if (field.isEmpty) {
+      isValid = false;
+
+      if (showErrors) {
+        this.showFieldError(key, this.strings['fieldEmptyFor' + capitalize(key)]);
+      }
+    } else if (!field.isValid) {
+      isValid = false;
+
+      if (showErrors) {
+        this.showFieldError(key, this.strings['fieldInvalidFor' + capitalize(key)]);
+      }
+    }
+  }.bind(this));
+
+  if (state.fields.number.isValid) {
+    cardType = constants.configurationCardTypes[state.cards[0].type];
+    cardTypeSupported = supportedCardTypes.indexOf(cardType) !== -1;
+
+    if (!cardTypeSupported) {
+      isValid = false;
+
+      if (showErrors) {
+        this.showFieldError('number', this.strings.unsupportedCardTypeError);
+      }
+    }
+  }
+
+  return isValid;
+};
+
+CardView.prototype.tokenize = function (callback) {
+  var transitionCallback;
+  var self = this;
+  var state = self.hostedFieldsInstance.getState();
+
+  this.model.clearError();
+
+  if (this._validateForm(true)) {
     self.hostedFieldsInstance.tokenize({
       vault: !self.model.isGuestCheckout
     }, function (err, payload) {
