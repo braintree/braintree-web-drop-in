@@ -46,6 +46,10 @@ DropinModel.prototype.changeActivePaymentView = function (paymentViewID) {
 };
 
 DropinModel.prototype.setPaymentMethodRequestable = function (options) {
+  if (this.isPaymentMethodRequestable() === options.isRequestable) {
+    return;
+  }
+
   this._paymentMethodIsRequestable = options.isRequestable;
 
   if (options.isRequestable) {

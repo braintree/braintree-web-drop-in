@@ -417,12 +417,29 @@ describe('DropinModel', function () {
     });
 
     it('emits noPaymentMethodRequestable with type when isRequestable is false', function () {
+      this.model._paymentMethodIsRequestable = true;
       this.model.setPaymentMethodRequestable({
         isRequestable: false
       });
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('noPaymentMethodRequestable');
+    });
+
+    it('does not emit when the state does not change', function () {
+      this.model._paymentMethodIsRequestable = false;
+      this.model.setPaymentMethodRequestable({
+        isRequestable: false
+      });
+
+      expect(this.model._emit).to.not.be.called;
+
+      this.model._paymentMethodIsRequestable = true;
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true
+      });
+
+      expect(this.model._emit).to.not.be.called;
     });
   });
 });
