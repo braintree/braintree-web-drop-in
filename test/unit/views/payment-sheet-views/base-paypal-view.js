@@ -1,6 +1,5 @@
 'use strict';
 /* eslint-disable no-new */
-/* eslint-disable */
 
 var Promise = require('../../../../src/lib/promise');
 var BaseView = require('../../../../src/views/base-view');
@@ -149,21 +148,6 @@ describe('BasePayPalView', function () {
       }.bind(this));
     });
 
-    it('calls paypal.Button.render with a locale if one is present', function (done) {
-      var fakeLocaleCode = 'fake_LOCALE';
-      var configurationObject = {locale: fakeLocaleCode};
-
-      this.model.merchantConfiguration.locale = fakeLocaleCode;
-
-      this.view._initialize();
-
-      waitForInitialize(function () {
-        expect(paypal.Button.render).to.be.calledOnce;
-        expect(paypal.Button.render).to.be.calledWith(this.sandbox.match(configurationObject));
-        done();
-      }.bind(this));
-    });
-
     it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function (done) {
       this.configuration.gatewayConfiguration.environment = 'production';
       this.view._initialize();
@@ -188,10 +172,13 @@ describe('BasePayPalView', function () {
       });
     });
 
-    it('calls paypalInstance.createPayment with merchant config when checkout.js payment function is called', function (done) {
+    it('calls paypalInstance.createPayment with a locale if one is provided', function (done) {
+      var fakeLocaleCode = 'fake_LOCALE';
       var paypalInstance = this.paypalInstance;
       var model = this.model;
       var view = this.view;
+
+      model.merchantConfiguration.locale = fakeLocaleCode;
 
       paypal.Button.render.returns(Promise.resolve().then(function () {
         // for some reason, this needs to be in a set timeout to grab the args from render
@@ -201,7 +188,9 @@ describe('BasePayPalView', function () {
           paymentFunction().then(function () {
             waitForInitialize(function () {
               expect(paypalInstance.createPayment).to.be.calledOnce;
-              expect(paypalInstance.createPayment).to.be.calledWith(view.paypalConfiguration);
+              expect(paypalInstance.createPayment).to.be.calledWithMatch({
+                locale: 'fake_LOCALE'
+              });
               done();
             });
           });
@@ -440,7 +429,7 @@ describe('BasePayPalView', function () {
             style: {label: 'credit'}
           });
           done();
-        }.bind(this));
+        });
       });
     });
   });

@@ -25,7 +25,7 @@ var paymentOptionAttributes = {
   },
   paypalCredit: {
     icon: '#logoPayPalCredit',
-    optionTitle: strings.PayPalCredit,
+    optionTitle: strings['PayPal Credit'],
     paymentOptionID: 'paypalCredit'
   }
 };
