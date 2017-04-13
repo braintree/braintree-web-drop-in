@@ -50,7 +50,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
       break;
     case paymentOptionIDs.paypalCredit:
       html = html.replace(/@ICON/g, 'logoPayPalCredit');
-      html = html.replace(/@OPTION_TITLE/g, this.strings.PayPalCredit);
+      html = html.replace(/@OPTION_TITLE/g, this.strings['PayPal Credit']);
       html = html.replace(/@CLASSNAME/g, '');
       break;
     default:
