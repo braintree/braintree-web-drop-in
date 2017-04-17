@@ -84,7 +84,7 @@ DropinModel.prototype.clearError = function () {
 
 function getSupportedPaymentOptions(options) {
   var result = [];
-  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal'];
+  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit'];
 
   if (!(paymentOptionPriority instanceof Array)) {
     throw new Error('paymentOptionPriority must be an array.');
@@ -113,6 +113,8 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
   } else if (paymentOption === 'paypal') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
+  } else if (paymentOption === 'paypalCredit') {
+    return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
   }
   throw new Error('paymentOptionPriority: Invalid payment option specified.');
 }

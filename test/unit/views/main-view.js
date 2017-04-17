@@ -1,8 +1,8 @@
 'use strict';
 
-var Promise = require('../../../src/lib/promise');
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
+var BasePayPalView = require('../../../src/views/payment-sheet-views/base-paypal-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var analytics = require('../../../src/lib/analytics');
@@ -14,7 +14,6 @@ var HostedFields = require('braintree-web/hosted-fields');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
-var paypal = require('paypal-checkout');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en');
 var transitionHelper = require('../../../src/lib/transition-helper');
@@ -26,8 +25,7 @@ describe('MainView', function () {
     this.client = {
       getConfiguration: fake.configuration
     };
-    this.sandbox.stub(PayPalView.prototype, 'setLogLevel');
-    this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
+    this.sandbox.stub(BasePayPalView.prototype, '_initialize');
   });
 
   describe('Constructor', function () {
@@ -206,7 +204,7 @@ describe('MainView', function () {
       var model = new DropinModel(fake.modelOptions());
       var wrapper = document.createElement('div');
 
-      model.supportedPaymentOptions = ['card', 'paypal'];
+      model.supportedPaymentOptions = ['card', 'paypal', 'paypalCredit'];
 
       wrapper.innerHTML = templateHTML;
 
@@ -293,10 +291,8 @@ describe('MainView', function () {
     });
 
     describe('when given a ', function () {
-      var SheetView;
-
       Object.keys(sheetViews).forEach(function (sheetViewKey) {
-        SheetView = sheetViews[sheetViewKey];
+        var SheetView = sheetViews[sheetViewKey];
 
         describe(SheetView.ID + ' view', function () {
           describe('in a non-guest checkout flow', function () {

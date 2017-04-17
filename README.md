@@ -73,9 +73,29 @@ braintree.dropin.create({
 }, callback);
 ```
 
-You can find more PayPal configuration options in the [Braintree JS client SDK v3 reference](https://braintree.github.io/braintree-web/current/PayPal.html#tokenize).
+You can find more PayPal configuration options in the [Braintree JS client SDK v3 reference](http://braintree.github.io/braintree-web/current/PayPalCheckout.html#createPayment).
 
-The structure of the PayPal payment method object returned in the callback of `requestPaymentMethod` can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizePayload).
+The structure of the PayPal payment method object returned in the callback of `requestPaymentMethod` can be found [here](http://braintree.github.io/braintree-web/current/PayPalCheckout.html#~tokenizePayload).
+
+### PayPal Credit
+
+PayPal Credit can also be enabled in Drop-in by including `paypalCredit` configuration options in the `create` call:
+
+```js
+braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  selector: '#dropin-container',
+  paypalCredit: {
+    flow: 'checkout', // Required for PayPal Credit
+    amount: 10.00,
+    currency: 'USD'
+  }
+}, callback);
+```
+
+PayPal Credit configuration parameters are the same as those for [PayPal](http://braintree.github.io/braintree-web/current/PayPalCheckout.html#createPayment).
+
+More details about PayPal Credit can be found in the Braintree [support articles](https://articles.braintreepayments.com/guides/payment-methods/paypal/paypal-credit).
 
 ## Full example
 
