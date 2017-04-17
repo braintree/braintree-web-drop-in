@@ -49,7 +49,7 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
   var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
   var typeHasNotChanged = options.type === this._paymentMethodRequestableType;
 
-  if (requestableStateHasNotChanged && typeHasNotChanged) {
+  if (requestableStateHasNotChanged && (!options.isRequestable || typeHasNotChanged)) {
     return false;
   }
 
@@ -60,7 +60,12 @@ DropinModel.prototype.setPaymentMethodRequestable = function (options) {
   var shouldEmitEvent = this._shouldEmitRequestableEvent(options);
 
   this._paymentMethodIsRequestable = options.isRequestable;
-  this._paymentMethodRequestableType = options.type;
+
+  if (options.isRequestable) {
+    this._paymentMethodRequestableType = options.type;
+  } else {
+    delete this._paymentMethodRequestableType;
+  }
 
   if (!shouldEmitEvent) {
     return;

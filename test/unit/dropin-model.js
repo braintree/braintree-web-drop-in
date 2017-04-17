@@ -444,6 +444,24 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.not.be.called;
     });
 
+    it('does not emit when isRequestable state is false and type has changed', function () {
+      this.model._paymentMethodIsRequestable = false;
+      this.model.setPaymentMethodRequestable({
+        isRequestable: false
+      });
+
+      expect(this.model._emit).to.not.be.called;
+
+      this.model._paymentMethodIsRequestable = true;
+      this.model._paymentMethodRequestableType = 'TYPE';
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'TYPE'
+      });
+
+      expect(this.model._emit).to.not.be.called;
+    });
+
     it('does emit when isRequestable state has not changed, but type state does', function () {
       this.model._paymentMethodIsRequestable = true;
       this.model._paymentMethodRequestableType = 'TYPE';
@@ -456,6 +474,16 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
         type: 'ANOTHER_TYPE'
       });
+    });
+
+    it('ignores type if isRequestable is false', function () {
+      this.model._paymentMethodRequestableType = 'SOMETHING';
+      this.model.setPaymentMethodRequestable({
+        isRequestable: false,
+        type: 'SOME_TYPE'
+      });
+
+      expect(this.model._paymentMethodRequestableType).to.not.exist;
     });
   });
 });
