@@ -295,10 +295,8 @@ describe('MainView', function () {
     });
 
     describe('when given a ', function () {
-      var SheetView;
-
       Object.keys(sheetViews).forEach(function (sheetViewKey) {
-        SheetView = sheetViews[sheetViewKey];
+        var SheetView = sheetViews[sheetViewKey];
 
         describe(SheetView.ID + ' view', function () {
           describe('in a non-guest checkout flow', function () {
@@ -377,6 +375,35 @@ describe('MainView', function () {
         mainView.setPrimaryView(PaymentOptionsView.ID);
 
         expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
+      });
+    });
+
+    it('calls setPaymentMethodRequestable when there is a payment method requestable', function () {
+      var mainView = new MainView(this.mainViewOptions);
+
+      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns({type: 'TYPE'});
+      this.sandbox.stub(mainView.model, 'setPaymentMethodRequestable');
+
+      mainView.setPrimaryView(PaymentOptionsView.ID);
+
+      expect(mainView.model.setPaymentMethodRequestable).to.be.calledOnce;
+      expect(mainView.model.setPaymentMethodRequestable).to.be.calledWith({
+        isRequestable: true,
+        type: 'TYPE'
+      });
+    });
+
+    it('calls setPaymentMethodRequestable when there is no payment method requestable', function () {
+      var mainView = new MainView(this.mainViewOptions);
+
+      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns(false);
+      this.sandbox.stub(mainView.model, 'setPaymentMethodRequestable');
+
+      mainView.setPrimaryView(PaymentOptionsView.ID);
+
+      expect(mainView.model.setPaymentMethodRequestable).to.be.calledOnce;
+      expect(mainView.model.setPaymentMethodRequestable).to.be.calledWithMatch({
+        isRequestable: false
       });
     });
   });

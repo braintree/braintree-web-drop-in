@@ -121,6 +121,8 @@ MainView.prototype.getView = function (id) {
 };
 
 MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
+  var paymentMethod;
+
   setTimeout(function () {
     this.element.className = prefixShowClass(id);
     if (secondaryViewId) {
@@ -149,6 +151,13 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
     // TODO update no flex support
     this.element.className += ' braintree-dropin__no-flexbox';
   }
+
+  paymentMethod = this.primaryView.getPaymentMethod();
+
+  this.model.setPaymentMethodRequestable({
+    isRequestable: Boolean(paymentMethod),
+    type: paymentMethod && paymentMethod.type
+  });
 
   this.model.clearError();
 };
