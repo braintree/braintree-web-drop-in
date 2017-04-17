@@ -348,6 +348,7 @@ describe('CardView', function () {
       this.context = {
         element: this.element,
         _generateFieldSelector: CardView.prototype._generateFieldSelector,
+        _validateForm: this.sandbox.stub(),
         getElementById: BaseView.prototype.getElementById,
         hideFieldError: CardView.prototype.hideFieldError,
         showFieldError: CardView.prototype.showFieldError,
@@ -996,6 +997,85 @@ describe('CardView', function () {
 
         expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(false);
       });
+
+      it('calls model.setPaymentMethodRequestable with isRequestable true if form is valid', function () {
+        var numberElement = this.element.querySelector('.braintree-form-number');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        this.sandbox.stub(this.context, 'hideFieldError');
+        this.sandbox.stub(this.context.model, 'setPaymentMethodRequestable');
+        this.context._validateForm.returns(true);
+
+        CardView.prototype._onValidityChangeEvent.call(this.context, fakeEvent);
+
+        expect(this.context.model.setPaymentMethodRequestable).to.be.calledOnce;
+        expect(this.context.model.setPaymentMethodRequestable).to.be.calledWith({
+          isRequestable: true,
+          type: 'card'
+        });
+      });
+
+      it('calls model.setPaymentMethodRequestable with isRequestable false if form is invalid', function () {
+        var numberElement = this.element.querySelector('.braintree-form-number');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        this.sandbox.stub(this.context, 'hideFieldError');
+        this.sandbox.stub(this.context.model, 'setPaymentMethodRequestable');
+        this.context._validateForm.returns(false);
+
+        CardView.prototype._onValidityChangeEvent.call(this.context, fakeEvent);
+
+        expect(this.context.model.setPaymentMethodRequestable).to.be.calledOnce;
+        expect(this.context.model.setPaymentMethodRequestable).to.be.calledWith({
+          isRequestable: false,
+          type: 'card'
+        });
+      });
+
+      it('does not call model.setPaymentMethodRequestable if tokenization is in progress', function () {
+        var numberElement = this.element.querySelector('.braintree-form-number');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        this.context._isTokenizing = true;
+
+        this.sandbox.stub(this.context, 'hideFieldError');
+        this.sandbox.stub(this.context.model, 'setPaymentMethodRequestable');
+        this.context._validateForm.returns(false);
+
+        CardView.prototype._onValidityChangeEvent.call(this.context, fakeEvent);
+
+        expect(this.context.model.setPaymentMethodRequestable).to.not.be.called;
+      });
     });
 
     describe('onNotEmptyEvent', function () {
@@ -1222,6 +1302,14 @@ describe('CardView', function () {
       expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
     });
 
+    it('sets isTokenizing to true', function () {
+      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
+
+      CardView.prototype.tokenize.call(this.context, function () {});
+
+      expect(this.context._isTokenizing).to.equal(true);
+    });
+
     it('does not call hostedFieldsInstance.tokenize if form is invalid', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
@@ -1266,6 +1354,27 @@ describe('CardView', function () {
       expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('cvv');
       expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
+    });
+
+    it('sets isTokenizing to false on successful tokenization', function (done) {
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
+      this.context.hostedFieldsInstance.tokenize.yields(null, {nonce: 'foo'});
+
+      CardView.prototype.tokenize.call(this.context, function () {
+        setTimeout(function () {
+          expect(this.context._isTokenizing).to.equal(false);
+          done();
+        }.bind(this), 100);
+      }.bind(this));
+    });
+
+    it('sets isTokenizing to false on unsuccessful tokenization', function (done) {
+      this.context.hostedFieldsInstance.tokenize.yieldsAsync(new Error('Error'));
+
+      CardView.prototype.tokenize.call(this.context, function () {
+        expect(this.context._isTokenizing).to.equal(false);
+        done();
+      }.bind(this));
     });
 
     it('removes braintree-sheet--loading class after successful tokenization', function () {
