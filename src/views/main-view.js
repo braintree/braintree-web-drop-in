@@ -148,8 +148,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
   }
 
   if (!this.supportsFlexbox) {
-    // TODO update no flex support
-    this.element.className += ' braintree-dropin__no-flexbox';
+    this.element.setAttribute('data-braintree-no-flexbox', true);
   }
 
   paymentMethod = this.primaryView.getPaymentMethod();

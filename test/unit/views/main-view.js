@@ -1,8 +1,8 @@
 'use strict';
 
-var Promise = require('../../../src/lib/promise');
 var MainView = require('../../../src/views/main-view');
 var BaseView = require('../../../src/views/base-view');
+var BasePayPalView = require('../../../src/views/payment-sheet-views/base-paypal-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var analytics = require('../../../src/lib/analytics');
@@ -14,7 +14,6 @@ var HostedFields = require('braintree-web/hosted-fields');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
-var paypal = require('paypal-checkout');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en');
 var transitionHelper = require('../../../src/lib/transition-helper');
@@ -27,8 +26,7 @@ describe('MainView', function () {
       getConfiguration: fake.configuration
     };
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
-    this.sandbox.stub(PayPalView.prototype, 'setLogLevel');
-    this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
+    this.sandbox.stub(BasePayPalView.prototype, '_initialize');
   });
 
   describe('Constructor', function () {
@@ -207,7 +205,7 @@ describe('MainView', function () {
       var model = new DropinModel(fake.modelOptions());
       var wrapper = document.createElement('div');
 
-      model.supportedPaymentOptions = ['card', 'paypal'];
+      model.supportedPaymentOptions = ['card', 'paypal', 'paypalCredit'];
 
       wrapper.innerHTML = templateHTML;
 
@@ -271,28 +269,26 @@ describe('MainView', function () {
       });
     });
 
-    // TODO: Pending until we update to support no flexbox
-    xit('applies no-flexbox class when flexbox is not supported', function () {
+    it('applies no-flexbox data attribute when flexbox is not supported', function () {
       var mainView = new MainView(this.mainViewOptions);
+      var wrapper = mainView.element;
 
-      mainView._views = this.views;
       mainView.supportsFlexbox = false;
 
-      mainView.setPrimaryView('id1');
+      mainView.setPrimaryView(CardView.ID);
 
-      expect(mainView.element.classList.contains('braintree-dropin__no-flexbox')).to.be.true;
+      expect(wrapper.dataset.braintreeNoFlexbox).to.equal('true');
     });
 
-    // TODO: Pending until we update to support no flexbox
-    xit('does not apply no-flexbox class when flexbox is supported', function () {
+    it('does not apply no-flexbox data attribute when flexbox is supported', function () {
       var mainView = new MainView(this.mainViewOptions);
+      var wrapper = mainView.element;
 
-      mainView._views = this.views;
       mainView.supportsFlexbox = true;
 
-      mainView.setPrimaryView('id1');
+      mainView.setPrimaryView(CardView.ID);
 
-      expect(mainView.element.classList.contains('braintree-dropin__no-flexbox')).to.be.false;
+      expect(wrapper.dataset.braintreeNoFlexbox).to.not.exist;
     });
 
     describe('when given a ', function () {

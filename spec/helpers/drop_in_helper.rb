@@ -1,6 +1,6 @@
 module DropIn
-  def click_option(option_text)
-    find(".braintree-option__label", :text => option_text).click
+  def click_option(option_type)
+    find(".braintree-option__#{option_type} .braintree-option__label").click
   end
 
   def hosted_field_send_input(key, value)

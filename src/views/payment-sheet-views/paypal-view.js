@@ -1,78 +1,16 @@
 'use strict';
 
-var BaseView = require('../base-view');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
-var btPaypal = require('braintree-web/paypal-checkout');
-
-var DEFAULT_LOG_LEVEL = 'warn';
+var BasePayPalView = require('./base-paypal-view');
 
 function PayPalView() {
-  BaseView.apply(this, arguments);
+  BasePayPalView.apply(this, arguments);
 
-  this._initialize();
+  this._initialize(false);
 }
 
-PayPalView.prototype = Object.create(BaseView.prototype);
+PayPalView.prototype = Object.create(BasePayPalView.prototype);
 PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
-
-PayPalView.prototype.setLogLevel = function (paypal) {
-  var level = this.model.merchantConfiguration.paypal.logLevel;
-
-  paypal.setup({
-    logLevel: level || DEFAULT_LOG_LEVEL
-  });
-};
-
-PayPalView.prototype._initialize = function () {
-  var self = this;
-  // We wait to require paypal-checkout here in order to respect the
-  // merchant's configured log level immediately upon instantiation.
-  var paypal = require('paypal-checkout');
-
-  this.setLogLevel(paypal);
-  this.model.asyncDependencyStarting();
-
-  btPaypal.create({client: this.client}, function (err, paypalInstance) {
-    var paypalCheckoutConfiguration;
-    var merchantConfiguration = self.model.merchantConfiguration;
-    var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
-
-    if (err) {
-      self.model.asyncDependencyFailed({
-        view: self.ID,
-        error: err
-      });
-      return;
-    }
-
-    self.paypalInstance = paypalInstance;
-
-    paypalCheckoutConfiguration = {
-      env: environment,
-      payment: function () {
-        return paypalInstance.createPayment(merchantConfiguration.paypal).catch(reportError);
-      },
-      onAuthorize: function (data) {
-        return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
-          self.model.addPaymentMethod(tokenizePayload);
-        }).catch(reportError);
-      },
-      onError: reportError
-    };
-
-    if (merchantConfiguration.locale) {
-      paypalCheckoutConfiguration.locale = merchantConfiguration.locale;
-    }
-
-    paypal.Button.render(paypalCheckoutConfiguration, '[data-braintree-id="paypal-button"]').then(function () {
-      self.model.asyncDependencyReady();
-    });
-  });
-
-  function reportError(err) {
-    self.model.reportError(err);
-  }
-};
 
 module.exports = PayPalView;

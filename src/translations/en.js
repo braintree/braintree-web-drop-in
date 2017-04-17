@@ -36,6 +36,7 @@ module.exports = {
   endingIn: 'Ending in ••{{lastTwoCardDigits}}',
   Card: 'Card',
   PayPal: 'PayPal',
+  'PayPal Credit': 'PayPal Credit',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',

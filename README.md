@@ -73,9 +73,29 @@ braintree.dropin.create({
 }, callback);
 ```
 
-You can find more PayPal configuration options in the [Braintree JS client SDK v3 reference](https://braintree.github.io/braintree-web/current/PayPal.html#tokenize).
+You can find more PayPal configuration options in the [Braintree JS client SDK v3 reference](http://braintree.github.io/braintree-web/current/PayPalCheckout.html#createPayment).
 
-The structure of the PayPal payment method object returned in the callback of `requestPaymentMethod` can be found [here](http://braintree.github.io/braintree-web/current/PayPal.html#~tokenizePayload).
+The structure of the PayPal payment method object returned in the callback of `requestPaymentMethod` can be found [here](http://braintree.github.io/braintree-web/current/PayPalCheckout.html#~tokenizePayload).
+
+### PayPal Credit
+
+PayPal Credit can also be enabled in Drop-in by including `paypalCredit` configuration options in the `create` call:
+
+```js
+braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  selector: '#dropin-container',
+  paypalCredit: {
+    flow: 'checkout', // Required for PayPal Credit
+    amount: 10.00,
+    currency: 'USD'
+  }
+}, callback);
+```
+
+PayPal Credit configuration parameters are the same as those for [PayPal](http://braintree.github.io/braintree-web/current/PayPalCheckout.html#createPayment).
+
+More details about PayPal Credit can be found in the Braintree [support articles](https://articles.braintreepayments.com/guides/payment-methods/paypal/paypal-credit).
 
 ## Full example
 
@@ -185,11 +205,13 @@ dropinInstance.teardown(function (err) {
 });
 ```
 
+## Browser support
+
+Drop-in is supported in all browsers supported by the [Braintree JavaScript Client SDK](http://braintree.github.io/braintree-web/current/#browser-support).
+
 ## Beta notes
 
 While in beta, we're still actively working on Drop-in. This means you might have to change your integration when upgrading your Drop-in version. This includes any custom CSS styling applied to `data-braintree-id` attributes.
-
-Browser support will be limited during beta and will not include Internet Explorer 9 or 10, but will eventually include [all browsers supported by Braintree.js](http://braintree.github.io/braintree-web/current/#browser-support).
 
 Much of the behavior in this version of Drop-in differs from the [previous version](https://developers.braintreepayments.com/guides/drop-in/javascript/v2). At this point, adding the hidden `payment_method_nonce` input and automatic form submission (the default behavior in the previous version) are not available.
 
@@ -198,4 +220,3 @@ Here are some of the features we're still working on:
  - Event API: An event system to indicate when a payment method can be requested
  - Full documentation in the [Braintree developer docs](https://developers.braintreepayments.com/guides/overview) and an API reference
  - Support for additional types of payment methods
- - Support for Internet Explorer 9 and 10
