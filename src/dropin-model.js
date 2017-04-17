@@ -45,12 +45,26 @@ DropinModel.prototype.changeActivePaymentView = function (paymentViewID) {
   this._emit('changeActivePaymentView', paymentViewID);
 };
 
-DropinModel.prototype.setPaymentMethodRequestable = function (options) {
-  if (this.isPaymentMethodRequestable() === options.isRequestable) {
-    return;
+DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
+  var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
+  var typeHasNotChanged = options.type === this._paymentMethodRequestableType;
+
+  if (requestableStateHasNotChanged && typeHasNotChanged) {
+    return false;
   }
 
+  return true;
+};
+
+DropinModel.prototype.setPaymentMethodRequestable = function (options) {
+  var shouldEmitEvent = this._shouldEmitRequestableEvent(options);
+
   this._paymentMethodIsRequestable = options.isRequestable;
+  this._paymentMethodRequestableType = options.type;
+
+  if (!shouldEmitEvent) {
+    return;
+  }
 
   if (options.isRequestable) {
     this._emit('paymentMethodRequestable', {type: options.type});
