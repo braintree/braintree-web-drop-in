@@ -1021,7 +1021,7 @@ describe('CardView', function () {
         expect(this.context.model.setPaymentMethodRequestable).to.be.calledOnce;
         expect(this.context.model.setPaymentMethodRequestable).to.be.calledWith({
           isRequestable: true,
-          type: 'card'
+          type: 'CreditCard'
         });
       });
 
@@ -1048,7 +1048,7 @@ describe('CardView', function () {
         expect(this.context.model.setPaymentMethodRequestable).to.be.calledOnce;
         expect(this.context.model.setPaymentMethodRequestable).to.be.calledWith({
           isRequestable: false,
-          type: 'card'
+          type: 'CreditCard'
         });
       });
 

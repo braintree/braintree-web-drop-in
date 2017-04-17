@@ -316,7 +316,7 @@ CardView.prototype._onValidityChangeEvent = function (event) {
   if (!this._isTokenizing) {
     this.model.setPaymentMethodRequestable({
       isRequestable: this._validateForm(),
-      type: 'card'
+      type: constants.paymentMethodTypes.card
     });
   }
 };
