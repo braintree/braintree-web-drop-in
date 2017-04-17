@@ -8,6 +8,7 @@ unreleased
 - Improve loading transition
 - Add full support for IE 9 and 10
 - Add support for PayPal Credit
+- Add events for `paymentMethodRequestable` and `noPaymentMethodRequestable`
 
 1.0.0-beta.6
 ------------
