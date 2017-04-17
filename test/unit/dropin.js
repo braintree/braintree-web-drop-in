@@ -9,6 +9,7 @@ var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
 var paypal = require('paypal-checkout');
+var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 
 describe('Dropin', function () {
@@ -31,6 +32,7 @@ describe('Dropin', function () {
       }
     };
 
+    this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
     this.sandbox.stub(paypalCheckout, 'create').yieldsAsync(null, fake.paypalInstance);
     this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());

@@ -26,6 +26,7 @@ describe('MainView', function () {
     this.client = {
       getConfiguration: fake.configuration
     };
+    this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(PayPalView.prototype, 'setLogLevel');
     this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
   });

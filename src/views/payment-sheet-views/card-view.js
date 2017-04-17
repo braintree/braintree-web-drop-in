@@ -163,6 +163,16 @@ CardView.prototype._validateForm = function (showFieldErrors) {
   return isValid;
 };
 
+CardView.prototype.getPaymentMethod = function () { // eslint-disable-line consistent-return
+  var formIsValid = this._validateForm();
+
+  if (formIsValid) {
+    return {
+      type: constants.paymentMethodTypes.card
+    };
+  }
+};
+
 CardView.prototype.tokenize = function (callback) {
   var transitionCallback;
   var self = this;
