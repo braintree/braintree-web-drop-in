@@ -553,6 +553,14 @@ describe('MainView', function () {
       this.sandbox.spy(MainView.prototype, 'hideLoadingIndicator');
 
       this.mainView = new MainView(this.mainViewOptions);
+      this.mainView._views = {
+        card: {
+          getPaymentMethod: this.sandbox.stub()
+        },
+        paypal: {
+          getPaymentMethod: this.sandbox.stub()
+        }
+      };
     });
 
     describe('for changeActivePaymentView', function () {

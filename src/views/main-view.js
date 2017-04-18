@@ -88,9 +88,11 @@ MainView.prototype._initialize = function () {
         classlist.add(this.sheetContainer, 'braintree-sheet--active');
       }.bind(this), 0);
       classlist.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
-      this.model.setPaymentMethodRequestable({
-        isRequestable: false
-      });
+      if (!this.getView(id).getPaymentMethod()) {
+        this.model.setPaymentMethodRequestable({
+          isRequestable: false
+        });
+      }
     }
   }.bind(this));
 
