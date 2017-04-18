@@ -383,7 +383,6 @@ describe('MainView', function () {
 
       mainView.setPrimaryView(PaymentOptionsView.ID);
 
-      expect(mainView.model.setPaymentMethodRequestable).to.be.calledOnce;
       expect(mainView.model.setPaymentMethodRequestable).to.be.calledWith({
         isRequestable: true,
         type: 'TYPE'
@@ -398,7 +397,6 @@ describe('MainView', function () {
 
       mainView.setPrimaryView(PaymentOptionsView.ID);
 
-      expect(mainView.model.setPaymentMethodRequestable).to.be.calledOnce;
       expect(mainView.model.setPaymentMethodRequestable).to.be.calledWithMatch({
         isRequestable: false
       });
@@ -559,6 +557,7 @@ describe('MainView', function () {
 
     describe('for changeActivePaymentView', function () {
       beforeEach(function () {
+        this.sandbox.stub(this.model, 'setPaymentMethodRequestable');
         this.paymentMethodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
         this.sheetElement = this.element.querySelector('[data-braintree-id="sheet-container"]');
       });
@@ -576,6 +575,10 @@ describe('MainView', function () {
 
         it('removes braintree-sheet--active from the payment sheet element', function () {
           expect(this.sheetElement.className).to.not.contain('braintree-sheet--active');
+        });
+
+        it('does not call model.setPaymentMethodRequestable', function () {
+          expect(this.model.setPaymentMethodRequestable).to.not.be.called;
         });
       });
 
@@ -600,6 +603,12 @@ describe('MainView', function () {
           it('removes braintree-methods--active from the payment methods view', function () {
             this.sandbox.clock.tick(1001);
             expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods--active');
+          });
+
+          it('calls model.setPaymentMethodRequestable', function () {
+            expect(this.model.setPaymentMethodRequestable).to.be.calledWith({
+              isRequestable: false
+            });
           });
         });
       });
