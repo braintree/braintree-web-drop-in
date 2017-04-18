@@ -1447,4 +1447,24 @@ describe('CardView', function () {
       });
     });
   });
+
+  describe('getPaymetnMethod', function () {
+    beforeEach(function () {
+      this.context = {
+        _validateForm: this.sandbox.stub()
+      };
+    });
+
+    it('returns undefined if form is invalid', function () {
+      this.context._validateForm.returns(false);
+      expect(CardView.prototype.getPaymentMethod.call(this.context)).to.equal(undefined); // eslint-disable-line no-undefined
+    });
+
+    it('returns a card payment method object if form is valid', function () {
+      this.context._validateForm.returns(true);
+      expect(CardView.prototype.getPaymentMethod.call(this.context)).to.deep.equal({
+        type: 'CreditCard'
+      });
+    });
+  });
 });

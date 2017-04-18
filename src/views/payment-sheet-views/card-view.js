@@ -118,10 +118,15 @@ CardView.prototype._initialize = function () {
 };
 
 CardView.prototype._validateForm = function (showFieldErrors) {
-  var cardType, cardTypeSupported;
+  var cardType, cardTypeSupported, state;
   var isValid = true;
-  var state = this.hostedFieldsInstance.getState();
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+
+  if (!this.hostedFieldsInstance) {
+    return false;
+  }
+
+  state = this.hostedFieldsInstance.getState();
 
   Object.keys(state.fields).forEach(function (key) {
     var field = state.fields[key];
