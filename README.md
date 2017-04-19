@@ -188,11 +188,11 @@ Payment options omitted from this array will not be offered to the customer.
 
 ### `paymentMethodRequestable` and `noPaymentMethodRequestable`
 
-`paymentMethodRequestable` fires when a payment method goes from being not requestable to requestable and provides the type of payment method (CreditCard, PayPalAccount, etc). 
+`paymentMethodRequestable` fires when a payment method can be retrieved using `requestPaymentMethod`. The event includes an object that provides the type of payment method (CreditCard, PayPalAccount, etc) that is ready to be requested. 
 
-`noPaymentMethodRequestable` fires when a payment method goes from being requestable to not requestable.
+`noPaymentMethodRequestable` fires when a payment method can no longer be retrieved with `requestPaymetnMethod`.
 
-Using these events, you can dynamically the submit button to be disabled or enabled based on when the payment method is requestable:
+Using these events, you can dynamically enable or disable your submit button based on whether or not the payment method is requestable:
 
 ```js
 var submitButton = document.querySelector('#submit-button');
