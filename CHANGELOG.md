@@ -8,6 +8,7 @@ unreleased
 - Improve loading transition
 - Add full support for IE 9 and 10
 - Add support for PayPal Credit
+- Fix bug where adding a vaulted payment method would duplicate previously added payment methods
 
 1.0.0-beta.6
 ------------

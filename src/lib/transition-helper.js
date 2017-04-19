@@ -8,11 +8,14 @@ function onTransitionEnd(element, propertyName, callback) {
     return;
   }
 
-  element.addEventListener('transitionend', function (event) {
+  function transitionEventListener(event) {
     if (event.propertyName === propertyName) {
+      element.removeEventListener('transitionend', transitionEventListener);
       callback();
     }
-  });
+  }
+
+  element.addEventListener('transitionend', transitionEventListener);
 }
 
 module.exports = {

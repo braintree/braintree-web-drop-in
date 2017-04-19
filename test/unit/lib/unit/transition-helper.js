@@ -31,6 +31,21 @@ describe('onTransitionEnd', function () {
     });
   });
 
+  it('removes event listener after callback is called', function (done) {
+    var element = document.createElement('div');
+
+    this.sandbox.stub(element, 'addEventListener').yields(this.fakeEvent);
+    this.sandbox.stub(element, 'removeEventListener');
+    this.sandbox.stub(browserDetection, 'isIe9').returns(false);
+
+    onTransitionEnd(element, this.fakePropertyName, function () {
+      expect(element.removeEventListener).to.have.been.calledOnce;
+      expect(element.addEventListener).to.have.been.calledWith('transitionend', this.sandbox.match.func);
+
+      done();
+    }.bind(this));
+  });
+
   it('does not call callback after onTransitionEnd end when the event propertyName does not match', function () {
     var callbackSpy = this.sandbox.spy();
     var element = document.createElement('div');
