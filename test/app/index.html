@@ -151,12 +151,10 @@
         }
 
         instance.on('paymentMethodRequestable', function (event) {
-          console.log('payment method requestable:', event.type);
           payButton.removeAttribute('disabled');
         });
 
         instance.on('noPaymentMethodRequestable', function (event) {
-          console.log('payment method not requestable');
           payButton.setAttribute('disabled', true);
         });
       } else {
