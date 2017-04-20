@@ -4,6 +4,7 @@ var BaseView = require('./base-view');
 var classlist = require('../lib/classlist');
 var constants = require('../constants');
 var fs = require('fs');
+var setUpEventHandlers = require('../lib/set-up-event-handlers');
 
 var paymentMethodHTML = fs.readFileSync(__dirname + '/../html/payment-method.html', 'utf8');
 
@@ -24,8 +25,9 @@ PaymentMethodView.prototype._initialize = function () {
 
   this.element = document.createElement('div');
   this.element.className = 'braintree-method';
+  this.element.setAttribute('tabindex', '0');
 
-  this.element.addEventListener('click', function () {
+  setUpEventHandlers(this.element, function () {
     this.model.changeActivePaymentMethod(this.paymentMethod);
   }.bind(this));
 
