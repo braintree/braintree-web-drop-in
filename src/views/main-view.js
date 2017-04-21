@@ -226,9 +226,10 @@ MainView.prototype.hideToggle = function () {
 
 MainView.prototype.showSheetError = function (error) {
   var errorMessage = this.strings.genericError;
+  var translatedErrorMessage = error && error.code && this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
 
-  if (error && error.code && this.strings[snakeCaseToCamelCase(error.code) + 'Error']) {
-    errorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
+  if (translatedErrorMessage) {
+    errorMessage = translatedErrorMessage;
   } else if (error && error.message) {
     errorMessage = error.message;
   }

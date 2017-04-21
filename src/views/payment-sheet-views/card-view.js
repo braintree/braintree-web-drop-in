@@ -210,7 +210,6 @@ CardView.prototype.tokenize = function (callback) {
           self.model.addPaymentMethod(payload);
           callback(null, payload);
           classlist.remove(self.element, 'braintree-sheet--tokenized');
-          self.element.removeEventListener('transitionend', transitionCallback);
         }, 0);
         self._isTokenizing = false;
       };
