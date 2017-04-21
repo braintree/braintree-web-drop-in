@@ -1,8 +1,8 @@
 'use strict';
 
-var setUpEventHandlers = require('../../../../src/lib/set-up-event-handlers');
+var addSelectionEventHandler = require('../../../../src/lib/add-selection-event-handler');
 
-describe('setUpEventHandlers', function () {
+describe('addSelectionEventHandler', function () {
   it('adds an event listener for click', function () {
     var event = {};
     var element = {
@@ -10,7 +10,7 @@ describe('setUpEventHandlers', function () {
     };
     var func = this.sandbox.stub();
 
-    setUpEventHandlers(element, func);
+    addSelectionEventHandler(element, func);
 
     expect(element.addEventListener).to.be.calledWith('click', func);
     expect(func).to.be.calledWith(event);
@@ -22,7 +22,7 @@ describe('setUpEventHandlers', function () {
     };
     var func = this.sandbox.stub();
 
-    setUpEventHandlers(element, func);
+    addSelectionEventHandler(element, func);
 
     expect(element.addEventListener).to.be.calledWith('keyup', this.sandbox.match.func);
   });
@@ -36,7 +36,7 @@ describe('setUpEventHandlers', function () {
 
     element.addEventListener.withArgs('keyup').yields(event);
 
-    setUpEventHandlers(element, func);
+    addSelectionEventHandler(element, func);
 
     expect(func).to.be.called;
   });
@@ -50,7 +50,7 @@ describe('setUpEventHandlers', function () {
 
     element.addEventListener.withArgs('keyup').yields(event);
 
-    setUpEventHandlers(element, func);
+    addSelectionEventHandler(element, func);
 
     expect(func).to.not.be.called;
   });

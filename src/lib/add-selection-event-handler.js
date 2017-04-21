@@ -1,6 +1,6 @@
 'use strict';
 
-function setUpEventHandlers(element, func) {
+function addSelectionEventHandler(element, func) {
   element.addEventListener('click', func);
   element.addEventListener('keyup', function (event) {
     if (event.keyCode === 13) {
@@ -9,4 +9,4 @@ function setUpEventHandlers(element, func) {
   });
 }
 
-module.exports = setUpEventHandlers;
+module.exports = addSelectionEventHandler;

@@ -1,7 +1,7 @@
 'use strict';
 
 var analytics = require('../lib/analytics');
-var setUpEventHandlers = require('../lib/set-up-event-handlers');
+var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var BaseView = require('./base-view');
 var fs = require('fs');
 var paymentOptionIDs = require('../constants').paymentOptionIDs;
@@ -61,7 +61,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
 
   div.innerHTML = html;
 
-  setUpEventHandlers(div, clickHandler);
+  addSelectionEventHandler(div, clickHandler);
 
   this.container.appendChild(div);
   this.elements[paymentOptionID] = {
