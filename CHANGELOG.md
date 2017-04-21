@@ -10,6 +10,7 @@ unreleased
 - Add support for PayPal Credit
 - Fix bug where adding a vaulted payment method would duplicate previously added payment methods
 - Add support for tab navigation
+- Provide more specific tokenization errors for duplicate payment methods and cvv verification failures
 
 1.0.0-beta.6
 ------------
