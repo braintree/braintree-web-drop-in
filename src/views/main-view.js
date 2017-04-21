@@ -7,6 +7,7 @@ var classlist = require('../lib/classlist');
 var sheetViews = require('./payment-sheet-views');
 var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
+var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var supportsFlexbox = require('../lib/supports-flexbox');
 var transitionHelper = require('../lib/transition-helper');
 
@@ -73,7 +74,7 @@ MainView.prototype._initialize = function () {
   });
   this.addView(this.paymentMethodsViews);
 
-  this.toggle.addEventListener('click', this.toggleAdditionalOptions.bind(this));
+  addSelectionEventHandler(this.toggle, this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
     this.setPrimaryView(PaymentMethodsView.ID);
