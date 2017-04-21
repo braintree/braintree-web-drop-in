@@ -453,11 +453,10 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.not.be.called;
 
-      this.model._paymentMethodIsRequestable = true;
       this.model._paymentMethodRequestableType = 'TYPE';
       this.model.setPaymentMethodRequestable({
-        isRequestable: true,
-        type: 'TYPE'
+        isRequestable: false,
+        type: 'ANOTHER_TYPE'
       });
 
       expect(this.model._emit).to.not.be.called;

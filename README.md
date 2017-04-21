@@ -190,7 +190,7 @@ Payment options omitted from this array will not be offered to the customer.
 
 `paymentMethodRequestable` fires when a payment method can be retrieved using `requestPaymentMethod`. The event includes an object that provides the type of payment method (CreditCard, PayPalAccount, etc) that is ready to be requested. 
 
-`noPaymentMethodRequestable` fires when a payment method can no longer be retrieved with `requestPaymetnMethod`.
+`noPaymentMethodRequestable` fires when a payment method can no longer be retrieved with `requestPaymentMethod`.
 
 Using these events, you can dynamically enable or disable your submit button based on whether or not the payment method is requestable:
 

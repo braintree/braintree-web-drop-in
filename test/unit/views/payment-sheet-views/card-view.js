@@ -1448,7 +1448,7 @@ describe('CardView', function () {
     });
   });
 
-  describe('getPaymetnMethod', function () {
+  describe('getPaymentMethod', function () {
     beforeEach(function () {
       this.context = {
         _validateForm: this.sandbox.stub()
