@@ -10,6 +10,7 @@ unreleased
 - Add support for PayPal Credit
 - Fix bug where adding a vaulted payment method would duplicate previously added payment methods
 - Add support for tab navigation
+- Fix bug where PayPal button was not being translated
 
 1.0.0-beta.6
 ------------
