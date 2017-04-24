@@ -114,7 +114,7 @@ This is a full example of a Drop-in integration that only accepts credit cards.
 
     <script src="https://js.braintreegateway.com/web/dropin/1.0.0-beta.6/js/dropin.min.js"></script>
 
-      <script>
+    <script>
       var submitButton = document.querySelector('#submit-button');
 
       braintree.dropin.create({
@@ -183,6 +183,46 @@ braintree.dropin.create({
 ```
 
 Payment options omitted from this array will not be offered to the customer.
+
+## Events
+
+### `paymentMethodRequestable` and `noPaymentMethodRequestable`
+
+`paymentMethodRequestable` fires when a payment method can be retrieved using `requestPaymentMethod`. The event includes an object that provides the type of payment method (CreditCard, PayPalAccount, etc) that is ready to be requested. 
+
+`noPaymentMethodRequestable` fires when a payment method can no longer be retrieved with `requestPaymentMethod`.
+
+Using these events, you can dynamically enable or disable your submit button based on whether or not the payment method is requestable:
+
+```js
+var submitButton = document.querySelector('#submit-button');
+
+braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  selector: '#dropin-container'
+}, function (err, dropinInstance) {
+  submitButton.addEventListener('click', function () {
+    dropinInstance.requestPaymentMethod(function (err, payload) { /* send to payload.nonce to server */ });
+  });
+
+  if (dropinInstance.isPaymentMethodRequestable()) {
+    // this will be true if you generated the client token
+    // with a customer ID and there is a saved payment method
+    // available to tokenize with that customer
+    submitButton.removeAttribute('disabled');
+  }
+
+  dropinInstance.on('paymentMethodRequestable', function (event) {
+    event.type; // the type of Payment Method, IE CreditCard, PayPalAccount
+
+    submitButton.removeAttribute('disabled');
+  });
+
+  dropinInstance.on('noPaymentMethodRequestable', function () {
+    submitButton.setAttribute('disabled', true);
+  });
+});
+```
 
 ## Teardown
 

@@ -89,6 +89,11 @@ MainView.prototype._initialize = function () {
         classlist.add(this.sheetContainer, 'braintree-sheet--active');
       }.bind(this), 0);
       classlist.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
+      if (!this.getView(id).getPaymentMethod()) {
+        this.model.setPaymentMethodRequestable({
+          isRequestable: false
+        });
+      }
     }
   }.bind(this));
 
@@ -122,6 +127,8 @@ MainView.prototype.getView = function (id) {
 };
 
 MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
+  var paymentMethod;
+
   setTimeout(function () {
     this.element.className = prefixShowClass(id);
     if (secondaryViewId) {
@@ -149,6 +156,13 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
   if (!this.supportsFlexbox) {
     this.element.setAttribute('data-braintree-no-flexbox', true);
   }
+
+  paymentMethod = this.primaryView.getPaymentMethod();
+
+  this.model.setPaymentMethodRequestable({
+    isRequestable: Boolean(paymentMethod),
+    type: paymentMethod && paymentMethod.type
+  });
 
   this.model.clearError();
 };

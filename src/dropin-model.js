@@ -14,6 +14,7 @@ function DropinModel(options) {
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
+  this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
 
   this.supportedPaymentOptions = getSupportedPaymentOptions(options);
 
@@ -23,6 +24,10 @@ function DropinModel(options) {
 DropinModel.prototype = Object.create(EventEmitter.prototype, {
   constructor: DropinModel
 });
+
+DropinModel.prototype.isPaymentMethodRequestable = function () {
+  return Boolean(this._paymentMethodIsRequestable);
+};
 
 DropinModel.prototype.addPaymentMethod = function (paymentMethod) {
   this._paymentMethods.push(paymentMethod);
@@ -38,6 +43,39 @@ DropinModel.prototype.changeActivePaymentMethod = function (paymentMethod) {
 DropinModel.prototype.changeActivePaymentView = function (paymentViewID) {
   this._activePaymentView = paymentViewID;
   this._emit('changeActivePaymentView', paymentViewID);
+};
+
+DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
+  var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
+  var typeHasNotChanged = options.type === this._paymentMethodRequestableType;
+
+  if (requestableStateHasNotChanged && (!options.isRequestable || typeHasNotChanged)) {
+    return false;
+  }
+
+  return true;
+};
+
+DropinModel.prototype.setPaymentMethodRequestable = function (options) {
+  var shouldEmitEvent = this._shouldEmitRequestableEvent(options);
+
+  this._paymentMethodIsRequestable = options.isRequestable;
+
+  if (options.isRequestable) {
+    this._paymentMethodRequestableType = options.type;
+  } else {
+    delete this._paymentMethodRequestableType;
+  }
+
+  if (!shouldEmitEvent) {
+    return;
+  }
+
+  if (options.isRequestable) {
+    this._emit('paymentMethodRequestable', {type: options.type});
+  } else {
+    this._emit('noPaymentMethodRequestable');
+  }
 };
 
 DropinModel.prototype.getPaymentMethods = function () {
