@@ -3,12 +3,11 @@
 module.exports = function (config) {
   config.set({
     basePath: '../',
-    frameworks: ['browserify', 'mocha', 'chai-sinon'],
+    frameworks: ['browserify', 'mocha'],
     plugins: [
       'karma-browserify',
       'karma-phantomjs-launcher',
       'karma-mocha',
-      'karma-chai-sinon',
       'karma-mocha-reporter'
     ],
     browsers: ['PhantomJS'],

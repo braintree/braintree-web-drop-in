@@ -1,6 +1,5 @@
 'use strict';
 
-var Promise = require('../../src/lib/promise');
 var Dropin = require('../../src/dropin/');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
@@ -33,7 +32,7 @@ describe('Dropin', function () {
 
     this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
     this.sandbox.stub(paypalCheckout, 'create').yieldsAsync(null, fake.paypalInstance);
-    this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
+    this.sandbox.stub(paypal.Button, 'render').resolves();
   });
 
   afterEach(function () {

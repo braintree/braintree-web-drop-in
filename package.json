@@ -39,7 +39,6 @@
     "is-uuid": "1.0.2",
     "karma": "0.13.22",
     "karma-browserify": "5.0.5",
-    "karma-chai-sinon": "0.1.5",
     "karma-mocha": "1.1.1",
     "karma-mocha-reporter": "2.0.3",
     "karma-phantomjs-launcher": "1.0.0",
@@ -50,6 +49,7 @@
     "sauce-connect-launcher": "0.14.0",
     "serve-static": "1.11.1",
     "sinon": "1.17.4",
+    "sinon-as-promised": "^4.0.3",
     "sinon-chai": "2.8.0",
     "vinyl-source-stream": "1.1.0"
   },
