@@ -501,7 +501,7 @@ describe('Dropin', function () {
   });
 
   describe('isPaymentMethodRequestable', function () {
-    it('returns the value on model.isPaymentMethodRequestable', function () {
+    it('returns the value of model.isPaymentMethodRequestable', function () {
       var instance = new Dropin(this.dropinOptions);
 
       instance._model = {
