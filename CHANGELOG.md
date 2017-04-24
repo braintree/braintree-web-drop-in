@@ -5,6 +5,7 @@ unreleased
 ----------
 - Use PayPal Checkout for PayPal View
 - Use version 3.12.0 of braintree-web
+- Use version 4.0.60 of paypal-checkout
 - Improve loading transition
 - Add full support for IE 9 and 10
 - Add support for PayPal Credit

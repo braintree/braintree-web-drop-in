@@ -145,7 +145,7 @@ describe "Drop-in" do
       expect(page).to have_content("Visa")
     end
 
-    it "PayPal" do
+    it "PayPal", :paypal do
       visit "http://#{HOSTNAME}:#{PORT}"
 
       click_option("paypal")
@@ -160,7 +160,7 @@ describe "Drop-in" do
       expect(page).to have_content(ENV["PAYPAL_USERNAME"])
     end
 
-    it "PayPal Credit" do
+    it "PayPal Credit", :paypal do
       visit "http://#{HOSTNAME}:#{PORT}"
 
       click_option("paypalCredit")
