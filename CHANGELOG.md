@@ -11,6 +11,7 @@ unreleased
 - Add support for PayPal Credit
 - Fix bug where adding a vaulted payment method would duplicate previously added payment methods
 - Add support for tab navigation
+- Auto focus the number input when selecting the card view
 - Add events for `paymentMethodRequestable` and `noPaymentMethodRequestable`
 
 1.0.0-beta.6

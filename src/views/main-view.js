@@ -81,6 +81,8 @@ MainView.prototype._initialize = function () {
   }.bind(this));
 
   this.model.on('changeActivePaymentView', function (id) {
+    var activePaymentView = this.getView(id);
+
     if (id === PaymentMethodsView.ID) {
       classlist.add(this.paymentMethodsViews.container, 'braintree-methods--active');
       classlist.remove(this.sheetContainer, 'braintree-sheet--active');
@@ -95,6 +97,8 @@ MainView.prototype._initialize = function () {
         });
       }
     }
+
+    activePaymentView.onSelection();
   }.bind(this));
 
   if (hasMultiplePaymentOptions) {

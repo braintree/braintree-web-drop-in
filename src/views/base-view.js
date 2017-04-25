@@ -23,6 +23,8 @@ BaseView.prototype.getPaymentMethod = function () {
   return this.activeMethodView && this.activeMethodView.paymentMethod;
 };
 
+BaseView.prototype.onSelection = function () {};
+
 BaseView.prototype.teardown = function (cb) {
   cb();
 };

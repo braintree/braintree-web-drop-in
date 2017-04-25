@@ -344,6 +344,12 @@ CardView.prototype.requestPaymentMethod = function (callback) {
   this.tokenize(callback);
 };
 
+CardView.prototype.onSelection = function () {
+  if (this.hostedFieldsInstance) {
+    this.hostedFieldsInstance.focus('number');
+  }
+};
+
 CardView.prototype._hideUnsupportedCardIcons = function () {
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
