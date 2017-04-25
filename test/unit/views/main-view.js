@@ -554,11 +554,16 @@ describe('MainView', function () {
 
       this.mainView = new MainView(this.mainViewOptions);
       this.mainView._views = {
+        methods: {
+          onSelection: this.sandbox.stub()
+        },
         card: {
-          getPaymentMethod: this.sandbox.stub()
+          getPaymentMethod: this.sandbox.stub(),
+          onSelection: this.sandbox.stub()
         },
         paypal: {
-          getPaymentMethod: this.sandbox.stub()
+          getPaymentMethod: this.sandbox.stub(),
+          onSelection: this.sandbox.stub()
         }
       };
     });
@@ -588,6 +593,10 @@ describe('MainView', function () {
         it('does not call model.setPaymentMethodRequestable', function () {
           expect(this.model.setPaymentMethodRequestable).to.not.be.called;
         });
+
+        it('calls onSelection', function () {
+          expect(this.mainView._views.methods.onSelection).to.be.calledOnce;
+        });
       });
 
       describe('when a payment sheet is active', function () {
@@ -599,23 +608,33 @@ describe('MainView', function () {
         });
 
         [CardView, PayPalView].forEach(function (PaymentSheetView) {
-          beforeEach(function () {
-            this.model._emit('changeActivePaymentView', PaymentSheetView.ID);
-          });
+          var ID = PaymentSheetView.ID;
 
-          it('adds braintree-sheet--active to the payment sheet', function () {
-            this.sandbox.clock.tick(1001);
-            expect(this.sheetElement.className).to.contain('braintree-sheet--active');
-          });
+          describe('using a ' + ID + ' sheet', function () {
+            beforeEach(function () {
+              this.model._emit('changeActivePaymentView', ID);
+            });
 
-          it('removes braintree-methods--active from the payment methods view', function () {
-            this.sandbox.clock.tick(1001);
-            expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods--active');
-          });
+            it('adds braintree-sheet--active to the payment sheet', function () {
+              this.sandbox.clock.tick(1001);
+              expect(this.sheetElement.className).to.contain('braintree-sheet--active');
+            });
 
-          it('calls model.setPaymentMethodRequestable', function () {
-            expect(this.model.setPaymentMethodRequestable).to.be.calledWith({
-              isRequestable: false
+            it('removes braintree-methods--active from the payment methods view', function () {
+              this.sandbox.clock.tick(1001);
+              expect(this.paymentMethodsContainer.className).to.not.contain('braintree-methods--active');
+            });
+
+            it('calls model.setPaymentMethodRequestable', function () {
+              expect(this.model.setPaymentMethodRequestable).to.be.calledWith({
+                isRequestable: false
+              });
+            });
+
+            it('calls onSelection on specific view', function () {
+              var view = this.mainView._views[ID];
+
+              expect(view.onSelection).to.be.calledOnce;
             });
           });
         });

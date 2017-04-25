@@ -1467,4 +1467,37 @@ describe('CardView', function () {
       });
     });
   });
+
+  describe('onSelection', function () {
+    it('focuses on the number field', function () {
+      var view;
+
+      this.sandbox.stub(CardView.prototype, '_initialize');
+
+      view = new CardView({element: this.element});
+
+      view.hostedFieldsInstance = {
+        focus: this.sandbox.stub()
+      };
+
+      view.onSelection();
+
+      expect(view.hostedFieldsInstance.focus).to.be.calledOnce;
+      expect(view.hostedFieldsInstance.focus).to.be.calledWith('number');
+    });
+
+    it('noops if the hosted fields instance is not available', function () {
+      var view;
+
+      this.sandbox.stub(CardView.prototype, '_initialize');
+
+      view = new CardView({element: this.element});
+
+      delete view.hostedFieldsInstance;
+
+      expect(function () {
+        view.onSelection();
+      }).to.not.throw();
+    });
+  });
 });

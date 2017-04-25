@@ -66,4 +66,12 @@ describe('BaseView', function () {
       expect(view.getPaymentMethod()).to.equal(paymentMethod);
     });
   });
+
+  describe('onSelection', function () {
+    it('is a noop function', function () {
+      var view = new BaseView();
+
+      expect(view.onSelection).to.be.a('function');
+    });
+  });
 });

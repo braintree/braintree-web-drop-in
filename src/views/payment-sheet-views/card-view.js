@@ -55,16 +55,16 @@ CardView.prototype._initialize = function () {
         color: 'black'
       },
       '::-webkit-input-placeholder': {
-        color: 'rgba(0,0,0,0.25)'
+        color: '#6a6a6a'
       },
       ':-moz-placeholder': {
-        color: 'rgba(0,0,0,0.25)'
+        color: '#6a6a6a'
       },
       '::-moz-placeholder': {
-        color: 'rgba(0,0,0,0.25)'
+        color: '#6a6a6a'
       },
       ':-ms-input-placeholder ': {
-        color: 'rgba(0,0,0,0.25)'
+        color: '#6a6a6a'
       },
       'input::-ms-clear': {
         color: 'transparent'
@@ -342,6 +342,12 @@ CardView.prototype._onValidityChangeEvent = function (event) {
 CardView.prototype.requestPaymentMethod = function (callback) {
   classlist.add(this.element, 'braintree-sheet--loading');
   this.tokenize(callback);
+};
+
+CardView.prototype.onSelection = function () {
+  if (this.hostedFieldsInstance) {
+    this.hostedFieldsInstance.focus('number');
+  }
 };
 
 CardView.prototype._hideUnsupportedCardIcons = function () {
