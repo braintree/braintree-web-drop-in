@@ -715,7 +715,7 @@ describe('MainView', function () {
         });
 
         it('sets the PaymentMethodsView as the primary view', function () {
-          expect(this.mainView.setPrimaryView).to.have.been.calledWith(PaymentMethodsView.ID, sinon.match.any);
+          expect(this.mainView.setPrimaryView).to.have.been.calledWith(PaymentMethodsView.ID, this.sandbox.match.any);
           expect(this.wrapper.className).to.contain('braintree-show-' + PaymentMethodsView.ID);
           expect(this.mainView.model.getActivePaymentView()).to.equal(PaymentMethodsView.ID);
         });
