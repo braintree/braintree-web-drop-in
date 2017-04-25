@@ -55,16 +55,16 @@ CardView.prototype._initialize = function () {
         color: 'black'
       },
       '::-webkit-input-placeholder': {
-        color: 'rgba(0,0,0,0.25)'
+        color: '#6a6a6a'
       },
       ':-moz-placeholder': {
-        color: 'rgba(0,0,0,0.25)'
+        color: '#6a6a6a'
       },
       '::-moz-placeholder': {
-        color: 'rgba(0,0,0,0.25)'
+        color: '#6a6a6a'
       },
       ':-ms-input-placeholder ': {
-        color: 'rgba(0,0,0,0.25)'
+        color: '#6a6a6a'
       },
       'input::-ms-clear': {
         color: 'transparent'
