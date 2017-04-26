@@ -224,7 +224,7 @@ CardView.prototype.tokenize = function (callback) {
       classlist.add(self.element, 'braintree-sheet--tokenized');
     });
   } else {
-    self.model.reportError({message: self.strings.hostedFieldsFieldsInvalidError});
+    self.model.reportError('hostedFieldsFieldsInvalidError');
     callback(new DropinError(constants.errors.NO_PAYMENT_METHOD_ERROR));
     classlist.remove(self.element, 'braintree-sheet--loading');
   }

@@ -230,13 +230,17 @@ MainView.prototype.hideToggle = function () {
 };
 
 MainView.prototype.showSheetError = function (error) {
+  var translatedErrorMessage;
   var errorMessage = this.strings.genericError;
-  var translatedErrorMessage = error && error.code && this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
+
+  if (this.strings.hasOwnProperty(error)) {
+    translatedErrorMessage = this.strings[error];
+  } else if (error && error.code) {
+    translatedErrorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
+  }
 
   if (translatedErrorMessage) {
     errorMessage = translatedErrorMessage;
-  } else if (error && error.message) {
-    errorMessage = error.message;
   }
 
   classlist.add(this.sheetContainer, 'braintree-sheet--has-error');

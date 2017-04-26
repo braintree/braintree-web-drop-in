@@ -437,7 +437,7 @@ describe('MainView', function () {
 
       MainView.prototype.showSheetError.call(this.context, fakeError);
 
-      expect(this.context.sheetErrorText.textContent).to.equal('Some text we will use because we do not know this error code');
+      expect(this.context.sheetErrorText.textContent).to.equal('Something went wrong on our end.');
     });
 
     it('shows a fallback error message when the error code is unknown and the error is missing a message', function () {

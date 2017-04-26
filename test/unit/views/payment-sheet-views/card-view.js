@@ -1206,7 +1206,7 @@ describe('CardView', function () {
 
       CardView.prototype.tokenize.call(this.context, function (err, payload) {
         expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
-        expect(this.context.model.reportError).to.be.calledWith({message: 'Please check your information and try again.'});
+        expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
         expect(err.message).to.equal('No payment method is available.');
         expect(payload).to.not.exist;
         done();
@@ -1245,7 +1245,7 @@ describe('CardView', function () {
 
       expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
       expect(numberFieldError.textContent).to.equal('This card type is not supported. Please try another card.');
-      expect(this.context.model.reportError).to.be.calledWith({message: 'Please check your information and try again.'});
+      expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
       expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
     });
 
