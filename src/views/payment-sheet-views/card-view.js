@@ -4,6 +4,7 @@ var fs = require('fs');
 var BaseView = require('../base-view');
 var classlist = require('../../lib/classlist');
 var constants = require('../../constants');
+var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
 var transitionHelper = require('../../lib/transition-helper');
 
@@ -194,7 +195,10 @@ CardView.prototype.tokenize = function (callback) {
       if (err) {
         self._isTokenizing = false;
         self.model.reportError(err);
-        callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
+        callback(new DropinError({
+          message: constants.errors.NO_PAYMENT_METHOD_ERROR,
+          braintreeWebError: err
+        }));
         classlist.remove(self.element, 'braintree-sheet--loading');
         return;
       }
@@ -221,7 +225,7 @@ CardView.prototype.tokenize = function (callback) {
     });
   } else {
     self.model.reportError({message: self.strings.hostedFieldsFieldsInvalidError});
-    callback(new Error(constants.errors.NO_PAYMENT_METHOD_ERROR));
+    callback(new DropinError(constants.errors.NO_PAYMENT_METHOD_ERROR));
     classlist.remove(self.element, 'braintree-sheet--loading');
   }
 };
