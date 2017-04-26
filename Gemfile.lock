@@ -98,6 +98,3 @@ DEPENDENCIES
   sauce
   sauce-connect
   selenium-webdriver
-
-BUNDLED WITH
-   1.11.2

@@ -1,6 +1,5 @@
 'use strict';
 
-var Promise = require('../../src/lib/promise');
 var Dropin = require('../../src/dropin/');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
@@ -9,6 +8,7 @@ var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
 var paypal = require('paypal-checkout');
+var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 
 describe('Dropin', function () {
@@ -31,9 +31,10 @@ describe('Dropin', function () {
       }
     };
 
+    this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
     this.sandbox.stub(paypalCheckout, 'create').yieldsAsync(null, fake.paypalInstance);
-    this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
+    this.sandbox.stub(paypal.Button, 'render').resolves();
   });
 
   afterEach(function () {
@@ -495,6 +496,46 @@ describe('Dropin', function () {
           done();
         });
       }.bind(this));
+    });
+  });
+
+  describe('isPaymentMethodRequestable', function () {
+    it('returns the value of model.isPaymentMethodRequestable', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._model = {
+        isPaymentMethodRequestable: this.sandbox.stub().returns('foo')
+      };
+
+      expect(instance.isPaymentMethodRequestable()).to.equal('foo');
+    });
+  });
+
+  describe('payment method requestable events', function () {
+    it('emits paymentMethodRequestable event when the model emits paymentMethodRequestable', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.on('paymentMethodRequestable', function (event) {
+        expect(event.type).to.equal('Foo');
+
+        done();
+      });
+
+      instance._initialize(function () {
+        instance._model._emit('paymentMethodRequestable', {type: 'Foo'});
+      });
+    });
+
+    it('emits noPaymentMethodRequestable events when the model emits noPaymentMethodRequestable', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.on('noPaymentMethodRequestable', function () {
+        done();
+      });
+
+      instance._initialize(function () {
+        instance._model._emit('noPaymentMethodRequestable');
+      });
     });
   });
 });

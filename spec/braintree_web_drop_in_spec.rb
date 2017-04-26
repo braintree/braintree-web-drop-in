@@ -70,6 +70,59 @@ describe "Drop-in" do
     end
   end
 
+  describe "events" do
+    it "disable and enable submit button on credit card validity" do
+      visit "http://#{HOSTNAME}:#{PORT}"
+
+      click_option("card")
+
+      expect(page).to have_button('Pay', disabled: true)
+
+      # Put in valid state
+      hosted_field_send_input("number", "4111111111111111")
+      hosted_field_send_input("expirationDate", "1019")
+      hosted_field_send_input("cvv", "123")
+
+      expect(page).to have_button('Pay', disabled: false)
+
+      # Put in invalid state
+      hosted_field_send_input("expirationDate", :backspace)
+      hosted_field_send_input("expirationDate", "2")
+
+      expect(page).to have_button('Pay', disabled: true)
+
+      # Put in valid state again
+      hosted_field_send_input("expirationDate", :backspace)
+      hosted_field_send_input("expirationDate", "9")
+
+      expect(page).to have_button('Pay', disabled: false)
+    end
+
+    it "enable submit button on PayPal authorization" do
+      visit "http://#{HOSTNAME}:#{PORT}"
+
+      click_option("paypal")
+
+      expect(page).to have_button('Pay', disabled: true)
+
+      open_popup_and_complete_login
+
+      expect(page).to have_button('Pay', disabled: false)
+
+      find('.braintree-toggle').click
+
+      expect(page).to have_button('Pay', disabled: false)
+
+      click_option("paypal")
+
+      expect(page).to have_button('Pay', disabled: true)
+
+      find('.braintree-toggle').click
+
+      expect(page).to have_button('Pay', disabled: false)
+    end
+  end
+
   describe "tokenizes" do
     it "a card" do
       visit "http://#{HOSTNAME}:#{PORT}"
@@ -92,7 +145,7 @@ describe "Drop-in" do
       expect(page).to have_content("Visa")
     end
 
-    it "PayPal" do
+    it "PayPal", :paypal do
       visit "http://#{HOSTNAME}:#{PORT}"
 
       click_option("paypal")
@@ -107,7 +160,7 @@ describe "Drop-in" do
       expect(page).to have_content(ENV["PAYPAL_USERNAME"])
     end
 
-    it "PayPal Credit" do
+    it "PayPal Credit", :paypal do
       visit "http://#{HOSTNAME}:#{PORT}"
 
       click_option("paypalCredit")

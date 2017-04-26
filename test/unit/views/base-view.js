@@ -39,4 +39,39 @@ describe('BaseView', function () {
       });
     });
   });
+
+  describe('getPaymentMethod', function () {
+    it('returns undefined if there is no activeMethodView on instance', function () {
+      var view = new BaseView();
+
+      expect(view.getPaymentMethod()).to.equal(undefined); // eslint-disable-line no-undefined
+    });
+
+    it('returns undefined if activeMethodView does not have a payment method', function () {
+      var view = new BaseView();
+
+      view.activeMethodView = {};
+
+      expect(view.getPaymentMethod()).to.equal(undefined); // eslint-disable-line no-undefined
+    });
+
+    it('returns the payment method object if there is an activeMethodView with a payment method object', function () {
+      var view = new BaseView();
+      var paymentMethod = {};
+
+      view.activeMethodView = {
+        paymentMethod: paymentMethod
+      };
+
+      expect(view.getPaymentMethod()).to.equal(paymentMethod);
+    });
+  });
+
+  describe('onSelection', function () {
+    it('is a noop function', function () {
+      var view = new BaseView();
+
+      expect(view.onSelection).to.be.a('function');
+    });
+  });
 });

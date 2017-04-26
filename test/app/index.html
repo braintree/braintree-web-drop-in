@@ -61,7 +61,7 @@
 <form id="checkout-form">
   <div id="dropin-container"></div>
 
-  <input type="submit" value="Pay">
+  <input id="pay-button" type="submit" value="Pay" disabled>
   <button id="create-button" disabled type="button">Create</button>
   <button id="teardown-button" type="button">Teardown</button>
 </form>
@@ -92,6 +92,7 @@
   var form = document.querySelector('#checkout-form');
   var results = document.querySelector('#results');
   var error = document.querySelector('#error');
+  var payButton = document.querySelector('#pay-button');
   var createButton = document.querySelector('#create-button');
   var teardownButton = document.querySelector('#teardown-button');
 
@@ -133,13 +134,31 @@
   }
 
   function createDropin () {
+    var config = getDropinConfig();
+
     results.textContent = '';
     error.textContent = '';
 
-    braintree.dropin.create(getDropinConfig(), function (err, instance) {
+    braintree.dropin.create(config, function (err, instance) {
       if (err) {
         error.textContent = err.message;
         throw err;
+      }
+
+      if (!config.disablePaymentMethodRequestableListeners) {
+        if (instance.isPaymentMethodRequestable()) {
+          payButton.removeAttribute('disabled');
+        }
+
+        instance.on('paymentMethodRequestable', function (event) {
+          payButton.removeAttribute('disabled');
+        });
+
+        instance.on('noPaymentMethodRequestable', function (event) {
+          payButton.setAttribute('disabled', true);
+        });
+      } else {
+        payButton.removeAttribute('disabled');
       }
 
       teardownButton.removeAttribute('disabled');

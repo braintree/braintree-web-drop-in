@@ -39,7 +39,6 @@
     "is-uuid": "1.0.2",
     "karma": "0.13.22",
     "karma-browserify": "5.0.5",
-    "karma-chai-sinon": "0.1.5",
     "karma-mocha": "1.1.1",
     "karma-mocha-reporter": "2.0.3",
     "karma-phantomjs-launcher": "1.0.0",
@@ -49,14 +48,14 @@
     "run-sequence": "1.2.2",
     "sauce-connect-launcher": "0.14.0",
     "serve-static": "1.11.1",
-    "sinon": "1.17.4",
-    "sinon-chai": "2.8.0",
+    "sinon": "2.1.0",
+    "sinon-chai": "2.9.0",
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
-    "braintree-web": "3.13.0",
+    "braintree-web": "3.14.0",
     "browser-detection": "braintree/browser-detection#1.1.0",
-    "paypal-checkout": "4.0.51",
+    "paypal-checkout": "4.0.60",
     "promise-polyfill": "6.0.2"
   },
   "browserify": {
