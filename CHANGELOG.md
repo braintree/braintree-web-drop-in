@@ -4,12 +4,15 @@ CHANGELOG
 unreleased
 ----------
 - Use PayPal Checkout for PayPal View
-- Use version 3.12.0 of braintree-web
+- Use version 3.14.0 of braintree-web
+- Use version 4.0.60 of paypal-checkout
 - Improve loading transition
 - Add full support for IE 9 and 10
 - Add support for PayPal Credit
 - Fix bug where adding a vaulted payment method would duplicate previously added payment methods
 - Add support for tab navigation
+- Auto focus the number input when selecting the card view
+- Add events for `paymentMethodRequestable` and `noPaymentMethodRequestable`
 - Fix bug where PayPal button was not being translated
 
 1.0.0-beta.6

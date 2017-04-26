@@ -19,6 +19,12 @@ BaseView.prototype.requestPaymentMethod = function (callback) {
   callback(new Error(errors.NO_PAYMENT_METHOD_ERROR));
 };
 
+BaseView.prototype.getPaymentMethod = function () {
+  return this.activeMethodView && this.activeMethodView.paymentMethod;
+};
+
+BaseView.prototype.onSelection = function () {};
+
 BaseView.prototype.teardown = function (cb) {
   cb();
 };

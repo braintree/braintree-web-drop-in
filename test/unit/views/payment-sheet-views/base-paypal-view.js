@@ -1,7 +1,6 @@
 'use strict';
 /* eslint-disable no-new */
 
-var Promise = require('../../../../src/lib/promise');
 var BaseView = require('../../../../src/views/base-view');
 var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
@@ -40,11 +39,11 @@ describe('BasePayPalView', function () {
       }
     };
     this.paypalInstance = {
-      createPayment: this.sandbox.stub().returns(Promise.resolve()),
-      tokenizePayment: this.sandbox.stub().returns(Promise.resolve())
+      createPayment: this.sandbox.stub().resolves(),
+      tokenizePayment: this.sandbox.stub().resolves()
     };
     this.sandbox.stub(PayPalCheckout, 'create').yieldsAsync(null, this.paypalInstance);
-    this.sandbox.stub(paypal.Button, 'render').returns(Promise.resolve());
+    this.sandbox.stub(paypal.Button, 'render').resolves();
   });
 
   afterEach(function () {
@@ -176,28 +175,24 @@ describe('BasePayPalView', function () {
       var fakeLocaleCode = 'fake_LOCALE';
       var paypalInstance = this.paypalInstance;
       var model = this.model;
-      var view = this.view;
 
       model.merchantConfiguration.locale = fakeLocaleCode;
 
-      paypal.Button.render.returns(Promise.resolve().then(function () {
-        // for some reason, this needs to be in a set timeout to grab the args from render
-        setTimeout(function () {
-          var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
+      paypal.Button.render.resolves();
 
-          paymentFunction().then(function () {
-            waitForInitialize(function () {
-              expect(paypalInstance.createPayment).to.be.calledOnce;
-              expect(paypalInstance.createPayment).to.be.calledWithMatch({
-                locale: 'fake_LOCALE'
-              });
-              done();
-            });
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
+
+        paymentFunction().then(function () {
+          expect(paypalInstance.createPayment).to.be.calledOnce;
+          expect(paypalInstance.createPayment).to.be.calledWithMatch({
+            locale: 'fake_LOCALE'
           });
-        }, 0);
-      }));
-
-      view._initialize();
+          done();
+        });
+      });
     });
 
     it('calls paypal.Button.render with a locale if one is provided', function (done) {
@@ -221,24 +216,21 @@ describe('BasePayPalView', function () {
       var model = this.model;
       var error = new Error('create payment error');
 
-      this.paypalInstance.createPayment.returns(Promise.reject(error));
+      this.paypalInstance.createPayment.rejects(error);
 
-      paypal.Button.render.returns(Promise.resolve().then(function () {
-        // for some reason, this needs to be in a set timeout to grab the args from render
-        setTimeout(function () {
-          var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
-
-          paymentFunction().then(function () {
-            waitForInitialize(function () {
-              expect(model.reportError).to.be.calledOnce;
-              expect(model.reportError).to.be.calledWith(error);
-              done();
-            });
-          });
-        }, 0);
-      }));
+      paypal.Button.render.resolves();
 
       this.view._initialize();
+
+      waitForInitialize(function () {
+        var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
+
+        paymentFunction().then(function () {
+          expect(model.reportError).to.be.calledOnce;
+          expect(model.reportError).to.be.calledWith(error);
+          done();
+        });
+      });
     });
 
     it('calls addPaymentMethod when paypal is tokenized', function (done) {
@@ -248,32 +240,31 @@ describe('BasePayPalView', function () {
         foo: 'bar'
       };
 
-      paypalInstance.tokenizePayment.returns(Promise.resolve(fakePayload));
+      paypalInstance.tokenizePayment.resolves(fakePayload);
       this.sandbox.stub(model, 'addPaymentMethod');
 
-      paypal.Button.render.returns(Promise.resolve().then(function () {
-        // for some reason, this needs to be in a set timeout to grab the args from render
-        setTimeout(function () {
-          var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
-          var tokenizeOptions = {
-            foo: 'bar'
-          };
-
-          onAuthFunction(tokenizeOptions);
-
-          waitForInitialize(function () {
-            expect(paypalInstance.tokenizePayment).to.be.calledOnce;
-            expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
-
-            expect(model.addPaymentMethod).to.be.calledOnce;
-            expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
-
-            done();
-          });
-        }, 0);
-      }));
+      paypal.Button.render.resolves();
 
       this.view._initialize();
+
+      waitForInitialize(function () {
+        var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
+        var tokenizeOptions = {
+          foo: 'bar'
+        };
+
+        onAuthFunction(tokenizeOptions);
+
+        expect(paypalInstance.tokenizePayment).to.be.calledOnce;
+        expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
+
+        setTimeout(function () {
+          expect(model.addPaymentMethod).to.be.calledOnce;
+          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
+
+          done();
+        }, 100);
+      });
     });
 
     it('reports errors from tokenizePayment', function (done) {
@@ -281,52 +272,47 @@ describe('BasePayPalView', function () {
       var model = this.model;
       var error = new Error('tokenize error');
 
-      paypalInstance.tokenizePayment.returns(Promise.reject(error));
+      paypalInstance.tokenizePayment.rejects(error);
       this.sandbox.stub(model, 'addPaymentMethod');
 
-      paypal.Button.render.returns(Promise.resolve().then(function () {
-        // for some reason, this needs to be in a set timeout to grab the args from render
-        setTimeout(function () {
-          var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
-          var tokenizeOptions = {
-            foo: 'bar'
-          };
-
-          onAuthFunction(tokenizeOptions);
-
-          waitForInitialize(function () {
-            expect(model.reportError).to.be.calledOnce;
-            expect(model.reportError).to.be.calledWith(error);
-
-            done();
-          });
-        }, 0);
-      }));
+      paypal.Button.render.resolves();
 
       this.view._initialize();
+
+      waitForInitialize(function () {
+        var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
+        var tokenizeOptions = {
+          foo: 'bar'
+        };
+
+        onAuthFunction(tokenizeOptions);
+
+        setTimeout(function () {
+          expect(model.reportError).to.be.calledOnce;
+          expect(model.reportError).to.be.calledWith(error);
+
+          done();
+        }, 100);
+      });
     });
 
     it('reports errors from paypal-checkout', function (done) {
       var model = this.model;
 
-      paypal.Button.render.returns(Promise.resolve().then(function () {
-        // for some reason, this needs to be in a set timeout to grab the args from render
-        setTimeout(function () {
-          var onErrorFunction = paypal.Button.render.getCall(0).args[0].onError;
-          var err = new Error('Some error');
-
-          onErrorFunction(err);
-
-          waitForInitialize(function () {
-            expect(model.reportError).to.be.calledOnce;
-            expect(model.reportError).to.be.calledWith(err);
-
-            done();
-          });
-        }, 0);
-      }));
-
+      paypal.Button.render.resolves();
       this.view._initialize();
+
+      waitForInitialize(function () {
+        var onErrorFunction = paypal.Button.render.getCall(0).args[0].onError;
+        var err = new Error('Some error');
+
+        onErrorFunction(err);
+
+        expect(model.reportError).to.be.calledOnce;
+        expect(model.reportError).to.be.calledWith(err);
+
+        done();
+      });
     });
 
     describe('with PayPal', function () {
