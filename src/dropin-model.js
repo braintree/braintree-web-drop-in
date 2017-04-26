@@ -1,5 +1,6 @@
 'use strict';
 
+var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('./lib/event-emitter');
 var paymentOptionIDs = require('./constants').paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
@@ -125,7 +126,7 @@ function getSupportedPaymentOptions(options) {
   var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit'];
 
   if (!(paymentOptionPriority instanceof Array)) {
-    throw new Error('paymentOptionPriority must be an array.');
+    throw new DropinError('paymentOptionPriority must be an array.');
   }
 
   // Remove duplicates
@@ -138,7 +139,7 @@ function getSupportedPaymentOptions(options) {
   });
 
   if (result.length === 0) {
-    throw new Error('No valid payment options available.');
+    throw new DropinError('No valid payment options available.');
   }
 
   return result;
@@ -154,7 +155,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
   } else if (paymentOption === 'paypalCredit') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
   }
-  throw new Error('paymentOptionPriority: Invalid payment option specified.');
+  throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }
 
 module.exports = DropinModel;

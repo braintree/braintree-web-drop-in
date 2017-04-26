@@ -5,18 +5,19 @@ var client = require('braintree-web/client');
 var deferred = require('./lib/deferred');
 var constants = require('./constants');
 var analytics = require('./lib/analytics');
+var DropinError = require('./lib/dropin-error');
 
 var VERSION = process.env.npm_package_version;
 
 function create(options, callback) {
   if (typeof callback !== 'function') {
-    throw new Error('create must include a callback function.');
+    throw new DropinError('create must include a callback function.');
   }
 
   callback = deferred(callback);
 
   if (!options.authorization) {
-    callback(new Error('options.authorization is required.'));
+    callback(new DropinError('options.authorization is required.'));
     return;
   }
 
@@ -24,7 +25,10 @@ function create(options, callback) {
     authorization: options.authorization
   }, function (err, clientInstance) {
     if (err) {
-      callback(err);
+      callback(new DropinError({
+        message: 'There was an error creating Drop-in.',
+        braintreeWebError: err
+      }));
       return;
     }
 
