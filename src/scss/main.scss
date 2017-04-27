@@ -1,5 +1,6 @@
 // Colors
 $border-color: #B5B5B5;
+$border-color-hover: #7d7d7d;
 $text-color: #000000;
 $background-color: #FAFAFA;
 $background-hover: #FCFCFC;
@@ -512,11 +513,11 @@ $loader-scale-duration: 300ms;
         padding: 0 8px;
 
         &:hover {
-          border-color: $black-40;
+          border-color: $border-color-hover;
         }
 
         &.braintree-form__field--valid {
-          border-color: $black-45;
+          border-color: $black-40;
         }
       }
     }
