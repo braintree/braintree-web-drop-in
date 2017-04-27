@@ -66,7 +66,6 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function (err) {
-        expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('options.selector is required.');
         expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
         done();

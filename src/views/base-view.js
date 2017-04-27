@@ -1,6 +1,7 @@
 'use strict';
 
 var assign = require('../lib/assign').assign;
+var DropinError = require('../lib/dropin-error');
 var errors = require('../constants').errors;
 
 function BaseView(options) {
@@ -16,7 +17,7 @@ BaseView.prototype.getElementById = function (id) {
 };
 
 BaseView.prototype.requestPaymentMethod = function (callback) {
-  callback(new Error(errors.NO_PAYMENT_METHOD_ERROR));
+  callback(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
 };
 
 BaseView.prototype.getPaymentMethod = function () {

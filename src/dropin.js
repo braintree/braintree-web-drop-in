@@ -4,6 +4,7 @@ var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
 var MainView = require('./views/main-view');
 var constants = require('./constants');
+var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
@@ -41,7 +42,7 @@ Dropin.prototype._initialize = function (callback) {
 
   if (!this._merchantConfiguration.selector) {
     analytics.sendEvent(this._client, 'configuration-error');
-    callback(new Error('options.selector is required.'));
+    callback(new DropinError('options.selector is required.'));
     return;
   }
 
@@ -49,11 +50,11 @@ Dropin.prototype._initialize = function (callback) {
 
   if (!container) {
     analytics.sendEvent(this._client, 'configuration-error');
-    callback(new Error('options.selector must reference a valid DOM node.'));
+    callback(new DropinError('options.selector must reference a valid DOM node.'));
     return;
   } else if (container.innerHTML.trim()) {
     analytics.sendEvent(this._client, 'configuration-error');
-    callback(new Error('options.selector must reference an empty DOM node.'));
+    callback(new DropinError('options.selector must reference an empty DOM node.'));
     return;
   }
 
@@ -95,7 +96,7 @@ Dropin.prototype._initialize = function (callback) {
       } else {
         analytics.sendEvent(this._client, 'load-error');
         this._dropinWrapper.innerHTML = '';
-        callback(new Error('All payment options failed to load.'));
+        callback(new DropinError('All payment options failed to load.'));
       }
     }.bind(this));
 

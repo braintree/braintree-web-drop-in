@@ -15,6 +15,7 @@ unreleased
 - Add events for `paymentMethodRequestable` and `noPaymentMethodRequestable`
 - Fix bug where PayPal button was not being translated
 - Fix bug where unusable payment methods would be displayed if saved in the vault
+- Provide more specific tokenization errors for duplicate payment methods and cvv verification failures
 
 1.0.0-beta.6
 ------------
