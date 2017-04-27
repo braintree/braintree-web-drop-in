@@ -1,7 +1,9 @@
 // Colors
 $border-color: #B5B5B5;
+$border-color-hover: #7d7d7d;
 $text-color: #000000;
 $background-color: #FAFAFA;
+$background-hover: #FCFCFC;
 $highlight-color: #219653;
 $error-color: #CA2A2A;
 $black-40: lighten(#000000, 40%);
@@ -243,6 +245,14 @@ $loader-scale-duration: 300ms;
   display: flex;
   padding: 12px 10px;
 
+  &:hover {
+    background: white;
+  }
+
+  &:hover .braintree-option__label {
+    font-weight: 500;
+  }
+
   &.braintree-disabled {
     background: #EAEAEA;
     cursor: not-allowed;
@@ -462,6 +472,10 @@ $loader-scale-duration: 300ms;
 
       .braintree-form__field .braintree-form__hosted-field {
         border-color: $error-color;
+
+        &:hover {
+          border-color: $error-color;
+        }
       }
     }
 
@@ -498,8 +512,12 @@ $loader-scale-duration: 300ms;
         margin: 4px 0 0;
         padding: 0 8px;
 
+        &:hover {
+          border-color: $border-color-hover;
+        }
+
         &.braintree-form__field--valid {
-          border-color: $black-45;
+          border-color: $black-40;
         }
       }
     }
@@ -574,6 +592,10 @@ $loader-scale-duration: 300ms;
   transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutBack, border-color 300ms, border-radius 300ms;
   width: 99%;
   z-index: 0;
+
+  &:hover .braintree-method__label {
+    font-weight: 500;
+  }
 
   &:first-child {
     border-radius: $radius-default $radius-default 0 0;
@@ -685,6 +707,15 @@ $loader-scale-duration: 300ms;
   padding: 18px;
   text-align: center;
   width: 99%;
+
+  &:hover {
+    background: $background-hover;
+    font-weight: 500;
+  }
+
+  &:hover span {
+    border-color: black;
+  }
 
   span {
     border-bottom: 1px solid $border-color;
