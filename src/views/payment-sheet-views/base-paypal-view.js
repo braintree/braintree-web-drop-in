@@ -51,6 +51,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
     self.paypalConfiguration.offerCredit = Boolean(isCredit);
     checkoutJSConfiguration = {
       env: environment,
+      locale: locale,
       payment: function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
       },
