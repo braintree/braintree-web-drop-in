@@ -16,6 +16,7 @@ unreleased
 - Fix bug where PayPal button was not being translated
 - Fix bug where unusable payment methods would be displayed if saved in the vault
 - Provide more specific tokenization errors for duplicate payment methods and cvv verification failures
+- Fix styling bug where hosted fields iframe margin style could be overwritten
 
 1.0.0-beta.6
 ------------
