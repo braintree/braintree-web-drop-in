@@ -458,6 +458,10 @@ $loader-scale-duration: 300ms;
    ========================================================================= */
 .braintree-form__hosted-field {
   transition: border-color 100ms;
+
+  iframe {
+    margin: auto;
+  }
 }
 
 .braintree-sheet__content--form {
