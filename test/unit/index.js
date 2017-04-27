@@ -78,7 +78,7 @@ describe('dropin.create', function () {
       _request: function () {}
     };
 
-    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
     });
 
@@ -125,7 +125,7 @@ describe('dropin.create', function () {
       _request: function () {}
     };
 
-    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
     });
 
@@ -151,7 +151,7 @@ describe('dropin.create', function () {
       _request: function () {}
     };
 
-    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
     });
     this.sandbox.stub(analytics, 'sendEvent');
@@ -180,7 +180,7 @@ describe('dropin.create', function () {
       _request: function () {}
     };
 
-    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
     });
     this.sandbox.stub(analytics, 'sendEvent');
