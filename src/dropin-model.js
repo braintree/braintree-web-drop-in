@@ -1,11 +1,12 @@
 'use strict';
 
 var EventEmitter = require('./lib/event-emitter');
-var paymentOptionIDs = require('./constants').paymentOptionIDs;
+var constants = require('./constants');
+var paymentMethodTypes = constants.paymentMethodTypes;
+var paymentOptionIDs = constants.paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
 
 function DropinModel(options) {
-  this._paymentMethods = options.paymentMethods;
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
 
@@ -14,9 +15,10 @@ function DropinModel(options) {
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
-  this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
 
   this.supportedPaymentOptions = getSupportedPaymentOptions(options);
+  this._paymentMethods = this._getSupportedPaymentMethods(options.paymentMethods);
+  this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
 
   EventEmitter.call(this);
 }
@@ -118,6 +120,22 @@ DropinModel.prototype.reportError = function (error) {
 
 DropinModel.prototype.clearError = function () {
   this._emit('errorCleared');
+};
+
+DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
+  var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
+    var paymentMethodType = paymentMethodTypes[key];
+
+    if (paymentMethodType) {
+      array.push(paymentMethodType);
+    }
+
+    return array;
+  }, []);
+
+  return paymentMethods.filter(function (paymentMethod) {
+    return supportedPaymentMethods.indexOf(paymentMethod.type) > -1;
+  });
 };
 
 function getSupportedPaymentOptions(options) {

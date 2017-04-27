@@ -8,7 +8,8 @@ module.exports = {
   },
   paymentMethodTypes: {
     card: 'CreditCard',
-    paypal: 'PayPalAccount'
+    paypal: 'PayPalAccount',
+    paypalCredit: 'PayPalAccount'
   },
   analyticsKinds: {
     CreditCard: 'card',
