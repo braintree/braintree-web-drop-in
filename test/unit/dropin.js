@@ -300,8 +300,8 @@ describe('Dropin', function () {
       var instance;
       var fakePaymentMethod = {
         nonce: 'nonce',
-        details: {},
-        type: 'type',
+        details: {lastTwo: '11'},
+        type: 'CreditCard',
         garbage: 'garbage'
       };
       var paymentMethodsPayload = {paymentMethods: [fakePaymentMethod]};
@@ -323,8 +323,8 @@ describe('Dropin', function () {
         var existingPaymentMethod = instance._model.getPaymentMethods()[0];
 
         expect(existingPaymentMethod.nonce).to.equal('nonce');
-        expect(existingPaymentMethod.details).to.deep.equal({});
-        expect(existingPaymentMethod.type).to.equal('type');
+        expect(existingPaymentMethod.details).to.deep.equal({lastTwo: '11'});
+        expect(existingPaymentMethod.type).to.equal('CreditCard');
         expect(existingPaymentMethod.garbage).to.not.exist;
         done();
       });

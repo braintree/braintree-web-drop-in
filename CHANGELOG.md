@@ -14,6 +14,7 @@ unreleased
 - Auto focus the number input when selecting the card view
 - Add events for `paymentMethodRequestable` and `noPaymentMethodRequestable`
 - Fix bug where PayPal button was not being translated
+- Fix bug where unusable payment methods would be displayed if saved in the vault
 
 1.0.0-beta.6
 ------------
