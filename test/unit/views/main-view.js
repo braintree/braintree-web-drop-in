@@ -103,7 +103,7 @@ describe('MainView', function () {
 
         element.innerHTML = templateHTML;
 
-        modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
+        modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}, {type: 'PayPalAccount'}];
         this.model = new DropinModel(modelOptions);
         this.model.supportedPaymentOptions = ['card', 'paypal'];
 
@@ -127,7 +127,7 @@ describe('MainView', function () {
 
         new MainView(this.mainViewOptions); // eslint-disable-line no-new
 
-        expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({foo: 'bar'});
+        expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({type: 'CreditCard', details: {lastTwo: '11'}});
       });
 
       it('sets the PaymentMethodsView as the primary view', function () {
@@ -720,7 +720,7 @@ describe('MainView', function () {
         beforeEach(function () {
           var modelOptions = fake.modelOptions();
 
-          modelOptions.paymentMethods = [{foo: 'bar'}];
+          modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
 
           this.mainViewOptions.model = new DropinModel(modelOptions);
           this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];

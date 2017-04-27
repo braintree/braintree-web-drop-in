@@ -32,7 +32,7 @@ describe('PaymentMethodsView', function () {
       this.element.innerHTML = mainHTML;
     });
 
-    it('adds all vaulted payment methods', function () {
+    it('adds supported vaulted payment methods', function () {
       var model, paymentMethodsViews;
       var modelOptions = fake.modelOptions();
 
@@ -43,13 +43,15 @@ describe('PaymentMethodsView', function () {
           gatewayConfiguration: fake.configuration().gatewayConfiguration
         };
       };
-      modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
+      modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}, {type: 'PayPalAccount', details: {email: 'wow@example.com'}}, {type: 'UnsupportedPaymentMethod'}];
+      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       model = new DropinModel(modelOptions);
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
         merchantConfiguration: {
+          paypal: modelOptions.merchantConfiguration.paypal,
           authorization: fake.clientTokenWithCustomerID
         },
         strings: strings
@@ -62,7 +64,7 @@ describe('PaymentMethodsView', function () {
     it('puts default payment method as first item in list', function () {
       var firstChildLabel, model, paymentMethodsViews;
       var creditCard = {
-        details: {type: 'Visa'},
+        details: {cardType: 'Visa'},
         type: 'CreditCard'
       };
       var paypalAccount = {
@@ -79,14 +81,13 @@ describe('PaymentMethodsView', function () {
         };
       };
       modelOptions.paymentMethods = [paypalAccount, creditCard];
+      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       model = new DropinModel(modelOptions);
       paymentMethodsViews = new PaymentMethodsView({
         element: this.element,
         model: model,
-        merchantConfiguration: {
-          authorization: fake.clientTokenWithCustomerID
-        },
+        merchantConfiguration: modelOptions.merchantConfiguration,
         strings: strings
       });
 
@@ -190,7 +191,10 @@ describe('PaymentMethodsView', function () {
 
       div.innerHTML = mainHTML;
       this.element = div.querySelector('.braintree-dropin');
-      this.fakePaymentMethod = {bax: 'qux'};
+      this.fakePaymentMethod = {
+        type: 'CreditCard',
+        details: {lastTwo: '11'}
+      };
     });
 
     it('does not remove other payment methods in non-guest checkout', function () {

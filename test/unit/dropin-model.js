@@ -43,17 +43,52 @@ describe('DropinModel', function () {
       it('sets existing payment methods as _paymentMethods', function () {
         var model;
 
-        this.modelOptions.paymentMethods = ['foo'];
+        this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
 
         model = new DropinModel(this.modelOptions);
 
-        expect(model._paymentMethods).to.deep.equal(['foo']);
+        expect(model._paymentMethods).to.deep.equal([{type: 'CreditCard', details: {lastTwo: '11'}}]);
       });
 
       it('_paymentMethods is empty if no existing payment methods', function () {
         var model = new DropinModel(this.modelOptions);
 
         expect(model._paymentMethods).to.deep.equal([]);
+      });
+
+      it('ignores invalid payment methods', function () {
+        var model;
+
+        this.modelOptions.paymentMethods = [
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+          {type: 'InvalidMethod', details: {}},
+          {type: 'AlsoInvalidMethod', details: {}}
+        ];
+
+        this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+        model = new DropinModel(this.modelOptions);
+
+        expect(model._paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+        ]);
+      });
+
+      it('ignores valid, but disabled payment methods', function () {
+        var model;
+
+        this.modelOptions.paymentMethods = [
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+        ];
+
+        delete this.modelOptions.merchantConfiguration.paypal;
+        model = new DropinModel(this.modelOptions);
+
+        expect(model._paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}}
+        ]);
       });
     });
 
@@ -369,7 +404,7 @@ describe('DropinModel', function () {
     it('returns true initially if payment methods are passed in', function () {
       var model;
 
-      this.modelOptions.paymentMethods = [{foo: 'bar'}];
+      this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
       model = new DropinModel(this.modelOptions);
 
       expect(model.isPaymentMethodRequestable()).to.equal(true);
