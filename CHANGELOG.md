@@ -13,6 +13,7 @@ unreleased
 - Add support for tab navigation
 - Auto focus the number input when selecting the card view
 - Add events for `paymentMethodRequestable` and `noPaymentMethodRequestable`
+- Fix bug where PayPal button was not being translated
 
 1.0.0-beta.6
 ------------

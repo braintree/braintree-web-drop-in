@@ -195,6 +195,23 @@ describe('BasePayPalView', function () {
       });
     });
 
+    it('calls paypal.Button.render with a locale if one is provided', function (done) {
+      var fakeLocaleCode = 'fake_LOCALE';
+      var model = this.model;
+      var view = this.view;
+
+      model.merchantConfiguration.locale = fakeLocaleCode;
+
+      view._initialize();
+
+      waitForInitialize(function () {
+        expect(paypal.Button.render).to.be.calledWithMatch({
+          locale: 'fake_LOCALE'
+        });
+        done();
+      });
+    });
+
     it('reports errors from createPayment', function (done) {
       var model = this.model;
       var error = new Error('create payment error');
