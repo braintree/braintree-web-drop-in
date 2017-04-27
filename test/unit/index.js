@@ -2,6 +2,8 @@
 
 var dropin = require('../../src/index');
 var Dropin = require('../../src/dropin');
+var DropinError = require('../../src/lib/dropin-error');
+var BraintreeError = require('braintree-web/lib/braintree-error');
 var client = require('braintree-web/client');
 var fake = require('../helpers/fake');
 var dropinConstants = require('../../src/constants');
@@ -27,7 +29,7 @@ describe('dropin.create', function () {
 
   it('errors out if no authorization given', function (done) {
     dropin.create({}, function (err, instance) {
-      expect(err).to.be.an.instanceOf(Error);
+      expect(err).to.be.an.instanceof(DropinError);
       expect(err.message).to.equal('options.authorization is required.');
       expect(instance).not.to.exist;
       done();
@@ -35,7 +37,11 @@ describe('dropin.create', function () {
   });
 
   it('returns an error if client.create errors', function (done) {
-    var originalErr = new Error('you goofed!!');
+    var originalErr = new BraintreeError({
+      type: 'MERCHANT',
+      code: 'CODE',
+      message: 'you goofed!!'
+    });
 
     client.create.yields(originalErr);
 
@@ -43,7 +49,9 @@ describe('dropin.create', function () {
       authorization: 'tokenization_key',
       selector: '#foo'
     }, function (err, instance) {
-      expect(err).to.equal(originalErr);
+      expect(err).to.be.an.instanceof(DropinError);
+      expect(err.message).to.equal('There was an error creating Drop-in.');
+      expect(err._braintreeWebError).to.equal(originalErr);
       expect(instance).not.to.exist;
       done();
     });
@@ -56,7 +64,7 @@ describe('dropin.create', function () {
         selector: '#foo'
       });
     } catch (err) {
-      expect(err).to.be.an.instanceOf(Error);
+      expect(err).to.be.an.instanceof(DropinError);
       expect(err.message).to.equal('create must include a callback function.');
 
       done();
@@ -70,7 +78,7 @@ describe('dropin.create', function () {
       _request: function () {}
     };
 
-    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
     });
 
@@ -93,7 +101,7 @@ describe('dropin.create', function () {
       request: function () {},
       _request: function () {}
     };
-    var dropinError = new Error('Dropin Error');
+    var dropinError = new DropinError('Dropin Error');
 
     this.sandbox.stub(Dropin.prototype, '_initialize').yields(dropinError);
 
@@ -117,7 +125,7 @@ describe('dropin.create', function () {
       _request: function () {}
     };
 
-    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
     });
 
@@ -143,7 +151,7 @@ describe('dropin.create', function () {
       _request: function () {}
     };
 
-    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
     });
     this.sandbox.stub(analytics, 'sendEvent');
@@ -172,7 +180,7 @@ describe('dropin.create', function () {
       _request: function () {}
     };
 
-    this.sandbox.stub(Dropin.prototype, '_initialize', function (callback) {
+    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
     });
     this.sandbox.stub(analytics, 'sendEvent');
