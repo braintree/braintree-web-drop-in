@@ -48,7 +48,6 @@ RSpec.configure do |config|
   config.around(:each) do |c|
     c.run_with_retry(retry: 2)
   end
-  config.fail_fast = 1
 
   config.around(:each, :paypal) do |c|
     c.run_with_retry(retry: 4, retry_wait: 4)

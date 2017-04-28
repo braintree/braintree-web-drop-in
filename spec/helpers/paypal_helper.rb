@@ -23,19 +23,19 @@ module PayPal
   end
 
   def login_to_paypal
-		expect(page).to have_text("Pay with PayPal", wait: 30)
+    expect(page).to have_text("Pay with PayPal", wait: 30)
 
-		login_iframe = find("#injectedUnifiedLogin iframe")
+    login_iframe = find("#injectedUnifiedLogin iframe")
 
-		within_frame login_iframe do
-			fill_in("email", :with => ENV["PAYPAL_USERNAME"])
-			fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
+    within_frame login_iframe do
+      fill_in("email", :with => ENV["PAYPAL_USERNAME"])
+      fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
 
       sleep 1
 
-			click_button("btnLogin")
-		end
+      click_button("btnLogin")
+    end
 
-		expect(page).to have_selector("#confirmButtonTop")
+    expect(page).to have_selector("#confirmButtonTop")
   end
 end
