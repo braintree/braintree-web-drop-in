@@ -9,7 +9,10 @@ module DropIn
   end
 
   def submit_pay
-    sleep 1
-    find("input[type='submit']").click
+    button = find("input[type='submit']")
+
+    sleep 2
+
+    button.click
   end
 end
