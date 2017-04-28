@@ -15,8 +15,6 @@ module PayPal
 
       block.call if block
 
-      sleep 1
-
       click_button("confirmButtonTop", wait: 30)
     end
 
@@ -32,6 +30,8 @@ module PayPal
 		within_frame login_iframe do
 			fill_in("email", :with => ENV["PAYPAL_USERNAME"])
 			fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
+
+      sleep 1
 
 			click_button("btnLogin")
 		end
