@@ -15,6 +15,8 @@ module PayPal
 
       block.call if block
 
+      sleep 1
+
       click_button("confirmButtonTop", wait: 30)
     end
 
