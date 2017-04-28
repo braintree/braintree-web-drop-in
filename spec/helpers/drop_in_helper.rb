@@ -9,6 +9,7 @@ module DropIn
   end
 
   def submit_pay
+    sleep 1
     find("input[type='submit']").click
   end
 end
