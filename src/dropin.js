@@ -2,19 +2,21 @@
 
 var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
-var MainView = require('./views/main-view');
 var constants = require('./constants');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var fs = require('fs');
+var MainView = require('./views/main-view');
+var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
+var DEFAULT_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;
 
 function Dropin(options) {
@@ -35,7 +37,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var container, strings, localizedStrings, localizedHTML;
+  var container, localizedStrings, localizedHTML, strings;
   var dropinInstance = this; // eslint-disable-line consistent-this
 
   this._injectStylesheet();
@@ -74,6 +76,8 @@ Dropin.prototype._initialize = function (callback) {
   container.appendChild(this._dropinWrapper);
 
   this._getVaultedPaymentMethods(function (paymentMethods) {
+    var paypalRequired;
+
     try {
       this._model = new DropinModel({
         client: this._client,
@@ -108,13 +112,33 @@ Dropin.prototype._initialize = function (callback) {
       this._emit('noPaymentMethodRequestable');
     }.bind(this));
 
-    this._mainView = new MainView({
-      client: this._client,
-      element: this._dropinWrapper,
-      model: this._model,
-      strings: strings
-    });
+    function createMainView() {
+      dropinInstance._mainView = new MainView({
+        client: dropinInstance._client,
+        element: dropinInstance._dropinWrapper,
+        model: dropinInstance._model,
+        strings: strings
+      });
+    }
+
+    paypalRequired = this._model.supportedPaymentOptions.indexOf(paymentOptionIDs.paypal) !== -1 || this._model.supportedPaymentOptions.indexOf(paymentOptionIDs.paypalCredit) !== -1;
+
+    if (paypalRequired) {
+      this._loadPayPalScript(createMainView);
+    } else {
+      createMainView();
+    }
   }.bind(this));
+};
+
+Dropin.prototype._loadPayPalScript = function (callback) {
+  var script = document.createElement('script');
+
+  script.src = constants.CHECKOUT_JS_SOURCE;
+  script.async = true;
+  script.addEventListener('load', callback);
+  script.setAttribute('data-log-level', this._merchantConfiguration.paypal.logLevel || DEFAULT_LOG_LEVEL);
+  this._dropinWrapper.appendChild(script);
 };
 
 Dropin.prototype._disableErroredPaymentMethods = function () {

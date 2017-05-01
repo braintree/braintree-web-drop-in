@@ -7,9 +7,9 @@ var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
-var paypal = require('paypal-checkout');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
+var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -34,7 +34,6 @@ describe('Dropin', function () {
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
     this.sandbox.stub(paypalCheckout, 'create').yieldsAsync(null, fake.paypalInstance);
-    this.sandbox.stub(paypal.Button, 'render').resolves();
   });
 
   afterEach(function () {
@@ -47,6 +46,8 @@ describe('Dropin', function () {
     if (stylesheet) {
       stylesheet.parentNode.removeChild(stylesheet);
     }
+
+    delete window.paypal;
   });
 
   describe('Constructor', function () {
@@ -56,6 +57,21 @@ describe('Dropin', function () {
   });
 
   describe('_initialize', function () {
+    beforeEach(function () {
+      this.paypalCheckout = {
+        Button: {
+          render: this.sandbox.stub().resolves()
+        },
+        setup: this.sandbox.stub()
+      };
+
+      this.sandbox.stub(Dropin.prototype, '_loadPayPalScript').callsFake(function (callback) {
+        window.paypal = this.paypalCheckout;
+
+        callback();
+      }.bind(this));
+    });
+
     it('errors out if no selector given', function (done) {
       var instance;
 
@@ -162,7 +178,7 @@ describe('Dropin', function () {
       });
     });
 
-    it('inserts dropin into container if merchant container has only white space', function (done) {
+    it('inserts dropin into container if merchant container has white space', function (done) {
       var instance;
 
       this.container.innerHTML = ' ';
@@ -348,6 +364,7 @@ describe('Dropin', function () {
 
       instance._initialize(function () {
         expect(instance._mainView).to.exist;
+
         done();
       });
     });
@@ -357,6 +374,63 @@ describe('Dropin', function () {
 
       instance._initialize(function () {
         expect(instance._mainView).to.exist;
+        done();
+      });
+    });
+
+    it('creates a MainView if checkout.js is not required', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(instance._mainView).to.exist;
+        done();
+      });
+    });
+
+    it('creates a MainView if checkout.js is required', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      instance._initialize(function (err, returned) {
+        expect(returned._mainView).to.exist;
+
+        done();
+      });
+    });
+
+    it('does not load checkout.js if PayPal is not required', function (done) {
+      var script;
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        script = document.querySelector('script[src="' + checkoutJsSource + '"]');
+        expect(script).to.not.exist;
+        expect(window.paypal).to.not.exist;
+        done();
+      });
+    });
+
+    it('loads checkout.js if PayPal is enabled', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      instance._initialize(function () {
+        expect(instance._loadPayPalScript).to.have.been.called;
+
+        done();
+      });
+    });
+
+    it('loads checkout.js if PayPal Credit is enabled', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.dropinOptions.merchantConfiguration.paypalCredit = {flow: 'vault'};
+
+      instance._initialize(function () {
+        expect(instance._loadPayPalScript).to.have.been.called;
+
         done();
       });
     });
@@ -535,6 +609,50 @@ describe('Dropin', function () {
       instance._initialize(function () {
         instance._model._emit('noPaymentMethodRequestable');
       });
+    });
+  });
+
+  describe('_loadPayPalScript', function () {
+    function noop() {}
+
+    beforeEach(function () {
+      this.fakeDropinWrapper = {
+        appendChild: this.sandbox.stub()
+      };
+      this.fakeScript = {
+        addEventListener: this.sandbox.stub(),
+        setAttribute: this.sandbox.stub()
+      };
+
+      this.sandbox.stub(document, 'createElement').returns(this.fakeScript);
+    });
+
+    it('adds script to document to load checkout.js', function () {
+      Dropin.prototype._loadPayPalScript.call({
+        _dropinWrapper: this.fakeDropinWrapper,
+        _merchantConfiguration: {
+          paypal: {}
+        }
+      }, noop);
+
+      expect(this.fakeScript.src).to.equal(constants.CHECKOUT_JS_SOURCE);
+      expect(this.fakeScript.async).to.equal(true);
+      expect(this.fakeScript.addEventListener).to.be.calledWith('load', noop);
+      expect(this.fakeScript.setAttribute).to.be.calledWith('data-log-level', 'warn');
+      expect(this.fakeDropinWrapper.appendChild).to.be.calledWith(this.fakeScript);
+    });
+
+    it('uses loglevel from merchantConfiguration.paypal', function () {
+      Dropin.prototype._loadPayPalScript.call({
+        _dropinWrapper: this.fakeDropinWrapper,
+        _merchantConfiguration: {
+          paypal: {
+            logLevel: 'customLogLevel'
+          }
+        }
+      }, noop);
+
+      expect(this.fakeScript.setAttribute).to.be.calledWith('data-log-level', 'customLogLevel');
     });
   });
 });
