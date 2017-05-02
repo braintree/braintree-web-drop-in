@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-unreleased
+1.0.0-beta.7
 ----------
 - Use PayPal Checkout for PayPal View
 - Use version 3.14.0 of braintree-web
