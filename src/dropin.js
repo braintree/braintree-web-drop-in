@@ -16,7 +16,7 @@ var uuid = require('./lib/uuid');
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
-var DEFAULT_LOG_LEVEL = 'warn';
+var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;
 
 function Dropin(options) {
@@ -121,7 +121,7 @@ Dropin.prototype._initialize = function (callback) {
       });
     }
 
-    paypalRequired = this._model.supportedPaymentOptions.indexOf(paymentOptionIDs.paypal) !== -1 || this._model.supportedPaymentOptions.indexOf(paymentOptionIDs.paypalCredit) !== -1;
+    paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
     if (paypalRequired) {
       this._loadPayPalScript(createMainView);
@@ -131,13 +131,17 @@ Dropin.prototype._initialize = function (callback) {
   }.bind(this));
 };
 
+Dropin.prototype._supportsPaymentOption = function (paymentOption) {
+  return this._model.supportedPaymentOptions.indexOf(paymentOption) !== -1;
+};
+
 Dropin.prototype._loadPayPalScript = function (callback) {
   var script = document.createElement('script');
 
   script.src = constants.CHECKOUT_JS_SOURCE;
   script.async = true;
   script.addEventListener('load', callback);
-  script.setAttribute('data-log-level', this._merchantConfiguration.paypal.logLevel || DEFAULT_LOG_LEVEL);
+  script.setAttribute('data-log-level', this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL);
   this._dropinWrapper.appendChild(script);
 };
 

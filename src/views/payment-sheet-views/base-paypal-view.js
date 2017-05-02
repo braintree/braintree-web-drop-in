@@ -58,7 +58,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
       checkoutJSConfiguration.style = {label: 'credit'};
     }
 
-    paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () { // eslint-disable-line no-undef
+    global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
       self.model.asyncDependencyReady();
     });
   });

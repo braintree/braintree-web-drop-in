@@ -23,7 +23,7 @@ describe('BasePayPalView', function () {
       setup: this.sandbox.stub()
     };
 
-    window.paypal = this.paypal;
+    global.paypal = this.paypal;
 
     this.model = new DropinModel(fake.modelOptions());
 

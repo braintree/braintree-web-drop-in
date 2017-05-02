@@ -47,7 +47,7 @@ describe('Dropin', function () {
       stylesheet.parentNode.removeChild(stylesheet);
     }
 
-    delete window.paypal;
+    delete global.paypal;
   });
 
   describe('Constructor', function () {
@@ -66,7 +66,7 @@ describe('Dropin', function () {
       };
 
       this.sandbox.stub(Dropin.prototype, '_loadPayPalScript').callsFake(function (callback) {
-        window.paypal = this.paypalCheckout;
+        global.paypal = this.paypalCheckout;
 
         callback();
       }.bind(this));
@@ -406,7 +406,7 @@ describe('Dropin', function () {
       instance._initialize(function () {
         script = document.querySelector('script[src="' + checkoutJsSource + '"]');
         expect(script).to.not.exist;
-        expect(window.paypal).to.not.exist;
+        expect(global.paypal).to.not.exist;
         done();
       });
     });
