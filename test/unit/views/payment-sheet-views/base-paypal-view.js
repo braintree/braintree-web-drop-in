@@ -6,7 +6,6 @@ var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
-var paypal = require('paypal-checkout');
 var BasePayPalView = require('../../../../src/views/payment-sheet-views/base-paypal-view');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
@@ -17,6 +16,15 @@ function waitForInitialize(func) {
 
 describe('BasePayPalView', function () {
   beforeEach(function () {
+    this.paypal = {
+      Button: {
+        render: this.sandbox.stub().resolves()
+      },
+      setup: this.sandbox.stub()
+    };
+
+    global.paypal = this.paypal;
+
     this.model = new DropinModel(fake.modelOptions());
 
     this.div = document.createElement('div');
@@ -43,7 +51,6 @@ describe('BasePayPalView', function () {
       tokenizePayment: this.sandbox.stub().resolves()
     };
     this.sandbox.stub(PayPalCheckout, 'create').yieldsAsync(null, this.paypalInstance);
-    this.sandbox.stub(paypal.Button, 'render').resolves();
   });
 
   afterEach(function () {
@@ -141,8 +148,8 @@ describe('BasePayPalView', function () {
       this.view._initialize();
 
       waitForInitialize(function () {
-        expect(paypal.Button.render).to.be.calledOnce;
-        expect(paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-button"]');
+        expect(this.paypal.Button.render).to.be.calledOnce;
+        expect(this.paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-button"]');
         done();
       }.bind(this));
     });
@@ -152,7 +159,7 @@ describe('BasePayPalView', function () {
       this.view._initialize();
 
       waitForInitialize(function () {
-        expect(paypal.Button.render).to.be.calledWithMatch({
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
           env: 'production'
         });
         done();
@@ -164,7 +171,7 @@ describe('BasePayPalView', function () {
       this.view._initialize();
 
       waitForInitialize(function () {
-        expect(paypal.Button.render).to.be.calledWithMatch({
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
           env: 'sandbox'
         });
         done();
@@ -178,12 +185,12 @@ describe('BasePayPalView', function () {
 
       model.merchantConfiguration.locale = fakeLocaleCode;
 
-      paypal.Button.render.resolves();
+      this.paypal.Button.render.resolves();
 
       this.view._initialize();
 
       waitForInitialize(function () {
-        var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
+        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
 
         paymentFunction().then(function () {
           expect(paypalInstance.createPayment).to.be.calledOnce;
@@ -205,7 +212,7 @@ describe('BasePayPalView', function () {
       view._initialize();
 
       waitForInitialize(function () {
-        expect(paypal.Button.render).to.be.calledWithMatch({
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
           locale: 'fake_LOCALE'
         });
         done();
@@ -218,12 +225,12 @@ describe('BasePayPalView', function () {
 
       this.paypalInstance.createPayment.rejects(error);
 
-      paypal.Button.render.resolves();
+      this.paypal.Button.render.resolves();
 
       this.view._initialize();
 
       waitForInitialize(function () {
-        var paymentFunction = paypal.Button.render.getCall(0).args[0].payment;
+        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
 
         paymentFunction().then(function () {
           expect(model.reportError).to.be.calledOnce;
@@ -243,12 +250,12 @@ describe('BasePayPalView', function () {
       paypalInstance.tokenizePayment.resolves(fakePayload);
       this.sandbox.stub(model, 'addPaymentMethod');
 
-      paypal.Button.render.resolves();
+      this.paypal.Button.render.resolves();
 
       this.view._initialize();
 
       waitForInitialize(function () {
-        var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
+        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
         var tokenizeOptions = {
           foo: 'bar'
         };
@@ -275,12 +282,12 @@ describe('BasePayPalView', function () {
       paypalInstance.tokenizePayment.rejects(error);
       this.sandbox.stub(model, 'addPaymentMethod');
 
-      paypal.Button.render.resolves();
+      this.paypal.Button.render.resolves();
 
       this.view._initialize();
 
       waitForInitialize(function () {
-        var onAuthFunction = paypal.Button.render.getCall(0).args[0].onAuthorize;
+        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
         var tokenizeOptions = {
           foo: 'bar'
         };
@@ -299,11 +306,11 @@ describe('BasePayPalView', function () {
     it('reports errors from paypal-checkout', function (done) {
       var model = this.model;
 
-      paypal.Button.render.resolves();
+      this.paypal.Button.render.resolves();
       this.view._initialize();
 
       waitForInitialize(function () {
-        var onErrorFunction = paypal.Button.render.getCall(0).args[0].onError;
+        var onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
         var err = new Error('Some error');
 
         onErrorFunction(err);
@@ -354,7 +361,7 @@ describe('BasePayPalView', function () {
         this.view._initialize(false);
 
         waitForInitialize(function () {
-          expect(paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-button"]');
+          expect(this.paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-button"]');
           done();
         }.bind(this));
       });
@@ -419,7 +426,7 @@ describe('BasePayPalView', function () {
         this.view._initialize(true);
 
         waitForInitialize(function () {
-          expect(paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-credit-button"]');
+          expect(this.paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-credit-button"]');
           done();
         }.bind(this));
       });
@@ -428,46 +435,11 @@ describe('BasePayPalView', function () {
         this.view._initialize(true);
 
         waitForInitialize(function () {
-          expect(paypal.Button.render).to.be.calledWithMatch({
+          expect(this.paypal.Button.render).to.be.calledWithMatch({
             style: {label: 'credit'}
           });
           done();
         });
-      });
-    });
-  });
-
-  describe('setLogLevel', function () {
-    beforeEach(function () {
-      this.context = {
-        paypalConfiguration: {},
-        model: {
-          merchantConfiguration: {
-            paypal: {}
-          }
-        }
-      };
-      this.fakePayPal = {
-        setup: this.sandbox.stub()
-      };
-    });
-
-    it('sets log level to a default value of "warn"', function () {
-      BasePayPalView.prototype.setLogLevel.call(this.context, this.fakePayPal);
-
-      expect(this.fakePayPal.setup).to.be.calledOnce;
-      expect(this.fakePayPal.setup).to.be.calledWith({
-        logLevel: 'warn'
-      });
-    });
-
-    it('sets log level to value set in merchant configuration', function () {
-      this.context.paypalConfiguration.logLevel = 'debug';
-      BasePayPalView.prototype.setLogLevel.call(this.context, this.fakePayPal);
-
-      expect(this.fakePayPal.setup).to.be.calledOnce;
-      expect(this.fakePayPal.setup).to.be.calledWith({
-        logLevel: 'debug'
       });
     });
   });
