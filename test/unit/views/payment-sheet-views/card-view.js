@@ -71,7 +71,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).to.exist;
@@ -82,7 +83,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).not.to.exist;
@@ -104,7 +106,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).to.exist;
@@ -115,7 +118,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
@@ -128,7 +132,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
@@ -143,7 +148,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
@@ -154,7 +160,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       expect(hostedFields.create).to.be.calledWith(this.sandbox.match({
@@ -185,6 +192,7 @@ describe('CardView', function () {
         mainView: this.mainView,
         model: this.model,
         client: this.client,
+        strings: strings,
         merchantConfiguration: {
           authorization: fake.clientToken
         }
@@ -210,6 +218,7 @@ describe('CardView', function () {
         mainView: this.mainView,
         model: this.model,
         client: this.client,
+        strings: strings,
         merchantConfiguration: {
           authorization: fake.clientToken
         }
@@ -230,7 +239,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       expect(this.model.asyncDependencyFailed).to.be.calledWith({
@@ -246,7 +256,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       supportedCardTypes.forEach(function (cardType) {
@@ -263,7 +274,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       unsupportedCardTypes.forEach(function (cardType) {
@@ -291,12 +303,43 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       unionPayCardIcon = this.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
 
       expect(unionPayCardIcon.classList.contains('braintree-hidden')).to.be.true;
+    });
+
+    it('sets field placeholders', function () {
+      var hostedFieldsConfiguredFields;
+
+      this.client.getConfiguration = function () {
+        return {
+          gatewayConfiguration: {
+            challenges: ['cvv', 'postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
+        };
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+
+      expect(hostedFieldsConfiguredFields.number.placeholder).to.equal('•••• •••• •••• ••••');
+      expect(hostedFieldsConfiguredFields.expirationDate.placeholder).to.equal(strings.expirationDatePlaceholder);
+      expect(hostedFieldsConfiguredFields.cvv.placeholder).to.equal('•••');
+      expect(hostedFieldsConfiguredFields.postalCode.placeholder).to.not.exist;
     });
   });
 
@@ -312,7 +355,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       this.sandbox.stub(cardView, 'tokenize').yields(new Error('foo'));
@@ -330,7 +374,8 @@ describe('CardView', function () {
         element: this.element,
         mainView: this.mainView,
         model: this.model,
-        client: this.client
+        client: this.client,
+        strings: strings
       });
 
       this.sandbox.stub(cardView, 'tokenize').yields(null, {foo: 'bar'});

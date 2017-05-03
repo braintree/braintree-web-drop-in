@@ -30,6 +30,7 @@ module.exports = {
   "cvvFourDigitLabelSubheading": "(4자리)",
   "expirationDateLabel": "만료일",
   "expirationDateLabelSubheading": "(MM/YY)",
+  "expirationDatePlaceholder": "MM/YY",
   "postalCodeLabel": "우편번호",
   "payWithCard": "카드로 결제",
   "endingIn": "끝 번호: ••{{lastTwoCardDigits}}",

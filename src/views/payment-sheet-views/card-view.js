@@ -35,15 +35,14 @@ CardView.prototype._initialize = function () {
       },
       expirationDate: {
         selector: this._generateFieldSelector('expiration'),
-        placeholder: 'MM / YY'
+        placeholder: this.strings.expirationDatePlaceholder
       },
       cvv: {
         selector: this._generateFieldSelector('cvv'),
         placeholder: '•••'
       },
       postalCode: {
-        selector: this._generateFieldSelector('postal-code'),
-        placeholder: 'ZIP'
+        selector: this._generateFieldSelector('postal-code')
       }
     },
     styles: {

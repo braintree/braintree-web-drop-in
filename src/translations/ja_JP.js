@@ -30,6 +30,7 @@ module.exports = {
   "cvvFourDigitLabelSubheading": "(4桁)",
   "expirationDateLabel": "有効期限",
   "expirationDateLabelSubheading": "(MM/YY)",
+  "expirationDatePlaceholder": "MM/YY",
   "postalCodeLabel": "郵便番号",
   "payWithCard": "カードで支払う",
   "endingIn": "x-{{lastTwoCardDigits}}",
