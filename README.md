@@ -141,6 +141,17 @@ This is a full example of a Drop-in integration that only accepts credit cards.
 </html>
 ```
 
+## Custom styling
+
+Customize the look and feel of Drop-in by using your own custom stylesheet.
+
+1. Copy the compiled CSS file to start with our Drop-in style as the foundation.
+1. Make edits to the styles.
+1. Link to your stylesheet. To prevent Drop-in from injecting its own stylesheet, set `id="braintree-dropin-stylesheet"`:
+  ```html
+  <link rel="stylesheet" type="text/css" href="/path/to/custom/dropin.css" id="braintree-dropin-stylesheet">
+  ```
+
 ## Localization
 
 You can pass a `locale` property to translate the Drop-in into other languages. Possible values are:
