@@ -842,6 +842,33 @@ describe('CardView', function () {
 
         expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
       });
+
+      it('does not update the cvv field placeholder when cvv field does not exist', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.spy()
+        };
+
+        this.context.client.getConfiguration = function () {
+          return {
+            gatewayConfiguration: {
+              challenges: [],
+              creditCards: {
+                supportedCardTypes: []
+              }
+            }
+          };
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
+      });
     });
 
     describe('onValidityChangeEvent', function () {
