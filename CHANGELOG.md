@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.0.0
+-----
 - Fix localization for placeholders
 - Fix error thrown when CVV was not enabled
 
