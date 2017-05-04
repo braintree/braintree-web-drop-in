@@ -30,6 +30,7 @@ module.exports = {
   "cvvFourDigitLabelSubheading": "(4 цифры)",
   "expirationDateLabel": "Действует до",
   "expirationDateLabelSubheading": "(ММ/ГГ)",
+  "expirationDatePlaceholder": "ММ/ГГ",
   "postalCodeLabel": "Индекс",
   "payWithCard": "Оплатить картой",
   "endingIn": "Последние две цифры номера карты: ••{{LastTwoCardDigits}}",

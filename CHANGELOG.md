@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix localization for placeholders
+
 1.0.0-beta.7
 ----------
 - Use PayPal Checkout for PayPal View

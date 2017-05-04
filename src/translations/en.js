@@ -31,6 +31,7 @@ module.exports = {
   cvvFourDigitLabelSubheading: '(4 digits)',
   expirationDateLabel: 'Expiration Date',
   expirationDateLabelSubheading: '(MM/YY)',
+  expirationDatePlaceholder: 'MM/YY',
   postalCodeLabel: 'Postal Code',
   payWithCard: 'Pay with card',
   // Payment Method descriptions

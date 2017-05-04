@@ -30,6 +30,7 @@ module.exports = {
   "cvvFourDigitLabelSubheading": "(4-stellig)",
   "expirationDateLabel": "Gültig bis",
   "expirationDateLabelSubheading": "(MM/JJ)",
+  "expirationDatePlaceholder": "MM/JJ",
   "postalCodeLabel": "PLZ",
   "payWithCard": "Mit Kreditkarte zahlen",
   "endingIn": "Mit den Endziffern ••{{lastTwoCardDigits}}",

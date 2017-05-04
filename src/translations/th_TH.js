@@ -30,6 +30,7 @@ module.exports = {
   "cvvFourDigitLabelSubheading": "(4 หลัก)",
   "expirationDateLabel": "วันหมดอายุ",
   "expirationDateLabelSubheading": "(ดด/ปป)",
+  "expirationDatePlaceholder": "ดด/ปป",
   "postalCodeLabel": "รหัสไปรษณีย์",
   "payWithCard": "ชำระเงินด้วยบัตร",
   "endingIn": "ลงท้ายด้วย ••{{lastTwoCardDigits}}",

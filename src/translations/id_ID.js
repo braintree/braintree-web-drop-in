@@ -30,6 +30,7 @@ module.exports = {
   "cvvFourDigitLabelSubheading": "(4 angka)",
   "expirationDateLabel": "Tanggal Kedaluwarsa",
   "expirationDateLabelSubheading": "(BB/TT)",
+  "expirationDatePlaceholder": "BB/TT",
   "postalCodeLabel": "Kode Pos",
   "payWithCard": "Bayar dengan kartu",
   "endingIn": "Berakhiran ••{{lastTwoCardDigits}}",

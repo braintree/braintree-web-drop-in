@@ -486,7 +486,8 @@ describe('MainView', function () {
         setPrimaryView: this.sandbox.stub(),
         showSheetError: this.sandbox.stub(),
         toggleAdditionalOptions: function () {},
-        showLoadingIndicator: function () {}
+        showLoadingIndicator: function () {},
+        strings: strings
       };
 
       MainView.prototype._initialize.call(this.context);
@@ -850,7 +851,8 @@ describe('MainView', function () {
           model: new DropinModel(fake.modelOptions()),
           merchantConfiguration: {
             authorization: fake.clientTokenWithCustomerID
-          }
+          },
+          strings: strings
         });
       });
 
