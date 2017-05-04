@@ -2,12 +2,13 @@
 
 A pre-made payments UI for accepting cards and alternative payments in the browser built using version 3 of the [Braintree JS client SDK](https://github.com/braintree/braintree-web).
 
-Because we're still in beta, the API and designs are subject to change. If you have any feedback in these areas, create an [issue](https://github.com/braintree/braintree-web-drop-in/issues) or email us at [web-drop-in-beta@getbraintree.com](mailto:web-drop-in-beta@getbraintree.com).
+If you have any feedback or questions, create an [issue](https://github.com/braintree/braintree-web-drop-in/issues) or [contact Braintree support](https://developers.braintreepayments.com/forms/contact).
 
 ## What's new
 
 - Updated UI to easily accommodate multiple payment methods
 - Not in an iframe; feel free to style Drop-in to blend in with your website
+- Now available in [23 languages](#localization)
 - Open source and open development
 
 ## Setup
@@ -248,15 +249,3 @@ dropinInstance.teardown(function (err) {
 ## Browser support
 
 Drop-in is supported in all browsers supported by the [Braintree JavaScript Client SDK](http://braintree.github.io/braintree-web/current/#browser-support).
-
-## Beta notes
-
-While in beta, we're still actively working on Drop-in. This means you might have to change your integration when upgrading your Drop-in version. This includes any custom CSS styling applied to `data-braintree-id` attributes.
-
-Much of the behavior in this version of Drop-in differs from the [previous version](https://developers.braintreepayments.com/guides/drop-in/javascript/v2). At this point, adding the hidden `payment_method_nonce` input and automatic form submission (the default behavior in the previous version) are not available.
-
-Here are some of the features we're still working on:
-
- - Event API: An event system to indicate when a payment method can be requested
- - Full documentation in the [Braintree developer docs](https://developers.braintreepayments.com/guides/overview) and an API reference
- - Support for additional types of payment methods
