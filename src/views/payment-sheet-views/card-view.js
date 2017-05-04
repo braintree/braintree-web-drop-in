@@ -75,6 +75,7 @@ CardView.prototype._initialize = function () {
   cardIcons.innerHTML = cardIconHTML;
   this._hideUnsupportedCardIcons();
 
+  this.hasCVV = hasCVV;
   this.cardNumberIcon = this.getElementById('card-number-icon');
   this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
   this.cvvIcon = this.getElementById('cvv-icon');
@@ -299,13 +300,16 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   }
 
   this.cardNumberIconSvg.setAttribute('xlink:href', cardNumberHrefLink);
-  this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
-  this.cvvLabelDescriptor.textContent = cvvDescriptor;
-  this.hostedFieldsInstance.setAttribute({
-    field: 'cvv',
-    attribute: 'placeholder',
-    value: cvvPlaceholder
-  });
+
+  if (this.hasCVV) {
+    this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
+    this.cvvLabelDescriptor.textContent = cvvDescriptor;
+    this.hostedFieldsInstance.setAttribute({
+      field: 'cvv',
+      attribute: 'placeholder',
+      value: cvvPlaceholder
+    });
+  }
 };
 
 CardView.prototype._onFocusEvent = function (event) {

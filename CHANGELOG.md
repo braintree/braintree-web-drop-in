@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Fix localization for placeholders
+- Fix error thrown when CVV was not enabled
 
 1.0.0-beta.7
 ----------
