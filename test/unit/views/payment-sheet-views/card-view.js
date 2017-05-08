@@ -550,7 +550,8 @@ describe('CardView', function () {
         expect(numberFieldError.textContent).to.equal('This card number is not valid.');
       });
 
-      it('does apply error class if field is empty', function () {
+      it('does apply error class if field is empty when focusing another hosted field', function () {
+        var fakeHostedField = document.createElement('iframe');
         var fakeEvent = {
           cards: [{type: 'visa'}],
           emittedBy: 'number',
@@ -567,6 +568,10 @@ describe('CardView', function () {
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
+
+        fakeHostedField.id = 'braintree-hosted-field-foo';
+        document.body.appendChild(fakeHostedField);
+        fakeHostedField.focus();
 
         this.context.client.getConfiguration = function () {
           return {
@@ -592,6 +597,98 @@ describe('CardView', function () {
 
         expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.true;
         expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
+      });
+
+      it('does not apply error class if field is empty and not focusing hosted fields', function () {
+        var fakeElement = document.createElement('iframe');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: true,
+              isValid: false
+            }
+          }
+        };
+        var modelOptions = fake.modelOptions();
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
+
+        document.body.appendChild(fakeElement);
+        fakeElement.focus();
+
+        this.context.client.getConfiguration = function () {
+          return {
+            authorization: fake.clientToken,
+            authorizationType: 'CLIENT_TOKEN',
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: ['Visa']
+              }
+            }
+          };
+        };
+
+        modelOptions.client.getConfiguration = this.context.client.getConfiguration;
+
+        this.context.model = new DropinModel(modelOptions);
+
+        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+      });
+
+      it('does not apply error class if field is empty and the active element is not an iframe', function () {
+        var fakeElement = document.createElement('div');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: true,
+              isValid: false
+            }
+          }
+        };
+        var modelOptions = fake.modelOptions();
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+        };
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
+
+        document.body.appendChild(fakeElement);
+        fakeElement.focus();
+
+        this.context.client.getConfiguration = function () {
+          return {
+            authorization: fake.clientToken,
+            authorizationType: 'CLIENT_TOKEN',
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: ['Visa']
+              }
+            }
+          };
+        };
+
+        modelOptions.client.getConfiguration = this.context.client.getConfiguration;
+
+        this.context.model = new DropinModel(modelOptions);
+
+        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+
+        CardView.prototype._initialize.call(this.context);
+
+        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
       });
     });
 

@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Show empty field errors only when another field is focused
+
 1.0.0
 -----
 - Fix localization for placeholders
