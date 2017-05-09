@@ -265,12 +265,14 @@ CardView.prototype._generateFieldSelector = function (field) {
 CardView.prototype._onBlurEvent = function (event) {
   var field = event.fields[event.emittedBy];
   var fieldGroup = this.getElementById(camelCaseToSnakeCase(event.emittedBy) + '-field-group');
+  var activeId = document.activeElement && document.activeElement.id;
+  var isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
-  if (field.isEmpty) {
+  if (isHostedFieldsElement && field.isEmpty) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
-  } else if (!field.isValid) {
+  } else if (!field.isEmpty && !field.isValid) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
   } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
     this.showFieldError('number', this.strings.unsupportedCardTypeError);

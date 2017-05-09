@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+1.0.1
+-----
+- Fix card icon overflow in small browser windows
+- Show empty field errors only when another field is focused
+- Use version 3.15.0 of braintree-web
+
 1.0.0
 -----
 - Fix localization for placeholders
