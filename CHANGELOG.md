@@ -11,6 +11,7 @@ CHANGELOG
 -----
 - Fix localization for placeholders
 - Fix error thrown when CVV was not enabled
+- Record Drop-in version in metadata
 
 1.0.0-beta.7
 ----------

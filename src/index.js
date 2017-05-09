@@ -52,6 +52,7 @@ function setAnalyticsIntegration(clientInstance) {
 
   configuration.analyticsMetadata.integration = constants.INTEGRATION;
   configuration.analyticsMetadata.integrationType = constants.INTEGRATION;
+  configuration.analyticsMetadata.dropinVersion = VERSION;
 
   clientInstance.getConfiguration = function () {
     return configuration;
