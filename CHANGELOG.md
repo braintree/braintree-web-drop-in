@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Show empty field errors only when another field is focused
+- Fix card icon overflow in small browser windows
 
 1.0.0
 -----
