@@ -3,7 +3,7 @@
 var BaseView = require('../../../src/views/base-view');
 var fs = require('fs');
 var PaymentMethodView = require('../../../src/views/payment-method-view');
-var strings = require('../../../src/translations/en');
+var strings = require('../../../src/translations/en_US');
 
 var paymentMethodHTML = fs.readFileSync(__dirname + '/../../../src/html/payment-method.html', 'utf8');
 

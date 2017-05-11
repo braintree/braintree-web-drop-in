@@ -149,7 +149,7 @@ You can pass a `locale` property to translate the Drop-in into other languages. 
 ```
 da_DK
 de_DE
-en
+en_US
 en_AU
 en_GB
 es_ES

@@ -15,7 +15,7 @@ var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
 var sheetViews = require('../../../src/views/payment-sheet-views');
-var strings = require('../../../src/translations/en');
+var strings = require('../../../src/translations/en_US');
 var transitionHelper = require('../../../src/lib/transition-helper');
 
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');

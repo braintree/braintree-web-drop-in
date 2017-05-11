@@ -7,7 +7,7 @@ var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 var hostedFields = require('braintree-web/hosted-fields');
-var strings = require('../../../../src/translations/en');
+var strings = require('../../../../src/translations/en_US');
 var transitionHelper = require('../../../../src/lib/transition-helper');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
