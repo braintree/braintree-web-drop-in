@@ -3,6 +3,7 @@
 
 var BaseView = require('../../../../src/views/base-view');
 var DropinModel = require('../../../../src/dropin-model');
+var DropinError = require('../../../../src/lib/dropin-error');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
@@ -443,6 +444,8 @@ describe('BasePayPalView', function () {
       });
 
       it('times out if the async dependency is never ready', function () {
+        var paypalError = new DropinError('There was an error connecting to PayPal.');
+
         this.sandbox.useFakeTimers();
 
         this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
@@ -452,7 +455,10 @@ describe('BasePayPalView', function () {
 
         this.sandbox.clock.tick(30001);
 
-        expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith({view: this.view.ID});
+        expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
+          view: this.view.ID,
+          error: paypalError
+        }));
       });
 
       it('does not timeout if async dependency sets up', function () {

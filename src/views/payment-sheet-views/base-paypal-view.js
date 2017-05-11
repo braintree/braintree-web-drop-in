@@ -1,8 +1,9 @@
 'use strict';
 
-var BaseView = require('../base-view');
 var assign = require('../../lib/assign').assign;
+var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
+var DropinError = require('../../lib/dropin-error');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 
@@ -23,7 +24,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
   asyncDependencyTimeoutHandler = setTimeout(function () {
     self.model.asyncDependencyFailed({
       view: self.ID,
-      error: {message: 'There was an error connecting to PayPal.'}
+      error: new DropinError('There was an error connecting to PayPal.')
     });
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
