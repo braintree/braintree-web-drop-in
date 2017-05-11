@@ -21,7 +21,10 @@ BasePayPalView.prototype._initialize = function (isCredit) {
 
   this.model.asyncDependencyStarting();
   asyncDependencyTimeoutHandler = setTimeout(function () {
-    self.model.asyncDependencyFailed({view: self.ID});
+    self.model.asyncDependencyFailed({
+      view: self.ID,
+      error: {message: 'There was an error connecting to PayPal.'}
+    });
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
   btPaypal.create({client: this.client}, function (err, paypalInstance) {

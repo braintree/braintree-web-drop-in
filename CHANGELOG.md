@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Add timeout for async dependencies in PayPal
+
 1.0.1
 -----
 - Fix card icon overflow in small browser windows
