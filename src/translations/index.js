@@ -4,7 +4,7 @@
 module.exports = {
   da: require('./da_DK'),
   de: require('./de_DE'),
-  en: require('./en'),
+  en: require('./en_US'),
   en_AU: require('./en_AU'),
   en_GB: require('./en_GB'),
   es: require('./es_ES'),

@@ -60,9 +60,11 @@ Dropin.prototype._initialize = function (callback) {
     return;
   }
 
+  // Backfill with `en`
   strings = assign({}, translations.en);
   if (this._merchantConfiguration.locale) {
     localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
+    // Fill `strings` with `localizedStrings` that may exist
     strings = assign(strings, localizedStrings);
   }
 

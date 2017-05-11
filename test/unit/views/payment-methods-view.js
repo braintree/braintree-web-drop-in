@@ -5,7 +5,7 @@ var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var fs = require('fs');
-var strings = require('../../../src/translations/en');
+var strings = require('../../../src/translations/en_US');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
