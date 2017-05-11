@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.0.2
+-----
 - Add timeout for async dependencies in PayPal
 - Record Drop-in version in metadata
 
