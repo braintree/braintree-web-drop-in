@@ -1,0 +1,9 @@
+{
+  "templates": {
+    "default": {
+      "includeDate": false
+    }
+  },
+  "plugins": ["plugins/markdown"]
+}
+

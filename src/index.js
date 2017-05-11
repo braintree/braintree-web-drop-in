@@ -1,4 +1,8 @@
 'use strict';
+/**
+ * @module braintree-web-drop-in
+ * @description This is the Drop-in module.
+ */
 
 var Dropin = require('./dropin');
 var client = require('braintree-web/client');
@@ -9,6 +13,14 @@ var DropinError = require('./lib/dropin-error');
 
 var VERSION = process.env.npm_package_version;
 
+/**
+ * @static
+ * @function create
+ * @param {object} options Creation options:
+ * @param {string} options.authorization TODO: authorization
+ * @param {function} callback TODO: the callback
+ * @returns {void}
+ */
 function create(options, callback) {
   if (typeof callback !== 'function') {
     throw new DropinError('create must include a callback function.');
@@ -63,5 +75,9 @@ function setAnalyticsIntegration(clientInstance) {
 
 module.exports = {
   create: create,
+  /**
+   * @description The current version of Drop-in, i.e. `{@pkg version}`.
+   * @type {string}
+   */
   VERSION: VERSION
 };
