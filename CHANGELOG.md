@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Add timeout for async dependencies in PayPal
+- Record Drop-in version in metadata
 
 1.0.1
 -----
@@ -15,7 +16,6 @@ unreleased
 -----
 - Fix localization for placeholders
 - Fix error thrown when CVV was not enabled
-- Record Drop-in version in metadata
 
 1.0.0-beta.7
 ----------
