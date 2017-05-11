@@ -1,8 +1,11 @@
 'use strict';
 
-var BaseView = require('../base-view');
 var assign = require('../../lib/assign').assign;
+var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
+var DropinError = require('../../lib/dropin-error');
+
+var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 
 function BasePayPalView() {
   BaseView.apply(this, arguments);
@@ -11,12 +14,19 @@ function BasePayPalView() {
 BasePayPalView.prototype = Object.create(BaseView.prototype);
 
 BasePayPalView.prototype._initialize = function (isCredit) {
+  var asyncDependencyTimeoutHandler;
   var self = this;
   var paypalConfiguration = isCredit ? this.model.merchantConfiguration.paypalCredit : this.model.merchantConfiguration.paypal;
 
   this.paypalConfiguration = assign({}, paypalConfiguration);
 
   this.model.asyncDependencyStarting();
+  asyncDependencyTimeoutHandler = setTimeout(function () {
+    self.model.asyncDependencyFailed({
+      view: self.ID,
+      error: new DropinError('There was an error connecting to PayPal.')
+    });
+  }, ASYNC_DEPENDENCY_TIMEOUT);
 
   btPaypal.create({client: this.client}, function (err, paypalInstance) {
     var checkoutJSConfiguration;
@@ -60,6 +70,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
 
     global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
       self.model.asyncDependencyReady();
+      clearTimeout(asyncDependencyTimeoutHandler);
     });
   });
 

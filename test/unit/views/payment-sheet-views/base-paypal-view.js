@@ -3,6 +3,7 @@
 
 var BaseView = require('../../../../src/views/base-view');
 var DropinModel = require('../../../../src/dropin-model');
+var DropinError = require('../../../../src/lib/dropin-error');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
@@ -440,6 +441,42 @@ describe('BasePayPalView', function () {
           });
           done();
         });
+      });
+
+      it('times out if the async dependency is never ready', function () {
+        var paypalError = new DropinError('There was an error connecting to PayPal.');
+
+        this.sandbox.useFakeTimers();
+
+        this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
+
+        this.paypal.Button.render.rejects();
+        this.view._initialize();
+
+        this.sandbox.clock.tick(30001);
+
+        expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
+          view: this.view.ID,
+          error: paypalError
+        }));
+      });
+
+      it('does not timeout if async dependency sets up', function () {
+        this.sandbox.useFakeTimers();
+        this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
+        PayPalCheckout.create.yields(null, this.paypalInstance);
+        // promises can't resolve while using fake timers
+        // so we make a fake promise
+        this.paypal.Button.render.returns({
+          then: this.sandbox.stub().yields()
+        });
+
+        this.view._initialize();
+        this.sandbox.clock.tick(10);
+
+        this.sandbox.clock.tick(300001);
+
+        expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.called;
       });
     });
   });
