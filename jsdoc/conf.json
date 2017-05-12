@@ -4,6 +4,5 @@
       "includeDate": false
     }
   },
-  "plugins": ["plugins/markdown"]
+  "plugins": ["version-interpolator-plugin", "plugins/markdown"]
 }
-
