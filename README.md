@@ -19,6 +19,14 @@ Drop-in is currently available directly from our servers, which you can save loc
 <script src="https://js.braintreegateway.com/web/dropin/1.0.2/js/dropin.min.js"></script>
 ```
 
+Alternatively, you can download it via npm.
+
+```bash
+npm install --save braintree-web-drop-in
+
+# var dropin = require('braintree-web-drop-in');
+```
+
 ## Basic usage
 
 Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function as shown below.
@@ -224,6 +232,17 @@ braintree.dropin.create({
   });
 });
 ```
+
+## Drop-in Styling
+
+The stylesheet for Drop-in will load automatically when Drop-in is initialized. 
+
+If you are using a custom build of Drop-in, or would like to use an alternative stylesheet, you can provide a `link` tag on your page with the id `braintree-dropin-stylesheet`. This will prevent the external stylesheet from loading.
+
+<!-- TODO remove this commented out section right before publishing to npm
+
+If you are using npm to manage your assets and would prefer to use a local version of the CSS, you can use the dropin.css file found in `node_modules/braintree-web-drop-in/dropin.css` and put it on your page in a `link` tag with the id `braintree-dropin-stylesheet`. 
+-->
 
 ## Teardown
 
