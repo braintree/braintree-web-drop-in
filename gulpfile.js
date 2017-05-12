@@ -27,6 +27,7 @@ var mkdirp = require('mkdirp');
 var VERSION = require('./package.json').version;
 
 var DIST_PATH = 'dist/web/dropin/' + VERSION;
+var GH_PAGES_PATH = 'dist/gh-pages';
 var NPM_PATH = 'dist/npm';
 
 var config = {
@@ -55,11 +56,11 @@ var config = {
   dist: {
     js: DIST_PATH + '/js',
     css: DIST_PATH + '/css',
-    jsdoc: DIST_PATH + '/jsdoc'
+    jsdoc: GH_PAGES_PATH + '/docs/'
   },
   server: {
     assetsPath: 'dist',
-    demoPath: 'test/app',
+    ghPagesPath: GH_PAGES_PATH,
     port: 4567
   }
 };
@@ -147,7 +148,7 @@ gulp.task('build', function (done) {
 
   runSequence(
   'clean',
-  ['build:js', 'build:css', 'build:jsdoc', 'build:npm'],
+  ['build:js', 'build:css', 'build:gh-pages', 'build:npm'],
   'build:link-latest',
   done);
 });
@@ -196,29 +197,46 @@ function jsdoc(options, done) {
   });
 }
 
-gulp.task('build:jsdoc', function (done) {
+gulp.task('build:gh-pages', ['build:demoapp'], function (done) {
+  runSequence(
+  'jsdoc:generate',
+  'jsdoc:statics',
+  done);
+});
+
+gulp.task('jsdoc:generate', function (done) {
   jsdoc({
     configure: 'jsdoc/conf.json',
-    destination: config.dist.jsdoc,
+    destination: config.dist.jsdoc + VERSION,
     recurse: true,
     readme: config.jsdoc.readme,
     template: 'node_modules/jsdoc-template'
   }, done);
 });
 
-gulp.task('demoapp', function () {
+gulp.task('jsdoc:statics', function () {
+  return gulp.src(['jsdoc/index.html']).pipe(gulp.dest(config.dist.jsdoc));
+});
+
+gulp.task('build:demoapp', function () {
+  return gulp.src([ './test/app/*']).pipe(gulp.dest(GH_PAGES_PATH));
+});
+
+gulp.task('gh-pages', ['build'], function (done) {
   connect()
-    .use(serveStatic(path.join(__dirname, config.server.demoPath)))
+    .use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
     .use(serveStatic(path.join(__dirname, config.server.assetsPath)))
     .listen(config.server.port, function () {
-      gutil.log(gutil.colors.magenta('Demo app'), 'started on port', gutil.colors.yellow(config.server.port));
+      gutil.log(gutil.colors.magenta('Demo app and JSDocs'), 'started on port', gutil.colors.yellow(config.server.port));
     });
+
+  fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
 });
 
 gulp.task('development', [
   'build',
   'watch',
-  'demoapp'
+  'gh-pages'
 ]);
 
 gulp.task('watch', function () {
@@ -226,7 +244,7 @@ gulp.task('watch', function () {
 
   gulp.watch([config.src.js.watch, config.src.html.watch], ['build:js']);
   gulp.watch([config.src.css.watch], ['build:css']);
-  gulp.watch([config.src.js.watch, config.jsdoc.watch], ['build:jsdoc']);
+  gulp.watch([config.src.js.watch, config.jsdoc.watch], ['build:gh-pages']);
 });
 
 gulp.task('watch:integration', ['watch']);
