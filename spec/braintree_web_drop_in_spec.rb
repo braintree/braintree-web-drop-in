@@ -122,7 +122,7 @@ describe "Drop-in" do
     it "requires a selector" do
       visit "http://#{HOSTNAME}:#{PORT}?selector=null"
 
-      expect(find("#error")).to have_content("options.selector is required.")
+      expect(find("#error")).to have_content("options.selector or options.container are required.")
     end
 
     it "requires authorization" do
