@@ -72,7 +72,7 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
-    it('errors out if no selector given', function (done) {
+    it('errors out if no selector or container are given', function (done) {
       var instance;
 
       delete this.dropinOptions.merchantConfiguration.selector;
@@ -82,7 +82,23 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function (err) {
-        expect(err.message).to.equal('options.selector is required.');
+        expect(err.message).to.equal('options.selector or options.container are required.');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
+        done();
+      });
+    });
+
+    it('errors out if both a selector and container are given', function (done) {
+      var instance;
+
+      this.dropinOptions.merchantConfiguration.container = {value: 'foo'};
+
+      this.sandbox.stub(analytics, 'sendEvent');
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function (err) {
+        expect(err.message).to.equal('Must only have one options.selector or options.container.');
         expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
         done();
       });
@@ -154,13 +170,13 @@ describe('Dropin', function () {
 
       instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('options.selector must reference a valid DOM node.');
+        expect(err.message).to.equal('options.selector or options.container must reference a valid DOM node.');
         expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
         done();
       });
     });
 
-    it('throws an error if merchant container is not empty', function (done) {
+    it('throws an error if merchant container from options.selector is not empty', function (done) {
       var instance;
       var div = document.createElement('div');
 
@@ -172,7 +188,47 @@ describe('Dropin', function () {
 
       instance._initialize(function (err) {
         expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('options.selector must reference an empty DOM node.');
+        expect(err.message).to.equal('options.selector or options.container must reference an empty DOM node.');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
+        done();
+      });
+    });
+
+    it('throws an error if merchant container from options.container is not empty', function (done) {
+      var instance;
+      var div = document.createElement('div');
+
+      this.container.appendChild(div);
+
+      delete this.dropinOptions.merchantConfiguration.selector;
+      this.dropinOptions.merchantConfiguration.container = this.container;
+
+      this.sandbox.stub(analytics, 'sendEvent');
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('options.selector or options.container must reference an empty DOM node.');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
+        done();
+      });
+    });
+
+    it('throws an error if merchant container from options.container is not a domNode-like object', function (done) {
+      var instance;
+      var fakeDiv = {appendChild: 'fake'};
+
+      delete this.dropinOptions.merchantConfiguration.selector;
+      this.dropinOptions.merchantConfiguration.container = fakeDiv;
+
+      this.sandbox.stub(analytics, 'sendEvent');
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('options.container must be a valid DOM node.');
         expect(analytics.sendEvent).to.be.calledWith(instance._client, 'configuration-error');
         done();
       });

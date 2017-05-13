@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+UNRELEASED
+----------
+- Add ability to pass in a DOM Node to Drop-in as an alternative to a CSS selector
+
 1.0.2
 -----
 - Add timeout for async dependencies in PayPal

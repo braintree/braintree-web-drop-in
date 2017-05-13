@@ -27,13 +27,16 @@ For credit cards, this attempts to validate the card form and will call the supp
 
 Other payment methods may behave differently. Refer to their documentation for details.
 
-In your `create` call, provide an `authorization` and a `selector`:
+In your `create` call, provide an `authorization` and either a `selector` or a `container`:
 
 - `authorization`: Your [client authorization](https://developers.braintreepayments.com/guides/authorization/overview) should be a [client token](https://developers.braintreepayments.com/guides/authorization/client-token) from your server or a [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key) that can be found in the Braintree Control Panel. If you [pass a customer ID](https://developers.braintreepayments.com/reference/request/client-token/generate#specify-a-customer-id) when generating the client token, Drop-in will display that customer's saved payment methods and automatically store any newly-added payment methods in their Vault record.
 
-- `selector`: This must be the selector for an empty element, such as a `<div>`, where Drop-in will be included on your page.
+- `selector`: This must be the CSS selector for an empty element, such as a `<div id="dropin-container">`, where Drop-in will be included on your page. Include this only if you are not including a `container`.
+
+- `container`: This must be the reference to an empty DOM Node on the page, such as a `var container = document.querySelector('#dropin-container');`, where Drop-in will be included on your page. Include this only if you are not including a `selector`.
 
 ```js
+// Example with selector
 var submitButton = document.querySelector('#submit-button');
 
 braintree.dropin.create({
@@ -53,6 +56,19 @@ braintree.dropin.create({
       // Send payload.nonce to your server
     });
   });
+});
+```
+
+```js
+// Example with container
+var submitButton = document.querySelector('#submit-button');
+var container = document.querySelector('#dropin-container');
+
+braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: container
+}, function (err, dropinInstance) {
+  // Same as the previous example
 });
 ```
 
