@@ -39,20 +39,45 @@ var VERSION = process.env.npm_package_version;
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
  */
 
-// TODO event example
-
 /**
  * @name Dropin#on
  * @function
  * @param {string} event The name of the event to which you are subscribing.
  * @param {function} handler A callback to handle the event.
  * @description Subscribes a handler function to a named event. `event` should be {@link HostedFields#event:paymentMethodRequestable|paymentMethodRequestable} or {@link HostedFields#event:noPaymentMethodRequestable|noPaymentMethodRequestable}.
- * @example
- * <caption>Use events to disable a submit button</caption>
  * @returns {void}
+ * @example
+ * <caption>Dynamically enable or disable your submit button based on whether or not the payment method is requestable</caption>
+ * var submitButton = document.querySelector('#submit-button');
+ *
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   selector: '#dropin-container'
+ * }, function (err, dropinInstance) {
+ *   submitButton.addEventListener('click', function () {
+ *     dropinInstance.requestPaymentMethod(function (err, payload) {
+ *       // Send payload.nonce to your server.
+ *     });
+ *   });
+ *
+ *   if (dropinInstance.isPaymentMethodRequestable()) {
+ *     // This will be true if you generated the client token
+ *     // with a customer ID and there is a saved payment method
+ *     // available to tokenize with that customer.
+ *     submitButton.removeAttribute('disabled');
+ *   }
+ *
+ *   dropinInstance.on('paymentMethodRequestable', function (event) {
+ *     console.log(event.type); // The type of Payment Method, e.g 'CreditCard', 'PayPalAccount'.
+ *
+ *     submitButton.removeAttribute('disabled');
+ *   });
+ *
+ *   dropinInstance.on('noPaymentMethodRequestable', function () {
+ *     submitButton.setAttribute('disabled', true);
+ *   });
+ * });
  */
-
-// TODO type example
 
 /**
  * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|isPaymentMethodRequestable}.
@@ -312,7 +337,7 @@ Dropin.prototype.teardown = function (callback) {
 };
 
 /**
- * Returns a boolean indicating if a payment method is available through {@link Dropin#requestPaymentMethod|requestPaymentMethod}.
+ * Returns a boolean indicating if a payment method is available through {@link Dropin#requestPaymentMethod|requestPaymentMethod}. Particularly useful for detecting if using a client token with a customer ID to show vaulted payment methods.
  * @public
  * @returns {Boolean} True if a payment method is available, otherwise false.
  */

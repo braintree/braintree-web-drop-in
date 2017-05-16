@@ -13,7 +13,6 @@ var DropinError = require('./lib/dropin-error');
 
 var VERSION = process.env.npm_package_version;
 
-// TODO add example
 // TODO use PayPal version for client reference link
 // TODO remove duplicate information from README
 
@@ -65,6 +64,65 @@ var VERSION = process.env.npm_package_version;
  * @param {string} [options.paypalCredit.currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {function} callback The second argument, `data`, is the {@link Dropin} instance.
  * @returns {void}
+ * @example
+ * <caption>A full example of accepting credit cards</caption>
+ * <!DOCTYPE html>
+ * <html lang="en">
+ *   <head>
+ *     <meta charset="UTF-8">
+ *     <title>Checkout</title>
+ *   </head>
+ *   <body>
+ *     <div id="dropin-container"></div>
+ *     <button id="submit-button">Purchase</button>
+ *
+ *     <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"></script>
+ *
+ *     <script>
+ *       var submitButton = document.querySelector('#submit-button');
+ *
+ *       braintree.dropin.create({
+ *         authorization: 'CLIENT_AUTHORIZATION',
+ *         selector: '#dropin-container'
+ *       }, function (err, dropinInstance) {
+ *         if (err) {
+ *           // Handle any errors that might've occurred when creating Drop-in
+ *           console.error(err);
+ *           return;
+ *         }
+ *         submitButton.addEventListener('click', function () {
+ *           dropinInstance.requestPaymentMethod(function (err, payload) {
+ *             if (err) {
+ *               // Handle errors in requesting payment method
+ *             }
+ *
+ *             // Send payload.nonce to your server
+ *           });
+ *         });
+ *       });
+ *     </script>
+ *   </body>
+ * </html>
+ *
+ * @example
+ * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   selector: '#dropin-container',
+ *   paypal: {
+ *     flow: 'checkout',
+ *     amount: 10.00,
+ *     currency: 'USD'
+ *   },
+ *  paypalCredit: {
+ *    flow: 'checkout',
+ *    amount: 10.00,
+ *    currency: 'USD'
+ *   }
+ * }, function (err, dropinInstance) {
+ *   // Set up a handler to request a payment method and
+ *   // submit the payment method nonce to your server
+ * });
  */
 
 function create(options, callback) {
