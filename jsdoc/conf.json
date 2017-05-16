@@ -1,8 +1,6 @@
 {
   "templates": {
-    "default": {
-      "includeDate": false
-    }
+    "referenceTitle": "Braintree Drop-in Reference"
   },
   "plugins": ["version-interpolator-plugin", "plugins/markdown"]
 }
