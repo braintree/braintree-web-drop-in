@@ -83,8 +83,6 @@ var VERSION = process.env.npm_package_version;
  * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|isPaymentMethodRequestable}.
  * @event Dropin#paymentMethodRequestable
  * @type {Dropin~paymentMethodRequestablePayload}
- * @example
- * <caption>Get the type of payment method available</caption>
  */
 
 /**

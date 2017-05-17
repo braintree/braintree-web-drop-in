@@ -153,6 +153,10 @@ gulp.task('build', function (done) {
   done);
 });
 
+function _replaceVersionInFile(filename) {
+    return `<(sed -e 's/@VERSION/${VERSION}/g' '${filename}')`;
+}
+
 function jsdoc(options, done) {
   var args = ['jsdoc', 'src'];
   var command = 'bash';
@@ -178,7 +182,7 @@ function jsdoc(options, done) {
   if (options.pedantic === true) args.splice(1, 0, '--pedantic');
   if (options.query) args.splice(1, 0, '-q', options.query);
   if (options.recurse === true) args.splice(1, 0, '-r');
-  if (options.readme) args.splice(1, 0, '-R', options.readme);
+  if (options.readme) args.splice(1, 0, '-R', _replaceVersionInFile(options.readme));
   if (options.template) args.splice(1, 0, '-t', options.template);
   if (options.test === true) args.splice(1, 0, '-T');
   if (options.tutorials) args.splice(1, 0, '-u', options.tutorials);
