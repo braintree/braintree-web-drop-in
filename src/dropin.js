@@ -9,8 +9,8 @@ var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var fs = require('fs');
 var MainView = require('./views/main-view');
-var PaymentMethodsView = require('./views/payment-methods-view');
-var PaymentOptionsView = require('./views/payment-options-view');
+var paymentMethodsViewID = require('./views/payment-methods-view').ID;
+var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
@@ -22,7 +22,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit
 ];
-var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_DELETION = [
+var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit
 ];
@@ -145,7 +145,6 @@ Dropin.prototype._initialize = function (callback) {
 
 Dropin.prototype.updateConfiguration = function (prop, key, value) {
   var isOnMethodsView, hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
-  var methodsViewId = PaymentMethodsView.ID;
 
   if (UPDATABLE_CONFIGURATION_OPTIONS.indexOf(prop) === -1) {
     return;
@@ -153,7 +152,7 @@ Dropin.prototype.updateConfiguration = function (prop, key, value) {
 
   this._mainView.getView(prop).updateConfiguration(key, value);
 
-  if (UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_DELETION.indexOf(prop) === -1) {
+  if (UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED.indexOf(prop) === -1) {
     return;
   }
 
@@ -163,7 +162,7 @@ Dropin.prototype.updateConfiguration = function (prop, key, value) {
     }
   }.bind(this));
 
-  isOnMethodsView = this._mainView.primaryView.ID === methodsViewId;
+  isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
 
   if (isOnMethodsView) {
     hasNoSavedPaymentMethods = this._model.getPaymentMethods().length === 0;
@@ -174,7 +173,7 @@ Dropin.prototype.updateConfiguration = function (prop, key, value) {
       if (hasOnlyOneSupportedPaymentOption) {
         this._mainView.setPrimaryView(this._model.supportedPaymentOptions[0]);
       } else {
-        this._mainView.setPrimaryView(PaymentOptionsView.ID);
+        this._mainView.setPrimaryView(paymentOptionsViewID);
       }
     }
   }
