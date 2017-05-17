@@ -55,6 +55,9 @@ BasePayPalView.prototype._initialize = function (isCredit) {
       },
       onAuthorize: function (data) {
         return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
+          if (self.paypalConfiguration.flow === 'vault' && !self.model.isGuestCheckout) {
+            tokenizePayload.vaulted = true;
+          }
           self.model.addPaymentMethod(tokenizePayload);
         }).catch(reportError);
       },

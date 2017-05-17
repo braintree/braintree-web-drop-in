@@ -275,6 +275,118 @@ describe('BasePayPalView', function () {
       });
     });
 
+    it('adds `vaulted: true` to the tokenization payload if flow is vault and is not guest checkout', function (done) {
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+      var fakePayload = {
+        foo: 'bar',
+        vaulted: true
+      };
+
+      model.isGuestCheckout = false;
+
+      paypalInstance.tokenizePayment.resolves(fakePayload);
+      paypalInstance.paypalConfiguration = {flow: 'vault'};
+      this.sandbox.stub(model, 'addPaymentMethod');
+
+      this.paypal.Button.render.resolves();
+
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
+        var tokenizeOptions = {
+          foo: 'bar'
+        };
+
+        onAuthFunction(tokenizeOptions);
+
+        expect(paypalInstance.tokenizePayment).to.be.calledOnce;
+        expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
+
+        setTimeout(function () {
+          expect(model.addPaymentMethod).to.be.calledOnce;
+          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
+
+          done();
+        }, 100);
+      });
+    });
+
+    it('does not add `vaulted: true` to the tokenization payload if flow is vault but is guest checkout', function (done) {
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+      var fakePayload = {
+        foo: 'bar'
+      };
+
+      model.isGuestCheckout = true;
+
+      paypalInstance.tokenizePayment.resolves(fakePayload);
+      paypalInstance.paypalConfiguration = {flow: 'vault'};
+      this.sandbox.stub(model, 'addPaymentMethod');
+
+      this.paypal.Button.render.resolves();
+
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
+        var tokenizeOptions = {
+          foo: 'bar'
+        };
+
+        onAuthFunction(tokenizeOptions);
+
+        expect(paypalInstance.tokenizePayment).to.be.calledOnce;
+        expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
+
+        setTimeout(function () {
+          expect(model.addPaymentMethod).to.be.calledOnce;
+          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
+
+          done();
+        }, 100);
+      });
+    });
+
+    it('does not add `vaulted: true` to the tokenization payload if flow is checkout and is not guest checkout', function (done) {
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+      var fakePayload = {
+        foo: 'bar'
+      };
+
+      model.isGuestCheckout = false;
+
+      paypalInstance.tokenizePayment.resolves(fakePayload);
+      paypalInstance.paypalConfiguration = {flow: 'checkout'};
+      this.sandbox.stub(model, 'addPaymentMethod');
+
+      this.paypal.Button.render.resolves();
+
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
+        var tokenizeOptions = {
+          foo: 'bar'
+        };
+
+        onAuthFunction(tokenizeOptions);
+
+        expect(paypalInstance.tokenizePayment).to.be.calledOnce;
+        expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
+
+        setTimeout(function () {
+          expect(model.addPaymentMethod).to.be.calledOnce;
+          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
+
+          done();
+        }, 100);
+      });
+    });
+
     it('reports errors from tokenizePayment', function (done) {
       var paypalInstance = this.paypalInstance;
       var model = this.model;

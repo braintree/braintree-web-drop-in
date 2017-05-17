@@ -1471,6 +1471,30 @@ describe('CardView', function () {
       expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
     });
 
+    it('includes `vaulted: true` in tokenization payload if not guest checkout', function (done) {
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
+      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, {});
+      this.context.model.isGuestCheckout = false;
+
+      CardView.prototype.tokenize.call(this.context, function (err, payload) {
+        expect(err).to.not.exist;
+        expect(payload.vaulted).to.equal(true);
+        done();
+      });
+    });
+
+    it('does not include `vaulted: true` in tokenization payload if guest checkout', function (done) {
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
+      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, {});
+      this.context.model.isGuestCheckout = true;
+
+      CardView.prototype.tokenize.call(this.context, function (err, payload) {
+        expect(err).to.not.exist;
+        expect(payload.vaulted).to.not.exist;
+        done();
+      });
+    });
+
     it('sets isTokenizing to true', function () {
       this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
 

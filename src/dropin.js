@@ -281,7 +281,8 @@ function formatPaymentMethodPayload(paymentMethod) {
   var formattedPaymentMethod = {
     nonce: paymentMethod.nonce,
     details: paymentMethod.details,
-    type: paymentMethod.type
+    type: paymentMethod.type,
+    vaulted: true
   };
 
   if (paymentMethod.type === constants.paymentMethodTypes.card) {

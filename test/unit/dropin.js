@@ -340,6 +340,7 @@ describe('Dropin', function () {
         expect(existingPaymentMethod.nonce).to.equal('nonce');
         expect(existingPaymentMethod.details).to.deep.equal({lastTwo: '11'});
         expect(existingPaymentMethod.type).to.equal('CreditCard');
+        expect(existingPaymentMethod.vaulted).to.equal(true);
         expect(existingPaymentMethod.garbage).to.not.exist;
         done();
       });

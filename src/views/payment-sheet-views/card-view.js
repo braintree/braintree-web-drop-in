@@ -207,6 +207,10 @@ CardView.prototype.tokenize = function (callback) {
         self.hostedFieldsInstance.clear(field);
       });
 
+      if (!self.model.isGuestCheckout) {
+        payload.vaulted = true;
+      }
+
       transitionCallback = function () {
         // Wait for braintree-sheet--tokenized class to be added in IE 9
         // before attempting to remove it
