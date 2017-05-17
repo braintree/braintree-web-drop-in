@@ -228,9 +228,11 @@ gulp.task('jsdoc:statics', function () {
 gulp.task('jsdoc:link-current', function (done) {
   var link = config.dist.jsdoc + 'current';
 
-  if (!fs.existsSync(link)) {
-    fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
+  if (fs.existsSync(link)) {
+    del.sync(link);
   }
+
+  fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
 });
 
 gulp.task('build:demoapp', function () {
