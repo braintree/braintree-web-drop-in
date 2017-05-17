@@ -3,7 +3,7 @@ CHANGELOG
 
 UNRELEASED
 ----------
-- Add updateConfig method to Drop-in instance for updating PayPal or PayPal Credit configuration
+- Add updateConfiguration method to Drop-in instance for updating PayPal or PayPal Credit configuration
 
 1.0.2
 -----

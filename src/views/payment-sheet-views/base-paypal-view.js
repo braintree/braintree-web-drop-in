@@ -84,7 +84,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
   }
 };
 
-BasePayPalView.prototype.updateConfig = function (key, value) {
+BasePayPalView.prototype.updateConfiguration = function (key, value) {
   if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
     this.paypalConfiguration[key] = value;
   }

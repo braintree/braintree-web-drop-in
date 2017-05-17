@@ -585,7 +585,7 @@ describe('Dropin', function () {
     });
   });
 
-  describe('updateConfig', function () {
+  describe('updateConfiguration', function () {
     it('does not update if a prop other than paypal or paypalCredit is used', function () {
       var instance = new Dropin(this.dropinOptions);
 
@@ -593,7 +593,7 @@ describe('Dropin', function () {
         getView: this.sandbox.stub()
       };
 
-      instance.updateConfig('card', 'foo', 'bar');
+      instance.updateConfiguration('card', 'foo', 'bar');
 
       expect(instance._mainView.getView).to.not.be.called;
     });
@@ -602,7 +602,7 @@ describe('Dropin', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
-        updateConfig: this.sandbox.stub()
+        updateConfiguration: this.sandbox.stub()
       };
 
       getViewStub.withArgs('paypal').returns(fakePayPalView);
@@ -617,18 +617,18 @@ describe('Dropin', function () {
         getPaymentMethods: this.sandbox.stub().returns([])
       };
 
-      instance.updateConfig('paypal', 'foo', 'bar');
+      instance.updateConfiguration('paypal', 'foo', 'bar');
 
       expect(instance._mainView.getView).to.be.calledOnce;
-      expect(fakePayPalView.updateConfig).to.be.calledOnce;
-      expect(fakePayPalView.updateConfig).to.be.calledWith('foo', 'bar');
+      expect(fakePayPalView.updateConfiguration).to.be.calledOnce;
+      expect(fakePayPalView.updateConfiguration).to.be.calledWith('foo', 'bar');
     });
 
     it('updates if view is paypalCredit', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
-        updateConfig: this.sandbox.stub()
+        updateConfiguration: this.sandbox.stub()
       };
 
       getViewStub.withArgs('paypalCredit').returns(fakePayPalView);
@@ -643,18 +643,18 @@ describe('Dropin', function () {
         getPaymentMethods: this.sandbox.stub().returns([])
       };
 
-      instance.updateConfig('paypalCredit', 'foo', 'bar');
+      instance.updateConfiguration('paypalCredit', 'foo', 'bar');
 
       expect(instance._mainView.getView).to.be.calledOnce;
-      expect(fakePayPalView.updateConfig).to.be.calledOnce;
-      expect(fakePayPalView.updateConfig).to.be.calledWith('foo', 'bar');
+      expect(fakePayPalView.updateConfiguration).to.be.calledOnce;
+      expect(fakePayPalView.updateConfiguration).to.be.calledWith('foo', 'bar');
     });
 
     it('removes saved paypal payment methods if they are not vaulted', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
-        updateConfig: this.sandbox.stub()
+        updateConfiguration: this.sandbox.stub()
       };
       var fakeMethodsView = {
         getPaymentMethod: this.sandbox.stub().returns({
@@ -682,7 +682,7 @@ describe('Dropin', function () {
       getViewStub.withArgs('paypal').returns(fakePayPalView);
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.updateConfig('paypal', 'foo', 'bar');
+      instance.updateConfiguration('paypal', 'foo', 'bar');
 
       expect(instance._model.getPaymentMethods).to.be.calledOnce;
       expect(instance._model.removePaymentMethod).to.be.calledTwice;
@@ -694,7 +694,7 @@ describe('Dropin', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
-        updateConfig: this.sandbox.stub()
+        updateConfiguration: this.sandbox.stub()
       };
       var fakeMethodsView = {
         getPaymentMethod: this.sandbox.stub().returns(null)
@@ -718,7 +718,7 @@ describe('Dropin', function () {
       getViewStub.withArgs('paypal').returns(fakePayPalView);
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.updateConfig('paypal', 'foo', 'bar');
+      instance.updateConfiguration('paypal', 'foo', 'bar');
 
       expect(instance._model.removePaymentMethod).to.not.be.called;
     });
@@ -727,7 +727,7 @@ describe('Dropin', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
-        updateConfig: this.sandbox.stub()
+        updateConfiguration: this.sandbox.stub()
       };
       var fakeMethodsView = {
         getPaymentMethod: this.sandbox.stub().returns({
@@ -751,7 +751,7 @@ describe('Dropin', function () {
       getViewStub.withArgs('paypal').returns(fakePayPalView);
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.updateConfig('paypal', 'foo', 'bar');
+      instance.updateConfiguration('paypal', 'foo', 'bar');
 
       expect(instance._mainView.setPrimaryView).to.be.calledOnce;
       expect(instance._mainView.setPrimaryView).to.be.calledWith('options');
@@ -761,7 +761,7 @@ describe('Dropin', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
-        updateConfig: this.sandbox.stub()
+        updateConfiguration: this.sandbox.stub()
       };
       var fakeMethodsView = {
         getPaymentMethod: this.sandbox.stub().returns({
@@ -785,7 +785,7 @@ describe('Dropin', function () {
       getViewStub.withArgs('paypal').returns(fakePayPalView);
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.updateConfig('paypal', 'foo', 'bar');
+      instance.updateConfiguration('paypal', 'foo', 'bar');
 
       expect(instance._mainView.setPrimaryView).to.be.calledOnce;
       expect(instance._mainView.setPrimaryView).to.be.calledWith('paypal');
@@ -795,7 +795,7 @@ describe('Dropin', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
-        updateConfig: this.sandbox.stub()
+        updateConfiguration: this.sandbox.stub()
       };
       var fakeMethodsView = {
         getPaymentMethod: this.sandbox.stub().returns({
@@ -818,7 +818,7 @@ describe('Dropin', function () {
       getViewStub.withArgs('paypal').returns(fakePayPalView);
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.updateConfig('paypal', 'foo', 'bar');
+      instance.updateConfiguration('paypal', 'foo', 'bar');
 
       expect(instance._mainView.setPrimaryView).to.not.be.called;
     });
@@ -827,7 +827,7 @@ describe('Dropin', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
-        updateConfig: this.sandbox.stub()
+        updateConfiguration: this.sandbox.stub()
       };
       var fakeMethodsView = {
         getPaymentMethod: this.sandbox.stub().returns({
@@ -852,7 +852,7 @@ describe('Dropin', function () {
       getViewStub.withArgs('paypal').returns(fakePayPalView);
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.updateConfig('paypal', 'foo', 'bar');
+      instance.updateConfiguration('paypal', 'foo', 'bar');
 
       expect(instance._mainView.setPrimaryView).to.not.be.called;
     });

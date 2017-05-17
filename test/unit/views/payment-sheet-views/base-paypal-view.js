@@ -593,13 +593,13 @@ describe('BasePayPalView', function () {
     });
   });
 
-  describe('updateConfig', function () {
+  describe('updateConfiguration', function () {
     it('ignores offerCredit updates', function () {
       var view = new BasePayPalView();
 
       view.paypalConfiguration = {offerCredit: true};
 
-      view.updateConfig('offerCredit', false);
+      view.updateConfiguration('offerCredit', false);
 
       expect(view.paypalConfiguration.offerCredit).to.equal(true);
     });
@@ -609,7 +609,7 @@ describe('BasePayPalView', function () {
 
       view.paypalConfiguration = {locale: 'es'};
 
-      view.updateConfig('locale', 'il');
+      view.updateConfiguration('locale', 'il');
 
       expect(view.paypalConfiguration.locale).to.equal('es');
     });
@@ -622,9 +622,9 @@ describe('BasePayPalView', function () {
         amount: '10.00'
       };
 
-      view.updateConfig('flow', 'checkout');
-      view.updateConfig('amount', '5.32');
-      view.updateConfig('currency', 'USD');
+      view.updateConfiguration('flow', 'checkout');
+      view.updateConfiguration('amount', '5.32');
+      view.updateConfiguration('currency', 'USD');
 
       expect(view.paypalConfiguration).to.deep.equal({
         flow: 'checkout',

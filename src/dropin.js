@@ -143,14 +143,14 @@ Dropin.prototype._initialize = function (callback) {
   }.bind(this));
 };
 
-Dropin.prototype.updateConfig = function (prop, key, value) {
+Dropin.prototype.updateConfiguration = function (prop, key, value) {
   var methodsViewId = PaymentMethodsView.ID;
 
   if (UPDATABLE_CONFIGURATION_OPTIONS.indexOf(prop) === -1) {
     return;
   }
 
-  this._mainView.getView(prop).updateConfig(key, value);
+  this._mainView.getView(prop).updateConfiguration(key, value);
 
   if (UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_DELETION.indexOf(prop) === -1) {
     return;
