@@ -226,7 +226,11 @@ gulp.task('jsdoc:statics', function () {
 });
 
 gulp.task('jsdoc:link-current', function (done) {
-  fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
+  var link = config.dist.jsdoc + 'current';
+
+  if (!fs.existsSync(link)) {
+    fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
+  }
 });
 
 gulp.task('build:demoapp', function () {
