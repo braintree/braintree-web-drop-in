@@ -18,6 +18,14 @@ var uuid = require('./lib/uuid');
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
+var UPDATABLE_CONFIGURATION_OPTIONS = [
+  paymentOptionIDs.paypal,
+  paymentOptionIDs.paypalCredit
+];
+var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_DELETION = [
+  paymentOptionIDs.paypal,
+  paymentOptionIDs.paypalCredit
+];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;
 
@@ -138,14 +146,18 @@ Dropin.prototype._initialize = function (callback) {
 Dropin.prototype.updateConfig = function (prop, key, value) {
   var methodsViewId = PaymentMethodsView.ID;
 
-  if (prop !== 'paypal' && prop !== 'paypalCredit') {
+  if (UPDATABLE_CONFIGURATION_OPTIONS.indexOf(prop) === -1) {
     return;
   }
 
   this._mainView.getView(prop).updateConfig(key, value);
 
+  if (UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_DELETION.indexOf(prop) === -1) {
+    return;
+  }
+
   this._model.getPaymentMethods().forEach(function (paymentMethod) {
-    if (paymentMethod.type === 'PayPalAccount' && !paymentMethod.vaulted) {
+    if (paymentMethod.type === constants.paymentMethodTypes[prop] && !paymentMethod.vaulted) {
       this._model.removePaymentMethod(paymentMethod);
     }
   }.bind(this));
