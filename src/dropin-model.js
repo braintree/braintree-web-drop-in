@@ -93,7 +93,11 @@ DropinModel.prototype.setPaymentMethodRequestable = function (options) {
 };
 
 DropinModel.prototype.getPaymentMethods = function () {
-  return this._paymentMethods;
+  // we want to return a copy of the Array
+  // so we can loop through it in dropin.updateConfig
+  // while calling model.removePaymentMethod
+  // which updates the original array
+  return this._paymentMethods.slice();
 };
 
 DropinModel.prototype.getActivePaymentMethod = function () {

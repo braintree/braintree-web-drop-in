@@ -283,12 +283,13 @@ describe('DropinModel', function () {
   });
 
   describe('getPaymentMethods', function () {
-    it('returns _paymentMethods', function () {
+    it('returns a copy of the _paymentMethods array', function () {
       var model = new DropinModel(this.modelOptions);
 
-      model._paymentMethods = 'these are my payment methods';
+      model._paymentMethods = ['these are my payment methods'];
 
-      expect(model.getPaymentMethods()).to.equal('these are my payment methods');
+      expect(model.getPaymentMethods()).to.not.equal(model._paymentMethods);
+      expect(model.getPaymentMethods()).to.deep.equal(model._paymentMethods);
     });
   });
 
