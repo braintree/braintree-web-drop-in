@@ -153,7 +153,11 @@ Dropin.prototype.updateConfig = function (prop, key, value) {
     this._model.removePaymentMethod(authenticatedPaymentMethod);
 
     if (this._mainView.primaryView.ID === methodsViewId) {
-      this._mainView.setPrimaryView(PaymentOptionsView.ID);
+      if (this._model.supportedPaymentOptions.length === 1) {
+        this._mainView.setPrimaryView(this._model.supportedPaymentOptions[0]);
+      } else {
+        this._mainView.setPrimaryView(PaymentOptionsView.ID);
+      }
     }
   }
 };

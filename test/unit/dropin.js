@@ -699,7 +699,7 @@ describe('Dropin', function () {
       expect(instance._model.removePaymentMethod).to.not.be.called;
     });
 
-    it('sets primary view to options if on the methods view', function () {
+    it('sets primary view to options if on the methods view and multiple payment options enabled', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
@@ -719,6 +719,7 @@ describe('Dropin', function () {
         setPrimaryView: this.sandbox.stub()
       };
       instance._model = {
+        supportedPaymentOptions: ['paypal', 'card'],
         removePaymentMethod: this.sandbox.stub()
       };
 
@@ -731,7 +732,40 @@ describe('Dropin', function () {
       expect(instance._mainView.setPrimaryView).to.be.calledWith('options');
     });
 
-    it('does not set primary view if primary view is not methods', function () {
+    it('sets primary view to available payment option view if on the methods view and only one payment option is available', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfig: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'PayPalAccount'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'methods'
+        },
+        setPrimaryView: this.sandbox.stub()
+      };
+      instance._model = {
+        supportedPaymentOptions: ['paypal'],
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypal').returns(fakePayPalView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfig('paypal', 'foo', 'bar');
+
+      expect(instance._mainView.setPrimaryView).to.be.calledOnce;
+      expect(instance._mainView.setPrimaryView).to.be.calledWith('paypal');
+    });
+
+    it('does not set primary view if current primary view is not methods', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakePayPalView = {
