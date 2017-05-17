@@ -480,4 +480,45 @@ describe('BasePayPalView', function () {
       });
     });
   });
+
+  describe('updateConfig', function () {
+    it('ignores offerCredit updates', function () {
+      var view = new BasePayPalView();
+
+      view.paypalConfiguration = {offerCredit: true};
+
+      view.updateConfig('offerCredit', false);
+
+      expect(view.paypalConfiguration.offerCredit).to.equal(true);
+    });
+
+    it('ignores locale updates', function () {
+      var view = new BasePayPalView();
+
+      view.paypalConfiguration = {locale: 'es'};
+
+      view.updateConfig('locale', 'il');
+
+      expect(view.paypalConfiguration.locale).to.equal('es');
+    });
+
+    it('can set properties on paypal config', function () {
+      var view = new BasePayPalView();
+
+      view.paypalConfiguration = {
+        flow: 'vault',
+        amount: '10.00'
+      };
+
+      view.updateConfig('flow', 'checkout');
+      view.updateConfig('amount', '5.32');
+      view.updateConfig('currency', 'USD');
+
+      expect(view.paypalConfiguration).to.deep.equal({
+        flow: 'checkout',
+        amount: '5.32',
+        currency: 'USD'
+      });
+    });
+  });
 });

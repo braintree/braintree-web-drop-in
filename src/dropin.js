@@ -9,6 +9,7 @@ var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var fs = require('fs');
 var MainView = require('./views/main-view');
+var PaymentMethodsView = require('./views/payment-methods-view');
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
@@ -131,6 +132,29 @@ Dropin.prototype._initialize = function (callback) {
       createMainView();
     }
   }.bind(this));
+};
+
+Dropin.prototype.updateConfig = function (prop, key, value) {
+  var authenticatedPaymentMethod, methodsView;
+  var methodsViewId = PaymentMethodsView.ID;
+
+  if (prop !== 'paypal' && prop !== 'paypalCredit') {
+    return;
+  }
+
+  this._mainView.getView(prop).updateConfig(key, value);
+
+  methodsView = this._mainView.getView(methodsViewId);
+
+  authenticatedPaymentMethod = methodsView && methodsView.getPaymentMethod();
+
+  if (authenticatedPaymentMethod && authenticatedPaymentMethod.type === 'PayPalAccount') {
+    this._model.removePaymentMethod(authenticatedPaymentMethod);
+
+    if (this._mainView.primaryView.ID === methodsViewId) {
+      this._mainView.setPrimaryView('options');
+    }
+  }
 };
 
 Dropin.prototype._supportsPaymentOption = function (paymentOption) {

@@ -6,6 +6,7 @@ var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
+var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
 
 function BasePayPalView() {
   BaseView.apply(this, arguments);
@@ -16,7 +17,8 @@ BasePayPalView.prototype = Object.create(BaseView.prototype);
 BasePayPalView.prototype._initialize = function (isCredit) {
   var asyncDependencyTimeoutHandler;
   var self = this;
-  var paypalConfiguration = isCredit ? this.model.merchantConfiguration.paypalCredit : this.model.merchantConfiguration.paypal;
+  var paypalType = isCredit ? 'paypalCredit' : 'paypal';
+  var paypalConfiguration = this.model.merchantConfiguration[paypalType];
 
   this.paypalConfiguration = assign({}, paypalConfiguration);
 
@@ -76,6 +78,12 @@ BasePayPalView.prototype._initialize = function (isCredit) {
 
   function reportError(err) {
     self.model.reportError(err);
+  }
+};
+
+BasePayPalView.prototype.updateConfig = function (key, value) {
+  if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
+    this.paypalConfiguration[key] = value;
   }
 };
 

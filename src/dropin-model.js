@@ -38,6 +38,17 @@ DropinModel.prototype.addPaymentMethod = function (paymentMethod) {
   this.changeActivePaymentMethod(paymentMethod);
 };
 
+DropinModel.prototype.removePaymentMethod = function (paymentMethod) {
+  var paymentMethodLocation = this._paymentMethods.indexOf(paymentMethod);
+
+  if (paymentMethodLocation === -1) {
+    return;
+  }
+
+  this._paymentMethods.splice(paymentMethodLocation, 1);
+  this._emit('removePaymentMethod', paymentMethod);
+};
+
 DropinModel.prototype.changeActivePaymentMethod = function (paymentMethod) {
   this._activePaymentMethod = paymentMethod;
   this._emit('changeActivePaymentMethod', paymentMethod);

@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+UNRELEASED
+----------
+- Add updateConfig method to Drop-in instance for updating PayPal or PayPal Credit configuration
+
 1.0.2
 -----
 - Add timeout for async dependencies in PayPal

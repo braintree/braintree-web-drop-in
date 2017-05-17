@@ -27,6 +27,7 @@ PaymentMethodsView.prototype._initialize = function () {
   this._headingLabel = this.getElementById('methods-label');
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
+  this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
 
   for (i = paymentMethods.length - 1; i >= 0; i--) {
@@ -60,6 +61,19 @@ PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
   }
 
   this.views.push(paymentMethodView);
+};
+
+PaymentMethodsView.prototype._removePaymentMethod = function (paymentMethod) {
+  var i;
+
+  for (i = 0; i < this.views.length; i++) {
+    if (this.views[i].paymentMethod === paymentMethod) {
+      this.container.removeChild(this.views[i].element);
+      this._headingLabel.innerHTML = '&nbsp;';
+      this.views.splice(i, 1);
+      break;
+    }
+  }
 };
 
 PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentMethod) {

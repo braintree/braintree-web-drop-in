@@ -274,6 +274,64 @@ describe('PaymentMethodsView', function () {
     });
   });
 
+  describe('_removePaymentMethod', function () {
+    beforeEach(function () {
+      var div = document.createElement('div');
+
+      div.innerHTML = mainHTML;
+      this.element = div.querySelector('.braintree-dropin');
+      this.element.id = 'fake-method';
+      this.fakePaymentMethod = {
+        type: 'CreditCard',
+        details: {lastTwo: '11'}
+      };
+
+      this.model = new DropinModel(fake.modelOptions());
+      this.paymentMethodsViews = new PaymentMethodsView({
+        element: document.createElement('div'),
+        model: this.model,
+        merchantConfiguration: {
+          authorization: fake.clientTokenWithCustomerID
+        },
+        strings: strings
+      });
+      this.paymentMethodsViews.views.push({
+        paymentMethod: this.fakePaymentMethod,
+        element: this.element
+      });
+      this.paymentMethodsViews.container = {
+        removeChild: this.sandbox.stub()
+      };
+      this.paymentMethodsViews._headingLabel = {
+        innerHTML: 'Paying with'
+      };
+    });
+
+    it('removes specified payment method from views', function () {
+      expect(this.paymentMethodsViews.views[0].paymentMethod).to.equal(this.fakePaymentMethod);
+
+      this.paymentMethodsViews._removePaymentMethod(this.fakePaymentMethod);
+
+      expect(this.paymentMethodsViews.views[0]).to.not.exist;
+    });
+
+    it('removes specified payment method div from DOM', function () {
+      this.paymentMethodsViews._removePaymentMethod(this.fakePaymentMethod);
+
+      expect(this.paymentMethodsViews.container.removeChild).to.be.calledOnce;
+      expect(this.paymentMethodsViews.container.removeChild).to.be.calledWith(this.element);
+    });
+
+    it('ignores payment methods that are not the exact object', function () {
+      var copy = JSON.parse(JSON.stringify(this.fakePaymentMethod));
+
+      this.paymentMethodsViews._removePaymentMethod(copy);
+
+      expect(this.paymentMethodsViews.views[0].paymentMethod).to.equal(this.fakePaymentMethod);
+      expect(this.paymentMethodsViews.container.removeChild).to.not.be.called;
+    });
+  });
+
   describe('requestPaymentMethod', function () {
     it('calls the callback with the active payment method from the active method view', function (done) {
       var paymentMethodsViews;
