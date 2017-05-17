@@ -38,12 +38,12 @@ You can also get Drop-in from [npm](https://www.npmjs.com/).
 npm install --save braintree-web-drop-in
 ```
 
-<a id="Usage"></a>
+<a id="usage"></a>
 ## Usage
 
 Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function as shown below.
 
-<a id="Accepting cards"></a>
+<a id="accepting-cards"></a>
 ### Accepting cards
 
 By default, Drop-in is configured to accepted cards and does not require any additional parameters in the [`create`](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules) call. If you are only accepting cards, Drop-in will appear as a card form. If you are accepting multiple payment options, Card will appear as an option in the list. CVV and Postal Code inputs are rendered conditionally based on [AVS and CVV settings](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules).
@@ -52,13 +52,13 @@ For credit cards, calling [`requestPaymentMethod`](/docs/current/Dropin.html#req
 
 Use [events](/docs/current/Dropin.html#on) to know when the card form could be considered valid. This does not necessarily mean the card form is complete, but it means it is considered valid by our client side validation.
 
-<a id="Accepting PayPal"></a>
+<a id="accepting-paypal"></a>
 ### Accepting PayPal
 For PayPal and PayPal Credit, users will click the PayPal button and continue through the PayPal authentication flow. After successful completion, the PayPal account will be visible in the UI and that payment method can be requested. Use [events](/docs/current/Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
 More details about PayPal and PayPal Credit can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/paypal/overview/javascript/v3).
 
-<a id="Localization"></a>
+<a id="localization"></a>
 ### Localization
 
 To translate Drop-in into different languages, pass a [supported locale code](/docs/current/module-braintree-web-drop-in.html#.create) in your `create` call:
@@ -71,19 +71,19 @@ braintree.dropin.create({
 }, callback);
 ```
 
-<a id="Events"></a>
+<a id="events"></a>
 ### Events
 
 Use events to know whether or not a payment method is currently available from Drop-in. This can be used to dynamically enable and disable a submit button or automatically submit a nonce to your server after the PayPal flow has successfully completed.
 
 See [`on`](/docs/current/Dropin.html#on) for more details and an example of event usage.
 
-<a id="Browser support"></a>
+<a id="browser-support"></a>
 ## Browser support
 
 Drop-in has the same browser support as the Braintree JS SDK which can be found in the [SDK reference](http://braintree.github.io/braintree-web/docs/current/#browser-support).
 
-<a id="Additional resources"></a>
+<a id="additional-resources"></a>
 ## Additional resources
 
 <li>[Braintree Drop-in Payment UI guide](https://developers.braintreepayments.com/guides/drop-in/javascript/v3)</li>
