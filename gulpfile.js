@@ -203,9 +203,12 @@ function jsdoc(options, done) {
 
 gulp.task('build:gh-pages', ['build:demoapp'], function (done) {
   runSequence(
-  'jsdoc:generate',
-  'jsdoc:statics',
-  done);
+    'jsdoc:generate',
+    [
+      'jsdoc:statics',
+      'jsdoc:link-current',
+    ],
+    done);
 });
 
 gulp.task('jsdoc:generate', function (done) {
@@ -222,19 +225,21 @@ gulp.task('jsdoc:statics', function () {
   return gulp.src(['jsdoc/index.html']).pipe(gulp.dest(config.dist.jsdoc));
 });
 
+gulp.task('jsdoc:link-current', function (done) {
+  fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
+});
+
 gulp.task('build:demoapp', function () {
   return gulp.src([ './test/app/*']).pipe(gulp.dest(GH_PAGES_PATH));
 });
 
-gulp.task('gh-pages', ['build'], function (done) {
+gulp.task('gh-pages', ['build'], function () {
   connect()
     .use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
     .use(serveStatic(path.join(__dirname, config.server.assetsPath)))
     .listen(config.server.port, function () {
       gutil.log(gutil.colors.magenta('Demo app and JSDocs'), 'started on port', gutil.colors.yellow(config.server.port));
     });
-
-  fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
 });
 
 gulp.task('development', [

@@ -5,6 +5,7 @@
   "scripts": {
     "build": "gulp build",
     "development": "gulp development",
+    "gh-pages": "gulp build:gh-pages",
     "lint": "eslint src test",
     "pretest": "npm run lint",
     "test": "karma start test/config/karma.js --single-run",
