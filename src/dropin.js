@@ -136,7 +136,6 @@ Dropin.prototype._initialize = function (callback) {
 };
 
 Dropin.prototype.updateConfig = function (prop, key, value) {
-  var authenticatedPaymentMethod, methodsView;
   var methodsViewId = PaymentMethodsView.ID;
 
   if (prop !== 'paypal' && prop !== 'paypalCredit') {
@@ -145,14 +144,14 @@ Dropin.prototype.updateConfig = function (prop, key, value) {
 
   this._mainView.getView(prop).updateConfig(key, value);
 
-  methodsView = this._mainView.getView(methodsViewId);
+  this._model.getPaymentMethods().forEach(function (paymentMethod) {
+    if (paymentMethod.type === 'PayPalAccount' && !paymentMethod.vaulted) {
+      this._model.removePaymentMethod(paymentMethod);
+    }
+  }.bind(this));
 
-  authenticatedPaymentMethod = methodsView && methodsView.getPaymentMethod();
-
-  if (authenticatedPaymentMethod && authenticatedPaymentMethod.type === 'PayPalAccount') {
-    this._model.removePaymentMethod(authenticatedPaymentMethod);
-
-    if (this._mainView.primaryView.ID === methodsViewId) {
+  if (this._mainView.primaryView.ID === methodsViewId) {
+    if (this._model.getPaymentMethods().length === 0) {
       if (this._model.supportedPaymentOptions.length === 1) {
         this._mainView.setPrimaryView(this._model.supportedPaymentOptions[0]);
       } else {
