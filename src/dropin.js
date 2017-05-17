@@ -10,6 +10,7 @@ var isGuestCheckout = require('./lib/is-guest-checkout');
 var fs = require('fs');
 var MainView = require('./views/main-view');
 var PaymentMethodsView = require('./views/payment-methods-view');
+var PaymentOptionsView = require('./views/payment-options-view');
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
@@ -152,7 +153,7 @@ Dropin.prototype.updateConfig = function (prop, key, value) {
     this._model.removePaymentMethod(authenticatedPaymentMethod);
 
     if (this._mainView.primaryView.ID === methodsViewId) {
-      this._mainView.setPrimaryView('options');
+      this._mainView.setPrimaryView(PaymentOptionsView.ID);
     }
   }
 };
