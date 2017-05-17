@@ -144,6 +144,7 @@ Dropin.prototype._initialize = function (callback) {
 };
 
 Dropin.prototype.updateConfiguration = function (prop, key, value) {
+  var isOnMethodsView, hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
   var methodsViewId = PaymentMethodsView.ID;
 
   if (UPDATABLE_CONFIGURATION_OPTIONS.indexOf(prop) === -1) {
@@ -162,9 +163,15 @@ Dropin.prototype.updateConfiguration = function (prop, key, value) {
     }
   }.bind(this));
 
-  if (this._mainView.primaryView.ID === methodsViewId) {
-    if (this._model.getPaymentMethods().length === 0) {
-      if (this._model.supportedPaymentOptions.length === 1) {
+  isOnMethodsView = this._mainView.primaryView.ID === methodsViewId;
+
+  if (isOnMethodsView) {
+    hasNoSavedPaymentMethods = this._model.getPaymentMethods().length === 0;
+
+    if (hasNoSavedPaymentMethods) {
+      hasOnlyOneSupportedPaymentOption = this._model.supportedPaymentOptions.length === 1;
+
+      if (hasOnlyOneSupportedPaymentOption) {
         this._mainView.setPrimaryView(this._model.supportedPaymentOptions[0]);
       } else {
         this._mainView.setPrimaryView(PaymentOptionsView.ID);
