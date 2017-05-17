@@ -19,8 +19,6 @@ var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;
 
-// TODO current PayPal version helper
-
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
  * @property {string} nonce The payment method nonce.
@@ -31,11 +29,10 @@ var VERSION = process.env.npm_package_version;
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
  */
 
-// TODO update PayPal details to be a link to the version of paypal-checkout used in this version
 /**
  * @typedef {object} Dropin~paypalPaymentMethodPayload
  * @property {string} nonce The payment method nonce.
- * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/current/PayPalCheckout.html#~tokenizePayload).
+ * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
  */
 
