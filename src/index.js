@@ -48,7 +48,7 @@ var VERSION = process.env.npm_package_version;
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
  *
  * Some of the PayPal configuration options are listed here, but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
- * @param {string} [options.paypal.flow] Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal.
+ * @param {string} options.paypal.flow Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal.
  * @param {string|number} [options.paypal.amount] The amount of the transaction. Required when using the Checkout flow.
  * @param {string} [options.paypal.currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  *
@@ -119,6 +119,55 @@ var VERSION = process.env.npm_package_version;
  *   // Set up a handler to request a payment method and
  *   // submit the payment method nonce to your server
  * });
+ *
+ * @example
+ * <caption>Submitting the payment method nonce to the server using a form</caption>
+ * <!DOCTYPE html>
+ * <html lang="en">
+ *   <head>
+ *     <meta charset="UTF-8">
+ *     <title>Checkout</title>
+ *   </head>
+ *   <body>
+ *     <form id="payment-form" action="/" method="post>
+ *       <div id="dropin-container"></div>
+ *       <input type="submit" value="Purchase"></input>
+ *       <input type="hidden id="nonce" name="payment_method_nonce"></input>
+ *     </form>
+ *
+ *     <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"></script>
+ *
+ *     <script>
+ *       var form = document.querySelector('#payment-form');
+ *       var nonceInput = document.querySelector('#nonce');
+ *
+ *       braintree.dropin.create({
+ *         authorization: 'CLIENT_AUTHORIZATION',
+ *         selector: '#dropin-container'
+ *       }, function (err, dropinInstance) {
+ *         if (err) {
+ *           // Handle any errors that might've occurred when creating Drop-in
+ *           console.error(err);
+ *           return;
+ *         }
+ *         form.addEventListener('submit', function (event) {
+ *           event.preventDefault();
+ *
+ *           dropinInstance.requestPaymentMethod(function (err, payload) {
+ *             if (err) {
+ *               // Handle errors in requesting payment method
+ *               return;
+ *             }
+ *
+ *             // Send payload.nonce to your server
+ *             nonceInput.value = payload.nonce;
+ *             form.submit();
+ *           });
+ *         });
+ *       });
+ *     </script>
+ *   </body>
+ * </html>
  */
 
 function create(options, callback) {

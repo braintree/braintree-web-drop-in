@@ -41,7 +41,7 @@ var VERSION = process.env.npm_package_version;
  * @function
  * @param {string} event The name of the event to which you are subscribing.
  * @param {function} handler A callback to handle the event.
- * @description Subscribes a handler function to a named event. `event` should be {@link HostedFields#event:paymentMethodRequestable|paymentMethodRequestable} or {@link HostedFields#event:noPaymentMethodRequestable|noPaymentMethodRequestable}.
+ * @description Subscribes a handler function to a named event. `event` should be {@link HostedFields#event:paymentMethodRequestable|`paymentMethodRequestable`} or {@link HostedFields#event:noPaymentMethodRequestable|`noPaymentMethodRequestable`}.
  * @returns {void}
  * @example
  * <caption>Dynamically enable or disable your submit button based on whether or not the payment method is requestable</caption>
@@ -77,19 +77,19 @@ var VERSION = process.env.npm_package_version;
  */
 
 /**
- * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|isPaymentMethodRequestable}.
+ * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMethodRequestable`}.
  * @event Dropin#paymentMethodRequestable
  * @type {Dropin~paymentMethodRequestablePayload}
  */
 
 /**
  * @typedef {object} Dropin~paymentMethodRequestablePayload
- * @description The event payload sent from {@link Dropin#on|on} with the {@link Dropin#event:paymentMethodRequestable|paymentMethodRequestable} event.
+ * @description The event payload sent from {@link Dropin#on|`on`} with the {@link Dropin#event:paymentMethodRequestable|`paymentMethodRequestable`} event.
  * @property {string} type The type of payment method that is requestable. Either `CreditCard` or `PayPalAccount`.
  */
 
 /**
- * This event is emitted when there is no payment method available in Drop-in. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|isPaymentMethodRequestable}. No payload is available in the callback for this event.
+ * This event is emitted when there is no payment method available in Drop-in. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMethodRequestable`}. No payload is available in the callback for this event.
  * @event Dropin#noPaymentMethodRequestable
  */
 
@@ -250,7 +250,7 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 };
 
 /**
- * Requests a payment method object, that includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account. If a payment method is not available, an error will appear in the UI and and error will be returned in the callback.
+ * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account. If a payment method is not available, an error will appear in the UI and and error will be returned in the callback.
  * @public
  * @param {callback} callback The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}.
  * @returns {void}
@@ -314,7 +314,7 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
 };
 
 /**
- * Cleanly remove anything set up by {@link module:braintree-web-drop-in|dropin.create}. This maybe be useful in a single-page app.
+ * Cleanly remove anything set up by {@link module:braintree-web-drop-in|dropin.create}. This may be be useful in a single-page app.
  * @public
  * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully.
  * @returns {void}

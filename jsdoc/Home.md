@@ -30,12 +30,22 @@ The Drop-in source is available from our CDN, that you can include in your proje
 
 ```html
 <script src="https://js.braintreegateway.com/web/dropin/@VERSION/js/dropin.min.js"></script>
+
+<script>
+braintree.dropin.create({ /* options */}, callback);
+<script>
 ```
 
 You can also get Drop-in from [npm](https://www.npmjs.com/).
 
 ```sh
 npm install --save braintree-web-drop-in
+```
+
+```javascript
+var dropin = require('braintree-web-drop-in');
+
+dropin.create({ /* options */ }, callback);
 ```
 
 <a id="usage"></a>
