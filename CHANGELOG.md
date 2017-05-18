@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix typo in Dutch translations
+
 1.0.2
 -----
 - Add timeout for async dependencies in PayPal
