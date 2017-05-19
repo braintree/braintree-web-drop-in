@@ -1,9 +1,10 @@
 CHANGELOG
 =========
 
-UNRELEASED
+unreleased
 ----------
 - Add ability to pass in a DOM Node to Drop-in as an alternative to a CSS selector
+- Fix typo in Dutch translations
 
 1.0.2
 -----
