@@ -1,9 +1,10 @@
 CHANGELOG
 =========
 
-UNRELEASED
+unreleased
 ----------
 - Add updateConfiguration method to Drop-in instance for updating PayPal or PayPal Credit configuration
+- Fix typo in Dutch translations
 
 1.0.2
 -----

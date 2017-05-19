@@ -28,7 +28,7 @@ module.exports = {
   "cvvLabel": "CVV",
   "cvvThreeDigitLabelSubheading": "(3 cijfers)",
   "cvvFourDigitLabelSubheading": "(4 cijfers)",
-  "expirationDateLabel": "VervaldatumB",
+  "expirationDateLabel": "Vervaldatum",
   "expirationDateLabelSubheading": "(MM/JJ)",
   "expirationDatePlaceholder": "MM/JJ",
   "postalCodeLabel": "Postcode",
