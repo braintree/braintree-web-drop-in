@@ -224,7 +224,7 @@ Dropin.prototype._initialize = function (callback) {
 };
 
 /**
- * Modify your configuration setting intially set in {@link module:braintree-web-drop-in|`dropin.create`}. Can be used for any `paypal` or `paypalCredit` property.
+ * Modify your configuration intially set in {@link module:braintree-web-drop-in|`dropin.create`}. Can be used for any `paypal` or `paypalCredit` property.
  *
  * If `updateConfiguration` is called after a user completes the PayPal authorization flow, any PayPal accounts not stored in the Vault record will be removed.
  * @public
