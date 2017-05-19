@@ -39,34 +39,31 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 Dropin.prototype._initialize = function (callback) {
   var localizedStrings, localizedHTML, strings;
   var dropinInstance = this; // eslint-disable-line consistent-this
-  var container = this._merchantConfiguration.container;
-  var selector = this._merchantConfiguration.selector;
+  var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
 
   this._injectStylesheet();
 
-  if (!selector && !container) {
+  if (!container) {
     analytics.sendEvent(this._client, 'configuration-error');
-    callback(new DropinError('options.selector or options.container are required.'));
+    callback(new DropinError('options.container is required.'));
     return;
-  } else if (selector && container) {
+  } else if (this._merchantConfiguration.container && this._merchantConfiguration.selector) {
     analytics.sendEvent(this._client, 'configuration-error');
     callback(new DropinError('Must only have one options.selector or options.container.'));
     return;
   }
 
-  if (container && container.nodeType !== 1) {
-    analytics.sendEvent(this._client, 'configuration-error');
-    callback(new DropinError('options.container must be a valid DOM node.'));
-    return;
-  } else if (selector) {
-    container = document.querySelector(selector);
+  if (typeof container === 'string') {
+    container = document.querySelector(container);
   }
 
-  if (!container) {
+  if (!container || container.nodeType !== 1) {
     analytics.sendEvent(this._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference a valid DOM node.'));
     return;
-  } else if (container.innerHTML.trim()) {
+  }
+
+  if (container.innerHTML.trim()) {
     analytics.sendEvent(this._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference an empty DOM node.'));
     return;
