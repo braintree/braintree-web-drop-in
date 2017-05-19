@@ -23,7 +23,7 @@ var VERSION = process.env.npm_package_version;
  * @typedef {object} Dropin~cardPaymentMethodPayload
  * @property {string} nonce The payment method nonce.
  * @property {object} details Additional account details.
- * @property {string} details.cardType Type of card, ex: Visa, MasterCard.
+ * @property {string} details.cardType Type of card, e.g. Visa, MasterCard.
  * @property {string} details.lastTwo Last two digits of card number.
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
