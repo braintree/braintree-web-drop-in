@@ -5,6 +5,7 @@
   "scripts": {
     "build": "gulp build",
     "development": "gulp development",
+    "gh-pages": "gulp build:gh-pages",
     "lint": "eslint src test",
     "pretest": "npm run lint",
     "test": "karma start test/config/karma.js --single-run",
@@ -37,6 +38,8 @@
     "gulp-uglify": "2.0.0",
     "gulp-util": "3.0.7",
     "is-uuid": "1.0.2",
+    "jsdoc": "3.4.0",
+    "jsdoc-template": "braintree/jsdoc-template#3.0.0",
     "karma": "0.13.22",
     "karma-browserify": "5.0.5",
     "karma-mocha": "1.1.1",
