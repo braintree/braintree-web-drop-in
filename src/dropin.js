@@ -49,7 +49,7 @@ var VERSION = process.env.npm_package_version;
  *
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
- *   selector: '#dropin-container'
+ *   container: '#dropin-container'
  * }, function (err, dropinInstance) {
  *   submitButton.addEventListener('click', function () {
  *     dropinInstance.requestPaymentMethod(function (err, payload) {
