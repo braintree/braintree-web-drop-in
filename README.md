@@ -12,8 +12,10 @@ If you have any feedback or questions, create an [issue](https://github.com/brai
 - Open source and open development
 
 ## Getting started
+[//]: # (Add the following line when JSDocs are deployed)
+[//]: # (For setup and usage, see our [reference](https://braintree.github.io/braintree-web-drop-in/docs/current/).)
 
-For setup and usage, see our [reference](https://braintree.github.io/braintree-web-drop-in/docs/current/).
+See the Getting started guide on the [`release` branch](https://github.com/braintree/braintree-web-drop-in/tree/release#setup) until our reference is available.
 
 ## Full example
 
