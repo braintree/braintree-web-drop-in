@@ -3,8 +3,9 @@ CHANGELOG
 
 unreleased
 ----------
-- Add updateConfiguration method to Drop-in instance for updating PayPal or PayPal Credit configuration
+- Add built css to npm build
 - Fix typo in Dutch translations
+- Add updateConfiguration method to Drop-in instance for updating PayPal or PayPal Credit configuration
 
 1.0.2
 -----
