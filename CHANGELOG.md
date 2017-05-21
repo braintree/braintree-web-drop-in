@@ -3,6 +3,7 @@ CHANGELOG
 
 unreleased
 ----------
+- Add built css to npm build
 - Fix typo in Dutch translations
 
 1.0.2
