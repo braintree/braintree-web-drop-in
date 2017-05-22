@@ -106,14 +106,14 @@
 <p><span class="rule"></span></p>
 <p><a id="overview"></a></p>
 <h2>Overview</h2><p>Drop-in is a pre-made payments UI for desktop and mobile browsers to be used with cards, PayPal, and PayPal Credit. It can be used as a one-time guest checkout or to offer saved payment methods with a client token created using a <a href="https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id">customer ID</a>.</p>
-<p>Test our our <a href="/">demo app</a> with one of our <a href="https://developers.braintreepayments.com/reference/general/testing/#no-credit-card-errors">test card numbers</a> or a <a href="https://developer.paypal.com/docs/classic/lifecycle/sb_create-accounts/">sandbox PayPal account</a>.</p>
+<p>Test our our <a href="/braintree-web-drop-in">demo app</a> with one of our <a href="https://developers.braintreepayments.com/reference/general/testing/#no-credit-card-errors">test card numbers</a> or a <a href="https://developer.paypal.com/docs/classic/lifecycle/sb_create-accounts/">sandbox PayPal account</a>.</p>
 <p>If you have any feedback or questions, create a <a href="https://github.com/braintree/braintree-web-drop-in/issues">GitHub issue</a> or <a href="https://developers.braintreepayments.com/forms/contact">contact Braintree support</a>.</p>
 <p><a id="setup"></a></p>
 <h2>Setup</h2><p>The Drop-in source is available from our CDN, that you can include in your project with a script tag:</p>
 <pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://js.braintreegateway.com/web/dropin/1.1.0/js/dropin.min.js&quot;>&lt;/script>
 
 &lt;script>
-braintree.dropin.create({ /* options */}, callback);
+braintree.dropin.create({ /* options */ }, callback);
 &lt;script></code></pre><p>You can also get Drop-in from <a href="https://www.npmjs.com/">npm</a>.</p>
 <pre class="prettyprint source lang-sh"><code>npm install --save braintree-web-drop-in</code></pre><pre class="prettyprint source lang-javascript"><code>var dropin = require('braintree-web-drop-in');
 
