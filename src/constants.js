@@ -40,7 +40,7 @@ module.exports = {
   },
   ANALYTICS_REQUEST_TIMEOUT_MS: 2000,
   ANALYTICS_PREFIX: 'web.dropin.',
-  CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.4.0.65.min.js',
+  CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.4.0.75.min.js',
   INTEGRATION: 'dropin2',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };

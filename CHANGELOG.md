@@ -6,6 +6,9 @@ unreleased
 - Add built css to npm build
 - Fix typo in Dutch translations
 - Add ability to pass in a DOM Node to Drop-in as an alternative to a CSS selector
+- Update braintree-web to [version 3.16.0](https://github.com/braintree/braintree-web/blob/master/CHANGELOG.md#3160)
+- Update browser-detection to version 1.3.0
+- Update PayPal Checkout.js to version 4.0.75
 - Add updateConfiguration method to Drop-in instance for updating PayPal or PayPal Credit configuration
 
 1.0.2
