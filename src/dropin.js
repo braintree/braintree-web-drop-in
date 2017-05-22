@@ -9,6 +9,8 @@ var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var fs = require('fs');
 var MainView = require('./views/main-view');
+var paymentMethodsViewID = require('./views/payment-methods-view').ID;
+var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
@@ -16,6 +18,14 @@ var uuid = require('./lib/uuid');
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
+var UPDATABLE_CONFIGURATION_OPTIONS = [
+  paymentOptionIDs.paypal,
+  paymentOptionIDs.paypalCredit
+];
+var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
+  paymentOptionIDs.paypal,
+  paymentOptionIDs.paypalCredit
+];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;
 
@@ -222,6 +232,52 @@ Dropin.prototype._initialize = function (callback) {
   }.bind(this));
 };
 
+/**
+ * Modify your configuration intially set in {@link module:braintree-web-drop-in|`dropin.create`}. Can be used for any `paypal` or `paypalCredit` property.
+ *
+ * If `updateConfiguration` is called after a user completes the PayPal authorization flow, any PayPal accounts not stored in the Vault record will be removed.
+ * @public
+ * @param {string} property The top-level property to update. Either `paypal` or `paypalCredit`.
+ * @param {string} key The key of the property to update, such as `amount` or `currency`.
+ * @param {string|number} value The value of the property to update. Must be the type of the property specified in {@link module:braintree-web-drop-in|`dropin.create`}.
+ * @returns {void}
+ */
+Dropin.prototype.updateConfiguration = function (property, key, value) {
+  var isOnMethodsView, hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
+
+  if (UPDATABLE_CONFIGURATION_OPTIONS.indexOf(property) === -1) {
+    return;
+  }
+
+  this._mainView.getView(property).updateConfiguration(key, value);
+
+  if (UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED.indexOf(property) === -1) {
+    return;
+  }
+
+  this._model.getPaymentMethods().forEach(function (paymentMethod) {
+    if (paymentMethod.type === constants.paymentMethodTypes[property] && !paymentMethod.vaulted) {
+      this._model.removePaymentMethod(paymentMethod);
+    }
+  }.bind(this));
+
+  isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
+
+  if (isOnMethodsView) {
+    hasNoSavedPaymentMethods = this._model.getPaymentMethods().length === 0;
+
+    if (hasNoSavedPaymentMethods) {
+      hasOnlyOneSupportedPaymentOption = this._model.supportedPaymentOptions.length === 1;
+
+      if (hasOnlyOneSupportedPaymentOption) {
+        this._mainView.setPrimaryView(this._model.supportedPaymentOptions[0]);
+      } else {
+        this._mainView.setPrimaryView(paymentOptionsViewID);
+      }
+    }
+  }
+};
+
 Dropin.prototype._supportsPaymentOption = function (paymentOption) {
   return this._model.supportedPaymentOptions.indexOf(paymentOption) !== -1;
 };
@@ -358,7 +414,8 @@ function formatPaymentMethodPayload(paymentMethod) {
   var formattedPaymentMethod = {
     nonce: paymentMethod.nonce,
     details: paymentMethod.details,
-    type: paymentMethod.type
+    type: paymentMethod.type,
+    vaulted: true
   };
 
   if (paymentMethod.type === constants.paymentMethodTypes.card) {

@@ -408,6 +408,7 @@ describe('Dropin', function () {
         expect(existingPaymentMethod.nonce).to.equal('nonce');
         expect(existingPaymentMethod.details).to.deep.equal({lastTwo: '11'});
         expect(existingPaymentMethod.type).to.equal('CreditCard');
+        expect(existingPaymentMethod.vaulted).to.equal(true);
         expect(existingPaymentMethod.garbage).to.not.exist;
         done();
       });
@@ -649,6 +650,279 @@ describe('Dropin', function () {
       };
 
       expect(instance.isPaymentMethodRequestable()).to.equal('foo');
+    });
+  });
+
+  describe('updateConfiguration', function () {
+    it('does not update if a prop other than paypal or paypalCredit is used', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._mainView = {
+        getView: this.sandbox.stub()
+      };
+
+      instance.updateConfiguration('card', 'foo', 'bar');
+
+      expect(instance._mainView.getView).to.not.be.called;
+    });
+
+    it('updates if view is paypal', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypal').returns(fakePayPalView);
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([])
+      };
+
+      instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._mainView.getView).to.be.calledOnce;
+      expect(fakePayPalView.updateConfiguration).to.be.calledOnce;
+      expect(fakePayPalView.updateConfiguration).to.be.calledWith('foo', 'bar');
+    });
+
+    it('updates if view is paypalCredit', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypalCredit').returns(fakePayPalView);
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([])
+      };
+
+      instance.updateConfiguration('paypalCredit', 'foo', 'bar');
+
+      expect(instance._mainView.getView).to.be.calledOnce;
+      expect(fakePayPalView.updateConfiguration).to.be.calledOnce;
+      expect(fakePayPalView.updateConfiguration).to.be.calledWith('foo', 'bar');
+    });
+
+    it('removes saved paypal payment methods if they are not vaulted', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'PayPalAccount'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'PayPalAccount', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'PayPalAccount'},
+          {nonce: '4', type: 'PayPalAccount', vaulted: true},
+          {nonce: '5', type: 'PayPalAccount'}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypal').returns(fakePayPalView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._model.getPaymentMethods).to.be.calledOnce;
+      expect(instance._model.removePaymentMethod).to.be.calledTwice;
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '3', type: 'PayPalAccount'});
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '5', type: 'PayPalAccount'});
+    });
+
+    it('does not call removePaymentMethod if no non-vaulted paypal accounts are avaialble', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns(null)
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'PayPalAccount', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'PayPalAccount', vaulted: true}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypal').returns(fakePayPalView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._model.removePaymentMethod).to.not.be.called;
+    });
+
+    it('sets primary view to options if on the methods view and there are no saved payment methods and supportedPaymentOptions is greater than 1', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'PayPalAccount'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'methods'
+        },
+        setPrimaryView: this.sandbox.stub()
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([]),
+        supportedPaymentOptions: ['paypal', 'card'],
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypal').returns(fakePayPalView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._mainView.setPrimaryView).to.be.calledOnce;
+      expect(instance._mainView.setPrimaryView).to.be.calledWith('options');
+    });
+
+    it('sets primary view to available payment option view if on the methods view and there are not saved payment methods and only one payment option is available', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'PayPalAccount'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'methods'
+        },
+        setPrimaryView: this.sandbox.stub()
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([]),
+        supportedPaymentOptions: ['paypal'],
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypal').returns(fakePayPalView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._mainView.setPrimaryView).to.be.calledOnce;
+      expect(instance._mainView.setPrimaryView).to.be.calledWith('paypal');
+    });
+
+    it('does not set primary view if current primary view is not methods', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'PayPalAccount'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'any-id-but-methods'
+        },
+        setPrimaryView: this.sandbox.stub()
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypal').returns(fakePayPalView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._mainView.setPrimaryView).to.not.be.called;
+    });
+
+    it('does not set primary view if there are saved payment methods', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'PayPalAccount'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'methods'
+        },
+        setPrimaryView: this.sandbox.stub()
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'CreditCard'}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('paypal').returns(fakePayPalView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._mainView.setPrimaryView).to.not.be.called;
     });
   });
 

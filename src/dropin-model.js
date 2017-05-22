@@ -38,6 +38,17 @@ DropinModel.prototype.addPaymentMethod = function (paymentMethod) {
   this.changeActivePaymentMethod(paymentMethod);
 };
 
+DropinModel.prototype.removePaymentMethod = function (paymentMethod) {
+  var paymentMethodLocation = this._paymentMethods.indexOf(paymentMethod);
+
+  if (paymentMethodLocation === -1) {
+    return;
+  }
+
+  this._paymentMethods.splice(paymentMethodLocation, 1);
+  this._emit('removePaymentMethod', paymentMethod);
+};
+
 DropinModel.prototype.changeActivePaymentMethod = function (paymentMethod) {
   this._activePaymentMethod = paymentMethod;
   this._emit('changeActivePaymentMethod', paymentMethod);
@@ -82,7 +93,11 @@ DropinModel.prototype.setPaymentMethodRequestable = function (options) {
 };
 
 DropinModel.prototype.getPaymentMethods = function () {
-  return this._paymentMethods;
+  // we want to return a copy of the Array
+  // so we can loop through it in dropin.updateConfiguration
+  // while calling model.removePaymentMethod
+  // which updates the original array
+  return this._paymentMethods.slice();
 };
 
 DropinModel.prototype.getActivePaymentMethod = function () {

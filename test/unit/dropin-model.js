@@ -233,13 +233,63 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('removePaymentMethod', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+    });
+
+    it('removes a payment method from _paymentMethods', function () {
+      var paymentMethod = {foo: 'bar'};
+
+      this.model.addPaymentMethod(paymentMethod);
+
+      this.model.removePaymentMethod(paymentMethod);
+
+      expect(this.model._paymentMethods).to.deep.equal([]);
+    });
+
+    it('does not remove a payment method from _paymentMethods if it only deep equals the existing payment method', function () {
+      var paymentMethod = {foo: 'bar'};
+
+      this.model.addPaymentMethod(paymentMethod);
+
+      this.model.removePaymentMethod({foo: 'bar'});
+
+      expect(this.model._paymentMethods[0]).to.equal(paymentMethod);
+    });
+
+    it('emits onRemovePaymentMethod event with new payment method', function (done) {
+      var paymentMethod = {foo: 'bar'};
+
+      this.model.addPaymentMethod(paymentMethod);
+      this.model.on('removePaymentMethod', function (emittedPaymentMethod) {
+        expect(emittedPaymentMethod).to.equal(paymentMethod);
+        done();
+      });
+
+      this.model.removePaymentMethod(paymentMethod);
+    });
+
+    it('does not emit onRemovePaymentMethod event when payment method does not exist', function () {
+      var paymentMethod = {foo: 'bar'};
+
+      this.sandbox.spy(this.model, '_emit');
+      this.model.addPaymentMethod(paymentMethod);
+
+      this.model.removePaymentMethod({someother: 'paymentMethod'});
+
+      expect(this.model._emit).to.not.be.calledWith('removePaymentMethod');
+    });
+  });
+
   describe('getPaymentMethods', function () {
-    it('returns _paymentMethods', function () {
+    it('returns a copy of the _paymentMethods array', function () {
       var model = new DropinModel(this.modelOptions);
 
-      model._paymentMethods = 'these are my payment methods';
+      model._paymentMethods = ['these are my payment methods'];
 
-      expect(model.getPaymentMethods()).to.equal('these are my payment methods');
+      expect(model.getPaymentMethods()).to.not.equal(model._paymentMethods);
+      expect(model.getPaymentMethods()).to.deep.equal(model._paymentMethods);
     });
   });
 
