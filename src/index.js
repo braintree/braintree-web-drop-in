@@ -18,8 +18,8 @@ var VERSION = process.env.npm_package_version;
  * @description This function is the entry point for `braintree.dropin`. It is used for creating {@link Dropin} instances.
  * @param {object} options Object containing all {@link Dropin} options:
  * @param {string} options.authorization A [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or a [client token](https://developers.braintreepayments.com/guides/authorization/client-token). If authorization is a client token created with a [customer ID](https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id), Drop-in will render saved payment methods and automatically store any newly-added payment methods in their Vault record.
- * @param {string|HTMLElement} options.container An empty element, such as a `<div>`, where Drop-in will be included on your page or the selector for the empty element. e.g. `#dropin-container`.
- * @param {string} options.selector Deprecated: Use `options.container`.
+ * @param {string|HTMLElement} options.container A reference to an empty element, such as a `<div>`, where Drop-in will be included on your page or the selector for the empty element. e.g. `#dropin-container`.
+ * @param {string} options.selector Deprecated: Now an alias for `options.container`.
  * @param {string} [options.locale=`en_US`] Use this option to change the language, links, and terminology used throughout Drop-in. Supported locales include:
  * `da_DK`,
  * `de_DE`,
