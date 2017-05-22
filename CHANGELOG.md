@@ -5,6 +5,7 @@ unreleased
 ----------
 - Add built css to npm build
 - Fix typo in Dutch translations
+- Add ability to pass in a DOM Node to Drop-in as an alternative to a CSS selector
 
 1.0.2
 -----
