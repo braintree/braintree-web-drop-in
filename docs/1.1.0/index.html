@@ -105,11 +105,11 @@
 </ul>
 <p><span class="rule"></span></p>
 <p><a id="overview"></a></p>
-<h2>Overview</h2><p>Drop-in is a pre-made payments UI for desktop and mobile browsers to be used with cards, PayPal, and PayPal credit. It can be used as a one-time guest checkout or to offer saved payment methods with a client token created using a <a href="https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id">customer ID</a>.</p>
+<h2>Overview</h2><p>Drop-in is a pre-made payments UI for desktop and mobile browsers to be used with cards, PayPal, and PayPal Credit. It can be used as a one-time guest checkout or to offer saved payment methods with a client token created using a <a href="https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id">customer ID</a>.</p>
 <p>Test our our <a href="/">demo app</a> with one of our <a href="https://developers.braintreepayments.com/reference/general/testing/#no-credit-card-errors">test card numbers</a> or a <a href="https://developer.paypal.com/docs/classic/lifecycle/sb_create-accounts/">sandbox PayPal account</a>.</p>
 <p>If you have any feedback or questions, create a <a href="https://github.com/braintree/braintree-web-drop-in/issues">GitHub issue</a> or <a href="https://developers.braintreepayments.com/forms/contact">contact Braintree support</a>.</p>
 <p><a id="setup"></a></p>
-<h2>Setup</h2><p>The Drop-in source is available from our CDN, that you can include in your project as a script tag:</p>
+<h2>Setup</h2><p>The Drop-in source is available from our CDN, that you can include in your project with a script tag:</p>
 <pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://js.braintreegateway.com/web/dropin/1.1.0/js/dropin.min.js&quot;>&lt;/script>
 
 &lt;script>
@@ -118,29 +118,29 @@ braintree.dropin.create({ /* options */}, callback);
 <pre class="prettyprint source lang-sh"><code>npm install --save braintree-web-drop-in</code></pre><pre class="prettyprint source lang-javascript"><code>var dropin = require('braintree-web-drop-in');
 
 dropin.create({ /* options */ }, callback);</code></pre><p><a id="usage"></a></p>
-<h2>Usage</h2><p>Drop-in provides a payment method object containing the <a href="https://developers.braintreepayments.com/start/overview#payment-method-nonce">payment method nonce</a> to send to your server. To get this object, use the <code>requestPaymentMethod</code> function as shown below.</p>
+<h2>Usage</h2><p>Drop-in provides a payment method object containing the <a href="https://developers.braintreepayments.com/start/overview#payment-method-nonce">payment method nonce</a> to send to your server. To get this object, use the <code>requestPaymentMethod</code> function.</p>
 <p><a id="accepting-cards"></a></p>
 <h3>Accepting cards</h3><p>By default, Drop-in is configured to accepted cards and does not require any additional parameters in the <a href="https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules"><code>create</code></a> call. If you are only accepting cards, Drop-in will appear as a card form. If you are accepting multiple payment options, Card will appear as an option in the list. CVV and Postal Code inputs are rendered conditionally based on <a href="https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules">AVS and CVV settings</a>.</p>
-<p>For credit cards, calling <a href="/docs/current/Dropin.html#requestPaymentMethod"><code>requestPaymentMethod</code></a> will attempt to validate the card form and will call the supplied callback with a payload, including the payment method nonce, if successful. If not successful, an error will be shown in the UI and the callback will be called with an error. Errors include invalid card details as well as card types not enabled by your merchant account.</p>
-<p>Use <a href="/docs/current/Dropin.html#on">events</a> to know when the card form could be considered valid. This does not necessarily mean the card form is complete, but it means it is considered valid by our client side validation.</p>
+<p>For credit cards, calling <a href="Dropin.html#requestPaymentMethod"><code>requestPaymentMethod</code></a> will attempt to validate the card form and will call the supplied callback with a payload, including the payment method nonce, if successful. If not successful, an error will be shown in the UI and the callback will be called with an error. Errors include invalid card details as well as card types not enabled by your merchant account.</p>
+<p>Use <a href="Dropin.html#on">events</a> to know when the card form could be considered valid. This does not necessarily mean the card form is complete, but it means it is considered valid by our client side validation.</p>
 <p><a id="accepting-paypal"></a></p>
-<h3>Accepting PayPal</h3><p>For PayPal and PayPal Credit, users will click the PayPal button and continue through the PayPal authentication flow. After successful completion, the PayPal account will be visible in the UI and that payment method can be requested. Use <a href="/docs/current/Dropin.html#on">events</a> to know when the authentication flow has been completed and the payment method can be requested.</p>
+<h3>Accepting PayPal</h3><p>For PayPal and PayPal Credit, users will click the PayPal button and continue through the PayPal authentication flow. After successful completion, the PayPal account will be visible in the UI and that payment method can be requested. Use <a href="Dropin.html#on">events</a> to know when the authentication flow has been completed and the payment method can be requested.</p>
 <p>More details about PayPal and PayPal Credit can be found in the Braintree <a href="https://developers.braintreepayments.com/guides/paypal/overview/javascript/v3">developer docs</a>.</p>
 <p><a id="localization"></a></p>
-<h3>Localization</h3><p>To translate Drop-in into different languages, pass a <a href="/docs/current/module-braintree-web-drop-in.html#.create">supported locale code</a> in your <code>create</code> call:</p>
+<h3>Localization</h3><p>To translate Drop-in into different languages, pass a <a href="module-braintree-web-drop-in.html#.create">supported locale code</a> in your <code>create</code> call:</p>
 <pre class="prettyprint source lang-js"><code>braintree.dropin.create({
   authorization: 'CLIENT_AUTHORIZATION',
   selector: '#dropin-container',
   locale: 'de_DE'
 }, callback);</code></pre><p><a id="events"></a></p>
 <h3>Events</h3><p>Use events to know whether or not a payment method is currently available from Drop-in. This can be used to dynamically enable and disable a submit button or automatically submit a nonce to your server after the PayPal flow has successfully completed.</p>
-<p>See <a href="/docs/current/Dropin.html#on"><code>on</code></a> for more details and an example of event usage.</p>
+<p>See <a href="Dropin.html#on"><code>on</code></a> for more details and an example of event usage.</p>
 <p><a id="styling"></a></p>
 <h3>Styling</h3><p>The stylesheet for Drop-in will load automatically when Drop-in is initialized.</p>
-<p>If you are using a custom build of Drop-in or would like to use an alternative styleshee, you can provide a <code>link</code> tag on your page with the id <code>braintree-dropin-stylesheet</code>. This will prevent the external stylesheet from loading.</p>
-<p>If you are using npm to manage your assets and owuld prefer to use a local version of the CSS, you can use the dropin.css file found in <code>node_modules/braintree-web-drop-in/dropin.css</code> and put it on your page in a <code>link</code> tag with the id <code>braintree-dropin-stylesheet</code>.</p>
+<p>If you are using a custom build of Drop-in or would like to use an alternative stylesheet, you can provide a <code>link</code> tag on your page with the id <code>braintree-dropin-stylesheet</code>. This will prevent the external stylesheet from loading.</p>
+<p>If you are using npm to manage your assets and would prefer to use a local version of the CSS, you can use the dropin.css file found in <code>node_modules/braintree-web-drop-in/dropin.css</code> and put it on your page in a <code>link</code> tag with the id <code>braintree-dropin-stylesheet</code>.</p>
 <p><a id="browser-support"></a></p>
-<h2>Browser support</h2><p>Drop-in has the same browser support as the Braintree JS SDK which can be found in the <a href="http://braintree.github.io/braintree-web/docs/current/#browser-support">SDK reference</a>.</p>
+<h2>Browser support</h2><p>Drop-in and the Braintree JS SDK have the same <a href="http://braintree.github.io/braintree-web/current/#browser-support">browser support</a>.</p>
 <p><a id="additional-resources"></a></p>
 <h2>Additional resources</h2><li><a href="https://developers.braintreepayments.com/guides/drop-in/javascript/v3">Braintree Drop-in Payment UI guide</a></li>
 <li><a href="https://github.com/braintree/braintree-web-drop-in"><code>braintree-web-drop-in</code> GitHub repo</a></li>
