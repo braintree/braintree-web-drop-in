@@ -9,6 +9,7 @@
   * [Accepting PayPal](#accepting-paypal)
   * [Localization](#localization)
   * [Events](#events)
+  * [Styling](#styling)
 * [Browser support](#browser-support)
 * [Additional resources](#additional-resources)
 
@@ -87,6 +88,15 @@ braintree.dropin.create({
 Use events to know whether or not a payment method is currently available from Drop-in. This can be used to dynamically enable and disable a submit button or automatically submit a nonce to your server after the PayPal flow has successfully completed.
 
 See [`on`](/docs/current/Dropin.html#on) for more details and an example of event usage.
+
+<a id="styling"></a>
+### Styling
+
+The stylesheet for Drop-in will load automatically when Drop-in is initialized.
+
+If you are using a custom build of Drop-in or would like to use an alternative styleshee, you can provide a `link` tag on your page with the id `braintree-dropin-stylesheet`. This will prevent the external stylesheet from loading.
+
+If you are using npm to manage your assets and owuld prefer to use a local version of the CSS, you can use the dropin.css file found in `node_modules/braintree-web-drop-in/dropin.css` and put it on your page in a `link` tag with the id `braintree-dropin-stylesheet`.
 
 <a id="browser-support"></a>
 ## Browser support

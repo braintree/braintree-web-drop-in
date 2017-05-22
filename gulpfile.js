@@ -112,6 +112,10 @@ gulp.task('build:npm:statics', function () {
   ]).pipe(gulp.dest(NPM_PATH));
 });
 
+gulp.task('build:npm:css', ['build:css'], function () {
+  return gulp.src([config.dist.css + '/dropin.css']).pipe(gulp.dest(NPM_PATH));
+});
+
 gulp.task('build:npm:package.json', function (done) {
   var pkg = Object.assign({}, require('./package.json'));
 
@@ -134,6 +138,7 @@ gulp.task('build:npm:src', function () {
 });
 
 gulp.task('build:npm', [
+  'build:npm:css',
   'build:npm:statics',
   'build:npm:package.json',
   'build:npm:src'
