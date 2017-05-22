@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -u
+set -e
+
+run_ressh() {
+  source "$HOME/.aliases"
+  ressh
+}
+
+commit_and_push() {
+  set +e
+  git clean -fd
+  git add .
+  git commit -m "Add version $npm_package_version"
+  run_ressh
+  git push origin gh-pages
+  set -e
+}
+
+TEMP_DIRECTORY=/tmp/braintree-web-drop-in-temp
+BT_DROPIN_DIR=~/bt/braintree-web-drop-in
+
+if [ -d "$TEMP_DIRECTORY" ]; then
+  rm -rf "$TEMP_DIRECTORY"
+fi
+
+echo -e "Building jsdoc...\n"
+cd "$BT_DROPIN_DIR" && npm run build:gh-pages
+cp -r $BT_DROPIN_DIR/dist/gh-pages $TEMP_DIRECTORY
+
+git co gh-pages
+git config user.name Braintree
+git config user.email code@getbraintree.com
+
+echo -e "Adding new jsdocs version...\n"
+cp -r $TEMP_DIRECTORY/docs/$npm_package_version .
+cp -r $TEMP_DIRECTORY/docs/current .
+cp -r $TEMP_DIRECTORY/index.html .
+#commit_and_push
+#
+#echo -e "Removing cloned braintree-web"
+#rm -rf "$TEMP_DIRECTORY"
+#
+#echo "Finished, exiting."
