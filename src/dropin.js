@@ -49,7 +49,7 @@ var VERSION = process.env.npm_package_version;
  *
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
- *   selector: '#dropin-container'
+ *   container: '#dropin-container'
  * }, function (err, dropinInstance) {
  *   submitButton.addEventListener('click', function () {
  *     dropinInstance.requestPaymentMethod(function (err, payload) {
@@ -117,26 +117,35 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var container, localizedStrings, localizedHTML, strings;
+  var localizedStrings, localizedHTML, strings;
   var dropinInstance = this; // eslint-disable-line consistent-this
+  var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
 
   this._injectStylesheet();
 
-  if (!this._merchantConfiguration.selector) {
+  if (!container) {
     analytics.sendEvent(this._client, 'configuration-error');
-    callback(new DropinError('options.selector is required.'));
+    callback(new DropinError('options.container is required.'));
+    return;
+  } else if (this._merchantConfiguration.container && this._merchantConfiguration.selector) {
+    analytics.sendEvent(this._client, 'configuration-error');
+    callback(new DropinError('Must only have one options.selector or options.container.'));
     return;
   }
 
-  container = document.querySelector(this._merchantConfiguration.selector);
+  if (typeof container === 'string') {
+    container = document.querySelector(container);
+  }
 
-  if (!container) {
+  if (!container || container.nodeType !== 1) {
     analytics.sendEvent(this._client, 'configuration-error');
-    callback(new DropinError('options.selector must reference a valid DOM node.'));
+    callback(new DropinError('options.selector or options.container must reference a valid DOM node.'));
     return;
-  } else if (container.innerHTML.trim()) {
+  }
+
+  if (container.innerHTML.trim()) {
     analytics.sendEvent(this._client, 'configuration-error');
-    callback(new DropinError('options.selector must reference an empty DOM node.'));
+    callback(new DropinError('options.selector or options.container must reference an empty DOM node.'));
     return;
   }
 
