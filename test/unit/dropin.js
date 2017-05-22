@@ -480,6 +480,25 @@ describe('Dropin', function () {
       });
     });
 
+    it('does not load checkout.js if script tag with paypal checkout id is already on the page', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var script = document.createElement('script');
+
+      global.paypal = this.paypalCheckout;
+
+      script.id = 'braintree-dropin-paypal-checkout-script';
+      document.body.appendChild(script);
+
+      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      instance._initialize(function () {
+        expect(instance._loadPayPalScript).to.not.have.been.called;
+        document.body.removeChild(script);
+
+        done();
+      });
+    });
+
     it('loads checkout.js if PayPal is enabled', function (done) {
       var instance = new Dropin(this.dropinOptions);
 

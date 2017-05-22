@@ -224,7 +224,7 @@ Dropin.prototype._initialize = function (callback) {
 
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
-    if (paypalRequired) {
+    if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
       this._loadPayPalScript(createMainView);
     } else {
       createMainView();
@@ -286,6 +286,7 @@ Dropin.prototype._loadPayPalScript = function (callback) {
   var script = document.createElement('script');
 
   script.src = constants.CHECKOUT_JS_SOURCE;
+  script.id = constants.PAYPAL_CHECKOUT_SCRIPT_ID;
   script.async = true;
   script.addEventListener('load', callback);
   script.setAttribute('data-log-level', this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL);
