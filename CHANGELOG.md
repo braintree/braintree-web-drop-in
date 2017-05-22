@@ -5,6 +5,9 @@ unreleased
 ----------
 - Add built css to npm build
 - Fix typo in Dutch translations
+- Update braintree-web to version 3.16.0
+- Update browser-detection to version 1.3.0
+- Update PayPal Checkout.js to version 4.0.75
 
 1.0.2
 -----
