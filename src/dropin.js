@@ -31,7 +31,7 @@ var VERSION = process.env.npm_package_version;
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
- * @property {string} nonce The payment method nonce.
+ * @property {string} nonce The payment method nonce, used by your server to charge the card.
  * @property {object} details Additional account details.
  * @property {string} details.cardType Type of card, e.g. Visa, MasterCard.
  * @property {string} details.lastTwo Last two digits of card number.
@@ -41,7 +41,7 @@ var VERSION = process.env.npm_package_version;
 
 /**
  * @typedef {object} Dropin~paypalPaymentMethodPayload
- * @property {string} nonce The payment method nonce.
+ * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
  * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
  */
@@ -318,7 +318,7 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 /**
  * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account. If a payment method is not available, an error will appear in the UI and and error will be returned in the callback.
  * @public
- * @param {callback} callback The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}.
+ * @param {callback} callback The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}.
  * @returns {void}
  */
 Dropin.prototype.requestPaymentMethod = function (callback) {
