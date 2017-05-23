@@ -239,8 +239,11 @@ Dropin.prototype._initialize = function (callback) {
  * @public
  * @param {string} property The top-level property to update. Either `paypal` or `paypalCredit`.
  * @param {string} key The key of the property to update, such as `amount` or `currency`.
- * @param {string|number} value The value of the property to update. Must be the type of the property specified in {@link module:braintree-web-drop-in|`dropin.create`}.
+ * @param value The value of the property to update. Must be the type of the property specified in {@link module:braintree-web-drop-in|`dropin.create`}.
  * @returns {void}
+ * @example
+ * dropinInstance.updateConfiguration('paypal', 'amount', '10.00');
+ *
  */
 Dropin.prototype.updateConfiguration = function (property, key, value) {
   var isOnMethodsView, hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
