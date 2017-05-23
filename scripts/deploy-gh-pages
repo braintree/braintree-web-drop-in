@@ -1,0 +1,46 @@
+#!/bin/bash
+
+set -u
+set -e
+
+run_ressh() {
+  source "$HOME/.aliases"
+  ressh
+}
+
+commit_and_push() {
+  set +e
+  git add .
+  echo -e "Committing and pushing new gh-pages...\n"
+  git commit -m "Add version $npm_package_version"
+  run_ressh
+  git push origin gh-pages
+  set -e
+}
+
+BT_DROPIN_DIR=~/bt/braintree-web-drop-in
+
+cd "$BT_DROPIN_DIR"
+
+echo -e "Building dropin...\n"
+npm run build
+
+git checkout gh-pages
+git pull
+
+git config user.name Braintree
+git config user.email code@getbraintree.com
+
+echo -e "Copying new jsdocs gh-pages...\n"
+cp -r dist/gh-pages/* .
+
+echo -e "Copying new dropin.css/js...\n"
+cp dist/web/dropin/dev/css/dropin.css web/dropin/dev/css
+cp dist/web/dropin/dev/js/dropin.js web/dropin/dev/js
+
+commit_and_push
+
+echo -e "Checking out previous branch...\n"
+git checkout -
+
+echo "Finished, exiting."

@@ -1,15 +1,16 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "main": "src/index.js",
   "scripts": {
     "build": "gulp build",
     "development": "gulp development",
-    "gh-pages": "gulp build:gh-pages",
+    "build:gh-pages": "gulp build:gh-pages",
     "lint": "eslint src test",
     "pretest": "npm run lint",
     "test": "karma start test/config/karma.js --single-run",
-    "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec"
+    "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec",
+    "deploy:gh-pages": "./scripts/deploy-gh-pages"
   },
   "repository": {
     "type": "git",
