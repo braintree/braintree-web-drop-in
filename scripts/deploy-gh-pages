@@ -10,7 +10,7 @@ run_ressh() {
 
 commit_and_push() {
   set +e
-  g add .
+  git add .
   echo -e "Committing and pushing new gh-pages...\n"
   git commit -m "Add version $npm_package_version"
   run_ressh
