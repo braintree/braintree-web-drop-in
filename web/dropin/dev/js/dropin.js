@@ -4608,6 +4608,7 @@ module.exports = {
   ANALYTICS_PREFIX: 'web.dropin.',
   CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.4.0.75.min.js',
   INTEGRATION: 'dropin2',
+  PAYPAL_CHECKOUT_SCRIPT_ID: 'braintree-dropin-paypal-checkout-script',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
 
@@ -4837,7 +4838,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.paypalCredit
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-var VERSION = "1.0.2";
+var VERSION = "1.1.0-rc.2";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -5034,7 +5035,7 @@ Dropin.prototype._initialize = function (callback) {
 
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
-    if (paypalRequired) {
+    if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
       this._loadPayPalScript(createMainView);
     } else {
       createMainView();
@@ -5096,6 +5097,7 @@ Dropin.prototype._loadPayPalScript = function (callback) {
   var script = document.createElement('script');
 
   script.src = constants.CHECKOUT_JS_SOURCE;
+  script.id = constants.PAYPAL_CHECKOUT_SCRIPT_ID;
   script.async = true;
   script.addEventListener('load', callback);
   script.setAttribute('data-log-level', this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL);
@@ -5250,7 +5252,7 @@ var constants = require('./constants');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 
-var VERSION = "1.0.2";
+var VERSION = "1.1.0-rc.2";
 
 /**
  * @static
