@@ -159,7 +159,9 @@ gulp.task('build', function (done) {
 });
 
 function _replaceVersionInFile(filename) {
-    return `<(sed -e 's/@VERSION/${VERSION}/g' '${filename}')`;
+  var updatedFile = fs.readFileSync(filename, 'utf-8').replace(/@VERSION/g, VERSION);
+
+  fs.writeFileSync(filename, updatedFile, 'utf-8');
 }
 
 function jsdoc(options, done) {
@@ -187,7 +189,7 @@ function jsdoc(options, done) {
   if (options.pedantic === true) args.splice(1, 0, '--pedantic');
   if (options.query) args.splice(1, 0, '-q', options.query);
   if (options.recurse === true) args.splice(1, 0, '-r');
-  if (options.readme) args.splice(1, 0, '-R', _replaceVersionInFile(options.readme));
+  if (options.readme) args.splice(1, 0, '-R', options.readme);
   if (options.template) args.splice(1, 0, '-t', options.template);
   if (options.test === true) args.splice(1, 0, '-T');
   if (options.tutorials) args.splice(1, 0, '-u', options.tutorials);
@@ -199,6 +201,8 @@ function jsdoc(options, done) {
     stdio: ['ignore', 1, 2]
   }).on('exit', function (code) {
     if (code === 0) {
+      _replaceVersionInFile(`dist/gh-pages/docs/${VERSION}/index.html`);
+
       done();
     } else {
       done(code);
