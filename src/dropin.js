@@ -243,7 +243,6 @@ Dropin.prototype._initialize = function (callback) {
  * @returns {void}
  * @example
  * dropinInstance.updateConfiguration('paypal', 'amount', '10.00');
- *
  */
 Dropin.prototype.updateConfiguration = function (property, key, value) {
   var isOnMethodsView, hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
