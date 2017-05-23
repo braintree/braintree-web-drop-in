@@ -158,8 +158,10 @@ gulp.task('build', function (done) {
   done);
 });
 
-function _replaceVersionInFile(filename) {
-    return `<(sed -e 's/@VERSION/${VERSION}/g' '${filename}')`;
+function _replaceVersionInFile(fs,src_filename,dst_filename) {
+	fs.writeFileSync(dst_filename, fs.readFileSync(src_filename, 'utf-8').replace(/@VERSION/g, VERSION), 'utf-8');
+	
+	return dst_filename;
 }
 
 function jsdoc(options, done) {
@@ -173,7 +175,7 @@ function jsdoc(options, done) {
   }
 
   options = options || {};
-
+  
   if (options.access) args.splice(1, 0, '-a', options.access);
   if (options.configure) args.splice(1, 0, '-c', options.configure);
   if (options.debug === true) args.splice(1, 0, '--debug');
@@ -187,7 +189,10 @@ function jsdoc(options, done) {
   if (options.pedantic === true) args.splice(1, 0, '--pedantic');
   if (options.query) args.splice(1, 0, '-q', options.query);
   if (options.recurse === true) args.splice(1, 0, '-r');
-  if (options.readme) args.splice(1, 0, '-R', _replaceVersionInFile(options.readme));
+  if (options.readme) {
+	var fs = require('fs');
+	args.splice(1, 0, '-R', _replaceVersionInFile(fs,options.readme,options.readme+'.ver'));
+  }
   if (options.template) args.splice(1, 0, '-t', options.template);
   if (options.test === true) args.splice(1, 0, '-T');
   if (options.tutorials) args.splice(1, 0, '-u', options.tutorials);
@@ -198,6 +203,7 @@ function jsdoc(options, done) {
   spawn(command, [commandOption, args.join(' ')], {
     stdio: ['ignore', 1, 2]
   }).on('exit', function (code) {
+	if (options.readme) fs.unlink(options.readme+'.ver');
     if (code === 0) {
       done();
     } else {
