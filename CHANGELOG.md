@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-unreleased
+1.1.0
 ----------
 - Add built css to npm build
 - Fix typo in Dutch translations
