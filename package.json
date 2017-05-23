@@ -9,7 +9,8 @@
     "lint": "eslint src test",
     "pretest": "npm run lint",
     "test": "karma start test/config/karma.js --single-run",
-    "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec"
+    "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec",
+    "deploy:gh-pages": "./scripts/deploy-gh-pages"
   },
   "repository": {
     "type": "git",
