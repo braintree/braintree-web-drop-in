@@ -57,7 +57,7 @@ Drop-in provides a payment method object containing the [payment method nonce](h
 <a id="accepting-cards"></a>
 ### Accepting cards
 
-By default, Drop-in is configured to accepted cards and does not require any additional parameters in the [`create`](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules) call. If you are only accepting cards, Drop-in will appear as a card form. If you are accepting multiple payment options, Card will appear as an option in the list. CVV and Postal Code inputs are rendered conditionally based on [AVS and CVV settings](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules).
+By default, Drop-in is configured to accepted cards and does not require any additional parameters in the [`create`](module-braintree-web-drop-in.html#.create) call. If you are only accepting cards, Drop-in will appear as a card form. If you are accepting multiple payment options, Card will appear as an option in the list. CVV and Postal Code inputs are rendered conditionally based on [AVS and CVV settings](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules).
 
 For credit cards, calling [`requestPaymentMethod`](Dropin.html#requestPaymentMethod) will attempt to validate the card form and will call the supplied callback with a payload, including the payment method nonce, if successful. If not successful, an error will be shown in the UI and the callback will be called with an error. Errors include invalid card details as well as card types not enabled by your merchant account.
 
