@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-unreleased
+1.1.0
 ----------
 - Add built css to npm build
 - Fix typo in Dutch translations
@@ -10,6 +10,7 @@ unreleased
 - Update browser-detection to version 1.3.0
 - Update PayPal Checkout.js to version 4.0.75
 - Add updateConfiguration method to Drop-in instance for updating PayPal or PayPal Credit configuration
+- Only load paypal checkout script once
 
 1.0.2
 -----
