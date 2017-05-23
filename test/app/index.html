@@ -21,6 +21,10 @@
     margin: 0 auto;
   }
 
+  .hidden {
+    display: none;
+  }
+
   #dropin-container, #checkout-form {
     margin-bottom: 1em;
   }
@@ -78,6 +82,17 @@
   <button id="create-button" disabled type="button">Create</button>
   <button id="teardown-button" type="button">Teardown</button>
 </form>
+
+<div id="update-paypal-configuration" class="hidden">
+  <hr>
+
+  <p>Update PayPal Configuration<p/>
+
+  <div>
+    <input type="radio" name="flow" onclick="setFlow('vault')" id="paypal-config-vault" checked><label for="vault"> Use Vault flow</label><br>
+    <input type="radio" name="flow" onclick="setFlow('checkout')" id="paypal-config-checkout"><label for="checkout"> Use Checkout flow</label>
+  </div>
+</div>
 
 <pre id="results"></pre>
 
@@ -153,6 +168,10 @@
   function createDropin () {
     var config = getDropinConfig();
 
+    if (config.showUpdatePayPalMenu) {
+      document.querySelector('#update-paypal-configuration').className = '';
+    }
+
     results.textContent = '';
     error.textContent = '';
 
@@ -183,6 +202,23 @@
 
       dropinInstance = instance;
     });
+  }
+
+  function setFlow(flow) {
+    dropinInstance.updateConfiguration('paypal', 'flow', flow);
+    dropinInstance.updateConfiguration('paypalCredit', 'flow', flow);
+
+    if (flow === 'checkout') {
+      dropinInstance.updateConfiguration('paypal', 'amount', '9.99');
+      dropinInstance.updateConfiguration('paypal', 'currency', 'USD');
+      dropinInstance.updateConfiguration('paypalCredit', 'amount', '9.99');
+      dropinInstance.updateConfiguration('paypalCredit', 'currency', 'USD');
+    } else {
+      dropinInstance.updateConfiguration('paypal', 'amount', null);
+      dropinInstance.updateConfiguration('paypal', 'currency', null);
+      dropinInstance.updateConfiguration('paypalCredit', 'amount', null);
+      dropinInstance.updateConfiguration('paypalCredit', 'currency', null);
+    }
   }
 
   createButton.addEventListener('click', createDropin);

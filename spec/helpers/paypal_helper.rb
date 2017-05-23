@@ -5,6 +5,21 @@ module PayPal
     end
   end
 
+  def complete_iframe_flow(&block)
+    find(".braintree-sheet__button--paypal").click
+    paypal_outer_frame = find("body > iframe")
+
+    within_frame paypal_outer_frame do
+      inner_frame = find("body iframe")
+
+      within_frame inner_frame do
+        block.call if block
+
+        click_button("confirmButtonTop", wait: 30)
+      end
+    end
+  end
+
   def open_popup_and_complete_login(&block)
     paypal_popup = open_popup
 
