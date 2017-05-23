@@ -4838,7 +4838,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.paypalCredit
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-var VERSION = "1.1.0-rc.2";
+var VERSION = "1.1.0-rc.3";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -5252,7 +5252,7 @@ var constants = require('./constants');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 
-var VERSION = "1.1.0-rc.2";
+var VERSION = "1.1.0-rc.3";
 
 /**
  * @static
