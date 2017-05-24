@@ -208,7 +208,7 @@ $loader-scale-duration: 300ms;
 }
 
 .braintree-loaded .braintree-upper-container {
-  min-height: auto; 
+  min-height: auto;
 
   &:before {
     border: 0px;
@@ -799,11 +799,11 @@ $loader-scale-duration: 300ms;
 }
 
 /* =========================================================================
-   Remove this when we have a payment methods width 100%  width    
+   Remove this when we have a payment methods width 100%  width
    ========================================================================= */
-.braintree-loaded [data-braintree-id='methods'], 
+.braintree-loaded [data-braintree-id='methods'],
 .braintree-loaded [data-braintree-id='options'] {
-   transition: none;  
+   transition: none;
 }
 
 .braintree-options {
