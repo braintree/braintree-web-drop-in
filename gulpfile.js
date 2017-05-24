@@ -168,8 +168,9 @@ function jsdoc(options, done) {
   var args = ['jsdoc', 'src'];
   var command = 'bash';
   var commandOption = '-c';
+  var platform = process.platform;
 
-  if (process.platform.indexOf('win')>=0) {
+  if (platform !== 'darwin' && platform.indexOf('win') >= 0) {
     command = 'cmd';
     commandOption = '/c';
   }
