@@ -590,7 +590,7 @@ $loader-scale-duration: 300ms;
   padding: 14px 10px;
   position: relative;
   transition: opacity 300ms, width 200ms $curve-easeOutBack, border-color 300ms, border-radius 300ms;
-  width: 100%;
+  width: 98%;
   z-index: 0;
 
   &:hover .braintree-method__label {
@@ -654,6 +654,16 @@ $loader-scale-duration: 300ms;
   z-index: 1;
   border-color: #219653;
   border-width: 2px;
+  margin-top: -1px;
+  margin-bottom: -1px;
+
+  &:first-of-type {
+    margin-top: 0px;
+  }
+
+  &:last-of-type {
+    margin-bottom: 0px;
+  }
 
   .braintree-method__check {
     background-color: $highlight-color;
