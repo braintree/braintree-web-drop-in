@@ -2,7 +2,8 @@ CHANGELOG
 =========
 
 UNRELEASED
----------
+----------
+- Adjust styling of saved payment methods
 - Fix typo in russian translation
 - Update browser detection library to 1.4.0
 
