@@ -4,6 +4,7 @@ CHANGELOG
 UNRELEASED
 ---------
 - Fix typo in russian translation
+- Update browser detection library to 1.4.0
 
 1.1.0
 ----------
