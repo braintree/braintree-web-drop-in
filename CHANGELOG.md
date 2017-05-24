@@ -6,6 +6,7 @@ UNRELEASED
 - Adjust styling of saved payment methods
 - Fix typo in russian translation
 - Update browser detection library to 1.4.0
+- Fix width errors where Drop-in was not aligned with other elements on merchant page
 
 1.1.0
 ----------

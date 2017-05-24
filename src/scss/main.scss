@@ -166,7 +166,6 @@ $loader-scale-duration: 300ms;
   color: $text-color;
   font-size: 16px;
   margin-bottom: 10px;
-  margin-left: 5px;
 }
 
 .braintree-placeholder {
@@ -199,16 +198,15 @@ $loader-scale-duration: 300ms;
     bottom: 5px;
     content: '';
     display: block;
-    left: 3px;
     position: absolute;
     top: 0;
-    width: 98.28%;
+    width: 100%;
     z-index: -3;
   }
 }
 
 .braintree-loaded .braintree-upper-container {
-  min-height: auto; 
+  min-height: auto;
 
   &:before {
     border: 0px;
@@ -233,7 +231,7 @@ $loader-scale-duration: 300ms;
 .braintree-options-list {
   margin: 0 auto;
   padding-bottom: 5px;
-  width: 99%;
+  width: 100%;
 }
 
 .braintree-option {
@@ -303,7 +301,7 @@ $loader-scale-duration: 300ms;
   margin: 0 auto;
   max-height: 500px;
   transition: transform 300ms, opacity 300ms, max-height 300ms ease;
-  width: 99%;
+  width: 100%;
 }
 
 .braintree-sheet--tokenized {
@@ -336,7 +334,7 @@ $loader-scale-duration: 300ms;
 .braintree-sheet__error {
   display: none;
   margin: 0 auto;
-  width: 99%;
+  width: 100%;
 }
 
 .braintree-sheet--has-error .braintree-sheet__error {
@@ -375,19 +373,14 @@ $loader-scale-duration: 300ms;
 
 .braintree-show-methods .braintree-sheet--active {
   &.braintree-sheet--has-error .braintree-sheet {
-    -moz-box-shadow: none;
-    -webkit-box-shadow: none;
     border-color: $error-color;
     border-radius: 5px 5px 0 0;
-    box-shadow: none;
   }
 
   .braintree-sheet {
-    -moz-box-shadow: 0 0 0 2px #219653;
-    -webkit-box-shadow: 0 0 0 2px #219653;
-    border-color: rgba(0,0,0,0);
     border-radius: 5px;
-    box-shadow: 0 0 0 2px #219653;
+    border-color: #219653;
+    border-width: 2px;
   }
 }
 
@@ -590,15 +583,14 @@ $loader-scale-duration: 300ms;
   border-color: $border-color;
   border-style: solid;
   border-width: 0 1px 1px 1px;
-  box-shadow: none;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   margin: 0 auto;
   padding: 14px 10px;
   position: relative;
-  transition: opacity 300ms, box-shadow 300ms, width 200ms $curve-easeOutBack, border-color 300ms, border-radius 300ms;
-  width: 99%;
+  transition: opacity 300ms, width 200ms $curve-easeOutBack, border-color 300ms, border-radius 300ms;
+  width: 98%;
   z-index: 0;
 
   &:hover .braintree-method__label {
@@ -656,14 +648,22 @@ $loader-scale-duration: 300ms;
 }
 
 .braintree-methods--active .braintree-method--active {
-  -moz-box-shadow: 0 0 0 2px #219653;
-  -webkit-box-shadow: 0 0 0 2px #219653;
-  border-color: rgba(0,0,0,0);
   border-radius: 5px;
-  box-shadow: 0 0 0 2px #219653;
   opacity: 1;
   width: 100%;
   z-index: 1;
+  border-color: #219653;
+  border-width: 2px;
+  margin-top: -1px;
+  margin-bottom: -1px;
+
+  &:first-of-type {
+    margin-top: 0px;
+  }
+
+  &:last-of-type {
+    margin-bottom: 0px;
+  }
 
   .braintree-method__check {
     background-color: $highlight-color;
@@ -714,7 +714,7 @@ $loader-scale-duration: 300ms;
   margin: 0 auto;
   padding: 18px;
   text-align: center;
-  width: 99%;
+  width: 100%;
 
   &:hover {
     background: $background-hover;
@@ -798,12 +798,9 @@ $loader-scale-duration: 300ms;
   display: block;
 }
 
-/* =========================================================================
-   Remove this when we have a payment methods width 100%  width    
-   ========================================================================= */
-.braintree-loaded [data-braintree-id='methods'], 
+.braintree-loaded [data-braintree-id='methods'],
 .braintree-loaded [data-braintree-id='options'] {
-   transition: none;  
+   transition: none;
 }
 
 .braintree-options {
