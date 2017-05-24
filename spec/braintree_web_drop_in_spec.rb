@@ -66,7 +66,7 @@ describe "Drop-in" do
   end
 
   describe "updateConfiguration" do
-    it "updates PayPal configuration" do
+    it "updates PayPal configuration", :paypal do
       visit "http://#{HOSTNAME}:#{PORT}?showUpdatePayPalMenu=true"
 
       find("#paypal-config-checkout").click()
@@ -84,7 +84,7 @@ describe "Drop-in" do
       end
     end
 
-    it "updates PayPal Credit configuration" do
+    it "updates PayPal Credit configuration", :paypal do
       visit "http://#{HOSTNAME}:#{PORT}?showUpdatePayPalMenu=true"
 
       find("#paypal-config-checkout").click()
@@ -102,7 +102,7 @@ describe "Drop-in" do
       end
     end
 
-    it "removes authorized PayPal account when configuration is updated" do
+    it "removes authorized PayPal account when configuration is updated", :paypal do
       visit "http://#{HOSTNAME}:#{PORT}?showUpdatePayPalMenu=true"
 
       find("#paypal-config-checkout").click()
