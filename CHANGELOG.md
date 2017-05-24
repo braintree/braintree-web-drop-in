@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+UNRELEASED
+---------
+- Fix typo in russian translation
+
 1.1.0
 ----------
 - Add built css to npm build
