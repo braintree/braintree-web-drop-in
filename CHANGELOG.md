@@ -5,7 +5,7 @@ UNRELEASED
 ---------
 - Fix typo in russian translation
 - Update browser detection library to 1.4.0
-- Fix width errors where drop-in was not aligned with other elements on merchant page
+- Fix width errors where Drop-in was not aligned with other elements on merchant page
 
 1.1.0
 ----------
