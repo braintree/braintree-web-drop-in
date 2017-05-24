@@ -47,7 +47,8 @@ var config = {
     },
     html: {
       watch: 'src/html/**/*.html'
-    }
+    },
+    demoApp: './test/app/*'
   },
   jsdoc: {
     watch: 'jsdoc/*',
@@ -168,8 +169,9 @@ function jsdoc(options, done) {
   var args = ['jsdoc', 'src'];
   var command = 'bash';
   var commandOption = '-c';
+  var platform = process.platform;
 
-  if (process.platform.indexOf('win')>=0) {
+  if (platform !== 'darwin' && platform.indexOf('win') >= 0) {
     command = 'cmd';
     commandOption = '/c';
   }
@@ -245,7 +247,7 @@ gulp.task('jsdoc:link-current', function (done) {
 });
 
 gulp.task('build:demoapp', function () {
-  return gulp.src([ './test/app/*']).pipe(gulp.dest(GH_PAGES_PATH));
+  return gulp.src([config.src.demoApp]).pipe(gulp.dest(GH_PAGES_PATH));
 });
 
 gulp.task('gh-pages', ['build'], function () {
@@ -269,6 +271,7 @@ gulp.task('watch', function () {
   gulp.watch([config.src.js.watch, config.src.html.watch], ['build:js']);
   gulp.watch([config.src.css.watch], ['build:css']);
   gulp.watch([config.src.js.watch, config.jsdoc.watch], ['build:gh-pages']);
+  gulp.watch([config.src.demoApp], ['build:demoapp']);
 });
 
 gulp.task('watch:integration', ['watch']);
