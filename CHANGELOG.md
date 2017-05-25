@@ -8,6 +8,7 @@ UNRELEASED
 - Update browser detection library to 1.4.0
 - Fix width errors where Drop-in was not aligned with other elements on merchant page
 - Add ability to style PayPal button
+- Fail early if PayPal creation errors
 
 1.1.0
 ----------

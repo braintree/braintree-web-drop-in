@@ -16,6 +16,7 @@ BasePayPalView.prototype = Object.create(BaseView.prototype);
 
 BasePayPalView.prototype._initialize = function (isCredit) {
   var asyncDependencyTimeoutHandler;
+  var setupComplete = false;
   var self = this;
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
   var paypalConfiguration = this.model.merchantConfiguration[paypalType];
@@ -76,12 +77,21 @@ BasePayPalView.prototype._initialize = function (isCredit) {
 
     global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
       self.model.asyncDependencyReady();
+      setupComplete = true;
       clearTimeout(asyncDependencyTimeoutHandler);
     });
   });
 
   function reportError(err) {
-    self.model.reportError(err);
+    if (setupComplete) {
+      self.model.reportError(err);
+    } else {
+      self.model.asyncDependencyFailed({
+        view: self.ID,
+        error: new DropinError(err)
+      });
+      clearTimeout(asyncDependencyTimeoutHandler);
+    }
   }
 };
 

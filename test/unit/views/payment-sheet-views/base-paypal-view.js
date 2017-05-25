@@ -494,6 +494,30 @@ describe('BasePayPalView', function () {
       });
     });
 
+    it('marks dependency as failed if error occurs before setup completes', function (done) {
+      var model = this.model;
+
+      this.sandbox.stub(model, 'asyncDependencyFailed');
+      this.paypal.Button.render.rejects();
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        var onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
+        var err = new Error('Some error');
+
+        onErrorFunction(err);
+
+        expect(model.reportError).to.not.be.called;
+        expect(model.asyncDependencyFailed).to.be.calledOnce;
+        expect(model.asyncDependencyFailed).to.be.calledWithMatch({
+          view: this.view.ID,
+          error: new DropinError(err)
+        });
+
+        done();
+      }.bind(this));
+    });
+
     describe('with PayPal', function () {
       it('uses the PayPal merchant configuration', function () {
         this.model.merchantConfiguration.paypal = {
@@ -648,6 +672,29 @@ describe('BasePayPalView', function () {
         this.sandbox.clock.tick(300001);
 
         expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.called;
+      });
+
+      it('does not timeout if async dependency failed early', function () {
+        var onErrorFunction, err;
+
+        this.sandbox.useFakeTimers();
+        this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
+        PayPalCheckout.create.yields(null, this.paypalInstance);
+        this.paypal.Button.render.rejects();
+
+        this.view._initialize();
+
+        onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
+        err = new Error('Some error');
+
+        onErrorFunction(err);
+
+        this.sandbox.clock.tick(300500);
+
+        expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
+        expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.calledWithMatch({
+          err: new DropinError('There was an error connecting to PayPal.')
+        });
       });
     });
   });
