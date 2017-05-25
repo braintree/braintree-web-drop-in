@@ -12,7 +12,7 @@ var transitionHelper = require('../../../../src/lib/transition-helper');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 
-describe.only('CardView', function () {
+describe('CardView', function () {
   beforeEach(function () {
     this.div = document.createElement('div');
 
