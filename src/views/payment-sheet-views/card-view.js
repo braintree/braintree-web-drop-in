@@ -287,7 +287,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   var cardType;
   var cardNumberHrefLink = '#iconCardFront';
   var cvvHrefLink = '#iconCVVBack';
-  var cvvDescriptor = '(3 digits)';
+  var cvvDescriptor = this.strings.cvvThreeDigitLabelSubheading;
   var cvvPlaceholder = '•••';
   var numberFieldGroup = this.getElementById('number-field-group');
 
@@ -296,7 +296,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
     cardNumberHrefLink = '#icon-' + cardType;
     if (cardType === 'american-express') {
       cvvHrefLink = '#iconCVVFront';
-      cvvDescriptor = '(4 digits)';
+      cvvDescriptor = this.strings.cvvFourDigitLabelSubheading;
       cvvPlaceholder = '••••';
     }
     // Keep icon visible when field is not focused
