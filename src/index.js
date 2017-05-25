@@ -1,10 +1,35 @@
 'use strict';
 /**
  * @module braintree-web-drop-in
+ * @description There are two ways to integrate Drop-in into your page. You can use [`dropin.create`](#.create) or a standalone script tag integration (example below).
+ *
+ * If you only need to process credit cards on your checkout form, the script tag integration is the simplest and easiest way to integrate. All you need to do is add the Dropin script inside your form where you want Drop-in to appear and include a `data-braintree-dropin-authorization` property with your [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or [client token](https://developers.braintreepayments.com/guides/authorization/client-token).
+ *
+ * The script tag integration will intercept the form submission and attempt to tokenize the credit card. If the tokenization is successful, it will insert the payment method nonce representing the credit card into a hidden input with the name `payment_method_nonce` and then submit your form.
+ *
+ * If you want more control over the process or accept additional payment methods (such as PayPal or PayPal Credit), you can use [`dropin.create` instead](#.create).
+ * @example
+ * <caption>Script tag integration (credit cards only)</caption>
+ * <!DOCTYPE html>
+ * <html lang="en">
+ *   <head>
+ *     <meta charset="UTF-8">
+ *     <title>Checkout</title>
+ *   </head>
+ *   <body>
+ *     <form id="payment-form" action="/" method="post>
+ *       <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *       ></script>
+ *       <input type="submit" value="Purchase"></input>
+ *     </form>
+ *   </body>
+ * </html>
  */
 
 var Dropin = require('./dropin');
 var client = require('braintree-web/client');
+var createFromScriptTag = require('./lib/create-from-script-tag');
 var deferred = require('./lib/deferred');
 var constants = require('./constants');
 var analytics = require('./lib/analytics');
@@ -222,6 +247,9 @@ function setAnalyticsIntegration(clientInstance) {
 
   return clientInstance;
 }
+
+// we check for document's existence to support server side rendering
+createFromScriptTag(create, document && document.querySelector('script[data-braintree-dropin-authorization]'));
 
 module.exports = {
   create: create,
