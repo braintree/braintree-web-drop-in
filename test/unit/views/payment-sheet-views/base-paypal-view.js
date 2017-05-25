@@ -155,6 +155,65 @@ describe('BasePayPalView', function () {
       }.bind(this));
     });
 
+    it('can style the PayPal button', function (done) {
+      this.view.model.merchantConfiguration.paypal.buttonStyle = {
+        size: 'medium',
+        color: 'orange',
+        shape: 'rect'
+      };
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          style: {
+            size: 'medium',
+            color: 'orange',
+            shape: 'rect'
+          }
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('can style the PayPal Credit button', function (done) {
+      this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
+      this.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
+        size: 'medium',
+        color: 'orange',
+        shape: 'rect'
+      };
+      this.view._initialize(true);
+
+      waitForInitialize(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          style: {
+            size: 'medium',
+            color: 'orange',
+            shape: 'rect',
+            label: 'credit'
+          }
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('cannot style label for PayPal Credit', function (done) {
+      this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
+      this.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
+        label: 'buynow'
+      };
+      this.view._initialize(true);
+
+      waitForInitialize(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          style: {
+            label: 'credit'
+          }
+        });
+        done();
+      }.bind(this));
+    });
+
     it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function (done) {
       this.configuration.gatewayConfiguration.environment = 'production';
       this.view._initialize();

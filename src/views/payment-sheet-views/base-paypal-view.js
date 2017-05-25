@@ -49,6 +49,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
     self.paypalConfiguration.offerCredit = Boolean(isCredit);
     checkoutJSConfiguration = {
       env: environment,
+      style: self.paypalConfiguration.buttonStyle || {},
       locale: locale,
       payment: function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
@@ -70,7 +71,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
 
     if (isCredit) {
       buttonSelector = '[data-braintree-id="paypal-credit-button"]';
-      checkoutJSConfiguration.style = {label: 'credit'};
+      checkoutJSConfiguration.style.label = 'credit';
     }
 
     global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
