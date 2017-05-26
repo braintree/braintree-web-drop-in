@@ -10,6 +10,7 @@ module.exports = {
   es: require('./es_ES'),
   fr_CA: require('./fr_CA'),
   fr: require('./fr_FR'),
+  hu: require('./hu_HU'),
   id: require('./id_ID'),
   it: require('./it_IT'),
   ja: require('./ja_JP'),
