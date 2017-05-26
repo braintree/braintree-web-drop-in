@@ -77,6 +77,7 @@ var VERSION = process.env.npm_package_version;
  * @param {string} options.paypal.flow Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal.
  * @param {string|number} [options.paypal.amount] The amount of the transaction. Required when using the Checkout flow.
  * @param {string} [options.paypal.currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
+ * @param {string} [options.paypal.buttonStyle] The style object to apply to the PayPal button. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/) are available.
  *
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live).
  *
@@ -84,6 +85,7 @@ var VERSION = process.env.npm_package_version;
  * @param {string} [options.paypalCredit.flow] Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal.
  * @param {string|number} [options.paypalCredit.amount] The amount of the transaction. Required when using the Checkout flow.
  * @param {string} [options.paypalCredit.currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
+ * @param {string} [options.paypalCredit.buttonStyle] The style object to apply to the PayPal Credit button. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/) are available. The `label` property cannot be adjusted.
  * @param {function} callback The second argument, `data`, is the {@link Dropin} instance.
  * @returns {void}
  * @example

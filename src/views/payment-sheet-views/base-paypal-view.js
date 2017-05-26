@@ -16,6 +16,7 @@ BasePayPalView.prototype = Object.create(BaseView.prototype);
 
 BasePayPalView.prototype._initialize = function (isCredit) {
   var asyncDependencyTimeoutHandler;
+  var setupComplete = false;
   var self = this;
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
   var paypalConfiguration = this.model.merchantConfiguration[paypalType];
@@ -49,6 +50,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
     self.paypalConfiguration.offerCredit = Boolean(isCredit);
     checkoutJSConfiguration = {
       env: environment,
+      style: self.paypalConfiguration.buttonStyle || {},
       locale: locale,
       payment: function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
@@ -70,17 +72,26 @@ BasePayPalView.prototype._initialize = function (isCredit) {
 
     if (isCredit) {
       buttonSelector = '[data-braintree-id="paypal-credit-button"]';
-      checkoutJSConfiguration.style = {label: 'credit'};
+      checkoutJSConfiguration.style.label = 'credit';
     }
 
     global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
       self.model.asyncDependencyReady();
+      setupComplete = true;
       clearTimeout(asyncDependencyTimeoutHandler);
     });
   });
 
   function reportError(err) {
-    self.model.reportError(err);
+    if (setupComplete) {
+      self.model.reportError(err);
+    } else {
+      self.model.asyncDependencyFailed({
+        view: self.ID,
+        error: new DropinError(err)
+      });
+      clearTimeout(asyncDependencyTimeoutHandler);
+    }
   }
 };
 
