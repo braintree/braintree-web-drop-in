@@ -155,6 +155,65 @@ describe('BasePayPalView', function () {
       }.bind(this));
     });
 
+    it('can style the PayPal button', function (done) {
+      this.view.model.merchantConfiguration.paypal.buttonStyle = {
+        size: 'medium',
+        color: 'orange',
+        shape: 'rect'
+      };
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          style: {
+            size: 'medium',
+            color: 'orange',
+            shape: 'rect'
+          }
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('can style the PayPal Credit button', function (done) {
+      this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
+      this.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
+        size: 'medium',
+        color: 'orange',
+        shape: 'rect'
+      };
+      this.view._initialize(true);
+
+      waitForInitialize(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          style: {
+            size: 'medium',
+            color: 'orange',
+            shape: 'rect',
+            label: 'credit'
+          }
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('cannot style label for PayPal Credit', function (done) {
+      this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
+      this.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
+        label: 'buynow'
+      };
+      this.view._initialize(true);
+
+      waitForInitialize(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          style: {
+            label: 'credit'
+          }
+        });
+        done();
+      }.bind(this));
+    });
+
     it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function (done) {
       this.configuration.gatewayConfiguration.environment = 'production';
       this.view._initialize();
@@ -435,6 +494,30 @@ describe('BasePayPalView', function () {
       });
     });
 
+    it('marks dependency as failed if error occurs before setup completes', function (done) {
+      var model = this.model;
+
+      this.sandbox.stub(model, 'asyncDependencyFailed');
+      this.paypal.Button.render.rejects();
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        var onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
+        var err = new Error('Some error');
+
+        onErrorFunction(err);
+
+        expect(model.reportError).to.not.be.called;
+        expect(model.asyncDependencyFailed).to.be.calledOnce;
+        expect(model.asyncDependencyFailed).to.be.calledWithMatch({
+          view: this.view.ID,
+          error: new DropinError(err)
+        });
+
+        done();
+      }.bind(this));
+    });
+
     describe('with PayPal', function () {
       it('uses the PayPal merchant configuration', function () {
         this.model.merchantConfiguration.paypal = {
@@ -589,6 +672,29 @@ describe('BasePayPalView', function () {
         this.sandbox.clock.tick(300001);
 
         expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.called;
+      });
+
+      it('does not timeout if async dependency failed early', function () {
+        var onErrorFunction, err;
+
+        this.sandbox.useFakeTimers();
+        this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
+        PayPalCheckout.create.yields(null, this.paypalInstance);
+        this.paypal.Button.render.rejects();
+
+        this.view._initialize();
+
+        onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
+        err = new Error('Some error');
+
+        onErrorFunction(err);
+
+        this.sandbox.clock.tick(300500);
+
+        expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
+        expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.calledWithMatch({
+          err: new DropinError('There was an error connecting to PayPal.')
+        });
       });
     });
   });
