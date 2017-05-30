@@ -41,4 +41,3 @@ describe('findParentForm', function () {
     })).to.equal(form);
   });
 });
-
