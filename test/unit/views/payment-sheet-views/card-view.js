@@ -1167,6 +1167,32 @@ describe('CardView', function () {
 
         expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
       });
+
+      it('does not update the cvv field placeholder when using a custom CVV placeholder', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.spy()
+        };
+
+        this.context.model.merchantConfiguration.card = {
+          overrides: {
+            fields: {
+              cvv: {
+                placeholder: 'cool custom placeholder'
+              }
+            }
+          }
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setAttribute).not.to.have.been.called;
+      });
     });
 
     describe('onValidityChangeEvent', function () {

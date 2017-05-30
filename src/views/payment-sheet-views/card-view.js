@@ -128,6 +128,10 @@ CardView.prototype._generateHostedFieldsOptions = function () {
   }
 
   if (overrides.fields) {
+    if (overrides.fields.cvv && overrides.fields.cvv.placeholder) {
+      this._hasCustomCVVPlaceholder = true;
+    }
+
     Object.keys(overrides.fields).forEach(function (field) {
       if ((field === 'cvv' || field === 'postalCode') && overrides.fields[field] === null) {
         delete options.fields[field];
@@ -350,11 +354,14 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   if (this.hasCVV) {
     this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
     this.cvvLabelDescriptor.textContent = cvvDescriptor;
-    this.hostedFieldsInstance.setAttribute({
-      field: 'cvv',
-      attribute: 'placeholder',
-      value: cvvPlaceholder
-    });
+
+    if (!this._hasCustomCVVPlaceholder) {
+      this.hostedFieldsInstance.setAttribute({
+        field: 'cvv',
+        attribute: 'placeholder',
+        value: cvvPlaceholder
+      });
+    }
   }
 };
 
