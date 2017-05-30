@@ -7,7 +7,7 @@ require "rspec/retry"
 Dotenv.load
 
 HOSTNAME = `hostname`.chomp
-PORT = 4567
+PORT = ENV["PORT"] || 4567
 
 Capybara.default_driver = :selenium
 Capybara.app_host = "https://#{HOSTNAME}:#{PORT}"

@@ -3,7 +3,7 @@ require_relative "helpers/drop_in_helper"
 require_relative "helpers/skip_browser_helper"
 
 HOSTNAME = `hostname`.chomp
-PORT = 4567
+PORT = ENV["PORT"] || 4567
 
 describe "Drop-in" do
   include SkipBrowser
