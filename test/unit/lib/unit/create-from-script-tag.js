@@ -30,11 +30,13 @@ describe('createFromScriptTag', function () {
     expect(document.createElement).to.not.be.called;
   });
 
-  it('does not create container if script tag does not have an authorization attribute', function () {
+  it('throws an error if script tag does not include an authorization', function () {
     this.scriptTag.getAttribute.returns(null);
     this.sandbox.spy(document, 'createElement');
 
-    createFromScriptTag(this.createFunction, this.scriptTag);
+    expect(function () {
+      createFromScriptTag(this.createFunction, this.scriptTag);
+    }.bind(this)).to.throw('Authorization not found in data-braintree-dropin-authorization attribute');
 
     expect(document.createElement).to.not.be.called;
   });

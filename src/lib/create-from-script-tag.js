@@ -14,7 +14,7 @@ function createFromScriptTag(createFunction, scriptTag) {
   authorization = scriptTag.getAttribute('data-braintree-dropin-authorization');
 
   if (!authorization) {
-    return;
+    throw new DropinError('Authorization not found in data-braintree-dropin-authorization attribute');
   }
 
   containerId = 'braintree-dropin-' + uuid();
