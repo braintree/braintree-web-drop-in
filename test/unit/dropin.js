@@ -574,6 +574,23 @@ describe('Dropin', function () {
       });
     });
 
+    it('uses custom translations when locale provided is an object', function (done) {
+      var instance;
+
+      this.dropinOptions.merchantConfiguration.locale = {
+        payingWith: 'You are paying with {{paymentSource}}',
+        chooseAnotherWayToPay: 'My custom chooseAnotherWayToPay string'
+      };
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(instance._mainView.strings.payingWith).to.equal('You are paying with {{paymentSource}}');
+        expect(instance._mainView.strings.chooseAnotherWayToPay).to.equal('My custom chooseAnotherWayToPay string');
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Postal Code');
+        done();
+      });
+    });
+
     it('loads localized strings into mainView when options.locale is a supported locale ID', function (done) {
       var instance;
 

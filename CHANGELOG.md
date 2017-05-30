@@ -9,6 +9,7 @@ UNRELEASED
 - Fix width errors where Drop-in was not aligned with other elements on merchant page
 - Add ability to style PayPal button
 - Fail early if PayPal creation errors
+- Add support for custom translations
 
 1.1.0
 ----------
