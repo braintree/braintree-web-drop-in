@@ -21,7 +21,7 @@ describe('dropin.create', function () {
     this.form.appendChild(container);
     document.body.appendChild(this.form);
 
-    this.sandbox.stub(client, 'create');
+    this.sandbox.stub(client, 'create').resolves();
   });
 
   afterEach(function () {
@@ -44,7 +44,7 @@ describe('dropin.create', function () {
       message: 'you goofed!!'
     });
 
-    client.create.yields(originalErr);
+    client.create.rejects(originalErr);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -83,7 +83,7 @@ describe('dropin.create', function () {
       callback(null, this);
     });
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -106,7 +106,7 @@ describe('dropin.create', function () {
 
     this.sandbox.stub(Dropin.prototype, '_initialize').yields(dropinError);
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -130,7 +130,7 @@ describe('dropin.create', function () {
       callback(null, this);
     });
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -158,7 +158,7 @@ describe('dropin.create', function () {
     });
     this.sandbox.stub(analytics, 'sendEvent');
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: fake.tokenizationKey,
@@ -187,7 +187,7 @@ describe('dropin.create', function () {
     });
     this.sandbox.stub(analytics, 'sendEvent');
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: fake.clientToken,

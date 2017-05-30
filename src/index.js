@@ -187,15 +187,7 @@ function create(options, callback) {
 
   client.create({
     authorization: options.authorization
-  }, function (err, clientInstance) {
-    if (err) {
-      callback(new DropinError({
-        message: 'There was an error creating Drop-in.',
-        braintreeWebError: err
-      }));
-      return;
-    }
-
+  }).then(function (clientInstance) {
     clientInstance = setAnalyticsIntegration(clientInstance);
 
     if (clientInstance.getConfiguration().authorizationType === 'TOKENIZATION_KEY') {
@@ -208,6 +200,11 @@ function create(options, callback) {
       merchantConfiguration: options,
       client: clientInstance
     })._initialize(callback);
+  }).catch(function (err) {
+    callback(new DropinError({
+      message: 'There was an error creating Drop-in.',
+      braintreeWebError: err
+    }));
   });
 }
 
