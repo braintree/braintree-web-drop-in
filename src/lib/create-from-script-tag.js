@@ -40,11 +40,13 @@ function createFromScriptTag(createFunction, scriptTag) {
       event.preventDefault();
 
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
-        var paymentMethodNonce = form.querySelector('[name="payment_method_nonce"]');
+        var paymentMethodNonce;
 
         if (requestPaymentError) {
           return;
         }
+
+        paymentMethodNonce = form.querySelector('[name="payment_method_nonce"]');
 
         if (!paymentMethodNonce) {
           paymentMethodNonce = document.createElement('input');
