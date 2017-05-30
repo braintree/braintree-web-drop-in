@@ -251,7 +251,7 @@ function setAnalyticsIntegration(clientInstance) {
 }
 
 // we check for document's existence to support server side rendering
-createFromScriptTag(create, document && document.querySelector('script[data-braintree-dropin-authorization]'));
+createFromScriptTag(create, typeof document !== 'undefined' && document.querySelector('script[data-braintree-dropin-authorization]'));
 
 module.exports = {
   create: create,
