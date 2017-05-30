@@ -1,9 +1,9 @@
 'use strict';
 /**
  * @module braintree-web-drop-in
- * @description There are two ways to integrate Drop-in into your page. You can use [`dropin.create`](#.create) or a standalone script tag integration (example below).
+ * @description The primary way to integrate Drop-in into your page is to use [`dropin.create`](#.create).
  *
- * If you only need to process credit cards on your checkout form, the script tag integration is the simplest and easiest way to integrate. All you need to do is add the Dropin script inside your form where you want Drop-in to appear and include a `data-braintree-dropin-authorization` property with your [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or [client token](https://developers.braintreepayments.com/guides/authorization/client-token).
+ * Alternatively, if you only need to process credit cards on your checkout page, the script tag integration is the simplest way to integrate. All you need to do is add the Drop-in script inside your form element where you want Drop-in to appear and include a `data-braintree-dropin-authorization` property with your [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or [client token](https://developers.braintreepayments.com/guides/authorization/client-token).
  *
  * The script tag integration will intercept the form submission and attempt to tokenize the credit card. If the tokenization is successful, it will insert the payment method nonce representing the credit card into a hidden input with the name `payment_method_nonce` and then submit your form.
  *
