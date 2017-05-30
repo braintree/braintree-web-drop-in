@@ -68,13 +68,13 @@ describe('createFromScriptTag', function () {
     expect(this.fakeForm.insertBefore).to.be.calledWith(fakeContainer, this.scriptTag);
   });
 
-  it('calls create with authorization and selector', function () {
+  it('calls create with authorization and container', function () {
     createFromScriptTag(this.createFunction, this.scriptTag);
 
     expect(this.createFunction).to.be.calledOnce;
     expect(this.createFunction).to.be.calledWithMatch({
       authorization: 'an-authorization',
-      selector: this.sandbox.match(/^#braintree-dropin-/)
+      container: this.sandbox.match.defined
     }, this.sandbox.match.func);
   });
 

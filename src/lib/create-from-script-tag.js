@@ -5,7 +5,7 @@ var uuid = require('./uuid');
 var DropinError = require('./dropin-error');
 
 function createFromScriptTag(createFunction, scriptTag) {
-  var authorization, containerId, container, form;
+  var authorization, container, form;
 
   if (!scriptTag) {
     return;
@@ -17,9 +17,8 @@ function createFromScriptTag(createFunction, scriptTag) {
     throw new DropinError('Authorization not found in data-braintree-dropin-authorization attribute');
   }
 
-  containerId = 'braintree-dropin-' + uuid();
   container = document.createElement('div');
-  container.id = containerId;
+  container.id = 'braintree-dropin-' + uuid();
 
   form = find.findParentForm(scriptTag);
 
@@ -31,7 +30,7 @@ function createFromScriptTag(createFunction, scriptTag) {
 
   createFunction({
     authorization: authorization,
-    selector: '#' + containerId
+    container: container
   }, function (createError, instance) {
     if (createError) {
       throw createError;
