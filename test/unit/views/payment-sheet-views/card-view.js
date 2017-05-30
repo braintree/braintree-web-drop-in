@@ -91,7 +91,7 @@ describe('CardView', function () {
       };
 
       this.model.merchantConfiguration.card = {
-        hostedFieldsOverrides: {
+        overrides: {
           fields: {
             cvv: null
           }
@@ -157,7 +157,7 @@ describe('CardView', function () {
       };
 
       this.model.merchantConfiguration.card = {
-        hostedFieldsOverrides: {
+        overrides: {
           fields: {
             postalCode: null
           }
@@ -418,7 +418,7 @@ describe('CardView', function () {
         };
       };
       this.model.merchantConfiguration.card = {
-        hostedFieldsOverrides: {
+        overrides: {
           fields: {
             number: {
               placeholder: 'placeholder'
@@ -448,7 +448,7 @@ describe('CardView', function () {
       var hostedFieldsConfiguredFields;
 
       this.model.merchantConfiguration.card = {
-        hostedFieldsOverrides: {
+        overrides: {
           fields: {
             postalCode: {
               selector: '#postal-code'
@@ -486,7 +486,7 @@ describe('CardView', function () {
       var hostedFieldsConfiguredFields;
 
       this.model.merchantConfiguration.card = {
-        hostedFieldsOverrides: {
+        overrides: {
           fields: {
             number: {
               selector: '#some-selector'
@@ -512,7 +512,7 @@ describe('CardView', function () {
       var hostedFieldsConfiguredStyles;
 
       this.model.merchantConfiguration.card = {
-        hostedFieldsOverrides: {
+        overrides: {
           styles: {
             input: {
               background: 'blue',

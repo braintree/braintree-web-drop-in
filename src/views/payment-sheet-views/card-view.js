@@ -76,7 +76,7 @@ CardView.prototype._initialize = function () {
 };
 
 CardView.prototype._generateHostedFieldsOptions = function () {
-  var hfOverrides = this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.hostedFieldsOverrides;
+  var overrides = this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.overrides;
   var options = {
     client: this.client,
     fields: {
@@ -123,13 +123,13 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     }
   };
 
-  if (!hfOverrides) {
+  if (!overrides) {
     return options;
   }
 
-  if (hfOverrides.fields) {
-    Object.keys(hfOverrides.fields).forEach(function (field) {
-      if ((field === 'cvv' || field === 'postalCode') && hfOverrides.fields[field] === null) {
+  if (overrides.fields) {
+    Object.keys(overrides.fields).forEach(function (field) {
+      if ((field === 'cvv' || field === 'postalCode') && overrides.fields[field] === null) {
         delete options.fields[field];
         return;
       }
@@ -138,20 +138,20 @@ CardView.prototype._generateHostedFieldsOptions = function () {
         return;
       }
 
-      assign(options.fields[field], hfOverrides.fields[field], {
+      assign(options.fields[field], overrides.fields[field], {
         selector: options.fields[field].selector
       });
     });
   }
 
-  if (hfOverrides.styles) {
-    Object.keys(hfOverrides.styles).forEach(function (style) {
-      if (hfOverrides.styles[style] === null) {
+  if (overrides.styles) {
+    Object.keys(overrides.styles).forEach(function (style) {
+      if (overrides.styles[style] === null) {
         delete options.styles[style];
         return;
       }
 
-      assign(options.styles[style], hfOverrides.styles[style]);
+      assign(options.styles[style], overrides.styles[style]);
     });
   }
 
