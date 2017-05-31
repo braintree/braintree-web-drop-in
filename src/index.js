@@ -46,6 +46,9 @@ var VERSION = process.env.npm_package_version;
  * `zh_TW`.
  * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit']`. Payment options omitted from this array will not be offered to the customer.
  *
+ * @param {object} [options.card] The configuration options for cards. If this option is omitted, cards will still appear as a payment option. To remove cards as a payment option, use `paymentOptionPriority`. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` configuration can be customized.
+ * @param {object} [options.card.overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
+ * @param {object} [options.card.overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~styleOptions).
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
  *
  * Some of the PayPal configuration options are listed here, but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
@@ -171,6 +174,34 @@ var VERSION = process.env.npm_package_version;
  *     </script>
  *   </body>
  * </html>
+ *
+ * @example
+ * <caption>Customizing Drop-in with card form overrides</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   card: {
+ *     overrides: {
+ *       fields: {
+ *         number: {
+ *           placeholder: '1111 1111 1111 1111' // Update the number field placeholder
+ *         },
+ *         postalCode: {
+ *           minlength: 5 // Set the minimum length of the postal code field
+ *         },
+ *         cvv: null // Remove the CVV field from your form
+ *       },
+ *       styles: {
+ *         input: {
+ *           'font-size': '18px' // Change the font size for all inputs
+ *         },
+ *         ':focus': {
+ *           color: 'red' // Change the focus color to red for all inputs
+ *         }
+ *       }
+ *     }
+ *   }
+ * }, callback);
  */
 
 function create(options, callback) {
