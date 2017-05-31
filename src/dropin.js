@@ -15,7 +15,7 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
-var wrapPromise = require('wrap-promise');
+var wrapPrototype = require('wrap-promise').wrapPrototype;
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
@@ -322,11 +322,11 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 /**
  * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account. If a payment method is not available, an error will appear in the UI and and error will be returned in the callback.
  * @public
- * @param {callback} callback The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}.
- * @returns {void}
+ * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
+ * @returns {void|Promise} Returns a promise if no callback is provided.
  */
-Dropin.prototype.requestPaymentMethod = function (callback) {
-  this._mainView.requestPaymentMethod(callback);
+Dropin.prototype.requestPaymentMethod = function () {
+  return this._mainView.requestPaymentMethod();
 };
 
 Dropin.prototype._removeStylesheet = function () {
@@ -387,20 +387,19 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
  * Cleanly remove anything set up by {@link module:braintree-web-drop-in|dropin.create}. This may be be useful in a single-page app.
  * @public
  * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully. If no callback is provided, `teardown` will return a promise.
- * @returns {void|Promise}
+ * @returns {void|Promise} Returns a promise if no callback is provided.
  */
-Dropin.prototype.teardown = wrapPromise(function () {
+Dropin.prototype.teardown = function () {
   var error;
-  var self = this; // eslint-disable-line no-invalid-this
 
-  self._removeStylesheet();
+  this._removeStylesheet();
 
-  if (self._mainView) {
-    return self._mainView.teardown().catch(function (err) {
+  if (this._mainView) {
+    return this._mainView.teardown().catch(function (err) {
       error = err;
     }).then(function () {
-      return self._removeDropinWrapper();
-    }).then(function () {
+      return this._removeDropinWrapper();
+    }.bind(this)).then(function () {
       if (error) {
         return Promise.reject(error);
       }
@@ -409,8 +408,8 @@ Dropin.prototype.teardown = wrapPromise(function () {
     });
   }
 
-  return self._removeDropinWrapper();
-});
+  return this._removeDropinWrapper();
+};
 
 /**
  * Returns a boolean indicating if a payment method is available through {@link Dropin#requestPaymentMethod|requestPaymentMethod}. Particularly useful for detecting if using a client token with a customer ID to show vaulted payment methods.
@@ -442,4 +441,4 @@ function formatPaymentMethodPayload(paymentMethod) {
   return formattedPaymentMethod;
 }
 
-module.exports = Dropin;
+module.exports = wrapPrototype(Dropin);

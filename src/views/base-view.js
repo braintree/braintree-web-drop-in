@@ -17,8 +17,8 @@ BaseView.prototype.getElementById = function (id) {
   return this.element.querySelector('[data-braintree-id="' + id + '"]');
 };
 
-BaseView.prototype.requestPaymentMethod = function (callback) {
-  callback(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
+BaseView.prototype.requestPaymentMethod = function () {
+  return Promise.reject(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
 };
 
 BaseView.prototype.getPaymentMethod = function () {

@@ -172,20 +172,18 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
   this.model.clearError();
 };
 
-MainView.prototype.requestPaymentMethod = function (callback) {
+MainView.prototype.requestPaymentMethod = function () {
   var activePaymentView = this.getView(this.model.getActivePaymentView());
 
-  activePaymentView.requestPaymentMethod(function (err, payload) {
-    if (err) {
-      analytics.sendEvent(this.client, 'request-payment-method.error');
-      callback(err);
-      return;
-    }
-
+  return activePaymentView.requestPaymentMethod().then(function (payload) {
     this.setPrimaryView(PaymentMethodsView.ID);
 
     analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
-    callback(null, payload);
+
+    return payload;
+  }.bind(this)).catch(function (err) {
+    analytics.sendEvent(this.client, 'request-payment-method.error');
+    return Promise.reject(err);
   }.bind(this));
 };
 

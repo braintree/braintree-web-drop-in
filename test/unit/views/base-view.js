@@ -30,14 +30,14 @@ describe('BaseView', function () {
   });
 
   describe('requestPaymentMethod', function () {
-    it('calls callback with an error', function (done) {
+    it('returns a rejected promise', function () {
       var view = new BaseView();
 
-      view.requestPaymentMethod(function (err, payload) {
+      return view.requestPaymentMethod().then(function () {
+        throw new Error('should not resolve');
+      }).catch(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal(constants.errors.NO_PAYMENT_METHOD_ERROR);
-        expect(payload).to.not.exist;
-        done();
       });
     });
   });

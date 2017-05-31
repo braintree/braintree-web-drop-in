@@ -771,69 +771,64 @@ describe('MainView', function () {
     });
 
     it('requests payment method from the primary view', function () {
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod');
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves({});
 
       this.mainView.requestPaymentMethod();
 
       expect(this.mainView.primaryView.requestPaymentMethod).to.be.called;
     });
 
-    it('calls callback with error when error occurs', function (done) {
+    it('calls callback with error when error occurs', function () {
       var fakeError = new Error('A bad thing happened');
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(fakeError);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').rejects(fakeError);
 
-      this.mainView.requestPaymentMethod(function (err, payload) {
-        expect(payload).to.not.exist;
+      return this.mainView.requestPaymentMethod().then(function () {
+        throw new Error('should not resolve');
+      }).catch(function (err) {
         expect(err).to.equal(fakeError);
         expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.error');
-        done();
       }.bind(this));
     });
 
-    it('calls callback with payload when successful', function (done) {
+    it('calls callback with payload when successful', function () {
       var stubPaymentMethod = {foo: 'bar'};
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves(stubPaymentMethod);
 
-      this.mainView.requestPaymentMethod(function (err, payload) {
-        expect(err).to.not.exist;
+      return this.mainView.requestPaymentMethod().then(function (payload) {
         expect(payload).to.equal(stubPaymentMethod);
-        done();
       });
     });
 
-    it('sends analytics event for successful CreditCard', function (done) {
+    it('sends analytics event for successful CreditCard', function () {
       var stubPaymentMethod = {type: 'CreditCard'};
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves(stubPaymentMethod);
 
-      this.mainView.requestPaymentMethod(function () {
+      return this.mainView.requestPaymentMethod().then(function () {
         expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.card');
-        done();
       }.bind(this));
     });
 
-    it('sends analytics event for successful PayPalAccount', function (done) {
+    it('sends analytics event for successful PayPalAccount', function () {
       var stubPaymentMethod = {type: 'PayPalAccount'};
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves(stubPaymentMethod);
 
-      this.mainView.requestPaymentMethod(function () {
+      return this.mainView.requestPaymentMethod().then(function () {
         expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.paypal');
-        done();
       }.bind(this));
     });
 
-    it('sets the PaymentMethodsView as the primary view when successful', function (done) {
+    it('sets the PaymentMethodsView as the primary view when successful', function () {
       var stubPaymentMethod = {foo: 'bar'};
       var paymentMethodsViews = this.mainView.getView(PaymentMethodsView.ID);
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves(stubPaymentMethod);
 
-      this.mainView.requestPaymentMethod(function () {
+      return this.mainView.requestPaymentMethod().then(function () {
         expect(this.mainView.primaryView).to.equal(paymentMethodsViews);
-        done();
       }.bind(this));
     });
 
@@ -861,22 +856,22 @@ describe('MainView', function () {
         var paymentMethodsViews = this.mainView.getView(PaymentMethodsView.ID);
 
         this.mainView.model.changeActivePaymentView(PaymentMethodsView.ID);
-        this.sandbox.stub(paymentMethodsViews, 'requestPaymentMethod');
+        this.sandbox.stub(paymentMethodsViews, 'requestPaymentMethod').resolves({});
 
-        this.mainView.requestPaymentMethod();
-
-        expect(paymentMethodsViews.requestPaymentMethod).to.be.called;
+        return this.mainView.requestPaymentMethod().then(function () {
+          expect(paymentMethodsViews.requestPaymentMethod).to.be.called;
+        });
       });
 
       it('requests payment method from card view when additional options are shown', function () {
         var cardView = this.mainView.getView(CardView.ID);
 
-        this.sandbox.stub(cardView, 'requestPaymentMethod');
+        this.sandbox.stub(cardView, 'requestPaymentMethod').resolves({});
         this.mainView.toggleAdditionalOptions();
 
-        this.mainView.requestPaymentMethod();
-
-        expect(cardView.requestPaymentMethod).to.be.called;
+        return this.mainView.requestPaymentMethod().then(function () {
+          expect(cardView.requestPaymentMethod).to.be.called;
+        });
       });
     });
   });

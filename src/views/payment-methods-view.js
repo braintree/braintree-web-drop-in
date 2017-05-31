@@ -2,6 +2,7 @@
 
 var BaseView = require('./base-view');
 var PaymentMethodView = require('./payment-method-view');
+var Promise = require('../lib/promise');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
@@ -94,8 +95,8 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
   this.activeMethodView.setActive(true);
 };
 
-PaymentMethodsView.prototype.requestPaymentMethod = function (callback) {
-  callback(null, this.activeMethodView.paymentMethod);
+PaymentMethodsView.prototype.requestPaymentMethod = function () {
+  return Promise.resolve(this.activeMethodView.paymentMethod);
 };
 
 module.exports = PaymentMethodsView;

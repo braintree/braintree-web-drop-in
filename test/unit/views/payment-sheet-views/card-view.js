@@ -12,6 +12,10 @@ var transitionHelper = require('../../../../src/lib/transition-helper');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 
+function throwIfResolves() {
+  throw new Error('should not resolve.');
+}
+
 describe('CardView', function () {
   beforeEach(function () {
     this.div = document.createElement('div');
@@ -350,7 +354,7 @@ describe('CardView', function () {
       this.model = new DropinModel(fake.modelOptions());
     });
 
-    it('calls the callback with an error when tokenize fails', function (done) {
+    it('calls the callback with an error when tokenize fails', function () {
       var cardView = new CardView({
         element: this.element,
         mainView: this.mainView,
@@ -359,17 +363,15 @@ describe('CardView', function () {
         strings: strings
       });
 
-      this.sandbox.stub(cardView, 'tokenize').yields(new Error('foo'));
+      this.sandbox.stub(cardView, 'tokenize').rejects(new Error('foo'));
 
-      cardView.requestPaymentMethod(function (err, payload) {
+      return cardView.requestPaymentMethod().then(throwIfResolves).catch(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('foo');
-        expect(payload).to.not.exist;
-        done();
       });
     });
 
-    it('calls the callback with the payload when tokenize is successful', function (done) {
+    it('calls the callback with the payload when tokenize is successful', function () {
       var cardView = new CardView({
         element: this.element,
         mainView: this.mainView,
@@ -378,12 +380,10 @@ describe('CardView', function () {
         strings: strings
       });
 
-      this.sandbox.stub(cardView, 'tokenize').yields(null, {foo: 'bar'});
+      this.sandbox.stub(cardView, 'tokenize').resolves({foo: 'bar'});
 
-      cardView.requestPaymentMethod(function (err, payload) {
-        expect(err).to.not.exist;
+      return cardView.requestPaymentMethod().then(function (payload) {
         expect(payload.foo).to.equal('bar');
-        done();
       });
     });
   });
@@ -1295,7 +1295,7 @@ describe('CardView', function () {
             }
           }
         }),
-        tokenize: this.sandbox.stub()
+        tokenize: this.sandbox.stub().resolves({})
       };
       this.model = new DropinModel(fake.modelOptions());
 
@@ -1315,9 +1315,10 @@ describe('CardView', function () {
         showFieldError: CardView.prototype.showFieldError,
         strings: strings
       };
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
     });
 
-    it('clears the error on the model', function (done) {
+    it('clears the error on the model', function () {
       this.sandbox.stub(this.model, 'clearError');
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'Card'}],
@@ -1331,13 +1332,12 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function () {
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
         expect(this.model.clearError).to.be.called;
-        done();
       }.bind(this));
     });
 
-    it('throws an error if there is no valid card type', function (done) {
+    it('throws an error if there is no valid card type', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'Card'}],
         fields: {
@@ -1350,15 +1350,13 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function (err, payload) {
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function (err) {
         expect(err).to.exist;
-        expect(payload).to.not.exist;
         expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
-        done();
       }.bind(this));
     });
 
-    it('calls callback with error and reports error to DropinModel if form is not valid', function (done) {
+    it('calls callback with error and reports error to DropinModel if form is not valid', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1373,12 +1371,10 @@ describe('CardView', function () {
 
       this.sandbox.stub(this.context.model, 'reportError');
 
-      CardView.prototype.tokenize.call(this.context, function (err, payload) {
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function (err) {
         expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
         expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
         expect(err.message).to.equal('No payment method is available.');
-        expect(payload).to.not.exist;
-        done();
       }.bind(this));
     });
 
@@ -1387,12 +1383,12 @@ describe('CardView', function () {
         code: 'A_REAL_ERROR_CODE'
       };
 
-      this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
+      this.context.hostedFieldsInstance.tokenize.rejects(fakeError);
       this.sandbox.stub(this.context.model, 'reportError');
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.model.reportError).to.be.calledWith(fakeError);
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.context.model.reportError).to.be.calledWith(fakeError);
+      }.bind(this));
     });
 
     it('shows unsupported card field error when attempting to use an unsupported card and reports an error', function () {
@@ -1410,12 +1406,12 @@ describe('CardView', function () {
         };
       };
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberFieldError.textContent).to.equal('This card type is not supported. Please try another card.');
-      expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldError.textContent).to.equal('This card type is not supported. Please try another card.');
+        expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
     });
 
     it('shows empty field error when attempting to sumbit an empty field', function () {
@@ -1434,11 +1430,11 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
     });
 
     it('shows invalid field error when attempting to submit an invalid field', function () {
@@ -1456,49 +1452,37 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberFieldError.textContent).to.equal('This card number is not valid.');
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldError.textContent).to.equal('This card number is not valid.');
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
     });
 
     it('calls hostedFieldsInstance.tokenize when form is valid', function () {
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
-
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
+      }.bind(this));
     });
 
-    it('includes `vaulted: true` in tokenization payload if not guest checkout', function (done) {
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, {});
+    it('includes `vaulted: true` in tokenization payload if not guest checkout', function () {
       this.context.model.isGuestCheckout = false;
 
-      CardView.prototype.tokenize.call(this.context, function (err, payload) {
-        expect(err).to.not.exist;
+      return CardView.prototype.tokenize.call(this.context).then(function (payload) {
         expect(payload.vaulted).to.equal(true);
-        done();
       });
     });
 
-    it('does not include `vaulted: true` in tokenization payload if guest checkout', function (done) {
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, {});
+    it('does not include `vaulted: true` in tokenization payload if guest checkout', function () {
       this.context.model.isGuestCheckout = true;
 
-      CardView.prototype.tokenize.call(this.context, function (err, payload) {
-        expect(err).to.not.exist;
+      return CardView.prototype.tokenize.call(this.context).then(function (payload) {
         expect(payload.vaulted).to.not.exist;
-        done();
       });
     });
 
     it('sets isTokenizing to true', function () {
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
-
-      CardView.prototype.tokenize.call(this.context, function () {});
+      CardView.prototype.tokenize.call(this.context);
 
       expect(this.context._isTokenizing).to.equal(true);
     });
@@ -1515,45 +1499,43 @@ describe('CardView', function () {
           }
         }
       });
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
     });
 
     it('vaults on tokenization if not using guest checkout', function () {
       this.context.model.isGuestCheckout = false;
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: true}, this.sandbox.match.func);
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: true});
+      }.bind(this));
     });
 
     it('does not vault on tokenization if using guest checkout', function () {
       this.context.model.isGuestCheckout = true;
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: false}, this.sandbox.match.func);
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: false});
+      }.bind(this));
     });
 
     it('clears fields after successful tokenization', function () {
-      this.context.hostedFieldsInstance.tokenize.yields(null, {nonce: 'foo'});
+      this.context.hostedFieldsInstance.tokenize.resolves({nonce: 'foo'});
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('number');
-      expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
-      expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('cvv');
-      expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('number');
+        expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
+        expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('cvv');
+        expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
+      }.bind(this));
     });
 
     it('sets isTokenizing to false on successful tokenization', function (done) {
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
-      this.context.hostedFieldsInstance.tokenize.yields(null, {nonce: 'foo'});
+      this.context.hostedFieldsInstance.tokenize.resolves({nonce: 'foo'});
 
-      CardView.prototype.tokenize.call(this.context, function () {
+      CardView.prototype.tokenize.call(this.context).then(function () {
         setTimeout(function () {
           expect(this.context._isTokenizing).to.equal(false);
           done();
@@ -1561,12 +1543,11 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('sets isTokenizing to false on unsuccessful tokenization', function (done) {
-      this.context.hostedFieldsInstance.tokenize.yieldsAsync(new Error('Error'));
+    it('sets isTokenizing to false on unsuccessful tokenization', function () {
+      this.context.hostedFieldsInstance.tokenize.rejects(new Error('Error'));
 
-      CardView.prototype.tokenize.call(this.context, function () {
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
         expect(this.context._isTokenizing).to.equal(false);
-        done();
       }.bind(this));
     });
 
@@ -1574,42 +1555,40 @@ describe('CardView', function () {
       var stubPayload = {};
 
       this.sandbox.stub(classlist, 'remove');
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
+      this.context.hostedFieldsInstance.tokenize.resolves(stubPayload);
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+      }.bind(this));
     });
 
     it('removes braintree-sheet--loading class after tokenization fails', function () {
       this.sandbox.stub(classlist, 'remove');
-      this.context.hostedFieldsInstance.tokenize.yields(new Error('foo'));
+      this.context.hostedFieldsInstance.tokenize.rejects(new Error('foo'));
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+      }.bind(this));
     });
 
-    it('adds a new payment method when tokenize is successful and transition ends', function (done) {
+    it('adds a new payment method when tokenize is successful and transition ends', function () {
       var stubPayload = {};
 
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
+      this.context.hostedFieldsInstance.tokenize.resolves(stubPayload);
       this.sandbox.stub(this.model, 'addPaymentMethod');
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
-      CardView.prototype.tokenize.call(this.context, function () {
+      return CardView.prototype.tokenize.call(this.context).then(function () {
         expect(this.model.addPaymentMethod).to.have.been.calledWith(stubPayload);
-        done();
       }.bind(this));
     });
 
     it('does not update the active payment method when tokenize fails', function () {
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(new Error('bad happen'));
+      this.context.hostedFieldsInstance.tokenize.rejects(new Error('bad happen'));
       this.sandbox.stub(this.model, 'addPaymentMethod');
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.model.addPaymentMethod).to.not.have.been.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.model.addPaymentMethod).to.not.have.been.called;
+      }.bind(this));
     });
   });
 
@@ -1635,7 +1614,7 @@ describe('CardView', function () {
 
       return CardView.prototype.teardown.call(this.context).then(function () {
         throw new Error('should not resolve');
-      }).catch(function (err) {
+      }).then(throwIfResolves).catch(function (err) {
         expect(err).to.equal(error);
       });
     });
