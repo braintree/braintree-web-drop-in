@@ -119,6 +119,9 @@ DropinModel.prototype.asyncDependencyReady = function () {
 };
 
 DropinModel.prototype.asyncDependencyFailed = function (options) {
+  if (this.failedDependencies.hasOwnProperty(options.view)) {
+    return;
+  }
   this.failedDependencies[options.view] = options.error;
   this.dependenciesInitializing--;
   this._checkAsyncDependencyFinished();
