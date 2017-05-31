@@ -14,6 +14,8 @@ var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
+var Promise = require('./lib/promise');
+var wrapPromise = require('wrap-promise');
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
@@ -187,7 +189,7 @@ Dropin.prototype._initialize = function (callback) {
         paymentMethods: paymentMethods
       });
     } catch (modelError) {
-      dropinInstance.teardown(function () {
+      dropinInstance.teardown().then(function () {
         callback(modelError);
       });
       return;
@@ -384,20 +386,31 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
 /**
  * Cleanly remove anything set up by {@link module:braintree-web-drop-in|dropin.create}. This may be be useful in a single-page app.
  * @public
- * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully.
- * @returns {void}
+ * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully. If no callback is provided, `teardown` will return a promise.
+ * @returns {void|Promise}
  */
-Dropin.prototype.teardown = function (callback) {
-  this._removeStylesheet();
+Dropin.prototype.teardown = wrapPromise(function () {
+  var error;
+  var self = this; // eslint-disable-line no-invalid-this
 
-  if (this._mainView) {
-    this._mainView.teardown(function (err) {
-      this._removeDropinWrapper(err, callback);
-    }.bind(this));
-  } else {
-    this._removeDropinWrapper(null, callback);
+  self._removeStylesheet();
+
+  if (self._mainView) {
+    return self._mainView.teardown().catch(function (err) {
+      error = err;
+    }).then(function () {
+      return self._removeDropinWrapper();
+    }).then(function () {
+      if (error) {
+        return Promise.reject(error);
+      }
+
+      return Promise.resolve();
+    });
   }
-};
+
+  return self._removeDropinWrapper();
+});
 
 /**
  * Returns a boolean indicating if a payment method is available through {@link Dropin#requestPaymentMethod|requestPaymentMethod}. Particularly useful for detecting if using a client token with a customer ID to show vaulted payment methods.
@@ -408,9 +421,10 @@ Dropin.prototype.isPaymentMethodRequestable = function () {
   return this._model.isPaymentMethodRequestable();
 };
 
-Dropin.prototype._removeDropinWrapper = function (err, callback) {
+Dropin.prototype._removeDropinWrapper = function () {
   this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
-  callback(err);
+
+  return Promise.resolve();
 };
 
 function formatPaymentMethodPayload(paymentMethod) {

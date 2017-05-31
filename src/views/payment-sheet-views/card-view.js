@@ -258,8 +258,8 @@ CardView.prototype.hideFieldError = function (field) {
   classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
 };
 
-CardView.prototype.teardown = function (callback) {
-  this.hostedFieldsInstance.teardown(callback);
+CardView.prototype.teardown = function () {
+  return this.hostedFieldsInstance.teardown();
 };
 
 CardView.prototype._generateFieldSelector = function (field) {

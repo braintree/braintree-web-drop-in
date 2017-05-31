@@ -5,6 +5,7 @@ var BaseView = require('../../../src/views/base-view');
 var BasePayPalView = require('../../../src/views/payment-sheet-views/base-paypal-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
+var Promise = require('../../../src/lib/promise');
 var analytics = require('../../../src/lib/analytics');
 var classlist = require('../../../src/lib/classlist');
 var DropinModel = require('../../../src/dropin-model');
@@ -885,41 +886,44 @@ describe('MainView', function () {
       this.context = {
         _views: {
           'braintree-card-view': {
-            teardown: this.sandbox.stub().yields()
+            teardown: this.sandbox.stub().resolves()
           }
         }
       };
     });
 
-    it('calls teardown on each view', function (done) {
+    it('calls teardown on each view', function () {
       var payWithCardView = this.context._views['braintree-card-view'];
 
-      MainView.prototype.teardown.call(this.context, function () {
+      return MainView.prototype.teardown.call(this.context).then(function () {
         expect(payWithCardView.teardown).to.be.calledOnce;
-        done();
       });
     });
 
-    it('waits to call callback until asynchronous teardowns complete', function (done) {
+    it('waits to call callback until asynchronous teardowns complete', function () {
       var payWithCardView = this.context._views['braintree-card-view'];
 
-      payWithCardView.teardown.yieldsAsync();
+      payWithCardView.teardown = function () {
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            resolve();
+          }, 300);
+        });
+      };
 
-      MainView.prototype.teardown.call(this.context, function () {
-        expect(payWithCardView.teardown).to.be.calledOnce;
-        done();
-      });
+      return MainView.prototype.teardown.call(this.context);
     });
 
-    it('calls callback with error from teardown function', function (done) {
+    it('calls callback with error from teardown function', function () {
       var payWithCardView = this.context._views['braintree-card-view'];
       var error = new Error('pay with card teardown error');
 
-      payWithCardView.teardown.yields(error);
+      payWithCardView.teardown.rejects(error);
 
-      MainView.prototype.teardown.call(this.context, function (err) {
+      return MainView.prototype.teardown.call(this.context).then(function () {
+        throw new Error('should not resolve');
+      }).catch(function (err) {
         expect(err).to.equal(error);
-        done();
       });
     });
   });

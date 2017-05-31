@@ -2,6 +2,7 @@
 
 var BaseView = require('../../../src/views/base-view');
 var constants = require('../../../src/constants');
+var Promise = require('../../../src/lib/promise');
 
 describe('BaseView', function () {
   describe('Constructor', function () {
@@ -20,10 +21,11 @@ describe('BaseView', function () {
   });
 
   describe('teardown', function () {
-    it('calls callback immediately', function (done) {
+    it('returns a resolved promise', function () {
       var view = new BaseView();
+      var promise = view.teardown();
 
-      view.teardown(done);
+      expect(promise).to.be.a.instanceof(Promise);
     });
   });
 

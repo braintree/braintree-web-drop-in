@@ -3,6 +3,7 @@
 var assign = require('../lib/assign').assign;
 var DropinError = require('../lib/dropin-error');
 var errors = require('../constants').errors;
+var Promise = require('../lib/promise');
 
 function BaseView(options) {
   options = options || {};
@@ -26,8 +27,8 @@ BaseView.prototype.getPaymentMethod = function () {
 
 BaseView.prototype.onSelection = function () {};
 
-BaseView.prototype.teardown = function (cb) {
-  cb();
+BaseView.prototype.teardown = function () {
+  return Promise.resolve();
 };
 
 module.exports = BaseView;

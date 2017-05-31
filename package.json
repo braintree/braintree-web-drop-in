@@ -59,7 +59,8 @@
   "dependencies": {
     "braintree-web": "3.16.0",
     "browser-detection": "braintree/browser-detection#1.4.0",
-    "promise-polyfill": "6.0.2"
+    "promise-polyfill": "6.0.2",
+    "wrap-promise": "braintree/wrap-promise#1.1.0"
   },
   "browserify": {
     "transform": [

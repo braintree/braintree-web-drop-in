@@ -1617,26 +1617,26 @@ describe('CardView', function () {
     beforeEach(function () {
       this.context = {
         hostedFieldsInstance: {
-          teardown: this.sandbox.stub().yields()
+          teardown: this.sandbox.stub().resolves()
         }
       };
     });
 
-    it('tears down hosted fields instance', function (done) {
-      CardView.prototype.teardown.call(this.context, function () {
+    it('tears down hosted fields instance', function () {
+      return CardView.prototype.teardown.call(this.context).then(function () {
         expect(this.context.hostedFieldsInstance.teardown).to.be.calledOnce;
-        done();
       }.bind(this));
     });
 
-    it('passes hosted fields teardown errors to callback', function (done) {
+    it('passes hosted fields teardown errors to callback', function () {
       var error = new Error('hosted fields teardown error');
 
-      this.context.hostedFieldsInstance.teardown.yields(error);
+      this.context.hostedFieldsInstance.teardown.rejects(error);
 
-      CardView.prototype.teardown.call(this.context, function (err) {
+      return CardView.prototype.teardown.call(this.context).then(function () {
+        throw new Error('should not resolve');
+      }).catch(function (err) {
         expect(err).to.equal(error);
-        done();
       });
     });
   });

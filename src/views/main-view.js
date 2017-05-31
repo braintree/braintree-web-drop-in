@@ -8,6 +8,7 @@ var sheetViews = require('./payment-sheet-views');
 var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
+var Promise = require('../lib/promise');
 var supportsFlexbox = require('../lib/supports-flexbox');
 var transitionHelper = require('../lib/transition-helper');
 
@@ -255,24 +256,22 @@ MainView.prototype.getOptionsElements = function () {
   return this._views.options.elements;
 };
 
-MainView.prototype.teardown = function (callback) {
-  var viewNames = Object.keys(this._views);
-  var numberOfViews = viewNames.length;
-  var viewsTornDown = 0;
+MainView.prototype.teardown = function () {
   var error;
-
-  viewNames.forEach(function (view) {
-    this._views[view].teardown(function (err) {
-      if (err) {
-        error = err;
-      }
-      viewsTornDown += 1;
-
-      if (viewsTornDown >= numberOfViews) {
-        callback(error);
-      }
+  var viewNames = Object.keys(this._views);
+  var teardownPromises = viewNames.map(function (view) {
+    return this._views[view].teardown().catch(function (err) {
+      error = err;
     });
   }.bind(this));
+
+  return Promise.all(teardownPromises).then(function () {
+    if (error) {
+      return Promise.reject(error);
+    }
+
+    return Promise.resolve();
+  });
 };
 
 function snakeCaseToCamelCase(s) {
