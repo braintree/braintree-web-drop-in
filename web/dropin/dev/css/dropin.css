@@ -9,6 +9,7 @@
 
 .braintree-dropin {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.2;
   margin: 0;
   min-width: 200px;
   padding: 0; }
@@ -108,8 +109,7 @@
 .braintree-heading {
   color: #000000;
   font-size: 16px;
-  margin-bottom: 10px;
-  margin-left: 5px; }
+  margin-bottom: 10px; }
 
 .braintree-placeholder {
   margin-bottom: 13px; }
@@ -138,10 +138,9 @@
     bottom: 5px;
     content: '';
     display: block;
-    left: 3px;
     position: absolute;
     top: 0;
-    width: 98.28%;
+    width: 100%;
     z-index: -3; }
 
 .braintree-loaded .braintree-upper-container {
@@ -165,7 +164,7 @@
 .braintree-options-list {
   margin: 0 auto;
   padding-bottom: 5px;
-  width: 99%; }
+  width: 100%; }
 
 .braintree-option {
   align-items: center;
@@ -214,7 +213,7 @@
   margin: 0 auto;
   max-height: 500px;
   transition: transform 300ms, opacity 300ms, max-height 300ms ease;
-  width: 99%; }
+  width: 100%; }
 
 .braintree-sheet--tokenized {
   max-height: 71px;
@@ -239,7 +238,7 @@
 .braintree-sheet__error {
   display: none;
   margin: 0 auto;
-  width: 99%; }
+  width: 100%; }
 
 .braintree-sheet--has-error .braintree-sheet__error {
   align-items: center;
@@ -269,18 +268,13 @@
     text-align: center; }
 
 .braintree-show-methods .braintree-sheet--active.braintree-sheet--has-error .braintree-sheet {
-  -moz-box-shadow: none;
-  -webkit-box-shadow: none;
   border-color: #CA2A2A;
-  border-radius: 5px 5px 0 0;
-  box-shadow: none; }
+  border-radius: 5px 5px 0 0; }
 
 .braintree-show-methods .braintree-sheet--active .braintree-sheet {
-  -moz-box-shadow: 0 0 0 2px #219653;
-  -webkit-box-shadow: 0 0 0 2px #219653;
-  border-color: transparent;
   border-radius: 5px;
-  box-shadow: 0 0 0 2px #219653; }
+  border-color: #219653;
+  border-width: 2px; }
 
 .braintree-sheet__header {
   align-items: center;
@@ -415,15 +409,14 @@
   border-color: #B5B5B5;
   border-style: solid;
   border-width: 0 1px 1px 1px;
-  box-shadow: none;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   margin: 0 auto;
   padding: 14px 10px;
   position: relative;
-  transition: opacity 300ms, box-shadow 300ms, width 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 300ms, border-radius 300ms;
-  width: 99%;
+  transition: opacity 300ms, width 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 300ms, border-radius 300ms;
+  width: 98%;
   z-index: 0; }
   .braintree-method:hover .braintree-method__label {
     font-weight: 500; }
@@ -446,7 +439,7 @@
     text-align: left;
     flex-grow: 1; }
     .braintree-method .braintree-method__label .braintree-method__label--small {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: normal; }
   .braintree-method .braintree-method__check {
     background-color: #FAFAFA;
@@ -462,14 +455,18 @@
       width: 100%; }
 
 .braintree-methods--active .braintree-method--active {
-  -moz-box-shadow: 0 0 0 2px #219653;
-  -webkit-box-shadow: 0 0 0 2px #219653;
-  border-color: transparent;
   border-radius: 5px;
-  box-shadow: 0 0 0 2px #219653;
   opacity: 1;
   width: 100%;
-  z-index: 1; }
+  z-index: 1;
+  border-color: #219653;
+  border-width: 2px;
+  margin-top: -1px;
+  margin-bottom: -1px; }
+  .braintree-methods--active .braintree-method--active:first-of-type {
+    margin-top: 0px; }
+  .braintree-methods--active .braintree-method--active:last-of-type {
+    margin-bottom: 0px; }
   .braintree-methods--active .braintree-method--active .braintree-method__check {
     background-color: #219653;
     fill: white;
@@ -509,7 +506,7 @@
   margin: 0 auto;
   padding: 18px;
   text-align: center;
-  width: 99%; }
+  width: 100%; }
   .braintree-toggle:hover {
     background: #FCFCFC;
     font-weight: 500; }
@@ -573,9 +570,6 @@
 .braintree-show-paypal [data-braintree-id='other-ways-to-pay'] {
   display: block; }
 
-/* =========================================================================
-   Remove this when we have a payment methods width 100%  width    
-   ========================================================================= */
 .braintree-loaded [data-braintree-id='methods'],
 .braintree-loaded [data-braintree-id='options'] {
   transition: none; }
