@@ -356,6 +356,23 @@ describe('DropinModel', function () {
       expect(this.model.failedDependencies.id).to.equal(err);
     });
 
+    it('ignores error if failure was already reported', function () {
+      var err = new Error('a bad error');
+      var ignoredError = new Error('a different error');
+
+      this.model.asyncDependencyFailed({
+        view: 'id',
+        error: err
+      });
+      this.model.asyncDependencyFailed({
+        view: 'id',
+        error: ignoredError
+      });
+
+      expect(this.model.failedDependencies.id).to.not.equal(ignoredError);
+      expect(this.model.failedDependencies.id).to.equal(err);
+    });
+
     it('emits asyncDependenciesReady event when there are no dependencies initializing', function (done) {
       var model = new DropinModel(this.modelOptions);
 

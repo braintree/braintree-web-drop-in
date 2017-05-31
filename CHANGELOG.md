@@ -10,6 +10,8 @@ UNRELEASED
 - Add ability to style PayPal button
 - Fail early if PayPal creation errors
 - Add support for custom translations
+- Upgrade braintree-web to v3.17.0
+- Upgrade checkout.js to 4.0.78
 
 1.1.0
 ----------

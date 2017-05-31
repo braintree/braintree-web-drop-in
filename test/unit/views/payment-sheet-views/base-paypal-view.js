@@ -341,6 +341,24 @@ describe('BasePayPalView', function () {
       });
     });
 
+    it('reports errors from paypal.Button.render', function (done) {
+      var error = new Error('setup error');
+
+      this.sandbox.stub(this.model, 'asyncDependencyFailed');
+      this.paypal.Button.render.rejects(error);
+
+      this.view._initialize();
+
+      waitForInitialize(function () {
+        expect(this.model.asyncDependencyFailed).to.be.calledOnce;
+        expect(this.model.asyncDependencyFailed).to.be.calledWithMatch({
+          view: this.view.ID,
+          error: new DropinError(error)
+        });
+        done();
+      }.bind(this));
+    });
+
     it('calls addPaymentMethod when paypal is tokenized', function (done) {
       var paypalInstance = this.paypalInstance;
       var model = this.model;
@@ -539,7 +557,13 @@ describe('BasePayPalView', function () {
       var model = this.model;
 
       this.sandbox.stub(model, 'asyncDependencyFailed');
-      this.paypal.Button.render.rejects();
+      // we need a fake promise so that it neither resolves
+      // or rejects
+      this.paypal.Button.render.returns({
+        then: this.sandbox.stub().returns({
+          'catch': this.sandbox.stub()
+        })
+      });
       this.view._initialize();
 
       waitForInitialize(function () {
@@ -704,7 +728,9 @@ describe('BasePayPalView', function () {
         // promises can't resolve while using fake timers
         // so we make a fake promise
         this.paypal.Button.render.returns({
-          then: this.sandbox.stub().yields()
+          then: this.sandbox.stub().yields().returns({
+            'catch': this.sandbox.stub()
+          })
         });
 
         this.view._initialize();
