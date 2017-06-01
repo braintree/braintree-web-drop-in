@@ -279,47 +279,6 @@ describe('BasePayPalView', function () {
       });
     });
 
-    it('does not call paypalInstance.createPayment with a locale if it is not a string', function (done) {
-      var fakeLocaleCode = {foo: 'fake_LOCALE'};
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
-
-      model.merchantConfiguration.locale = fakeLocaleCode;
-
-      this.paypal.Button.render.resolves();
-
-      this.view._initialize();
-
-      waitForInitialize(function () {
-        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
-
-        paymentFunction().then(function () {
-          expect(paypalInstance.createPayment).to.be.calledOnce;
-          expect(paypalInstance.createPayment).to.not.be.calledWithMatch({
-            locale: fakeLocaleCode
-          });
-          done();
-        });
-      });
-    });
-
-    it('does not call paypal.Button.render with a locale if it is not a string', function (done) {
-      var fakeLocaleCode = {foo: 'fake_LOCALE'};
-      var model = this.model;
-      var view = this.view;
-
-      model.merchantConfiguration.locale = fakeLocaleCode;
-
-      view._initialize();
-
-      waitForInitialize(function () {
-        expect(this.paypal.Button.render).to.not.be.calledWithMatch({
-          locale: fakeLocaleCode
-        });
-        done();
-      });
-    });
-
     it('reports errors from createPayment', function (done) {
       var model = this.model;
       var error = new Error('create payment error');

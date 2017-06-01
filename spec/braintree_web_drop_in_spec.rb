@@ -201,10 +201,11 @@ describe "Drop-in" do
     end
 
     it "supports custom locale object" do
-      locale = '{"chooseAWayToPay":"My Choose a Way to Pay String"}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?locale=#{locale}")
+      translations = '{"chooseAWayToPay":"My Choose a Way to Pay String"}'
+      visit URI.encode("http://#{HOSTNAME}:#{PORT}?translations=#{translations}&locale=es_ES")
 
       expect(page).to have_content("My Choose a Way to Pay String")
+      expect(page).to have_content("Tarjeta")
     end
   end
 

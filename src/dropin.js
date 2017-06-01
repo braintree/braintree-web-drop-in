@@ -161,12 +161,14 @@ Dropin.prototype._initialize = function (callback) {
 
   // Backfill with `en`
   strings = assign({}, translations.en);
-  if (typeof this._merchantConfiguration.locale === 'string') {
+  if (this._merchantConfiguration.locale) {
     localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
     strings = assign(strings, localizedStrings);
-  } else if (typeof this._merchantConfiguration.locale === 'object') {
-    strings = assign(strings, this._merchantConfiguration.locale);
+  }
+
+  if (this._merchantConfiguration.translations) {
+    strings = assign(strings, this._merchantConfiguration.translations);
   }
 
   localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {

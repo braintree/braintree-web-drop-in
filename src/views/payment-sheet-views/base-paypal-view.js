@@ -32,9 +32,10 @@ BasePayPalView.prototype._initialize = function (isCredit) {
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
   btPaypal.create({client: this.client}, function (err, paypalInstance) {
-    var checkoutJSConfiguration, locale;
+    var checkoutJSConfiguration;
     var buttonSelector = '[data-braintree-id="paypal-button"]';
     var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
+    var locale = self.model.merchantConfiguration.locale;
 
     if (err) {
       self.model.asyncDependencyFailed({
@@ -42,10 +43,6 @@ BasePayPalView.prototype._initialize = function (isCredit) {
         error: err
       });
       return;
-    }
-
-    if (typeof self.model.merchantConfiguration.locale === 'string') {
-      locale = self.model.merchantConfiguration.locale;
     }
 
     self.paypalInstance = paypalInstance;
