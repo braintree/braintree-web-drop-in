@@ -60,7 +60,7 @@
     "braintree-web": "3.17.0",
     "browser-detection": "braintree/browser-detection#1.4.0",
     "promise-polyfill": "6.0.2",
-    "wrap-promise": "braintree/wrap-promise#1.1.0"
+    "@braintree/wrap-promise": "1.1.1"
   },
   "browserify": {
     "transform": [

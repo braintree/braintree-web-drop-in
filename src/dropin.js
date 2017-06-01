@@ -15,7 +15,7 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
-var wrapPrototype = require('wrap-promise').wrapPrototype;
+var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');

@@ -9,7 +9,7 @@ var constants = require('./constants');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
-var wrapPromise = require('wrap-promise');
+var wrapPromise = require('@braintree/wrap-promise');
 
 var VERSION = process.env.npm_package_version;
 
