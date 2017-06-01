@@ -82,7 +82,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
       self.model.asyncDependencyReady();
       setupComplete = true;
       clearTimeout(asyncDependencyTimeoutHandler);
-    });
+    }).catch(reportError);
   });
 
   function reportError(err) {

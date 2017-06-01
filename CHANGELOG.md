@@ -1,18 +1,23 @@
 CHANGELOG
 =========
 
-UNRELEASED
+unreleased
 ----------
+- Add support for custom translations
+
+1.2.0
+------
 - Adjust styling of saved payment methods
-- Fix typo in russian translation
+- Fix typo in Russian translation
 - Update browser detection library to 1.4.0
 - Fix width errors where Drop-in was not aligned with other elements on merchant page
 - Add ability to style PayPal button
 - Fail early if PayPal creation errors
-- Add support for custom translations
+- Upgrade braintree-web to v3.17.0
+- Upgrade checkout.js to 4.0.78
 
 1.1.0
-----------
+------
 - Add built css to npm build
 - Fix typo in Dutch translations
 - Add ability to pass in a DOM Node to Drop-in as an alternative to a CSS selector
