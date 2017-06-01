@@ -159,6 +159,26 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('shows PayPal linked sandbox error in option', function (done) {
+      var instance;
+      var paypalError = new Error('PayPal Error');
+
+      paypalError.code = 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED';
+
+      paypalCheckout.create.yieldsAsync(paypalError);
+      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        var paypalOption = this.container.querySelector('.braintree-option__paypal');
+
+        expect(paypalOption.className).to.include('braintree-disabled');
+        expect(paypalOption.innerHTML).to.include(constants.errors.PAYPAL_NON_LINKED_SANDBOX);
+        done();
+      }.bind(this));
+    });
+
     it('throws an error with a container that points to a nonexistent DOM node', function (done) {
       var instance;
 
