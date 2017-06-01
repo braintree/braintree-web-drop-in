@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+UNRELEASED
+----------
+- Use npm scoped version of browser-detection
+
 1.2.0
 ------
 - Adjust styling of saved payment methods
