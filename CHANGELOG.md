@@ -1,8 +1,10 @@
 CHANGELOG
 =========
 
-unreleased
+
+UNRELEASED
 ----------
+- Use npm scoped version of browser-detection
 - Clean up payment option error messages
 
 1.2.0
