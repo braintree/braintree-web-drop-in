@@ -1,8 +1,9 @@
 CHANGELOG
 =========
 
-unreleased
+UNRELEASED
 ----------
+- Use npm scoped version of browser-detection
 - `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
 - `dropinInstance.teardown` will return a promise if no callback is provided
 - `dropin.create` will return a promise if no callback is provided
