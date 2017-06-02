@@ -4,6 +4,7 @@ CHANGELOG
 UNRELEASED
 ----------
 - Use npm scoped version of browser-detection
+- Add script tag integration for cards only
 
 1.2.0
 ------
@@ -15,7 +16,6 @@ UNRELEASED
 - Fail early if PayPal creation errors
 - Upgrade braintree-web to v3.17.0
 - Upgrade checkout.js to 4.0.78
-- Add script tag integration for cards only
 
 1.1.0
 ------
