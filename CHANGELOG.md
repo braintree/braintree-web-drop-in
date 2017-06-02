@@ -3,8 +3,12 @@ CHANGELOG
 
 UNRELEASED
 ----------
+- Use npm scoped version of browser-detection
+
+1.2.0
+------
 - Adjust styling of saved payment methods
-- Fix typo in russian translation
+- Fix typo in Russian translation
 - Update browser detection library to 1.4.0
 - Fix width errors where Drop-in was not aligned with other elements on merchant page
 - Add ability to style PayPal button
@@ -14,7 +18,7 @@ UNRELEASED
 - Add script tag integration for cards only
 
 1.1.0
-----------
+------
 - Add built css to npm build
 - Fix typo in Dutch translations
 - Add ability to pass in a DOM Node to Drop-in as an alternative to a CSS selector

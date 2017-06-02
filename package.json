@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "src/index.js",
   "scripts": {
     "build": "gulp build",
@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "braintree-web": "3.17.0",
-    "browser-detection": "braintree/browser-detection#1.4.0",
+    "@braintree/browser-detection": "1.4.1",
     "promise-polyfill": "6.0.2"
   },
   "browserify": {
