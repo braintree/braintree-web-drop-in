@@ -1,8 +1,9 @@
 CHANGELOG
 =========
 
-unreleased
+UNRELEASED
 ----------
+- Use npm scoped version of browser-detection
 - Add support for custom translations
 
 1.2.0
