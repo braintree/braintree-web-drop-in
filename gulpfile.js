@@ -62,7 +62,7 @@ var config = {
   server: {
     assetsPath: 'dist',
     ghPagesPath: GH_PAGES_PATH,
-    port: 4567
+    port: process.env.PORT || 4567
   }
 };
 
