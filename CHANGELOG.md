@@ -3,8 +3,9 @@ CHANGELOG
 
 UNRELEASED
 ----------
-- Use npm scoped version of browser-detection
+- Add script tag integration for cards only
 - Add support for custom translations
+- Use npm scoped version of browser-detection
 
 1.2.0
 ------
