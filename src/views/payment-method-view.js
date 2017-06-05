@@ -45,6 +45,11 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@TITLE/g, this.paymentMethod.details.email)
         .replace(/@SUBTITLE/g, this.strings.PayPal);
       break;
+    case paymentMethodTypes.applePay:
+      html = html.replace(/@ICON/g, 'logoApplePay')
+        .replace(/@CLASSNAME/g, '')
+        .replace(/@TITLE/g, this.paymentMethod.details.paymentInstrumentName)
+        .replace(/@SUBTITLE/g, this.strings.ApplePay);
     default:
       break;
   }

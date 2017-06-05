@@ -44,7 +44,7 @@ var VERSION = process.env.npm_package_version;
  * `zh_CN`,
  * `zh_HK`,
  * `zh_TW`.
- * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit']`. Payment options omitted from this array will not be offered to the customer.
+ * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'applePay']`. Payment options omitted from this array will not be offered to the customer.
  *
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
  *
@@ -61,6 +61,9 @@ var VERSION = process.env.npm_package_version;
  * @param {string|number} [options.paypalCredit.amount] The amount of the transaction. Required when using the Checkout flow.
  * @param {string} [options.paypalCredit.currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {string} [options.paypalCredit.buttonStyle] The style object to apply to the PayPal Credit button. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/) are available. The `label` property cannot be adjusted.
+ *
+ * @param {object} [options.applePay] The configuration options for Apple Pay. To include an Apple Pay option in your Drop-in integration, include the `applePay` parameter and [enable Apple Pay in the Braintree Control Panel](https://developers.braintreepayments.com/guides/apple-pay/configuration/javascript/v3).
+ *
  * @param {function} callback The second argument, `data`, is the {@link Dropin} instance.
  * @returns {void}
  * @example

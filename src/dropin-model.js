@@ -159,7 +159,7 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
 
 function getSupportedPaymentOptions(options) {
   var result = [];
-  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit'];
+  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit', 'applePay'];
 
   if (!(paymentOptionPriority instanceof Array)) {
     throw new DropinError('paymentOptionPriority must be an array.');
@@ -190,6 +190,9 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
   } else if (paymentOption === 'paypalCredit') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
+  } else if (paymentOption === 'applePay') {
+    debugger;
+    return gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay);
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }

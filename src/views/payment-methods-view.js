@@ -5,7 +5,8 @@ var PaymentMethodView = require('./payment-method-view');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
-  PayPalAccount: 'PayPal'
+  PayPalAccount: 'PayPal',
+  ApplePayCard: 'Apple Pay'
 };
 
 function PaymentMethodsView() {

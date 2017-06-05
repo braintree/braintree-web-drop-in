@@ -23,6 +23,9 @@ module.exports = {
   paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
   paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
+  applePayAccountTokenizationFailedError: 'Something went wrong with Apple Pay. Please try again.',
+  applePayFlowFailedError: 'Something went wrong initializing Apple Pay. Please try again.',
+  applePayTokenizationRequestActiveError: 'Apple Pay is already in progress.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
   // Card form
   cardNumberLabel: 'Card Number',
@@ -39,6 +42,7 @@ module.exports = {
   Card: 'Card',
   PayPal: 'PayPal',
   'PayPal Credit': 'PayPal Credit',
+  'Apple Pay': 'Apple Pay',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',

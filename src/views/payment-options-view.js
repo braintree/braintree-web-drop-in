@@ -54,6 +54,10 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
       html = html.replace(/@OPTION_TITLE/g, this.strings['PayPal Credit']);
       html = html.replace(/@CLASSNAME/g, '');
       break;
+    case paymentOptionIDs.applePay:
+      html = html.replace(/@ICON/g, 'logoApplePay'); // TODO: get icon from Apple
+      html = html.replace(/@OPTION_TITLE/g, this.strings['Apple Pay']); // TODO: set string
+      html = html.replace(/@CLASSNAME/g, '');
     default:
       break;
   }

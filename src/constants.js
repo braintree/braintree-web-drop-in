@@ -4,16 +4,19 @@ module.exports = {
   paymentOptionIDs: {
     card: 'card',
     paypal: 'paypal',
-    paypalCredit: 'paypalCredit'
+    paypalCredit: 'paypalCredit',
+    applePay: 'applePay'
   },
   paymentMethodTypes: {
     card: 'CreditCard',
     paypal: 'PayPalAccount',
-    paypalCredit: 'PayPalAccount'
+    paypalCredit: 'PayPalAccount',
+    applePay: 'ApplePayCard'
   },
   analyticsKinds: {
     CreditCard: 'card',
-    PayPalAccount: 'paypal'
+    PayPalAccount: 'paypal',
+    ApplePayCard: 'applepay' // TODO: check where this is used
   },
   paymentMethodCardTypes: {
     Visa: 'visa',
