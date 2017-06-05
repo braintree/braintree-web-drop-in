@@ -48,9 +48,9 @@ var VERSION = process.env.npm_package_version;
  * @param {string} [options.locale=`en_US`] Use this option to change the language, links, and terminology used throughout Drop-in. Supported locales include:
  * `da_DK`,
  * `de_DE`,
- * `en_US`,
  * `en_AU`,
  * `en_GB`,
+ * `en_US`,
  * `es_ES`,
  * `fr_CA`,
  * `fr_FR`,
@@ -69,6 +69,8 @@ var VERSION = process.env.npm_package_version;
  * `zh_CN`,
  * `zh_HK`,
  * `zh_TW`.
+ *
+ * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
  * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit']`. Payment options omitted from this array will not be offered to the customer.
  *
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
@@ -196,6 +198,18 @@ var VERSION = process.env.npm_package_version;
  *     </script>
  *   </body>
  * </html>
+ *
+ * @example
+ * <caption>Use your own translations</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   translations: {
+ *     payingWith: 'You are paying with {{paymentSource}}',
+ *     chooseAnotherWayToPay: 'My custom chooseAnotherWayToPay string',
+ *     // Any other custom translation strings
+ *   }
+ * }, callback);
  */
 
 function create(options, callback) {

@@ -167,6 +167,10 @@ Dropin.prototype._initialize = function (callback) {
     strings = assign(strings, localizedStrings);
   }
 
+  if (this._merchantConfiguration.translations) {
+    strings = assign(strings, this._merchantConfiguration.translations);
+  }
+
   localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {
     var stringValue = strings[stringKey];
 

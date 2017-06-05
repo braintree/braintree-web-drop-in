@@ -3,7 +3,7 @@ require_relative "helpers/drop_in_helper"
 require_relative "helpers/skip_browser_helper"
 
 HOSTNAME = `hostname`.chomp
-PORT = 4567
+PORT = ENV["PORT"] || 4567
 
 describe "Drop-in" do
   include SkipBrowser
@@ -197,6 +197,14 @@ describe "Drop-in" do
     it "supports locale" do
       visit "http://#{HOSTNAME}:#{PORT}?locale=es_ES"
 
+      expect(page).to have_content("Tarjeta")
+    end
+
+    it "supports custom locale object" do
+      translations = '{"chooseAWayToPay":"My Choose a Way to Pay String"}'
+      visit URI.encode("http://#{HOSTNAME}:#{PORT}?translations=#{translations}&locale=es_ES")
+
+      expect(page).to have_content("My Choose a Way to Pay String")
       expect(page).to have_content("Tarjeta")
     end
   end
