@@ -4,6 +4,7 @@ CHANGELOG
 UNRELEASED
 ----------
 - Use npm scoped version of browser-detection
+- Add script tag integration for cards only
 
 1.2.0
 ------
