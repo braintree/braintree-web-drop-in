@@ -313,11 +313,16 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
     var element = paymentMethodOptionsElements[paymentMethodId];
     var div = element.div;
     var clickHandler = element.clickHandler;
-    var error = this._model.failedDependencies[paymentMethodId].message;
+    var error = this._model.failedDependencies[paymentMethodId];
+    var errorMessageDiv = div.querySelector('.braintree-option__disabled-message');
 
     div.classList.add('braintree-disabled');
     div.removeEventListener('click', clickHandler);
-    div.querySelector('.braintree-option__disabled-message').textContent = error;
+    if (error.code === 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED') {
+      errorMessageDiv.innerHTML = constants.errors.PAYPAL_NON_LINKED_SANDBOX;
+    } else {
+      errorMessageDiv.textContent = error.message;
+    }
   }.bind(this));
 };
 

@@ -256,6 +256,10 @@ $loader-scale-duration: 300ms;
     background: #EAEAEA;
     cursor: not-allowed;
 
+    &:hover .braintree-option__label {
+      font-weight: normal;
+    }
+
     .braintree-option__label {
       color: #787878;
     }
@@ -263,6 +267,10 @@ $loader-scale-duration: 300ms;
     .braintree-option__disabled-message {
       float: right;
       font-size: 14px;
+
+      span {
+        border-bottom: 1px solid $border-color;
+      }
     }
   }
 

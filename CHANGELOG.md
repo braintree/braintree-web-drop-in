@@ -1,11 +1,12 @@
 CHANGELOG
 =========
 
-UNRELEASED
-----------
+unreleased
+-----------
 - Add script tag integration for cards only
 - Add support for custom translations
 - Use npm scoped version of browser-detection
+- Clean up payment option error messages
 
 1.2.0
 ------
