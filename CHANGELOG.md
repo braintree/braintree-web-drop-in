@@ -15,6 +15,7 @@ UNRELEASED
 - Fix width errors where Drop-in was not aligned with other elements on merchant page
 - Add ability to style PayPal button
 - Fail early if PayPal creation errors
+- Allow card overrides with Hosted Fields
 - Upgrade braintree-web to v3.17.0
 - Upgrade checkout.js to 4.0.78
 
