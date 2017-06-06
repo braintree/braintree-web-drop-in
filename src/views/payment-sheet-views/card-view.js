@@ -1,5 +1,6 @@
 'use strict';
 
+var assign = require('../../lib/assign').assign;
 var fs = require('fs');
 var BaseView = require('../base-view');
 var classlist = require('../../lib/classlist');
@@ -27,7 +28,57 @@ CardView.prototype._initialize = function () {
   var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
   var hasCVV = challenges.indexOf('cvv') !== -1;
   var hasPostal = challenges.indexOf('postal_code') !== -1;
-  var hfOptions = {
+  var hfOptions = this._generateHostedFieldsOptions();
+
+  cardIcons.innerHTML = cardIconHTML;
+  this._hideUnsupportedCardIcons();
+
+  this.hasCVV = hasCVV;
+  this.cardNumberIcon = this.getElementById('card-number-icon');
+  this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
+  this.cvvIcon = this.getElementById('cvv-icon');
+  this.cvvIconSvg = this.getElementById('cvv-icon-svg');
+  this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
+  this.fieldErrors = {};
+
+  if (!hasCVV || !hfOptions.fields.cvv) {
+    cvvFieldGroup = this.getElementById('cvv-field-group');
+
+    cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
+    delete hfOptions.fields.cvv;
+  }
+  if (!hasPostal || !hfOptions.fields.postalCode) {
+    postalCodeFieldGroup = this.getElementById('postal-code-field-group');
+
+    postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
+    delete hfOptions.fields.postalCode;
+  }
+
+  this.model.asyncDependencyStarting();
+
+  hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
+    if (err) {
+      this.model.asyncDependencyFailed({
+        view: this.ID,
+        error: err
+      });
+      return;
+    }
+
+    this.hostedFieldsInstance = hostedFieldsInstance;
+    this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
+    this.hostedFieldsInstance.on('cardTypeChange', this._onCardTypeChangeEvent.bind(this));
+    this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
+    this.hostedFieldsInstance.on('notEmpty', this._onNotEmptyEvent.bind(this));
+    this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
+
+    this.model.asyncDependencyReady();
+  }.bind(this));
+};
+
+CardView.prototype._generateHostedFieldsOptions = function () {
+  var overrides = this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.overrides;
+  var options = {
     client: this.client,
     fields: {
       number: {
@@ -73,50 +124,43 @@ CardView.prototype._initialize = function () {
     }
   };
 
-  cardIcons.innerHTML = cardIconHTML;
-  this._hideUnsupportedCardIcons();
-
-  this.hasCVV = hasCVV;
-  this.cardNumberIcon = this.getElementById('card-number-icon');
-  this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
-  this.cvvIcon = this.getElementById('cvv-icon');
-  this.cvvIconSvg = this.getElementById('cvv-icon-svg');
-  this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
-  this.fieldErrors = {};
-
-  if (!hasCVV) {
-    cvvFieldGroup = this.getElementById('cvv-field-group');
-
-    cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
-    delete hfOptions.fields.cvv;
-  }
-  if (!hasPostal) {
-    postalCodeFieldGroup = this.getElementById('postal-code-field-group');
-
-    postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
-    delete hfOptions.fields.postalCode;
+  if (!overrides) {
+    return options;
   }
 
-  this.model.asyncDependencyStarting();
-
-  hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
-    if (err) {
-      this.model.asyncDependencyFailed({
-        view: this.ID,
-        error: err
-      });
-      return;
+  if (overrides.fields) {
+    if (overrides.fields.cvv && overrides.fields.cvv.placeholder) {
+      this._hasCustomCVVPlaceholder = true;
     }
 
-    this.hostedFieldsInstance = hostedFieldsInstance;
-    this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
-    this.hostedFieldsInstance.on('cardTypeChange', this._onCardTypeChangeEvent.bind(this));
-    this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
-    this.hostedFieldsInstance.on('notEmpty', this._onNotEmptyEvent.bind(this));
-    this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
+    Object.keys(overrides.fields).forEach(function (field) {
+      if ((field === 'cvv' || field === 'postalCode') && overrides.fields[field] === null) {
+        delete options.fields[field];
+        return;
+      }
 
-    this.model.asyncDependencyReady();
-  }.bind(this));
+      if (!options.fields[field]) {
+        return;
+      }
+
+      assign(options.fields[field], overrides.fields[field], {
+        selector: options.fields[field].selector
+      });
+    });
+  }
+
+  if (overrides.styles) {
+    Object.keys(overrides.styles).forEach(function (style) {
+      if (overrides.styles[style] === null) {
+        delete options.styles[style];
+        return;
+      }
+
+      assign(options.styles[style], overrides.styles[style]);
+    });
+  }
+
+  return options;
 };
 
 CardView.prototype._validateForm = function (showFieldErrors) {
@@ -311,11 +355,14 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   if (this.hasCVV) {
     this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
     this.cvvLabelDescriptor.textContent = cvvDescriptor;
-    this.hostedFieldsInstance.setAttribute({
-      field: 'cvv',
-      attribute: 'placeholder',
-      value: cvvPlaceholder
-    });
+
+    if (!this._hasCustomCVVPlaceholder) {
+      this.hostedFieldsInstance.setAttribute({
+        field: 'cvv',
+        attribute: 'placeholder',
+        value: cvvPlaceholder
+      });
+    }
   }
 };
 

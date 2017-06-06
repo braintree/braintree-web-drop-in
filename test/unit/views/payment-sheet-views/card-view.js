@@ -82,6 +82,37 @@ describe('CardView', function () {
       expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).to.exist;
     });
 
+    it('does not have cvv if supplied in challenges, but hosted fields overrides sets cvv to null', function () {
+      this.client.getConfiguration = function () {
+        return {
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
+        };
+      };
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            cvv: null
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).not.to.exist;
+    });
+
     it('does not have cvv if not supplied in challenges', function () {
       new CardView({ // eslint-disable-line no-new
         element: this.element,
@@ -115,6 +146,37 @@ describe('CardView', function () {
       });
 
       expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).to.exist;
+    });
+
+    it('does not have postal code if supplied in challenges, but hosted fields overrides sets postal code to null', function () {
+      this.client.getConfiguration = function () {
+        return {
+          gatewayConfiguration: {
+            challenges: ['postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
+        };
+      };
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            postalCode: null
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
     });
 
     it('does not have postal code if not supplied in challenges', function () {
@@ -345,6 +407,144 @@ describe('CardView', function () {
       expect(hostedFieldsConfiguredFields.cvv.placeholder).to.equal('•••');
       expect(hostedFieldsConfiguredFields.postalCode.placeholder).to.not.exist;
     });
+
+    it('allows overriding field options for hosted fields', function () {
+      var hostedFieldsConfiguredFields;
+
+      this.client.getConfiguration = function () {
+        return {
+          gatewayConfiguration: {
+            challenges: ['cvv', 'postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
+        };
+      };
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              placeholder: 'placeholder'
+            },
+            cvv: {
+              maxlength: 2
+            }
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+
+      expect(hostedFieldsConfiguredFields.number.placeholder).to.equal('placeholder');
+      expect(hostedFieldsConfiguredFields.cvv.maxlength).to.equal(2);
+    });
+
+    it('does not add hosted fields elements for fields that are not present', function () {
+      var hostedFieldsConfiguredFields;
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            postalCode: {
+              selector: '#postal-code'
+            },
+            cvv: {
+              selector: '#cvv'
+            },
+            expirationMonth: {
+              selector: '#month'
+            },
+            expirationYear: {
+              selector: '#year'
+            }
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+
+      expect(hostedFieldsConfiguredFields.cvv).to.not.exist;
+      expect(hostedFieldsConfiguredFields.postalCode).to.not.exist;
+      expect(hostedFieldsConfiguredFields.expirationMonth).to.not.exist;
+      expect(hostedFieldsConfiguredFields.expirationYear).to.not.exist;
+    });
+
+    it('ignores changes to selector in field options', function () {
+      var hostedFieldsConfiguredFields;
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              selector: '#some-selector'
+            }
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+
+      expect(hostedFieldsConfiguredFields.number.selector).to.not.equal('#some-selector');
+    });
+
+    it('allows overriding styles options for hosted fields', function () {
+      var hostedFieldsConfiguredStyles;
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          styles: {
+            input: {
+              background: 'blue',
+              color: 'red'
+            },
+            ':focus': null
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredStyles = hostedFields.create.lastCall.args[0].styles;
+
+      expect(hostedFieldsConfiguredStyles.input.color).to.equal('red');
+      expect(hostedFieldsConfiguredStyles.input.background).to.equal('blue');
+      expect(hostedFieldsConfiguredStyles.input['font-size']).to.equal('16px');
+      expect(hostedFieldsConfiguredStyles[':focus']).to.not.exist;
+      expect(hostedFieldsConfiguredStyles['input::-ms-clear']).to.deep.equal({
+        color: 'transparent'
+      });
+    });
   });
 
   describe('requestPaymentMethod', function () {
@@ -393,6 +593,7 @@ describe('CardView', function () {
       this.context = {
         element: this.element,
         _generateFieldSelector: CardView.prototype._generateFieldSelector,
+        _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
         _validateForm: this.sandbox.stub(),
         getElementById: BaseView.prototype.getElementById,
         hideFieldError: CardView.prototype.hideFieldError,
@@ -965,6 +1166,32 @@ describe('CardView', function () {
         CardView.prototype._initialize.call(this.context);
 
         expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
+      });
+
+      it('does not update the cvv field placeholder when using a custom CVV placeholder', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.spy()
+        };
+
+        this.context.model.merchantConfiguration.card = {
+          overrides: {
+            fields: {
+              cvv: {
+                placeholder: 'cool custom placeholder'
+              }
+            }
+          }
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setAttribute).not.to.have.been.called;
       });
     });
 

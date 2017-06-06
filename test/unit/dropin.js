@@ -159,6 +159,26 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('shows PayPal linked sandbox error in option', function (done) {
+      var instance;
+      var paypalError = new Error('PayPal Error');
+
+      paypalError.code = 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED';
+
+      paypalCheckout.create.yieldsAsync(paypalError);
+      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        var paypalOption = this.container.querySelector('.braintree-option__paypal');
+
+        expect(paypalOption.className).to.include('braintree-disabled');
+        expect(paypalOption.innerHTML).to.include(constants.errors.PAYPAL_NON_LINKED_SANDBOX);
+        done();
+      }.bind(this));
+    });
+
     it('throws an error with a container that points to a nonexistent DOM node', function (done) {
       var instance;
 
@@ -569,6 +589,41 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Código postal');
+        done();
+      });
+    });
+
+    it('uses custom translations when options.translations is specified', function (done) {
+      var instance;
+
+      this.dropinOptions.merchantConfiguration.translations = {
+        payingWith: 'You are paying with {{paymentSource}}',
+        chooseAnotherWayToPay: 'My custom chooseAnotherWayToPay string'
+      };
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(instance._mainView.strings.payingWith).to.equal('You are paying with {{paymentSource}}');
+        expect(instance._mainView.strings.chooseAnotherWayToPay).to.equal('My custom chooseAnotherWayToPay string');
+        expect(instance._mainView.strings.postalCodeLabel).to.equal('Postal Code');
+        done();
+      });
+    });
+
+    it('uses locale with custom translations', function (done) {
+      var instance;
+
+      this.dropinOptions.merchantConfiguration.locale = 'es_ES';
+      this.dropinOptions.merchantConfiguration.translations = {
+        payingWith: 'You are paying with {{paymentSource}}',
+        chooseAnotherWayToPay: 'My custom chooseAnotherWayToPay string'
+      };
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(instance._mainView.strings.payingWith).to.equal('You are paying with {{paymentSource}}');
+        expect(instance._mainView.strings.chooseAnotherWayToPay).to.equal('My custom chooseAnotherWayToPay string');
         expect(instance._mainView.strings.postalCodeLabel).to.equal('Código postal');
         done();
       });
