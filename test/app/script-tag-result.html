@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="web/dropin/dev/css/dropin.css" id="braintree-dropin-stylesheet">
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="IE=Edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drop-in demo</title>
+<style>
+  html {
+    font-family: sans-serif;
+    font-size: 16pt;
+    background: #f9f9f9;
+  }
+
+  body {
+    width: 95%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+</style>
+
+<script src="assign-polyfill.js"></script>
+</head>
+<body>
+  <h1>Braintree Drop-in Script Tag Result Page</h1>
+
+  <pre id="results"></pre>
+
+  <script>
+    var results = document.querySelector('#results');
+    var query = window.location.search.substring(1);
+    var paramPairs = query.split('&');
+
+    paramPairs.forEach(function (param) {
+      var pair = param.split('=');
+
+      results.textContent = results.textContent + '\n' + pair[0] + ': ' + pair[1];
+    });
+  </script>
+</body>
+</html>

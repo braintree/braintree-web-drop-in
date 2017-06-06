@@ -1,10 +1,35 @@
 'use strict';
 /**
  * @module braintree-web-drop-in
+ * @description The primary way to integrate Drop-in into your page is to use [`dropin.create`](#.create).
+ *
+ * Alternatively, if you only need to process credit cards on your checkout page, the script tag integration is the simplest way to integrate. All you need to do is add the Drop-in script inside your form element where you want Drop-in to appear and include a `data-braintree-dropin-authorization` property with your [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or [client token](https://developers.braintreepayments.com/guides/authorization/client-token).
+ *
+ * The script tag integration will intercept the form submission and attempt to tokenize the credit card. If the tokenization is successful, it will insert the payment method nonce representing the credit card into a hidden input with the name `payment_method_nonce` and then submit your form.
+ *
+ * If you want more control over the process or accept additional payment methods (such as PayPal or PayPal Credit), you can use [`dropin.create` instead](#.create).
+ * @example
+ * <caption>Script tag integration (credit cards only)</caption>
+ * <!DOCTYPE html>
+ * <html lang="en">
+ *   <head>
+ *     <meta charset="UTF-8">
+ *     <title>Checkout</title>
+ *   </head>
+ *   <body>
+ *     <form id="payment-form" action="/" method="post">
+ *       <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *       ></script>
+ *       <input type="submit" value="Purchase"></input>
+ *     </form>
+ *   </body>
+ * </html>
  */
 
 var Dropin = require('./dropin');
 var client = require('braintree-web/client');
+var createFromScriptTag = require('./lib/create-from-script-tag');
 var deferred = require('./lib/deferred');
 var constants = require('./constants');
 var analytics = require('./lib/analytics');
@@ -23,9 +48,9 @@ var VERSION = process.env.npm_package_version;
  * @param {string} [options.locale=`en_US`] Use this option to change the language, links, and terminology used throughout Drop-in. Supported locales include:
  * `da_DK`,
  * `de_DE`,
- * `en_US`,
  * `en_AU`,
  * `en_GB`,
+ * `en_US`,
  * `es_ES`,
  * `fr_CA`,
  * `fr_FR`,
@@ -44,8 +69,13 @@ var VERSION = process.env.npm_package_version;
  * `zh_CN`,
  * `zh_HK`,
  * `zh_TW`.
+ *
+ * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
  * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit']`. Payment options omitted from this array will not be offered to the customer.
  *
+ * @param {object} [options.card] The configuration options for cards. If this option is omitted, cards will still appear as a payment option. To remove cards as a payment option, use `paymentOptionPriority`. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` configuration can be customized.
+ * @param {object} [options.card.overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
+ * @param {object} [options.card.overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~styleOptions).
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
  *
  * Some of the PayPal configuration options are listed here, but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
@@ -132,7 +162,7 @@ var VERSION = process.env.npm_package_version;
  *     <title>Checkout</title>
  *   </head>
  *   <body>
- *     <form id="payment-form" action="/" method="post>
+ *     <form id="payment-form" action="/" method="post">
  *       <div id="dropin-container"></div>
  *       <input type="submit" value="Purchase"></input>
  *       <input type="hidden id="nonce" name="payment_method_nonce"></input>
@@ -171,6 +201,46 @@ var VERSION = process.env.npm_package_version;
  *     </script>
  *   </body>
  * </html>
+ *
+ * @example
+ * <caption>Use your own translations</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   translations: {
+ *     payingWith: 'You are paying with {{paymentSource}}',
+ *     chooseAnotherWayToPay: 'My custom chooseAnotherWayToPay string',
+ *     // Any other custom translation strings
+ *   }
+ * }, callback);
+ *
+ * @example
+ * <caption>Customizing Drop-in with card form overrides</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   card: {
+ *     overrides: {
+ *       fields: {
+ *         number: {
+ *           placeholder: '1111 1111 1111 1111' // Update the number field placeholder
+ *         },
+ *         postalCode: {
+ *           minlength: 5 // Set the minimum length of the postal code field
+ *         },
+ *         cvv: null // Remove the CVV field from your form
+ *       },
+ *       styles: {
+ *         input: {
+ *           'font-size': '18px' // Change the font size for all inputs
+ *         },
+ *         ':focus': {
+ *           color: 'red' // Change the focus color to red for all inputs
+ *         }
+ *       }
+ *     }
+ *   }
+ * }, callback);
  */
 
 function create(options, callback) {
@@ -224,6 +294,9 @@ function setAnalyticsIntegration(clientInstance) {
 
   return clientInstance;
 }
+
+// we check for document's existence to support server side rendering
+createFromScriptTag(create, typeof document !== 'undefined' && document.querySelector('script[data-braintree-dropin-authorization]'));
 
 module.exports = {
   create: create,
