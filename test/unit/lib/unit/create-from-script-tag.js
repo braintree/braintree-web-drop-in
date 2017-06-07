@@ -89,7 +89,7 @@ describe('createFromScriptTag', function () {
   it('adds submit listener to form for requesting a payment method', function () {
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    expect(this.fakeForm.addEventListener).to.be.calledOnce;
+    expect(this.fakeForm.addEventListener).to.be.calledTwice;
     expect(this.fakeForm.addEventListener).to.be.calledWith('submit', this.sandbox.match.func);
   });
 
@@ -108,16 +108,27 @@ describe('createFromScriptTag', function () {
     expect(fakeEvent.preventDefault).to.be.calledOnce;
   });
 
+  it('prevents default form submission before Drop-in is created', function () {
+    var submitHandler;
+    var fakeCreateFunction = this.sandbox.stub();
+    var fakeEvent = {preventDefault: this.sandbox.stub()};
+
+    createFromScriptTag(fakeCreateFunction, this.scriptTag);
+
+    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+
+    submitHandler(fakeEvent);
+
+    expect(fakeEvent.preventDefault).to.be.calledOnce;
+  });
+
   it('calls requestPaymentMethod when form submits', function () {
     var submitHandler;
 
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
-
-    submitHandler({
-      preventDefault: this.sandbox.stub()
-    });
+    submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+    submitHandler();
 
     expect(this.instance.requestPaymentMethod).to.be.calledOnce;
   });
@@ -130,9 +141,8 @@ describe('createFromScriptTag', function () {
     document.createElement.withArgs('input').returns(fakeInput);
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
-
-    submitHandler({preventDefault: this.sandbox.stub()});
+    submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+    submitHandler();
 
     expect(this.fakeForm.appendChild).to.be.calledOnce;
     expect(this.fakeForm.appendChild).to.be.calledWith(fakeInput);
@@ -149,9 +159,8 @@ describe('createFromScriptTag', function () {
     this.sandbox.spy(document, 'createElement');
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
-
-    submitHandler({preventDefault: this.sandbox.stub()});
+    submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+    submitHandler();
 
     expect(document.createElement).to.not.be.calledWith('input');
     expect(this.fakeForm.submit).to.not.be.called;
@@ -166,9 +175,8 @@ describe('createFromScriptTag', function () {
 
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
-
-    submitHandler({preventDefault: this.sandbox.stub()});
+    submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+    submitHandler();
 
     expect(this.fakeForm.appendChild).to.not.be.called;
     expect(document.createElement).to.not.be.calledWith('input');
