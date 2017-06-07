@@ -11,7 +11,7 @@ describe('createFromScriptTag', function () {
     this.scriptTag = {
       getAttribute: this.sandbox.stub().returns('an-authorization')
     };
-    this.createFunction = this.sandbox.stub().yields(null, this.instance);
+    this.createFunction = this.sandbox.stub().resolves(this.instance);
     this.fakeForm = {
       insertBefore: this.sandbox.stub(),
       addEventListener: this.sandbox.stub(),
@@ -41,7 +41,7 @@ describe('createFromScriptTag', function () {
     expect(document.createElement).to.not.be.called;
   });
 
-  it('creates a container for drop-in', function () {
+  it('creates a container for Drop-in', function () {
     this.sandbox.spy(document, 'createElement');
 
     createFromScriptTag(this.createFunction, this.scriptTag);
@@ -72,28 +72,23 @@ describe('createFromScriptTag', function () {
     createFromScriptTag(this.createFunction, this.scriptTag);
 
     expect(this.createFunction).to.be.calledOnce;
-    expect(this.createFunction).to.be.calledWithMatch({
+    expect(this.createFunction).to.be.calledWith({
       authorization: 'an-authorization',
       container: this.sandbox.match.defined
-    }, this.sandbox.match.func);
+    });
   });
 
-  it('throws an error if instance creation fails', function () {
-    this.createFunction.yields(new Error('foo'));
-
-    expect(function () {
-      createFromScriptTag(this.createFunction, this.scriptTag);
-    }.bind(this)).to.throw('foo');
-  });
-
-  it('adds submit listener to form for requesting a payment method', function () {
+  it('adds submit listener to form for requesting a payment method', function (done) {
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    expect(this.fakeForm.addEventListener).to.be.calledOnce;
-    expect(this.fakeForm.addEventListener).to.be.calledWith('submit', this.sandbox.match.func);
+    setTimeout(function () {
+      expect(this.fakeForm.addEventListener).to.be.calledOnce;
+      expect(this.fakeForm.addEventListener).to.be.calledWith('submit');
+      done();
+    }.bind(this));
   });
 
-  it('prevents default form submission', function () {
+  it('prevents default form submission', function (done) {
     var submitHandler;
     var fakeEvent = {
       preventDefault: this.sandbox.stub()
@@ -101,28 +96,32 @@ describe('createFromScriptTag', function () {
 
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+    setTimeout(function () {
+      submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+      submitHandler(fakeEvent);
 
-    submitHandler(fakeEvent);
-
-    expect(fakeEvent.preventDefault).to.be.calledOnce;
+      expect(fakeEvent.preventDefault).to.be.calledOnce;
+      done();
+    }.bind(this));
   });
 
-  it('calls requestPaymentMethod when form submits', function () {
+  it('calls requestPaymentMethod when form submits', function (done) {
     var submitHandler;
 
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+    setTimeout(function () {
+      submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+      submitHandler({
+        preventDefault: this.sandbox.stub()
+      });
 
-    submitHandler({
-      preventDefault: this.sandbox.stub()
-    });
-
-    expect(this.instance.requestPaymentMethod).to.be.calledOnce;
+      expect(this.instance.requestPaymentMethod).to.be.calledOnce;
+      done();
+    }.bind(this));
   });
 
-  it('adds payment method nonce to form and submits form if payment method is requestable', function () {
+  it('adds payment method nonce to form and submits form if payment method is requestable', function (done) {
     var submitHandler;
     var fakeInput = {};
 
@@ -130,34 +129,38 @@ describe('createFromScriptTag', function () {
     document.createElement.withArgs('input').returns(fakeInput);
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+    setTimeout(function () {
+      submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+      submitHandler({preventDefault: this.sandbox.stub()});
 
-    submitHandler({preventDefault: this.sandbox.stub()});
-
-    expect(this.fakeForm.appendChild).to.be.calledOnce;
-    expect(this.fakeForm.appendChild).to.be.calledWith(fakeInput);
-    expect(fakeInput.type).to.equal('hidden');
-    expect(fakeInput.name).to.equal('payment_method_nonce');
-    expect(fakeInput.value).to.equal('a-nonce');
-    expect(this.fakeForm.submit).to.be.calledOnce;
+      expect(this.fakeForm.appendChild).to.be.calledOnce;
+      expect(this.fakeForm.appendChild).to.be.calledWith(fakeInput);
+      expect(fakeInput.type).to.equal('hidden');
+      expect(fakeInput.name).to.equal('payment_method_nonce');
+      expect(fakeInput.value).to.equal('a-nonce');
+      expect(this.fakeForm.submit).to.be.calledOnce;
+      done();
+    }.bind(this));
   });
 
-  it('does not add nonce and submit form if requestPaymentMethod fails', function () {
+  it('does not add nonce and submit form if requestPaymentMethod fails', function (done) {
     var submitHandler;
 
     this.instance.requestPaymentMethod.yields(new Error('failure'));
     this.sandbox.spy(document, 'createElement');
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+    setTimeout(function () {
+      submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+      submitHandler({preventDefault: this.sandbox.stub()});
 
-    submitHandler({preventDefault: this.sandbox.stub()});
-
-    expect(document.createElement).to.not.be.calledWith('input');
-    expect(this.fakeForm.submit).to.not.be.called;
+      expect(document.createElement).to.not.be.calledWith('input');
+      expect(this.fakeForm.submit).to.not.be.called;
+      done();
+    }.bind(this));
   });
 
-  it('uses existing payment_method_nonce input if it already exists', function () {
+  it('uses existing payment_method_nonce input if it already exists', function (done) {
     var submitHandler;
     var fakeInput = {};
 
@@ -166,13 +169,15 @@ describe('createFromScriptTag', function () {
 
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+    setTimeout(function () {
+      submitHandler = this.fakeForm.addEventListener.getCall(0).args[1];
+      submitHandler({preventDefault: this.sandbox.stub()});
 
-    submitHandler({preventDefault: this.sandbox.stub()});
-
-    expect(this.fakeForm.appendChild).to.not.be.called;
-    expect(document.createElement).to.not.be.calledWith('input');
-    expect(fakeInput.value).to.equal('a-nonce');
-    expect(this.fakeForm.submit).to.be.calledOnce;
+      expect(this.fakeForm.appendChild).to.not.be.called;
+      expect(document.createElement).to.not.be.calledWith('input');
+      expect(fakeInput.value).to.equal('a-nonce');
+      expect(this.fakeForm.submit).to.be.calledOnce;
+      done();
+    }.bind(this));
   });
 });
