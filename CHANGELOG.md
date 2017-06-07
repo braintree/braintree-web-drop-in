@@ -7,6 +7,8 @@ unreleased
 - Add support for custom translations
 - Use npm scoped version of browser-detection
 - Clean up payment option error messages
+- Update braintree-web to version 3.18.0
+- Update paypal checkout.js to version 4.0.82
 
 1.2.0
 ------
