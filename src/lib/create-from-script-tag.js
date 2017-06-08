@@ -5,13 +5,14 @@ var uuid = require('./uuid');
 var DropinError = require('./dropin-error');
 
 function createFromScriptTag(createFunction, scriptTag) {
-  var authorization, container, form;
+  var authorization, locale, container, form;
 
   if (!scriptTag) {
     return;
   }
 
   authorization = scriptTag.getAttribute('data-braintree-dropin-authorization');
+  locale = scriptTag.getAttribute('data-locale');
 
   if (!authorization) {
     throw new DropinError('Authorization not found in data-braintree-dropin-authorization attribute');
@@ -34,6 +35,7 @@ function createFromScriptTag(createFunction, scriptTag) {
 
   createFunction({
     authorization: authorization,
+    locale: locale,
     container: container
   }, function (createError, instance) {
     if (createError) {

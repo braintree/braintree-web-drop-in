@@ -78,6 +78,16 @@ describe('createFromScriptTag', function () {
     }, this.sandbox.match.func);
   });
 
+  it('calls create with locale if provided', function () {
+    this.scriptTag.getAttribute.withArgs('data-locale').returns('DE');
+    createFromScriptTag(this.createFunction, this.scriptTag);
+
+    expect(this.createFunction).to.be.calledOnce;
+    expect(this.createFunction).to.be.calledWithMatch({
+      locale: 'DE'
+    });
+  });
+
   it('throws an error if instance creation fails', function () {
     this.createFunction.yields(new Error('foo'));
 

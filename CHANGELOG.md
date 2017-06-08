@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+-----------
+- Add locale to script tag integration
+
 1.3.0
 ------
 - Add script tag integration for cards only
