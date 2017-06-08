@@ -19,7 +19,7 @@
  *   <body>
  *     <form id="payment-form" action="/" method="post">
  *       <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
- *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *         data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *       ></script>
  *       <input type="submit" value="Purchase"></input>
  *     </form>
