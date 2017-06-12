@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Add aria-invalid attribute for cards
+
+
 1.3.0
 ------
 - Add script tag integration for cards only
