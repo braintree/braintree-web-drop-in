@@ -28,6 +28,7 @@
     "eslint-config-braintree": "1.0.2",
     "finalhandler": "0.5.0",
     "gulp": "3.9.1",
+    "gulp-autoprefixer": "4.0.0",
     "gulp-brfs": "0.1.0",
     "gulp-clean-css": "2.0.13",
     "gulp-envify": "1.0.0",

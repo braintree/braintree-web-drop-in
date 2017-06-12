@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Autoprefix CSS, fixing issues in older browsers
+
 1.3.0
 ------
 - Add script tag integration for cards only
