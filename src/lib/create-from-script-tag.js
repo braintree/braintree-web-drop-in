@@ -1,11 +1,31 @@
 'use strict';
 
+var assign = require('./assign').assign;
 var find = require('./find-parent-form');
 var uuid = require('./uuid');
 var DropinError = require('./dropin-error');
 
+function addCompositeKeyValuePairToObject(obj, key, value) {
+  var decomposedKeys = key.split('.');
+
+  if (decomposedKeys.length === 1) {
+    obj[decomposedKeys[0]] = deserialize(value);
+  } else {
+    obj[decomposedKeys[0]] = obj[decomposedKeys[0]] || {};
+    addCompositeKeyValuePairToObject(obj[decomposedKeys[0]], decomposedKeys.slice(1).join('.'), value);
+  }
+}
+
+function deserialize(value) {
+  try {
+    return JSON.parse(value);
+  } catch (e) {
+    return value;
+  }
+}
+
 function createFromScriptTag(createFunction, scriptTag) {
-  var authorization, container, form;
+  var authorization, container, createOptions, form, scriptTagDataset;
 
   if (!scriptTag) {
     return;
@@ -32,10 +52,18 @@ function createFromScriptTag(createFunction, scriptTag) {
 
   form.insertBefore(container, scriptTag);
 
-  createFunction({
+  createOptions = {
     authorization: authorization,
     container: container
-  }).then(function (instance) {
+  };
+
+  scriptTagDataset = assign({}, scriptTag.dataset);
+  delete scriptTagDataset.braintreeDropinAuthorization;
+  Object.keys(scriptTagDataset).forEach(function (compositeKey) {
+    addCompositeKeyValuePairToObject(createOptions, compositeKey, scriptTag.dataset[compositeKey]);
+  });
+
+  createFunction(createOptions).then(function (instance) {
     form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
         var paymentMethodNonce;

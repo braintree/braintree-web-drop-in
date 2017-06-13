@@ -9,6 +9,7 @@ describe('createFromScriptTag', function () {
       requestPaymentMethod: this.sandbox.stub().yields(null, {nonce: 'a-nonce'})
     };
     this.scriptTag = {
+      dataset: {},
       getAttribute: this.sandbox.stub().returns('an-authorization')
     };
     this.createFunction = this.sandbox.stub().resolves(this.instance);
@@ -206,5 +207,98 @@ describe('createFromScriptTag', function () {
       expect(this.fakeForm.submit).to.be.calledOnce;
       done();
     }.bind(this));
+  });
+
+  describe('data attributes handling', function () {
+    beforeEach(function () {
+      this.scriptTag = document.createElement('script');
+      this.scriptTag.dataset.braintreeDropinAuthorization = 'an_authorization';
+    });
+
+    it('accepts strings', function (done) {
+      var submitHandler;
+
+      this.scriptTag.dataset.locale = 'es_ES';
+
+      createFromScriptTag(this.createFunction, this.scriptTag);
+
+      setTimeout(function () {
+        submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+        submitHandler();
+
+        expect(this.createFunction).to.be.calledOnce;
+        expect(this.createFunction).to.be.calledWithMatch({
+          locale: 'es_ES'
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('accepts Booleans', function (done) {
+      var submitHandler;
+
+      this.scriptTag.dataset.someBoolean = 'true';
+
+      createFromScriptTag(this.createFunction, this.scriptTag);
+
+      setTimeout(function () {
+        submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+        submitHandler();
+
+        expect(this.createFunction).to.be.calledOnce;
+        expect(this.createFunction).to.be.calledWithMatch({
+          someBoolean: true
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('accepts arrays', function (done) {
+      var submitHandler;
+
+      this.scriptTag.dataset.paymentOptionPriority = '["paypal", "card"]';
+
+      createFromScriptTag(this.createFunction, this.scriptTag);
+
+      setTimeout(function () {
+        submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+        submitHandler();
+
+        expect(this.createFunction).to.be.calledOnce;
+        expect(this.createFunction).to.be.calledWithMatch({
+          paymentOptionPriority: ['paypal', 'card']
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('accepts nested objects', function (done) {
+      var submitHandler;
+
+      this.scriptTag.dataset['paypal.flow'] = 'vault';
+      this.scriptTag.dataset['paypal.shippingAddressOverride.line1'] = '123 Main St';
+      this.scriptTag.dataset['paypal.shippingAddressOverride.city'] = 'San Francisco';
+      this.scriptTag.dataset['paypal.shippingAddressOverride.state'] = 'CA';
+
+      createFromScriptTag(this.createFunction, this.scriptTag);
+
+      setTimeout(function () {
+        submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+        submitHandler();
+
+        expect(this.createFunction).to.be.calledOnce;
+        expect(this.createFunction).to.be.calledWithMatch({
+          paypal: {
+            flow: 'vault',
+            shippingAddressOverride: {
+              line1: '123 Main St',
+              city: 'San Francisco',
+              state: 'CA'
+            }
+          }
+        });
+        done();
+      }.bind(this));
+    });
   });
 });
