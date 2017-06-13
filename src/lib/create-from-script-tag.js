@@ -26,15 +26,17 @@ function createFromScriptTag(createFunction, scriptTag) {
     throw new DropinError('No form found for script tag integration.');
   }
 
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+  });
+
   form.insertBefore(container, scriptTag);
 
   createFunction({
     authorization: authorization,
     container: container
   }).then(function (instance) {
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-
+    form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
         var paymentMethodNonce;
 

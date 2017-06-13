@@ -2,14 +2,20 @@ CHANGELOG
 =========
 
 unreleased
------------
-- Add script tag integration for cards only
-- Add support for custom translations
-- Clean up payment option error messages
+----------
 - `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
 - `dropinInstance.teardown` will return a promise if no callback is provided
 - `dropin.create` will return a promise if no callback is provided
 - Use npm scoped version of browser-detection
+
+1.3.0
+------
+- Add script tag integration for cards only
+- Add support for custom translations
+- Clean up payment option error messages
+- Update braintree-web to version 3.18.0
+- Update paypal checkout.js to version 4.0.82
+- Allow card overrides with Hosted Fields
 
 1.2.0
 ------
@@ -19,7 +25,6 @@ unreleased
 - Fix width errors where Drop-in was not aligned with other elements on merchant page
 - Add ability to style PayPal button
 - Fail early if PayPal creation errors
-- Allow card overrides with Hosted Fields
 - Upgrade braintree-web to v3.17.0
 - Upgrade checkout.js to 4.0.78
 
