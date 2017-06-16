@@ -3,6 +3,7 @@ CHANGELOG
 
 unreleased
 ----------
+- Use version 3.19.0 of braintree-web
 - Autoprefix CSS, fixing issues in older browsers
 
 1.3.0
