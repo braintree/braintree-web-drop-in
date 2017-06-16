@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Use version 3.19.0 of braintree-web
+
 1.3.0
 ------
 - Add script tag integration for cards only
