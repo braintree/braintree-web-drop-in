@@ -640,7 +640,7 @@ module.exports = {
 var BraintreeError = require('../lib/braintree-error');
 var Client = require('./client');
 var getConfiguration = require('./get-configuration').getConfiguration;
-var VERSION = "3.18.0";
+var VERSION = "3.19.0";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var sharedErrors = require('../lib/errors');
@@ -1037,7 +1037,7 @@ var EventEmitter = require('../../lib/event-emitter');
 var injectFrame = require('./inject-frame');
 var analytics = require('../../lib/analytics');
 var whitelistedFields = constants.whitelistedFields;
-var VERSION = "3.18.0";
+var VERSION = "3.19.0";
 var methods = require('../../lib/methods');
 var convertMethodsToError = require('../../lib/convert-methods-to-error');
 var sharedErrors = require('../../lib/errors');
@@ -1530,6 +1530,7 @@ HostedFields.prototype.teardown = function () {
  * @public
  * @param {object} [options] All tokenization options for the Hosted Fields component.
  * @param {boolean} [options.vault=false] When true, will vault the tokenized card. Cards will only be vaulted when using a client created with a client token that includes a customer ID.
+ * @param {string} [options.cardholderName] When supplied, the cardholder name to be tokenized with the contents of the fields.
  * @param {string} [options.billingAddress.postalCode] When supplied, this postal code will be tokenized along with the contents of the fields. If a postal code is provided as part of the Hosted Fields configuration, the value of the field will be tokenized and this value will be ignored.
  * @param {callback} [callback] The second argument, <code>data</code>, is a {@link HostedFields~tokenizePayload|tokenizePayload}. If no callback is provided, `tokenize` returns a function that resolves with a {@link HostedFields~tokenizePayload|tokenizePayload}.
  * @example <caption>Tokenize a card</caption>
@@ -1581,6 +1582,16 @@ HostedFields.prototype.teardown = function () {
  * @example <caption>Tokenize and vault a card</caption>
  * hostedFieldsInstance.tokenize({
  *   vault: true
+ * }, function (tokenizeErr, payload) {
+ *   if (tokenizeErr) {
+ *     console.error(tokenizeErr);
+ *   } else {
+ *     console.log('Got nonce:', payload.nonce);
+ *   }
+ * });
+ * @example <caption>Tokenize a card with cardholder name</caption>
+ * hostedFieldsInstance.tokenize({
+ *   cardholderName: 'First Last'
  * }, function (tokenizeErr, payload) {
  *   if (tokenizeErr) {
  *     console.error(tokenizeErr);
@@ -1980,7 +1991,7 @@ var HostedFields = require('./external/hosted-fields');
 var supportsInputFormatting = require('restricted-input/supports-input-formatting');
 var wrapPromise = require('@braintree/wrap-promise');
 var Promise = require('../lib/promise');
-var VERSION = "3.18.0";
+var VERSION = "3.19.0";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -2178,7 +2189,7 @@ module.exports = {
 
 var enumerate = require('../../lib/enumerate');
 var errors = require('./errors');
-var VERSION = "3.18.0";
+var VERSION = "3.19.0";
 
 var constants = {
   VERSION: VERSION,
@@ -2825,7 +2836,7 @@ module.exports = {
 },{}],42:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.18.0";
+var VERSION = "3.19.0";
 var PLATFORM = 'web';
 
 module.exports = {
@@ -3336,7 +3347,7 @@ var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var PayPalCheckout = require('./paypal-checkout');
 var sharedErrors = require('../lib/errors');
-var VERSION = "3.18.0";
+var VERSION = "3.19.0";
 
 /**
  * @static
@@ -3524,6 +3535,7 @@ function PayPalCheckout(options) {
  * @param {string} [options.intent=authorize]
  * Checkout flows only.
  * * `authorize` - Submits the transaction for authorization but not settlement.
+ * * `order` - Validates the transaction without an authorization (i.e. without holding funds). Useful for authorizing and capturing funds up to 90 days after the order has been placed.
  * * `sale` - Payment will be immediately submitted for settlement upon creating a transaction.
  * @param {boolean} [options.offerCredit=false] Offers the customer PayPal Credit if they qualify.
  * @param {string|number} [options.amount] The amount of the transaction. Required when using the Checkout flow.
@@ -4852,7 +4864,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.paypalCredit
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-var VERSION = "1.3.0";
+var VERSION = "1.3.1";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -5302,7 +5314,7 @@ var constants = require('./constants');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 
-var VERSION = "1.3.0";
+var VERSION = "1.3.1";
 
 /**
  * @static
@@ -8063,6 +8075,12 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
 
   fieldError = this.fieldErrors[field];
   fieldError.textContent = errorMessage;
+
+  this.hostedFieldsInstance.setAttribute({
+    field: field,
+    attribute: 'aria-invalid',
+    value: true
+  });
 };
 
 CardView.prototype.hideFieldError = function (field) {
@@ -8073,6 +8091,11 @@ CardView.prototype.hideFieldError = function (field) {
   }
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
+
+  this.hostedFieldsInstance.removeAttribute({
+    field: field,
+    attribute: 'aria-invalid'
+  });
 };
 
 CardView.prototype.teardown = function (callback) {
