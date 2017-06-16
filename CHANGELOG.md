@@ -5,10 +5,10 @@ unreleased
 ----------
 - Use version 3.19.0 of braintree-web
 - Autoprefix CSS, fixing issues in older browsers
+- Use npm scoped version of browser-detection
 - `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
 - `dropinInstance.teardown` will return a promise if no callback is provided
 - `dropin.create` will return a promise if no callback is provided
-- Use npm scoped version of browser-detection
 
 1.3.0
 ------
