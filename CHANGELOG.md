@@ -5,7 +5,6 @@ unreleased
 ----------
 - Use version 3.19.0 of braintree-web
 - Autoprefix CSS, fixing issues in older browsers
-- Use npm scoped version of browser-detection
 - Add aria-invalid attribute for cards
 
 1.3.0
@@ -17,6 +16,7 @@ unreleased
 - Update braintree-web to version 3.18.0
 - Update paypal checkout.js to version 4.0.82
 - Allow card overrides with Hosted Fields
+- Use npm scoped version of browser-detection
 
 1.2.0
 ------
