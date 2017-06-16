@@ -6,6 +6,7 @@ unreleased
 - Use version 3.19.0 of braintree-web
 - Autoprefix CSS, fixing issues in older browsers
 - Use npm scoped version of browser-detection
+- Add aria-invalid attribute for cards
 
 1.3.0
 ------
