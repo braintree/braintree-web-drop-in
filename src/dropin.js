@@ -329,7 +329,9 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 };
 
 /**
- * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account. If a payment method is not available, an error will appear in the UI and and error will be returned in the callback.
+ * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account.
+ *
+ * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
  * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
@@ -399,25 +401,29 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
-  var error;
+  var mainviewTeardownError;
+  var promise = Promise.resolve();
+  var self = this;
 
   this._removeStylesheet();
 
   if (this._mainView) {
-    return this._mainView.teardown().catch(function (err) {
-      error = err;
-    }).then(function () {
-      return this._removeDropinWrapper();
-    }.bind(this)).then(function () {
-      if (error) {
-        return Promise.reject(error);
-      }
-
-      return Promise.resolve();
+    promise.then(function () {
+      return self._mainView.teardown().catch(function (err) {
+        mainviewTeardownError = err;
+      });
     });
   }
 
-  return this._removeDropinWrapper();
+  return promise.then(function () {
+    return self._removeDropinWrapper();
+  }).then(function () {
+    if (mainviewTeardownError) {
+      return Promise.reject(mainviewTeardownError);
+    }
+
+    return Promise.resolve();
+  });
 };
 
 /**

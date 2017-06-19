@@ -699,7 +699,8 @@ describe('CardView', function () {
           }
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.stub()
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -726,7 +727,8 @@ describe('CardView', function () {
             if (event === 'blur') {
               callback(fakeEvent);
             }
-          }
+          },
+          setAttribute: this.sandbox.stub()
         };
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
@@ -765,7 +767,8 @@ describe('CardView', function () {
         };
         var modelOptions = fake.modelOptions();
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.stub()
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
@@ -1214,7 +1217,8 @@ describe('CardView', function () {
           }
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          removeAttribute: this.sandbox.stub()
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -1244,7 +1248,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -1271,7 +1276,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -1298,7 +1304,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.context.client.getConfiguration = function () {
@@ -1336,7 +1343,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.context.client.getConfiguration = function () {
@@ -1374,7 +1382,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.context.client.getConfiguration = function () {
@@ -1493,7 +1502,8 @@ describe('CardView', function () {
           }
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          removeAttribute: this.sandbox.stub()
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -1522,6 +1532,8 @@ describe('CardView', function () {
             }
           }
         }),
+        removeAttribute: this.sandbox.stub(),
+        setAttribute: this.sandbox.stub(),
         tokenize: this.sandbox.stub().resolves({})
       };
       this.model = new DropinModel(fake.modelOptions());
@@ -1684,6 +1696,55 @@ describe('CardView', function () {
         expect(numberFieldError.textContent).to.equal('This card number is not valid.');
         expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
       }.bind(this));
+    });
+
+    it('calls hostedFieldsInstance.tokenize when form is valid', function () {
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
+      }.bind(this));
+    });
+
+    it('sets the aria-invalid attribute when a field error is shown', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      CardView.prototype.showFieldError.call(this.context, 'number');
+
+      expect(this.context.hostedFieldsInstance.setAttribute).to.be.calledWith({
+        field: 'number',
+        attribute: 'aria-invalid',
+        value: true
+      });
+    });
+
+    it('removes the aria-invalid attribute when a field error is hidden', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      CardView.prototype.hideFieldError.call(this.context, 'number');
+
+      expect(this.context.hostedFieldsInstance.removeAttribute).to.be.calledWith({
+        field: 'number',
+        attribute: 'aria-invalid'
+      });
     });
 
     it('calls hostedFieldsInstance.tokenize when form is valid', function () {

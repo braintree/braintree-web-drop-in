@@ -291,6 +291,12 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
 
   fieldError = this.fieldErrors[field];
   fieldError.textContent = errorMessage;
+
+  this.hostedFieldsInstance.setAttribute({
+    field: field,
+    attribute: 'aria-invalid',
+    value: true
+  });
 };
 
 CardView.prototype.hideFieldError = function (field) {
@@ -301,6 +307,11 @@ CardView.prototype.hideFieldError = function (field) {
   }
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
+
+  this.hostedFieldsInstance.removeAttribute({
+    field: field,
+    attribute: 'aria-invalid'
+  });
 };
 
 CardView.prototype.teardown = function () {

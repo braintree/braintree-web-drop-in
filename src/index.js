@@ -95,7 +95,7 @@ var VERSION = process.env.npm_package_version;
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
  * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example
- * <caption>A full example of accepting credit cards</caption>
+ * <caption>A full example of accepting credit cards with callback API</caption>
  * <!DOCTYPE html>
  * <html lang="en">
  *   <head>
@@ -133,7 +133,41 @@ var VERSION = process.env.npm_package_version;
  *     </script>
  *   </body>
  * </html>
+ * @example
+ * <caption>A full example of accepting credit cards with promise API</caption>
+ * <!DOCTYPE html>
+ * <html lang="en">
+ *   <head>
+ *     <meta charset="UTF-8">
+ *     <title>Checkout</title>
+ *   </head>
+ *   <body>
+ *     <div id="dropin-container"></div>
+ *     <button id="submit-button">Purchase</button>
  *
+ *     <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"></script>
+ *
+ *     <script>
+ *       var submitButton = document.querySelector('#submit-button');
+ *
+ *       braintree.dropin.create({
+ *         authorization: 'CLIENT_AUTHORIZATION',
+ *         container: '#dropin-container'
+ *       }).then(function (dropinInstance) {
+ *         submitButton.addEventListener('click', function () {
+ *           dropinInstance.requestPaymentMethod().then(function (payload) {
+ *             // Send payload.nonce to your server
+ *           }).catch(function (err) {
+ *             // Handle errors in requesting payment method
+ *           });
+ *         });
+ *       }).catch(function (err) {
+ *         // Handle any errors that might've occurred when creating Drop-in
+ *         console.error(err);
+ *       });
+ *     </script>
+ *   </body>
+ * </html>
  * @example
  * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit</caption>
  * braintree.dropin.create({
