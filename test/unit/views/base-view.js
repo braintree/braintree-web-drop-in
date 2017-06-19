@@ -2,6 +2,7 @@
 
 var BaseView = require('../../../src/views/base-view');
 var constants = require('../../../src/constants');
+var Promise = require('../../../src/lib/promise');
 
 describe('BaseView', function () {
   describe('Constructor', function () {
@@ -20,22 +21,23 @@ describe('BaseView', function () {
   });
 
   describe('teardown', function () {
-    it('calls callback immediately', function (done) {
+    it('returns a resolved promise', function () {
       var view = new BaseView();
+      var promise = view.teardown();
 
-      view.teardown(done);
+      expect(promise).to.be.a.instanceof(Promise);
     });
   });
 
   describe('requestPaymentMethod', function () {
-    it('calls callback with an error', function (done) {
+    it('returns a rejected promise', function () {
       var view = new BaseView();
 
-      view.requestPaymentMethod(function (err, payload) {
+      return view.requestPaymentMethod().then(function () {
+        throw new Error('should not resolve');
+      }).catch(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal(constants.errors.NO_PAYMENT_METHOD_ERROR);
-        expect(payload).to.not.exist;
-        done();
       });
     });
   });

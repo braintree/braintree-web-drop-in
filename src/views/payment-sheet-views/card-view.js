@@ -8,6 +8,7 @@ var constants = require('../../constants');
 var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
 var transitionHelper = require('../../lib/transition-helper');
+var Promise = require('../../lib/promise');
 
 var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
@@ -223,44 +224,40 @@ CardView.prototype.getPaymentMethod = function () { // eslint-disable-line consi
   }
 };
 
-CardView.prototype.tokenize = function (callback) {
+CardView.prototype.tokenize = function () {
   var transitionCallback;
   var self = this;
   var state = self.hostedFieldsInstance.getState();
 
   this.model.clearError();
 
-  if (this._validateForm(true)) {
-    self._isTokenizing = true;
+  if (!this._validateForm(true)) {
+    self.model.reportError('hostedFieldsFieldsInvalidError');
+    classlist.remove(self.element, 'braintree-sheet--loading');
 
-    self.hostedFieldsInstance.tokenize({
-      vault: !self.model.isGuestCheckout
-    }, function (err, payload) {
-      if (err) {
-        self._isTokenizing = false;
-        self.model.reportError(err);
-        callback(new DropinError({
-          message: constants.errors.NO_PAYMENT_METHOD_ERROR,
-          braintreeWebError: err
-        }));
-        classlist.remove(self.element, 'braintree-sheet--loading');
-        return;
-      }
+    return Promise.reject(new DropinError(constants.errors.NO_PAYMENT_METHOD_ERROR));
+  }
 
-      Object.keys(state.fields).forEach(function (field) {
-        self.hostedFieldsInstance.clear(field);
-      });
+  self._isTokenizing = true;
 
-      if (!self.model.isGuestCheckout) {
-        payload.vaulted = true;
-      }
+  return self.hostedFieldsInstance.tokenize({
+    vault: !self.model.isGuestCheckout
+  }).then(function (payload) {
+    Object.keys(state.fields).forEach(function (field) {
+      self.hostedFieldsInstance.clear(field);
+    });
 
+    if (!self.model.isGuestCheckout) {
+      payload.vaulted = true;
+    }
+
+    return new Promise(function (resolve) {
       transitionCallback = function () {
         // Wait for braintree-sheet--tokenized class to be added in IE 9
         // before attempting to remove it
         setTimeout(function () {
           self.model.addPaymentMethod(payload);
-          callback(null, payload);
+          resolve(payload);
           classlist.remove(self.element, 'braintree-sheet--tokenized');
         }, 0);
         self._isTokenizing = false;
@@ -271,11 +268,15 @@ CardView.prototype.tokenize = function (callback) {
       classlist.remove(self.element, 'braintree-sheet--loading');
       classlist.add(self.element, 'braintree-sheet--tokenized');
     });
-  } else {
-    self.model.reportError('hostedFieldsFieldsInvalidError');
-    callback(new DropinError(constants.errors.NO_PAYMENT_METHOD_ERROR));
+  }).catch(function (err) {
+    self._isTokenizing = false;
+    self.model.reportError(err);
     classlist.remove(self.element, 'braintree-sheet--loading');
-  }
+    return Promise.reject(new DropinError({
+      message: constants.errors.NO_PAYMENT_METHOD_ERROR,
+      braintreeWebError: err
+    }));
+  });
 };
 
 CardView.prototype.showFieldError = function (field, errorMessage) {
@@ -313,8 +314,8 @@ CardView.prototype.hideFieldError = function (field) {
   });
 };
 
-CardView.prototype.teardown = function (callback) {
-  this.hostedFieldsInstance.teardown(callback);
+CardView.prototype.teardown = function () {
+  return this.hostedFieldsInstance.teardown();
 };
 
 CardView.prototype._generateFieldSelector = function (field) {
@@ -410,9 +411,9 @@ CardView.prototype._onValidityChangeEvent = function (event) {
   }
 };
 
-CardView.prototype.requestPaymentMethod = function (callback) {
+CardView.prototype.requestPaymentMethod = function () {
   classlist.add(this.element, 'braintree-sheet--loading');
-  this.tokenize(callback);
+  return this.tokenize();
 };
 
 CardView.prototype.onSelection = function () {

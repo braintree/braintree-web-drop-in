@@ -333,7 +333,7 @@ describe('PaymentMethodsView', function () {
   });
 
   describe('requestPaymentMethod', function () {
-    it('calls the callback with the active payment method from the active method view', function (done) {
+    it('resolves a promise with the active payment method from the active method view', function () {
       var paymentMethodsViews;
       var fakeActiveMethodView = {
         paymentMethod: {foo: 'bar'}
@@ -353,10 +353,8 @@ describe('PaymentMethodsView', function () {
 
       paymentMethodsViews.activeMethodView = fakeActiveMethodView;
 
-      paymentMethodsViews.requestPaymentMethod(function (err, payload) {
-        expect(err).to.not.exist;
+      return paymentMethodsViews.requestPaymentMethod().then(function (payload) {
         expect(payload).to.equal(fakeActiveMethodView.paymentMethod);
-        done();
       });
     });
   });

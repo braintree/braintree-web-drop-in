@@ -35,11 +35,7 @@ function createFromScriptTag(createFunction, scriptTag) {
   createFunction({
     authorization: authorization,
     container: container
-  }, function (createError, instance) {
-    if (createError) {
-      throw createError;
-    }
-
+  }).then(function (instance) {
     form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
         var paymentMethodNonce;

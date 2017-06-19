@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
+- `dropinInstance.teardown` will return a promise if no callback is provided
+- `dropin.create` will return a promise if no callback is provided
+
 1.3.1
 -----
 - Use version 3.19.0 of braintree-web
@@ -11,7 +17,6 @@ CHANGELOG
 ------
 - Add script tag integration for cards only
 - Add support for custom translations
-- Use npm scoped version of browser-detection
 - Clean up payment option error messages
 - Update braintree-web to version 3.18.0
 - Update paypal checkout.js to version 4.0.82

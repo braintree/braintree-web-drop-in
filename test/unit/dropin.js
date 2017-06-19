@@ -671,7 +671,7 @@ describe('Dropin', function () {
       this.instance = new Dropin(this.dropinOptions);
       this.container.appendChild(this.instance._dropinWrapper);
       this.instance._mainView = {
-        teardown: this.sandbox.stub().yields()
+        teardown: this.sandbox.stub().resolves()
       };
     });
 
@@ -692,7 +692,7 @@ describe('Dropin', function () {
     it('passes errors in mainView teardown to callback', function (done) {
       var error = new Error('Teardown Error');
 
-      this.instance._mainView.teardown.yields(error);
+      this.instance._mainView.teardown.rejects(error);
 
       this.instance.teardown(function (err) {
         expect(err).to.equal(error);

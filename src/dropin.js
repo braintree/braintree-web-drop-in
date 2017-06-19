@@ -14,6 +14,8 @@ var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
+var Promise = require('./lib/promise');
+var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
@@ -191,7 +193,7 @@ Dropin.prototype._initialize = function (callback) {
         paymentMethods: paymentMethods
       });
     } catch (modelError) {
-      dropinInstance.teardown(function () {
+      dropinInstance.teardown().then(function () {
         callback(modelError);
       });
       return;
@@ -327,13 +329,15 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 };
 
 /**
- * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account. If a payment method is not available, an error will appear in the UI and and error will be returned in the callback.
+ * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account.
+ *
+ * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
- * @param {callback} callback The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}.
- * @returns {void}
+ * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
+ * @returns {void|Promise} Returns a promise if no callback is provided.
  */
-Dropin.prototype.requestPaymentMethod = function (callback) {
-  this._mainView.requestPaymentMethod(callback);
+Dropin.prototype.requestPaymentMethod = function () {
+  return this._mainView.requestPaymentMethod();
 };
 
 Dropin.prototype._removeStylesheet = function () {
@@ -393,19 +397,33 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
 /**
  * Cleanly remove anything set up by {@link module:braintree-web-drop-in|dropin.create}. This may be be useful in a single-page app.
  * @public
- * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully.
- * @returns {void}
+ * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully. If no callback is provided, `teardown` will return a promise.
+ * @returns {void|Promise} Returns a promise if no callback is provided.
  */
-Dropin.prototype.teardown = function (callback) {
+Dropin.prototype.teardown = function () {
+  var mainviewTeardownError;
+  var promise = Promise.resolve();
+  var self = this;
+
   this._removeStylesheet();
 
   if (this._mainView) {
-    this._mainView.teardown(function (err) {
-      this._removeDropinWrapper(err, callback);
-    }.bind(this));
-  } else {
-    this._removeDropinWrapper(null, callback);
+    promise.then(function () {
+      return self._mainView.teardown().catch(function (err) {
+        mainviewTeardownError = err;
+      });
+    });
   }
+
+  return promise.then(function () {
+    return self._removeDropinWrapper();
+  }).then(function () {
+    if (mainviewTeardownError) {
+      return Promise.reject(mainviewTeardownError);
+    }
+
+    return Promise.resolve();
+  });
 };
 
 /**
@@ -417,9 +435,10 @@ Dropin.prototype.isPaymentMethodRequestable = function () {
   return this._model.isPaymentMethodRequestable();
 };
 
-Dropin.prototype._removeDropinWrapper = function (err, callback) {
+Dropin.prototype._removeDropinWrapper = function () {
   this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
-  callback(err);
+
+  return Promise.resolve();
 };
 
 function formatPaymentMethodPayload(paymentMethod) {
@@ -437,4 +456,4 @@ function formatPaymentMethodPayload(paymentMethod) {
   return formattedPaymentMethod;
 }
 
-module.exports = Dropin;
+module.exports = wrapPrototype(Dropin);

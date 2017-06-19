@@ -30,10 +30,11 @@
 var Dropin = require('./dropin');
 var client = require('braintree-web/client');
 var createFromScriptTag = require('./lib/create-from-script-tag');
-var deferred = require('./lib/deferred');
 var constants = require('./constants');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
+var Promise = require('./lib/promise');
+var wrapPromise = require('@braintree/wrap-promise');
 
 var VERSION = process.env.npm_package_version;
 
@@ -91,10 +92,10 @@ var VERSION = process.env.npm_package_version;
  * @param {string|number} [options.paypalCredit.amount] The amount of the transaction. Required when using the Checkout flow.
  * @param {string} [options.paypalCredit.currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {string} [options.paypalCredit.buttonStyle] The style object to apply to the PayPal Credit button. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/) are available. The `label` property cannot be adjusted.
- * @param {function} callback The second argument, `data`, is the {@link Dropin} instance.
- * @returns {void}
+ * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
+ * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example
- * <caption>A full example of accepting credit cards</caption>
+ * <caption>A full example of accepting credit cards with callback API</caption>
  * <!DOCTYPE html>
  * <html lang="en">
  *   <head>
@@ -132,7 +133,41 @@ var VERSION = process.env.npm_package_version;
  *     </script>
  *   </body>
  * </html>
+ * @example
+ * <caption>A full example of accepting credit cards with promise API</caption>
+ * <!DOCTYPE html>
+ * <html lang="en">
+ *   <head>
+ *     <meta charset="UTF-8">
+ *     <title>Checkout</title>
+ *   </head>
+ *   <body>
+ *     <div id="dropin-container"></div>
+ *     <button id="submit-button">Purchase</button>
  *
+ *     <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"></script>
+ *
+ *     <script>
+ *       var submitButton = document.querySelector('#submit-button');
+ *
+ *       braintree.dropin.create({
+ *         authorization: 'CLIENT_AUTHORIZATION',
+ *         container: '#dropin-container'
+ *       }).then(function (dropinInstance) {
+ *         submitButton.addEventListener('click', function () {
+ *           dropinInstance.requestPaymentMethod().then(function (payload) {
+ *             // Send payload.nonce to your server
+ *           }).catch(function (err) {
+ *             // Handle errors in requesting payment method
+ *           });
+ *         });
+ *       }).catch(function (err) {
+ *         // Handle any errors that might've occurred when creating Drop-in
+ *         console.error(err);
+ *       });
+ *     </script>
+ *   </body>
+ * </html>
  * @example
  * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit</caption>
  * braintree.dropin.create({
@@ -243,29 +278,19 @@ var VERSION = process.env.npm_package_version;
  * }, callback);
  */
 
-function create(options, callback) {
-  if (typeof callback !== 'function') {
-    throw new DropinError('create must include a callback function.');
-  }
-
-  callback = deferred(callback);
-
+function create(options) {
   if (!options.authorization) {
-    callback(new DropinError('options.authorization is required.'));
-    return;
+    return Promise.reject(new DropinError('options.authorization is required.'));
   }
 
-  client.create({
+  return client.create({
     authorization: options.authorization
-  }, function (err, clientInstance) {
-    if (err) {
-      callback(new DropinError({
-        message: 'There was an error creating Drop-in.',
-        braintreeWebError: err
-      }));
-      return;
-    }
-
+  }).catch(function (err) {
+    return Promise.reject(new DropinError({
+      message: 'There was an error creating Drop-in.',
+      braintreeWebError: err
+    }));
+  }).then(function (clientInstance) {
     clientInstance = setAnalyticsIntegration(clientInstance);
 
     if (clientInstance.getConfiguration().authorizationType === 'TOKENIZATION_KEY') {
@@ -274,10 +299,19 @@ function create(options, callback) {
       analytics.sendEvent(clientInstance, 'started.client-token');
     }
 
-    new Dropin({
-      merchantConfiguration: options,
-      client: clientInstance
-    })._initialize(callback);
+    return new Promise(function (resolve, reject) {
+      new Dropin({
+        merchantConfiguration: options,
+        client: clientInstance
+      })._initialize(function (err, instance) {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(instance);
+      });
+    });
   });
 }
 
@@ -299,7 +333,7 @@ function setAnalyticsIntegration(clientInstance) {
 createFromScriptTag(create, typeof document !== 'undefined' && document.querySelector('script[data-braintree-dropin-authorization]'));
 
 module.exports = {
-  create: create,
+  create: wrapPromise(create),
   /**
    * @description The current version of Drop-in, i.e. `{@pkg version}`.
    * @type {string}
