@@ -25,15 +25,12 @@ CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 CardView.prototype._initialize = function () {
   var cvvFieldGroup, postalCodeFieldGroup;
   var cardIcons = this.getElementById('card-view-icons');
-  var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
-  var hasCVV = challenges.indexOf('cvv') !== -1;
-  var hasPostal = challenges.indexOf('postal_code') !== -1;
   var hfOptions = this._generateHostedFieldsOptions();
 
   cardIcons.innerHTML = cardIconHTML;
   this._hideUnsupportedCardIcons();
 
-  this.hasCVV = hasCVV;
+  this.hasCVV = hfOptions.fields.cvv;
   this.cardNumberIcon = this.getElementById('card-number-icon');
   this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
   this.cvvIcon = this.getElementById('cvv-icon');
@@ -41,17 +38,14 @@ CardView.prototype._initialize = function () {
   this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
   this.fieldErrors = {};
 
-  if (!hasCVV || !hfOptions.fields.cvv) {
+  if (!hfOptions.fields.cvv) {
     cvvFieldGroup = this.getElementById('cvv-field-group');
-
     cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
-    delete hfOptions.fields.cvv;
   }
-  if (!hasPostal || !hfOptions.fields.postalCode) {
-    postalCodeFieldGroup = this.getElementById('postal-code-field-group');
 
+  if (!hfOptions.fields.postalCode) {
+    postalCodeFieldGroup = this.getElementById('postal-code-field-group');
     postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
-    delete hfOptions.fields.postalCode;
   }
 
   this.model.asyncDependencyStarting();
@@ -77,6 +71,9 @@ CardView.prototype._initialize = function () {
 };
 
 CardView.prototype._generateHostedFieldsOptions = function () {
+  var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
+  var hasCVVChallenge = challenges.indexOf('cvv') !== -1;
+  var hasPostalCodeChallenge = challenges.indexOf('postal_code') !== -1;
   var overrides = this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.overrides;
   var options = {
     client: this.client,
@@ -124,40 +121,46 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     }
   };
 
-  if (!overrides) {
-    return options;
-  }
+  if (overrides) {
+    if (overrides.fields) {
+      if (overrides.fields.cvv && overrides.fields.cvv.placeholder) {
+        this._hasCustomCVVPlaceholder = true;
+      }
 
-  if (overrides.fields) {
-    if (overrides.fields.cvv && overrides.fields.cvv.placeholder) {
-      this._hasCustomCVVPlaceholder = true;
+      Object.keys(overrides.fields).forEach(function (field) {
+        if ((field === 'cvv' || field === 'postalCode') && overrides.fields[field] === null) {
+          delete options.fields[field];
+          return;
+        }
+
+        if (!options.fields[field]) {
+          return;
+        }
+
+        assign(options.fields[field], overrides.fields[field], {
+          selector: options.fields[field].selector
+        });
+      });
     }
 
-    Object.keys(overrides.fields).forEach(function (field) {
-      if ((field === 'cvv' || field === 'postalCode') && overrides.fields[field] === null) {
-        delete options.fields[field];
-        return;
-      }
+    if (overrides.styles) {
+      Object.keys(overrides.styles).forEach(function (style) {
+        if (overrides.styles[style] === null) {
+          delete options.styles[style];
+          return;
+        }
 
-      if (!options.fields[field]) {
-        return;
-      }
-
-      assign(options.fields[field], overrides.fields[field], {
-        selector: options.fields[field].selector
+        assign(options.styles[style], overrides.styles[style]);
       });
-    });
+    }
   }
 
-  if (overrides.styles) {
-    Object.keys(overrides.styles).forEach(function (style) {
-      if (overrides.styles[style] === null) {
-        delete options.styles[style];
-        return;
-      }
+  if (!hasCVVChallenge) {
+    delete options.fields.cvv;
+  }
 
-      assign(options.styles[style], overrides.styles[style]);
-    });
+  if (!hasPostalCodeChallenge) {
+    delete options.fields.postalCode;
   }
 
   return options;
