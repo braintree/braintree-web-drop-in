@@ -401,25 +401,29 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
-  var error;
+  var mainviewTeardownError;
+  var promise = Promise.resolve();
+  var self = this;
 
   this._removeStylesheet();
 
   if (this._mainView) {
-    return this._mainView.teardown().catch(function (err) {
-      error = err;
-    }).then(function () {
-      return this._removeDropinWrapper();
-    }.bind(this)).then(function () {
-      if (error) {
-        return Promise.reject(error);
-      }
-
-      return Promise.resolve();
+    promise.then(function () {
+      return self._mainView.teardown().catch(function (err) {
+        mainviewTeardownError = err;
+      });
     });
   }
 
-  return this._removeDropinWrapper();
+  return promise.then(function () {
+    return self._removeDropinWrapper();
+  }).then(function () {
+    if (mainviewTeardownError) {
+      return Promise.reject(mainviewTeardownError);
+    }
+
+    return Promise.resolve();
+  });
 };
 
 /**
