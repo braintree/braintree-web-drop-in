@@ -1534,7 +1534,7 @@ describe('CardView', function () {
         }),
         removeAttribute: this.sandbox.stub(),
         setAttribute: this.sandbox.stub(),
-        tokenize: this.sandbox.stub()
+        tokenize: this.sandbox.stub().resolves({})
       };
       this.model = new DropinModel(fake.modelOptions());
 
