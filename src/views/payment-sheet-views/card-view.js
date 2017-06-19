@@ -38,7 +38,7 @@ CardView.prototype._initialize = function () {
   this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
   this.fieldErrors = {};
 
-  if (!hfOptions.fields.cvv) {
+  if (!this.hasCVV) {
     cvvFieldGroup = this.getElementById('cvv-field-group');
     cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
   }
