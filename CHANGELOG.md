@@ -1,14 +1,17 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
+- `dropinInstance.teardown` will return a promise if no callback is provided
+- `dropin.create` will return a promise if no callback is provided
+
 1.3.1
 -----
 - Use version 3.19.0 of braintree-web
 - Autoprefix CSS, fixing issues in older browsers
 - Add aria-invalid attribute for cards
-- `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
-- `dropinInstance.teardown` will return a promise if no callback is provided
-- `dropin.create` will return a promise if no callback is provided
 
 1.3.0
 ------
