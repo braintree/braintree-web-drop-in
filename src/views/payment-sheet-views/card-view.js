@@ -121,46 +121,46 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     }
   };
 
-  if (overrides) {
-    if (overrides.fields) {
-      if (overrides.fields.cvv && overrides.fields.cvv.placeholder) {
-        this._hasCustomCVVPlaceholder = true;
-      }
-
-      Object.keys(overrides.fields).forEach(function (field) {
-        if ((field === 'cvv' || field === 'postalCode') && overrides.fields[field] === null) {
-          delete options.fields[field];
-          return;
-        }
-
-        if (!options.fields[field]) {
-          return;
-        }
-
-        assign(options.fields[field], overrides.fields[field], {
-          selector: options.fields[field].selector
-        });
-      });
-    }
-
-    if (overrides.styles) {
-      Object.keys(overrides.styles).forEach(function (style) {
-        if (overrides.styles[style] === null) {
-          delete options.styles[style];
-          return;
-        }
-
-        assign(options.styles[style], overrides.styles[style]);
-      });
-    }
-  }
-
   if (!hasCVVChallenge) {
     delete options.fields.cvv;
   }
 
   if (!hasPostalCodeChallenge) {
     delete options.fields.postalCode;
+  }
+
+  if (!overrides) { return options; }
+
+  if (overrides.fields) {
+    if (overrides.fields.cvv && overrides.fields.cvv.placeholder) {
+      this._hasCustomCVVPlaceholder = true;
+    }
+
+    Object.keys(overrides.fields).forEach(function (field) {
+      if ((field === 'cvv' || field === 'postalCode') && overrides.fields[field] === null) {
+        delete options.fields[field];
+        return;
+      }
+
+      if (!options.fields[field]) {
+        return;
+      }
+
+      assign(options.fields[field], overrides.fields[field], {
+        selector: options.fields[field].selector
+      });
+    });
+  }
+
+  if (overrides.styles) {
+    Object.keys(overrides.styles).forEach(function (style) {
+      if (overrides.styles[style] === null) {
+        delete options.styles[style];
+        return;
+      }
+
+      assign(options.styles[style], overrides.styles[style]);
+    });
   }
 
   return options;
