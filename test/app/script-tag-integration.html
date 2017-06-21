@@ -40,7 +40,18 @@
 
 <form id="checkout-form" action="script-tag-result.html">
   <script src="web/dropin/dev/js/dropin.js"
-    data-braintree-dropin-authorization="sandbox_f252zhq7_hh4cpc39zq4rgjcg"
+   data-braintree-dropin-authorization="sandbox_f252zhq7_hh4cpc39zq4rgjcg"
+   data-payment-option-priority='["paypal","card", "paypalCredit"]'
+   data-card.overrides.fields.cvv="null"
+   data-paypal.flow="checkout"
+   data-paypal.amount="10.00"
+   data-paypal.currency="USD"
+   data-paypal.shipping-address-override.line1="123 Townsend St"
+   data-paypal.shipping-address-override.city="San Francisco"
+   data-paypal.shipping-address-override.state="CA"
+   data-paypal.shipping-address-override.postal-code="94107"
+   data-paypal.shipping-address-override.country-code="US"
+   data-paypal-credit.flow="vault"
   ></script>
   <input id="pay-button" type="submit" value="Pay">
 </form>
