@@ -1,15 +1,20 @@
 'use strict';
 /**
  * @module braintree-web-drop-in
- * @description The primary way to integrate Drop-in into your page is to use [`dropin.create`](#.create).
+ * @description There are two ways to integrate Drop-in into your page: a script tag integration and a JavaScript integration using [`dropin.create`](#.create).
  *
- * Alternatively, if you only need to process credit cards on your checkout page, the script tag integration is the simplest way to integrate. All you need to do is add the Drop-in script inside your form element where you want Drop-in to appear and include a `data-braintree-dropin-authorization` property with your [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or [client token](https://developers.braintreepayments.com/guides/authorization/client-token).
+ * The script tag integration is the fastest way to integrate. All you need to do is add the Drop-in script inside your form element where you want Drop-in to appear and include a `data-braintree-dropin-authorization` property with your [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or [client token](https://developers.braintreepayments.com/guides/authorization/client-token).
  *
- * The script tag integration will intercept the form submission and attempt to tokenize the credit card. If the tokenization is successful, it will insert the payment method nonce representing the credit card into a hidden input with the name `payment_method_nonce` and then submit your form.
+ * When your form is submitted, Drop-in will intercept the form submission and attempt to tokenize the payment method. If the tokenization is successful, it will insert the payment method nonce into a hidden input with the name `payment_method_nonce` and then submit your form. If the tokenization is unsuccessful, a relevant error will be shown in the UI.
  *
- * If you want more control over the process or accept additional payment methods (such as PayPal or PayPal Credit), you can use [`dropin.create` instead](#.create).
+ * Specify creation options as data attributes in your script tag, as shown in the examples below. See [`dropin.create`](#.create) for a full list of creation options.
+ *
+ * For more control and customization, use [`dropin.create` instead](#.create).
+ *
+ * See our [demo app](https://braintree.github.io/braintree-web-drop-in/script-tag-integration.html) for an example of using our script tag integration.
+ *
  * @example
- * <caption>Script tag integration (credit cards only)</caption>
+ * <caption>A full example accepting only cards</caption>
  * <!DOCTYPE html>
  * <html lang="en">
  *   <head>
@@ -25,6 +30,50 @@
  *     </form>
  *   </body>
  * </html>
+ *
+ * @example
+ * <caption>A full example accepting cards, PayPal, and PayPal credit</caption>
+ * <!DOCTYPE html>
+ * <html lang="en">
+ *   <head>
+ *     <meta charset="UTF-8">
+ *     <title>Checkout</title>
+ *   </head>
+ *   <body>
+ *     <form id="payment-form" action="/" method="post">
+ *       <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *        data-paypal.flow="checkout"
+ *        data-paypal.amount="10.00"
+ *        data-paypal.currency="USD"
+ *        data-paypal-credit.flow="vault"
+ *       ></script>
+ *       <input type="submit" value="Purchase"></input>
+ *     </form>
+ *   </body>
+ * </html>
+ *
+ * @example
+ * <caption>Specifying a locale and payment option priority</caption>
+ * <form id="payment-form" action="/" method="post">
+ *   <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *    data-locale="de_DE"
+ *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
+ *   ></script>
+ *   <input type="submit" value="Purchase"></input>
+ * </form>
+ *
+ * @example
+ * <caption>Using card overrides to update styles</caption>
+ * <form id="payment-form" action="/" method="post">
+ *   <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *    data-card.overrides.styles.input.font-size="18px"
+ *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
+ *   ></script>
+ *   <input type="submit" value="Purchase"></input>
+ * </form>
  */
 
 var Dropin = require('./dropin');
