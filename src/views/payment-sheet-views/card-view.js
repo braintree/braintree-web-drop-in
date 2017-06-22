@@ -156,6 +156,8 @@ CardView.prototype._generateHostedFieldsOptions = function () {
         return;
       }
 
+      normalizeStyles(overrides.styles[style]);
+
       assign(options.styles[style], overrides.styles[style]);
     });
   }
@@ -449,6 +451,14 @@ function camelCaseToSnakeCase(string) {
 
 function capitalize(string) {
   return string[0].toUpperCase() + string.substr(1);
+}
+
+function normalizeStyles(styles) {
+  Object.keys(styles).forEach(function (style) {
+    var newKey = camelCaseToSnakeCase(style);
+
+    styles[newKey] = styles[style];
+  });
 }
 
 module.exports = CardView;
