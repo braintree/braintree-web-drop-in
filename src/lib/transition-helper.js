@@ -2,8 +2,20 @@
 
 var browserDetection = require('./browser-detection');
 
+function isHidden(element) {
+  if (!element) { // no parentNode, so nothing containing the element is hidden
+    return false;
+  }
+
+  if (element.style.display === 'none') {
+    return true;
+  }
+
+  return isHidden(element.parentNode);
+}
+
 function onTransitionEnd(element, propertyName, callback) {
-  if (browserDetection.isIe9()) {
+  if (browserDetection.isIe9() || isHidden(element)) {
     callback();
     return;
   }
