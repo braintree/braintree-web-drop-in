@@ -1028,6 +1028,22 @@ describe('Dropin', function () {
     });
   });
 
+  describe('payemnt option selected event', function () {
+    it('emits paymentOptionSelected when the model emits paymentOptionSelected', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance.on('paymentOptionSelected', function (event) {
+        expect(event.paymentOption).to.equal('Foo');
+
+        done();
+      });
+
+      instance._initialize(function () {
+        instance._model._emit('paymentOptionSelected', {paymentOption: 'Foo'});
+      });
+    });
+  });
+
   describe('_loadPayPalScript', function () {
     function noop() {}
 

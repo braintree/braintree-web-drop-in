@@ -32,6 +32,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   var html = paymentMethodOptionHTML;
   var clickHandler = function clickHandler() {
     this.mainView.setPrimaryView(paymentOptionID);
+    this.model.selectPaymentOption(paymentOptionID);
     analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
   }.bind(this);
 

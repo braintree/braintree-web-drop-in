@@ -106,6 +106,18 @@ var VERSION = process.env.npm_package_version;
  */
 
 /**
+ * This event is emitted when a payment option is selected by the customer.
+ * @event Dropin#paymentOptionSelected
+ * @type {Dropin~paymentOptionSelectedPayload}
+ */
+
+/**
+ * @typedef {object} Dropin~paymentOptionSelectedPayload
+ * @description The event payload sent from {@link Dropin#on|`on`} with the {@link Dropin#event:paymentOptionSelected|`paymentOptionSelected`} event.
+ * @property {string} paymentOption The payment option view selected. Either `card`, `paypal`, or `paypalCredit`.
+ */
+
+/**
  * @class
  * @param {object} options For create options, see {@link module:braintree-web-drop-in|dropin.create}.
  * @description <strong>Do not use this constructor directly. Use {@link module:braintree-web-drop-in|dropin.create} instead.</strong>
@@ -217,6 +229,10 @@ Dropin.prototype._initialize = function (callback) {
 
     this._model.on('noPaymentMethodRequestable', function () {
       this._emit('noPaymentMethodRequestable');
+    }.bind(this));
+
+    this._model.on('paymentOptionSelected', function (event) {
+      this._emit('paymentOptionSelected', event);
     }.bind(this));
 
     function createMainView() {

@@ -6,6 +6,7 @@ unreleased
 - `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
 - `dropinInstance.teardown` will return a promise if no callback is provided
 - `dropin.create` will return a promise if no callback is provided
+- Add `paymentOptionChosen` event
 
 1.3.1
 -----
