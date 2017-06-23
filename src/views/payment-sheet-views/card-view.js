@@ -283,10 +283,10 @@ CardView.prototype.tokenize = function () {
 
 CardView.prototype.showFieldError = function (field, errorMessage) {
   var fieldError;
-  var fieldGroup = this.getElementById(camelCaseToSnakeCase(field) + '-field-group');
+  var fieldGroup = this.getElementById(kebabCaseToCamelCase(field) + '-field-group');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
-    this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
+    this.fieldErrors[field] = this.getElementById(kebabCaseToCamelCase(field) + '-field-error');
   }
 
   classlist.add(fieldGroup, 'braintree-form__field-group--has-error');
@@ -302,10 +302,10 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
 };
 
 CardView.prototype.hideFieldError = function (field) {
-  var fieldGroup = this.getElementById(camelCaseToSnakeCase(field) + '-field-group');
+  var fieldGroup = this.getElementById(kebabCaseToCamelCase(field) + '-field-group');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
-    this.fieldErrors[field] = this.getElementById(camelCaseToSnakeCase(field) + '-field-error');
+    this.fieldErrors[field] = this.getElementById(kebabCaseToCamelCase(field) + '-field-error');
   }
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
@@ -326,7 +326,7 @@ CardView.prototype._generateFieldSelector = function (field) {
 
 CardView.prototype._onBlurEvent = function (event) {
   var field = event.fields[event.emittedBy];
-  var fieldGroup = this.getElementById(camelCaseToSnakeCase(event.emittedBy) + '-field-group');
+  var fieldGroup = this.getElementById(kebabCaseToCamelCase(event.emittedBy) + '-field-group');
   var activeId = document.activeElement && document.activeElement.id;
   var isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
 
@@ -380,7 +380,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 };
 
 CardView.prototype._onFocusEvent = function (event) {
-  var fieldGroup = this.getElementById(camelCaseToSnakeCase(event.emittedBy) + '-field-group');
+  var fieldGroup = this.getElementById(kebabCaseToCamelCase(event.emittedBy) + '-field-group');
 
   classlist.add(fieldGroup, 'braintree-form__field-group--is-focused');
 };
@@ -445,7 +445,7 @@ CardView.prototype._isCardTypeSupported = function (cardType) {
   return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
 
-function camelCaseToSnakeCase(string) {
+function kebabCaseToCamelCase(string) {
   return string.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
@@ -455,7 +455,7 @@ function capitalize(string) {
 
 function normalizeStyles(styles) {
   Object.keys(styles).forEach(function (style) {
-    var newKey = camelCaseToSnakeCase(style);
+    var newKey = kebabCaseToCamelCase(style);
 
     styles[newKey] = styles[style];
   });
