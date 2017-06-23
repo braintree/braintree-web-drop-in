@@ -1,5 +1,6 @@
 'use strict';
 
+var analytics = require('./analytics');
 var find = require('./find-parent-form');
 var uuid = require('./uuid');
 var DropinError = require('./dropin-error');
@@ -73,7 +74,7 @@ function createFromScriptTag(createFunction, scriptTag) {
   WHITELISTED_DATA_ATTRIBUTES.forEach(function (compositeKey) {
     var value = scriptTag.getAttribute('data-' + compositeKey);
 
-    if (!value) {
+    if (value == null) {
       return;
     }
 
@@ -81,6 +82,7 @@ function createFromScriptTag(createFunction, scriptTag) {
   });
 
   createFunction(createOptions).then(function (instance) {
+    analytics.sendEvent(instance._client, 'integration-type.script-tag');
     form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
         var paymentMethodNonce;

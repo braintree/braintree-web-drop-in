@@ -2,10 +2,13 @@
 
 var createFromScriptTag = require('../../../../src/lib/create-from-script-tag');
 var findParentForm = require('../../../../src/lib/find-parent-form');
+var analytics = require('../../../../src/lib/analytics');
 
 describe('createFromScriptTag', function () {
   beforeEach(function () {
+    this.sandbox.stub(analytics, 'sendEvent');
     this.instance = {
+      _client: 'fake-client',
       requestPaymentMethod: this.sandbox.stub().yields(null, {nonce: 'a-nonce'})
     };
     this.scriptTag = document.createElement('script');
@@ -57,24 +60,40 @@ describe('createFromScriptTag', function () {
     }.bind(this)).to.throw('No form found for script tag integration.');
   });
 
-  it('inserts container before script tag when form is found', function () {
+  it('inserts container before script tag when form is found', function (done) {
     var fakeContainer = {};
 
     this.sandbox.stub(document, 'createElement').returns(fakeContainer);
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    expect(this.fakeForm.insertBefore).to.be.calledOnce;
-    expect(this.fakeForm.insertBefore).to.be.calledWith(fakeContainer, this.scriptTag);
+    setTimeout(function () {
+      expect(this.fakeForm.insertBefore).to.be.calledOnce;
+      expect(this.fakeForm.insertBefore).to.be.calledWith(fakeContainer, this.scriptTag);
+      done();
+    }.bind(this));
   });
 
-  it('calls create with authorization and container', function () {
+  it('calls create with authorization and container', function (done) {
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    expect(this.createFunction).to.be.calledOnce;
-    expect(this.createFunction).to.be.calledWithMatch({
-      authorization: 'an-authorization',
-      container: this.sandbox.match.defined
-    });
+    setTimeout(function () {
+      expect(this.createFunction).to.be.calledOnce;
+      expect(this.createFunction).to.be.calledWithMatch({
+        authorization: 'an-authorization',
+        container: this.sandbox.match.defined
+      });
+      done();
+    }.bind(this));
+  });
+
+  it('sends an analytics event for script tag integration', function (done) {
+    createFromScriptTag(this.createFunction, this.scriptTag);
+
+    setTimeout(function () {
+      expect(analytics.sendEvent).to.be.calledOnce;
+      expect(analytics.sendEvent).to.be.calledWith(this.instance._client, 'integration-type.script-tag');
+      done();
+    }.bind(this));
   });
 
   it('adds submit listener to form for requesting a payment method', function (done) {
