@@ -1,18 +1,31 @@
 'use strict';
 
-var assign = require('./assign').assign;
 var find = require('./find-parent-form');
 var uuid = require('./uuid');
 var DropinError = require('./dropin-error');
+var kebabCaseToCamelCase = require('./kebab-case-to-camel-case');
+var WHITELISTED_DATA_ATTRIBUTES = [
+  'locale',
+  'payment-option-priority',
+
+  'paypal.amount',
+  'paypal.currency',
+  'paypal.flow',
+
+  'paypal-credit.amount',
+  'paypal-credit.currency',
+  'paypal-credit.flow'
+];
 
 function addCompositeKeyValuePairToObject(obj, key, value) {
   var decomposedKeys = key.split('.');
+  var topLevelKey = kebabCaseToCamelCase(decomposedKeys[0]);
 
   if (decomposedKeys.length === 1) {
-    obj[decomposedKeys[0]] = deserialize(value);
+    obj[topLevelKey] = deserialize(value);
   } else {
-    obj[decomposedKeys[0]] = obj[decomposedKeys[0]] || {};
-    addCompositeKeyValuePairToObject(obj[decomposedKeys[0]], decomposedKeys.slice(1).join('.'), value);
+    obj[topLevelKey] = obj[topLevelKey] || {};
+    addCompositeKeyValuePairToObject(obj[topLevelKey], decomposedKeys.slice(1).join('.'), value);
   }
 }
 
@@ -25,7 +38,7 @@ function deserialize(value) {
 }
 
 function createFromScriptTag(createFunction, scriptTag) {
-  var authorization, container, createOptions, form, scriptTagDataset;
+  var authorization, container, createOptions, form;
 
   if (!scriptTag) {
     return;
@@ -57,10 +70,14 @@ function createFromScriptTag(createFunction, scriptTag) {
     container: container
   };
 
-  scriptTagDataset = assign({}, scriptTag.dataset);
-  delete scriptTagDataset.braintreeDropinAuthorization;
-  Object.keys(scriptTagDataset).forEach(function (compositeKey) {
-    addCompositeKeyValuePairToObject(createOptions, compositeKey, scriptTag.dataset[compositeKey]);
+  WHITELISTED_DATA_ATTRIBUTES.forEach(function (compositeKey) {
+    var value = scriptTag.getAttribute('data-' + compositeKey);
+
+    if (!value) {
+      return;
+    }
+
+    addCompositeKeyValuePairToObject(createOptions, compositeKey, value);
   });
 
   createFunction(createOptions).then(function (instance) {

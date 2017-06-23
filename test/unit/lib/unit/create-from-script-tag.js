@@ -8,10 +8,8 @@ describe('createFromScriptTag', function () {
     this.instance = {
       requestPaymentMethod: this.sandbox.stub().yields(null, {nonce: 'a-nonce'})
     };
-    this.scriptTag = {
-      dataset: {},
-      getAttribute: this.sandbox.stub().returns('an-authorization')
-    };
+    this.scriptTag = document.createElement('script');
+    this.scriptTag.dataset.braintreeDropinAuthorization = 'an-authorization';
     this.createFunction = this.sandbox.stub().resolves(this.instance);
     this.fakeForm = {
       insertBefore: this.sandbox.stub(),
@@ -32,7 +30,7 @@ describe('createFromScriptTag', function () {
   });
 
   it('throws an error if script tag does not include an authorization', function () {
-    this.scriptTag.getAttribute.returns(null);
+    delete this.scriptTag.dataset.braintreeDropinAuthorization;
     this.sandbox.spy(document, 'createElement');
 
     expect(function () {
@@ -73,7 +71,7 @@ describe('createFromScriptTag', function () {
     createFromScriptTag(this.createFunction, this.scriptTag);
 
     expect(this.createFunction).to.be.calledOnce;
-    expect(this.createFunction).to.be.calledWith({
+    expect(this.createFunction).to.be.calledWithMatch({
       authorization: 'an-authorization',
       container: this.sandbox.match.defined
     });
@@ -210,11 +208,6 @@ describe('createFromScriptTag', function () {
   });
 
   describe('data attributes handling', function () {
-    beforeEach(function () {
-      this.scriptTag = document.createElement('script');
-      this.scriptTag.dataset.braintreeDropinAuthorization = 'an_authorization';
-    });
-
     it('accepts strings', function (done) {
       var submitHandler;
 
@@ -237,7 +230,10 @@ describe('createFromScriptTag', function () {
     it('accepts Booleans', function (done) {
       var submitHandler;
 
-      this.scriptTag.dataset.someBoolean = 'true';
+      // no properties available are booleans
+      // but there may be ones in the future
+      // so we just use locale for testing right now
+      this.scriptTag.dataset.locale = 'true';
 
       createFromScriptTag(this.createFunction, this.scriptTag);
 
@@ -247,7 +243,7 @@ describe('createFromScriptTag', function () {
 
         expect(this.createFunction).to.be.calledOnce;
         expect(this.createFunction).to.be.calledWithMatch({
-          someBoolean: true
+          locale: true
         });
         done();
       }.bind(this));
@@ -272,13 +268,13 @@ describe('createFromScriptTag', function () {
       }.bind(this));
     });
 
-    it('accepts nested objects', function (done) {
+    it('accepts objects', function (done) {
       var submitHandler;
 
-      this.scriptTag.dataset['paypal.flow'] = 'vault';
-      this.scriptTag.dataset['paypal.shippingAddressOverride.line1'] = '123 Main St';
-      this.scriptTag.dataset['paypal.shippingAddressOverride.city'] = 'San Francisco';
-      this.scriptTag.dataset['paypal.shippingAddressOverride.state'] = 'CA';
+      this.scriptTag.dataset['paypal.flow'] = 'checkout';
+      this.scriptTag.dataset['paypal.amount'] = '10.00';
+      this.scriptTag.dataset['paypal.currency'] = 'USD';
+      this.scriptTag.dataset['paypalCredit.flow'] = 'vault';
 
       createFromScriptTag(this.createFunction, this.scriptTag);
 
@@ -289,12 +285,12 @@ describe('createFromScriptTag', function () {
         expect(this.createFunction).to.be.calledOnce;
         expect(this.createFunction).to.be.calledWithMatch({
           paypal: {
-            flow: 'vault',
-            shippingAddressOverride: {
-              line1: '123 Main St',
-              city: 'San Francisco',
-              state: 'CA'
-            }
+            flow: 'checkout',
+            amount: 10,
+            currency: 'USD'
+          },
+          paypalCredit: {
+            flow: 'vault'
           }
         });
         done();
