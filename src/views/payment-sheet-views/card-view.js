@@ -455,9 +455,9 @@ function capitalize(string) {
 
 function normalizeStyles(styles) {
   Object.keys(styles).forEach(function (style) {
-    var newKey = camelCaseToKebabCase(style);
+    var transformedKeyName = camelCaseToKebabCase(style);
 
-    styles[newKey] = styles[style];
+    styles[transformedKeyName] = styles[style];
   });
 }
 
