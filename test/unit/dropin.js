@@ -1028,7 +1028,7 @@ describe('Dropin', function () {
     });
   });
 
-  describe('payemnt option selected event', function () {
+  describe('payment option selected event', function () {
     it('emits paymentOptionSelected when the model emits paymentOptionSelected', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
