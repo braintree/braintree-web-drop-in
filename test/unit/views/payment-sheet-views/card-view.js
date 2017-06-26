@@ -1144,7 +1144,7 @@ describe('CardView', function () {
         expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
       });
 
-      it('does not update the cvv field placeholder when cvv field does not exist', function () {
+      it('does not update the cvv field placeholder when there is no cvv challenge', function () {
         var fakeEvent = {
           cards: [{type: 'american-express'}, {type: 'visa'}],
           emittedBy: 'number'
@@ -1163,6 +1163,30 @@ describe('CardView', function () {
               }
             }
           };
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
+      });
+
+      it('does not update the cvv field placeholder when it is removed with an override', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.spy()
+        };
+
+        this.context.model.merchantConfiguration.card = {
+          overrides: {
+            fields: {
+              cvv: null
+            }
+          }
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);

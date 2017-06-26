@@ -6,7 +6,8 @@ unreleased
 - `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
 - `dropinInstance.teardown` will return a promise if no callback is provided
 - `dropin.create` will return a promise if no callback is provided
-- Add `paymentOptionChosen` event
+- Fix error thrown in console when removing fields with card overrides
+- Add `paymentOptionSelected` event
 
 1.3.1
 -----
