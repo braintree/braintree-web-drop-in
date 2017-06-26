@@ -14,6 +14,7 @@ describe "Drop-in Script Tag Integration" do
     click_option("card")
     hosted_field_send_input("number", "4111111111111111")
     hosted_field_send_input("expirationDate", "1019")
+    hosted_field_send_input("cvv", "123")
 
     submit_pay
 
@@ -57,12 +58,5 @@ describe "Drop-in Script Tag Integration" do
     expect(payment_options[0]).to have_content("PayPal")
     expect(payment_options[1]).to have_content("Card")
     expect(payment_options[2]).to have_content("PayPal Credit")
-
-    # Accepts a nested object for card overrides
-    click_option("card")
-
-    expect(page).to have_content("Card Number")
-    expect(page).to have_content("Expiration Date")
-    expect(page).to_not have_content("CVV")
   end
 end
