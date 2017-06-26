@@ -7,11 +7,20 @@
  *
  * When your form is submitted, Drop-in will intercept the form submission and attempt to tokenize the payment method. If the tokenization is successful, it will insert the payment method nonce into a hidden input with the name `payment_method_nonce` and then submit your form. If the tokenization is unsuccessful, a relevant error will be shown in the UI.
  *
- * Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set: `locale`, `payment-option-priority`, `paypal.amount`, `paypal.currency`, `paypal.flow`, `paypal-credit.amount`, `paypal-credit.currency`, `paypal-credit.flow`.
+ * Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set:
+ *
+ * * `data-locale`
+ * * `data-payment-option-priority`
+ * * `data-paypal.amount`
+ * * `data-paypal.currency`
+ * * `data-paypal.flow`
+ * * `data-paypal-credit.amount`
+ * * `data-paypal-credit.currency`
+ * * `data-paypal-credit.flow`
  *
  * For more control and customization, use [`dropin.create` instead](#.create).
  *
- * See our [demo app](https://braintree.github.io/braintree-web-drop-in/script-tag-integration.html) for an example of using our script tag integration.
+ * See our [demo app](../../script-tag-integration.html) for an example of using our script tag integration.
  *
  * @example
  * <caption>A full example accepting only cards</caption>
