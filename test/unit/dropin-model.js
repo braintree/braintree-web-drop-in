@@ -588,4 +588,21 @@ describe('DropinModel', function () {
       expect(this.model._paymentMethodRequestableType).to.not.exist;
     });
   });
+
+  describe('selectPaymentOption', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a paymentOptionSelected event with the id of the payment option that was selected', function () {
+      this.model.selectPaymentOption('card');
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('paymentOptionSelected', {
+        paymentOption: 'card'
+      });
+    });
+  });
 });

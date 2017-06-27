@@ -190,6 +190,12 @@
         payButton.removeAttribute('disabled');
       }
 
+      if (!config.disablePaymentOptionSelectedListener) {
+        instance.on('paymentOptionSelected', function (event) {
+          console.log(event.paymentOption, 'selected.');
+        });
+      }
+
       teardownButton.removeAttribute('disabled');
       createButton.setAttribute('disabled', true);
 
