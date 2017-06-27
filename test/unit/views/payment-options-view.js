@@ -107,6 +107,24 @@ describe('PaymentOptionsView', function () {
 
       expect(mainViewStub.setPrimaryView).to.have.been.calledWith(CardView.ID);
     });
+
+    it('calls model.selectPaymentOption when payment option is clicked', function () {
+      var mainViewStub = {setPrimaryView: this.sandbox.stub()};
+      var paymentOptionsView = new PaymentOptionsView({
+        client: this.client,
+        element: this.element,
+        mainView: mainViewStub,
+        model: modelThatSupports(['card']),
+        strings: strings
+      });
+      var option = paymentOptionsView.container.querySelector('.braintree-option');
+
+      this.sandbox.stub(paymentOptionsView.model, 'selectPaymentOption');
+
+      option.click();
+
+      expect(paymentOptionsView.model.selectPaymentOption).to.have.been.calledWith(CardView.ID);
+    });
   });
 
   describe('sends analytics events', function () {
