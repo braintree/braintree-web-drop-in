@@ -17,6 +17,26 @@ describe('onTransitionEnd', function () {
     onTransitionEnd(element, this.fakePropertyName, done);
   });
 
+  it('immediately calls callback when element has display: none', function (done) {
+    var element = document.createElement('div');
+
+    element.style.display = 'none';
+
+    onTransitionEnd(element, this.fakePropertyName, done);
+  });
+
+  it('immediately calls callback when a parent element has display: none', function (done) {
+    var topLevelElement = document.createElement('div');
+    var middleElement = document.createElement('div');
+    var element = document.createElement('div');
+
+    topLevelElement.style.display = 'none';
+    middleElement.appendChild(element);
+    topLevelElement.appendChild(middleElement);
+
+    onTransitionEnd(element, this.fakePropertyName, done);
+  });
+
   it('calls callback after onTransitionEnd end when the event propertyName matches', function (done) {
     var element = document.createElement('div');
 
