@@ -570,6 +570,17 @@ describe('MainView', function () {
       };
     });
 
+    describe('for changeActivePaymentMethod', function () {
+      it('sets the PaymentMethodsView as the primary view', function () {
+        this.mainView.paymentMethodsViews.activeMethodView = {setActive: function () {}};
+        this.sandbox.stub(this.mainView, 'setPrimaryView');
+
+        this.model._emit('changeActivePaymentMethod', {});
+
+        expect(this.mainView.setPrimaryView).to.be.called;
+      });
+    });
+
     describe('for changeActivePaymentView', function () {
       beforeEach(function () {
         this.sandbox.stub(this.model, 'setPaymentMethodRequestable');
@@ -818,17 +829,6 @@ describe('MainView', function () {
 
       return this.mainView.requestPaymentMethod().then(function () {
         expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.paypal');
-      }.bind(this));
-    });
-
-    it('sets the PaymentMethodsView as the primary view when successful', function () {
-      var stubPaymentMethod = {foo: 'bar'};
-      var paymentMethodsViews = this.mainView.getView(PaymentMethodsView.ID);
-
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves(stubPaymentMethod);
-
-      return this.mainView.requestPaymentMethod().then(function () {
-        expect(this.mainView.primaryView).to.equal(paymentMethodsViews);
       }.bind(this));
     });
 

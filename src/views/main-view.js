@@ -24,8 +24,8 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
-  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var paymentOptionsView;
+  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var paymentMethods = this.model.getPaymentMethods();
 
   this._views = {};
@@ -176,8 +176,6 @@ MainView.prototype.requestPaymentMethod = function () {
   var activePaymentView = this.getView(this.model.getActivePaymentView());
 
   return activePaymentView.requestPaymentMethod().then(function (payload) {
-    this.setPrimaryView(PaymentMethodsView.ID);
-
     analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
 
     return payload;
