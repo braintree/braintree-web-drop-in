@@ -20,6 +20,7 @@ var strings = require('../../../src/translations/en_US');
 var transitionHelper = require('../../../src/lib/transition-helper');
 
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
+var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 
 describe('MainView', function () {
   beforeEach(function () {
@@ -137,7 +138,7 @@ describe('MainView', function () {
         setTimeout(function () {
           expect(mainView.primaryView.ID).to.equal(PaymentMethodsView.ID);
           done();
-        }, 200);
+        }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
       });
     });
 
@@ -583,7 +584,7 @@ describe('MainView', function () {
         setTimeout(function () {
           expect(this.mainView.setPrimaryView).to.be.called;
           done();
-        }.bind(this), 200);
+        }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
       });
     });
 

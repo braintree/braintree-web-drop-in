@@ -11,6 +11,7 @@ var strings = require('../../../../src/translations/en_US');
 var transitionHelper = require('../../../../src/lib/transition-helper');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
+var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 
 function throwIfResolves() {
   throw new Error('should not resolve.');
@@ -1857,14 +1858,17 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('removes braintree-sheet--loading class after successful tokenization', function () {
+    it('removes braintree-sheet--loading class after successful tokenization', function (done) {
       var stubPayload = {};
 
       this.sandbox.stub(classlist, 'remove');
       this.context.hostedFieldsInstance.tokenize.resolves(stubPayload);
 
-      return CardView.prototype.tokenize.call(this.context).then(function () {
-        expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+      CardView.prototype.tokenize.call(this.context).then(function () {
+        setTimeout(function () {
+          expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+          done();
+        }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
       }.bind(this));
     });
 

@@ -12,6 +12,8 @@ var Promise = require('../lib/promise');
 var supportsFlexbox = require('../lib/supports-flexbox');
 var transitionHelper = require('../lib/transition-helper');
 
+var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+
 function MainView() {
   BaseView.apply(this, arguments);
 
@@ -80,7 +82,7 @@ MainView.prototype._initialize = function () {
   this.model.on('changeActivePaymentMethod', function () {
     setTimeout(function () {
       this.setPrimaryView(PaymentMethodsView.ID);
-    }.bind(this), 200);
+    }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
   }.bind(this));
 
   this.model.on('changeActivePaymentView', function (id) {

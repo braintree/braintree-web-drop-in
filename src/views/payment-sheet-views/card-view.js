@@ -268,7 +268,10 @@ CardView.prototype.tokenize = function () {
 
       transitionHelper.onTransitionEnd(self.element, 'max-height', transitionCallback);
 
-      classlist.remove(self.element, 'braintree-sheet--loading');
+      setTimeout(function () {
+        classlist.remove(self.element, 'braintree-sheet--loading');
+      }, constants.CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+
       classlist.add(self.element, 'braintree-sheet--tokenized');
     });
   }).catch(function (err) {
