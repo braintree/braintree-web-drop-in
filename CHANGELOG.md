@@ -9,6 +9,7 @@ unreleased
 - `dropin.create` will return a promise if no callback is provided
 - Fix error thrown in console when removing fields with card overrides
 - Fix bug where Drop-in would not finish loading if inside a hidden div
+- Fix transition from payment sheet views to payment methods view
 
 1.3.1
 -----

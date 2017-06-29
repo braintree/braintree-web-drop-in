@@ -131,10 +131,13 @@ describe('MainView', function () {
         expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({type: 'CreditCard', details: {lastTwo: '11'}});
       });
 
-      it('sets the PaymentMethodsView as the primary view', function () {
+      it('sets the PaymentMethodsView as the primary view', function (done) {
         var mainView = new MainView(this.mainViewOptions);
 
-        expect(mainView.primaryView.ID).to.equal(PaymentMethodsView.ID);
+        setTimeout(function () {
+          expect(mainView.primaryView.ID).to.equal(PaymentMethodsView.ID);
+          done();
+        }, 200);
       });
     });
 
@@ -571,13 +574,16 @@ describe('MainView', function () {
     });
 
     describe('for changeActivePaymentMethod', function () {
-      it('sets the PaymentMethodsView as the primary view', function () {
+      it('sets the PaymentMethodsView as the primary view', function (done) {
         this.mainView.paymentMethodsViews.activeMethodView = {setActive: function () {}};
         this.sandbox.stub(this.mainView, 'setPrimaryView');
 
         this.model._emit('changeActivePaymentMethod', {});
 
-        expect(this.mainView.setPrimaryView).to.be.called;
+        setTimeout(function () {
+          expect(this.mainView.setPrimaryView).to.be.called;
+          done();
+        }.bind(this), 200);
       });
     });
 

@@ -78,7 +78,9 @@ MainView.prototype._initialize = function () {
   addSelectionEventHandler(this.toggle, this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
-    this.setPrimaryView(PaymentMethodsView.ID);
+    setTimeout(function () {
+      this.setPrimaryView(PaymentMethodsView.ID);
+    }.bind(this), 200);
   }.bind(this));
 
   this.model.on('changeActivePaymentView', function (id) {
