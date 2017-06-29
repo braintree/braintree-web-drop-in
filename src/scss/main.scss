@@ -206,6 +206,7 @@ $loader-scale-duration: 300ms;
 }
 
 .braintree-loaded .braintree-upper-container {
+  min-height: inherit;
   min-height: auto;
 
   &:before {
