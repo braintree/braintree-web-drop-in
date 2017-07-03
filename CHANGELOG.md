@@ -9,6 +9,7 @@ unreleased
 - `dropin.create` will return a promise if no callback is provided
 - Fix error thrown in console when removing fields with card overrides
 - Fix bug where Drop-in would not finish loading if inside a hidden div
+- Update browser-detection to v1.5.0
 
 1.3.1
 -----
