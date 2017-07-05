@@ -12,6 +12,8 @@ var Promise = require('../lib/promise');
 var supportsFlexbox = require('../lib/supports-flexbox');
 var transitionHelper = require('../lib/transition-helper');
 
+var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+
 function MainView() {
   BaseView.apply(this, arguments);
 
@@ -24,8 +26,8 @@ MainView.prototype = Object.create(BaseView.prototype);
 MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
-  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var paymentOptionsView;
+  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var paymentMethods = this.model.getPaymentMethods();
 
   this._views = {};
@@ -78,7 +80,9 @@ MainView.prototype._initialize = function () {
   addSelectionEventHandler(this.toggle, this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
-    this.setPrimaryView(PaymentMethodsView.ID);
+    setTimeout(function () {
+      this.setPrimaryView(PaymentMethodsView.ID);
+    }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
   }.bind(this));
 
   this.model.on('changeActivePaymentView', function (id) {
@@ -176,8 +180,6 @@ MainView.prototype.requestPaymentMethod = function () {
   var activePaymentView = this.getView(this.model.getActivePaymentView());
 
   return activePaymentView.requestPaymentMethod().then(function (payload) {
-    this.setPrimaryView(PaymentMethodsView.ID);
-
     analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
 
     return payload;

@@ -11,6 +11,7 @@ unreleased
 - `dropin.create` will return a promise if no callback is provided
 - Fix error thrown in console when removing fields with card overrides
 - Fix bug where Drop-in would not finish loading if inside a hidden div
+- Improve transition from payment sheet views to payment methods view
 - Use version 3.19.1 of braintree-web
 
 1.3.1
