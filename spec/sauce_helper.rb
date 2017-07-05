@@ -23,7 +23,8 @@ def select_browsers
       # ["OS X 10.11", "safari", nil],
       ["Windows 7", "internet explorer", "9"],
       ["Windows 8", "internet explorer", "10"],
-      ["Windows 10", "internet explorer", "11"],
+      # Sauce is having problems logging in for PayPal Checkout in Windows 10
+      ["Windows 8.1", "internet explorer", "11"],
     ]
   end
 
