@@ -1,11 +1,45 @@
 'use strict';
 
+var analytics = require('./analytics');
 var find = require('./find-parent-form');
 var uuid = require('./uuid');
 var DropinError = require('./dropin-error');
+var kebabCaseToCamelCase = require('./kebab-case-to-camel-case');
+var WHITELISTED_DATA_ATTRIBUTES = [
+  'locale',
+  'payment-option-priority',
+
+  'paypal.amount',
+  'paypal.currency',
+  'paypal.flow',
+
+  'paypal-credit.amount',
+  'paypal-credit.currency',
+  'paypal-credit.flow'
+];
+
+function addCompositeKeyValuePairToObject(obj, key, value) {
+  var decomposedKeys = key.split('.');
+  var topLevelKey = kebabCaseToCamelCase(decomposedKeys[0]);
+
+  if (decomposedKeys.length === 1) {
+    obj[topLevelKey] = deserialize(value);
+  } else {
+    obj[topLevelKey] = obj[topLevelKey] || {};
+    addCompositeKeyValuePairToObject(obj[topLevelKey], decomposedKeys.slice(1).join('.'), value);
+  }
+}
+
+function deserialize(value) {
+  try {
+    return JSON.parse(value);
+  } catch (e) {
+    return value;
+  }
+}
 
 function createFromScriptTag(createFunction, scriptTag) {
-  var authorization, container, form;
+  var authorization, container, createOptions, form;
 
   if (!scriptTag) {
     return;
@@ -32,10 +66,23 @@ function createFromScriptTag(createFunction, scriptTag) {
 
   form.insertBefore(container, scriptTag);
 
-  createFunction({
+  createOptions = {
     authorization: authorization,
     container: container
-  }).then(function (instance) {
+  };
+
+  WHITELISTED_DATA_ATTRIBUTES.forEach(function (compositeKey) {
+    var value = scriptTag.getAttribute('data-' + compositeKey);
+
+    if (value == null) {
+      return;
+    }
+
+    addCompositeKeyValuePairToObject(createOptions, compositeKey, value);
+  });
+
+  createFunction(createOptions).then(function (instance) {
+    analytics.sendEvent(instance._client, 'integration-type.script-tag');
     form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
         var paymentMethodNonce;

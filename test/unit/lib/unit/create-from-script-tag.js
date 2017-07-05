@@ -2,15 +2,17 @@
 
 var createFromScriptTag = require('../../../../src/lib/create-from-script-tag');
 var findParentForm = require('../../../../src/lib/find-parent-form');
+var analytics = require('../../../../src/lib/analytics');
 
 describe('createFromScriptTag', function () {
   beforeEach(function () {
+    this.sandbox.stub(analytics, 'sendEvent');
     this.instance = {
+      _client: 'fake-client',
       requestPaymentMethod: this.sandbox.stub().yields(null, {nonce: 'a-nonce'})
     };
-    this.scriptTag = {
-      getAttribute: this.sandbox.stub().returns('an-authorization')
-    };
+    this.scriptTag = document.createElement('script');
+    this.scriptTag.dataset.braintreeDropinAuthorization = 'an-authorization';
     this.createFunction = this.sandbox.stub().resolves(this.instance);
     this.fakeForm = {
       insertBefore: this.sandbox.stub(),
@@ -31,7 +33,7 @@ describe('createFromScriptTag', function () {
   });
 
   it('throws an error if script tag does not include an authorization', function () {
-    this.scriptTag.getAttribute.returns(null);
+    delete this.scriptTag.dataset.braintreeDropinAuthorization;
     this.sandbox.spy(document, 'createElement');
 
     expect(function () {
@@ -58,24 +60,40 @@ describe('createFromScriptTag', function () {
     }.bind(this)).to.throw('No form found for script tag integration.');
   });
 
-  it('inserts container before script tag when form is found', function () {
+  it('inserts container before script tag when form is found', function (done) {
     var fakeContainer = {};
 
     this.sandbox.stub(document, 'createElement').returns(fakeContainer);
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    expect(this.fakeForm.insertBefore).to.be.calledOnce;
-    expect(this.fakeForm.insertBefore).to.be.calledWith(fakeContainer, this.scriptTag);
+    setTimeout(function () {
+      expect(this.fakeForm.insertBefore).to.be.calledOnce;
+      expect(this.fakeForm.insertBefore).to.be.calledWith(fakeContainer, this.scriptTag);
+      done();
+    }.bind(this));
   });
 
-  it('calls create with authorization and container', function () {
+  it('calls create with authorization and container', function (done) {
     createFromScriptTag(this.createFunction, this.scriptTag);
 
-    expect(this.createFunction).to.be.calledOnce;
-    expect(this.createFunction).to.be.calledWith({
-      authorization: 'an-authorization',
-      container: this.sandbox.match.defined
-    });
+    setTimeout(function () {
+      expect(this.createFunction).to.be.calledOnce;
+      expect(this.createFunction).to.be.calledWithMatch({
+        authorization: 'an-authorization',
+        container: this.sandbox.match.defined
+      });
+      done();
+    }.bind(this));
+  });
+
+  it('sends an analytics event for script tag integration', function (done) {
+    createFromScriptTag(this.createFunction, this.scriptTag);
+
+    setTimeout(function () {
+      expect(analytics.sendEvent).to.be.calledOnce;
+      expect(analytics.sendEvent).to.be.calledWith(this.instance._client, 'integration-type.script-tag');
+      done();
+    }.bind(this));
   });
 
   it('adds submit listener to form for requesting a payment method', function (done) {
@@ -206,5 +224,96 @@ describe('createFromScriptTag', function () {
       expect(this.fakeForm.submit).to.be.calledOnce;
       done();
     }.bind(this));
+  });
+
+  describe('data attributes handling', function () {
+    it('accepts strings', function (done) {
+      var submitHandler;
+
+      this.scriptTag.dataset.locale = 'es_ES';
+
+      createFromScriptTag(this.createFunction, this.scriptTag);
+
+      setTimeout(function () {
+        submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+        submitHandler();
+
+        expect(this.createFunction).to.be.calledOnce;
+        expect(this.createFunction).to.be.calledWithMatch({
+          locale: 'es_ES'
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('accepts Booleans', function (done) {
+      var submitHandler;
+
+      // no properties available are booleans
+      // but there may be ones in the future
+      // so we just use locale for testing right now
+      this.scriptTag.dataset.locale = 'true';
+
+      createFromScriptTag(this.createFunction, this.scriptTag);
+
+      setTimeout(function () {
+        submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+        submitHandler();
+
+        expect(this.createFunction).to.be.calledOnce;
+        expect(this.createFunction).to.be.calledWithMatch({
+          locale: true
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('accepts arrays', function (done) {
+      var submitHandler;
+
+      this.scriptTag.dataset.paymentOptionPriority = '["paypal", "card"]';
+
+      createFromScriptTag(this.createFunction, this.scriptTag);
+
+      setTimeout(function () {
+        submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+        submitHandler();
+
+        expect(this.createFunction).to.be.calledOnce;
+        expect(this.createFunction).to.be.calledWithMatch({
+          paymentOptionPriority: ['paypal', 'card']
+        });
+        done();
+      }.bind(this));
+    });
+
+    it('accepts objects', function (done) {
+      var submitHandler;
+
+      this.scriptTag.dataset['paypal.flow'] = 'checkout';
+      this.scriptTag.dataset['paypal.amount'] = '10.00';
+      this.scriptTag.dataset['paypal.currency'] = 'USD';
+      this.scriptTag.dataset['paypalCredit.flow'] = 'vault';
+
+      createFromScriptTag(this.createFunction, this.scriptTag);
+
+      setTimeout(function () {
+        submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+        submitHandler();
+
+        expect(this.createFunction).to.be.calledOnce;
+        expect(this.createFunction).to.be.calledWithMatch({
+          paypal: {
+            flow: 'checkout',
+            amount: 10,
+            currency: 'USD'
+          },
+          paypalCredit: {
+            flow: 'vault'
+          }
+        });
+        done();
+      }.bind(this));
+    });
   });
 });

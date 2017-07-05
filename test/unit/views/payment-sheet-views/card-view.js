@@ -520,7 +520,8 @@ describe('CardView', function () {
           styles: {
             input: {
               background: 'blue',
-              color: 'red'
+              color: 'red',
+              fontFamily: 'fantasy'
             },
             ':focus': null
           }
@@ -540,6 +541,7 @@ describe('CardView', function () {
       expect(hostedFieldsConfiguredStyles.input.color).to.equal('red');
       expect(hostedFieldsConfiguredStyles.input.background).to.equal('blue');
       expect(hostedFieldsConfiguredStyles.input['font-size']).to.equal('16px');
+      expect(hostedFieldsConfiguredStyles.input['font-family']).to.equal('fantasy');
       expect(hostedFieldsConfiguredStyles[':focus']).to.not.exist;
       expect(hostedFieldsConfiguredStyles['input::-ms-clear']).to.deep.equal({
         color: 'transparent'
@@ -1719,6 +1721,12 @@ describe('CardView', function () {
         expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
         expect(numberFieldError.textContent).to.equal('This card number is not valid.');
         expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
+    });
+
+    it('calls hostedFieldsInstance.tokenize when form is valid', function () {
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
       }.bind(this));
     });
 

@@ -4,6 +4,8 @@ CHANGELOG
 unreleased
 ----------
 - Add `paymentOptionSelected` event
+- Add support for PayPal and PayPal credit in the script tag integration
+- Add support for locale and payment option priority in the script tag integration
 - `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
 - `dropinInstance.teardown` will return a promise if no callback is provided
 - `dropin.create` will return a promise if no callback is provided
