@@ -381,16 +381,21 @@ describe('MainView', function () {
     });
 
     it('calls setPaymentMethodRequestable when there is a payment method requestable', function () {
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
       var mainView = new MainView(this.mainViewOptions);
 
-      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns({type: 'TYPE'});
+      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns(fakePaymentMethod);
       this.sandbox.stub(mainView.model, 'setPaymentMethodRequestable');
 
       mainView.setPrimaryView(PaymentOptionsView.ID);
 
       expect(mainView.model.setPaymentMethodRequestable).to.be.calledWith({
         isRequestable: true,
-        type: 'TYPE'
+        type: 'TYPE',
+        selectedPaymentMethod: fakePaymentMethod
       });
     });
 

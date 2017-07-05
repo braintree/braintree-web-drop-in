@@ -53,7 +53,7 @@ var VERSION = process.env.npm_package_version;
  * @function
  * @param {string} event The name of the event to which you are subscribing.
  * @param {function} handler A callback to handle the event.
- * @description Subscribes a handler function to a named event. `event` should be {@link HostedFields#event:paymentMethodRequestable|`paymentMethodRequestable`} or {@link HostedFields#event:noPaymentMethodRequestable|`noPaymentMethodRequestable`}.
+ * @description Subscribes a handler function to a named event. `event` should be {@link Dropin~paymentMethodRequestablePayload|`paymentMethodRequestable`} or {@link Dropin~noPaymentMethodRequestablePayload|`noPaymentMethodRequestable`}.
  * @returns {void}
  * @example
  * <caption>Dynamically enable or disable your submit button based on whether or not the payment method is requestable</caption>
@@ -98,6 +98,7 @@ var VERSION = process.env.npm_package_version;
  * @typedef {object} Dropin~paymentMethodRequestablePayload
  * @description The event payload sent from {@link Dropin#on|`on`} with the {@link Dropin#event:paymentMethodRequestable|`paymentMethodRequestable`} event.
  * @property {string} type The type of payment method that is requestable. Either `CreditCard` or `PayPalAccount`.
+ * @property {?Object} selectedPaymentMethod The payment method payload, either {@link Dropin~cardPaymentMethodPayload|`cardPaymentMethodPayload`} or {@link Dropin~paypalPaymentMethodPayload|`paypalPaymentMethodPayload`}. If this property does not exist, call {@link Dropin#requestPaymentMethod|`requestPaymentMethod`} to request the payment method.
  */
 
 /**

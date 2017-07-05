@@ -181,10 +181,12 @@
 
         instance.on('paymentMethodRequestable', function (event) {
           payButton.removeAttribute('disabled');
+          console.log('paymentMethodRequestable', event);
         });
 
         instance.on('noPaymentMethodRequestable', function (event) {
           payButton.setAttribute('disabled', true);
+          console.log('noPaymentMethodRequestable');
         });
       } else {
         payButton.removeAttribute('disabled');
@@ -192,7 +194,7 @@
 
       if (!config.disablePaymentOptionSelectedListener) {
         instance.on('paymentOptionSelected', function (event) {
-          console.log(event.paymentOption, 'selected.');
+          console.log('paymentOptionSelected', event.paymentOption);
         });
       }
 

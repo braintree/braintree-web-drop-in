@@ -587,6 +587,32 @@ describe('DropinModel', function () {
 
       expect(this.model._paymentMethodRequestableType).to.not.exist;
     });
+
+    it('includes the selectedPaymentMethod if one is provided', function () {
+      var selectedPaymentMethod = {foo: 'bar'};
+
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'TYPE',
+        selectedPaymentMethod: selectedPaymentMethod
+      });
+
+      expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
+        type: 'TYPE',
+        selectedPaymentMethod: selectedPaymentMethod
+      });
+    });
+
+    it('does not include selectedPaymentMethod when not provided', function () {
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'TYPE'
+      });
+
+      expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
+        type: 'TYPE'
+      });
+    });
   });
 
   describe('selectPaymentOption', function () {
