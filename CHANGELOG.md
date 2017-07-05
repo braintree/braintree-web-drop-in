@@ -9,6 +9,7 @@ unreleased
 - `dropin.create` will return a promise if no callback is provided
 - Fix error thrown in console when removing fields with card overrides
 - Fix bug where Drop-in would not finish loading if inside a hidden div
+- Improve UI in older versions of iOS Safari
 
 1.3.1
 -----
