@@ -78,6 +78,7 @@ var VERSION = process.env.npm_package_version;
  *
  *   dropinInstance.on('paymentMethodRequestable', function (event) {
  *     console.log(event.type); // The type of Payment Method, e.g 'CreditCard', 'PayPalAccount'.
+ *     console.log(event.selectedPaymentMethod); // If available, the payment method object.
  *
  *     submitButton.removeAttribute('disabled');
  *   });
