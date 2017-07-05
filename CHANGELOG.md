@@ -13,6 +13,7 @@ unreleased
 - Fix bug where Drop-in would not finish loading if inside a hidden div
 - Improve transition from payment sheet views to payment methods view
 - Use version 3.19.1 of braintree-web
+- Add `selectedPaymentMethod` property on `paymentMethodRequestable` events if applicable
 
 1.3.1
 -----
