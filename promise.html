@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="IE=Edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Drop-in demo</title>
+<title>Drop-in demo with Promises</title>
 <style>
 
   html {
@@ -62,7 +62,7 @@
 
 </head>
 <body>
-<h1>Braintree Drop-in demo</h1>
+<h1>Braintree Drop-in demo with Promise API</h1>
 
 <p>You can create a <a href="https://developer.paypal.com/docs/classic/lifecycle/sb_about-accounts/#creating-sandbox-test-accounts" target="_blank" rel="nofollow">PayPal Sandbox account</a> to test the PayPal flow.</p>
 
@@ -143,7 +143,6 @@
       try {
         jsonParsedValue = JSON.parse(value);
         value = jsonParsedValue;
-
       } catch (e) {}
 
       obj[prop] = value;
@@ -168,12 +167,7 @@
     results.textContent = '';
     error.textContent = '';
 
-    braintree.dropin.create(config, function (err, instance) {
-      if (err) {
-        error.textContent = err.message;
-        throw err;
-      }
-
+    braintree.dropin.create(config).then(function (instance) {
       if (!config.disablePaymentMethodRequestableListeners) {
         if (instance.isPaymentMethodRequestable()) {
           payButton.removeAttribute('disabled');
@@ -190,16 +184,12 @@
         payButton.removeAttribute('disabled');
       }
 
-      if (!config.disablePaymentOptionSelectedListener) {
-        instance.on('paymentOptionSelected', function (event) {
-          console.log(event.paymentOption, 'selected.');
-        });
-      }
-
       teardownButton.removeAttribute('disabled');
       createButton.setAttribute('disabled', true);
 
       dropinInstance = instance;
+    }).catch(function (err) {
+      error.textContent = err.message;
     });
   }
 
@@ -224,27 +214,23 @@
   form.addEventListener('submit', function (event) {
     event.preventDefault();
 
-    dropinInstance.requestPaymentMethod(function (err, payload) {
-      if (err) {
-        error.textContent = err.message;
-        results.textContent = '';
-      } else {
-        results.textContent = JSON.stringify(payload, null, 2);
-        error.textContent = '';
-      }
+    dropinInstance.requestPaymentMethod().then(function (payload) {
+      results.textContent = JSON.stringify(payload, null, 2);
+      error.textContent = '';
+    }).catch(function (err) {
+      error.textContent = err.message;
+      results.textContent = '';
     });
   }, false);
 
   teardownButton.addEventListener('click', function () {
     teardownButton.setAttribute('disabled', true);
-    dropinInstance.teardown(function (err) {
-      if (err) {
-        error.textContent = 'Failed to tear down:' + err;
-      } else {
-        results.textContent = 'Teardown successful';
-        createButton.removeAttribute('disabled');
-      }
-    });
+    dropinInstance.teardown().then(function () {
+      results.textContent = 'Teardown successful';
+      createButton.removeAttribute('disabled');
+    }).catch(function (err) {
+      error.textContent = 'Failed to tear down:' + err;
+    })
   });
 
   createDropin();
@@ -252,3 +238,4 @@
 
 </body>
 </html>
+

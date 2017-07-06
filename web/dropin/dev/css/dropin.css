@@ -192,6 +192,7 @@
     z-index: -3; }
 
 .braintree-loaded .braintree-upper-container {
+  min-height: inherit;
   min-height: auto; }
   .braintree-loaded .braintree-upper-container:before {
     border: 0px; }
@@ -216,6 +217,7 @@
 
 .braintree-option {
   -webkit-box-align: center;
+  -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
   background-color: #FAFAFA;
@@ -224,6 +226,7 @@
   border-width: 0 1px 1px 1px;
   cursor: pointer;
   display: -webkit-box;
+  display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   padding: 12px 10px; }
@@ -250,10 +253,12 @@
     border-radius: 0 0 4px 4px; }
   .braintree-option .braintree-option__logo {
     display: -webkit-box;
+    display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
     text-align: center;
     -webkit-box-align: center;
+    -webkit-align-items: center;
         -ms-flex-align: center;
             align-items: center; }
   .braintree-option .braintree-option__label {
@@ -306,6 +311,7 @@
 
 .braintree-sheet--has-error .braintree-sheet__error {
   -webkit-box-align: center;
+  -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
   background-color: #CA2A2A;
@@ -314,6 +320,7 @@
   border-style: solid;
   border-width: 0 0 1px 0;
   display: -webkit-box;
+  display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   padding: 6px;
@@ -346,24 +353,30 @@
 
 .braintree-sheet__header {
   -webkit-box-align: center;
+  -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
   border-bottom: 1px solid #B5B5B5;
   display: -webkit-box;
+  display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
   padding: 12px 15px 0 12px;
   position: relative; }
   .braintree-sheet__header .braintree-sheet__header-label {
     -webkit-box-align: center;
+    -webkit-align-items: center;
         -ms-flex-align: center;
             align-items: center;
     display: -webkit-box;
+    display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
     -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
             flex-grow: 1;
     padding-bottom: 12px; }
@@ -371,9 +384,11 @@
     font-size: 16px; }
   .braintree-sheet__header .braintree-sheet__logo--header {
     -webkit-box-align: center;
+    -webkit-align-items: center;
         -ms-flex-align: center;
             align-items: center;
     display: -webkit-box;
+    display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
     text-align: center;
@@ -480,17 +495,22 @@
       display: block; }
   .braintree-sheet__content--form .braintree-form__flexible-fields {
     display: -webkit-box;
+    display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
-    -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
     -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
             justify-content: space-between; }
     .braintree-sheet__content--form .braintree-form__flexible-fields .braintree-form__field-group {
-      -ms-flex-preferred-size: 190px;
-          flex-basis: 190px;
+      -webkit-flex-basis: 190px;
+          -ms-flex-preferred-size: 190px;
+              flex-basis: 190px;
       -webkit-box-flex: 1;
+      -webkit-flex-grow: 1;
           -ms-flex-positive: 1;
               flex-grow: 1; }
 
@@ -499,6 +519,7 @@
    ========================================================================= */
 .braintree-method {
   -webkit-box-align: center;
+  -webkit-align-items: center;
       -ms-flex-align: center;
           align-items: center;
   background-color: white;
@@ -507,9 +528,11 @@
   border-width: 0 1px 1px 1px;
   cursor: pointer;
   display: -webkit-box;
+  display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
   margin: 0 auto;
@@ -530,17 +553,21 @@
     border-radius: 4px; }
   .braintree-method .braintree-method__logo {
     -webkit-box-align: center;
+    -webkit-align-items: center;
         -ms-flex-align: center;
             align-items: center;
     display: -webkit-box;
+    display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
     -webkit-box-pack: center;
+    -webkit-justify-content: center;
         -ms-flex-pack: center;
             justify-content: center; }
   .braintree-method .braintree-method__label {
     color: #000000;
     -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
             flex-grow: 1;
     font-size: 16px;
@@ -556,7 +583,7 @@
     fill: #FAFAFA;
     height: 41px;
     margin-right: 7px;
-    padding: 7px 10px 10px;
+    padding: 10px;
     -webkit-transform: scale(0);
             transform: scale(0);
     -webkit-transition: -webkit-transform 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
