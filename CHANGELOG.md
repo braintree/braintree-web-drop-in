@@ -14,6 +14,7 @@ unreleased
 - Improve transition from payment sheet views to payment methods view
 - Use version 3.19.1 of braintree-web
 - Add `selectedPaymentMethod` property on `paymentMethodRequestable` events if applicable
+- Improve UI in older versions of iOS Safari
 
 1.3.1
 -----
