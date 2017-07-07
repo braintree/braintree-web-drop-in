@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix bug where Firefox would not render svgs when inside of a base element
+
 1.4.0
 ------
 - Add `paymentOptionSelected` event

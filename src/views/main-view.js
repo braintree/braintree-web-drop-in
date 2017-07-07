@@ -125,6 +125,8 @@ MainView.prototype._initialize = function () {
   } else {
     this.setPrimaryView(this.paymentSheetViewIDs[0]);
   }
+
+  applySVGFixForFirefoxWithBaseElement(this.element);
 };
 
 MainView.prototype.addView = function (view) {
@@ -273,6 +275,22 @@ MainView.prototype.teardown = function () {
     return Promise.resolve();
   });
 };
+
+// Firefox messes up relative links for svgs when a
+// base elment with an href property is set. Frameworks
+// such as Angular use the base elment for their routing.
+// Firefox plans to have this behavior fixed by October 2017
+// https://ricaud.me/blog/post/2017/04/On-the-utility-of-filing-bugs
+// Until then, we need a workaround to allow our svgs to work
+// in Firefox when inside a base element.
+function applySVGFixForFirefoxWithBaseElement(wrapper) {
+  var pageUrl = global.location.href.replace(global.location.hash, ''); // page url without the hash
+  var svgs = wrapper.querySelectorAll('svg use');
+
+  [].slice.call(svgs).forEach(function (svg) {
+    svg.setAttribute('xlink:href', pageUrl + svg.getAttribute('xlink:href'));
+  });
+}
 
 function snakeCaseToCamelCase(s) {
   return s.toLowerCase().replace(/(\_\w)/g, function (m) {
