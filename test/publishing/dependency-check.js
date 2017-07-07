@@ -33,7 +33,7 @@ describe('Shared dependency', function () {
           var dependencyVersion = dependencies[sharedDepName];
 
           if (sharedDepVersion !== dependencyVersion) {
-            throw new Error(depPkgName + ' should be using ' + sharedDepName + '@' + dependencyVersion + ' but was ' + sharedDepVersion);
+            throw new Error(depPkg.name + ' should be using ' + sharedDepName + '@' + dependencyVersion + ' but was ' + sharedDepVersion);
           }
         });
       });

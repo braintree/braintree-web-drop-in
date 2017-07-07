@@ -10,7 +10,7 @@
     "pretest": "npm run lint",
     "test": "karma start test/config/karma.js --single-run",
     "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec",
-    "test:publishing": "npm run pretest && ./node_modules/mocha/bin/mocha test/publishing",
+    "test:publishing": "npm run pretest && mocha test/publishing",
     "deploy:gh-pages": "./scripts/deploy-gh-pages"
   },
   "repository": {
