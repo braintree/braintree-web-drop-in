@@ -53,7 +53,10 @@ var VERSION = process.env.npm_package_version;
  * @function
  * @param {string} event The name of the event to which you are subscribing.
  * @param {function} handler A callback to handle the event.
- * @description Subscribes a handler function to a named event. `event` should be {@link Dropin~paymentMethodRequestablePayload|`paymentMethodRequestable`} or {@link Dropin~noPaymentMethodRequestablePayload|`noPaymentMethodRequestable`}.
+ * @description Subscribes a handler function to a named event. `event` should be one of the following:
+ *  * [`paymentMethodRequestable`](#event:paymentMethodRequestable)
+ *  * [`noPaymentMethodRequestable`](#event:noPaymentMethodRequestable)
+ *  * [`paymentOptionSelected`](#event:paymentOptionSelected)
  * @returns {void}
  * @example
  * <caption>Dynamically enable or disable your submit button based on whether or not the payment method is requestable</caption>
@@ -78,13 +81,46 @@ var VERSION = process.env.npm_package_version;
  *
  *   dropinInstance.on('paymentMethodRequestable', function (event) {
  *     console.log(event.type); // The type of Payment Method, e.g 'CreditCard', 'PayPalAccount'.
- *     console.log(event.selectedPaymentMethod); // If available, the payment method object.
+ *     console.log(event.isPaymentMethodSelected); // true if a customer has selected a payment method when paymentMethodRequestable fires
  *
  *     submitButton.removeAttribute('disabled');
  *   });
  *
  *   dropinInstance.on('noPaymentMethodRequestable', function () {
  *     submitButton.setAttribute('disabled', true);
+ *   });
+ * });
+ * @example
+ * <caption>Automatically submit nonce to server as soon as it becomes available</caption>
+ * var submitButton = document.querySelector('#submit-button');
+ *
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container'
+ * }, function (err, dropinInstance) {
+ *   function sendNonceToServer() {
+ *     dropinInstance.requestPaymentMethod(function (err, payload) {
+ *       if (err) {
+ *         // handle errors
+ *       }
+ *
+ *       // send payload.nonce to your server
+ *     });
+ *   }
+ *
+ *   // allows us to still request the payment method manually, such as
+ *   // when filling out a credit card form
+ *   submitButton.addEventListener('click', sendNonceToServer);
+ *
+ *   dropinInstance.on('paymentMethodRequestable', function (event) {
+ *     // if the nonce is already available (via PayPal authentication
+ *     // or by using a stored payment method), we can request the
+ *     // nonce right away. Otherwise, we wait for the customer to
+ *     // request the nonce by pressing the submit button once they
+ *     // are finished entering their credit card details
+ *     if (event.isPaymentMethodSelected) {
+ *       sendNonceToServer();
+ *     }
  *   });
  * });
  */
@@ -99,7 +135,11 @@ var VERSION = process.env.npm_package_version;
  * @typedef {object} Dropin~paymentMethodRequestablePayload
  * @description The event payload sent from {@link Dropin#on|`on`} with the {@link Dropin#event:paymentMethodRequestable|`paymentMethodRequestable`} event.
  * @property {string} type The type of payment method that is requestable. Either `CreditCard` or `PayPalAccount`.
- * @property {?Object} selectedPaymentMethod The payment method payload, either {@link Dropin~cardPaymentMethodPayload|`cardPaymentMethodPayload`} or {@link Dropin~paypalPaymentMethodPayload|`paypalPaymentMethodPayload`}. If this property does not exist, call {@link Dropin#requestPaymentMethod|`requestPaymentMethod`} to request the payment method.
+ * @property {boolean} isPaymentMethodSelected A property to determine if a payment method is currently selected when the payment method becomes requestable.
+ *
+ * This will be `true` any time a payment method is visably selected in the Drop-in UI, such as when PayPal authentication completes or a stored payment method is selected.
+ *
+ * This will be `false` when {@link Dropin#requestPaymentMethod|`requestPaymentMethod`} can be called, but a payment method is not currently selected. For instance, when a card form has been filled in with valid values, but has not been submitted to be converted into a payment method nonce.
  */
 
 /**

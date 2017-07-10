@@ -79,14 +79,11 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
 DropinModel.prototype.setPaymentMethodRequestable = function (options) {
   var shouldEmitEvent = this._shouldEmitRequestableEvent(options);
   var paymentMethodRequestableResponse = {
+    isPaymentMethodSelected: Boolean(options.selectedPaymentMethod),
     type: options.type
   };
 
   this._paymentMethodIsRequestable = options.isRequestable;
-
-  if (options.selectedPaymentMethod) {
-    paymentMethodRequestableResponse.selectedPaymentMethod = options.selectedPaymentMethod;
-  }
 
   if (options.isRequestable) {
     this._paymentMethodRequestableType = options.type;
