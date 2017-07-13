@@ -81,7 +81,7 @@ var VERSION = process.env.npm_package_version;
  *
  *   dropinInstance.on('paymentMethodRequestable', function (event) {
  *     console.log(event.type); // The type of Payment Method, e.g 'CreditCard', 'PayPalAccount'.
- *     console.log(event.isPaymentMethodSelected); // true if a customer has selected a payment method when paymentMethodRequestable fires
+ *     console.log(event.paymentMethodIsSelected); // true if a customer has selected a payment method when paymentMethodRequestable fires
  *
  *     submitButton.removeAttribute('disabled');
  *   });
@@ -118,7 +118,7 @@ var VERSION = process.env.npm_package_version;
  *     // nonce right away. Otherwise, we wait for the customer to
  *     // request the nonce by pressing the submit button once they
  *     // are finished entering their credit card details
- *     if (event.isPaymentMethodSelected) {
+ *     if (event.paymentMethodIsSelected) {
  *       sendNonceToServer();
  *     }
  *   });
@@ -135,7 +135,7 @@ var VERSION = process.env.npm_package_version;
  * @typedef {object} Dropin~paymentMethodRequestablePayload
  * @description The event payload sent from {@link Dropin#on|`on`} with the {@link Dropin#event:paymentMethodRequestable|`paymentMethodRequestable`} event.
  * @property {string} type The type of payment method that is requestable. Either `CreditCard` or `PayPalAccount`.
- * @property {boolean} isPaymentMethodSelected A property to determine if a payment method is currently selected when the payment method becomes requestable.
+ * @property {boolean} paymentMethodIsSelected A property to determine if a payment method is currently selected when the payment method becomes requestable.
  *
  * This will be `true` any time a payment method is visably selected in the Drop-in UI, such as when PayPal authentication completes or a stored payment method is selected.
  *

@@ -504,7 +504,7 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
         type: 'card',
-        isPaymentMethodSelected: false
+        paymentMethodIsSelected: false
       });
     });
 
@@ -576,7 +576,7 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
         type: 'ANOTHER_TYPE',
-        isPaymentMethodSelected: false
+        paymentMethodIsSelected: false
       });
     });
 
@@ -590,7 +590,7 @@ describe('DropinModel', function () {
       expect(this.model._paymentMethodRequestableType).to.not.exist;
     });
 
-    it('includes the isPaymentMethodSelected as true if Drop-in displays a selected payment method', function () {
+    it('includes the paymentMethodIsSelected as true if Drop-in displays a selected payment method', function () {
       var selectedPaymentMethod = {foo: 'bar'};
 
       this.model.setPaymentMethodRequestable({
@@ -601,11 +601,11 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
         type: 'TYPE',
-        isPaymentMethodSelected: true
+        paymentMethodIsSelected: true
       });
     });
 
-    it('includes the isPaymentMethodSelected as false if no payment method is actively selected', function () {
+    it('includes the paymentMethodIsSelected as false if no payment method is actively selected', function () {
       this.model.setPaymentMethodRequestable({
         isRequestable: true,
         type: 'TYPE'
@@ -613,7 +613,7 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
         type: 'TYPE',
-        isPaymentMethodSelected: false
+        paymentMethodIsSelected: false
       });
     });
   });
