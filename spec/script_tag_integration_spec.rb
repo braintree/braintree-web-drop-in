@@ -22,7 +22,7 @@ describe "Drop-in Script Tag Integration" do
     expect(page).to have_content("payment_method_nonce:")
   end
 
-  it "tokenizes PayPal" do
+  it "tokenizes PayPal", :paypal do
     visit "http://#{HOSTNAME}:#{PORT}/script-tag-integration.html"
 
     click_option("paypal")
