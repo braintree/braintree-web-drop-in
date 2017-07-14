@@ -18,7 +18,8 @@ notifications:
 env:
   matrix:
   - TEST="test"
-  - TEST="test:integration" PLATFORM="desktop" IS_INTEGRATION_TEST=true
+  - TEST="test:integration:paypal-only" PLATFORM="desktop" IS_INTEGRATION_TEST=true
+  - TEST="test:integration:skip-paypal" PLATFORM="desktop" IS_INTEGRATION_TEST=true
   # iOS tests on Travis are flaky. Run these manually before merging something in
   # - TEST="test:integration" PLATFORM="ios" IS_INTEGRATION_TEST=true
   global:
