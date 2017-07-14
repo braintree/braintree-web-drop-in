@@ -97,6 +97,11 @@
 <script src="web/dropin/dev/js/dropin.js"></script>
 
 <script>
+  // IE9 doesn't have console defined unless the dev tools are open
+  window.console = window.console || {};
+  window.console.log = window.console.log || function () {};
+</script>
+<script>
   var defaultCreateObject = {
     // If you are copying this demo app for your integration,
     // use your own client token or tokenization key
@@ -158,15 +163,6 @@
     return config;
   }
 
-  function log() {
-    if (!console || !console.log) {
-      // in IE without dev tools open
-      return;
-    }
-
-    console.log.apply(window, arguments);
-  }
-
   function createDropin () {
     var config = getDropinConfig();
 
@@ -190,12 +186,12 @@
 
         instance.on('paymentMethodRequestable', function (event) {
           payButton.removeAttribute('disabled');
-          log('paymentMethodRequestable', event);
+          console.log('paymentMethodRequestable', event);
         });
 
         instance.on('noPaymentMethodRequestable', function (event) {
           payButton.setAttribute('disabled', true);
-          log('noPaymentMethodRequestable');
+          console.log('noPaymentMethodRequestable');
         });
       } else {
         payButton.removeAttribute('disabled');
@@ -203,7 +199,7 @@
 
       if (!config.disablePaymentOptionSelectedListener) {
         instance.on('paymentOptionSelected', function (event) {
-          log('paymentOptionSelected', event.paymentOption);
+          console.log('paymentOptionSelected', event.paymentOption);
         });
       }
 
