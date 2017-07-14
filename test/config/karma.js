@@ -27,6 +27,9 @@ module.exports = function (config) {
     files: [
       '**/*.js'
     ],
-    exclude: ['**/*.swp']
+    exclude: [
+      '**/*.swp',
+      '**/publishing/*.js'
+    ]
   });
 };
