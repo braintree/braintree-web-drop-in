@@ -503,7 +503,8 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
-        type: 'card'
+        type: 'card',
+        paymentMethodIsSelected: false
       });
     });
 
@@ -574,7 +575,8 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
-        type: 'ANOTHER_TYPE'
+        type: 'ANOTHER_TYPE',
+        paymentMethodIsSelected: false
       });
     });
 
@@ -586,6 +588,33 @@ describe('DropinModel', function () {
       });
 
       expect(this.model._paymentMethodRequestableType).to.not.exist;
+    });
+
+    it('includes the paymentMethodIsSelected as true if Drop-in displays a selected payment method', function () {
+      var selectedPaymentMethod = {foo: 'bar'};
+
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'TYPE',
+        selectedPaymentMethod: selectedPaymentMethod
+      });
+
+      expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
+        type: 'TYPE',
+        paymentMethodIsSelected: true
+      });
+    });
+
+    it('includes the paymentMethodIsSelected as false if no payment method is actively selected', function () {
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'TYPE'
+      });
+
+      expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
+        type: 'TYPE',
+        paymentMethodIsSelected: false
+      });
     });
   });
 
