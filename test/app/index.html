@@ -158,6 +158,15 @@
     return config;
   }
 
+  function log() {
+    if (!console || !console.log) {
+      // in IE without dev tools open
+      return;
+    }
+
+    console.log.apply(window, arguments);
+  }
+
   function createDropin () {
     var config = getDropinConfig();
 
@@ -181,12 +190,12 @@
 
         instance.on('paymentMethodRequestable', function (event) {
           payButton.removeAttribute('disabled');
-          console.log('paymentMethodRequestable', event);
+          log('paymentMethodRequestable', event);
         });
 
         instance.on('noPaymentMethodRequestable', function (event) {
           payButton.setAttribute('disabled', true);
-          console.log('noPaymentMethodRequestable');
+          log('noPaymentMethodRequestable');
         });
       } else {
         payButton.removeAttribute('disabled');
@@ -194,7 +203,7 @@
 
       if (!config.disablePaymentOptionSelectedListener) {
         instance.on('paymentOptionSelected', function (event) {
-          console.log('paymentOptionSelected', event.paymentOption);
+          log('paymentOptionSelected', event.paymentOption);
         });
       }
 
