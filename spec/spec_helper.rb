@@ -8,6 +8,8 @@ Dotenv.load
 
 HOSTNAME = `hostname`.chomp
 PORT = ENV["PORT"] || 4567
+RUN_PAYPAL_ONLY = ENV["RUN_PAYPAL_ONLY"]
+SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
 
 Capybara.default_driver = :selenium
 Capybara.app_host = "https://#{HOSTNAME}:#{PORT}"
@@ -75,5 +77,13 @@ RSpec.configure do |config|
 
   config.define_derived_metadata(:file_path => %r{/spec}) do |metadata|
     metadata[:sauce] = true
+  end
+
+  config.filter_run_excluding :paypal => true if SKIP_PAYPAL
+
+  if RUN_PAYPAL_ONLY
+    config.around do |example|
+      example.run if example.metadata[:paypal]
+    end
   end
 end
