@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Add `aria-label` attribute to payment options
+
 1.4.0
 ------
 - Add `paymentOptionSelected` event
