@@ -10,6 +10,8 @@
     "pretest": "npm run lint",
     "test": "karma start test/config/karma.js --single-run",
     "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec",
+    "test:integration:paypal-only": "RUN_PAYPAL_ONLY=true npm run test:integration",
+    "test:integration:paypal-skipped": "SKIP_PAYPAL=true npm run test:integration",
     "test:publishing": "npm run pretest && mocha test/publishing",
     "deploy:gh-pages": "./scripts/deploy-gh-pages",
     "prepublish": "npm run test:publishing"
