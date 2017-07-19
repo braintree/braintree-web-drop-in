@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+
+- Use version 3.20.0 of braintree-web
+
 1.4.0
 ------
 - Add `paymentOptionSelected` event
