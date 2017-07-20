@@ -1,6 +1,11 @@
 IS_TRAVIS = ENV["IS_TRAVIS"]
+PORT = ENV["PORT"] || 4567
 
 module DropIn
+  def visit_dropin_url(path = "")
+    visit "http://#{get_hostname}:#{PORT}#{path}"
+  end
+
   def get_hostname
     return `hostname`.chomp if !IS_TRAVIS
 
