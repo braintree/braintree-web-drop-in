@@ -36,13 +36,7 @@ def download_sauce_connect
 end
 
 def should_run_on_sauce(metadata)
-  if RUN_PAYPAL_ONLY
-    return metadata.include?(:paypal)
-  end
-
-  if SKIP_PAYPAL
-    return metadata.include?(:paypal) == false
-  end
+  return metadata.include?(:paypal) if RUN_PAYPAL_ONLY
 
   return true
 end
@@ -90,4 +84,6 @@ RSpec.configure do |config|
   config.define_derived_metadata(:file_path => %r{/spec}) do |metadata|
     metadata[:sauce] = true if should_run_on_sauce(metadata)
   end
+
+  config.filter_run_excluding :paypal => true if SKIP_PAYPAL
 end
