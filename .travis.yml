@@ -8,7 +8,7 @@ script: npm run $TEST
 addons:
   sauce_connect: true
   hosts:
-    - travis.dev
+    - braintree-web-dropin.example
 notifications:
   email: false
   slack:
