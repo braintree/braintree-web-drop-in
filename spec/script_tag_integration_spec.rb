@@ -1,7 +1,7 @@
 require_relative "helpers/drop_in_helper"
 require_relative "helpers/paypal_helper"
 
-HOSTNAME = "braintree-web-dropin.example"
+HOSTNAME = get_hostname
 PORT = ENV["PORT"] || 4567
 
 describe "Drop-in Script Tag Integration" do

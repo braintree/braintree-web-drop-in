@@ -2,7 +2,7 @@ require_relative "helpers/paypal_helper"
 require_relative "helpers/drop_in_helper"
 require_relative "helpers/skip_browser_helper"
 
-HOSTNAME = "braintree-web-dropin.example"
+HOSTNAME = get_hostname
 PORT = ENV["PORT"] || 4567
 
 describe "Drop-in" do

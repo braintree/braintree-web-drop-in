@@ -1,4 +1,12 @@
+IS_TRAVIS = ENV["IS_TRAVIS"]
+
 module DropIn
+  def get_hostname
+    return `hostname`.chomp if !IS_TRAVIS
+
+    return "braintree-web-dropin.example"
+  end
+
   def click_option(option_type)
     find(".braintree-option__#{option_type} .braintree-option__label").click
   end
