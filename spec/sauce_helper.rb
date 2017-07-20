@@ -53,8 +53,4 @@ Sauce.config do |c|
   c["tunnel-identifier"] = tunnel_id
   c[:sauce_connect_4_executable] = OS.get_sauce_bin
   c[:browsers] = select_browsers
-  c[:prerun] = {
-    :executable => 'https://gist.githubusercontent.com/quinnjn/5dbf0bed3b39bec6f08c1e8262ef7beb/raw/01cd75829af0a06b80e07ed2d9309206972ddf09/helloworld.bat',
-    :background => false
-  }
 end

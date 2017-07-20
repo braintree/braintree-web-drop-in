@@ -7,6 +7,8 @@ before_install:
 script: npm run $TEST
 addons:
   sauce_connect: true
+  hosts:
+    - travis.dev
 notifications:
   email: false
   slack:
