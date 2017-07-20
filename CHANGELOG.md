@@ -6,6 +6,7 @@ unreleased
 
 - Use version 3.20.0 of braintree-web
 - Update browser-detection to v1.5.0
+- Update checkout.js to v4.0.94
 
 1.4.0
 ------
