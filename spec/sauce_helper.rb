@@ -16,13 +16,13 @@ def select_browsers
   if !PLATFORM || PLATFORM == "desktop"
     browsers += [
       ["Windows 10", "chrome", 56], # chrome 57 has a bug where iframes can't have characters sent into them
-      # ["Windows 10", "firefox", 47],
+      ["Windows 10", "firefox", 47],
       # the Safari driver can't send keys
       # to inputs in iframes. Both hosted
       # fields and paypal use iframe inputs
       # ["OS X 10.11", "safari", nil],
-      # ["Windows 7", "internet explorer", "9"],
-      # ["Windows 8", "internet explorer", "10"],
+      ["Windows 7", "internet explorer", "9"],
+      ["Windows 8", "internet explorer", "10"],
       # Sauce is having problems logging in for PayPal Checkout in Windows 10
       ["Windows 8.1", "internet explorer", "11"],
     ]
