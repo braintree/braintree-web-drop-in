@@ -170,7 +170,8 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
 
   this.model.setPaymentMethodRequestable({
     isRequestable: Boolean(paymentMethod),
-    type: paymentMethod && paymentMethod.type
+    type: paymentMethod && paymentMethod.type,
+    selectedPaymentMethod: paymentMethod
   });
 
   this.model.clearError();
