@@ -35,6 +35,12 @@ def download_sauce_connect
   puts "[DOWNLOADED] Sauce connect"
 end
 
+def should_run_on_sauce(metadata)
+  return metadata.include?(:paypal) if RUN_PAYPAL_ONLY
+
+  return true
+end
+
 def wait_port(port)
   loop do
     `lsof -i :#{port}`
@@ -76,14 +82,8 @@ RSpec.configure do |config|
   end
 
   config.define_derived_metadata(:file_path => %r{/spec}) do |metadata|
-    metadata[:sauce] = true
+    metadata[:sauce] = true if should_run_on_sauce(metadata)
   end
 
   config.filter_run_excluding :paypal => true if SKIP_PAYPAL
-
-  if RUN_PAYPAL_ONLY
-    config.around do |example|
-      example.run if example.metadata[:paypal]
-    end
-  end
 end
