@@ -192,6 +192,36 @@ describe('CardView', function () {
       expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
     });
 
+    it('has cardholderName if provided in merchant configuration', function () {
+      this.model.merchantConfiguration.card = {
+        cardholderName: true
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.exist;
+    });
+
+    it('doesnot include cardholderName if not provided in merchant configuration', function () {
+      this.model.merchantConfiguration.card = {};
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.not.exist;
+    });
+
     it('starts async dependency', function () {
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
 
@@ -598,6 +628,8 @@ describe('CardView', function () {
         _generateFieldSelector: CardView.prototype._generateFieldSelector,
         _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
         _validateForm: this.sandbox.stub(),
+        _validateCardholderName: this.sandbox.stub().returns(true),
+        _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
         getElementById: BaseView.prototype.getElementById,
         hideFieldError: CardView.prototype.hideFieldError,
         showFieldError: CardView.prototype.showFieldError,
@@ -1572,6 +1604,9 @@ describe('CardView', function () {
         fieldErrors: {},
         model: this.model,
         _validateForm: CardView.prototype._validateForm,
+        _validateCardholderName: this.sandbox.stub().returns(true),
+        _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
+        _setupCardholderName: this.sandbox.stub(),
         client: {
           getConfiguration: fake.configuration
         },

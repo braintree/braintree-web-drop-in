@@ -64,6 +64,22 @@
           <div data-braintree-id="card-view-icons" class="braintree-sheet__icons"></div>
         </div>
         <div class="braintree-sheet__content braintree-sheet__content--form">
+          <div data-braintree-id="cardholder-name-field-group" class="braintree-form__field-group">
+            <div class="braintree-form__label">Cardholder Name</div>
+            <div class="braintree-form__field">
+              <div class="braintree-form-cardholder-name braintree-form__hosted-field">
+                <input type="text" placeholder="Cardholder Name"/>
+              </div>
+              <div class="braintree-form__icon-container">
+                <div class="braintree-form__icon braintree-form__field-error-icon">
+                  <svg width="24" height="24">
+                  <use xlink:href="#iconError"></use>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div data-braintree-id="cardholder-name-field-error" class="braintree-form__field-error">Please fill out a cardholder name.</div>
+          </div>
           <div data-braintree-id="number-field-group" class="braintree-form__field-group">
             <div class="braintree-form__label">{{cardNumberLabel}}</div>
             <div class="braintree-form__field">
