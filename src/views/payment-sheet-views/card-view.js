@@ -484,7 +484,15 @@ CardView.prototype.requestPaymentMethod = function () {
 };
 
 CardView.prototype.onSelection = function () {
-  if (this.hostedFieldsInstance) {
+  if (!this.hostedFieldsInstance) {
+    return;
+  }
+
+  if (this.hasCardholderName) {
+    setTimeout(function () { // wait until input is visible
+      this.cardholderNameInput.focus();
+    }.bind(this), 1);
+  } else {
     this.hostedFieldsInstance.focus('number');
   }
 };
