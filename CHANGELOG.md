@@ -6,6 +6,7 @@ unreleased
 - Use version 3.20.0 of braintree-web
 - Update browser-detection to v1.5.0
 - Add `aria-label` attribute to payment options
+- Add `cardholderName` option to card configuration
 
 1.4.0
 ------

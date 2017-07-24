@@ -10,6 +10,8 @@
  * Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set:
  *
  * * `data-locale`
+ * * `data-card.cardholder-name`
+ * * `data-card.cardholder-name.required`
  * * `data-payment-option-priority`
  * * `data-paypal.amount`
  * * `data-paypal.currency`
@@ -69,6 +71,30 @@
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-locale="de_DE"
  *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
+ *    data-paypal.flow="checkout"
+ *    data-paypal.amount="10.00"
+ *    data-paypal.currency="USD"
+ *    data-paypal-credit.flow="vault"
+ *   ></script>
+ *   <input type="submit" value="Purchase"></input>
+ * </form>
+ *
+ * @example
+ * <caption>Including cardholder name field in card form</caption>
+ * <form id="payment-form" action="/" method="post">
+ *   <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *    data-card.cardholder-name="true"
+ *   ></script>
+ *   <input type="submit" value="Purchase"></input>
+ * </form>
+ *
+ * @example
+ * <caption>Including a required cardholder name field in card form</caption>
+ * <form id="payment-form" action="/" method="post">
+ *   <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *    data-card.cardholder-name.required="true"
  *   ></script>
  *   <input type="submit" value="Purchase"></input>
  * </form>
@@ -122,6 +148,8 @@ var VERSION = process.env.npm_package_version;
  * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit']`. Payment options omitted from this array will not be offered to the customer.
  *
  * @param {object} [options.card] The configuration options for cards. If this option is omitted, cards will still appear as a payment option. To remove cards as a payment option, use `paymentOptionPriority`. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` configuration can be customized.
+ * @param {boolean|object} [options.card.cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
+ * @param {boolean} [options.card.cardholderName.required=false] Whether or not the cardholder name field should be required to fill in when validating the card details. If set to `true`, calling `requestPaymentMethod` will error if no cardholder name is supplied. If set to `false`, any cardholder name provided will be encoded in the nonce, but if left blank, it will not cause the request to fail.
  * @param {object} [options.card.overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
  * @param {object} [options.card.overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/current/module-braintree-web_hosted-fields.html#~styleOptions).
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
@@ -320,6 +348,28 @@ var VERSION = process.env.npm_package_version;
  *           color: 'red' // Change the focus color to red for all inputs
  *         }
  *       }
+ *     }
+ *   }
+ * }, callback);
+ *
+ * @example
+ * <caption>Including a cardholder name field</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   card: {
+ *     cardholderName: true
+ *   }
+ * }, callback);
+ *
+ * @example
+ * <caption>Including a required cardholder name field</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   card: {
+ *     cardholderName: {
+ *       required: true
  *     }
  *   }
  * }, callback);
