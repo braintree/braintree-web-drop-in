@@ -2,9 +2,6 @@ require_relative "helpers/paypal_helper"
 require_relative "helpers/drop_in_helper"
 require_relative "helpers/skip_browser_helper"
 
-HOSTNAME = `hostname`.chomp
-PORT = ENV["PORT"] || 4567
-
 describe "Drop-in" do
   include SkipBrowser
   include DropIn
@@ -12,7 +9,7 @@ describe "Drop-in" do
 
   describe "tokenizes" do
     it "a card" do
-      visit "http://#{HOSTNAME}:#{PORT}"
+      visit_dropin_url
 
       click_option("card")
       hosted_field_send_input("number", "4111111111111111")
@@ -33,7 +30,7 @@ describe "Drop-in" do
     end
 
     it "PayPal", :paypal do
-      visit "http://#{HOSTNAME}:#{PORT}"
+      visit_dropin_url
 
       click_option("paypal")
 
@@ -48,7 +45,7 @@ describe "Drop-in" do
     end
 
     it "PayPal Credit", :paypal do
-      visit "http://#{HOSTNAME}:#{PORT}"
+      visit_dropin_url
 
       click_option("paypalCredit")
 
@@ -67,7 +64,7 @@ describe "Drop-in" do
 
   describe "promise API" do
     it "tokenizes a card" do
-      visit "http://#{HOSTNAME}:#{PORT}/promise.html"
+      visit_dropin_url("/promise.html")
 
       click_option("card")
       hosted_field_send_input("number", "4111111111111111")
@@ -88,7 +85,7 @@ describe "Drop-in" do
     end
 
     it "tokenizes PayPal", :paypal do
-      visit "http://#{HOSTNAME}:#{PORT}/promise.html"
+      visit_dropin_url("/promise.html")
 
       click_option("paypal")
 
@@ -105,7 +102,7 @@ describe "Drop-in" do
 
   describe "updateConfiguration" do
     it "updates PayPal configuration", :paypal do
-      visit "http://#{HOSTNAME}:#{PORT}?showUpdatePayPalMenu=true"
+      visit_dropin_url("?showUpdatePayPalMenu=true")
 
       find("#paypal-config-checkout").click()
       click_option("paypal")
@@ -117,13 +114,13 @@ describe "Drop-in" do
       find("#paypal-config-vault").click()
       click_option("paypal")
 
-      complete_iframe_flow do
+      open_already_logged_in_paypal_flow do
         expect(page).to have_content("future payments");
       end
     end
 
     it "updates PayPal Credit configuration", :paypal do
-      visit "http://#{HOSTNAME}:#{PORT}?showUpdatePayPalMenu=true"
+      visit_dropin_url("?showUpdatePayPalMenu=true")
 
       find("#paypal-config-checkout").click()
       click_option("paypalCredit")
@@ -135,13 +132,13 @@ describe "Drop-in" do
       find("#paypal-config-vault").click()
       click_option("paypalCredit")
 
-      complete_iframe_flow do
+      open_already_logged_in_paypal_flow do
         expect(page).to have_content("future payments");
       end
     end
 
     it "removes authorized PayPal account when configuration is updated", :paypal do
-      visit "http://#{HOSTNAME}:#{PORT}?showUpdatePayPalMenu=true"
+      visit_dropin_url("?showUpdatePayPalMenu=true")
 
       find("#paypal-config-checkout").click()
       click_option("paypal")
@@ -160,7 +157,7 @@ describe "Drop-in" do
 
   describe "events" do
     it "disable and enable submit button on credit card validity" do
-      visit "http://#{HOSTNAME}:#{PORT}"
+      visit_dropin_url
 
       click_option("card")
 
@@ -187,7 +184,7 @@ describe "Drop-in" do
     end
 
     it "enable submit button on PayPal authorization", :paypal do
-      visit "http://#{HOSTNAME}:#{PORT}"
+      visit_dropin_url
 
       click_option("paypal")
 
@@ -213,19 +210,19 @@ describe "Drop-in" do
 
   describe "setup" do
     it "requires a selector or container" do
-      visit "http://#{HOSTNAME}:#{PORT}?container=null&selector=null"
+      visit_dropin_url("?container=null&selector=null")
 
       expect(find("#error")).to have_content("options.container is required.")
     end
 
     it "requires authorization" do
-      visit "http://#{HOSTNAME}:#{PORT}?authorization=null"
+      visit_dropin_url("?authorization=null")
 
       expect(find("#error")).to have_content("options.authorization is required.")
     end
 
     it "does not setup paypal when not configured" do
-      visit "http://#{HOSTNAME}:#{PORT}?paypal=null&paypalCredit=null"
+      visit_dropin_url("?paypal=null&paypalCredit=null")
 
       expect(page).not_to have_selector(".braintree-option__paypal")
       expect(page).to have_content("Card Number")
@@ -233,14 +230,14 @@ describe "Drop-in" do
     end
 
     it "supports locale" do
-      visit "http://#{HOSTNAME}:#{PORT}?locale=es_ES"
+      visit_dropin_url("?locale=es_ES")
 
       expect(page).to have_content("Tarjeta")
     end
 
     it "supports custom locale object" do
       translations = '{"chooseAWayToPay":"My Choose a Way to Pay String"}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?translations=#{translations}&locale=es_ES")
+      visit_dropin_url("?translations=#{translations}&locale=es_ES")
 
       expect(page).to have_content("My Choose a Way to Pay String")
       expect(page).to have_content("Tarjeta")
@@ -249,7 +246,7 @@ describe "Drop-in" do
 
   describe "payment option priority" do
     it "uses default priority of card, paypal, paypalCredit" do
-      visit "http://#{HOSTNAME}:#{PORT}"
+      visit_dropin_url
 
       find(".braintree-heading")
       payment_options = all(:css, ".braintree-option__label")
@@ -261,7 +258,7 @@ describe "Drop-in" do
 
     it "uses custom priority of paypal, card, paypalCredit" do
       options = '["paypal","card","paypalCredit"]'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}")
+      visit_dropin_url("?paymentOptionPriority=#{options}")
 
       find(".braintree-heading")
       payment_options = all(:css, ".braintree-option__label")
@@ -273,7 +270,7 @@ describe "Drop-in" do
 
     it "shows an error when an unrecognized payment option is specified" do
       options = '["dummy","card"]'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}")
+      visit_dropin_url("?paymentOptionPriority=#{options}")
 
       expect(find("#error")).to have_content("paymentOptionPriority: Invalid payment option specified.")
     end
@@ -341,7 +338,7 @@ describe "Drop-in" do
   describe "Hosted Fields overrides" do
     it "can remove a field from the card form" do
       options = '{"overrides":{"fields":{"cvv":null}}}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
@@ -352,7 +349,7 @@ describe "Drop-in" do
 
     it "can override field configurations" do
       options = '{"overrides":{"fields":{"cvv":{"placeholder":"my placeholder"}}}}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
@@ -365,7 +362,7 @@ describe "Drop-in" do
 
     it "can override style configurations" do
       options = '{"overrides":{"styles":{"input":{"font-size":"20px"}}}}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
