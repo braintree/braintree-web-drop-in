@@ -279,7 +279,7 @@ describe "Drop-in" do
   describe "cardholder name" do
     it "can add a cardholder name field to the card form" do
       options = '{"cardholderName":true}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
@@ -287,7 +287,7 @@ describe "Drop-in" do
     end
 
     it "does not include cardholder name field if not included in config" do
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}")
+      visit_dropin_url
 
       click_option("card")
 
@@ -296,7 +296,7 @@ describe "Drop-in" do
 
     it "does not require cardholder name" do
       options = '{"cardholderName":true}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
@@ -314,7 +314,7 @@ describe "Drop-in" do
 
     it "can set cardholder name to be required" do
       options = '{"cardholderName":{"required":true}}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
