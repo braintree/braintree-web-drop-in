@@ -114,7 +114,7 @@ describe "Drop-in" do
       find("#paypal-config-vault").click()
       click_option("paypal")
 
-      complete_iframe_flow do
+      open_already_logged_in_paypal_flow do
         expect(page).to have_content("future payments");
       end
     end
@@ -132,7 +132,7 @@ describe "Drop-in" do
       find("#paypal-config-vault").click()
       click_option("paypalCredit")
 
-      complete_iframe_flow do
+      open_already_logged_in_paypal_flow do
         expect(page).to have_content("future payments");
       end
     end
