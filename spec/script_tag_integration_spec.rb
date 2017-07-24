@@ -1,15 +1,12 @@
 require_relative "helpers/drop_in_helper"
 require_relative "helpers/paypal_helper"
 
-HOSTNAME = `hostname`.chomp
-PORT = ENV["PORT"] || 4567
-
 describe "Drop-in Script Tag Integration" do
   include DropIn
   include PayPal
 
   it "tokenizes a card" do
-    visit "http://#{HOSTNAME}:#{PORT}/script-tag-integration.html"
+    visit_dropin_url("/script-tag-integration.html")
 
     click_option("card")
     hosted_field_send_input("number", "4111111111111111")
@@ -23,7 +20,7 @@ describe "Drop-in Script Tag Integration" do
   end
 
   it "tokenizes PayPal", :paypal do
-    visit "http://#{HOSTNAME}:#{PORT}/script-tag-integration.html"
+    visit_dropin_url("/script-tag-integration.html")
 
     click_option("paypal")
 
@@ -38,7 +35,7 @@ describe "Drop-in Script Tag Integration" do
   end
 
   it "does not submit form if card form is invalid" do
-    visit "http://#{HOSTNAME}:#{PORT}/script-tag-integration.html"
+    visit_dropin_url("/script-tag-integration.html")
 
     click_option("card")
     hosted_field_send_input("number", "4111111111111111")
@@ -49,7 +46,7 @@ describe "Drop-in Script Tag Integration" do
   end
 
   it "accepts data attributes as create options" do
-    visit "http://#{HOSTNAME}:#{PORT}/script-tag-integration.html"
+    visit_dropin_url("/script-tag-integration.html")
 
     # Accepts an array for payment option priority
     find(".braintree-heading")
