@@ -3,7 +3,7 @@ PORT = ENV["PORT"] || 4567
 
 module DropIn
   def visit_dropin_url(path = "")
-    visit "http://#{get_hostname}:#{PORT}#{path}"
+    visit URI.encode("http://#{get_hostname}:#{PORT}#{path}")
   end
 
   def get_hostname

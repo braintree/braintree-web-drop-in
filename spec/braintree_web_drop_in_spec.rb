@@ -237,7 +237,7 @@ describe "Drop-in" do
 
     it "supports custom locale object" do
       translations = '{"chooseAWayToPay":"My Choose a Way to Pay String"}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?translations=#{translations}&locale=es_ES")
+      visit_dropin_url("?translations=#{translations}&locale=es_ES")
 
       expect(page).to have_content("My Choose a Way to Pay String")
       expect(page).to have_content("Tarjeta")
@@ -258,7 +258,7 @@ describe "Drop-in" do
 
     it "uses custom priority of paypal, card, paypalCredit" do
       options = '["paypal","card","paypalCredit"]'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}")
+      visit_dropin_url("?paymentOptionPriority=#{options}")
 
       find(".braintree-heading")
       payment_options = all(:css, ".braintree-option__label")
@@ -270,7 +270,7 @@ describe "Drop-in" do
 
     it "shows an error when an unrecognized payment option is specified" do
       options = '["dummy","card"]'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?paymentOptionPriority=#{options}")
+      visit_dropin_url("?paymentOptionPriority=#{options}")
 
       expect(find("#error")).to have_content("paymentOptionPriority: Invalid payment option specified.")
     end
@@ -279,7 +279,7 @@ describe "Drop-in" do
   describe "Hosted Fields overrides" do
     it "can remove a field from the card form" do
       options = '{"overrides":{"fields":{"cvv":null}}}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
@@ -290,7 +290,7 @@ describe "Drop-in" do
 
     it "can override field configurations" do
       options = '{"overrides":{"fields":{"cvv":{"placeholder":"my placeholder"}}}}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
@@ -303,7 +303,7 @@ describe "Drop-in" do
 
     it "can override style configurations" do
       options = '{"overrides":{"styles":{"input":{"font-size":"20px"}}}}'
-      visit URI.encode("http://#{HOSTNAME}:#{PORT}?card=#{options}")
+      visit_dropin_url("?card=#{options}")
 
       click_option("card")
 
