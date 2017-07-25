@@ -304,7 +304,7 @@ describe "Drop-in" do
       hosted_field_send_input("expirationDate", "1019")
       hosted_field_send_input("cvv", "123")
 
-      expect(page).to have_button('Pay', disabled: false)
+      expect(page).to have_button("Pay", disabled: false)
 
       submit_pay
 
