@@ -208,7 +208,7 @@ describe('CardView', function () {
       expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.exist;
     });
 
-    it('doesnot include cardholderName if not provided in merchant configuration', function () {
+    it('does not include cardholderName if not provided in merchant configuration', function () {
       this.model.merchantConfiguration.card = {};
 
       new CardView({ // eslint-disable-line no-new
