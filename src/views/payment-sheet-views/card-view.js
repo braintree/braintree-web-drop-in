@@ -101,9 +101,14 @@ CardView.prototype._setupCardholderName = function (cardholderNameField) {
 
   if (cardholderNameOptions.required) {
     this.cardholderNameInput.addEventListener('blur', function () {
-      if (this.cardholderNameInput.value.length === 0) {
-        classlist.add(cardholderNameField, 'braintree-form__field-group--has-error');
-      }
+      // the active element inside the blur event is the docuemnt.body
+      // by taking it out of the event loop, we can detect the new
+      // active element (hosted field or other card view element)
+      setTimeout(function () {
+        if (isCardViewElement() && this.cardholderNameInput.value.length === 0) {
+          classlist.add(cardholderNameField, 'braintree-form__field-group--has-error');
+        }
+      }.bind(this), 0);
     }.bind(this), false);
   }
 };
@@ -397,12 +402,10 @@ CardView.prototype._validateCardholderName = function () {
 CardView.prototype._onBlurEvent = function (event) {
   var field = event.fields[event.emittedBy];
   var fieldGroup = this.getElementById(camelCaseToKebabCase(event.emittedBy) + '-field-group');
-  var activeId = document.activeElement && document.activeElement.id;
-  var isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
-  if (isHostedFieldsElement && field.isEmpty) {
+  if (isCardViewElement() && field.isEmpty) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
@@ -517,6 +520,14 @@ CardView.prototype._isCardTypeSupported = function (cardType) {
 
   return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
+
+function isCardViewElement() {
+  var activeId = document.activeElement && document.activeElement.id;
+  var isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
+  var isNormalFieldElement = activeId.indexOf('braintree__card-view-input') !== -1;
+
+  return isHostedFieldsElement || isNormalFieldElement;
+}
 
 function camelCaseToKebabCase(string) {
   return string.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
