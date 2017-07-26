@@ -4,7 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Use version 3.20.1 of braintree-web
-- Update browser-detection to v1.5.0
+- Update browser-detection to v1.6.0
 - Add `aria-label` attribute to payment options
 - Update checkout.js to v4.0.95
 
