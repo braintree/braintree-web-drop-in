@@ -593,6 +593,22 @@ describe('MainView', function () {
       });
     });
 
+    describe('for removeActivePaymentMethod', function () {
+      it('calls removeActivePaymentMethod if there is an active view', function (done) {
+        var optionsView = {ID: 'options', removeActivePaymentMethod: this.sandbox.stub()};
+
+        this.mainView.addView(optionsView);
+
+        this.sandbox.stub(this.model, 'getActivePaymentView').returns('options');
+        this.model._emit('removeActivePaymentMethod');
+
+        setTimeout(function () {
+          expect(optionsView.removeActivePaymentMethod).to.be.calledOnce;
+          done();
+        }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+      });
+    });
+
     describe('for changeActivePaymentView', function () {
       beforeEach(function () {
         this.sandbox.stub(this.model, 'setPaymentMethodRequestable');
