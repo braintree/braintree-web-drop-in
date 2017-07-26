@@ -309,8 +309,6 @@ Dropin.prototype._initialize = function (callback) {
  * dropinInstance.updateConfiguration('paypal', 'amount', '10.00');
  */
 Dropin.prototype.updateConfiguration = function (property, key, value) {
-  var isOnMethodsView, hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
-
   if (UPDATABLE_CONFIGURATION_OPTIONS.indexOf(property) === -1) {
     return;
   }
@@ -321,13 +319,57 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
     return;
   }
 
+  this._removeUnvaultedPaymentMethods(function (paymentMethod) {
+    return paymentMethod.type === constants.paymentMethodTypes[property];
+  });
+  this._navigateToInitialView();
+};
+
+/**
+ * Removes the currently selected payment method and returns the customer to the payment options view.
+ * @public
+ * @returns {void}
+ * @example
+ * dropinInstance.requestPaymentMethod(function (requestPaymentMethodError, payload) {
+ *   if (requestPaymentMethodError) {
+ *     // handle errors
+ *     return;
+ *   }
+ *
+ *   functionToSendNonceToServer(payload.nonce, function (transactionError, response) {
+ *     if (transactionError) {
+ *       // transaction sale with selected payment method failed
+ *       // clear the selected payment method and add a message
+ *       // to the checkout page about the failure
+ *       dropinInstance.clearActivePaymentMethod();
+ *       divForErrorMessages.textContent = 'my error message about entering a different payment method.';
+ *     } else {
+ *       // redirect to success page
+ *     }
+ *   });
+ * });
+ */
+Dropin.prototype.clearActivePaymentMethod = function () {
+  this._removeUnvaultedPaymentMethods();
+
+  this._navigateToInitialView();
+
+  this._model.removeActivePaymentMethodView();
+};
+
+Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
+  filter = filter || function () { return true; };
+
   this._model.getPaymentMethods().forEach(function (paymentMethod) {
-    if (paymentMethod.type === constants.paymentMethodTypes[property] && !paymentMethod.vaulted) {
+    if (filter(paymentMethod) && !paymentMethod.vaulted) {
       this._model.removePaymentMethod(paymentMethod);
     }
   }.bind(this));
+};
 
-  isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
+Dropin.prototype._navigateToInitialView = function () {
+  var hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
+  var isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
 
   if (isOnMethodsView) {
     hasNoSavedPaymentMethods = this._model.getPaymentMethods().length === 0;

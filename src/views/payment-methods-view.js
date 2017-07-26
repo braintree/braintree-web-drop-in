@@ -2,6 +2,9 @@
 
 var BaseView = require('./base-view');
 var PaymentMethodView = require('./payment-method-view');
+var DropinError = require('../lib/dropin-error');
+var classlist = require('../lib/classlist');
+var errors = require('../constants').errors;
 var Promise = require('../lib/promise');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
@@ -34,6 +37,15 @@ PaymentMethodsView.prototype._initialize = function () {
   for (i = paymentMethods.length - 1; i >= 0; i--) {
     this._addPaymentMethod(paymentMethods[i]);
   }
+};
+
+PaymentMethodsView.prototype.removeActivePaymentMethod = function () {
+  if (!this.activeMethodView) {
+    return;
+  }
+  this.activeMethodView.setActive(false);
+  this.activeMethodView = null;
+  classlist.add(this._headingLabel, 'braintree-no-payment-method-selected');
 };
 
 PaymentMethodsView.prototype._getPaymentMethodString = function () {
@@ -93,9 +105,13 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
     previousActiveMethodView.setActive(false);
   }
   this.activeMethodView.setActive(true);
+  classlist.remove(this._headingLabel, 'braintree-no-payment-method-selected');
 };
 
 PaymentMethodsView.prototype.requestPaymentMethod = function () {
+  if (!this.activeMethodView) {
+    return Promise.reject(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
+  }
   return Promise.resolve(this.activeMethodView.paymentMethod);
 };
 

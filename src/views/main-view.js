@@ -106,6 +106,14 @@ MainView.prototype._initialize = function () {
     activePaymentView.onSelection();
   }.bind(this));
 
+  this.model.on('removeActivePaymentMethod', function () {
+    var activePaymentView = this.getView(this.model.getActivePaymentView());
+
+    if (activePaymentView) {
+      activePaymentView.removeActivePaymentMethod();
+    }
+  }.bind(this));
+
   if (hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
       client: this.client,
