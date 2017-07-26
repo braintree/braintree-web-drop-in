@@ -155,6 +155,41 @@ describe "Drop-in" do
     end
   end
 
+  describe "clearActivePaymentMethod" do
+    it "clears active payment method card" do
+      visit_dropin_url
+
+      click_option("card")
+      hosted_field_send_input("number", "4111111111111111")
+      hosted_field_send_input("expirationDate", "1019")
+      hosted_field_send_input("cvv", "123")
+
+      submit_pay
+
+      expect(page).to have_selector(".braintree-method.braintree-method--active")
+
+      find("#clear-button").click
+
+      expect(page).to_not have_selector(".braintree-method.braintree-method--active")
+    end
+
+    it "clears active payment method card", :paypal do
+      visit_dropin_url
+
+      click_option("paypal")
+
+      open_popup_and_complete_login
+
+      submit_pay
+
+      expect(page).to have_selector(".braintree-method.braintree-method--active")
+
+      find("#clear-button").click
+
+      expect(page).to_not have_selector(".braintree-method.braintree-method--active")
+    end
+  end
+
   describe "events" do
     it "disable and enable submit button on credit card validity" do
       visit_dropin_url
