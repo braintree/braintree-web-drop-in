@@ -1024,6 +1024,7 @@ describe('Dropin', function () {
           {nonce: '4', type: 'PayPalAccount'},
           {nonce: '5', type: 'PayPalAccount', vaulted: true}
         ]),
+        removeActivePaymentMethod: this.sandbox.stub(),
         removePaymentMethod: this.sandbox.stub()
       };
 
@@ -1057,6 +1058,7 @@ describe('Dropin', function () {
           {nonce: '2', type: 'CreditCard', vaulted: true},
           {nonce: '3', type: 'PayPalAccount', vaulted: true}
         ]),
+        removeActivePaymentMethod: this.sandbox.stub(),
         removePaymentMethod: this.sandbox.stub()
       };
 
@@ -1085,6 +1087,7 @@ describe('Dropin', function () {
       };
       instance._model = {
         getPaymentMethods: this.sandbox.stub().returns([]),
+        removeActivePaymentMethod: this.sandbox.stub(),
         supportedPaymentOptions: ['paypal', 'card'],
         removePaymentMethod: this.sandbox.stub()
       };
@@ -1115,6 +1118,7 @@ describe('Dropin', function () {
       };
       instance._model = {
         getPaymentMethods: this.sandbox.stub().returns([]),
+        removeActivePaymentMethod: this.sandbox.stub(),
         supportedPaymentOptions: ['paypal'],
         removePaymentMethod: this.sandbox.stub()
       };
@@ -1145,6 +1149,7 @@ describe('Dropin', function () {
       };
       instance._model = {
         getPaymentMethods: this.sandbox.stub().returns([]),
+        removeActivePaymentMethod: this.sandbox.stub(),
         removePaymentMethod: this.sandbox.stub()
       };
 
@@ -1175,6 +1180,7 @@ describe('Dropin', function () {
         getPaymentMethods: this.sandbox.stub().returns([
           {nonce: '1', type: 'CreditCard'}
         ]),
+        removeActivePaymentMethod: this.sandbox.stub(),
         removePaymentMethod: this.sandbox.stub()
       };
 
@@ -1183,6 +1189,37 @@ describe('Dropin', function () {
       instance.clearActivePaymentMethod();
 
       expect(instance._mainView.setPrimaryView).to.not.be.called;
+    });
+
+    it('removes active payment method view', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'PayPalAccount'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'methods'
+        },
+        setPrimaryView: this.sandbox.stub()
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'CreditCard'}
+        ]),
+        removeActivePaymentMethod: this.sandbox.stub(),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.clearActivePaymentMethod();
+
+      expect(instance._model.removeActivePaymentMethod).to.be.calledOnce;
     });
   });
 

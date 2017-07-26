@@ -318,6 +318,38 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('removeActivePaymentMethod', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+      this.sandbox.stub(this.model, '_emit');
+      this.sandbox.stub(this.model, 'setPaymentMethodRequestable');
+    });
+
+    it('sets active payment method to null', function () {
+      this.model._activePaymentMethod = {foo: 'bar'};
+
+      this.model.removeActivePaymentMethod();
+
+      expect(this.model._activePaymentMethod).to.not.exist;
+    });
+
+    it('emits removeActivePaymentMethod event', function () {
+      this.model.removeActivePaymentMethod();
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('removeActivePaymentMethod');
+    });
+
+    it('sets payment method to not be requestable', function () {
+      this.model.removeActivePaymentMethod();
+
+      expect(this.model.setPaymentMethodRequestable).to.be.calledOnce;
+      expect(this.model.setPaymentMethodRequestable).to.be.calledWith({
+        isRequestable: false
+      });
+    });
+  });
+
   describe('getActivePaymentMethod', function () {
     it('returns _activePaymentMethod', function () {
       var model = new DropinModel(this.modelOptions);

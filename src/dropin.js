@@ -354,7 +354,7 @@ Dropin.prototype.clearActivePaymentMethod = function () {
 
   this._navigateToInitialView();
 
-  this._model.removeActivePaymentMethodView();
+  this._model.removeActivePaymentMethod();
 };
 
 Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {

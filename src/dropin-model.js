@@ -59,7 +59,7 @@ DropinModel.prototype.changeActivePaymentView = function (paymentViewID) {
   this._emit('changeActivePaymentView', paymentViewID);
 };
 
-DropinModel.prototype.removeActivePaymentMethodView = function () {
+DropinModel.prototype.removeActivePaymentMethod = function () {
   this._activePaymentMethod = null;
   this._emit('removeActivePaymentMethod');
   this.setPaymentMethodRequestable({
