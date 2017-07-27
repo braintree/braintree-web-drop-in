@@ -155,7 +155,7 @@ describe "Drop-in" do
     end
   end
 
-  describe "clearActivePaymentMethod" do
+  describe "clearSelectedPaymentMethod" do
     it "clears active payment method card" do
       visit_dropin_url
 

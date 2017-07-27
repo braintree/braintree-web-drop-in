@@ -326,7 +326,7 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
 };
 
 /**
- * Removes the currently selected payment method and returns the customer to the payment options view.
+ * Removes the currently selected payment method and returns the customer to the payment options view. Does not remove vaulted payment methods.
  * @public
  * @returns {void}
  * @example
@@ -341,7 +341,7 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
  *       // transaction sale with selected payment method failed
  *       // clear the selected payment method and add a message
  *       // to the checkout page about the failure
- *       dropinInstance.clearActivePaymentMethod();
+ *       dropinInstance.clearSelectedPaymentMethod();
  *       divForErrorMessages.textContent = 'my error message about entering a different payment method.';
  *     } else {
  *       // redirect to success page
@@ -349,7 +349,7 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
  *   });
  * });
  */
-Dropin.prototype.clearActivePaymentMethod = function () {
+Dropin.prototype.clearSelectedPaymentMethod = function () {
   this._removeUnvaultedPaymentMethods();
 
   this._navigateToInitialView();

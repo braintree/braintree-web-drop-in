@@ -1000,7 +1000,7 @@ describe('Dropin', function () {
     });
   });
 
-  describe('clearActivePaymentMethod', function () {
+  describe('clearSelectedPaymentMethod', function () {
     it('removes saved payment methods if they are not vaulted', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
@@ -1030,7 +1030,7 @@ describe('Dropin', function () {
 
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.clearActivePaymentMethod();
+      instance.clearSelectedPaymentMethod();
 
       expect(instance._model.removePaymentMethod).to.be.calledTwice;
       expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '3', type: 'CreditCard'});
@@ -1064,7 +1064,7 @@ describe('Dropin', function () {
 
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.clearActivePaymentMethod();
+      instance.clearSelectedPaymentMethod();
 
       expect(instance._model.removePaymentMethod).to.not.be.called;
     });
@@ -1094,7 +1094,7 @@ describe('Dropin', function () {
 
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.clearActivePaymentMethod();
+      instance.clearSelectedPaymentMethod();
 
       expect(instance._mainView.setPrimaryView).to.be.calledOnce;
       expect(instance._mainView.setPrimaryView).to.be.calledWith('options');
@@ -1125,7 +1125,7 @@ describe('Dropin', function () {
 
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.clearActivePaymentMethod();
+      instance.clearSelectedPaymentMethod();
 
       expect(instance._mainView.setPrimaryView).to.be.calledOnce;
       expect(instance._mainView.setPrimaryView).to.be.calledWith('paypal');
@@ -1155,7 +1155,7 @@ describe('Dropin', function () {
 
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.clearActivePaymentMethod();
+      instance.clearSelectedPaymentMethod();
 
       expect(instance._mainView.setPrimaryView).to.not.be.called;
     });
@@ -1186,7 +1186,7 @@ describe('Dropin', function () {
 
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.clearActivePaymentMethod();
+      instance.clearSelectedPaymentMethod();
 
       expect(instance._mainView.setPrimaryView).to.not.be.called;
     });
@@ -1217,7 +1217,7 @@ describe('Dropin', function () {
 
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
-      instance.clearActivePaymentMethod();
+      instance.clearSelectedPaymentMethod();
 
       expect(instance._model.removeActivePaymentMethod).to.be.calledOnce;
     });
