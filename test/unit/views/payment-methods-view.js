@@ -3,6 +3,7 @@
 var BaseView = require('../../../src/views/base-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var DropinModel = require('../../../src/dropin-model');
+var classlist = require('../../../src/lib/classlist');
 var fake = require('../../helpers/fake');
 var fs = require('fs');
 var strings = require('../../../src/translations/en_US');
@@ -271,6 +272,51 @@ describe('PaymentMethodsView', function () {
 
       expect(paymentMethodsViews.views.length).to.equal(1);
       expect(methodsContainer.childElementCount).to.equal(1);
+    });
+  });
+
+  describe('removeActivePaymentMethod', function () {
+    beforeEach(function () {
+      var model;
+      var modelOptions = fake.modelOptions();
+
+      modelOptions.merchantConfiguration.authorization = fake.clientToken;
+      model = new DropinModel(modelOptions);
+
+      this.paymentMethodsViews = new PaymentMethodsView({
+        element: this.element,
+        model: model,
+        merchantConfiguration: {
+          authorization: fake.clientToken
+        },
+        strings: strings
+      });
+      this.activeMethodView = {
+        setActive: this.sandbox.stub()
+      };
+
+      this.paymentMethodsViews.activeMethodView = this.activeMethodView;
+      this.sandbox.stub(classlist, 'add');
+    });
+
+    it('sets the active method view to not active', function () {
+      this.paymentMethodsViews.removeActivePaymentMethod();
+
+      expect(this.activeMethodView.setActive).to.be.calledOnce;
+      expect(this.activeMethodView.setActive).to.be.calledWith(false);
+    });
+
+    it('removes active method view from instance', function () {
+      this.paymentMethodsViews.removeActivePaymentMethod();
+
+      expect(this.paymentMethodsViews.activeMethodView).to.not.exist;
+    });
+
+    it('applies class to heading label to hide it when no payment methods are selected', function () {
+      this.paymentMethodsViews.removeActivePaymentMethod();
+
+      expect(classlist.add).to.be.calledOnce;
+      expect(classlist.add).to.be.calledWith(this.sandbox.match.any, 'braintree-no-payment-method-selected');
     });
   });
 

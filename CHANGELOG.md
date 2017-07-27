@@ -7,6 +7,7 @@ unreleased
 - Update browser-detection to v1.6.0
 - Add `aria-label` attribute to payment options
 - Update checkout.js to v4.0.95
+- Add `clearSelectedPaymentMethod` to remove selected payment method
 
 1.4.0
 ------
