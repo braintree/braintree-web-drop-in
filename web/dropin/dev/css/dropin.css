@@ -690,6 +690,10 @@
           transform: none;
   visibility: visible; }
 
+.braintree-show-methods [data-braintree-id='methods-label'].braintree-no-payment-method-selected {
+  -webkit-transform: translateY(30px);
+          transform: translateY(30px); }
+
 .braintree-show-methods.braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
   -webkit-transform: translateY(30px);
           transform: translateY(30px);
