@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Hide Diners Club logo when Diners Club may not be supported
+
 1.5.0
 ----------
 - Use version 3.20.1 of braintree-web
