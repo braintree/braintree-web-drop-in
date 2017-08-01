@@ -1,5 +1,5 @@
 IS_TRAVIS = ENV["IS_TRAVIS"]
-PORT = ENV["PORT"] || 4567
+PORT = ENV["PORT"] || 4567 if PORT.nil?
 
 module DropIn
   def visit_dropin_url(path = "")
