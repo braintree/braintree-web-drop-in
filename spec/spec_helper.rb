@@ -14,17 +14,11 @@ SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
 
 Capybara.default_driver = :selenium
 Capybara.app_host = "https://#{HOSTNAME}:#{PORT}"
-Capybara.default_max_wait_time = calculate_default_wait_time
+Capybara.default_max_wait_time = PLATFORM == "ie-desktop" ? 40 : 20
 
 require_relative "sauce_helper"
 
 $pids = []
-
-def calculate_default_wait_time
-  return 40 if PLATFORM == "ie-desktop"
-
-  20
-end
 
 def calculate_paypal_retry_count
   return 6 if PLATFORM == 'ie-desktop'
