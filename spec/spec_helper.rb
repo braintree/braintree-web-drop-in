@@ -14,11 +14,23 @@ SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
 
 Capybara.default_driver = :selenium
 Capybara.app_host = "https://#{HOSTNAME}:#{PORT}"
-Capybara.default_max_wait_time = 20
+Capybara.default_max_wait_time = calculate_default_wait_time
 
 require_relative "sauce_helper"
 
 $pids = []
+
+def calculate_default_wait_time
+  return 40 if PLATFORM == "ie-desktop"
+
+  20
+end
+
+def calculate_paypal_retry_count
+  return 6 if PLATFORM == 'ie-desktop'
+
+  4
+end
 
 def spawn_until_port(cmd, port)
   `lsof -i :#{port}`
@@ -59,13 +71,7 @@ RSpec.configure do |config|
   end
 
   config.around(:each, :paypal) do |c|
-    if PLATFORM == 'ie-desktop'
-      retry_count = 6
-    else
-      retry_count = 4
-    end
-
-    c.run_with_retry(retry: retry_count, retry_wait: 4)
+    c.run_with_retry(retry: calculate_paypal_retry_count, retry_wait: 4)
   end
 
   if ParallelTests.first_process?

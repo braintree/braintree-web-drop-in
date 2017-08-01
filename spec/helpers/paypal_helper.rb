@@ -10,7 +10,7 @@ module PayPal
       within_window open_popup do
         block.call if block
 
-        click_button("confirmButtonTop", wait: 30)
+        click_button("confirmButtonTop")
       end
     rescue Capybara::WindowError
       paypal_outer_frame = find(".paypal-checkout-sandbox iframe")
@@ -21,7 +21,7 @@ module PayPal
         within_frame inner_frame do
           block.call if block
 
-          click_button("confirmButtonTop", wait: 30)
+          click_button("confirmButtonTop")
         end
       end
     end
@@ -37,7 +37,7 @@ module PayPal
 
       block.call if block
 
-      click_button("confirmButtonTop", wait: 30)
+      click_button("confirmButtonTop")
     end
 
     # can take sandbox a while to close
@@ -45,7 +45,7 @@ module PayPal
   end
 
   def login_to_paypal
-    expect(page).to have_text("Pay with PayPal", wait: 30)
+    expect(page).to have_text("Pay with PayPal")
 
     login_iframe = find("#injectedUnifiedLogin iframe")
 
