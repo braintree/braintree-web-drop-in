@@ -8,6 +8,7 @@ Dotenv.load
 
 HOSTNAME = `hostname`.chomp
 PORT = ENV["PORT"] || 4567
+PLATFORM = ENV["PLATFORM"]
 RUN_PAYPAL_ONLY = ENV["RUN_PAYPAL_ONLY"]
 SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
 
@@ -58,7 +59,13 @@ RSpec.configure do |config|
   end
 
   config.around(:each, :paypal) do |c|
-    c.run_with_retry(retry: 4, retry_wait: 4)
+    if PLATFORM == 'ie-desktop'
+      retry_count = 6
+    else
+      retry_count = 4
+    end
+
+    c.run_with_retry(retry: retry_count, retry_wait: 4)
   end
 
   if ParallelTests.first_process?

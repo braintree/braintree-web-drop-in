@@ -21,7 +21,8 @@ env:
   matrix:
   - TEST="test"
   - TEST="test:publishing"
-  - TEST="test:integration:paypal-only" PLATFORM="desktop" IS_INTEGRATION_TEST=true
+  - TEST="test:integration:paypal-only" PLATFORM="ie-desktop" IS_INTEGRATION_TEST=true
+  - TEST="test:integration:paypal-only" PLATFORM="not-ie-desktop" IS_INTEGRATION_TEST=true
   - TEST="test:integration:paypal-skipped" PLATFORM="desktop" IS_INTEGRATION_TEST=true
   # iOS tests on Travis are flaky. Run these manually before merging something in
   # - TEST="test:integration" PLATFORM="ios" IS_INTEGRATION_TEST=true
