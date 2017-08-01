@@ -8,7 +8,7 @@ require_relative "./os"
 
 tunnel_id = "braintree-web-drop-in"
 
-PLATFORM = ENV["PLATFORM"] if PLATFORM.nil?
+PLATFORM = ENV["PLATFORM"]
 IE_DESKTOP_BROWSERS = [
   ["Windows 7", "internet explorer", "9"],
   ["Windows 8", "internet explorer", "10"],

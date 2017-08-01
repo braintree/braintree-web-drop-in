@@ -7,8 +7,8 @@ require "rspec/retry"
 Dotenv.load
 
 HOSTNAME = `hostname`.chomp
-PORT = ENV["PORT"] || 4567 if PORT.nil?
-PLATFORM = ENV["PLATFORM"] if PLATFORM.nil?
+PORT = ENV["PORT"] || 4567
+PLATFORM = ENV["PLATFORM"]
 RUN_PAYPAL_ONLY = ENV["RUN_PAYPAL_ONLY"]
 SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
 
