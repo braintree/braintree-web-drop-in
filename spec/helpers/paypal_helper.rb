@@ -10,7 +10,7 @@ module PayPal
       within_window open_popup do
         block.call if block
 
-        click_button("confirmButtonTop")
+        click_button("confirmButtonTop", wait: 30)
       end
     rescue Capybara::WindowError
       paypal_outer_frame = find(".paypal-checkout-sandbox iframe")
