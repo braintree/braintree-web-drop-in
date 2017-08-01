@@ -14,7 +14,7 @@ SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
 
 Capybara.default_driver = :selenium
 Capybara.app_host = "https://#{HOSTNAME}:#{PORT}"
-Capybara.default_max_wait_time = PLATFORM == "ie-desktop" ? 40 : 20
+Capybara.default_max_wait_time = 20
 
 require_relative "sauce_helper"
 
