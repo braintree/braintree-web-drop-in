@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "main": "src/index.js",
   "scripts": {
     "build": "gulp build",
@@ -12,9 +12,8 @@
     "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec",
     "test:integration:paypal-only": "RUN_PAYPAL_ONLY=true npm run test:integration",
     "test:integration:paypal-skipped": "SKIP_PAYPAL=true npm run test:integration",
-    "test:publishing": "npm run pretest && mocha test/publishing",
-    "deploy:gh-pages": "./scripts/deploy-gh-pages",
-    "prepublish": "npm run test:publishing"
+    "test:publishing": "mocha test/publishing",
+    "deploy:gh-pages": "./scripts/deploy-gh-pages"
   },
   "repository": {
     "type": "git",
@@ -62,8 +61,8 @@
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
-    "braintree-web": "3.20.0",
-    "@braintree/browser-detection": "1.5.0",
+    "braintree-web": "3.20.1",
+    "@braintree/browser-detection": "1.6.0",
     "promise-polyfill": "6.0.2",
     "@braintree/wrap-promise": "1.1.1"
   },
