@@ -8,7 +8,6 @@ Dotenv.load
 
 HOSTNAME = `hostname`.chomp
 PORT = ENV["PORT"] || 4567
-PLATFORM = ENV["PLATFORM"]
 RUN_PAYPAL_ONLY = ENV["RUN_PAYPAL_ONLY"]
 SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
 ONLY = ENV["ONLY"]
@@ -20,12 +19,6 @@ Capybara.default_max_wait_time = 20
 require_relative "sauce_helper"
 
 $pids = []
-
-def calculate_paypal_retry_count
-  return 6 if PLATFORM == 'ie-desktop'
-
-  4
-end
 
 def spawn_until_port(cmd, port)
   `lsof -i :#{port}`
@@ -67,7 +60,7 @@ RSpec.configure do |config|
   end
 
   config.around(:each, :paypal) do |c|
-    c.run_with_retry(retry: calculate_paypal_retry_count, retry_wait: 4)
+    c.run_with_retry(retry: 4, retry_wait: 4)
   end
 
   if ParallelTests.first_process?
