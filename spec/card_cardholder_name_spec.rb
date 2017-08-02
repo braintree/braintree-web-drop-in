@@ -1,3 +1,5 @@
+require_relative "helpers/drop_in_helper"
+
 describe "Drop-in card.cardholderName" do
   include DropIn
 
