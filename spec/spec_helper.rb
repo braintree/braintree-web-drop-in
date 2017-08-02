@@ -10,6 +10,7 @@ HOSTNAME = `hostname`.chomp
 PORT = ENV["PORT"] || 4567
 RUN_PAYPAL_ONLY = ENV["RUN_PAYPAL_ONLY"]
 SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
+ONLY = ENV["ONLY"]
 
 Capybara.default_driver = :selenium
 Capybara.app_host = "https://#{HOSTNAME}:#{PORT}"
@@ -36,6 +37,7 @@ def download_sauce_connect
 end
 
 def should_run_on_sauce(metadata)
+  return metadata.include?(:only) if ONLY
   return metadata.include?(:paypal) if RUN_PAYPAL_ONLY
 
   return true
