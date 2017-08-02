@@ -10,12 +10,19 @@ describe "Drop-in#updateConfiguration" do
   it "updates PayPal configuration", :paypal do
     visit_dropin_url("?showUpdatePayPalMenu=true")
 
+    sleep 2
+
     find("#paypal-config-checkout").click()
+
+    sleep 2
+
     click_option("paypal")
 
     open_popup_and_complete_login do
       expect(page).to_not have_content("future payments");
     end
+
+    sleep 2
 
     find("#paypal-config-vault").click()
     click_option("paypal")
@@ -28,12 +35,19 @@ describe "Drop-in#updateConfiguration" do
   it "updates PayPal Credit configuration", :paypal do
     visit_dropin_url("?showUpdatePayPalMenu=true")
 
+    sleep 2
+
     find("#paypal-config-checkout").click()
+
+    sleep 2
+
     click_option("paypalCredit")
 
     open_popup_and_complete_login do
       expect(page).to_not have_content("future payments");
     end
+
+    sleep 2
 
     find("#paypal-config-vault").click()
     click_option("paypalCredit")
