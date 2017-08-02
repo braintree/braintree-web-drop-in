@@ -3,7 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
-- Use version 3.21.0 of braintree-web
+- Use version 3.21.1 of braintree-web
+- Update checkout.js to v4.0.99
 
 1.5.0
 -----
