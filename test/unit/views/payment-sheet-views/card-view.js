@@ -347,7 +347,7 @@ describe('CardView', function () {
     });
 
     it('shows supported card icons', function () {
-      var supportedCardTypes = ['american-express', 'discover', 'diners-club', 'jcb', 'master-card', 'visa'];
+      var supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa'];
 
       new CardView({ // eslint-disable-line no-new
         element: this.element,
@@ -365,7 +365,7 @@ describe('CardView', function () {
     });
 
     it('hides unsupported card icons', function () {
-      var unsupportedCardTypes = ['maestro'];
+      var unsupportedCardTypes = ['maestro', 'diners-club'];
 
       new CardView({ // eslint-disable-line no-new
         element: this.element,
