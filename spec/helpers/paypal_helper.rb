@@ -21,6 +21,8 @@ module PayPal
         within_frame inner_frame do
           block.call if block
 
+          sleep 2
+
           click_button("confirmButtonTop", wait: 30)
         end
       end
@@ -36,6 +38,8 @@ module PayPal
       sleep 1
 
       block.call if block
+
+      sleep 2
 
       click_button("confirmButtonTop", wait: 30)
     end
