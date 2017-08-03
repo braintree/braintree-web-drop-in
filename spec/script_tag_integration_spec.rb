@@ -6,7 +6,7 @@ describe "Drop-in Script Tag Integration" do
   include PayPal
 
   it "tokenizes a card" do
-    visit_dropin_url("/script-tag-integration.html", false)
+    visit_dropin_url("/script-tag-integration.html")
 
     click_option("card")
     hosted_field_send_input("number", "4111111111111111")
@@ -20,7 +20,7 @@ describe "Drop-in Script Tag Integration" do
   end
 
   it "tokenizes PayPal", :paypal do
-    visit_dropin_url("/script-tag-integration.html", false)
+    visit_dropin_url("/script-tag-integration.html")
 
     click_option("paypal")
 
@@ -35,7 +35,7 @@ describe "Drop-in Script Tag Integration" do
   end
 
   it "does not submit form if card form is invalid" do
-    visit_dropin_url("/script-tag-integration.html", false)
+    visit_dropin_url("/script-tag-integration.html")
 
     click_option("card")
     hosted_field_send_input("number", "4111111111111111")
@@ -46,7 +46,7 @@ describe "Drop-in Script Tag Integration" do
   end
 
   it "accepts data attributes as create options" do
-    visit_dropin_url("/script-tag-integration.html", false)
+    visit_dropin_url("/script-tag-integration.html")
 
     # Accepts an array for payment option priority
     find(".braintree-heading")
