@@ -9,6 +9,9 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'locale',
   'payment-option-priority',
 
+  'card.cardholderName',
+  'card.cardholderName.required',
+
   'paypal.amount',
   'paypal.currency',
   'paypal.flow',

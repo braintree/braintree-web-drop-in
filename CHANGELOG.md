@@ -4,9 +4,10 @@ CHANGELOG
 unreleased
 ----------
 - Hide Diners Club logo when Diners Club may not be supported
+- Add `cardholderName` option to card configuration
 
 1.5.0
-----------
+-----
 - Use version 3.20.1 of braintree-web
 - Update browser-detection to v1.6.0
 - Add `aria-label` attribute to payment options
