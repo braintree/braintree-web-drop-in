@@ -10,6 +10,8 @@
  * Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set:
  *
  * * `data-locale`
+ * * `data-card.cardholder-name`
+ * * `data-card.cardholder-name.required`
  * * `data-payment-option-priority`
  * * `data-paypal.amount`
  * * `data-paypal.currency`
@@ -69,6 +71,30 @@
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-locale="de_DE"
  *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
+ *    data-paypal.flow="checkout"
+ *    data-paypal.amount="10.00"
+ *    data-paypal.currency="USD"
+ *    data-paypal-credit.flow="vault"
+ *   ></script>
+ *   <input type="submit" value="Purchase"></input>
+ * </form>
+ *
+ * @example
+ * <caption>Including cardholder name field in card form</caption>
+ * <form id="payment-form" action="/" method="post">
+ *   <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *    data-card.cardholder-name="true"
+ *   ></script>
+ *   <input type="submit" value="Purchase"></input>
+ * </form>
+ *
+ * @example
+ * <caption>Including a required cardholder name field in card form</caption>
+ * <form id="payment-form" action="/" method="post">
+ *   <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
+ *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+ *    data-card.cardholder-name.required="true"
  *   ></script>
  *   <input type="submit" value="Purchase"></input>
  * </form>
@@ -88,6 +114,7 @@ var VERSION = process.env.npm_package_version;
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
  *
+ * @param {boolean|object} [cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
  * @property {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
  * @property {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions).
  */
@@ -325,6 +352,28 @@ var VERSION = process.env.npm_package_version;
  *           color: 'red' // Change the focus color to red for all inputs
  *         }
  *       }
+ *     }
+ *   }
+ * }, callback);
+ *
+ * @example
+ * <caption>Including a cardholder name field</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   card: {
+ *     cardholderName: true
+ *   }
+ * }, callback);
+ *
+ * @example
+ * <caption>Including a required cardholder name field</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   card: {
+ *     cardholderName: {
+ *       required: true
  *     }
  *   }
  * }, callback);

@@ -529,6 +529,24 @@ $loader-scale-duration: 300ms;
         &.braintree-form__field--valid {
           border-color: $black-40;
         }
+
+        input {
+          border:none;
+          background-image:none;
+          background-color:transparent;
+          -webkit-box-shadow: none;
+          -moz-box-shadow: none;
+          box-shadow: none;
+          width: 100%;
+          height: 100%;
+          font-size: 16px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+          color: rgb(0, 0, 0);
+
+          &:focus {
+            outline: none;
+          }
+        }
       }
     }
 

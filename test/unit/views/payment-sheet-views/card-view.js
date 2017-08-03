@@ -192,6 +192,36 @@ describe('CardView', function () {
       expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
     });
 
+    it('has cardholderName if provided in merchant configuration', function () {
+      this.model.merchantConfiguration.card = {
+        cardholderName: true
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.exist;
+    });
+
+    it('does not include cardholderName if not provided in merchant configuration', function () {
+      this.model.merchantConfiguration.card = {};
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.not.exist;
+    });
+
     it('starts async dependency', function () {
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
 
@@ -598,6 +628,8 @@ describe('CardView', function () {
         _generateFieldSelector: CardView.prototype._generateFieldSelector,
         _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
         _validateForm: this.sandbox.stub(),
+        _validateCardholderName: this.sandbox.stub().returns(true),
+        _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
         getElementById: BaseView.prototype.getElementById,
         hideFieldError: CardView.prototype.hideFieldError,
         showFieldError: CardView.prototype.showFieldError,
@@ -1572,12 +1604,17 @@ describe('CardView', function () {
         fieldErrors: {},
         model: this.model,
         _validateForm: CardView.prototype._validateForm,
+        _validateCardholderName: CardView.prototype._validateCardholderName,
+        _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
+        _setupCardholderName: this.sandbox.stub(),
         client: {
           getConfiguration: fake.configuration
         },
         merchantConfiguration: {
-          authorization: fake.configuration().authorization
+          authorization: fake.configuration().authorization,
+          card: {}
         },
+        hasCardholderName: false,
         showFieldError: CardView.prototype.showFieldError,
         strings: strings
       };
@@ -1641,6 +1678,85 @@ describe('CardView', function () {
         expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
         expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
         expect(err.message).to.equal('No payment method is available.');
+      }.bind(this));
+    });
+
+    it('calls callback with error when cardholder name is required and the input is empty', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+      this.context.hasCardholderName = true;
+      this.context.model.merchantConfiguration.card = {
+        cardholderName: {
+          required: true
+        }
+      };
+      this.context.cardholderNameInput = {value: ''};
+
+      this.sandbox.stub(this.context.model, 'reportError');
+
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function (err) {
+        expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
+        expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
+        expect(err.message).to.equal('No payment method is available.');
+      }.bind(this));
+    });
+
+    it('does not error if cardholder name is empty, but not required', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+      this.context.hasCardholderName = true;
+      this.context.model.merchantConfiguration.card = {
+        cardholderName: {
+          required: false
+        }
+      };
+      this.context.cardholderNameInput = {value: ''};
+
+      this.sandbox.stub(this.context.model, 'reportError');
+
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.model.reportError).to.not.be.called;
+        expect(this.fakeHostedFieldsInstance.tokenize).to.be.calledOnce;
+      }.bind(this));
+    });
+
+    it('does not error if cardholder name is not included', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+      this.context.hasCardholderName = false;
+
+      this.sandbox.stub(this.context.model, 'reportError');
+
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.model.reportError).to.not.be.called;
+        expect(this.fakeHostedFieldsInstance.tokenize).to.be.calledOnce;
       }.bind(this));
     });
 
