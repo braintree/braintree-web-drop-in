@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-unreleased
+1.6.0
 ----------
 - Hide Diners Club logo when Diners Club may not be supported
 - Add `cardholderName` option to card configuration
