@@ -466,6 +466,19 @@
           border-color: #7d7d7d; }
         .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field .braintree-form__hosted-field.braintree-form__field--valid {
           border-color: #666666; }
+        .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field .braintree-form__hosted-field input {
+          border: none;
+          background-image: none;
+          background-color: transparent;
+          -webkit-box-shadow: none;
+          box-shadow: none;
+          width: 100%;
+          height: 100%;
+          font-size: 16px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+          color: black; }
+          .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field .braintree-form__hosted-field input:focus {
+            outline: none; }
     .braintree-sheet__content--form .braintree-form__field-group.braintree-form__field-group--has-error .braintree-form__field-secondary-icon,
     .braintree-sheet__content--form .braintree-form__field-group.braintree-form__field-group--has-error.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon,
     .braintree-sheet__content--form .braintree-form__field-group.braintree-form__field-group--has-error.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon,
