@@ -5,6 +5,7 @@ unreleased
 ----------
 - Hide Diners Club logo when Diners Club may not be supported
 - Add `cardholderName` option to card configuration
+- Use version 3.21.1 of braintree-web
 
 1.5.0
 -----
