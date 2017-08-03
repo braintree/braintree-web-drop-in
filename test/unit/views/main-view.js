@@ -5,6 +5,7 @@ var BaseView = require('../../../src/views/base-view');
 var BasePayPalView = require('../../../src/views/payment-sheet-views/base-paypal-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
+var Promise = require('../../../src/lib/promise');
 var analytics = require('../../../src/lib/analytics');
 var classlist = require('../../../src/lib/classlist');
 var DropinModel = require('../../../src/dropin-model');
@@ -19,6 +20,7 @@ var strings = require('../../../src/translations/en_US');
 var transitionHelper = require('../../../src/lib/transition-helper');
 
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
+var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 
 describe('MainView', function () {
   beforeEach(function () {
@@ -130,10 +132,13 @@ describe('MainView', function () {
         expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({type: 'CreditCard', details: {lastTwo: '11'}});
       });
 
-      it('sets the PaymentMethodsView as the primary view', function () {
+      it('sets the PaymentMethodsView as the primary view', function (done) {
         var mainView = new MainView(this.mainViewOptions);
 
-        expect(mainView.primaryView.ID).to.equal(PaymentMethodsView.ID);
+        setTimeout(function () {
+          expect(mainView.primaryView.ID).to.equal(PaymentMethodsView.ID);
+          done();
+        }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
       });
     });
 
@@ -376,16 +381,21 @@ describe('MainView', function () {
     });
 
     it('calls setPaymentMethodRequestable when there is a payment method requestable', function () {
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
       var mainView = new MainView(this.mainViewOptions);
 
-      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns({type: 'TYPE'});
+      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns(fakePaymentMethod);
       this.sandbox.stub(mainView.model, 'setPaymentMethodRequestable');
 
       mainView.setPrimaryView(PaymentOptionsView.ID);
 
       expect(mainView.model.setPaymentMethodRequestable).to.be.calledWith({
         isRequestable: true,
-        type: 'TYPE'
+        type: 'TYPE',
+        selectedPaymentMethod: fakePaymentMethod
       });
     });
 
@@ -567,6 +577,36 @@ describe('MainView', function () {
           onSelection: this.sandbox.stub()
         }
       };
+    });
+
+    describe('for changeActivePaymentMethod', function () {
+      it('sets the PaymentMethodsView as the primary view', function (done) {
+        this.mainView.paymentMethodsViews.activeMethodView = {setActive: function () {}};
+        this.sandbox.stub(this.mainView, 'setPrimaryView');
+
+        this.model._emit('changeActivePaymentMethod', {});
+
+        setTimeout(function () {
+          expect(this.mainView.setPrimaryView).to.be.called;
+          done();
+        }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+      });
+    });
+
+    describe('for removeActivePaymentMethod', function () {
+      it('calls removeActivePaymentMethod if there is an active view', function (done) {
+        var optionsView = {ID: 'options', removeActivePaymentMethod: this.sandbox.stub()};
+
+        this.mainView.addView(optionsView);
+
+        this.sandbox.stub(this.model, 'getActivePaymentView').returns('options');
+        this.model._emit('removeActivePaymentMethod');
+
+        setTimeout(function () {
+          expect(optionsView.removeActivePaymentMethod).to.be.calledOnce;
+          done();
+        }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+      });
     });
 
     describe('for changeActivePaymentView', function () {
@@ -770,69 +810,53 @@ describe('MainView', function () {
     });
 
     it('requests payment method from the primary view', function () {
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod');
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves({});
 
       this.mainView.requestPaymentMethod();
 
       expect(this.mainView.primaryView.requestPaymentMethod).to.be.called;
     });
 
-    it('calls callback with error when error occurs', function (done) {
+    it('calls callback with error when error occurs', function () {
       var fakeError = new Error('A bad thing happened');
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(fakeError);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').rejects(fakeError);
 
-      this.mainView.requestPaymentMethod(function (err, payload) {
-        expect(payload).to.not.exist;
+      return this.mainView.requestPaymentMethod().then(function () {
+        throw new Error('should not resolve');
+      }).catch(function (err) {
         expect(err).to.equal(fakeError);
         expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.error');
-        done();
       }.bind(this));
     });
 
-    it('calls callback with payload when successful', function (done) {
+    it('calls callback with payload when successful', function () {
       var stubPaymentMethod = {foo: 'bar'};
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves(stubPaymentMethod);
 
-      this.mainView.requestPaymentMethod(function (err, payload) {
-        expect(err).to.not.exist;
+      return this.mainView.requestPaymentMethod().then(function (payload) {
         expect(payload).to.equal(stubPaymentMethod);
-        done();
       });
     });
 
-    it('sends analytics event for successful CreditCard', function (done) {
+    it('sends analytics event for successful CreditCard', function () {
       var stubPaymentMethod = {type: 'CreditCard'};
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves(stubPaymentMethod);
 
-      this.mainView.requestPaymentMethod(function () {
+      return this.mainView.requestPaymentMethod().then(function () {
         expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.card');
-        done();
       }.bind(this));
     });
 
-    it('sends analytics event for successful PayPalAccount', function (done) {
+    it('sends analytics event for successful PayPalAccount', function () {
       var stubPaymentMethod = {type: 'PayPalAccount'};
 
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
+      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').resolves(stubPaymentMethod);
 
-      this.mainView.requestPaymentMethod(function () {
+      return this.mainView.requestPaymentMethod().then(function () {
         expect(analytics.sendEvent).to.be.calledWith(this.client, 'request-payment-method.paypal');
-        done();
-      }.bind(this));
-    });
-
-    it('sets the PaymentMethodsView as the primary view when successful', function (done) {
-      var stubPaymentMethod = {foo: 'bar'};
-      var paymentMethodsViews = this.mainView.getView(PaymentMethodsView.ID);
-
-      this.sandbox.stub(CardView.prototype, 'requestPaymentMethod').yields(null, stubPaymentMethod);
-
-      this.mainView.requestPaymentMethod(function () {
-        expect(this.mainView.primaryView).to.equal(paymentMethodsViews);
-        done();
       }.bind(this));
     });
 
@@ -860,22 +884,22 @@ describe('MainView', function () {
         var paymentMethodsViews = this.mainView.getView(PaymentMethodsView.ID);
 
         this.mainView.model.changeActivePaymentView(PaymentMethodsView.ID);
-        this.sandbox.stub(paymentMethodsViews, 'requestPaymentMethod');
+        this.sandbox.stub(paymentMethodsViews, 'requestPaymentMethod').resolves({});
 
-        this.mainView.requestPaymentMethod();
-
-        expect(paymentMethodsViews.requestPaymentMethod).to.be.called;
+        return this.mainView.requestPaymentMethod().then(function () {
+          expect(paymentMethodsViews.requestPaymentMethod).to.be.called;
+        });
       });
 
       it('requests payment method from card view when additional options are shown', function () {
         var cardView = this.mainView.getView(CardView.ID);
 
-        this.sandbox.stub(cardView, 'requestPaymentMethod');
+        this.sandbox.stub(cardView, 'requestPaymentMethod').resolves({});
         this.mainView.toggleAdditionalOptions();
 
-        this.mainView.requestPaymentMethod();
-
-        expect(cardView.requestPaymentMethod).to.be.called;
+        return this.mainView.requestPaymentMethod().then(function () {
+          expect(cardView.requestPaymentMethod).to.be.called;
+        });
       });
     });
   });
@@ -885,41 +909,44 @@ describe('MainView', function () {
       this.context = {
         _views: {
           'braintree-card-view': {
-            teardown: this.sandbox.stub().yields()
+            teardown: this.sandbox.stub().resolves()
           }
         }
       };
     });
 
-    it('calls teardown on each view', function (done) {
+    it('calls teardown on each view', function () {
       var payWithCardView = this.context._views['braintree-card-view'];
 
-      MainView.prototype.teardown.call(this.context, function () {
+      return MainView.prototype.teardown.call(this.context).then(function () {
         expect(payWithCardView.teardown).to.be.calledOnce;
-        done();
       });
     });
 
-    it('waits to call callback until asynchronous teardowns complete', function (done) {
+    it('waits to call callback until asynchronous teardowns complete', function () {
       var payWithCardView = this.context._views['braintree-card-view'];
 
-      payWithCardView.teardown.yieldsAsync();
+      payWithCardView.teardown = function () {
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            resolve();
+          }, 300);
+        });
+      };
 
-      MainView.prototype.teardown.call(this.context, function () {
-        expect(payWithCardView.teardown).to.be.calledOnce;
-        done();
-      });
+      return MainView.prototype.teardown.call(this.context);
     });
 
-    it('calls callback with error from teardown function', function (done) {
+    it('calls callback with error from teardown function', function () {
       var payWithCardView = this.context._views['braintree-card-view'];
       var error = new Error('pay with card teardown error');
 
-      payWithCardView.teardown.yields(error);
+      payWithCardView.teardown.rejects(error);
 
-      MainView.prototype.teardown.call(this.context, function (err) {
+      return MainView.prototype.teardown.call(this.context).then(function () {
+        throw new Error('should not resolve');
+      }).catch(function (err) {
         expect(err).to.equal(error);
-        done();
       });
     });
   });

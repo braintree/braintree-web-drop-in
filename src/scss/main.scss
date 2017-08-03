@@ -206,6 +206,7 @@ $loader-scale-duration: 300ms;
 }
 
 .braintree-loaded .braintree-upper-container {
+  min-height: inherit;
   min-height: auto;
 
   &:before {
@@ -256,6 +257,10 @@ $loader-scale-duration: 300ms;
     background: #EAEAEA;
     cursor: not-allowed;
 
+    &:hover .braintree-option__label {
+      font-weight: normal;
+    }
+
     .braintree-option__label {
       color: #787878;
     }
@@ -263,6 +268,10 @@ $loader-scale-duration: 300ms;
     .braintree-option__disabled-message {
       float: right;
       font-size: 14px;
+
+      span {
+        border-bottom: 1px solid $border-color;
+      }
     }
   }
 
@@ -574,6 +583,24 @@ $loader-scale-duration: 300ms;
         &.braintree-form__field--valid {
           border-color: $black-40;
         }
+
+        input {
+          border:none;
+          background-image:none;
+          background-color:transparent;
+          -webkit-box-shadow: none;
+          -moz-box-shadow: none;
+          box-shadow: none;
+          width: 100%;
+          height: 100%;
+          font-size: 16px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+          color: rgb(0, 0, 0);
+
+          &:focus {
+            outline: none;
+          }
+        }
       }
     }
 
@@ -690,7 +717,7 @@ $loader-scale-duration: 300ms;
     fill: $background-color;
     height: 41px;
     margin-right: 7px;
-    padding: 7px 10px 10px;
+    padding: 10px;
     transform: scale(0);
     transition: transform 300ms $curve-easeOutBack;
     width: 41px;
@@ -817,6 +844,10 @@ $loader-scale-duration: 300ms;
 .braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
   transform: none;
   visibility: visible;
+}
+
+.braintree-show-methods [data-braintree-id='methods-label'].braintree-no-payment-method-selected {
+  transform: translateY(30px);
 }
 
 .braintree-show-methods.braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {

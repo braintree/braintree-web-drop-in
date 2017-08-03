@@ -15,16 +15,19 @@ var paymentOptionAttributes = {
   card: {
     className: 'braintree-icon--bordered',
     icon: '#iconCardFront',
+    optionLabel: 'Paying with Card',
     optionTitle: strings.Card,
     paymentOptionID: 'card'
   },
   paypal: {
     icon: '#logoPayPal',
+    optionLabel: 'Paying with PayPal',
     optionTitle: strings.PayPal,
     paymentOptionID: 'paypal'
   },
   paypalCredit: {
     icon: '#logoPayPalCredit',
+    optionLabel: 'Paying with PayPal Credit',
     optionTitle: strings['PayPal Credit'],
     paymentOptionID: 'paypalCredit'
   }
@@ -79,6 +82,7 @@ describe('PaymentOptionsView', function () {
         var iconContainer = icon.parentElement;
         var optionElement = paymentOptionsView.elements[option.paymentOptionID];
 
+        expect(label.getAttribute('aria-label')).to.equal(option.optionLabel);
         expect(label.innerHTML).to.contain(option.optionTitle);
         expect(icon.href.baseVal).to.equal(option.icon);
         expect(optionElement.div).to.exist;
@@ -106,6 +110,24 @@ describe('PaymentOptionsView', function () {
       option.click();
 
       expect(mainViewStub.setPrimaryView).to.have.been.calledWith(CardView.ID);
+    });
+
+    it('calls model.selectPaymentOption when payment option is clicked', function () {
+      var mainViewStub = {setPrimaryView: this.sandbox.stub()};
+      var paymentOptionsView = new PaymentOptionsView({
+        client: this.client,
+        element: this.element,
+        mainView: mainViewStub,
+        model: modelThatSupports(['card']),
+        strings: strings
+      });
+      var option = paymentOptionsView.container.querySelector('.braintree-option');
+
+      this.sandbox.stub(paymentOptionsView.model, 'selectPaymentOption');
+
+      option.click();
+
+      expect(paymentOptionsView.model.selectPaymentOption).to.have.been.calledWith(CardView.ID);
     });
   });
 

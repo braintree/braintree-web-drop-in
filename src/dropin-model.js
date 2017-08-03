@@ -59,6 +59,20 @@ DropinModel.prototype.changeActivePaymentView = function (paymentViewID) {
   this._emit('changeActivePaymentView', paymentViewID);
 };
 
+DropinModel.prototype.removeActivePaymentMethod = function () {
+  this._activePaymentMethod = null;
+  this._emit('removeActivePaymentMethod');
+  this.setPaymentMethodRequestable({
+    isRequestable: false
+  });
+};
+
+DropinModel.prototype.selectPaymentOption = function (paymentViewID) {
+  this._emit('paymentOptionSelected', {
+    paymentOption: paymentViewID
+  });
+};
+
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
   var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
   var typeHasNotChanged = options.type === this._paymentMethodRequestableType;
@@ -72,6 +86,10 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
 
 DropinModel.prototype.setPaymentMethodRequestable = function (options) {
   var shouldEmitEvent = this._shouldEmitRequestableEvent(options);
+  var paymentMethodRequestableResponse = {
+    paymentMethodIsSelected: Boolean(options.selectedPaymentMethod),
+    type: options.type
+  };
 
   this._paymentMethodIsRequestable = options.isRequestable;
 
@@ -86,7 +104,7 @@ DropinModel.prototype.setPaymentMethodRequestable = function (options) {
   }
 
   if (options.isRequestable) {
-    this._emit('paymentMethodRequestable', {type: options.type});
+    this._emit('paymentMethodRequestable', paymentMethodRequestableResponse);
   } else {
     this._emit('noPaymentMethodRequestable');
   }

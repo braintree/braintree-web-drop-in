@@ -7,7 +7,10 @@ require "rspec/retry"
 Dotenv.load
 
 HOSTNAME = `hostname`.chomp
-PORT = 4567
+PORT = ENV["PORT"] || 4567
+RUN_PAYPAL_ONLY = ENV["RUN_PAYPAL_ONLY"]
+SKIP_PAYPAL = ENV["SKIP_PAYPAL"]
+ONLY = ENV["ONLY"]
 
 Capybara.default_driver = :selenium
 Capybara.app_host = "https://#{HOSTNAME}:#{PORT}"
@@ -31,6 +34,13 @@ def download_sauce_connect
   puts "[DOWNLOADING] Sauce connect"
   `node -e "require('sauce-connect-launcher').download(function () {});"`
   puts "[DOWNLOADED] Sauce connect"
+end
+
+def should_run_on_sauce(metadata)
+  return metadata.include?(:only) if ONLY
+  return metadata.include?(:paypal) if RUN_PAYPAL_ONLY
+
+  return true
 end
 
 def wait_port(port)
@@ -74,6 +84,8 @@ RSpec.configure do |config|
   end
 
   config.define_derived_metadata(:file_path => %r{/spec}) do |metadata|
-    metadata[:sauce] = true
+    metadata[:sauce] = true if should_run_on_sauce(metadata)
   end
+
+  config.filter_run_excluding :paypal => true if SKIP_PAYPAL
 end

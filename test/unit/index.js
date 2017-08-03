@@ -3,6 +3,7 @@
 var dropin = require('../../src/index');
 var Dropin = require('../../src/dropin');
 var DropinError = require('../../src/lib/dropin-error');
+var Promise = require('../../src/lib/promise');
 var BraintreeError = require('braintree-web/lib/braintree-error');
 var client = require('braintree-web/client');
 var fake = require('../helpers/fake');
@@ -21,7 +22,7 @@ describe('dropin.create', function () {
     this.form.appendChild(container);
     document.body.appendChild(this.form);
 
-    this.sandbox.stub(client, 'create');
+    this.sandbox.stub(client, 'create').resolves();
   });
 
   afterEach(function () {
@@ -44,7 +45,7 @@ describe('dropin.create', function () {
       message: 'you goofed!!'
     });
 
-    client.create.yields(originalErr);
+    client.create.rejects(originalErr);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -58,18 +59,13 @@ describe('dropin.create', function () {
     });
   });
 
-  it('requires a callback', function (done) {
-    try {
-      dropin.create({
-        authorization: 'tokenization_key',
-        selector: '#foo'
-      });
-    } catch (err) {
-      expect(err).to.be.an.instanceof(DropinError);
-      expect(err.message).to.equal('create must include a callback function.');
+  it('returns a promise if no callback is provided', function () {
+    var promise = dropin.create({
+      authorization: 'tokenization_key',
+      selector: '#foo'
+    }).catch(function () { /* supress errors */ });
 
-      done();
-    }
+    expect(promise).to.be.an.instanceof(Promise);
   });
 
   it('returns a Dropin instance if client.create returns successfully', function (done) {
@@ -83,7 +79,7 @@ describe('dropin.create', function () {
       callback(null, this);
     });
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -106,7 +102,7 @@ describe('dropin.create', function () {
 
     this.sandbox.stub(Dropin.prototype, '_initialize').yields(dropinError);
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -130,7 +126,7 @@ describe('dropin.create', function () {
       callback(null, this);
     });
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -158,7 +154,7 @@ describe('dropin.create', function () {
     });
     this.sandbox.stub(analytics, 'sendEvent');
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: fake.tokenizationKey,
@@ -187,7 +183,7 @@ describe('dropin.create', function () {
     });
     this.sandbox.stub(analytics, 'sendEvent');
 
-    client.create.yields(null, fakeClient);
+    client.create.resolves(fakeClient);
 
     dropin.create({
       authorization: fake.clientToken,

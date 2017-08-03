@@ -54,6 +54,8 @@ dropin.create({ /* options */ }, callback);
 
 Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function.
 
+If you are using a [script tag integration](module-braintree-web-drop-in.html), a hidden `payment_method_nonce` input will be added to the form with the nonce value. The following instructions specify usage of a JavaScript integration.
+
 <a id="accepting-cards"></a>
 ### Accepting cards
 

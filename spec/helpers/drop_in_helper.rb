@@ -1,4 +1,17 @@
+IS_TRAVIS = ENV["IS_TRAVIS"]
+PORT = ENV["PORT"] || 4567
+
 module DropIn
+  def visit_dropin_url(path = "")
+    visit URI.encode("http://#{get_hostname}:#{PORT}#{path}")
+  end
+
+  def get_hostname
+    return `hostname`.chomp if !IS_TRAVIS
+
+    return "braintree-web-dropin.example"
+  end
+
   def click_option(option_type)
     find(".braintree-option__#{option_type} .braintree-option__label").click
   end

@@ -11,6 +11,11 @@ var strings = require('../../../../src/translations/en_US');
 var transitionHelper = require('../../../../src/lib/transition-helper');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
+var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+
+function throwIfResolves() {
+  throw new Error('should not resolve.');
+}
 
 describe('CardView', function () {
   beforeEach(function () {
@@ -78,6 +83,37 @@ describe('CardView', function () {
       expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).to.exist;
     });
 
+    it('does not have cvv if supplied in challenges, but hosted fields overrides sets cvv to null', function () {
+      this.client.getConfiguration = function () {
+        return {
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
+        };
+      };
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            cvv: null
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).not.to.exist;
+    });
+
     it('does not have cvv if not supplied in challenges', function () {
       new CardView({ // eslint-disable-line no-new
         element: this.element,
@@ -113,6 +149,37 @@ describe('CardView', function () {
       expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).to.exist;
     });
 
+    it('does not have postal code if supplied in challenges, but hosted fields overrides sets postal code to null', function () {
+      this.client.getConfiguration = function () {
+        return {
+          gatewayConfiguration: {
+            challenges: ['postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
+        };
+      };
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            postalCode: null
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
+    });
+
     it('does not have postal code if not supplied in challenges', function () {
       new CardView({ // eslint-disable-line no-new
         element: this.element,
@@ -123,6 +190,36 @@ describe('CardView', function () {
       });
 
       expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
+    });
+
+    it('has cardholderName if provided in merchant configuration', function () {
+      this.model.merchantConfiguration.card = {
+        cardholderName: true
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.exist;
+    });
+
+    it('does not include cardholderName if not provided in merchant configuration', function () {
+      this.model.merchantConfiguration.card = {};
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.not.exist;
     });
 
     it('starts async dependency', function () {
@@ -250,7 +347,7 @@ describe('CardView', function () {
     });
 
     it('shows supported card icons', function () {
-      var supportedCardTypes = ['american-express', 'discover', 'diners-club', 'jcb', 'master-card', 'visa'];
+      var supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa'];
 
       new CardView({ // eslint-disable-line no-new
         element: this.element,
@@ -268,7 +365,7 @@ describe('CardView', function () {
     });
 
     it('hides unsupported card icons', function () {
-      var unsupportedCardTypes = ['maestro'];
+      var unsupportedCardTypes = ['maestro', 'diners-club'];
 
       new CardView({ // eslint-disable-line no-new
         element: this.element,
@@ -341,6 +438,146 @@ describe('CardView', function () {
       expect(hostedFieldsConfiguredFields.cvv.placeholder).to.equal('•••');
       expect(hostedFieldsConfiguredFields.postalCode.placeholder).to.not.exist;
     });
+
+    it('allows overriding field options for hosted fields', function () {
+      var hostedFieldsConfiguredFields;
+
+      this.client.getConfiguration = function () {
+        return {
+          gatewayConfiguration: {
+            challenges: ['cvv', 'postal_code'],
+            creditCards: {
+              supportedCardTypes: []
+            }
+          }
+        };
+      };
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              placeholder: 'placeholder'
+            },
+            cvv: {
+              maxlength: 2
+            }
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+
+      expect(hostedFieldsConfiguredFields.number.placeholder).to.equal('placeholder');
+      expect(hostedFieldsConfiguredFields.cvv.maxlength).to.equal(2);
+    });
+
+    it('does not add hosted fields elements for fields that are not present', function () {
+      var hostedFieldsConfiguredFields;
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            postalCode: {
+              selector: '#postal-code'
+            },
+            cvv: {
+              selector: '#cvv'
+            },
+            expirationMonth: {
+              selector: '#month'
+            },
+            expirationYear: {
+              selector: '#year'
+            }
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+
+      expect(hostedFieldsConfiguredFields.cvv).to.not.exist;
+      expect(hostedFieldsConfiguredFields.postalCode).to.not.exist;
+      expect(hostedFieldsConfiguredFields.expirationMonth).to.not.exist;
+      expect(hostedFieldsConfiguredFields.expirationYear).to.not.exist;
+    });
+
+    it('ignores changes to selector in field options', function () {
+      var hostedFieldsConfiguredFields;
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              selector: '#some-selector'
+            }
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+
+      expect(hostedFieldsConfiguredFields.number.selector).to.not.equal('#some-selector');
+    });
+
+    it('allows overriding styles options for hosted fields', function () {
+      var hostedFieldsConfiguredStyles;
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          styles: {
+            input: {
+              background: 'blue',
+              color: 'red',
+              fontFamily: 'fantasy'
+            },
+            ':focus': null
+          }
+        }
+      };
+
+      new CardView({ // eslint-disable-line no-new
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      hostedFieldsConfiguredStyles = hostedFields.create.lastCall.args[0].styles;
+
+      expect(hostedFieldsConfiguredStyles.input.color).to.equal('red');
+      expect(hostedFieldsConfiguredStyles.input.background).to.equal('blue');
+      expect(hostedFieldsConfiguredStyles.input['font-size']).to.equal('16px');
+      expect(hostedFieldsConfiguredStyles.input['font-family']).to.equal('fantasy');
+      expect(hostedFieldsConfiguredStyles[':focus']).to.not.exist;
+      expect(hostedFieldsConfiguredStyles['input::-ms-clear']).to.deep.equal({
+        color: 'transparent'
+      });
+    });
   });
 
   describe('requestPaymentMethod', function () {
@@ -350,7 +587,7 @@ describe('CardView', function () {
       this.model = new DropinModel(fake.modelOptions());
     });
 
-    it('calls the callback with an error when tokenize fails', function (done) {
+    it('calls the callback with an error when tokenize fails', function () {
       var cardView = new CardView({
         element: this.element,
         mainView: this.mainView,
@@ -359,17 +596,15 @@ describe('CardView', function () {
         strings: strings
       });
 
-      this.sandbox.stub(cardView, 'tokenize').yields(new Error('foo'));
+      this.sandbox.stub(cardView, 'tokenize').rejects(new Error('foo'));
 
-      cardView.requestPaymentMethod(function (err, payload) {
+      return cardView.requestPaymentMethod().then(throwIfResolves).catch(function (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal('foo');
-        expect(payload).to.not.exist;
-        done();
       });
     });
 
-    it('calls the callback with the payload when tokenize is successful', function (done) {
+    it('calls the callback with the payload when tokenize is successful', function () {
       var cardView = new CardView({
         element: this.element,
         mainView: this.mainView,
@@ -378,12 +613,10 @@ describe('CardView', function () {
         strings: strings
       });
 
-      this.sandbox.stub(cardView, 'tokenize').yields(null, {foo: 'bar'});
+      this.sandbox.stub(cardView, 'tokenize').resolves({foo: 'bar'});
 
-      cardView.requestPaymentMethod(function (err, payload) {
-        expect(err).to.not.exist;
+      return cardView.requestPaymentMethod().then(function (payload) {
         expect(payload.foo).to.equal('bar');
-        done();
       });
     });
   });
@@ -393,7 +626,10 @@ describe('CardView', function () {
       this.context = {
         element: this.element,
         _generateFieldSelector: CardView.prototype._generateFieldSelector,
+        _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
         _validateForm: this.sandbox.stub(),
+        _validateCardholderName: this.sandbox.stub().returns(true),
+        _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
         getElementById: BaseView.prototype.getElementById,
         hideFieldError: CardView.prototype.hideFieldError,
         showFieldError: CardView.prototype.showFieldError,
@@ -498,7 +734,8 @@ describe('CardView', function () {
           }
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.stub()
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -525,7 +762,8 @@ describe('CardView', function () {
             if (event === 'blur') {
               callback(fakeEvent);
             }
-          }
+          },
+          setAttribute: this.sandbox.stub()
         };
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
@@ -564,7 +802,8 @@ describe('CardView', function () {
         };
         var modelOptions = fake.modelOptions();
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.stub()
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
@@ -940,7 +1179,7 @@ describe('CardView', function () {
         expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
       });
 
-      it('does not update the cvv field placeholder when cvv field does not exist', function () {
+      it('does not update the cvv field placeholder when there is no cvv challenge', function () {
         var fakeEvent = {
           cards: [{type: 'american-express'}, {type: 'visa'}],
           emittedBy: 'number'
@@ -966,6 +1205,56 @@ describe('CardView', function () {
 
         expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
       });
+
+      it('does not update the cvv field placeholder when it is removed with an override', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.spy()
+        };
+
+        this.context.model.merchantConfiguration.card = {
+          overrides: {
+            fields: {
+              cvv: null
+            }
+          }
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
+      });
+
+      it('does not update the cvv field placeholder when using a custom CVV placeholder', function () {
+        var fakeEvent = {
+          cards: [{type: 'american-express'}, {type: 'visa'}],
+          emittedBy: 'number'
+        };
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.spy()
+        };
+
+        this.context.model.merchantConfiguration.card = {
+          overrides: {
+            fields: {
+              cvv: {
+                placeholder: 'cool custom placeholder'
+              }
+            }
+          }
+        };
+
+        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        CardView.prototype._initialize.call(this.context);
+
+        expect(hostedFieldsInstance.setAttribute).not.to.have.been.called;
+      });
     });
 
     describe('onValidityChangeEvent', function () {
@@ -987,7 +1276,8 @@ describe('CardView', function () {
           }
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          removeAttribute: this.sandbox.stub()
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -1017,7 +1307,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -1044,7 +1335,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
@@ -1071,7 +1363,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.context.client.getConfiguration = function () {
@@ -1109,7 +1402,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.context.client.getConfiguration = function () {
@@ -1147,7 +1441,8 @@ describe('CardView', function () {
             if (event === 'validityChange') {
               callback(fakeEvent);
             }
-          }
+          },
+          removeAttribute: this.sandbox.stub()
         };
 
         this.context.client.getConfiguration = function () {
@@ -1266,7 +1561,8 @@ describe('CardView', function () {
           }
         };
         var hostedFieldsInstance = {
-          on: this.sandbox.stub().callsArgWith(1, fakeEvent)
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          removeAttribute: this.sandbox.stub()
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -1295,7 +1591,9 @@ describe('CardView', function () {
             }
           }
         }),
-        tokenize: this.sandbox.stub()
+        removeAttribute: this.sandbox.stub(),
+        setAttribute: this.sandbox.stub(),
+        tokenize: this.sandbox.stub().resolves({})
       };
       this.model = new DropinModel(fake.modelOptions());
 
@@ -1306,18 +1604,24 @@ describe('CardView', function () {
         fieldErrors: {},
         model: this.model,
         _validateForm: CardView.prototype._validateForm,
+        _validateCardholderName: CardView.prototype._validateCardholderName,
+        _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
+        _setupCardholderName: this.sandbox.stub(),
         client: {
           getConfiguration: fake.configuration
         },
         merchantConfiguration: {
-          authorization: fake.configuration().authorization
+          authorization: fake.configuration().authorization,
+          card: {}
         },
+        hasCardholderName: false,
         showFieldError: CardView.prototype.showFieldError,
         strings: strings
       };
+      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
     });
 
-    it('clears the error on the model', function (done) {
+    it('clears the error on the model', function () {
       this.sandbox.stub(this.model, 'clearError');
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'Card'}],
@@ -1331,13 +1635,12 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function () {
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
         expect(this.model.clearError).to.be.called;
-        done();
       }.bind(this));
     });
 
-    it('throws an error if there is no valid card type', function (done) {
+    it('throws an error if there is no valid card type', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'Card'}],
         fields: {
@@ -1350,15 +1653,13 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function (err, payload) {
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function (err) {
         expect(err).to.exist;
-        expect(payload).to.not.exist;
         expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
-        done();
       }.bind(this));
     });
 
-    it('calls callback with error and reports error to DropinModel if form is not valid', function (done) {
+    it('calls callback with error and reports error to DropinModel if form is not valid', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1373,12 +1674,89 @@ describe('CardView', function () {
 
       this.sandbox.stub(this.context.model, 'reportError');
 
-      CardView.prototype.tokenize.call(this.context, function (err, payload) {
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function (err) {
         expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
         expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
         expect(err.message).to.equal('No payment method is available.');
-        expect(payload).to.not.exist;
-        done();
+      }.bind(this));
+    });
+
+    it('calls callback with error when cardholder name is required and the input is empty', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+      this.context.hasCardholderName = true;
+      this.context.model.merchantConfiguration.card = {
+        cardholderName: {
+          required: true
+        }
+      };
+      this.context.cardholderNameInput = {value: ''};
+
+      this.sandbox.stub(this.context.model, 'reportError');
+
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function (err) {
+        expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
+        expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
+        expect(err.message).to.equal('No payment method is available.');
+      }.bind(this));
+    });
+
+    it('does not error if cardholder name is empty, but not required', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+      this.context.hasCardholderName = true;
+      this.context.model.merchantConfiguration.card = {
+        cardholderName: {
+          required: false
+        }
+      };
+      this.context.cardholderNameInput = {value: ''};
+
+      this.sandbox.stub(this.context.model, 'reportError');
+
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.model.reportError).to.not.be.called;
+        expect(this.fakeHostedFieldsInstance.tokenize).to.be.calledOnce;
+      }.bind(this));
+    });
+
+    it('does not error if cardholder name is not included', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+      this.context.hasCardholderName = false;
+
+      this.sandbox.stub(this.context.model, 'reportError');
+
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.model.reportError).to.not.be.called;
+        expect(this.fakeHostedFieldsInstance.tokenize).to.be.calledOnce;
       }.bind(this));
     });
 
@@ -1387,12 +1765,12 @@ describe('CardView', function () {
         code: 'A_REAL_ERROR_CODE'
       };
 
-      this.context.hostedFieldsInstance.tokenize.yields(fakeError, null);
+      this.context.hostedFieldsInstance.tokenize.rejects(fakeError);
       this.sandbox.stub(this.context.model, 'reportError');
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.model.reportError).to.be.calledWith(fakeError);
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.context.model.reportError).to.be.calledWith(fakeError);
+      }.bind(this));
     });
 
     it('shows unsupported card field error when attempting to use an unsupported card and reports an error', function () {
@@ -1410,12 +1788,12 @@ describe('CardView', function () {
         };
       };
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberFieldError.textContent).to.equal('This card type is not supported. Please try another card.');
-      expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldError.textContent).to.equal('This card type is not supported. Please try another card.');
+        expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
     });
 
     it('shows empty field error when attempting to sumbit an empty field', function () {
@@ -1434,11 +1812,11 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
     });
 
     it('shows invalid field error when attempting to submit an invalid field', function () {
@@ -1456,49 +1834,86 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
-      expect(numberFieldError.textContent).to.equal('This card number is not valid.');
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
+        expect(numberFieldError.textContent).to.equal('This card number is not valid.');
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
     });
 
     it('calls hostedFieldsInstance.tokenize when form is valid', function () {
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
-
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
+      }.bind(this));
     });
 
-    it('includes `vaulted: true` in tokenization payload if not guest checkout', function (done) {
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, {});
-      this.context.model.isGuestCheckout = false;
+    it('sets the aria-invalid attribute when a field error is shown', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
 
-      CardView.prototype.tokenize.call(this.context, function (err, payload) {
-        expect(err).to.not.exist;
-        expect(payload.vaulted).to.equal(true);
-        done();
+      CardView.prototype.showFieldError.call(this.context, 'number');
+
+      expect(this.context.hostedFieldsInstance.setAttribute).to.be.calledWith({
+        field: 'number',
+        attribute: 'aria-invalid',
+        value: true
       });
     });
 
-    it('does not include `vaulted: true` in tokenization payload if guest checkout', function (done) {
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, {});
+    it('removes the aria-invalid attribute when a field error is hidden', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      CardView.prototype.hideFieldError.call(this.context, 'number');
+
+      expect(this.context.hostedFieldsInstance.removeAttribute).to.be.calledWith({
+        field: 'number',
+        attribute: 'aria-invalid'
+      });
+    });
+
+    it('calls hostedFieldsInstance.tokenize when form is valid', function () {
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
+      }.bind(this));
+    });
+
+    it('includes `vaulted: true` in tokenization payload if not guest checkout', function () {
+      this.context.model.isGuestCheckout = false;
+
+      return CardView.prototype.tokenize.call(this.context).then(function (payload) {
+        expect(payload.vaulted).to.equal(true);
+      });
+    });
+
+    it('does not include `vaulted: true` in tokenization payload if guest checkout', function () {
       this.context.model.isGuestCheckout = true;
 
-      CardView.prototype.tokenize.call(this.context, function (err, payload) {
-        expect(err).to.not.exist;
+      return CardView.prototype.tokenize.call(this.context).then(function (payload) {
         expect(payload.vaulted).to.not.exist;
-        done();
       });
     });
 
     it('sets isTokenizing to true', function () {
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
-
-      CardView.prototype.tokenize.call(this.context, function () {});
+      CardView.prototype.tokenize.call(this.context);
 
       expect(this.context._isTokenizing).to.equal(true);
     });
@@ -1515,45 +1930,43 @@ describe('CardView', function () {
           }
         }
       });
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub();
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
     });
 
     it('vaults on tokenization if not using guest checkout', function () {
       this.context.model.isGuestCheckout = false;
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: true}, this.sandbox.match.func);
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: true});
+      }.bind(this));
     });
 
     it('does not vault on tokenization if using guest checkout', function () {
       this.context.model.isGuestCheckout = true;
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: false}, this.sandbox.match.func);
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: false});
+      }.bind(this));
     });
 
     it('clears fields after successful tokenization', function () {
-      this.context.hostedFieldsInstance.tokenize.yields(null, {nonce: 'foo'});
+      this.context.hostedFieldsInstance.tokenize.resolves({nonce: 'foo'});
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('number');
-      expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
-      expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('cvv');
-      expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('number');
+        expect(this.context.hostedFieldsInstance.clear).to.have.been.calledWith('expirationDate');
+        expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('cvv');
+        expect(this.context.hostedFieldsInstance.clear).not.to.have.been.calledWith('postalCode');
+      }.bind(this));
     });
 
     it('sets isTokenizing to false on successful tokenization', function (done) {
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
-      this.context.hostedFieldsInstance.tokenize.yields(null, {nonce: 'foo'});
+      this.context.hostedFieldsInstance.tokenize.resolves({nonce: 'foo'});
 
-      CardView.prototype.tokenize.call(this.context, function () {
+      CardView.prototype.tokenize.call(this.context).then(function () {
         setTimeout(function () {
           expect(this.context._isTokenizing).to.equal(false);
           done();
@@ -1561,55 +1974,55 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('sets isTokenizing to false on unsuccessful tokenization', function (done) {
-      this.context.hostedFieldsInstance.tokenize.yieldsAsync(new Error('Error'));
+    it('sets isTokenizing to false on unsuccessful tokenization', function () {
+      this.context.hostedFieldsInstance.tokenize.rejects(new Error('Error'));
 
-      CardView.prototype.tokenize.call(this.context, function () {
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
         expect(this.context._isTokenizing).to.equal(false);
-        done();
       }.bind(this));
     });
 
-    it('removes braintree-sheet--loading class after successful tokenization', function () {
+    it('removes braintree-sheet--loading class after successful tokenization', function (done) {
       var stubPayload = {};
 
       this.sandbox.stub(classlist, 'remove');
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
+      this.context.hostedFieldsInstance.tokenize.resolves(stubPayload);
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+      CardView.prototype.tokenize.call(this.context).then(function () {
+        setTimeout(function () {
+          expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+          done();
+        }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+      }.bind(this));
     });
 
     it('removes braintree-sheet--loading class after tokenization fails', function () {
       this.sandbox.stub(classlist, 'remove');
-      this.context.hostedFieldsInstance.tokenize.yields(new Error('foo'));
+      this.context.hostedFieldsInstance.tokenize.rejects(new Error('foo'));
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+      }.bind(this));
     });
 
-    it('adds a new payment method when tokenize is successful and transition ends', function (done) {
+    it('adds a new payment method when tokenize is successful and transition ends', function () {
       var stubPayload = {};
 
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(null, stubPayload);
+      this.context.hostedFieldsInstance.tokenize.resolves(stubPayload);
       this.sandbox.stub(this.model, 'addPaymentMethod');
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
-      CardView.prototype.tokenize.call(this.context, function () {
+      return CardView.prototype.tokenize.call(this.context).then(function () {
         expect(this.model.addPaymentMethod).to.have.been.calledWith(stubPayload);
-        done();
       }.bind(this));
     });
 
     it('does not update the active payment method when tokenize fails', function () {
-      this.context.hostedFieldsInstance.tokenize = this.sandbox.stub().yields(new Error('bad happen'));
+      this.context.hostedFieldsInstance.tokenize.rejects(new Error('bad happen'));
       this.sandbox.stub(this.model, 'addPaymentMethod');
 
-      CardView.prototype.tokenize.call(this.context, function () {});
-
-      expect(this.model.addPaymentMethod).to.not.have.been.called;
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.model.addPaymentMethod).to.not.have.been.called;
+      }.bind(this));
     });
   });
 
@@ -1617,26 +2030,26 @@ describe('CardView', function () {
     beforeEach(function () {
       this.context = {
         hostedFieldsInstance: {
-          teardown: this.sandbox.stub().yields()
+          teardown: this.sandbox.stub().resolves()
         }
       };
     });
 
-    it('tears down hosted fields instance', function (done) {
-      CardView.prototype.teardown.call(this.context, function () {
+    it('tears down hosted fields instance', function () {
+      return CardView.prototype.teardown.call(this.context).then(function () {
         expect(this.context.hostedFieldsInstance.teardown).to.be.calledOnce;
-        done();
       }.bind(this));
     });
 
-    it('passes hosted fields teardown errors to callback', function (done) {
+    it('passes hosted fields teardown errors to callback', function () {
       var error = new Error('hosted fields teardown error');
 
-      this.context.hostedFieldsInstance.teardown.yields(error);
+      this.context.hostedFieldsInstance.teardown.rejects(error);
 
-      CardView.prototype.teardown.call(this.context, function (err) {
+      return CardView.prototype.teardown.call(this.context).then(function () {
+        throw new Error('should not resolve');
+      }).then(throwIfResolves).catch(function (err) {
         expect(err).to.equal(error);
-        done();
       });
     });
   });

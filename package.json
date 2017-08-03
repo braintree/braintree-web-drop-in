@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.2.0",
+  "version": "1.6.0-rc.1",
   "main": "src/index.js",
   "scripts": {
     "build": "gulp build",
@@ -10,6 +10,9 @@
     "pretest": "npm run lint",
     "test": "karma start test/config/karma.js --single-run",
     "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec",
+    "test:integration:paypal-only": "RUN_PAYPAL_ONLY=true npm run test:integration",
+    "test:integration:paypal-skipped": "SKIP_PAYPAL=true npm run test:integration",
+    "test:publishing": "mocha test/publishing",
     "deploy:gh-pages": "./scripts/deploy-gh-pages"
   },
   "repository": {
@@ -28,6 +31,7 @@
     "eslint-config-braintree": "1.0.2",
     "finalhandler": "0.5.0",
     "gulp": "3.9.1",
+    "gulp-autoprefixer": "4.0.0",
     "gulp-brfs": "0.1.0",
     "gulp-clean-css": "2.0.13",
     "gulp-envify": "1.0.0",
@@ -40,7 +44,7 @@
     "gulp-util": "3.0.7",
     "is-uuid": "1.0.2",
     "jsdoc": "3.4.0",
-    "jsdoc-template": "braintree/jsdoc-template#3.0.0",
+    "jsdoc-template": "braintree/jsdoc-template#3.1.0",
     "karma": "0.13.22",
     "karma-browserify": "5.0.5",
     "karma-mocha": "1.1.1",
@@ -57,9 +61,10 @@
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
-    "braintree-web": "3.17.0",
-    "browser-detection": "braintree/browser-detection#1.4.0",
-    "promise-polyfill": "6.0.2"
+    "braintree-web": "3.21.1",
+    "@braintree/browser-detection": "1.6.0",
+    "promise-polyfill": "6.0.2",
+    "@braintree/wrap-promise": "1.1.1"
   },
   "browserify": {
     "transform": [
@@ -71,5 +76,9 @@
         }
       ]
     ]
-  }
+  },
+  "browserslist": [
+    "last 2 versions",
+    "iOS 8"
+  ]
 }

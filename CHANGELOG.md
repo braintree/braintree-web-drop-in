@@ -1,6 +1,51 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Hide Diners Club logo when Diners Club may not be supported
+- Add `cardholderName` option to card configuration
+- Use version 3.21.1 of braintree-web
+
+1.5.0
+-----
+- Use version 3.20.1 of braintree-web
+- Update browser-detection to v1.6.0
+- Add `aria-label` attribute to payment options
+- Update checkout.js to v4.0.95
+- Add `clearSelectedPaymentMethod` to remove selected payment method
+
+1.4.0
+------
+- Add `paymentOptionSelected` event
+- Add support for PayPal and PayPal credit in the script tag integration
+- Add support for locale and payment option priority in the script tag integration
+- `dropinInstance.requestPaymentMethod` will return a promise if no callback is provided
+- `dropinInstance.teardown` will return a promise if no callback is provided
+- `dropin.create` will return a promise if no callback is provided
+- Fix error thrown in console when removing fields with card overrides
+- Fix bug where Drop-in would not finish loading if inside a hidden div
+- Improve transition from payment sheet views to payment methods view
+- Use version 3.19.1 of braintree-web
+- Add `paymentMethodIsSelected` property on `paymentMethodRequestable` events
+- Improve UI in older versions of iOS Safari
+
+1.3.1
+-----
+- Use version 3.19.0 of braintree-web
+- Autoprefix CSS, fixing issues in older browsers
+- Add aria-invalid attribute for cards
+
+1.3.0
+------
+- Add script tag integration for cards only
+- Add support for custom translations
+- Clean up payment option error messages
+- Update braintree-web to version 3.18.0
+- Update paypal checkout.js to version 4.0.82
+- Allow card overrides with Hosted Fields
+- Use npm scoped version of browser-detection
+
 1.2.0
 ------
 - Adjust styling of saved payment methods

@@ -5,17 +5,26 @@ module PayPal
     end
   end
 
-  def complete_iframe_flow(&block)
-    find(".braintree-sheet__button--paypal").click
-    paypal_outer_frame = find("body > iframe")
-
-    within_frame paypal_outer_frame do
-      inner_frame = find("body iframe")
-
-      within_frame inner_frame do
+  def open_already_logged_in_paypal_flow(&block)
+    begin
+      within_window open_popup do
         block.call if block
 
         click_button("confirmButtonTop", wait: 30)
+      end
+    rescue Capybara::WindowError
+      paypal_outer_frame = find(".paypal-checkout-sandbox iframe")
+
+      within_frame paypal_outer_frame do
+        inner_frame = find("body iframe")
+
+        within_frame inner_frame do
+          block.call if block
+
+          sleep 2
+
+          click_button("confirmButtonTop", wait: 30)
+        end
       end
     end
   end
@@ -29,6 +38,8 @@ module PayPal
       sleep 1
 
       block.call if block
+
+      sleep 2
 
       click_button("confirmButtonTop", wait: 30)
     end

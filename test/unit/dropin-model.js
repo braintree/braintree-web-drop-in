@@ -318,6 +318,38 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('removeActivePaymentMethod', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+      this.sandbox.stub(this.model, '_emit');
+      this.sandbox.stub(this.model, 'setPaymentMethodRequestable');
+    });
+
+    it('sets active payment method to null', function () {
+      this.model._activePaymentMethod = {foo: 'bar'};
+
+      this.model.removeActivePaymentMethod();
+
+      expect(this.model._activePaymentMethod).to.not.exist;
+    });
+
+    it('emits removeActivePaymentMethod event', function () {
+      this.model.removeActivePaymentMethod();
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('removeActivePaymentMethod');
+    });
+
+    it('sets payment method to not be requestable', function () {
+      this.model.removeActivePaymentMethod();
+
+      expect(this.model.setPaymentMethodRequestable).to.be.calledOnce;
+      expect(this.model.setPaymentMethodRequestable).to.be.calledWith({
+        isRequestable: false
+      });
+    });
+  });
+
   describe('getActivePaymentMethod', function () {
     it('returns _activePaymentMethod', function () {
       var model = new DropinModel(this.modelOptions);
@@ -503,7 +535,8 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
-        type: 'card'
+        type: 'card',
+        paymentMethodIsSelected: false
       });
     });
 
@@ -574,7 +607,8 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
-        type: 'ANOTHER_TYPE'
+        type: 'ANOTHER_TYPE',
+        paymentMethodIsSelected: false
       });
     });
 
@@ -586,6 +620,50 @@ describe('DropinModel', function () {
       });
 
       expect(this.model._paymentMethodRequestableType).to.not.exist;
+    });
+
+    it('includes the paymentMethodIsSelected as true if Drop-in displays a selected payment method', function () {
+      var selectedPaymentMethod = {foo: 'bar'};
+
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'TYPE',
+        selectedPaymentMethod: selectedPaymentMethod
+      });
+
+      expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
+        type: 'TYPE',
+        paymentMethodIsSelected: true
+      });
+    });
+
+    it('includes the paymentMethodIsSelected as false if no payment method is actively selected', function () {
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'TYPE'
+      });
+
+      expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
+        type: 'TYPE',
+        paymentMethodIsSelected: false
+      });
+    });
+  });
+
+  describe('selectPaymentOption', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a paymentOptionSelected event with the id of the payment option that was selected', function () {
+      this.model.selectPaymentOption('card');
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('paymentOptionSelected', {
+        paymentOption: 'card'
+      });
     });
   });
 });

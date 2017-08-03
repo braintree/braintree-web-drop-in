@@ -14,6 +14,8 @@ var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
+var Promise = require('./lib/promise');
+var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
@@ -53,7 +55,10 @@ var VERSION = process.env.npm_package_version;
  * @function
  * @param {string} event The name of the event to which you are subscribing.
  * @param {function} handler A callback to handle the event.
- * @description Subscribes a handler function to a named event. `event` should be {@link HostedFields#event:paymentMethodRequestable|`paymentMethodRequestable`} or {@link HostedFields#event:noPaymentMethodRequestable|`noPaymentMethodRequestable`}.
+ * @description Subscribes a handler function to a named event. `event` should be one of the following:
+ *  * [`paymentMethodRequestable`](#event:paymentMethodRequestable)
+ *  * [`noPaymentMethodRequestable`](#event:noPaymentMethodRequestable)
+ *  * [`paymentOptionSelected`](#event:paymentOptionSelected)
  * @returns {void}
  * @example
  * <caption>Dynamically enable or disable your submit button based on whether or not the payment method is requestable</caption>
@@ -78,12 +83,46 @@ var VERSION = process.env.npm_package_version;
  *
  *   dropinInstance.on('paymentMethodRequestable', function (event) {
  *     console.log(event.type); // The type of Payment Method, e.g 'CreditCard', 'PayPalAccount'.
+ *     console.log(event.paymentMethodIsSelected); // true if a customer has selected a payment method when paymentMethodRequestable fires
  *
  *     submitButton.removeAttribute('disabled');
  *   });
  *
  *   dropinInstance.on('noPaymentMethodRequestable', function () {
  *     submitButton.setAttribute('disabled', true);
+ *   });
+ * });
+ * @example
+ * <caption>Automatically submit nonce to server as soon as it becomes available</caption>
+ * var submitButton = document.querySelector('#submit-button');
+ *
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container'
+ * }, function (err, dropinInstance) {
+ *   function sendNonceToServer() {
+ *     dropinInstance.requestPaymentMethod(function (err, payload) {
+ *       if (err) {
+ *         // handle errors
+ *       }
+ *
+ *       // send payload.nonce to your server
+ *     });
+ *   }
+ *
+ *   // allows us to still request the payment method manually, such as
+ *   // when filling out a credit card form
+ *   submitButton.addEventListener('click', sendNonceToServer);
+ *
+ *   dropinInstance.on('paymentMethodRequestable', function (event) {
+ *     // if the nonce is already available (via PayPal authentication
+ *     // or by using a stored payment method), we can request the
+ *     // nonce right away. Otherwise, we wait for the customer to
+ *     // request the nonce by pressing the submit button once they
+ *     // are finished entering their credit card details
+ *     if (event.paymentMethodIsSelected) {
+ *       sendNonceToServer();
+ *     }
  *   });
  * });
  */
@@ -98,11 +137,28 @@ var VERSION = process.env.npm_package_version;
  * @typedef {object} Dropin~paymentMethodRequestablePayload
  * @description The event payload sent from {@link Dropin#on|`on`} with the {@link Dropin#event:paymentMethodRequestable|`paymentMethodRequestable`} event.
  * @property {string} type The type of payment method that is requestable. Either `CreditCard` or `PayPalAccount`.
+ * @property {boolean} paymentMethodIsSelected A property to determine if a payment method is currently selected when the payment method becomes requestable.
+ *
+ * This will be `true` any time a payment method is visably selected in the Drop-in UI, such as when PayPal authentication completes or a stored payment method is selected.
+ *
+ * This will be `false` when {@link Dropin#requestPaymentMethod|`requestPaymentMethod`} can be called, but a payment method is not currently selected. For instance, when a card form has been filled in with valid values, but has not been submitted to be converted into a payment method nonce.
  */
 
 /**
  * This event is emitted when there is no payment method available in Drop-in. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMethodRequestable`}. No payload is available in the callback for this event.
  * @event Dropin#noPaymentMethodRequestable
+ */
+
+/**
+ * This event is emitted when a payment option is selected by the customer.
+ * @event Dropin#paymentOptionSelected
+ * @type {Dropin~paymentOptionSelectedPayload}
+ */
+
+/**
+ * @typedef {object} Dropin~paymentOptionSelectedPayload
+ * @description The event payload sent from {@link Dropin#on|`on`} with the {@link Dropin#event:paymentOptionSelected|`paymentOptionSelected`} event.
+ * @property {string} paymentOption The payment option view selected. Either `card`, `paypal`, or `paypalCredit`.
  */
 
 /**
@@ -169,6 +225,10 @@ Dropin.prototype._initialize = function (callback) {
     strings = assign(strings, localizedStrings);
   }
 
+  if (this._merchantConfiguration.translations) {
+    strings = assign(strings, this._merchantConfiguration.translations);
+  }
+
   localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {
     var stringValue = strings[stringKey];
 
@@ -189,7 +249,7 @@ Dropin.prototype._initialize = function (callback) {
         paymentMethods: paymentMethods
       });
     } catch (modelError) {
-      dropinInstance.teardown(function () {
+      dropinInstance.teardown().then(function () {
         callback(modelError);
       });
       return;
@@ -213,6 +273,10 @@ Dropin.prototype._initialize = function (callback) {
 
     this._model.on('noPaymentMethodRequestable', function () {
       this._emit('noPaymentMethodRequestable');
+    }.bind(this));
+
+    this._model.on('paymentOptionSelected', function (event) {
+      this._emit('paymentOptionSelected', event);
     }.bind(this));
 
     function createMainView() {
@@ -247,8 +311,6 @@ Dropin.prototype._initialize = function (callback) {
  * dropinInstance.updateConfiguration('paypal', 'amount', '10.00');
  */
 Dropin.prototype.updateConfiguration = function (property, key, value) {
-  var isOnMethodsView, hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
-
   if (UPDATABLE_CONFIGURATION_OPTIONS.indexOf(property) === -1) {
     return;
   }
@@ -259,13 +321,57 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
     return;
   }
 
+  this._removeUnvaultedPaymentMethods(function (paymentMethod) {
+    return paymentMethod.type === constants.paymentMethodTypes[property];
+  });
+  this._navigateToInitialView();
+};
+
+/**
+ * Removes the currently selected payment method and returns the customer to the payment options view. Does not remove vaulted payment methods.
+ * @public
+ * @returns {void}
+ * @example
+ * dropinInstance.requestPaymentMethod(function (requestPaymentMethodError, payload) {
+ *   if (requestPaymentMethodError) {
+ *     // handle errors
+ *     return;
+ *   }
+ *
+ *   functionToSendNonceToServer(payload.nonce, function (transactionError, response) {
+ *     if (transactionError) {
+ *       // transaction sale with selected payment method failed
+ *       // clear the selected payment method and add a message
+ *       // to the checkout page about the failure
+ *       dropinInstance.clearSelectedPaymentMethod();
+ *       divForErrorMessages.textContent = 'my error message about entering a different payment method.';
+ *     } else {
+ *       // redirect to success page
+ *     }
+ *   });
+ * });
+ */
+Dropin.prototype.clearSelectedPaymentMethod = function () {
+  this._removeUnvaultedPaymentMethods();
+
+  this._navigateToInitialView();
+
+  this._model.removeActivePaymentMethod();
+};
+
+Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
+  filter = filter || function () { return true; };
+
   this._model.getPaymentMethods().forEach(function (paymentMethod) {
-    if (paymentMethod.type === constants.paymentMethodTypes[property] && !paymentMethod.vaulted) {
+    if (filter(paymentMethod) && !paymentMethod.vaulted) {
       this._model.removePaymentMethod(paymentMethod);
     }
   }.bind(this));
+};
 
-  isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
+Dropin.prototype._navigateToInitialView = function () {
+  var hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
+  var isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
 
   if (isOnMethodsView) {
     hasNoSavedPaymentMethods = this._model.getPaymentMethods().length === 0;
@@ -311,22 +417,29 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
     var element = paymentMethodOptionsElements[paymentMethodId];
     var div = element.div;
     var clickHandler = element.clickHandler;
-    var error = this._model.failedDependencies[paymentMethodId].message;
+    var error = this._model.failedDependencies[paymentMethodId];
+    var errorMessageDiv = div.querySelector('.braintree-option__disabled-message');
 
     div.classList.add('braintree-disabled');
     div.removeEventListener('click', clickHandler);
-    div.querySelector('.braintree-option__disabled-message').textContent = error;
+    if (error.code === 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED') {
+      errorMessageDiv.innerHTML = constants.errors.PAYPAL_NON_LINKED_SANDBOX;
+    } else {
+      errorMessageDiv.textContent = error.message;
+    }
   }.bind(this));
 };
 
 /**
- * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account. If a payment method is not available, an error will appear in the UI and and error will be returned in the callback.
+ * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account.
+ *
+ * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
- * @param {callback} callback The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}.
- * @returns {void}
+ * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
+ * @returns {void|Promise} Returns a promise if no callback is provided.
  */
-Dropin.prototype.requestPaymentMethod = function (callback) {
-  this._mainView.requestPaymentMethod(callback);
+Dropin.prototype.requestPaymentMethod = function () {
+  return this._mainView.requestPaymentMethod();
 };
 
 Dropin.prototype._removeStylesheet = function () {
@@ -386,19 +499,33 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
 /**
  * Cleanly remove anything set up by {@link module:braintree-web-drop-in|dropin.create}. This may be be useful in a single-page app.
  * @public
- * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully.
- * @returns {void}
+ * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully. If no callback is provided, `teardown` will return a promise.
+ * @returns {void|Promise} Returns a promise if no callback is provided.
  */
-Dropin.prototype.teardown = function (callback) {
+Dropin.prototype.teardown = function () {
+  var mainviewTeardownError;
+  var promise = Promise.resolve();
+  var self = this;
+
   this._removeStylesheet();
 
   if (this._mainView) {
-    this._mainView.teardown(function (err) {
-      this._removeDropinWrapper(err, callback);
-    }.bind(this));
-  } else {
-    this._removeDropinWrapper(null, callback);
+    promise.then(function () {
+      return self._mainView.teardown().catch(function (err) {
+        mainviewTeardownError = err;
+      });
+    });
   }
+
+  return promise.then(function () {
+    return self._removeDropinWrapper();
+  }).then(function () {
+    if (mainviewTeardownError) {
+      return Promise.reject(mainviewTeardownError);
+    }
+
+    return Promise.resolve();
+  });
 };
 
 /**
@@ -410,9 +537,10 @@ Dropin.prototype.isPaymentMethodRequestable = function () {
   return this._model.isPaymentMethodRequestable();
 };
 
-Dropin.prototype._removeDropinWrapper = function (err, callback) {
+Dropin.prototype._removeDropinWrapper = function () {
   this._dropinWrapper.parentNode.removeChild(this._dropinWrapper);
-  callback(err);
+
+  return Promise.resolve();
 };
 
 function formatPaymentMethodPayload(paymentMethod) {
@@ -430,4 +558,4 @@ function formatPaymentMethodPayload(paymentMethod) {
   return formattedPaymentMethod;
 }
 
-module.exports = Dropin;
+module.exports = wrapPrototype(Dropin);

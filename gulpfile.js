@@ -24,6 +24,8 @@ var serveStatic = require('serve-static');
 var finalhandler = require('finalhandler');
 var gutil = require('gulp-util');
 var mkdirp = require('mkdirp');
+var autoprefixer = require('gulp-autoprefixer');
+
 var VERSION = require('./package.json').version;
 
 var DIST_PATH = 'dist/web/dropin/' + VERSION;
@@ -62,7 +64,7 @@ var config = {
   server: {
     assetsPath: 'dist',
     ghPagesPath: GH_PAGES_PATH,
-    port: 4567
+    port: process.env.PORT || 4567
   }
 };
 
@@ -93,6 +95,7 @@ gulp.task('build:css', function () {
 
   return gulp.src(config.src.css.main)
     .pipe(sass(sassOptions).on('error', sass.logError))
+    .pipe(autoprefixer())
     .pipe(rename(config.src.css.output))
     .pipe(gulp.dest(config.dist.css))
     .pipe(cleanCSS())
