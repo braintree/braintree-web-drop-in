@@ -10,6 +10,8 @@ describe "Drop-in#updateConfiguration" do
   it "updates PayPal configuration", :paypal do
     visit_dropin_url("?showUpdatePayPalMenu=true")
 
+    sleep 2
+
     find("#paypal-config-checkout").click()
 
     sleep 2
@@ -32,6 +34,8 @@ describe "Drop-in#updateConfiguration" do
 
   it "updates PayPal Credit configuration", :paypal do
     visit_dropin_url("?showUpdatePayPalMenu=true")
+
+    sleep 2
 
     find("#paypal-config-checkout").click()
 

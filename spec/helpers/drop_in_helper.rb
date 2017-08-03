@@ -2,12 +2,8 @@ IS_TRAVIS = ENV["IS_TRAVIS"]
 PORT = ENV["PORT"] || 4567
 
 module DropIn
-  def visit_dropin_url(path = "", ready="ready")
+  def visit_dropin_url(path = "")
     visit URI.encode("http://#{get_hostname}:#{PORT}#{path}")
-
-    if ready
-      expect(page).to have_selector('#ready', :visible => false, :text => ready, :wait => 30)
-    end
   end
 
   def get_hostname

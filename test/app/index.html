@@ -39,11 +39,6 @@
     display: none;
   }
 
-  #ready {
-    position: fixed;
-    left: -200%;
-  }
-
   input[type="submit"], button {
     font: inherit;
     padding: 0.5em 1em;
@@ -94,7 +89,6 @@
 </div>
 
 <pre id="results"></pre>
-<div id="ready"></div>
 
 <footer>
   <p><a href="docs">View the Reference Documentation</a></p>
@@ -133,7 +127,6 @@
   var createButton = document.querySelector('#create-button');
   var teardownButton = document.querySelector('#teardown-button');
   var clearButton = document.querySelector('#clear-button');
-  var ready = document.querySelector('#ready');
 
   function getDropinConfig () {
     var query = window.location.search.substring(1);
@@ -184,7 +177,6 @@
 
     braintree.dropin.create(config, function (err, instance) {
       if (err) {
-        ready.textContent = 'error';
         error.textContent = err.message;
         throw err;
       }
@@ -222,8 +214,6 @@
       createButton.setAttribute('disabled', true);
 
       dropinInstance = instance;
-
-      ready.textContent = 'ready';
     });
   }
 
