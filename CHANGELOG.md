@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix svgs not showing up when d3.js is used on page
+
 1.6.0
 ----------
 - Hide Diners Club logo when Diners Club may not be supported
