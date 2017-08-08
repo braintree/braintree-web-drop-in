@@ -1,13 +1,13 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.6.1
+------
 - Fix svgs not showing up when d3.js is used on page
 - Use version 3.22.0 of braintree-web
 
 1.6.0
-----------
+------
 - Hide Diners Club logo when Diners Club may not be supported
 - Add `cardholderName` option to card configuration
 - Use version 3.21.1 of braintree-web
