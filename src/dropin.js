@@ -183,7 +183,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var localizedStrings, localizedHTML, strings;
+  var localizedStrings, localizedHTML;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
 
@@ -216,22 +216,22 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   // Backfill with `en`
-  strings = assign({}, translations.en);
+  this._strings = assign({}, translations.en);
   if (this._merchantConfiguration.locale) {
     localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
-    strings = assign(strings, localizedStrings);
+    this._strings = assign(this._strings, localizedStrings);
   }
 
   if (this._merchantConfiguration.translations) {
-    strings = assign(strings, this._merchantConfiguration.translations);
+    this._strings = assign(this._strings, this._merchantConfiguration.translations);
   }
 
-  localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {
-    var stringValue = strings[stringKey];
+  localizedHTML = Object.keys(this._strings).reduce(function (result, stringKey) {
+    var stringValue = this._strings[stringKey];
 
     return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
-  }, mainHTML);
+  }.bind(this), mainHTML);
 
   this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(this._dropinWrapper);
@@ -277,21 +277,14 @@ Dropin.prototype._initialize = function (callback) {
       this._emit('paymentOptionSelected', event);
     }.bind(this));
 
-    function createMainView() {
-      dropinInstance._mainView = new MainView({
-        client: dropinInstance._client,
-        element: dropinInstance._dropinWrapper,
-        model: dropinInstance._model,
-        strings: strings
-      });
-    }
-
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
     if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
-      this._loadPayPalScript(createMainView);
+      this._loadPayPalScript(function () {
+        this._setUpDependenciesAndViews();
+      }.bind(this));
     } else {
-      createMainView();
+      this._setUpDependenciesAndViews();
     }
   }.bind(this));
 };
@@ -355,6 +348,15 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
   this._navigateToInitialView();
 
   this._model.removeActivePaymentMethod();
+};
+
+Dropin.prototype._setUpDependenciesAndViews = function () {
+  this._mainView = new MainView({
+    client: this._client,
+    element: this._dropinWrapper,
+    model: this._model,
+    strings: this._strings
+  });
 };
 
 Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
