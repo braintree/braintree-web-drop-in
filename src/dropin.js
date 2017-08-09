@@ -254,15 +254,19 @@ Dropin.prototype._initialize = function (callback) {
       return;
     }
 
+    this._model.on('cancelInitialization', function (err) {
+      analytics.sendEvent(this._client, 'load-error');
+      this._dropinWrapper.innerHTML = '';
+      callback(err);
+    }.bind(this));
+
     this._model.on('asyncDependenciesReady', function () {
       if (this._model.dependencySuccessCount >= 1) {
         analytics.sendEvent(this._client, 'appeared');
         this._disableErroredPaymentMethods();
         callback(null, dropinInstance);
       } else {
-        analytics.sendEvent(this._client, 'load-error');
-        this._dropinWrapper.innerHTML = '';
-        callback(new DropinError('All payment options failed to load.'));
+        this._model.cancelInitialization(new DropinError('All payment options failed to load.'));
       }
     }.bind(this));
 
