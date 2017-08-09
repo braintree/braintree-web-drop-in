@@ -7,6 +7,8 @@ var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
+var dataCollector = require('braintree-web/data-collector');
+var MainView = require('../../src/views/main-view');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
@@ -662,6 +664,92 @@ describe('Dropin', function () {
       instance._initialize(function () {
         expect(instance._mainView.strings.postalCodeLabel).to.equal('Postal Code');
         done();
+      });
+    });
+  });
+
+  describe('data collector', function () {
+    beforeEach(function () {
+      this.deviceData = {correlationId: '123'};
+      this.dropinOptions.merchantConfiguration.dataCollector = {kount: true};
+      this.sandbox.stub(dataCollector, 'create').resolves({
+        deviceData: this.deviceData
+      });
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
+    });
+
+    it('does not setup data collector if data collector is not enabled', function (done) {
+      var instance;
+
+      delete this.dropinOptions.merchantConfiguration.dataCollector;
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(dataCollector.create).to.not.be.called;
+
+        done();
+      });
+    });
+
+    it('sets up data collector when enabled', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(dataCollector.create).to.be.calledOnce;
+        expect(dataCollector.create).to.be.calledWith({
+          client: instance._client,
+          kount: true
+        });
+
+        done();
+      });
+    });
+
+    it('starts an async dependency', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        // once for card view
+        // second time for data collector
+        expect(instance._model.asyncDependencyStarting).to.be.calledTwice;
+        expect(instance._model.asyncDependencyReady).to.be.calledTwice;
+
+        done();
+      });
+    });
+
+    it('continues even if data collector fails to set up', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var err = new Error('data collector failed');
+
+      this.sandbox.stub(console, 'log');
+      dataCollector.create.rejects(err);
+
+      instance._initialize(function () {
+        // once for card view
+        // once for data collector
+        expect(instance._model.asyncDependencyReady).to.be.calledTwice;
+        expect(console.log).to.be.calledWith('Data Collector failed to set up', err);
+
+        done();
+      });
+    });
+
+    it('passes along device data when requesting payment method', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var deviceData = this.deviceData;
+
+      this.sandbox.stub(MainView.prototype, 'requestPaymentMethod').resolves({
+        nonce: 'a-nonce'
+      });
+
+      instance._initialize(function () {
+        instance.requestPaymentMethod(function (err, payload) {
+          expect(payload.nonce).to.equal('a-nonce');
+          expect(payload.deviceData).to.equal(deviceData);
+          done();
+        });
       });
     });
   });

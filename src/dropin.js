@@ -3,6 +3,7 @@
 var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
 var constants = require('./constants');
+var dataCollector = require('braintree-web/data-collector');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
@@ -350,7 +351,25 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
   this._model.removeActivePaymentMethod();
 };
 
+Dropin.prototype._setUpDataCollector = function () {
+  var config = assign({}, this._merchantConfiguration.dataCollector, {client: this._client});
+
+  this._model.asyncDependencyStarting();
+
+  dataCollector.create(config).then(function (instance) {
+    this._deviceData = instance.deviceData;
+  }.bind(this)).catch(function (err) {
+    console.log('Data Collector failed to set up', err);
+  }).then(function () {
+    this._model.asyncDependencyReady();
+  }.bind(this));
+};
+
 Dropin.prototype._setUpDependenciesAndViews = function () {
+  if (this._merchantConfiguration.dataCollector) {
+    this._setUpDataCollector();
+  }
+
   this._mainView = new MainView({
     client: this._client,
     element: this._dropinWrapper,
@@ -439,7 +458,13 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.requestPaymentMethod = function () {
-  return this._mainView.requestPaymentMethod();
+  return this._mainView.requestPaymentMethod().then(function (payload) {
+    if (this._deviceData) {
+      payload.deviceData = this._deviceData;
+    }
+
+    return payload;
+  }.bind(this));
 };
 
 Dropin.prototype._removeStylesheet = function () {

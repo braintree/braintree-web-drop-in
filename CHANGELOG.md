@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Add data collector
+
 1.6.1
 ------
 - Fix svgs not showing up when d3.js is used on page
