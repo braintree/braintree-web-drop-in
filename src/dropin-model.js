@@ -151,6 +151,10 @@ DropinModel.prototype._checkAsyncDependencyFinished = function () {
   }
 };
 
+DropinModel.prototype.cancelInitialization = function (error) {
+  this._emit('cancelInitialization', error);
+};
+
 DropinModel.prototype.reportError = function (error) {
   this._emit('errorOccurred', error);
 };

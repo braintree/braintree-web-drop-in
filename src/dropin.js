@@ -3,6 +3,7 @@
 var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
 var constants = require('./constants');
+var dataCollector = require('braintree-web/data-collector');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
@@ -183,7 +184,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var localizedStrings, localizedHTML, strings;
+  var localizedStrings, localizedHTML;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
 
@@ -216,22 +217,22 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   // Backfill with `en`
-  strings = assign({}, translations.en);
+  this._strings = assign({}, translations.en);
   if (this._merchantConfiguration.locale) {
     localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
-    strings = assign(strings, localizedStrings);
+    this._strings = assign(this._strings, localizedStrings);
   }
 
   if (this._merchantConfiguration.translations) {
-    strings = assign(strings, this._merchantConfiguration.translations);
+    this._strings = assign(this._strings, this._merchantConfiguration.translations);
   }
 
-  localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {
-    var stringValue = strings[stringKey];
+  localizedHTML = Object.keys(this._strings).reduce(function (result, stringKey) {
+    var stringValue = this._strings[stringKey];
 
     return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
-  }, mainHTML);
+  }.bind(this), mainHTML);
 
   this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(this._dropinWrapper);
@@ -253,15 +254,19 @@ Dropin.prototype._initialize = function (callback) {
       return;
     }
 
+    this._model.on('cancelInitialization', function (err) {
+      analytics.sendEvent(this._client, 'load-error');
+      this._dropinWrapper.innerHTML = '';
+      callback(err);
+    }.bind(this));
+
     this._model.on('asyncDependenciesReady', function () {
       if (this._model.dependencySuccessCount >= 1) {
         analytics.sendEvent(this._client, 'appeared');
         this._disableErroredPaymentMethods();
         callback(null, dropinInstance);
       } else {
-        analytics.sendEvent(this._client, 'load-error');
-        this._dropinWrapper.innerHTML = '';
-        callback(new DropinError('All payment options failed to load.'));
+        this._model.cancelInitialization(new DropinError('All payment options failed to load.'));
       }
     }.bind(this));
 
@@ -277,21 +282,14 @@ Dropin.prototype._initialize = function (callback) {
       this._emit('paymentOptionSelected', event);
     }.bind(this));
 
-    function createMainView() {
-      dropinInstance._mainView = new MainView({
-        client: dropinInstance._client,
-        element: dropinInstance._dropinWrapper,
-        model: dropinInstance._model,
-        strings: strings
-      });
-    }
-
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
     if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
-      this._loadPayPalScript(createMainView);
+      this._loadPayPalScript(function () {
+        this._setUpDependenciesAndViews();
+      }.bind(this));
     } else {
-      createMainView();
+      this._setUpDependenciesAndViews();
     }
   }.bind(this));
 };
@@ -355,6 +353,35 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
   this._navigateToInitialView();
 
   this._model.removeActivePaymentMethod();
+};
+
+Dropin.prototype._setUpDataCollector = function () {
+  var config = assign({}, this._merchantConfiguration.dataCollector, {client: this._client});
+
+  this._model.asyncDependencyStarting();
+
+  dataCollector.create(config).then(function (instance) {
+    this._deviceData = instance.deviceData;
+    this._model.asyncDependencyReady();
+  }.bind(this)).catch(function (err) {
+    this._model.cancelInitialization(new DropinError({
+      message: 'Data Collector failed to set up.',
+      braintreeWebError: err
+    }));
+  }.bind(this));
+};
+
+Dropin.prototype._setUpDependenciesAndViews = function () {
+  if (this._merchantConfiguration.dataCollector) {
+    this._setUpDataCollector();
+  }
+
+  this._mainView = new MainView({
+    client: this._client,
+    element: this._dropinWrapper,
+    model: this._model,
+    strings: this._strings
+  });
 };
 
 Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
@@ -437,7 +464,13 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.requestPaymentMethod = function () {
-  return this._mainView.requestPaymentMethod();
+  return this._mainView.requestPaymentMethod().then(function (payload) {
+    if (this._deviceData) {
+      payload.deviceData = this._deviceData;
+    }
+
+    return payload;
+  }.bind(this));
 };
 
 Dropin.prototype._removeStylesheet = function () {
