@@ -362,10 +362,12 @@ Dropin.prototype._setUpDataCollector = function () {
 
   dataCollector.create(config).then(function (instance) {
     this._deviceData = instance.deviceData;
-  }.bind(this)).catch(function (err) {
-    console.log('Data Collector failed to set up', err);
-  }).then(function () {
     this._model.asyncDependencyReady();
+  }.bind(this)).catch(function (err) {
+    this._model.cancelInitialization(new DropinError({
+      message: 'Data Collector failed to set up.',
+      braintreeWebError: err
+    }));
   }.bind(this));
 };
 

@@ -719,18 +719,15 @@ describe('Dropin', function () {
       });
     });
 
-    it('continues even if data collector fails to set up', function (done) {
+    it('fails initialization when data collector fails to create', function (done) {
       var instance = new Dropin(this.dropinOptions);
-      var err = new Error('data collector failed');
+      var dataCollectorError = new Error('data collector failed');
 
-      this.sandbox.stub(console, 'log');
-      dataCollector.create.rejects(err);
+      dataCollector.create.rejects(dataCollectorError);
 
-      instance._initialize(function () {
-        // once for card view
-        // once for data collector
-        expect(instance._model.asyncDependencyReady).to.be.calledTwice;
-        expect(console.log).to.be.calledWith('Data Collector failed to set up', err);
+      instance._initialize(function (err) {
+        expect(err.message).to.equal('Data Collector failed to set up.');
+        expect(err._braintreeWebError).to.equal(dataCollectorError);
 
         done();
       });
