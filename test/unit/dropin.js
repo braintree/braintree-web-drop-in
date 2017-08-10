@@ -774,6 +774,30 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('calls teardown on dataCollector', function (done) {
+      this.instance._dataCollectorInstance = {
+        teardown: this.sandbox.stub().resolves()
+      };
+
+      this.instance.teardown(function () {
+        expect(this.instance._dataCollectorInstance.teardown).to.be.calledOnce;
+        done();
+      }.bind(this));
+    });
+
+    it('passes errors from data collector teardown to callback', function (done) {
+      var error = new Error('Data Collector failured');
+
+      this.instance._dataCollectorInstance = {
+        teardown: this.sandbox.stub().rejects(error)
+      };
+
+      this.instance.teardown(function (err) {
+        expect(err.message).to.equal('Drop-in errored tearing down Data Collector.');
+        done();
+      });
+    });
+
     it('passes errors in mainView teardown to callback', function (done) {
       var error = new Error('Teardown Error');
 

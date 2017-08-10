@@ -361,7 +361,7 @@ Dropin.prototype._setUpDataCollector = function () {
   this._model.asyncDependencyStarting();
 
   dataCollector.create(config).then(function (instance) {
-    this._deviceData = instance.deviceData;
+    this._dataCollectorInstance = instance;
     this._model.asyncDependencyReady();
   }.bind(this)).catch(function (err) {
     this._model.cancelInitialization(new DropinError({
@@ -465,8 +465,8 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  */
 Dropin.prototype.requestPaymentMethod = function () {
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (this._deviceData) {
-      payload.deviceData = this._deviceData;
+    if (this._dataCollectorInstance) {
+      payload.deviceData = this._dataCollectorInstance.deviceData;
     }
 
     return payload;
@@ -534,7 +534,7 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
-  var mainviewTeardownError;
+  var mainviewTeardownError, dataCollectorError;
   var promise = Promise.resolve();
   var self = this;
 
@@ -548,11 +548,24 @@ Dropin.prototype.teardown = function () {
     });
   }
 
+  if (this._dataCollectorInstance) {
+    promise.then(function () {
+      return this._dataCollectorInstance.teardown().catch(function (error) {
+        dataCollectorError = new DropinError({
+          message: 'Drop-in errored tearing down Data Collector.',
+          braintreeWebError: error
+        });
+      });
+    }.bind(this));
+  }
+
   return promise.then(function () {
     return self._removeDropinWrapper();
   }).then(function () {
     if (mainviewTeardownError) {
       return Promise.reject(mainviewTeardownError);
+    } else if (dataCollectorError) {
+      return Promise.reject(dataCollectorError);
     }
 
     return Promise.resolve();
