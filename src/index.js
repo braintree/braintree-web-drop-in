@@ -7,12 +7,16 @@
  *
  * When your form is submitted, Drop-in will intercept the form submission and attempt to tokenize the payment method. If the tokenization is successful, it will insert the payment method nonce into a hidden input with the name `payment_method_nonce` and then submit your form. If the tokenization is unsuccessful, a relevant error will be shown in the UI.
  *
+ * If you have data collector enabled, the device data will be injected into a hidden input with the name `device_data` before form submission.
+ *
  * Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set:
  *
  * * `data-locale`
  * * `data-card.cardholder-name`
  * * `data-card.cardholder-name.required`
  * * `data-payment-option-priority`
+ * * `data-data-collector.kount`
+ * * `data-data-collector.paypal`
  * * `data-paypal.amount`
  * * `data-paypal.currency`
  * * `data-paypal.flow`

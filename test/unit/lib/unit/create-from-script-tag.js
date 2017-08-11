@@ -226,6 +226,60 @@ describe('createFromScriptTag', function () {
     }.bind(this));
   });
 
+  it('adds device data to form and submits form if request payment method contains device data', function (done) {
+    var submitHandler;
+    var fakeNonceInput = {};
+    var fakeDeviceDataInput = {};
+
+    this.instance.requestPaymentMethod.yields(null, {
+      nonce: 'a-nonce',
+      deviceData: 'some-data'
+    });
+    this.sandbox.stub(document, 'createElement').callThrough();
+    document.createElement.withArgs('input').onCall(0).returns(fakeNonceInput);
+    document.createElement.withArgs('input').onCall(1).returns(fakeDeviceDataInput);
+    createFromScriptTag(this.createFunction, this.scriptTag);
+
+    setTimeout(function () {
+      submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+      submitHandler();
+
+      expect(this.fakeForm.appendChild).to.be.calledTwice;
+      expect(this.fakeForm.appendChild).to.be.calledWith(fakeDeviceDataInput);
+      expect(fakeDeviceDataInput.type).to.equal('hidden');
+      expect(fakeDeviceDataInput.name).to.equal('device_data');
+      expect(fakeDeviceDataInput.value).to.equal('some-data');
+      expect(this.fakeForm.submit).to.be.calledOnce;
+      done();
+    }.bind(this));
+  });
+
+  it('uses existing device_data input if it already exists', function (done) {
+    var submitHandler;
+    var fakeInput = {};
+
+    this.fakeForm.querySelector.withArgs('[name="payment_method_nonce"]').returns({});
+    this.fakeForm.querySelector.withArgs('[name="device_data"]').returns(fakeInput);
+    this.sandbox.spy(document, 'createElement');
+    this.instance.requestPaymentMethod.yields(null, {
+      nonce: 'a-nonce',
+      deviceData: 'some-data'
+    });
+
+    createFromScriptTag(this.createFunction, this.scriptTag);
+
+    setTimeout(function () {
+      submitHandler = this.fakeForm.addEventListener.getCall(1).args[1];
+      submitHandler();
+
+      expect(this.fakeForm.appendChild).to.not.be.called;
+      expect(document.createElement).to.not.be.calledWith('input');
+      expect(fakeInput.value).to.equal('some-data');
+      expect(this.fakeForm.submit).to.be.calledOnce;
+      done();
+    }.bind(this));
+  });
+
   describe('data attributes handling', function () {
     it('accepts strings', function (done) {
       var submitHandler;
