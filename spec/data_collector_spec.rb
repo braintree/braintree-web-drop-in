@@ -4,7 +4,8 @@ describe "Drop-in with Data Collector" do
   include DropIn
 
   it "includes device data in request payment method payload" do
-    visit_dropin_url
+    options = '{"paypal":true}'
+    visit_dropin_url("?dataCollector=#{options}")
 
     click_option("card")
     hosted_field_send_input("number", "4111111111111111")
