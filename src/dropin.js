@@ -40,6 +40,7 @@ var VERSION = process.env.npm_package_version;
  * @property {string} details.lastTwo Last two digits of card number.
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
 
 /**
@@ -47,6 +48,7 @@ var VERSION = process.env.npm_package_version;
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
  * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
 
 /**
@@ -361,7 +363,7 @@ Dropin.prototype._setUpDataCollector = function () {
   this._model.asyncDependencyStarting();
 
   dataCollector.create(config).then(function (instance) {
-    this._deviceData = instance.deviceData;
+    this._dataCollectorInstance = instance;
     this._model.asyncDependencyReady();
   }.bind(this)).catch(function (err) {
     this._model.cancelInitialization(new DropinError({
@@ -462,11 +464,45 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  * @public
  * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
+ * @example <caption>Requesting a payment method</caption>
+ * var form = document.querySelector('#my-form');
+ * var hiddenNonceInput = document.querySelector('#my-nonce-input');
+ *
+ * form.addEventListener('submit', function (event) {
+ *  event.preventDefault();
+ *
+ *  dropinInstance.requestPaymentMethod(function (err, payload) {
+ *    if (err) {
+ *      // handle error
+ *      return;
+ *    }
+ *    hiddenNonceInput.value = payload.nonce;
+ *    form.submit();
+ *  });
+ * });
+ * @example <caption>Requesting a payment method with data collector</caption>
+ * var form = document.querySelector('#my-form');
+ * var hiddenNonceInput = document.querySelector('#my-nonce-input');
+ * var hiddenDeviceDataInput = document.querySelector('#my-device-data-input');
+ *
+ * form.addEventListener('submit', function (event) {
+ *  event.preventDefault();
+ *
+ *  dropinInstance.requestPaymentMethod(function (err, payload) {
+ *    if (err) {
+ *      // handle error
+ *      return;
+ *    }
+ *    hiddenNonceInput.value = payload.nonce;
+ *    hiddenDeviceDataInput.value = payload.deviceData;
+ *    form.submit();
+ *  });
+ * });
  */
 Dropin.prototype.requestPaymentMethod = function () {
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (this._deviceData) {
-      payload.deviceData = this._deviceData;
+    if (this._dataCollectorInstance) {
+      payload.deviceData = this._dataCollectorInstance.deviceData;
     }
 
     return payload;
@@ -534,7 +570,7 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
-  var mainviewTeardownError;
+  var mainviewTeardownError, dataCollectorError;
   var promise = Promise.resolve();
   var self = this;
 
@@ -548,11 +584,24 @@ Dropin.prototype.teardown = function () {
     });
   }
 
+  if (this._dataCollectorInstance) {
+    promise.then(function () {
+      return this._dataCollectorInstance.teardown().catch(function (error) {
+        dataCollectorError = new DropinError({
+          message: 'Drop-in errored tearing down Data Collector.',
+          braintreeWebError: error
+        });
+      });
+    }.bind(this));
+  }
+
   return promise.then(function () {
     return self._removeDropinWrapper();
   }).then(function () {
     if (mainviewTeardownError) {
       return Promise.reject(mainviewTeardownError);
+    } else if (dataCollectorError) {
+      return Promise.reject(dataCollectorError);
     }
 
     return Promise.resolve();
