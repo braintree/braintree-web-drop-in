@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Add data collector
+- Update PayPal Checkout to v4.0.110
 
 1.6.1
 ------
