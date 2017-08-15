@@ -28,7 +28,7 @@ describe('MainView', function () {
       getConfiguration: fake.configuration
     };
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
-    this.sandbox.stub(BasePayPalView.prototype, '_initialize');
+    this.sandbox.stub(BasePayPalView.prototype, 'initialize');
   });
 
   describe('Constructor', function () {
@@ -560,7 +560,7 @@ describe('MainView', function () {
         strings: strings
       };
 
-      this.sandbox.stub(CardView.prototype, '_initialize');
+      this.sandbox.stub(CardView.prototype, 'initialize');
       this.sandbox.spy(MainView.prototype, 'hideLoadingIndicator');
 
       this.mainView = new MainView(this.mainViewOptions);

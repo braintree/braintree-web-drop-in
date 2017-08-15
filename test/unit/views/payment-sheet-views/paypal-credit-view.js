@@ -6,14 +6,7 @@ var PayPalCreditView = require('../../../../src/views/payment-sheet-views/paypal
 
 describe('PayPalCreditView', function () {
   beforeEach(function () {
-    this.sandbox.stub(PayPalCreditView.prototype, '_initialize');
-  });
-
-  it('calls _initialize with true for isCredit', function () {
-    new PayPalCreditView();
-
-    expect(PayPalCreditView.prototype._initialize).to.have.been.calledOnce;
-    expect(PayPalCreditView.prototype._initialize).to.have.been.calledWith(true);
+    this.sandbox.stub(PayPalCreditView.prototype, 'initialize');
   });
 
   it('inherits from BasePayPalView', function () {

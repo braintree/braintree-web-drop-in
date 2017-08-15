@@ -14,8 +14,9 @@ function BasePayPalView() {
 
 BasePayPalView.prototype = Object.create(BaseView.prototype);
 
-BasePayPalView.prototype._initialize = function (isCredit) {
+BasePayPalView.prototype.initialize = function () {
   var asyncDependencyTimeoutHandler;
+  var isCredit = Boolean(this._isPayPalCredit);
   var setupComplete = false;
   var self = this;
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
