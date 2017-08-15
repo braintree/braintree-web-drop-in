@@ -57,15 +57,7 @@ CardView.prototype.initialize = function () {
 
   this.model.asyncDependencyStarting();
 
-  hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
-    if (err) {
-      this.model.asyncDependencyFailed({
-        view: this.ID,
-        error: err
-      });
-      return;
-    }
-
+  return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
     this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
     this.hostedFieldsInstance.on('cardTypeChange', this._onCardTypeChangeEvent.bind(this));
@@ -74,6 +66,11 @@ CardView.prototype.initialize = function () {
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
 
     this.model.asyncDependencyReady();
+  }.bind(this)).catch(function (err) {
+    this.model.asyncDependencyFailed({
+      view: this.ID,
+      error: err
+    });
   }.bind(this));
 };
 

@@ -34,7 +34,7 @@ describe('Dropin', function () {
     };
 
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
-    this.sandbox.stub(hostedFields, 'create').yieldsAsync(null, fake.hostedFieldsInstance);
+    this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
     this.sandbox.stub(paypalCheckout, 'create').yieldsAsync(null, fake.paypalInstance);
   });
 
@@ -111,7 +111,7 @@ describe('Dropin', function () {
       var paypalError = new Error('PayPal Error');
       var hostedFieldsError = new Error('HostedFields Error');
 
-      hostedFields.create.yieldsAsync(hostedFieldsError);
+      hostedFields.create.rejects(hostedFieldsError);
       paypalCheckout.create.yieldsAsync(paypalError);
 
       this.sandbox.stub(analytics, 'sendEvent');
@@ -132,7 +132,7 @@ describe('Dropin', function () {
       var instance;
       var hostedFieldsError = new Error('HostedFields Error');
 
-      hostedFields.create.yieldsAsync(hostedFieldsError);
+      hostedFields.create.rejects(hostedFieldsError);
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance = new Dropin(this.dropinOptions);
