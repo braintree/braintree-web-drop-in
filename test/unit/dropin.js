@@ -35,7 +35,7 @@ describe('Dropin', function () {
 
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
-    this.sandbox.stub(paypalCheckout, 'create').yieldsAsync(null, fake.paypalInstance);
+    this.sandbox.stub(paypalCheckout, 'create').resolves(fake.paypalInstance);
   });
 
   afterEach(function () {
@@ -112,7 +112,7 @@ describe('Dropin', function () {
       var hostedFieldsError = new Error('HostedFields Error');
 
       hostedFields.create.rejects(hostedFieldsError);
-      paypalCheckout.create.yieldsAsync(paypalError);
+      paypalCheckout.create.rejects(paypalError);
 
       this.sandbox.stub(analytics, 'sendEvent');
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
@@ -147,7 +147,7 @@ describe('Dropin', function () {
       var instance;
       var paypalError = new Error('PayPal Error');
 
-      paypalCheckout.create.yieldsAsync(paypalError);
+      paypalCheckout.create.rejects(paypalError);
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance = new Dropin(this.dropinOptions);
@@ -167,7 +167,7 @@ describe('Dropin', function () {
 
       paypalError.code = 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED';
 
-      paypalCheckout.create.yieldsAsync(paypalError);
+      paypalCheckout.create.rejects(paypalError);
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance = new Dropin(this.dropinOptions);
@@ -175,9 +175,11 @@ describe('Dropin', function () {
       instance._initialize(function () {
         var paypalOption = this.container.querySelector('.braintree-option__paypal');
 
-        expect(paypalOption.className).to.include('braintree-disabled');
-        expect(paypalOption.innerHTML).to.include(constants.errors.PAYPAL_NON_LINKED_SANDBOX);
-        done();
+        setTimeout(function () {
+          expect(paypalOption.className).to.include('braintree-disabled');
+          expect(paypalOption.innerHTML).to.include(constants.errors.PAYPAL_NON_LINKED_SANDBOX);
+          done();
+        }, 100);
       }.bind(this));
     });
 
