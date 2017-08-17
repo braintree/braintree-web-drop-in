@@ -14,15 +14,13 @@ var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'u
 
 function CardView() {
   BaseView.apply(this, arguments);
-
-  this._initialize();
 }
 
 CardView.prototype = Object.create(BaseView.prototype);
 CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
-CardView.prototype._initialize = function () {
+CardView.prototype.initialize = function () {
   var cvvFieldGroup, postalCodeFieldGroup;
   var cardholderNameField = this.getElementById('cardholder-name-field-group');
   var cardIcons = this.getElementById('card-view-icons');
@@ -59,15 +57,7 @@ CardView.prototype._initialize = function () {
 
   this.model.asyncDependencyStarting();
 
-  hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
-    if (err) {
-      this.model.asyncDependencyFailed({
-        view: this.ID,
-        error: err
-      });
-      return;
-    }
-
+  return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
     this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
     this.hostedFieldsInstance.on('cardTypeChange', this._onCardTypeChangeEvent.bind(this));
@@ -76,6 +66,11 @@ CardView.prototype._initialize = function () {
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
 
     this.model.asyncDependencyReady();
+  }.bind(this)).catch(function (err) {
+    this.model.asyncDependencyFailed({
+      view: this.ID,
+      error: err
+    });
   }.bind(this));
 };
 

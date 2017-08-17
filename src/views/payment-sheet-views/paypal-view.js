@@ -5,8 +5,6 @@ var BasePayPalView = require('./base-paypal-view');
 
 function PayPalView() {
   BasePayPalView.apply(this, arguments);
-
-  this._initialize(false);
 }
 
 PayPalView.prototype = Object.create(BasePayPalView.prototype);

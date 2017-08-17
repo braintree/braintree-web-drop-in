@@ -36,13 +36,7 @@ describe('CardView', function () {
 
   describe('Constructor', function () {
     beforeEach(function () {
-      this.sandbox.stub(CardView.prototype, '_initialize');
-    });
-
-    it('calls _initialize', function () {
-      new CardView({element: this.element}); // eslint-disable-line no-new
-
-      expect(CardView.prototype._initialize).to.have.been.calledOnce;
+      this.sandbox.stub(CardView.prototype, 'initialize');
     });
 
     it('inherits from BaseView', function () {
@@ -50,12 +44,12 @@ describe('CardView', function () {
     });
   });
 
-  describe('_initialize', function () {
+  describe('initialize', function () {
     beforeEach(function () {
       this.hostedFieldsInstance = {
         on: this.sandbox.spy()
       };
-      this.sandbox.stub(hostedFields, 'create').yields(null, this.hostedFieldsInstance);
+      this.sandbox.stub(hostedFields, 'create').resolves(this.hostedFieldsInstance);
 
       this.model = new DropinModel(fake.modelOptions());
     });
@@ -72,7 +66,7 @@ describe('CardView', function () {
         };
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -80,7 +74,9 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).to.exist;
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).to.exist;
+      }.bind(this));
     });
 
     it('does not have cvv if supplied in challenges, but hosted fields overrides sets cvv to null', function () {
@@ -103,7 +99,7 @@ describe('CardView', function () {
         }
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -111,11 +107,13 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).not.to.exist;
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).not.to.exist;
+      }.bind(this));
     });
 
     it('does not have cvv if not supplied in challenges', function () {
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -123,7 +121,9 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).not.to.exist;
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="cvv-field-group"]')).not.to.exist;
+      }.bind(this));
     });
 
     it('has postal code if supplied in challenges', function () {
@@ -138,7 +138,7 @@ describe('CardView', function () {
         };
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -146,7 +146,9 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).to.exist;
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).to.exist;
+      }.bind(this));
     });
 
     it('does not have postal code if supplied in challenges, but hosted fields overrides sets postal code to null', function () {
@@ -169,7 +171,7 @@ describe('CardView', function () {
         }
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -177,11 +179,13 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
+      }.bind(this));
     });
 
     it('does not have postal code if not supplied in challenges', function () {
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -189,7 +193,9 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="postal-code-field-group"]')).not.to.exist;
+      }.bind(this));
     });
 
     it('has cardholderName if provided in merchant configuration', function () {
@@ -197,7 +203,7 @@ describe('CardView', function () {
         cardholderName: true
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -205,13 +211,15 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.exist;
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.exist;
+      }.bind(this));
     });
 
     it('does not include cardholderName if not provided in merchant configuration', function () {
       this.model.merchantConfiguration.card = {};
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -219,13 +227,15 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.not.exist;
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).to.not.exist;
+      }.bind(this));
     });
 
     it('starts async dependency', function () {
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -233,15 +243,15 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
+      return this.view.initialize().then(function () {
+        expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
+      });
     });
 
     it('notifies async dependency is ready when Hosted Fields is created', function () {
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
 
-      hostedFields.create.callsArgWith(1, null, {on: function () {}});
-
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -249,11 +259,13 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
+      return this.view.initialize().then(function () {
+        expect(DropinModel.prototype.asyncDependencyReady).to.be.calledOnce;
+      });
     });
 
     it('creates Hosted Fields with number and expiration date', function () {
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -261,15 +273,17 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(hostedFields.create).to.be.calledWith(this.sandbox.match({
-        client: this.client,
-        fields: {
-          number: {},
-          expirationDate: {}
-        }
-      }), this.sandbox.match.func);
-      expect(hostedFields.create.lastCall.args[0]).not.to.have.deep.property('fields.cvv');
-      expect(hostedFields.create.lastCall.args[0]).not.to.have.deep.property('fields.postalCode');
+      return this.view.initialize().then(function () {
+        expect(hostedFields.create).to.be.calledWith(this.sandbox.match({
+          client: this.client,
+          fields: {
+            number: {},
+            expirationDate: {}
+          }
+        }));
+        expect(hostedFields.create.lastCall.args[0]).not.to.have.deep.property('fields.cvv');
+        expect(hostedFields.create.lastCall.args[0]).not.to.have.deep.property('fields.postalCode');
+      }.bind(this));
     });
 
     it('creates Hosted Fields with cvv if included in challenges', function () {
@@ -284,7 +298,7 @@ describe('CardView', function () {
         };
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -295,7 +309,9 @@ describe('CardView', function () {
         }
       });
 
-      expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.cvv');
+      return this.view.initialize().then(function () {
+        expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.cvv');
+      });
     });
 
     it('creates Hosted Fields with postal code if included in challenges', function () {
@@ -310,7 +326,7 @@ describe('CardView', function () {
         };
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -321,7 +337,9 @@ describe('CardView', function () {
         }
       });
 
-      expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
+      return this.view.initialize().then(function () {
+        expect(hostedFields.create.lastCall.args[0]).to.have.deep.property('fields.postalCode');
+      });
     });
 
     it('calls asyncDependencyFailed with an error when Hosted Fields creation fails', function () {
@@ -329,10 +347,10 @@ describe('CardView', function () {
         code: 'A_REAL_ERROR_CODE'
       };
 
-      hostedFields.create.yields(fakeError);
+      hostedFields.create.rejects(fakeError);
       this.sandbox.stub(this.model, 'asyncDependencyFailed');
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -340,16 +358,18 @@ describe('CardView', function () {
         strings: strings
       });
 
-      expect(this.model.asyncDependencyFailed).to.be.calledWith({
-        view: 'card',
-        error: fakeError
-      });
+      return this.view.initialize().then(function () {
+        expect(this.model.asyncDependencyFailed).to.be.calledWith({
+          view: 'card',
+          error: fakeError
+        });
+      }.bind(this));
     });
 
     it('shows supported card icons', function () {
       var supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa'];
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -357,17 +377,19 @@ describe('CardView', function () {
         strings: strings
       });
 
-      supportedCardTypes.forEach(function (cardType) {
-        var cardIcon = this.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
+      return this.view.initialize().then(function () {
+        supportedCardTypes.forEach(function (cardType) {
+          var cardIcon = this.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
-        expect(cardIcon.classList.contains('braintree-hidden')).to.be.false;
+          expect(cardIcon.classList.contains('braintree-hidden')).to.be.false;
+        }.bind(this));
       }.bind(this));
     });
 
     it('hides unsupported card icons', function () {
       var unsupportedCardTypes = ['maestro', 'diners-club'];
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -375,10 +397,12 @@ describe('CardView', function () {
         strings: strings
       });
 
-      unsupportedCardTypes.forEach(function (cardType) {
-        var cardIcon = this.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
+      return this.view.initialize().then(function () {
+        unsupportedCardTypes.forEach(function (cardType) {
+          var cardIcon = this.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
-        expect(cardIcon.classList.contains('braintree-hidden')).to.be.true;
+          expect(cardIcon.classList.contains('braintree-hidden')).to.be.true;
+        }.bind(this));
       }.bind(this));
     });
 
@@ -396,7 +420,7 @@ describe('CardView', function () {
         };
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -404,9 +428,11 @@ describe('CardView', function () {
         strings: strings
       });
 
-      unionPayCardIcon = this.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
+      return this.view.initialize().then(function () {
+        unionPayCardIcon = this.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
 
-      expect(unionPayCardIcon.classList.contains('braintree-hidden')).to.be.true;
+        expect(unionPayCardIcon.classList.contains('braintree-hidden')).to.be.true;
+      }.bind(this));
     });
 
     it('sets field placeholders', function () {
@@ -423,7 +449,7 @@ describe('CardView', function () {
         };
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -431,12 +457,14 @@ describe('CardView', function () {
         strings: strings
       });
 
-      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+      return this.view.initialize().then(function () {
+        hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
 
-      expect(hostedFieldsConfiguredFields.number.placeholder).to.equal('•••• •••• •••• ••••');
-      expect(hostedFieldsConfiguredFields.expirationDate.placeholder).to.equal(strings.expirationDatePlaceholder);
-      expect(hostedFieldsConfiguredFields.cvv.placeholder).to.equal('•••');
-      expect(hostedFieldsConfiguredFields.postalCode.placeholder).to.not.exist;
+        expect(hostedFieldsConfiguredFields.number.placeholder).to.equal('•••• •••• •••• ••••');
+        expect(hostedFieldsConfiguredFields.expirationDate.placeholder).to.equal(strings.expirationDatePlaceholder);
+        expect(hostedFieldsConfiguredFields.cvv.placeholder).to.equal('•••');
+        expect(hostedFieldsConfiguredFields.postalCode.placeholder).to.not.exist;
+      });
     });
 
     it('allows overriding field options for hosted fields', function () {
@@ -465,7 +493,7 @@ describe('CardView', function () {
         }
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -473,10 +501,12 @@ describe('CardView', function () {
         strings: strings
       });
 
-      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+      return this.view.initialize().then(function () {
+        hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
 
-      expect(hostedFieldsConfiguredFields.number.placeholder).to.equal('placeholder');
-      expect(hostedFieldsConfiguredFields.cvv.maxlength).to.equal(2);
+        expect(hostedFieldsConfiguredFields.number.placeholder).to.equal('placeholder');
+        expect(hostedFieldsConfiguredFields.cvv.maxlength).to.equal(2);
+      });
     });
 
     it('does not add hosted fields elements for fields that are not present', function () {
@@ -501,7 +531,7 @@ describe('CardView', function () {
         }
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -509,17 +539,17 @@ describe('CardView', function () {
         strings: strings
       });
 
-      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+      return this.view.initialize().then(function () {
+        hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
 
-      expect(hostedFieldsConfiguredFields.cvv).to.not.exist;
-      expect(hostedFieldsConfiguredFields.postalCode).to.not.exist;
-      expect(hostedFieldsConfiguredFields.expirationMonth).to.not.exist;
-      expect(hostedFieldsConfiguredFields.expirationYear).to.not.exist;
+        expect(hostedFieldsConfiguredFields.cvv).to.not.exist;
+        expect(hostedFieldsConfiguredFields.postalCode).to.not.exist;
+        expect(hostedFieldsConfiguredFields.expirationMonth).to.not.exist;
+        expect(hostedFieldsConfiguredFields.expirationYear).to.not.exist;
+      });
     });
 
     it('ignores changes to selector in field options', function () {
-      var hostedFieldsConfiguredFields;
-
       this.model.merchantConfiguration.card = {
         overrides: {
           fields: {
@@ -530,7 +560,7 @@ describe('CardView', function () {
         }
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -538,9 +568,11 @@ describe('CardView', function () {
         strings: strings
       });
 
-      hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
+      return this.view.initialize().then(function () {
+        var hostedFieldsConfiguredFields = hostedFields.create.lastCall.args[0].fields;
 
-      expect(hostedFieldsConfiguredFields.number.selector).to.not.equal('#some-selector');
+        expect(hostedFieldsConfiguredFields.number.selector).to.not.equal('#some-selector');
+      });
     });
 
     it('allows overriding styles options for hosted fields', function () {
@@ -559,7 +591,7 @@ describe('CardView', function () {
         }
       };
 
-      new CardView({ // eslint-disable-line no-new
+      this.view = new CardView({
         element: this.element,
         mainView: this.mainView,
         model: this.model,
@@ -567,22 +599,24 @@ describe('CardView', function () {
         strings: strings
       });
 
-      hostedFieldsConfiguredStyles = hostedFields.create.lastCall.args[0].styles;
+      return this.view.initialize().then(function () {
+        hostedFieldsConfiguredStyles = hostedFields.create.lastCall.args[0].styles;
 
-      expect(hostedFieldsConfiguredStyles.input.color).to.equal('red');
-      expect(hostedFieldsConfiguredStyles.input.background).to.equal('blue');
-      expect(hostedFieldsConfiguredStyles.input['font-size']).to.equal('16px');
-      expect(hostedFieldsConfiguredStyles.input['font-family']).to.equal('fantasy');
-      expect(hostedFieldsConfiguredStyles[':focus']).to.not.exist;
-      expect(hostedFieldsConfiguredStyles['input::-ms-clear']).to.deep.equal({
-        color: 'transparent'
+        expect(hostedFieldsConfiguredStyles.input.color).to.equal('red');
+        expect(hostedFieldsConfiguredStyles.input.background).to.equal('blue');
+        expect(hostedFieldsConfiguredStyles.input['font-size']).to.equal('16px');
+        expect(hostedFieldsConfiguredStyles.input['font-family']).to.equal('fantasy');
+        expect(hostedFieldsConfiguredStyles[':focus']).to.not.exist;
+        expect(hostedFieldsConfiguredStyles['input::-ms-clear']).to.deep.equal({
+          color: 'transparent'
+        });
       });
     });
   });
 
   describe('requestPaymentMethod', function () {
     beforeEach(function () {
-      this.sandbox.stub(hostedFields, 'create').yields(null, fake.hostedFieldsInstance);
+      this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
 
       this.model = new DropinModel(fake.modelOptions());
     });
@@ -666,33 +700,33 @@ describe('CardView', function () {
       });
 
       it('shows default card icon in number field when focused', function () {
-        var cardNumberIcon;
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'number'})
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        CardView.prototype._initialize.call(this.context);
-        cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          var cardNumberIcon = this.element.querySelector('[data-braintree-id="card-number-icon"]');
 
-        expect(cardNumberIcon.classList.contains('braintree-hidden')).to.be.false;
-        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+          expect(cardNumberIcon.classList.contains('braintree-hidden')).to.be.false;
+          expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+        }.bind(this));
       });
 
       it('shows default cvv icon in cvv field when focused', function () {
-        var cvvIcon;
         var hostedFieldsInstance = {
           on: this.sandbox.stub().callsArgWith(1, {emittedBy: 'cvv'})
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        CardView.prototype._initialize.call(this.context);
-        cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          var cvvIcon = this.element.querySelector('[data-braintree-id="cvv-icon"]');
 
-        expect(cvvIcon.classList.contains('braintree-hidden')).to.be.false;
-        expect(cvvIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCVVBack');
+          expect(cvvIcon.classList.contains('braintree-hidden')).to.be.false;
+          expect(cvvIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCVVBack');
+        }.bind(this));
       });
 
       it('adds braintree-form__field-group--is-focused', function () {
@@ -711,12 +745,12 @@ describe('CardView', function () {
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--is-focused');
 
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.true;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.true;
+        });
       });
     });
 
@@ -739,12 +773,12 @@ describe('CardView', function () {
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
         classlist.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
 
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.false;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.false;
+        });
       });
 
       it('applies error class if field is not valid', function () {
@@ -780,12 +814,12 @@ describe('CardView', function () {
         };
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.true;
-        expect(numberFieldError.textContent).to.equal('This card number is not valid.');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.true;
+          expect(numberFieldError.textContent).to.equal('This card number is not valid.');
+        });
       });
 
       it('does apply error class if field is empty when focusing another hosted field', function () {
@@ -830,12 +864,12 @@ describe('CardView', function () {
         this.context.model = new DropinModel(modelOptions);
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.true;
-        expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.true;
+          expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
+        });
       });
 
       it('does not apply error class if field is empty and not focusing hosted fields', function () {
@@ -877,11 +911,11 @@ describe('CardView', function () {
         this.context.model = new DropinModel(modelOptions);
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        });
       });
 
       it('does not apply error class if field is empty and the active element is not an iframe', function () {
@@ -923,11 +957,11 @@ describe('CardView', function () {
         this.context.model = new DropinModel(modelOptions);
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        });
       });
     });
 
@@ -947,10 +981,11 @@ describe('CardView', function () {
           setAttribute: function () {}
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.true;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.true;
+        });
       });
 
       it('removes the card-type-known class when there is no possible card type', function () {
@@ -966,10 +1001,11 @@ describe('CardView', function () {
 
         classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.false;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.false;
+        });
       });
 
       it('removes the card-type-known class when there are many possible card types', function () {
@@ -985,10 +1021,11 @@ describe('CardView', function () {
 
         classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.false;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).to.be.false;
+        });
       });
 
       it('updates the card number icon to the card type if there is one possible card type', function () {
@@ -1002,10 +1039,11 @@ describe('CardView', function () {
           setAttribute: function () {}
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#icon-master-card');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#icon-master-card');
+        });
       });
 
       it('updates the card number icon to the generic card if there are many possible card types', function () {
@@ -1019,10 +1057,11 @@ describe('CardView', function () {
           setAttribute: function () {}
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+        });
       });
 
       it('updates the card icon to the generic card if there no card types', function () {
@@ -1036,10 +1075,11 @@ describe('CardView', function () {
           setAttribute: function () {}
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).to.equal('#iconCardFront');
+        });
       });
 
       it('updates the cvv icon to back icon for non-amex cards', function () {
@@ -1054,10 +1094,11 @@ describe('CardView', function () {
         };
 
         use.setAttribute('xlink:href', '#iconCVVFront');
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(use.getAttribute('xlink:href')).to.equal('#iconCVVBack');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(use.getAttribute('xlink:href')).to.equal('#iconCVVBack');
+        });
       });
 
       it('updates the cvv icon to front icon for amex cards', function () {
@@ -1071,10 +1112,11 @@ describe('CardView', function () {
           setAttribute: function () {}
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(use.getAttribute('xlink:href')).to.equal('#iconCVVFront');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(use.getAttribute('xlink:href')).to.equal('#iconCVVFront');
+        });
       });
 
       it('updates the cvv label descriptor to four digits when card type is amex', function () {
@@ -1089,10 +1131,11 @@ describe('CardView', function () {
         };
 
         cvvLabelDescriptor.textContent = 'some value';
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(cvvLabelDescriptor.textContent).to.equal('(4 digits)');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(cvvLabelDescriptor.textContent).to.equal('(4 digits)');
+        });
       });
 
       it('updates the cvv label descriptor to three digits when card type is non-amex', function () {
@@ -1107,10 +1150,11 @@ describe('CardView', function () {
         };
 
         cvvLabelDescriptor.textContent = 'some value';
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(cvvLabelDescriptor.textContent).to.equal('(3 digits)');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(cvvLabelDescriptor.textContent).to.equal('(3 digits)');
+        });
       });
 
       it('updates the cvv label descriptor to three digits when multiple card types', function () {
@@ -1125,10 +1169,11 @@ describe('CardView', function () {
         };
 
         cvvLabelDescriptor.textContent = 'some value';
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(cvvLabelDescriptor.textContent).to.equal('(3 digits)');
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(cvvLabelDescriptor.textContent).to.equal('(3 digits)');
+        });
       });
 
       it('updates the cvv field placeholder when card type is amex', function () {
@@ -1141,10 +1186,11 @@ describe('CardView', function () {
           setAttribute: this.sandbox.spy()
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '••••'});
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '••••'});
+        });
       });
 
       it('updates the cvv field placeholder when card type is non-amex', function () {
@@ -1157,10 +1203,11 @@ describe('CardView', function () {
           setAttribute: this.sandbox.spy()
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
+        });
       });
 
       it('updates the cvv field placeholder when multiple card types', function () {
@@ -1173,10 +1220,11 @@ describe('CardView', function () {
           setAttribute: this.sandbox.spy()
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(hostedFieldsInstance.setAttribute).to.have.been.calledWith({field: 'cvv', attribute: 'placeholder', value: '•••'});
+        });
       });
 
       it('does not update the cvv field placeholder when there is no cvv challenge', function () {
@@ -1200,10 +1248,11 @@ describe('CardView', function () {
           };
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
+        });
       });
 
       it('does not update the cvv field placeholder when it is removed with an override', function () {
@@ -1224,10 +1273,11 @@ describe('CardView', function () {
           }
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(hostedFieldsInstance.setAttribute).to.not.have.been.called;
+        });
       });
 
       it('does not update the cvv field placeholder when using a custom CVV placeholder', function () {
@@ -1250,10 +1300,11 @@ describe('CardView', function () {
           }
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(hostedFieldsInstance.setAttribute).not.to.have.been.called;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(hostedFieldsInstance.setAttribute).not.to.have.been.called;
+        });
       });
     });
 
@@ -1282,11 +1333,11 @@ describe('CardView', function () {
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
         classlist.add(numberFieldGroup, 'braintree-form__field-group--has-error');
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        });
       });
 
       it('adds braintree-form__field--valid class to valid expiration date field', function () {
@@ -1311,10 +1362,11 @@ describe('CardView', function () {
           removeAttribute: this.sandbox.stub()
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(expirationElement.classList.contains('braintree-form__field--valid')).to.equal(true);
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(expirationElement.classList.contains('braintree-form__field--valid')).to.equal(true);
+        });
       });
 
       it('removes braintree-form__field--valid class to invalid expiration date field', function () {
@@ -1339,10 +1391,11 @@ describe('CardView', function () {
           removeAttribute: this.sandbox.stub()
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(expirationElement.classList.contains('braintree-form__field--valid')).to.equal(false);
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(expirationElement.classList.contains('braintree-form__field--valid')).to.equal(false);
+        });
       });
 
       it('adds braintree-form__field--valid class to valid number with card type supported', function () {
@@ -1378,10 +1431,11 @@ describe('CardView', function () {
           };
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(true);
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(true);
+        });
       });
 
       it('removes braintree-form__field--valid class to valid number without card type supported', function () {
@@ -1417,10 +1471,11 @@ describe('CardView', function () {
           };
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(false);
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(false);
+        });
       });
 
       it('removes braintree-form__field--valid class to not valid number with card type supported', function () {
@@ -1456,10 +1511,11 @@ describe('CardView', function () {
           };
         };
 
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
-        CardView.prototype._initialize.call(this.context);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(false);
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberElement.classList.contains('braintree-form__field--valid')).to.equal(false);
+        });
       });
 
       it('calls model.setPaymentMethodRequestable with isRequestable true if form is valid', function () {
@@ -1567,11 +1623,11 @@ describe('CardView', function () {
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
         classlist.add(numberFieldGroup, 'braintree-form__field-group--has-error');
-        this.sandbox.stub(hostedFields, 'create').yields(null, hostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
-        CardView.prototype._initialize.call(this.context);
-
-        expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        return CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.false;
+        });
       });
     });
   });
@@ -2078,7 +2134,7 @@ describe('CardView', function () {
     it('focuses on the number field', function () {
       var view;
 
-      this.sandbox.stub(CardView.prototype, '_initialize');
+      this.sandbox.stub(CardView.prototype, 'initialize');
 
       view = new CardView({element: this.element});
 
@@ -2095,7 +2151,7 @@ describe('CardView', function () {
     it('noops if the hosted fields instance is not available', function () {
       var view;
 
-      this.sandbox.stub(CardView.prototype, '_initialize');
+      this.sandbox.stub(CardView.prototype, 'initialize');
 
       view = new CardView({element: this.element});
 

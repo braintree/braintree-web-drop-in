@@ -62,6 +62,7 @@ MainView.prototype._initialize = function () {
         client: this.client,
         strings: this.strings
       });
+      paymentSheetView.initialize();
 
       this.addView(paymentSheetView);
       ids.push(paymentSheetView.ID);

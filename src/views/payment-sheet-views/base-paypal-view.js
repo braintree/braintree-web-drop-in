@@ -14,8 +14,9 @@ function BasePayPalView() {
 
 BasePayPalView.prototype = Object.create(BaseView.prototype);
 
-BasePayPalView.prototype._initialize = function (isCredit) {
+BasePayPalView.prototype.initialize = function () {
   var asyncDependencyTimeoutHandler;
+  var isCredit = Boolean(this._isPayPalCredit);
   var setupComplete = false;
   var self = this;
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
@@ -31,19 +32,11 @@ BasePayPalView.prototype._initialize = function (isCredit) {
     });
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
-  btPaypal.create({client: this.client}, function (err, paypalInstance) {
+  return btPaypal.create({client: this.client}).then(function (paypalInstance) {
     var checkoutJSConfiguration;
     var buttonSelector = '[data-braintree-id="paypal-button"]';
     var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
     var locale = self.model.merchantConfiguration.locale;
-
-    if (err) {
-      self.model.asyncDependencyFailed({
-        view: self.ID,
-        error: err
-      });
-      return;
-    }
 
     self.paypalInstance = paypalInstance;
 
@@ -75,12 +68,12 @@ BasePayPalView.prototype._initialize = function (isCredit) {
       checkoutJSConfiguration.style.label = 'credit';
     }
 
-    global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
+    return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
       self.model.asyncDependencyReady();
       setupComplete = true;
       clearTimeout(asyncDependencyTimeoutHandler);
-    }).catch(reportError);
-  });
+    });
+  }).catch(reportError);
 
   function reportError(err) {
     if (setupComplete) {
@@ -88,7 +81,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
     } else {
       self.model.asyncDependencyFailed({
         view: self.ID,
-        error: new DropinError(err)
+        error: err
       });
       clearTimeout(asyncDependencyTimeoutHandler);
     }

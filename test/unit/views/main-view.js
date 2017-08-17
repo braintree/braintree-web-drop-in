@@ -11,7 +11,7 @@ var classlist = require('../../../src/lib/classlist');
 var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var fs = require('fs');
-var HostedFields = require('braintree-web/hosted-fields');
+var hostedFields = require('braintree-web/hosted-fields');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
 var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
@@ -28,7 +28,7 @@ describe('MainView', function () {
       getConfiguration: fake.configuration
     };
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
-    this.sandbox.stub(BasePayPalView.prototype, '_initialize');
+    this.sandbox.stub(BasePayPalView.prototype, 'initialize');
   });
 
   describe('Constructor', function () {
@@ -560,7 +560,7 @@ describe('MainView', function () {
         strings: strings
       };
 
-      this.sandbox.stub(CardView.prototype, '_initialize');
+      this.sandbox.stub(CardView.prototype, 'initialize');
       this.sandbox.spy(MainView.prototype, 'hideLoadingIndicator');
 
       this.mainView = new MainView(this.mainViewOptions);
@@ -868,7 +868,7 @@ describe('MainView', function () {
 
         this.wrapper = document.createElement('div');
         this.wrapper.innerHTML = templateHTML;
-        this.sandbox.stub(HostedFields, 'create').returns(null, fake.HostedFieldsInstance);
+        this.sandbox.stub(hostedFields, 'create').resolves(fake.HostedFieldsInstance);
         this.mainView = new MainView({
           element: this.wrapper,
           client: this.client,
