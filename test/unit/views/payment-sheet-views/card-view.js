@@ -2128,9 +2128,7 @@ describe('CardView', function () {
 
   describe('onSelection', function () {
     it('focuses on the number field', function () {
-      var view;
-
-      view = new CardView({element: this.element});
+      var view = new CardView({element: this.element});
 
       view.hostedFieldsInstance = {
         focus: this.sandbox.stub()
@@ -2143,9 +2141,7 @@ describe('CardView', function () {
     });
 
     it('noops if the hosted fields instance is not available', function () {
-      var view;
-
-      view = new CardView({element: this.element});
+      var view = new CardView({element: this.element});
 
       delete view.hostedFieldsInstance;
 
