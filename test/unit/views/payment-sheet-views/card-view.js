@@ -35,10 +35,6 @@ describe('CardView', function () {
   });
 
   describe('Constructor', function () {
-    beforeEach(function () {
-      this.sandbox.stub(CardView.prototype, 'initialize');
-    });
-
     it('inherits from BaseView', function () {
       expect(new CardView({element: this.element})).to.be.an.instanceOf(BaseView);
     });
@@ -2134,8 +2130,6 @@ describe('CardView', function () {
     it('focuses on the number field', function () {
       var view;
 
-      this.sandbox.stub(CardView.prototype, 'initialize');
-
       view = new CardView({element: this.element});
 
       view.hostedFieldsInstance = {
@@ -2150,8 +2144,6 @@ describe('CardView', function () {
 
     it('noops if the hosted fields instance is not available', function () {
       var view;
-
-      this.sandbox.stub(CardView.prototype, 'initialize');
 
       view = new CardView({element: this.element});
 
