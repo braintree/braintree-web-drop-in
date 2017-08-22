@@ -5,7 +5,7 @@ unreleased
 ----------
 - Add data collector
 - Update PayPal Checkout to v4.0.110
-- Update braintree-web to v3.22.1
+- Update braintree-web to v3.22.2
 
 1.6.1
 ------
