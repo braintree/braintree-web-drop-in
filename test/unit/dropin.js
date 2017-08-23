@@ -18,7 +18,7 @@ describe('Dropin', function () {
       request: this.sandbox.stub(),
       _request: this.sandbox.stub(),
       getConfiguration: fake.configuration,
-      getVersion: function () { return '1.2.3'; }
+      getVersion: function () { return braintreeWebVersion; }
     };
 
     this.container = document.createElement('div');
@@ -757,6 +757,7 @@ describe('Dropin', function () {
       var dataCollectorURL = 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js';
 
       Dropin.prototype._loadDataCollectorScript.call({
+        _client: this.client,
         _dropinWrapper: this.fakeDropinWrapper,
         _model: this.model
       }, noop);
@@ -771,6 +772,7 @@ describe('Dropin', function () {
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
 
       Dropin.prototype._loadDataCollectorScript.call({
+        _client: this.client,
         _dropinWrapper: this.fakeDropinWrapper,
         _model: this.model
       }, noop);

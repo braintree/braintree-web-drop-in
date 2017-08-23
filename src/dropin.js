@@ -20,7 +20,6 @@ var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
-var BRAINTREE_WEB_VERSION = require('../package.json').dependencies['braintree-web'];
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit
@@ -374,7 +373,8 @@ Dropin.prototype._setUpDataCollector = function () {
 
 Dropin.prototype._loadDataCollectorScript = function (callback) {
   var script = document.createElement('script');
-  var dataCollectorSrc = 'https://js.braintreegateway.com/web/' + BRAINTREE_WEB_VERSION + '/js/data-collector.min.js';
+  var braintreeWebVersion = this._client.getVersion();
+  var dataCollectorSrc = 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js';
 
   this._model.asyncDependencyStarting();
 
