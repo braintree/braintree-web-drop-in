@@ -7,18 +7,18 @@ var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
-var dataCollector = require('braintree-web/data-collector');
-var MainView = require('../../src/views/main-view');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
+var braintreeWebVersion = require('../../package.json').dependencies['braintree-web'];
 
 describe('Dropin', function () {
   beforeEach(function () {
     this.client = {
       request: this.sandbox.stub(),
       _request: this.sandbox.stub(),
-      getConfiguration: fake.configuration
+      getConfiguration: fake.configuration,
+      getVersion: function () { return '1.2.3'; }
     };
 
     this.container = document.createElement('div');
@@ -49,6 +49,7 @@ describe('Dropin', function () {
       stylesheet.parentNode.removeChild(stylesheet);
     }
 
+    delete global.braintree;
     delete global.paypal;
   });
 
@@ -670,86 +671,169 @@ describe('Dropin', function () {
     });
   });
 
-  describe('data collector', function () {
+  describe('loads data collector', function () {
+    function noop() {}
+
     beforeEach(function () {
       this.deviceData = {correlationId: '123'};
       this.dropinOptions.merchantConfiguration.dataCollector = {kount: true};
-      this.sandbox.stub(dataCollector, 'create').resolves({
-        deviceData: this.deviceData
-      });
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
+      this.sandbox.spy(Dropin.prototype, '_loadDataCollectorScript');
+      this.sandbox.spy(Dropin.prototype, '_setUpDataCollector');
+
+      global.braintree = {
+        dataCollector: {
+          create: noop
+        }
+      };
+
+      this.sandbox.spy(global.braintree.dataCollector, 'create');
     });
 
-    it('does not setup data collector if data collector is not enabled', function (done) {
+    it('does not load data collector if data collector is not enabled', function (done) {
       var instance;
 
       delete this.dropinOptions.merchantConfiguration.dataCollector;
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(dataCollector.create).to.not.be.called;
+        expect(instance._loadDataCollectorScript).to.not.be.called;
 
         done();
       });
     });
 
-    it('sets up data collector when enabled', function (done) {
+    it('does load data collector if data collector is enabled', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(dataCollector.create).to.be.calledOnce;
-        expect(dataCollector.create).to.be.calledWith({
-          client: instance._client,
-          kount: true
-        });
+        expect(instance._loadDataCollectorScript).to.be.called;
 
         done();
       });
     });
 
-    it('starts an async dependency', function (done) {
+    it('does not load data collector if data collector script is already loaded', function (done) {
       var instance = new Dropin(this.dropinOptions);
+      var script = document.createElement('script');
+
+      script.id = 'braintree-dropin-data-collector-script';
+      document.body.appendChild(script);
 
       instance._initialize(function () {
-        // once for card view
-        // second time for data collector
-        expect(instance._model.asyncDependencyStarting).to.be.calledTwice;
-        expect(instance._model.asyncDependencyReady).to.be.calledTwice;
+        expect(instance._loadDataCollectorScript).to.not.be.called;
 
         done();
       });
     });
+  });
 
-    it('fails initialization when data collector fails to create', function (done) {
-      var instance = new Dropin(this.dropinOptions);
+  describe('_loadDataCollectorScript', function () {
+    function noop() {}
+
+    beforeEach(function () {
+      this.fakeDropinWrapper = {
+        appendChild: this.sandbox.stub()
+      };
+      this.fakeScript = {
+        addEventListener: this.sandbox.stub().yields(),
+        setAttribute: this.sandbox.stub()
+      };
+      this.model = new DropinModel({
+        componentID: 'foo',
+        client: this.client,
+        merchantConfiguration: {
+          container: '#foo',
+          authorization: fake.tokenizationKey
+        },
+        paymentMethods: ['card']
+      });
+
+      this.sandbox.stub(document, 'createElement').returns(this.fakeScript);
+    });
+
+    it('adds script to document to load data collector', function () {
+      var dataCollectorURL = 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js';
+
+      Dropin.prototype._loadDataCollectorScript.call({
+        _dropinWrapper: this.fakeDropinWrapper,
+        _model: this.model
+      }, noop);
+
+      expect(this.fakeScript.src).to.equal(dataCollectorURL);
+      expect(this.fakeScript.async).to.equal(true);
+      expect(this.fakeScript.addEventListener).to.be.calledWith('load', noop);
+      expect(this.fakeDropinWrapper.appendChild).to.be.calledWith(this.fakeScript);
+    });
+
+    it('starts an async dependency', function () {
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
+
+      Dropin.prototype._loadDataCollectorScript.call({
+        _dropinWrapper: this.fakeDropinWrapper,
+        _model: this.model
+      }, noop);
+
+      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
+    });
+  });
+
+  describe('_setUpDataCollector', function () {
+    beforeEach(function () {
+      this.model = new DropinModel({
+        componentID: 'foo',
+        client: this.client,
+        merchantConfiguration: {
+          container: '#foo',
+          authorization: fake.tokenizationKey
+        },
+        paymentMethods: ['card']
+      });
+
+      global.braintree = {
+        dataCollector: {
+          create: this.sandbox.stub().resolves({deviceData: 'kount'})
+        }
+      };
+    });
+
+    it('sets up a data collector instance', function () {
+      Dropin.prototype._setUpDataCollector.call({
+        _client: this.client,
+        _model: this.model,
+        _merchantConfiguration: {
+          dataCollector: {kount: true}
+        }
+      });
+
+      expect(global.braintree.dataCollector.create).to.be.calledOnce;
+      expect(global.braintree.dataCollector.create).to.be.calledWith({
+        client: this.client,
+        kount: true
+      });
+    });
+
+    it('fails initialization when data collector creation fails', function (done) {
       var dataCollectorError = new Error('data collector failed');
 
-      dataCollector.create.rejects(dataCollectorError);
+      this.sandbox.spy(DropinModel.prototype, 'cancelInitialization');
 
-      instance._initialize(function (err) {
-        expect(err.message).to.equal('Data Collector failed to set up.');
-        expect(err._braintreeWebError).to.equal(dataCollectorError);
+      global.braintree.dataCollector.create.rejects(dataCollectorError);
 
+      Dropin.prototype._setUpDataCollector.call({
+        _client: this.client,
+        _model: this.model,
+        _merchantConfiguration: {
+          dataCollector: {kount: true}
+        }
+      });
+
+      expect(global.braintree.dataCollector.create).to.be.calledOnce;
+      setTimeout(function () {
+        expect(DropinModel.prototype.cancelInitialization).to.be.called;
         done();
-      });
-    });
-
-    it('passes along device data when requesting payment method', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var deviceData = this.deviceData;
-
-      this.sandbox.stub(MainView.prototype, 'requestPaymentMethod').resolves({
-        nonce: 'a-nonce'
-      });
-
-      instance._initialize(function () {
-        instance.requestPaymentMethod(function (err, payload) {
-          expect(payload.nonce).to.equal('a-nonce');
-          expect(payload.deviceData).to.equal(deviceData);
-          done();
-        });
-      });
+      }, 1000);
     });
   });
 

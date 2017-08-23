@@ -3,7 +3,6 @@
 var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
 var constants = require('./constants');
-var dataCollector = require('braintree-web/data-collector');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
@@ -21,6 +20,7 @@ var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
+var BRAINTREE_WEB_VERSION = require('../package.json').dependencies['braintree-web'];
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit
@@ -358,24 +358,36 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
 };
 
 Dropin.prototype._setUpDataCollector = function () {
-  var config = assign({}, this._merchantConfiguration.dataCollector, {client: this._client});
+  var self = this;
+  var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
 
-  this._model.asyncDependencyStarting();
-
-  dataCollector.create(config).then(function (instance) {
-    this._dataCollectorInstance = instance;
-    this._model.asyncDependencyReady();
-  }.bind(this)).catch(function (err) {
-    this._model.cancelInitialization(new DropinError({
+  global.braintree.dataCollector.create(config).then(function (instance) {
+    self._dataCollectorInstance = instance;
+    self._model.asyncDependencyReady();
+  }).catch(function (err) {
+    self._model.cancelInitialization(new DropinError({
       message: 'Data Collector failed to set up.',
       braintreeWebError: err
     }));
-  }.bind(this));
+  });
+};
+
+Dropin.prototype._loadDataCollectorScript = function (callback) {
+  var script = document.createElement('script');
+  var dataCollectorSrc = 'https://js.braintreegateway.com/web/' + BRAINTREE_WEB_VERSION + '/js/data-collector.min.js';
+
+  this._model.asyncDependencyStarting();
+
+  script.src = dataCollectorSrc;
+  script.id = constants.DATA_COLLECTOR_SCRIPT_ID;
+  script.async = true;
+  script.addEventListener('load', callback);
+  this._dropinWrapper.appendChild(script);
 };
 
 Dropin.prototype._setUpDependenciesAndViews = function () {
-  if (this._merchantConfiguration.dataCollector) {
-    this._setUpDataCollector();
+  if (this._merchantConfiguration.dataCollector && !document.querySelector('#' + constants.DATA_COLLECTOR_SCRIPT_ID)) {
+    this._loadDataCollectorScript(this._setUpDataCollector.bind(this));
   }
 
   this._mainView = new MainView({
