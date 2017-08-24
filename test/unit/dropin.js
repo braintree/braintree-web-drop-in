@@ -8,6 +8,7 @@ var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
 var dataCollector = require('braintree-web/data-collector');
+var MainView = require('../../src/views/main-view');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
@@ -731,6 +732,23 @@ describe('Dropin', function () {
         expect(err._braintreeWebError).to.equal(dataCollectorError);
 
         done();
+      });
+    });
+
+    it('passes along device data when requesting payment method', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var deviceData = this.deviceData;
+
+      this.sandbox.stub(MainView.prototype, 'requestPaymentMethod').resolves({
+        nonce: 'a-nonce'
+      });
+
+      instance._initialize(function () {
+        instance.requestPaymentMethod(function (err, payload) {
+          expect(payload.nonce).to.equal('a-nonce');
+          expect(payload.deviceData).to.equal(deviceData);
+          done();
+        });
       });
     });
   });

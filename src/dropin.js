@@ -515,8 +515,12 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  */
 Dropin.prototype.requestPaymentMethod = function () {
   return this._mainView.requestPaymentMethod().then(function (payload) {
+    if (this._dataCollectorInstance) {
+      payload.deviceData = this._dataCollectorInstance.deviceData;
+    }
+
     return formatPaymentMethodPayload(payload);
-  });
+  }.bind(this));
 };
 
 Dropin.prototype._removeStylesheet = function () {
