@@ -515,12 +515,8 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  */
 Dropin.prototype.requestPaymentMethod = function () {
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (this._dataCollectorInstance) {
-      payload.deviceData = this._dataCollectorInstance.deviceData;
-    }
-
-    return payload;
-  }.bind(this));
+    return formatPaymentMethodPayload(payload);
+  });
 };
 
 Dropin.prototype._removeStylesheet = function () {
@@ -647,6 +643,14 @@ function formatPaymentMethodPayload(paymentMethod) {
 
   if (paymentMethod.type === constants.paymentMethodTypes.card) {
     formattedPaymentMethod.description = paymentMethod.description;
+  }
+
+  if (paymentMethod.deviceData) {
+    formattedPaymentMethod.deviceData = paymentMethod.deviceData;
+  }
+
+  if (paymentMethod.binData) {
+    formattedPaymentMethod.binData = paymentMethod.binData;
   }
 
   return formattedPaymentMethod;

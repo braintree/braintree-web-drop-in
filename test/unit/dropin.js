@@ -8,7 +8,6 @@ var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
 var dataCollector = require('braintree-web/data-collector');
-var MainView = require('../../src/views/main-view');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
@@ -734,23 +733,6 @@ describe('Dropin', function () {
         done();
       });
     });
-
-    it('passes along device data when requesting payment method', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var deviceData = this.deviceData;
-
-      this.sandbox.stub(MainView.prototype, 'requestPaymentMethod').resolves({
-        nonce: 'a-nonce'
-      });
-
-      instance._initialize(function () {
-        instance.requestPaymentMethod(function (err, payload) {
-          expect(payload.nonce).to.equal('a-nonce');
-          expect(payload.deviceData).to.equal(deviceData);
-          done();
-        });
-      });
-    });
   });
 
   describe('teardown', function () {
@@ -820,6 +802,40 @@ describe('Dropin', function () {
         this.sandbox.spy(instance._mainView, 'requestPaymentMethod');
         instance.requestPaymentMethod(function () {
           expect(instance._mainView.requestPaymentMethod).to.have.been.calledOnce;
+          done();
+        });
+      }.bind(this));
+    });
+
+    it('returns a formatted payload', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        details: {
+          foo: 'bar'
+        },
+        type: 'cool-type',
+        vaulted: true,
+        deviceData: 'cool-device-data',
+        binData: {
+          bin: 'data'
+        },
+        rogueParameter: 'baz'
+      };
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+
+        instance.requestPaymentMethod(function (err, payload) {
+          expect(payload.nonce).to.equal(fakePayload.nonce);
+          expect(payload.details).to.equal(fakePayload.details);
+          expect(payload.type).to.equal(fakePayload.type);
+          expect(payload.vaulted).to.equal(fakePayload.vaulted);
+          expect(payload.deviceData).to.equal(fakePayload.deviceData);
+          expect(payload.binData).to.equal(fakePayload.binData);
+
+          expect(payload.rogueParameter).to.not.exist;
+
           done();
         });
       }.bind(this));
