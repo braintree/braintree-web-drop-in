@@ -185,7 +185,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var localizedStrings, localizedHTML;
+  var localizedStrings, localizedHTML, paypalScriptOptions;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
 
@@ -286,7 +286,13 @@ Dropin.prototype._initialize = function (callback) {
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
     if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
-      this._loadPayPalScript(function () {
+      paypalScriptOptions = {
+        src: constants.CHECKOUT_JS_SOURCE,
+        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+        logLevel: this._merchantConfiguration.paypal && this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+      };
+
+      this._loadScript(paypalScriptOptions, function () {
         this._setUpDependenciesAndViews();
       }.bind(this));
     } else {
@@ -360,6 +366,7 @@ Dropin.prototype._setUpDataCollector = function () {
   var self = this;
   var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
 
+  this._model.asyncDependencyStarting();
   global.braintree.dataCollector.create(config).then(function (instance) {
     self._dataCollectorInstance = instance;
     self._model.asyncDependencyReady();
@@ -371,23 +378,17 @@ Dropin.prototype._setUpDataCollector = function () {
   });
 };
 
-Dropin.prototype._loadDataCollectorScript = function (callback) {
-  var script = document.createElement('script');
-  var braintreeWebVersion = this._client.getVersion();
-  var dataCollectorSrc = 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js';
-
-  this._model.asyncDependencyStarting();
-
-  script.src = dataCollectorSrc;
-  script.id = constants.DATA_COLLECTOR_SCRIPT_ID;
-  script.async = true;
-  script.addEventListener('load', callback);
-  this._dropinWrapper.appendChild(script);
-};
-
 Dropin.prototype._setUpDependenciesAndViews = function () {
+  var braintreeWebVersion, dataCollectorScriptOptions;
+
   if (this._merchantConfiguration.dataCollector && !document.querySelector('#' + constants.DATA_COLLECTOR_SCRIPT_ID)) {
-    this._loadDataCollectorScript(this._setUpDataCollector.bind(this));
+    braintreeWebVersion = this._client.getVersion();
+    dataCollectorScriptOptions = {
+      src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
+      id: constants.DATA_COLLECTOR_SCRIPT_ID
+    };
+
+    this._loadScript(dataCollectorScriptOptions, this._setUpDataCollector.bind(this));
   }
 
   this._mainView = new MainView({
@@ -431,14 +432,17 @@ Dropin.prototype._supportsPaymentOption = function (paymentOption) {
   return this._model.supportedPaymentOptions.indexOf(paymentOption) !== -1;
 };
 
-Dropin.prototype._loadPayPalScript = function (callback) {
+Dropin.prototype._loadScript = function (options, callback) {
   var script = document.createElement('script');
 
-  script.src = constants.CHECKOUT_JS_SOURCE;
-  script.id = constants.PAYPAL_CHECKOUT_SCRIPT_ID;
+  script.src = options.src;
+  script.id = options.id;
   script.async = true;
+
+  if (options.logLevel) {
+    script.setAttribute('data-log-level', options.logLevel);
+  }
   script.addEventListener('load', callback);
-  script.setAttribute('data-log-level', this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL);
   this._dropinWrapper.appendChild(script);
 };
 

@@ -11,6 +11,7 @@ var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
 var braintreeWebVersion = require('../../package.json').dependencies['braintree-web'];
+var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -68,7 +69,7 @@ describe('Dropin', function () {
         setup: this.sandbox.stub()
       };
 
-      this.sandbox.stub(Dropin.prototype, '_loadPayPalScript').callsFake(function (callback) {
+      this.sandbox.stub(Dropin.prototype, '_loadScript').callsFake(function (options, callback) {
         global.paypal = this.paypalCheckout;
 
         callback();
@@ -517,7 +518,7 @@ describe('Dropin', function () {
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadPayPalScript).to.not.have.been.called;
+        expect(instance._loadScript).to.not.have.been.called;
         document.body.removeChild(script);
 
         done();
@@ -526,11 +527,17 @@ describe('Dropin', function () {
 
     it('loads checkout.js if PayPal is enabled', function (done) {
       var instance = new Dropin(this.dropinOptions);
+      var paypalScriptOptions = {
+        src: constants.CHECKOUT_JS_SOURCE,
+        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+        logLevel: DEFAULT_CHECKOUTJS_LOG_LEVEL
+      };
 
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadPayPalScript).to.have.been.called;
+        expect(instance._loadScript).to.have.been.called;
+        expect(instance._loadScript.args[0][0]).to.deep.equal(paypalScriptOptions);
 
         done();
       });
@@ -538,11 +545,17 @@ describe('Dropin', function () {
 
     it('loads checkout.js if PayPal Credit is enabled', function (done) {
       var instance = new Dropin(this.dropinOptions);
+      var paypalScriptOptions = {
+        src: constants.CHECKOUT_JS_SOURCE,
+        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+        logLevel: DEFAULT_CHECKOUTJS_LOG_LEVEL
+      };
 
       this.dropinOptions.merchantConfiguration.paypalCredit = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadPayPalScript).to.have.been.called;
+        expect(instance._loadScript).to.have.been.called;
+        expect(instance._loadScript.args[0][0]).to.deep.equal(paypalScriptOptions);
 
         done();
       });
@@ -679,8 +692,8 @@ describe('Dropin', function () {
       this.dropinOptions.merchantConfiguration.dataCollector = {kount: true};
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
-      this.sandbox.spy(Dropin.prototype, '_loadDataCollectorScript');
-      this.sandbox.spy(Dropin.prototype, '_setUpDataCollector');
+      this.sandbox.stub(Dropin.prototype, '_loadScript').yields();
+      this.sandbox.stub(Dropin.prototype, '_setUpDataCollector');
 
       global.braintree = {
         dataCollector: {
@@ -698,7 +711,7 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(instance._loadDataCollectorScript).to.not.be.called;
+        expect(instance._loadScript).to.not.be.called;
 
         done();
       });
@@ -706,9 +719,15 @@ describe('Dropin', function () {
 
     it('does load data collector if data collector is enabled', function (done) {
       var instance = new Dropin(this.dropinOptions);
+      var dataCollectorScriptOptions = {
+        src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
+        id: constants.DATA_COLLECTOR_SCRIPT_ID
+      };
 
       instance._initialize(function () {
-        expect(instance._loadDataCollectorScript).to.be.called;
+        expect(instance._loadScript).to.be.calledOnce;
+        expect(instance._loadScript.args[0][0]).to.deep.equal(dataCollectorScriptOptions);
+        expect(instance._setUpDataCollector).to.be.called;
 
         done();
       });
@@ -722,62 +741,10 @@ describe('Dropin', function () {
       document.body.appendChild(script);
 
       instance._initialize(function () {
-        expect(instance._loadDataCollectorScript).to.not.be.called;
+        expect(instance._loadScript).to.not.be.called;
 
         done();
       });
-    });
-  });
-
-  describe('_loadDataCollectorScript', function () {
-    function noop() {}
-
-    beforeEach(function () {
-      this.fakeDropinWrapper = {
-        appendChild: this.sandbox.stub()
-      };
-      this.fakeScript = {
-        addEventListener: this.sandbox.stub().yields(),
-        setAttribute: this.sandbox.stub()
-      };
-      this.model = new DropinModel({
-        componentID: 'foo',
-        client: this.client,
-        merchantConfiguration: {
-          container: '#foo',
-          authorization: fake.tokenizationKey
-        },
-        paymentMethods: ['card']
-      });
-
-      this.sandbox.stub(document, 'createElement').returns(this.fakeScript);
-    });
-
-    it('adds script to document to load data collector', function () {
-      var dataCollectorURL = 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js';
-
-      Dropin.prototype._loadDataCollectorScript.call({
-        _client: this.client,
-        _dropinWrapper: this.fakeDropinWrapper,
-        _model: this.model
-      }, noop);
-
-      expect(this.fakeScript.src).to.equal(dataCollectorURL);
-      expect(this.fakeScript.async).to.equal(true);
-      expect(this.fakeScript.addEventListener).to.be.calledWith('load', noop);
-      expect(this.fakeDropinWrapper.appendChild).to.be.calledWith(this.fakeScript);
-    });
-
-    it('starts an async dependency', function () {
-      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
-
-      Dropin.prototype._loadDataCollectorScript.call({
-        _client: this.client,
-        _dropinWrapper: this.fakeDropinWrapper,
-        _model: this.model
-      }, noop);
-
-      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
     });
   });
 
@@ -836,6 +803,21 @@ describe('Dropin', function () {
         expect(DropinModel.prototype.cancelInitialization).to.be.called;
         done();
       }, 1000);
+    });
+
+    it('starts an async dependency', function () {
+      function noop() {}
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
+
+      Dropin.prototype._setUpDataCollector.call({
+        _client: this.client,
+        _merchantConfiguration: {
+          dataCollector: {kount: true}
+        },
+        _model: this.model
+      }, noop);
+
+      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
     });
   });
 
@@ -1464,10 +1446,15 @@ describe('Dropin', function () {
     });
   });
 
-  describe('_loadPayPalScript', function () {
+  describe('_loadScript', function () {
     function noop() {}
 
     beforeEach(function () {
+      this.scriptOptions = {
+        src: 'https://foobar.com/foo.js',
+        id: 'foobarbaz'
+      };
+
       this.fakeDropinWrapper = {
         appendChild: this.sandbox.stub()
       };
@@ -1479,30 +1466,31 @@ describe('Dropin', function () {
       this.sandbox.stub(document, 'createElement').returns(this.fakeScript);
     });
 
-    it('adds script to document to load checkout.js', function () {
-      Dropin.prototype._loadPayPalScript.call({
+    it('adds script to document', function () {
+      Dropin.prototype._loadScript.call({
         _dropinWrapper: this.fakeDropinWrapper,
         _merchantConfiguration: {
           paypal: {}
         }
-      }, noop);
+      }, this.scriptOptions, noop);
 
-      expect(this.fakeScript.src).to.equal(constants.CHECKOUT_JS_SOURCE);
+      expect(this.fakeScript.src).to.equal('https://foobar.com/foo.js');
       expect(this.fakeScript.async).to.equal(true);
       expect(this.fakeScript.addEventListener).to.be.calledWith('load', noop);
-      expect(this.fakeScript.setAttribute).to.be.calledWith('data-log-level', 'warn');
+      expect(this.fakeScript.id).to.equal('foobarbaz');
       expect(this.fakeDropinWrapper.appendChild).to.be.calledWith(this.fakeScript);
     });
 
-    it('uses loglevel from merchantConfiguration.paypal', function () {
-      Dropin.prototype._loadPayPalScript.call({
+    it('uses loglevel if present', function () {
+      this.scriptOptions.logLevel = 'customLogLevel';
+      Dropin.prototype._loadScript.call({
         _dropinWrapper: this.fakeDropinWrapper,
         _merchantConfiguration: {
           paypal: {
             logLevel: 'customLogLevel'
           }
         }
-      }, noop);
+      }, this.scriptOptions, noop);
 
       expect(this.fakeScript.setAttribute).to.be.calledWith('data-log-level', 'customLogLevel');
     });
