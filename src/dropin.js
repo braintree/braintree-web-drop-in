@@ -40,6 +40,7 @@ var VERSION = process.env.npm_package_version;
  * @property {string} details.lastTwo Last two digits of card number.
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
 
@@ -49,6 +50,19 @@ var VERSION = process.env.npm_package_version;
  * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~binData Information about the card based on the bin.
+ * @property {string} commercial Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} countryOfIssuance The country of issuance.
+ * @property {string} debit Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} durbinRegulated Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} healthcare Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} issuingBank The issuing bank.
+ * @property {string} payroll Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} prepaid Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} productId The product id.
  */
 
 /**
@@ -505,7 +519,7 @@ Dropin.prototype.requestPaymentMethod = function () {
       payload.deviceData = this._dataCollectorInstance.deviceData;
     }
 
-    return payload;
+    return formatPaymentMethodPayload(payload);
   }.bind(this));
 };
 
@@ -633,6 +647,14 @@ function formatPaymentMethodPayload(paymentMethod) {
 
   if (paymentMethod.type === constants.paymentMethodTypes.card) {
     formattedPaymentMethod.description = paymentMethod.description;
+  }
+
+  if (paymentMethod.deviceData) {
+    formattedPaymentMethod.deviceData = paymentMethod.deviceData;
+  }
+
+  if (paymentMethod.binData) {
+    formattedPaymentMethod.binData = paymentMethod.binData;
   }
 
   return formattedPaymentMethod;

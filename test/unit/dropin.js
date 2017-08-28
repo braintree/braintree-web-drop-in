@@ -824,6 +824,40 @@ describe('Dropin', function () {
         });
       }.bind(this));
     });
+
+    it('returns a formatted payload', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        details: {
+          foo: 'bar'
+        },
+        type: 'cool-type',
+        vaulted: true,
+        deviceData: 'cool-device-data',
+        binData: {
+          bin: 'data'
+        },
+        rogueParameter: 'baz'
+      };
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+
+        instance.requestPaymentMethod(function (err, payload) {
+          expect(payload.nonce).to.equal(fakePayload.nonce);
+          expect(payload.details).to.equal(fakePayload.details);
+          expect(payload.type).to.equal(fakePayload.type);
+          expect(payload.vaulted).to.equal(fakePayload.vaulted);
+          expect(payload.deviceData).to.equal(fakePayload.deviceData);
+          expect(payload.binData).to.equal(fakePayload.binData);
+
+          expect(payload.rogueParameter).to.not.exist;
+
+          done();
+        });
+      }.bind(this));
+    });
   });
 
   describe('isPaymentMethodRequestable', function () {
