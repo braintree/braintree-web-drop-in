@@ -45,5 +45,6 @@ module.exports = {
   CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.4.0.110.min.js',
   INTEGRATION: 'dropin2',
   PAYPAL_CHECKOUT_SCRIPT_ID: 'braintree-dropin-paypal-checkout-script',
+  DATA_COLLECTOR_SCRIPT_ID: 'braintree-dropin-data-collector-script',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
