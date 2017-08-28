@@ -12,10 +12,14 @@ commit_and_push() {
   set +e
   git add .
   echo -e "Committing and pushing new gh-pages...\n"
-  git commit -m "Add version $npm_package_version"
+  git commit -m "Add version $(get_package_json_version)"
   run_ressh
   git push origin gh-pages
   set -e
+}
+
+get_package_json_version() {
+  grep \"version\" package.json | cut -d':' -f2- | tr -d '" ,'
 }
 
 BT_DROPIN_DIR=~/bt/braintree-web-drop-in
