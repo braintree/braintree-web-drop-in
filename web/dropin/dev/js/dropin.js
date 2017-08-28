@@ -757,7 +757,7 @@ module.exports = {
 var BraintreeError = require('../lib/braintree-error');
 var Client = require('./client');
 var getConfiguration = require('./get-configuration').getConfiguration;
-var VERSION = "3.22.0";
+var VERSION = "3.22.2";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var sharedErrors = require('../lib/errors');
@@ -1190,7 +1190,7 @@ var EventEmitter = require('../../lib/event-emitter');
 var injectFrame = require('./inject-frame');
 var analytics = require('../../lib/analytics');
 var whitelistedFields = constants.whitelistedFields;
-var VERSION = "3.22.0";
+var VERSION = "3.22.2";
 var methods = require('../../lib/methods');
 var convertMethodsToError = require('../../lib/convert-methods-to-error');
 var sharedErrors = require('../../lib/errors');
@@ -2238,7 +2238,7 @@ var HostedFields = require('./external/hosted-fields');
 var supportsInputFormatting = require('restricted-input/supports-input-formatting');
 var wrapPromise = require('@braintree/wrap-promise');
 var Promise = require('../lib/promise');
-var VERSION = "3.22.0";
+var VERSION = "3.22.2";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -2447,7 +2447,7 @@ module.exports = {
 
 var enumerate = require('../../lib/enumerate');
 var errors = require('./errors');
-var VERSION = "3.22.0";
+var VERSION = "3.22.2";
 
 var constants = {
   VERSION: VERSION,
@@ -3094,7 +3094,7 @@ module.exports = {
 },{}],49:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.22.0";
+var VERSION = "3.22.2";
 var PLATFORM = 'web';
 
 module.exports = {
@@ -3605,7 +3605,7 @@ var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var PayPalCheckout = require('./paypal-checkout');
 var sharedErrors = require('../lib/errors');
-var VERSION = "3.22.0";
+var VERSION = "3.22.2";
 
 /**
  * @static
@@ -3795,7 +3795,7 @@ function PayPalCheckout(options) {
  * * `authorize` - Submits the transaction for authorization but not settlement.
  * * `order` - Validates the transaction without an authorization (i.e. without holding funds). Useful for authorizing and capturing funds up to 90 days after the order has been placed.
  * * `sale` - Payment will be immediately submitted for settlement upon creating a transaction.
- * @param {boolean} [options.offerCredit=false] Offers the customer PayPal Credit if they qualify.
+ * @param {boolean} [options.offerCredit=false] Offers PayPal Credit as the default funding instrument for the transaction. If the customer isn't pre-approved for PayPal Credit, they will be prompted to apply for it.
  * @param {string|number} [options.amount] The amount of the transaction. Required when using the Checkout flow.
  * @param {string} [options.currency] The currency code of the amount, such as 'USD'. Required when using the Checkout flow.
  * @param {string} [options.displayName] The merchant name displayed inside of the PayPal lightbox; defaults to the company name on your Braintree account
@@ -4116,6 +4116,17 @@ function clone(x) {
 
   if (!x) { return null; }
 
+  // TODO: in the next major version, we should
+  // consider removing these pattern properties.
+  // They are not useful extnerally and can be
+  // confusing because the exactPattern does not
+  // always match (for instance, Maestro cards
+  // can start with 62, but the exact pattern
+  // does not include that since it would
+  // exclude UnionPay and Discover cards
+  // when it is not sure whether or not
+  // the card is a UnionPay, Discover or
+  // Maestro card).
   prefixPattern = x.prefixPattern.source;
   exactPattern = x.exactPattern.source;
   dupe = JSON.parse(JSON.stringify(x));
@@ -4171,7 +4182,7 @@ types[DINERS_CLUB] = {
   prefixPattern: /^(3|3[0689]|30[0-5])$/,
   exactPattern: /^3(0[0-5]|[689])\d*$/,
   gaps: [4, 10],
-  lengths: [14],
+  lengths: [14, 16, 19],
   code: {
     name: CVV,
     size: 3
@@ -4221,7 +4232,7 @@ types[MAESTRO] = {
   niceType: 'Maestro',
   type: MAESTRO,
   prefixPattern: /^(5|5[06-9]|6\d*)$/,
-  exactPattern: /^5[06-9]\d*$/,
+  exactPattern: /^(5[06-9]|6[37])\d*$/,
   gaps: [4, 8, 12],
   lengths: [12, 13, 14, 15, 16, 17, 18, 19],
   code: {
@@ -4888,9 +4899,10 @@ module.exports = {
   ANALYTICS_REQUEST_TIMEOUT_MS: 2000,
   ANALYTICS_PREFIX: 'web.dropin.',
   CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT: 200,
-  CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.4.0.95.min.js',
+  CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.4.0.110.min.js',
   INTEGRATION: 'dropin2',
   PAYPAL_CHECKOUT_SCRIPT_ID: 'braintree-dropin-paypal-checkout-script',
+  DATA_COLLECTOR_SCRIPT_ID: 'braintree-dropin-data-collector-script',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
 
@@ -5048,6 +5060,10 @@ DropinModel.prototype._checkAsyncDependencyFinished = function () {
   }
 };
 
+DropinModel.prototype.cancelInitialization = function (error) {
+  this._emit('cancelInitialization', error);
+};
+
 DropinModel.prototype.reportError = function (error) {
   this._emit('errorOccurred', error);
 };
@@ -5112,6 +5128,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
 module.exports = DropinModel;
 
 },{"./constants":76,"./lib/dropin-error":86,"./lib/event-emitter":87,"./lib/is-guest-checkout":89}],78:[function(require,module,exports){
+(function (global){
 'use strict';
 
 var assign = require('./lib/assign').assign;
@@ -5143,7 +5160,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.paypalCredit
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-var VERSION = "1.6.1";
+var VERSION = "1.7.0";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -5153,6 +5170,8 @@ var VERSION = "1.6.1";
  * @property {string} details.lastTwo Last two digits of card number.
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
 
 /**
@@ -5160,6 +5179,20 @@ var VERSION = "1.6.1";
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
  * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~binData Information about the card based on the bin.
+ * @property {string} commercial Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} countryOfIssuance The country of issuance.
+ * @property {string} debit Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} durbinRegulated Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} healthcare Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} issuingBank The issuing bank.
+ * @property {string} payroll Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} prepaid Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} productId The product id.
  */
 
 /**
@@ -5297,7 +5330,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var localizedStrings, localizedHTML, strings;
+  var localizedStrings, localizedHTML, paypalScriptOptions;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
 
@@ -5330,22 +5363,22 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   // Backfill with `en`
-  strings = assign({}, translations.en);
+  this._strings = assign({}, translations.en);
   if (this._merchantConfiguration.locale) {
     localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
-    strings = assign(strings, localizedStrings);
+    this._strings = assign(this._strings, localizedStrings);
   }
 
   if (this._merchantConfiguration.translations) {
-    strings = assign(strings, this._merchantConfiguration.translations);
+    this._strings = assign(this._strings, this._merchantConfiguration.translations);
   }
 
-  localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {
-    var stringValue = strings[stringKey];
+  localizedHTML = Object.keys(this._strings).reduce(function (result, stringKey) {
+    var stringValue = this._strings[stringKey];
 
     return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
-  }, mainHTML);
+  }.bind(this), mainHTML);
 
   this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(this._dropinWrapper);
@@ -5367,15 +5400,19 @@ Dropin.prototype._initialize = function (callback) {
       return;
     }
 
+    this._model.on('cancelInitialization', function (err) {
+      analytics.sendEvent(this._client, 'load-error');
+      this._dropinWrapper.innerHTML = '';
+      callback(err);
+    }.bind(this));
+
     this._model.on('asyncDependenciesReady', function () {
       if (this._model.dependencySuccessCount >= 1) {
         analytics.sendEvent(this._client, 'appeared');
         this._disableErroredPaymentMethods();
         callback(null, dropinInstance);
       } else {
-        analytics.sendEvent(this._client, 'load-error');
-        this._dropinWrapper.innerHTML = '';
-        callback(new DropinError('All payment options failed to load.'));
+        this._model.cancelInitialization(new DropinError('All payment options failed to load.'));
       }
     }.bind(this));
 
@@ -5391,21 +5428,20 @@ Dropin.prototype._initialize = function (callback) {
       this._emit('paymentOptionSelected', event);
     }.bind(this));
 
-    function createMainView() {
-      dropinInstance._mainView = new MainView({
-        client: dropinInstance._client,
-        element: dropinInstance._dropinWrapper,
-        model: dropinInstance._model,
-        strings: strings
-      });
-    }
-
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
     if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
-      this._loadPayPalScript(createMainView);
+      paypalScriptOptions = {
+        src: constants.CHECKOUT_JS_SOURCE,
+        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+        logLevel: this._merchantConfiguration.paypal && this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+      };
+
+      this._loadScript(paypalScriptOptions, function () {
+        this._setUpDependenciesAndViews();
+      }.bind(this));
     } else {
-      createMainView();
+      this._setUpDependenciesAndViews();
     }
   }.bind(this));
 };
@@ -5471,6 +5507,43 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
   this._model.removeActivePaymentMethod();
 };
 
+Dropin.prototype._setUpDataCollector = function () {
+  var self = this;
+  var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
+
+  this._model.asyncDependencyStarting();
+  global.braintree.dataCollector.create(config).then(function (instance) {
+    self._dataCollectorInstance = instance;
+    self._model.asyncDependencyReady();
+  }).catch(function (err) {
+    self._model.cancelInitialization(new DropinError({
+      message: 'Data Collector failed to set up.',
+      braintreeWebError: err
+    }));
+  });
+};
+
+Dropin.prototype._setUpDependenciesAndViews = function () {
+  var braintreeWebVersion, dataCollectorScriptOptions;
+
+  if (this._merchantConfiguration.dataCollector && !document.querySelector('#' + constants.DATA_COLLECTOR_SCRIPT_ID)) {
+    braintreeWebVersion = this._client.getVersion();
+    dataCollectorScriptOptions = {
+      src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
+      id: constants.DATA_COLLECTOR_SCRIPT_ID
+    };
+
+    this._loadScript(dataCollectorScriptOptions, this._setUpDataCollector.bind(this));
+  }
+
+  this._mainView = new MainView({
+    client: this._client,
+    element: this._dropinWrapper,
+    model: this._model,
+    strings: this._strings
+  });
+};
+
 Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
   filter = filter || function () { return true; };
 
@@ -5504,14 +5577,17 @@ Dropin.prototype._supportsPaymentOption = function (paymentOption) {
   return this._model.supportedPaymentOptions.indexOf(paymentOption) !== -1;
 };
 
-Dropin.prototype._loadPayPalScript = function (callback) {
+Dropin.prototype._loadScript = function (options, callback) {
   var script = document.createElement('script');
 
-  script.src = constants.CHECKOUT_JS_SOURCE;
-  script.id = constants.PAYPAL_CHECKOUT_SCRIPT_ID;
+  script.src = options.src;
+  script.id = options.id;
   script.async = true;
+
+  if (options.logLevel) {
+    script.setAttribute('data-log-level', options.logLevel);
+  }
   script.addEventListener('load', callback);
-  script.setAttribute('data-log-level', this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL);
   this._dropinWrapper.appendChild(script);
 };
 
@@ -5549,9 +5625,49 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  * @public
  * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
+ * @example <caption>Requesting a payment method</caption>
+ * var form = document.querySelector('#my-form');
+ * var hiddenNonceInput = document.querySelector('#my-nonce-input');
+ *
+ * form.addEventListener('submit', function (event) {
+ *  event.preventDefault();
+ *
+ *  dropinInstance.requestPaymentMethod(function (err, payload) {
+ *    if (err) {
+ *      // handle error
+ *      return;
+ *    }
+ *    hiddenNonceInput.value = payload.nonce;
+ *    form.submit();
+ *  });
+ * });
+ * @example <caption>Requesting a payment method with data collector</caption>
+ * var form = document.querySelector('#my-form');
+ * var hiddenNonceInput = document.querySelector('#my-nonce-input');
+ * var hiddenDeviceDataInput = document.querySelector('#my-device-data-input');
+ *
+ * form.addEventListener('submit', function (event) {
+ *  event.preventDefault();
+ *
+ *  dropinInstance.requestPaymentMethod(function (err, payload) {
+ *    if (err) {
+ *      // handle error
+ *      return;
+ *    }
+ *    hiddenNonceInput.value = payload.nonce;
+ *    hiddenDeviceDataInput.value = payload.deviceData;
+ *    form.submit();
+ *  });
+ * });
  */
 Dropin.prototype.requestPaymentMethod = function () {
-  return this._mainView.requestPaymentMethod();
+  return this._mainView.requestPaymentMethod().then(function (payload) {
+    if (this._dataCollectorInstance) {
+      payload.deviceData = this._dataCollectorInstance.deviceData;
+    }
+
+    return formatPaymentMethodPayload(payload);
+  }.bind(this));
 };
 
 Dropin.prototype._removeStylesheet = function () {
@@ -5615,7 +5731,7 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
-  var mainviewTeardownError;
+  var mainviewTeardownError, dataCollectorError;
   var promise = Promise.resolve();
   var self = this;
 
@@ -5629,11 +5745,24 @@ Dropin.prototype.teardown = function () {
     });
   }
 
+  if (this._dataCollectorInstance) {
+    promise.then(function () {
+      return this._dataCollectorInstance.teardown().catch(function (error) {
+        dataCollectorError = new DropinError({
+          message: 'Drop-in errored tearing down Data Collector.',
+          braintreeWebError: error
+        });
+      });
+    }.bind(this));
+  }
+
   return promise.then(function () {
     return self._removeDropinWrapper();
   }).then(function () {
     if (mainviewTeardownError) {
       return Promise.reject(mainviewTeardownError);
+    } else if (dataCollectorError) {
+      return Promise.reject(dataCollectorError);
     }
 
     return Promise.resolve();
@@ -5667,11 +5796,20 @@ function formatPaymentMethodPayload(paymentMethod) {
     formattedPaymentMethod.description = paymentMethod.description;
   }
 
+  if (paymentMethod.deviceData) {
+    formattedPaymentMethod.deviceData = paymentMethod.deviceData;
+  }
+
+  if (paymentMethod.binData) {
+    formattedPaymentMethod.binData = paymentMethod.binData;
+  }
+
   return formattedPaymentMethod;
 }
 
 module.exports = wrapPrototype(Dropin);
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./constants":76,"./dropin-model":77,"./lib/analytics":81,"./lib/assign":82,"./lib/dropin-error":86,"./lib/event-emitter":87,"./lib/is-guest-checkout":89,"./lib/promise":92,"./lib/uuid":95,"./translations":105,"./views/main-view":121,"./views/payment-methods-view":123,"./views/payment-options-view":124,"@braintree/wrap-promise":17}],79:[function(require,module,exports){
 'use strict';
 /**
@@ -5682,12 +5820,16 @@ module.exports = wrapPrototype(Dropin);
  *
  * When your form is submitted, Drop-in will intercept the form submission and attempt to tokenize the payment method. If the tokenization is successful, it will insert the payment method nonce into a hidden input with the name `payment_method_nonce` and then submit your form. If the tokenization is unsuccessful, a relevant error will be shown in the UI.
  *
+ * If you have data collector enabled, the device data will be injected into a hidden input with the name `device_data` before form submission.
+ *
  * Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set:
  *
  * * `data-locale`
  * * `data-card.cardholder-name`
  * * `data-card.cardholder-name.required`
  * * `data-payment-option-priority`
+ * * `data-data-collector.kount`
+ * * `data-data-collector.paypal`
  * * `data-paypal.amount`
  * * `data-paypal.currency`
  * * `data-paypal.flow`
@@ -5784,7 +5926,7 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = "1.6.1";
+var VERSION = "1.7.0";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -5793,6 +5935,13 @@ var VERSION = "1.6.1";
  * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
  * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
  * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions).
+ */
+
+/**
+ * @typedef {object} dataCollectorOptions The configuration options for Data Collector. Requires [advanced fraud protection](https://developers.braintreepayments.com/guides/advanced-fraud-tools/client-side/javascript/v3) to be enabled in the Braintree gateway. Contact our [support team](https://developers.braintreepayments.com/forms/contact) to configure your Kount ID. The device data will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
+ *
+ * @param {boolean} [kount] If true, Kount fraud data collection is enabled. Required if `paypal` parameter is not used.
+ * @param {boolean} [paypal] If true, PayPal fraud data collection is enabled. Required if `kount` parameter is not used.
  */
 
 /** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
@@ -5847,6 +5996,9 @@ var VERSION = "1.6.1";
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live).
  *
  * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3).
+ *
+ * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
+ *
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
  * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example
@@ -6247,6 +6399,9 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'locale',
   'payment-option-priority',
 
+  'data-collector.kount',
+  'data-collector.paypal',
+
   'card.cardholderName',
   'card.cardholderName.required',
 
@@ -6258,6 +6413,19 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'paypal-credit.currency',
   'paypal-credit.flow'
 ];
+
+function injectHiddenInput(name, value, form) {
+  var input = form.querySelector('[name="' + name + '"]');
+
+  if (!input) {
+    input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    form.appendChild(input);
+  }
+
+  input.value = value;
+}
 
 function addCompositeKeyValuePairToObject(obj, key, value) {
   var decomposedKeys = key.split('.');
@@ -6326,22 +6494,15 @@ function createFromScriptTag(createFunction, scriptTag) {
     analytics.sendEvent(instance._client, 'integration-type.script-tag');
     form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
-        var paymentMethodNonce;
-
         if (requestPaymentError) {
           return;
         }
 
-        paymentMethodNonce = form.querySelector('[name="payment_method_nonce"]');
+        injectHiddenInput('payment_method_nonce', payload.nonce, form);
 
-        if (!paymentMethodNonce) {
-          paymentMethodNonce = document.createElement('input');
-          paymentMethodNonce.type = 'hidden';
-          paymentMethodNonce.name = 'payment_method_nonce';
-          form.appendChild(paymentMethodNonce);
+        if (payload.deviceData) {
+          injectHiddenInput('device_data', payload.deviceData, form);
         }
-
-        paymentMethodNonce.value = payload.nonce;
 
         form.submit();
       });
@@ -7883,6 +8044,7 @@ MainView.prototype._initialize = function () {
         client: this.client,
         strings: this.strings
       });
+      paymentSheetView.initialize();
 
       this.addView(paymentSheetView);
       ids.push(paymentSheetView.ID);
@@ -8404,8 +8566,9 @@ function BasePayPalView() {
 
 BasePayPalView.prototype = Object.create(BaseView.prototype);
 
-BasePayPalView.prototype._initialize = function (isCredit) {
+BasePayPalView.prototype.initialize = function () {
   var asyncDependencyTimeoutHandler;
+  var isCredit = Boolean(this._isPayPalCredit);
   var setupComplete = false;
   var self = this;
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
@@ -8421,19 +8584,11 @@ BasePayPalView.prototype._initialize = function (isCredit) {
     });
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
-  btPaypal.create({client: this.client}, function (err, paypalInstance) {
+  return btPaypal.create({client: this.client}).then(function (paypalInstance) {
     var checkoutJSConfiguration;
     var buttonSelector = '[data-braintree-id="paypal-button"]';
     var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
     var locale = self.model.merchantConfiguration.locale;
-
-    if (err) {
-      self.model.asyncDependencyFailed({
-        view: self.ID,
-        error: err
-      });
-      return;
-    }
 
     self.paypalInstance = paypalInstance;
 
@@ -8465,12 +8620,12 @@ BasePayPalView.prototype._initialize = function (isCredit) {
       checkoutJSConfiguration.style.label = 'credit';
     }
 
-    global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
+    return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
       self.model.asyncDependencyReady();
       setupComplete = true;
       clearTimeout(asyncDependencyTimeoutHandler);
-    }).catch(reportError);
-  });
+    });
+  }).catch(reportError);
 
   function reportError(err) {
     if (setupComplete) {
@@ -8478,7 +8633,7 @@ BasePayPalView.prototype._initialize = function (isCredit) {
     } else {
       self.model.asyncDependencyFailed({
         view: self.ID,
-        error: new DropinError(err)
+        error: err
       });
       clearTimeout(asyncDependencyTimeoutHandler);
     }
@@ -8511,15 +8666,13 @@ var cardIconHTML = "<div data-braintree-id=\"visa-card-icon\" class=\"braintree-
 
 function CardView() {
   BaseView.apply(this, arguments);
-
-  this._initialize();
 }
 
 CardView.prototype = Object.create(BaseView.prototype);
 CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
-CardView.prototype._initialize = function () {
+CardView.prototype.initialize = function () {
   var cvvFieldGroup, postalCodeFieldGroup;
   var cardholderNameField = this.getElementById('cardholder-name-field-group');
   var cardIcons = this.getElementById('card-view-icons');
@@ -8556,15 +8709,7 @@ CardView.prototype._initialize = function () {
 
   this.model.asyncDependencyStarting();
 
-  hostedFields.create(hfOptions, function (err, hostedFieldsInstance) {
-    if (err) {
-      this.model.asyncDependencyFailed({
-        view: this.ID,
-        error: err
-      });
-      return;
-    }
-
+  return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
     this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
     this.hostedFieldsInstance.on('cardTypeChange', this._onCardTypeChangeEvent.bind(this));
@@ -8573,6 +8718,11 @@ CardView.prototype._initialize = function () {
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
 
     this.model.asyncDependencyReady();
+  }.bind(this)).catch(function (err) {
+    this.model.asyncDependencyFailed({
+      view: this.ID,
+      error: err
+    });
   }.bind(this));
 };
 
@@ -9066,7 +9216,7 @@ var BasePayPalView = require('./base-paypal-view');
 function PayPalCreditView() {
   BasePayPalView.apply(this, arguments);
 
-  this._initialize(true);
+  this._isPayPalCredit = true;
 }
 
 PayPalCreditView.prototype = Object.create(BasePayPalView.prototype);
@@ -9083,8 +9233,6 @@ var BasePayPalView = require('./base-paypal-view');
 
 function PayPalView() {
   BasePayPalView.apply(this, arguments);
-
-  this._initialize(false);
 }
 
 PayPalView.prototype = Object.create(BasePayPalView.prototype);
