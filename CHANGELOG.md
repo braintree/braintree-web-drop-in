@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+x.x.x
+------
+- Allow useraction to be set for PayPal button.
+
 1.7.0
 ------
 - Add data collector
