@@ -5,6 +5,7 @@ unreleased
 ----------
 - Simplify check for checkout.js on the merchant's page
 - Allow useraction to be set for PayPal button.
+- Allow vaulted payment methods to not be pre-selected on initialization
 
 1.7.0
 ------
