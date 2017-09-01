@@ -44,7 +44,7 @@ BasePayPalView.prototype.initialize = function () {
     checkoutJSConfiguration = {
       env: environment,
       style: self.paypalConfiguration.buttonStyle || {},
-      commit: self.paypalConfiguration.commit || false,
+      commit: self.paypalConfiguration.commit,
       locale: locale,
       payment: function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
