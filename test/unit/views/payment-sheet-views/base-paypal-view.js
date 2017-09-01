@@ -188,6 +188,24 @@ describe('BasePayPalView', function () {
       }.bind(this));
     });
 
+    it('can set user action to commit for the PayPal button', function () {
+      this.view.model.merchantConfiguration.paypal.commit = true;
+      return this.view.initialize().then(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          commit: true
+        });
+      }.bind(this));
+    });
+
+    it('can set user action to continue for the PayPal button', function () {
+      this.view.model.merchantConfiguration.paypal.commit = false;
+      return this.view.initialize().then(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          commit: false
+        });
+      }.bind(this));
+    });
+
     it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function () {
       this.configuration.gatewayConfiguration.environment = 'production';
       return this.view.initialize().then(function () {

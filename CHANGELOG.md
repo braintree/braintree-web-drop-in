@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Simplify check for checkout.js on the merchant's page
+- Allow useraction to be set for PayPal button.
 
 1.7.0
 ------
