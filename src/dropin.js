@@ -299,7 +299,7 @@ Dropin.prototype._initialize = function (callback) {
 
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
-    if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
+    if (paypalRequired && !global.paypal) {
       paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
