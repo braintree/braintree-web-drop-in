@@ -164,7 +164,7 @@ var VERSION = process.env.npm_package_version;
  */
 
 /**
- * This event is emitted when a payment option is selected by the customer.
+ * This event is emitted when the customer selects a new payment option type (e.g. PayPal, PayPal Credit, credit card). This event is not emitted when the user changes between existing saved payment methods. Only relevant when accepting multiple payment options.
  * @event Dropin#paymentOptionSelected
  * @type {Dropin~paymentOptionSelectedPayload}
  */
