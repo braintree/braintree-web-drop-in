@@ -157,6 +157,7 @@ var VERSION = process.env.npm_package_version;
  * `es_ES`,
  * `fr_CA`,
  * `fr_FR`,
+ * `hu_HU`,
  * `id_ID`,
  * `it_IT`,
  * `ja_JP`,

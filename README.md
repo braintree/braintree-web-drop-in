@@ -8,7 +8,7 @@ If you have any feedback or questions, create an [issue](https://github.com/brai
 
 - Updated UI to easily accommodate multiple payment methods
 - Not in an iframe; feel free to style Drop-in to blend in with your website
-- Now available in [23 languages](https://braintree.github.io/braintree-web-drop-in/docs/current/#localization)
+- Now available in [24 languages](https://braintree.github.io/braintree-web-drop-in/docs/current/#localization)
 - Open source and open development
 
 ## Getting started
