@@ -132,6 +132,18 @@ describe('MainView', function () {
         expect(this.model.changeActivePaymentMethod).to.have.been.calledWith({type: 'CreditCard', details: {lastTwo: '11'}});
       });
 
+      it('does not set the first payment method to be the active payment method if configured not to', function () {
+        this.sandbox.spy(this.model, 'changeActivePaymentMethod');
+        this.model.merchantConfiguration.preselectVaultedPaymentMethod = false;
+        this.sandbox.stub(MainView.prototype, 'setPrimaryView');
+
+        new MainView(this.mainViewOptions); // eslint-disable-line no-new
+
+        expect(this.model.changeActivePaymentMethod).to.not.have.been.called;
+        expect(MainView.prototype.setPrimaryView).to.be.calledOnce;
+        expect(MainView.prototype.setPrimaryView).to.be.calledWith('methods');
+      });
+
       it('sets the PaymentMethodsView as the primary view', function (done) {
         var mainView = new MainView(this.mainViewOptions);
 
