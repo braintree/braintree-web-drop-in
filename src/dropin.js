@@ -585,7 +585,10 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
       if (err) {
         paymentMethods = [];
       } else {
-        paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
+        paymentMethods = paymentMethodsPayload.paymentMethods.map(function (paymentMethod) {
+          paymentMethod.vaulted = true;
+          return paymentMethod;
+        }).map(formatPaymentMethodPayload);
       }
 
       callback(paymentMethods);
@@ -657,9 +660,12 @@ function formatPaymentMethodPayload(paymentMethod) {
   var formattedPaymentMethod = {
     nonce: paymentMethod.nonce,
     details: paymentMethod.details,
-    type: paymentMethod.type,
-    vaulted: true
+    type: paymentMethod.type
   };
+
+  if (paymentMethod.vaulted != null) {
+    formattedPaymentMethod.vaulted = paymentMethod.vaulted;
+  }
 
   if (paymentMethod.type === constants.paymentMethodTypes.card) {
     formattedPaymentMethod.description = paymentMethod.description;
