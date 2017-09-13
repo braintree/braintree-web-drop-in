@@ -296,7 +296,7 @@ var VERSION = process.env.npm_package_version;
  *     <form id="payment-form" action="/" method="post">
  *       <div id="dropin-container"></div>
  *       <input type="submit" value="Purchase"></input>
- *       <input type="hidden id="nonce" name="payment_method_nonce"></input>
+ *       <input type="hidden" id="nonce" name="payment_method_nonce"></input>
  *     </form>
  *
  *     <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"></script>
