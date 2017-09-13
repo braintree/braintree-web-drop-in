@@ -29,6 +29,7 @@ MainView.prototype._initialize = function () {
   var paymentOptionsView;
   var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var paymentMethods = this.model.getPaymentMethods();
+  var preselectVaultedPaymentMethod = this.model.merchantConfiguration.preselectVaultedPaymentMethod !== false;
 
   this._views = {};
 
@@ -62,6 +63,7 @@ MainView.prototype._initialize = function () {
         client: this.client,
         strings: this.strings
       });
+      paymentSheetView.initialize();
 
       this.addView(paymentSheetView);
       ids.push(paymentSheetView.ID);
@@ -127,7 +129,11 @@ MainView.prototype._initialize = function () {
   }
 
   if (paymentMethods.length > 0) {
-    this.model.changeActivePaymentMethod(paymentMethods[0]);
+    if (preselectVaultedPaymentMethod) {
+      this.model.changeActivePaymentMethod(paymentMethods[0]);
+    } else {
+      this.setPrimaryView(this.paymentMethodsViews.ID);
+    }
   } else if (hasMultiplePaymentOptions) {
     this.setPrimaryView(paymentOptionsView.ID);
   } else {

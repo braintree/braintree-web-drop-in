@@ -467,6 +467,20 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('cancelInitialization', function () {
+    it('emits cancelInitialization event wth the error', function (done) {
+      var dropinModel = new DropinModel(this.modelOptions);
+      var fakeError = {foo: 'boo'};
+
+      dropinModel.on('cancelInitialization', function (error) {
+        expect(error).to.deep.equal(fakeError);
+        done();
+      });
+
+      dropinModel.cancelInitialization(fakeError);
+    });
+  });
+
   describe('reportError', function () {
     it('emits an errorOccurred event with the error', function (done) {
       var dropinModel = new DropinModel(this.modelOptions);

@@ -6,7 +6,7 @@ var BasePayPalView = require('./base-paypal-view');
 function PayPalCreditView() {
   BasePayPalView.apply(this, arguments);
 
-  this._initialize(true);
+  this._isPayPalCredit = true;
 }
 
 PayPalCreditView.prototype = Object.create(BasePayPalView.prototype);

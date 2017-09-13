@@ -31,7 +31,7 @@ module.exports = {
   "cvvThreeDigitLabelSubheading": "(3 chiffres)",
   "cvvFourDigitLabelSubheading": "(4 chiffres)",
   "cardholderNamePlaceholder": "Nom du titulaire de la carte",
-  "expirationDateLabel": "Date d\\'expiration ",
+  "expirationDateLabel": "Date d'expiration ",
   "expirationDateLabelSubheading": "(MM/AA)",
   "expirationDatePlaceholder": "MM/AA",
   "postalCodeLabel": "Code postal",

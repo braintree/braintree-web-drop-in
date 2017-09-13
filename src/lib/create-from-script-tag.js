@@ -9,6 +9,9 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'locale',
   'payment-option-priority',
 
+  'data-collector.kount',
+  'data-collector.paypal',
+
   'card.cardholderName',
   'card.cardholderName.required',
 
@@ -20,6 +23,19 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'paypal-credit.currency',
   'paypal-credit.flow'
 ];
+
+function injectHiddenInput(name, value, form) {
+  var input = form.querySelector('[name="' + name + '"]');
+
+  if (!input) {
+    input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    form.appendChild(input);
+  }
+
+  input.value = value;
+}
 
 function addCompositeKeyValuePairToObject(obj, key, value) {
   var decomposedKeys = key.split('.');
@@ -88,22 +104,15 @@ function createFromScriptTag(createFunction, scriptTag) {
     analytics.sendEvent(instance._client, 'integration-type.script-tag');
     form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
-        var paymentMethodNonce;
-
         if (requestPaymentError) {
           return;
         }
 
-        paymentMethodNonce = form.querySelector('[name="payment_method_nonce"]');
+        injectHiddenInput('payment_method_nonce', payload.nonce, form);
 
-        if (!paymentMethodNonce) {
-          paymentMethodNonce = document.createElement('input');
-          paymentMethodNonce.type = 'hidden';
-          paymentMethodNonce.name = 'payment_method_nonce';
-          form.appendChild(paymentMethodNonce);
+        if (payload.deviceData) {
+          injectHiddenInput('device_data', payload.deviceData, form);
         }
-
-        paymentMethodNonce.value = payload.nonce;
 
         form.submit();
       });

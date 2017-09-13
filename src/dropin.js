@@ -41,6 +41,8 @@ var VERSION = process.env.npm_package_version;
  * @property {string} details.lastTwo Last two digits of card number.
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
 
 /**
@@ -48,6 +50,20 @@ var VERSION = process.env.npm_package_version;
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
  * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~binData Information about the card based on the bin.
+ * @property {string} commercial Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} countryOfIssuance The country of issuance.
+ * @property {string} debit Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} durbinRegulated Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} healthcare Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} issuingBank The issuing bank.
+ * @property {string} payroll Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} prepaid Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} productId The product id.
  */
 
 /**
@@ -150,7 +166,7 @@ var VERSION = process.env.npm_package_version;
  */
 
 /**
- * This event is emitted when a payment option is selected by the customer.
+ * This event is emitted when the customer selects a new payment option type (e.g. PayPal, PayPal Credit, credit card). This event is not emitted when the user changes between existing saved payment methods. Only relevant when accepting multiple payment options.
  * @event Dropin#paymentOptionSelected
  * @type {Dropin~paymentOptionSelectedPayload}
  */
@@ -185,7 +201,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var localizedStrings, localizedHTML, strings;
+  var localizedStrings, localizedHTML, paypalScriptOptions;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
 
@@ -218,22 +234,22 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   // Backfill with `en`
-  strings = assign({}, translations.en);
+  this._strings = assign({}, translations.en);
   if (this._merchantConfiguration.locale) {
     localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
-    strings = assign(strings, localizedStrings);
+    this._strings = assign(this._strings, localizedStrings);
   }
 
   if (this._merchantConfiguration.translations) {
-    strings = assign(strings, this._merchantConfiguration.translations);
+    this._strings = assign(this._strings, this._merchantConfiguration.translations);
   }
 
-  localizedHTML = Object.keys(strings).reduce(function (result, stringKey) {
-    var stringValue = strings[stringKey];
+  localizedHTML = Object.keys(this._strings).reduce(function (result, stringKey) {
+    var stringValue = this._strings[stringKey];
 
     return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
-  }, mainHTML);
+  }.bind(this), mainHTML);
 
   this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(this._dropinWrapper);
@@ -255,15 +271,19 @@ Dropin.prototype._initialize = function (callback) {
       return;
     }
 
+    this._model.on('cancelInitialization', function (err) {
+      analytics.sendEvent(this._client, 'load-error');
+      this._dropinWrapper.innerHTML = '';
+      callback(err);
+    }.bind(this));
+
     this._model.on('asyncDependenciesReady', function () {
       if (this._model.dependencySuccessCount >= 1) {
         analytics.sendEvent(this._client, 'appeared');
         this._disableErroredPaymentMethods();
         callback(null, dropinInstance);
       } else {
-        analytics.sendEvent(this._client, 'load-error');
-        this._dropinWrapper.innerHTML = '';
-        callback(new DropinError('All payment options failed to load.'));
+        this._model.cancelInitialization(new DropinError('All payment options failed to load.'));
       }
     }.bind(this));
 
@@ -279,21 +299,20 @@ Dropin.prototype._initialize = function (callback) {
       this._emit('paymentOptionSelected', event);
     }.bind(this));
 
-    function createMainView() {
-      dropinInstance._mainView = new MainView({
-        client: dropinInstance._client,
-        element: dropinInstance._dropinWrapper,
-        model: dropinInstance._model,
-        strings: strings
-      });
-    }
-
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
-    if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
-      this._loadPayPalScript(createMainView);
+    if (paypalRequired && !global.paypal) {
+      paypalScriptOptions = {
+        src: constants.CHECKOUT_JS_SOURCE,
+        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+        logLevel: this._merchantConfiguration.paypal && this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+      };
+
+      this._loadScript(paypalScriptOptions, function () {
+        this._setUpDependenciesAndViews();
+      }.bind(this));
     } else {
-      createMainView();
+      this._setUpDependenciesAndViews();
     }
   }.bind(this));
 };
@@ -359,6 +378,43 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
   this._model.removeActivePaymentMethod();
 };
 
+Dropin.prototype._setUpDataCollector = function () {
+  var self = this;
+  var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
+
+  this._model.asyncDependencyStarting();
+  global.braintree.dataCollector.create(config).then(function (instance) {
+    self._dataCollectorInstance = instance;
+    self._model.asyncDependencyReady();
+  }).catch(function (err) {
+    self._model.cancelInitialization(new DropinError({
+      message: 'Data Collector failed to set up.',
+      braintreeWebError: err
+    }));
+  });
+};
+
+Dropin.prototype._setUpDependenciesAndViews = function () {
+  var braintreeWebVersion, dataCollectorScriptOptions;
+
+  if (this._merchantConfiguration.dataCollector && !document.querySelector('#' + constants.DATA_COLLECTOR_SCRIPT_ID)) {
+    braintreeWebVersion = this._client.getVersion();
+    dataCollectorScriptOptions = {
+      src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
+      id: constants.DATA_COLLECTOR_SCRIPT_ID
+    };
+
+    this._loadScript(dataCollectorScriptOptions, this._setUpDataCollector.bind(this));
+  }
+
+  this._mainView = new MainView({
+    client: this._client,
+    element: this._dropinWrapper,
+    model: this._model,
+    strings: this._strings
+  });
+};
+
 Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
   filter = filter || function () { return true; };
 
@@ -392,14 +448,17 @@ Dropin.prototype._supportsPaymentOption = function (paymentOption) {
   return this._model.supportedPaymentOptions.indexOf(paymentOption) !== -1;
 };
 
-Dropin.prototype._loadPayPalScript = function (callback) {
+Dropin.prototype._loadScript = function (options, callback) {
   var script = document.createElement('script');
 
-  script.src = constants.CHECKOUT_JS_SOURCE;
-  script.id = constants.PAYPAL_CHECKOUT_SCRIPT_ID;
+  script.src = options.src;
+  script.id = options.id;
   script.async = true;
+
+  if (options.logLevel) {
+    script.setAttribute('data-log-level', options.logLevel);
+  }
   script.addEventListener('load', callback);
-  script.setAttribute('data-log-level', this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL);
   this._dropinWrapper.appendChild(script);
 };
 
@@ -437,9 +496,49 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  * @public
  * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
+ * @example <caption>Requesting a payment method</caption>
+ * var form = document.querySelector('#my-form');
+ * var hiddenNonceInput = document.querySelector('#my-nonce-input');
+ *
+ * form.addEventListener('submit', function (event) {
+ *  event.preventDefault();
+ *
+ *  dropinInstance.requestPaymentMethod(function (err, payload) {
+ *    if (err) {
+ *      // handle error
+ *      return;
+ *    }
+ *    hiddenNonceInput.value = payload.nonce;
+ *    form.submit();
+ *  });
+ * });
+ * @example <caption>Requesting a payment method with data collector</caption>
+ * var form = document.querySelector('#my-form');
+ * var hiddenNonceInput = document.querySelector('#my-nonce-input');
+ * var hiddenDeviceDataInput = document.querySelector('#my-device-data-input');
+ *
+ * form.addEventListener('submit', function (event) {
+ *  event.preventDefault();
+ *
+ *  dropinInstance.requestPaymentMethod(function (err, payload) {
+ *    if (err) {
+ *      // handle error
+ *      return;
+ *    }
+ *    hiddenNonceInput.value = payload.nonce;
+ *    hiddenDeviceDataInput.value = payload.deviceData;
+ *    form.submit();
+ *  });
+ * });
  */
 Dropin.prototype.requestPaymentMethod = function () {
-  return this._mainView.requestPaymentMethod();
+  return this._mainView.requestPaymentMethod().then(function (payload) {
+    if (this._dataCollectorInstance) {
+      payload.deviceData = this._dataCollectorInstance.deviceData;
+    }
+
+    return formatPaymentMethodPayload(payload);
+  }.bind(this));
 };
 
 Dropin.prototype._removeStylesheet = function () {
@@ -488,7 +587,10 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
       if (err) {
         paymentMethods = [];
       } else {
-        paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
+        paymentMethods = paymentMethodsPayload.paymentMethods.map(function (paymentMethod) {
+          paymentMethod.vaulted = true;
+          return paymentMethod;
+        }).map(formatPaymentMethodPayload);
       }
 
       callback(paymentMethods);
@@ -503,7 +605,7 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
-  var mainviewTeardownError;
+  var mainviewTeardownError, dataCollectorError;
   var promise = Promise.resolve();
   var self = this;
 
@@ -517,11 +619,24 @@ Dropin.prototype.teardown = function () {
     });
   }
 
+  if (this._dataCollectorInstance) {
+    promise.then(function () {
+      return this._dataCollectorInstance.teardown().catch(function (error) {
+        dataCollectorError = new DropinError({
+          message: 'Drop-in errored tearing down Data Collector.',
+          braintreeWebError: error
+        });
+      });
+    }.bind(this));
+  }
+
   return promise.then(function () {
     return self._removeDropinWrapper();
   }).then(function () {
     if (mainviewTeardownError) {
       return Promise.reject(mainviewTeardownError);
+    } else if (dataCollectorError) {
+      return Promise.reject(dataCollectorError);
     }
 
     return Promise.resolve();
@@ -547,12 +662,23 @@ function formatPaymentMethodPayload(paymentMethod) {
   var formattedPaymentMethod = {
     nonce: paymentMethod.nonce,
     details: paymentMethod.details,
-    type: paymentMethod.type,
-    vaulted: true
+    type: paymentMethod.type
   };
+
+  if (paymentMethod.vaulted != null) {
+    formattedPaymentMethod.vaulted = paymentMethod.vaulted;
+  }
 
   if (paymentMethod.type === constants.paymentMethodTypes.card) {
     formattedPaymentMethod.description = paymentMethod.description;
+  }
+
+  if (paymentMethod.deviceData) {
+    formattedPaymentMethod.deviceData = paymentMethod.deviceData;
+  }
+
+  if (paymentMethod.binData) {
+    formattedPaymentMethod.binData = paymentMethod.binData;
   }
 
   return formattedPaymentMethod;

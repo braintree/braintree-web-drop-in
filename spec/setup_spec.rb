@@ -8,13 +8,13 @@ describe "Drop-in#create" do
   include PayPal
 
   it "requires a selector or container" do
-    visit_dropin_url("?container=null&selector=null")
+    visit_dropin_url("?container=null&selector=null", "error")
 
     expect(find("#error")).to have_content("options.container is required.")
   end
 
   it "requires authorization" do
-    visit_dropin_url("?authorization=null")
+    visit_dropin_url("?authorization=null", "error")
 
     expect(find("#error")).to have_content("options.authorization is required.")
   end
@@ -66,7 +66,7 @@ describe "Drop-in#create" do
 
   it "shows an error when an unrecognized payment option is specified" do
     options = '["dummy","card"]'
-    visit_dropin_url("?paymentOptionPriority=#{options}")
+    visit_dropin_url("?paymentOptionPriority=#{options}", "error")
 
     expect(find("#error")).to have_content("paymentOptionPriority: Invalid payment option specified.")
   end
