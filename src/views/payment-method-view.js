@@ -18,7 +18,7 @@ PaymentMethodView.prototype = Object.create(BaseView.prototype);
 PaymentMethodView.prototype.constructor = PaymentMethodView;
 
 PaymentMethodView.prototype._initialize = function () {
-  var endingInText;
+  var endingInText, lastTwo;
   var html = paymentMethodHTML;
   var paymentMethodCardTypes = constants.paymentMethodCardTypes;
   var paymentMethodTypes = constants.paymentMethodTypes;
@@ -46,10 +46,12 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@SUBTITLE/g, this.strings.PayPal);
       break;
     case paymentMethodTypes.applePay:
+      lastTwo = this.paymentMethod.details.paymentInstrumentName.slice(-2);
+      endingInText = this.strings.endingIn.replace('{{lastTwoCardDigits}}', lastTwo);
       html = html.replace(/@ICON/g, 'logoApplePay')
         .replace(/@CLASSNAME/g, '')
-        .replace(/@TITLE/g, this.paymentMethod.details.paymentInstrumentName)
-        .replace(/@SUBTITLE/g, this.strings.ApplePay);
+        .replace(/@TITLE/g, endingInText)
+        .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
       break;
     default:
       break;
