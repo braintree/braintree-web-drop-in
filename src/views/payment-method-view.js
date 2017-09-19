@@ -50,6 +50,7 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@CLASSNAME/g, '')
         .replace(/@TITLE/g, this.paymentMethod.details.paymentInstrumentName)
         .replace(/@SUBTITLE/g, this.strings.ApplePay);
+      break;
     default:
       break;
   }

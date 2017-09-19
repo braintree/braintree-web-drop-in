@@ -22,7 +22,7 @@ ApplePayView.prototype.initialize = function () {
   var setupComplete = false;
   var self = this;
 
-  this.applePayConfiguration = assign({}, this.model.merchantConfiguration['applePay']);
+  this.applePayConfiguration = assign({}, this.model.merchantConfiguration.applePay);
 
   this.model.asyncDependencyStarting();
   asyncDependencyTimeoutHandler = setTimeout(function () {
@@ -32,7 +32,7 @@ ApplePayView.prototype.initialize = function () {
     });
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
-  if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) {
+  if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) { // eslint-disable-line no-undef
     self.model.asyncDependencyFailed({
       view: self.ID,
       error: new DropinError('Browser or device does not support Apple Pay.')
@@ -41,8 +41,8 @@ ApplePayView.prototype.initialize = function () {
   }
 
   btApplePay.create({client: this.client}, function (err, applePayInstance) {
+    var buttonDiv, buttonElement, session;
     var buttonSelector = '[data-braintree-id="apple-pay-button"]';
-    var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox'; // TODO: remove if not needed
     var locale = self.model.merchantConfiguration.locale;
 
     if (err) {
@@ -55,14 +55,15 @@ ApplePayView.prototype.initialize = function () {
 
     self.applePayInstance = applePayInstance;
 
-    var showPaymentSheet = function () {
+    function showPaymentSheet() {
       var request = applePayInstance.createPaymentRequest({
         total: {
           label: 'My Store', // TODO: use options passed in applePayConfiguration
           amount: '19.99'
         }
       });
-      var session = new ApplePaySession(2, request);
+
+      session = new ApplePaySession(2, request); // eslint-disable-line no-undef
 
       // TODO: use options from merchant -
       // button style
@@ -93,10 +94,10 @@ ApplePayView.prototype.initialize = function () {
         }, function (tokenizeErr, payload) {
           if (tokenizeErr) {
             reportError(tokenizeErr);
-            session.completePayment(ApplePaySession.STATUS_FAILURE);
+            session.completePayment(ApplePaySession.STATUS_FAILURE); // eslint-disable-line no-undef
             return;
           }
-          session.completePayment(ApplePaySession.STATUS_SUCCESS);
+          session.completePayment(ApplePaySession.STATUS_SUCCESS); // eslint-disable-line no-undef
           self.model.addPaymentMethod(payload);
         });
       };
@@ -104,10 +105,10 @@ ApplePayView.prototype.initialize = function () {
       // Show the payment sheet
       session.begin();
       return false;
-    };
+    }
 
-    var buttonDiv = document.querySelector(buttonSelector);
-    var buttonElement = document.createElement('div');
+    buttonDiv = document.querySelector(buttonSelector);
+    buttonElement = document.createElement('div');
     buttonElement.className = 'apple-pay-button apple-pay-button-black';
     buttonElement.onclick = showPaymentSheet;
     buttonDiv.appendChild(buttonElement);
@@ -115,7 +116,7 @@ ApplePayView.prototype.initialize = function () {
     self.model.asyncDependencyReady();
     setupComplete = true;
     clearTimeout(asyncDependencyTimeoutHandler);
-  }.bind(this));
+  });
 
   function reportError(err) {
     if (setupComplete) {
