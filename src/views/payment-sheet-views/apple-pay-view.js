@@ -11,15 +11,13 @@ var READ_ONLY_CONFIGURATION_OPTIONS = ['locale'];
 
 function ApplePayView() {
   BaseView.apply(this, arguments);
-
-  this._initialize();
 }
 
 ApplePayView.prototype = Object.create(BaseView.prototype);
 ApplePayView.prototype.constructor = ApplePayView;
 ApplePayView.ID = ApplePayView.prototype.ID = paymentOptionIDs.applePay;
 
-ApplePayView.prototype._initialize = function () {
+ApplePayView.prototype.initialize = function () {
   var asyncDependencyTimeoutHandler;
   var setupComplete = false;
   var self = this;
@@ -64,7 +62,7 @@ ApplePayView.prototype._initialize = function () {
           amount: '19.99'
         }
       });
-      var session = new ApplePaySession(1, request);
+      var session = new ApplePaySession(2, request);
 
       // TODO: use options from merchant -
       // button style
@@ -109,7 +107,7 @@ ApplePayView.prototype._initialize = function () {
     };
 
     var buttonDiv = document.querySelector(buttonSelector);
-    var buttonElement = document.createElement('button');
+    var buttonElement = document.createElement('div');
     buttonElement.className = 'apple-pay-button apple-pay-button-black';
     buttonElement.onclick = showPaymentSheet;
     buttonDiv.appendChild(buttonElement);

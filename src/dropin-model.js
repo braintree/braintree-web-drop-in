@@ -213,7 +213,6 @@ function isPaymentOptionEnabled(paymentOption, options) {
   } else if (paymentOption === 'paypalCredit') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
   } else if (paymentOption === 'applePay') {
-    debugger;
     return gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay);
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
