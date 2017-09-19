@@ -12,6 +12,12 @@ var analytics = require('../../../src/lib/analytics');
 var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
 var paymentOptionAttributes = {
+  applePay: {
+    icon: '#logoApplePay', // Get this
+    optionLabel: 'Paying with Apple Pay',
+    optionTitle: strings['Apple Pay'],
+    paymentOptionID: 'applePay'
+  },
   card: {
     className: 'braintree-icon--bordered',
     icon: '#iconCardFront',
