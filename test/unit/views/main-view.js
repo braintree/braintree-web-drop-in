@@ -1,6 +1,7 @@
 'use strict';
 
 var MainView = require('../../../src/views/main-view');
+var ApplePayView = require('../../../src/views/payment-sheet-views/apple-pay-view');
 var BaseView = require('../../../src/views/base-view');
 var BasePayPalView = require('../../../src/views/payment-sheet-views/base-paypal-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
@@ -250,6 +251,7 @@ describe('MainView', function () {
     });
 
     [
+      ApplePayView,
       CardView,
       PaymentMethodsView,
       PaymentOptionsView,
