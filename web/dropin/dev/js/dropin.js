@@ -4899,7 +4899,7 @@ module.exports = {
   ANALYTICS_REQUEST_TIMEOUT_MS: 2000,
   ANALYTICS_PREFIX: 'web.dropin.',
   CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT: 200,
-  CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.4.0.110.min.js',
+  CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.4.0.130.min.js',
   INTEGRATION: 'dropin2',
   PAYPAL_CHECKOUT_SCRIPT_ID: 'braintree-dropin-paypal-checkout-script',
   DATA_COLLECTOR_SCRIPT_ID: 'braintree-dropin-data-collector-script',
@@ -5160,7 +5160,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.paypalCredit
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-var VERSION = "1.7.0";
+var VERSION = "1.8.0";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -5295,7 +5295,7 @@ var VERSION = "1.7.0";
  */
 
 /**
- * This event is emitted when a payment option is selected by the customer.
+ * This event is emitted when the customer selects a new payment option type (e.g. PayPal, PayPal Credit, credit card). This event is not emitted when the user changes between existing saved payment methods. Only relevant when accepting multiple payment options.
  * @event Dropin#paymentOptionSelected
  * @type {Dropin~paymentOptionSelectedPayload}
  */
@@ -5430,7 +5430,7 @@ Dropin.prototype._initialize = function (callback) {
 
     paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
-    if (paypalRequired && !document.querySelector('#' + constants.PAYPAL_CHECKOUT_SCRIPT_ID)) {
+    if (paypalRequired && !global.paypal) {
       paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
@@ -5716,7 +5716,10 @@ Dropin.prototype._getVaultedPaymentMethods = function (callback) {
       if (err) {
         paymentMethods = [];
       } else {
-        paymentMethods = paymentMethodsPayload.paymentMethods.map(formatPaymentMethodPayload);
+        paymentMethods = paymentMethodsPayload.paymentMethods.map(function (paymentMethod) {
+          paymentMethod.vaulted = true;
+          return paymentMethod;
+        }).map(formatPaymentMethodPayload);
       }
 
       callback(paymentMethods);
@@ -5788,9 +5791,12 @@ function formatPaymentMethodPayload(paymentMethod) {
   var formattedPaymentMethod = {
     nonce: paymentMethod.nonce,
     details: paymentMethod.details,
-    type: paymentMethod.type,
-    vaulted: true
+    type: paymentMethod.type
   };
+
+  if (paymentMethod.vaulted != null) {
+    formattedPaymentMethod.vaulted = paymentMethod.vaulted;
+  }
 
   if (paymentMethod.type === constants.paymentMethodTypes.card) {
     formattedPaymentMethod.description = paymentMethod.description;
@@ -5926,7 +5932,7 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = "1.7.0";
+var VERSION = "1.8.0";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -5950,6 +5956,7 @@ var VERSION = "1.7.0";
  * @param {string|number} [amount] The amount of the transaction. Required when using the Checkout flow.
  * @param {string} [currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {string} [buttonStyle] The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles) are available.
+ * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
  */
 
 /**
@@ -5998,6 +6005,7 @@ var VERSION = "1.7.0";
  * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3).
  *
  * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
+ * @param {boolean} [preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
  *
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
  * @returns {void|Promise} Returns a promise if no callback is provided.
@@ -6107,7 +6115,7 @@ var VERSION = "1.7.0";
  *     <form id="payment-form" action="/" method="post">
  *       <div id="dropin-container"></div>
  *       <input type="submit" value="Purchase"></input>
- *       <input type="hidden id="nonce" name="payment_method_nonce"></input>
+ *       <input type="hidden" id="nonce" name="payment_method_nonce"></input>
  *     </form>
  *
  *     <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"></script>
@@ -7045,7 +7053,7 @@ module.exports = {
   "cvvThreeDigitLabelSubheading": "(3 chiffres)",
   "cvvFourDigitLabelSubheading": "(4 chiffres)",
   "cardholderNamePlaceholder": "Nom du titulaire de la carte",
-  "expirationDateLabel": "Date d\\'expiration ",
+  "expirationDateLabel": "Date d'expiration ",
   "expirationDateLabelSubheading": "(MM/AA)",
   "expirationDatePlaceholder": "MM/AA",
   "postalCodeLabel": "Code postal",
@@ -8011,6 +8019,7 @@ MainView.prototype._initialize = function () {
   var paymentOptionsView;
   var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var paymentMethods = this.model.getPaymentMethods();
+  var preselectVaultedPaymentMethod = this.model.merchantConfiguration.preselectVaultedPaymentMethod !== false;
 
   this._views = {};
 
@@ -8110,7 +8119,11 @@ MainView.prototype._initialize = function () {
   }
 
   if (paymentMethods.length > 0) {
-    this.model.changeActivePaymentMethod(paymentMethods[0]);
+    if (preselectVaultedPaymentMethod) {
+      this.model.changeActivePaymentMethod(paymentMethods[0]);
+    } else {
+      this.setPrimaryView(this.paymentMethodsViews.ID);
+    }
   } else if (hasMultiplePaymentOptions) {
     this.setPrimaryView(paymentOptionsView.ID);
   } else {
@@ -8596,6 +8609,7 @@ BasePayPalView.prototype.initialize = function () {
     checkoutJSConfiguration = {
       env: environment,
       style: self.paypalConfiguration.buttonStyle || {},
+      commit: self.paypalConfiguration.commit,
       locale: locale,
       payment: function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
