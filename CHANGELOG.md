@@ -2,25 +2,25 @@ CHANGELOG
 =========
 
 1.8.0
-----------
+-----
 - Simplify check for checkout.js on the merchant's page
 - Allow useraction to be set for PayPal button.
 - Allow vaulted payment methods to not be pre-selected on initialization
 - Update PayPal Checkout to v4.0.130
 
 1.7.0
-------
+-----
 - Add data collector
 - Update PayPal Checkout to v4.0.110
 - Update braintree-web to v3.22.2
 
 1.6.1
-------
+-----
 - Fix svgs not showing up when d3.js is used on page
 - Use version 3.22.0 of braintree-web
 
 1.6.0
-------
+-----
 - Hide Diners Club logo when Diners Club may not be supported
 - Add `cardholderName` option to card configuration
 - Use version 3.21.1 of braintree-web
