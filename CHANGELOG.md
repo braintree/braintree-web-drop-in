@@ -32,6 +32,7 @@ CHANGELOG
 - Add `aria-label` attribute to payment options
 - Update checkout.js to v4.0.95
 - Add `clearSelectedPaymentMethod` to remove selected payment method
+- Add `paymentMethodIsSelected` property on `paymentMethodRequestable` events
 
 1.4.0
 -----
@@ -45,7 +46,6 @@ CHANGELOG
 - Fix bug where Drop-in would not finish loading if inside a hidden div
 - Improve transition from payment sheet views to payment methods view
 - Use version 3.19.1 of braintree-web
-- Add `paymentMethodIsSelected` property on `paymentMethodRequestable` events
 - Improve UI in older versions of iOS Safari
 
 1.3.1
