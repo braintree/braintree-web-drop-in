@@ -7,6 +7,7 @@ var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
+var threeDSecure = require('braintree-web/three-d-secure');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
@@ -743,6 +744,38 @@ describe('Dropin', function () {
     });
   });
 
+  describe('loads 3D Secure', function () {
+    beforeEach(function () {
+      this.dropinOptions.merchantConfiguration.threeDSecure = {};
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
+      this.sandbox.stub(Dropin.prototype, '_setUpThreeDSecure');
+    });
+
+    it('does not load 3D Secure if 3D Secure is not enabled', function (done) {
+      var instance;
+
+      delete this.dropinOptions.merchantConfiguration.threeDSecure;
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(instance._setUpThreeDSecure).to.not.be.called;
+
+        done();
+      });
+    });
+
+    it('does load 3D Secure if 3D Secure is enabled', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(instance._setUpThreeDSecure).to.be.called;
+
+        done();
+      });
+    });
+  });
+
   describe('_setUpDataCollector', function () {
     beforeEach(function () {
       this.model = new DropinModel({
@@ -808,6 +841,81 @@ describe('Dropin', function () {
         _client: this.client,
         _merchantConfiguration: {
           dataCollector: {kount: true}
+        },
+        _model: this.model
+      }, noop);
+
+      expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
+    });
+  });
+
+  describe('_setUpThreeDSecure', function () {
+    beforeEach(function () {
+      this.model = new DropinModel({
+        componentID: 'foo',
+        client: this.client,
+        merchantConfiguration: {
+          container: '#foo',
+          authorization: fake.tokenizationKey
+        },
+        paymentMethods: ['card']
+      });
+
+      this.sandbox.stub(threeDSecure, 'create').resolves();
+    });
+
+    it('sets up a 3DS instance', function () {
+      Dropin.prototype._setUpThreeDSecure.call({
+        _client: this.client,
+        _model: this.model,
+        _merchantConfiguration: {
+          threeDSecure: {
+            foo: 'bar'
+          }
+        }
+      });
+
+      expect(threeDSecure.create).to.be.calledOnce;
+      expect(threeDSecure.create).to.be.calledWith({
+        client: this.client,
+        foo: 'bar'
+      });
+    });
+
+    it('fails initialization when 3DS cration fails', function (done) {
+      var error = new Error('failed.');
+
+      this.sandbox.spy(DropinModel.prototype, 'cancelInitialization');
+
+      threeDSecure.create.rejects(error);
+
+      Dropin.prototype._setUpThreeDSecure.call({
+        _client: this.client,
+        _model: this.model,
+        _merchantConfiguration: {
+          threeDSecure: {
+            foo: 'bar'
+          }
+        }
+      });
+
+      expect(threeDSecure.create).to.be.calledOnce;
+      setTimeout(function () {
+        expect(DropinModel.prototype.cancelInitialization).to.be.called;
+        done();
+      }, 1000);
+    });
+
+    it('starts an async dependency', function () {
+      function noop() {}
+      this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
+
+      Dropin.prototype._setUpThreeDSecure.call({
+        _client: this.client,
+        _merchantConfiguration: {
+          threeDSecure: {
+            foo: 'bar'
+          }
         },
         _model: this.model
       }, noop);

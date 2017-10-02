@@ -15,6 +15,7 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
+var threeDSecure = require('braintree-web/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
@@ -392,6 +393,22 @@ Dropin.prototype._setUpDataCollector = function () {
   });
 };
 
+Dropin.prototype._setUpThreeDSecure = function () {
+  var self = this;
+  var config = assign({}, self._merchantConfiguration.threeDSecure, {client: self._client});
+
+  this._model.asyncDependencyStarting();
+  threeDSecure.create(config).then(function (instance) {
+    self._threeDSecure = instance;
+    self._model.asyncDependencyReady();
+  }).catch(function (err) {
+    self._model.cancelInitialization(new DropinError({
+      message: '3D Secure failed to set up.',
+      braintreeWebError: err
+    }));
+  });
+};
+
 Dropin.prototype._setUpDependenciesAndViews = function () {
   var braintreeWebVersion, dataCollectorScriptOptions;
 
@@ -403,6 +420,10 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
     };
 
     this._loadScript(dataCollectorScriptOptions, this._setUpDataCollector.bind(this));
+  }
+
+  if (this._merchantConfiguration.threeDSecure) {
+    this._setUpThreeDSecure();
   }
 
   this._mainView = new MainView({
