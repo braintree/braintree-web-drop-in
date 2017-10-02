@@ -50,9 +50,12 @@ CardView.prototype.initialize = function () {
   }
 
   if (this.hasCardholderName) {
-    this._setupExtraInput('cardholder-name-field-group', this.model.merchantConfiguration.card.cardholderName.required);
+    this._setupExtraInput('cardholderName', this.model.merchantConfiguration.card.cardholderName.required, [{
+      isValid: function (input) { return input.value > 0; },
+      error: this.strings.fieldEmptyForCardholderName
+    }]);
   } else {
-    this._removeExtraInput('cardholder-name-field-group');
+    this._removeExtraInput('cardholderName');
   }
 
   this.model.asyncDependencyStarting();
@@ -74,22 +77,28 @@ CardView.prototype.initialize = function () {
   }.bind(this));
 };
 
-CardView.prototype._setupExtraInput = function (fieldName, required) {
+CardView.prototype._setupExtraInput = function (fieldName, required, checks) {
   var self = this;
-  var field = this.getElementById(fieldName);
+  var fieldNameKebab = camelCaseToKebabCase(fieldName);
+  var field = this.getElementById(fieldNameKebab + '-field-group');
   var input = field.querySelector('input');
   var nameContainer = field.querySelector('.braintree-form__hosted-field');
 
   input.addEventListener('keyup', function () {
-    var hasContent = input.value.length > 0;
+    var i;
+    var valid = true;
 
-    classlist.toggle(nameContainer, 'braintree-form__field--valid', hasContent);
+    for (i = 0; i < checks.length; i++) {
+      valid = valid && checks[i].isValid(input.value);
+    }
+
+    classlist.toggle(nameContainer, 'braintree-form__field--valid', valid);
 
     if (!required) {
       return;
     }
 
-    if (hasContent) {
+    if (valid) {
       classlist.remove(field, 'braintree-form__field-group--has-error');
     }
 
@@ -102,8 +111,17 @@ CardView.prototype._setupExtraInput = function (fieldName, required) {
       // by taking it out of the event loop, we can detect the new
       // active element (hosted field or other card view element)
       setTimeout(function () {
-        if (isCardViewElement() && input.value.length === 0) {
-          classlist.add(field, 'braintree-form__field-group--has-error');
+        var check, i;
+
+        if (isCardViewElement()) {
+          for (i = 0; i < checks.length; i++) {
+            check = checks[i];
+
+            if (!check.isValid(input.value)) {
+              self.showFieldError(fieldName, check.error);
+              break;
+            }
+          }
         }
       }, 0);
     }, false);
@@ -111,7 +129,7 @@ CardView.prototype._setupExtraInput = function (fieldName, required) {
 };
 
 CardView.prototype._removeExtraInput = function (braintreeId) {
-  var field = this.getElementById(braintreeId);
+  var field = this.getElementById(camelCaseToKebabCase(braintreeId) + '-field-group');
 
   field.parentNode.removeChild(field);
 };
