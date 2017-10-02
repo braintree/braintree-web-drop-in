@@ -21,8 +21,6 @@ ApplePayView.prototype.initialize = function () {
   var asyncDependencyTimeoutHandler;
   var self = this;
 
-  self.setupComplete = false;
-
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
 
   self.model.asyncDependencyStarting();
@@ -34,7 +32,7 @@ ApplePayView.prototype.initialize = function () {
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
   if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) { // eslint-disable-line no-undef
-    self._reportError(asyncDependencyTimeoutHandler, 'Browser does not support Apple Pay.');
+    self._reportSetupError(asyncDependencyTimeoutHandler, 'Browser does not support Apple Pay.');
     return;
   }
 
@@ -46,23 +44,22 @@ ApplePayView.prototype.initialize = function () {
     buttonDiv.onclick = self._showPaymentSheet.bind(self);
 
     self.model.asyncDependencyReady();
-    self.setupComplete = true;
     clearTimeout(asyncDependencyTimeoutHandler);
   }).catch(function (err) {
-    self._reportError(asyncDependencyTimeoutHandler, err);
+    self._reportSetupError(asyncDependencyTimeoutHandler, err);
   });
 };
 
-ApplePayView.prototype._reportError = function (asyncDependencyTimeoutHandler, err) {
-  if (this.setupComplete) {
-    this.model.reportError(err);
-  } else {
-    this.model.asyncDependencyFailed({
-      view: this.ID,
-      error: new DropinError(err)
-    });
-    clearTimeout(asyncDependencyTimeoutHandler);
-  }
+ApplePayView.prototype._reportSetupError = function (asyncDependencyTimeoutHandler, err) {
+  this.model.asyncDependencyFailed({
+    view: this.ID,
+    error: new DropinError(err)
+  });
+  clearTimeout(asyncDependencyTimeoutHandler);
+};
+
+ApplePayView.prototype._reportError = function (err) {
+  this.model.reportError(err);
 };
 
 ApplePayView.prototype._showPaymentSheet = function () {
@@ -90,7 +87,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
       displayName: 'My Store' // TODO: use merchant's display name
     }, function (validationErr, merchantSession) {
       if (validationErr) {
-        self._reportError(null, validationErr);
+        self._reportError(validationErr);
         session.abort();
         return;
       }
@@ -104,7 +101,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
       token: event.payment.token
     }, function (tokenizeErr, payload) {
       if (tokenizeErr) {
-        self._reportError(null, tokenizeErr);
+        self._reportError(tokenizeErr);
         session.completePayment(ApplePaySession.STATUS_FAILURE); // eslint-disable-line no-undef
         return;
       }
