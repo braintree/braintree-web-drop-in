@@ -18,6 +18,7 @@ var PayPalCheckout = require('braintree-web/paypal-checkout');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en_US');
 var transitionHelper = require('../../../src/lib/transition-helper');
+var braintreeWebVersion = require('../../../package.json').dependencies['braintree-web'];
 
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
@@ -25,7 +26,8 @@ var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHA
 describe('MainView', function () {
   beforeEach(function () {
     this.client = {
-      getConfiguration: fake.configuration
+      getConfiguration: fake.configuration,
+      getVersion: function () { return braintreeWebVersion; }
     };
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(BasePayPalView.prototype, 'initialize');
@@ -111,7 +113,8 @@ describe('MainView', function () {
 
         this.mainViewOptions = {
           client: {
-            getConfiguration: fake.configuration
+            getConfiguration: fake.configuration,
+            getVersion: function () { return braintreeWebVersion; }
           },
           element: element,
           merchantConfiguration: {
@@ -503,7 +506,8 @@ describe('MainView', function () {
         hideLoadingIndicator: function () {},
         model: new DropinModel(fake.modelOptions()),
         client: {
-          getConfiguration: fake.configuration
+          getConfiguration: fake.configuration,
+          getVersion: function () { return braintreeWebVersion; }
         },
         setPrimaryView: this.sandbox.stub(),
         showSheetError: this.sandbox.stub(),
