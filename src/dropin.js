@@ -399,13 +399,19 @@ Dropin.prototype._setUpThreeDSecure = function () {
 
   this._model.asyncDependencyStarting();
   threeDSecure.create(config).then(function (instance) {
-    self._threeDSecure = instance;
+    self._threeDSecureInstance = instance;
     self._model.asyncDependencyReady();
   }).catch(function (err) {
     self._model.cancelInitialization(new DropinError({
       message: '3D Secure failed to set up.',
       braintreeWebError: err
     }));
+  });
+};
+
+Dropin.prototype._runThreeDSecure = function (nonce) {
+  return Promise.resolve({
+    nonce: nonce
   });
 };
 
@@ -552,12 +558,19 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  */
 Dropin.prototype.requestPaymentMethod = function () {
   return this._mainView.requestPaymentMethod().then(function (payload) {
+    if (this._threeDSecureInstance && payload.type === 'CREDIT_CARD' && payload.liabilityShifted == null) {
+      return this._runThreeDSecure(payload.nonce);
+    }
+
+    return payload;
+  }.bind(this)).then(function (payload) {
     if (this._dataCollectorInstance) {
       payload.deviceData = this._dataCollectorInstance.deviceData;
     }
-
+    return payload;
+  }.bind(this)).then(function (payload) {
     return formatPaymentMethodPayload(payload);
-  }.bind(this));
+  });
 };
 
 Dropin.prototype._removeStylesheet = function () {

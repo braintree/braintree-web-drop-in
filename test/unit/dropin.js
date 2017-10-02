@@ -38,6 +38,7 @@ describe('Dropin', function () {
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
     this.sandbox.stub(paypalCheckout, 'create').resolves(fake.paypalInstance);
+    this.sandbox.stub(threeDSecure, 'create').resolves(fake.threeDSecureInstance);
   });
 
   afterEach(function () {
@@ -860,8 +861,6 @@ describe('Dropin', function () {
         },
         paymentMethods: ['card']
       });
-
-      this.sandbox.stub(threeDSecure, 'create').resolves();
     });
 
     it('sets up a 3DS instance', function () {
@@ -1024,6 +1023,99 @@ describe('Dropin', function () {
           expect(payload.binData).to.equal(fakePayload.binData);
 
           expect(payload.rogueParameter).to.not.exist;
+
+          done();
+        });
+      }.bind(this));
+    });
+
+    it('does not call 3D Secure if it is not enabled', function (done) {
+      var fakePayload = {
+        nonce: 'cool-nonce'
+      };
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(instance, '_runThreeDSecure');
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+
+        instance.requestPaymentMethod(function () {
+          expect(instance._runThreeDSecure).to.not.be.called;
+
+          done();
+        });
+      }.bind(this));
+    });
+
+    it('does not call 3D Secure if payment method is not a credit card', function (done) {
+      var instance;
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'PAYPAL_ACCOUNT'
+      };
+
+      this.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(instance, '_runThreeDSecure');
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+
+        instance.requestPaymentMethod(function () {
+          expect(instance._runThreeDSecure).to.not.be.called;
+
+          done();
+        });
+      }.bind(this));
+    });
+
+    it('does not call 3D Secure if payment method nonce payload contains liablity information', function (done) {
+      var instance;
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CREDIT_CARD',
+        liabilityShifted: false
+      };
+
+      this.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(instance, '_runThreeDSecure');
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+
+        instance.requestPaymentMethod(function () {
+          expect(instance._runThreeDSecure).to.not.be.called;
+
+          done();
+        });
+      }.bind(this));
+    });
+
+    it('calls 3D Secure if payment method nonce payload is a credit card and does not contain liability info', function (done) {
+      var instance;
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CREDIT_CARD'
+      };
+
+      this.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(instance, '_runThreeDSecure');
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+
+        instance.requestPaymentMethod(function () {
+          expect(instance._runThreeDSecure).to.be.calledOnce;
+          expect(instance._runThreeDSecure).to.be.calledWith('cool-nonce');
 
           done();
         });
