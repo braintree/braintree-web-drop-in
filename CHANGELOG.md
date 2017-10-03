@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Update braintree-web to v3.23.0
+
 1.8.0
 -----
 - Simplify check for checkout.js on the merchant's page
