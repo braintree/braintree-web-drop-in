@@ -21,7 +21,7 @@ CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
 CardView.prototype.initialize = function () {
-  var cvvFieldGroup, postalCodeFieldGroup;
+  var cvvFieldGroup, i, postalCodeFieldGroup, extraInput;
   var cardholderNameField = this.getElementById('cardholder-name-field-group');
   var cardIcons = this.getElementById('card-view-icons');
   var hfOptions = this._generateHostedFieldsOptions();
@@ -38,6 +38,26 @@ CardView.prototype.initialize = function () {
   this.cvvIconSvg = this.getElementById('cvv-icon-svg');
   this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
   this.fieldErrors = {};
+  this.extraInputs = [
+    {
+      fieldName: 'cardholderName',
+      enabled: Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName),
+      required: Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName && this.model.merchantConfiguration.card.cardholderName.required),
+      checks: [
+        {
+          isValid: function (input) {
+            return input.length > 0;
+          },
+          error: this.strings.fieldEmptyForCardholderName
+        }, {
+          isValid: function (input) {
+            return input.length < 256;
+          },
+          error: this.strings.fieldTooLongForCardholderName
+        }
+      ]
+    }
+  ];
 
   if (!this.hasCVV) {
     cvvFieldGroup = this.getElementById('cvv-field-group');
@@ -49,13 +69,14 @@ CardView.prototype.initialize = function () {
     postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
   }
 
-  if (this.hasCardholderName) {
-    this._setupExtraInput('cardholderName', this.model.merchantConfiguration.card.cardholderName.required, [{
-      isValid: function (input) { return input.value > 0; },
-      error: this.strings.fieldEmptyForCardholderName
-    }]);
-  } else {
-    this._removeExtraInput('cardholderName');
+  for (i = 0; i < this.extraInputs.length; i++) {
+    extraInput = this.extraInputs[i];
+
+    if (extraInput.enabled) {
+      this._setupExtraInput(extraInput);
+    } else {
+      this._removeExtraInput(extraInput);
+    }
   }
 
   this.model.asyncDependencyStarting();
@@ -77,9 +98,9 @@ CardView.prototype.initialize = function () {
   }.bind(this));
 };
 
-CardView.prototype._setupExtraInput = function (fieldName, required, checks) {
+CardView.prototype._setupExtraInput = function (extraInput) {
   var self = this;
-  var fieldNameKebab = camelCaseToKebabCase(fieldName);
+  var fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
   var field = this.getElementById(fieldNameKebab + '-field-group');
   var input = field.querySelector('input');
   var nameContainer = field.querySelector('.braintree-form__hosted-field');
@@ -88,24 +109,24 @@ CardView.prototype._setupExtraInput = function (fieldName, required, checks) {
     var i;
     var valid = true;
 
-    for (i = 0; i < checks.length; i++) {
-      valid = valid && checks[i].isValid(input.value);
+    for (i = 0; i < extraInput.checks.length; i++) {
+      valid = valid && extraInput.checks[i].isValid(input.value);
     }
 
     classlist.toggle(nameContainer, 'braintree-form__field--valid', valid);
 
-    if (!required) {
+    if (!extraInput.required) {
       return;
     }
 
     if (valid) {
-      classlist.remove(field, 'braintree-form__field-group--has-error');
+      self.hideFieldError(extraInput.fieldName);
     }
 
     self._sendRequestableEvent();
   }, false);
 
-  if (required) {
+  if (extraInput.required) {
     input.addEventListener('blur', function () {
       // the active element inside the blur event is the document.body
       // by taking it out of the event loop, we can detect the new
@@ -114,11 +135,11 @@ CardView.prototype._setupExtraInput = function (fieldName, required, checks) {
         var check, i;
 
         if (isCardViewElement()) {
-          for (i = 0; i < checks.length; i++) {
-            check = checks[i];
+          for (i = 0; i < extraInput.checks.length; i++) {
+            check = extraInput.checks[i];
 
             if (!check.isValid(input.value)) {
-              self.showFieldError(fieldName, check.error);
+              self.showFieldError(extraInput.fieldName, check.error);
               break;
             }
           }
@@ -128,8 +149,8 @@ CardView.prototype._setupExtraInput = function (fieldName, required, checks) {
   }
 };
 
-CardView.prototype._removeExtraInput = function (braintreeId) {
-  var field = this.getElementById(camelCaseToKebabCase(braintreeId) + '-field-group');
+CardView.prototype._removeExtraInput = function (extraInput) {
+  var field = this.getElementById(camelCaseToKebabCase(extraInput.fieldName) + '-field-group');
 
   field.parentNode.removeChild(field);
 };
@@ -242,7 +263,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
 };
 
 CardView.prototype._validateForm = function (showFieldErrors) {
-  var cardType, cardTypeSupported, state;
+  var cardType, cardTypeSupported, state, extraInput, i;
   var isValid = true;
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
@@ -289,11 +310,34 @@ CardView.prototype._validateForm = function (showFieldErrors) {
     }
   }
 
-  if (!this._validateCardholderName()) {
-    isValid = false;
+  if (this.extraInputs) {
+    for (i = 0; i < this.extraInputs.length; i++) {
+      extraInput = this.extraInputs[i];
+
+      if (!extraInput.enabled) {
+        continue;
+      }
+
+      isValid = isValid && this._validateExtraInput(extraInput);
+    }
   }
 
   return isValid;
+};
+
+CardView.prototype._validateExtraInput = function (extraInput) {
+  var i;
+  var fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
+  var field = this.getElementById(fieldNameKebab + '-field-group');
+  var input = field.querySelector('input');
+
+  for (i = 0; i < extraInput.checks.length; i++) {
+    if (!extraInput.checks[i].isValid(input.value)) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 CardView.prototype.getPaymentMethod = function () { // eslint-disable-line consistent-return
@@ -372,6 +416,7 @@ CardView.prototype.tokenize = function () {
 CardView.prototype.showFieldError = function (field, errorMessage) {
   var fieldError;
   var fieldGroup = this.getElementById(camelCaseToKebabCase(field) + '-field-group');
+  var input = fieldGroup.querySelector('input');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToKebabCase(field) + '-field-error');
@@ -382,15 +427,18 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
   fieldError = this.fieldErrors[field];
   fieldError.textContent = errorMessage;
 
-  this.hostedFieldsInstance.setAttribute({
-    field: field,
-    attribute: 'aria-invalid',
-    value: true
-  });
+  if (!(input && isNormalFieldElement(input))) {
+    this.hostedFieldsInstance.setAttribute({
+      field: field,
+      attribute: 'aria-invalid',
+      value: true
+    });
+  }
 };
 
 CardView.prototype.hideFieldError = function (field) {
   var fieldGroup = this.getElementById(camelCaseToKebabCase(field) + '-field-group');
+  var input = fieldGroup.querySelector('input');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToKebabCase(field) + '-field-error');
@@ -398,10 +446,12 @@ CardView.prototype.hideFieldError = function (field) {
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
 
-  this.hostedFieldsInstance.removeAttribute({
-    field: field,
-    attribute: 'aria-invalid'
-  });
+  if (!(input && isNormalFieldElement(input))) {
+    this.hostedFieldsInstance.removeAttribute({
+      field: field,
+      attribute: 'aria-invalid'
+    });
+  }
 };
 
 CardView.prototype.teardown = function () {
@@ -410,14 +460,6 @@ CardView.prototype.teardown = function () {
 
 CardView.prototype._generateFieldSelector = function (field) {
   return '#braintree--dropin__' + this.model.componentID + ' .braintree-form-' + field;
-};
-
-CardView.prototype._validateCardholderName = function () {
-  if (!this.hasCardholderName || !this.model.merchantConfiguration.card.cardholderName.required) {
-    return true;
-  }
-
-  return this.cardholderNameInput.value.length > 0;
 };
 
 CardView.prototype._onBlurEvent = function (event) {
@@ -542,12 +584,15 @@ CardView.prototype._isCardTypeSupported = function (cardType) {
   return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
 
+function isNormalFieldElement(element) {
+  return element.id.indexOf('braintree__card-view-input') !== -1;
+}
+
 function isCardViewElement() {
   var activeId = document.activeElement && document.activeElement.id;
   var isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
-  var isNormalFieldElement = activeId.indexOf('braintree__card-view-input') !== -1;
 
-  return isHostedFieldsElement || isNormalFieldElement;
+  return isHostedFieldsElement || isNormalFieldElement(document.activeElement);
 }
 
 function camelCaseToKebabCase(string) {

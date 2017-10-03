@@ -658,7 +658,6 @@ describe('CardView', function () {
         _generateFieldSelector: CardView.prototype._generateFieldSelector,
         _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
         _validateForm: this.sandbox.stub(),
-        _validateCardholderName: this.sandbox.stub().returns(true),
         _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
         getElementById: BaseView.prototype.getElementById,
         hideFieldError: CardView.prototype.hideFieldError,
@@ -1658,7 +1657,7 @@ describe('CardView', function () {
         fieldErrors: {},
         model: this.model,
         _validateForm: CardView.prototype._validateForm,
-        _validateCardholderName: CardView.prototype._validateCardholderName,
+        _validateExtraInput: CardView.prototype._validateExtraInput,
         _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
         _setupCardholderName: this.sandbox.stub(),
         client: {
@@ -1747,13 +1746,16 @@ describe('CardView', function () {
           }
         }
       });
-      this.context.hasCardholderName = true;
-      this.context.model.merchantConfiguration.card = {
-        cardholderName: {
-          required: true
-        }
-      };
       this.context.cardholderNameInput = {value: ''};
+      this.context.extraInputs = [{
+        fieldName: 'cardholderName',
+        enabled: true,
+        required: true,
+        checks: [{
+          isValid: function (input) { return input.length > 0; },
+          error: strings.fieldEmptyForCardholderName
+        }]
+      }];
 
       this.sandbox.stub(this.context.model, 'reportError');
 
@@ -1805,12 +1807,54 @@ describe('CardView', function () {
         }
       });
       this.context.hasCardholderName = false;
-
       this.sandbox.stub(this.context.model, 'reportError');
 
       return CardView.prototype.tokenize.call(this.context).then(function () {
         expect(this.context.model.reportError).to.not.be.called;
         expect(this.fakeHostedFieldsInstance.tokenize).to.be.calledOnce;
+      }.bind(this));
+    });
+
+    it('calls callback with error when cardholder name length is over 255 characters', function () {
+      var overLengthValue = Array(256).join('a');
+
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'visa'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+      this.context.hasCardholderName = true;
+      this.context.model.merchantConfiguration.card = {
+        cardholderName: true
+      };
+      this.context.cardholderNameInput = {
+        value: overLengthValue
+      };
+      this.context.extraInputs = [{
+        fieldName: 'cardholderName',
+        enabled: true,
+        required: true,
+        checks: [{
+          isValid: function (input) { return input.length > 0; },
+          error: strings.fieldEmptyForCardholderName
+        }, {
+          isValid: function (input) { return input.length < 256; },
+          error: strings.fieldTooLongForCardholderName
+        }]
+      }];
+
+      this.sandbox.stub(this.context.model, 'reportError');
+
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function (err) {
+        expect(this.fakeHostedFieldsInstance.tokenize).to.not.be.called;
+        expect(this.context.model.reportError).to.be.calledWith('hostedFieldsFieldsInvalidError');
+        expect(err.message).to.equal('No payment method is available.');
       }.bind(this));
     });
 
@@ -2077,6 +2121,92 @@ describe('CardView', function () {
       return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
         expect(this.model.addPaymentMethod).to.not.have.been.called;
       }.bind(this));
+    });
+  });
+
+  describe('field errors', function () {
+    beforeEach(function () {
+      this.context = {
+        fieldErrors: {
+          hasOwnProperty: this.sandbox.stub().returns(false)
+        },
+        hostedFieldsInstance: {
+          setAttribute: this.sandbox.stub(),
+          removeAttribute: this.sandbox.stub()
+        },
+        getElementById: this.sandbox.stub().returns({})
+      };
+
+      this.sandbox.stub(classlist, 'add');
+    });
+
+    describe('showFieldError', function () {
+      it('sets hosted fields attributes on hosted fields', function () {
+        var fakeGroup = document.createElement('div');
+        var fakeHostedField = document.createElement('iframe');
+
+        fakeHostedField.id = 'braintree-hosted-field-foo';
+        fakeGroup.appendChild(fakeHostedField);
+
+        this.context.getElementById = this.sandbox.stub().returns(fakeGroup);
+
+        CardView.prototype.showFieldError.call(this.context, 'foo', 'errorMessage');
+
+        expect(this.context.hostedFieldsInstance.setAttribute).to.have.been.calledWith({
+          field: 'foo',
+          attribute: 'aria-invalid',
+          value: true
+        });
+      });
+
+      it('does not set hosted fields attributes on non hosted fields', function () {
+        var fakeInput = document.createElement('input');
+        var fakeGroup = document.createElement('div');
+
+        fakeGroup.setAttribute('data-braintree-id', 'foo-field-group');
+        fakeInput.id = 'braintree__card-view-input';
+        fakeGroup.appendChild(fakeInput);
+
+        this.context.getElementById = this.sandbox.stub().returns(fakeGroup);
+
+        CardView.prototype.showFieldError.call(this.context, 'foo', 'errorMessage');
+
+        expect(this.context.hostedFieldsInstance.setAttribute).to.not.have.been.called;
+      });
+    });
+
+    describe('hideFieldError', function () {
+      it('removes hosted fields attributes on hosted fields', function () {
+        var fakeGroup = document.createElement('div');
+        var fakeHostedField = document.createElement('iframe');
+
+        fakeHostedField.id = 'braintree-hosted-field-foo';
+        fakeGroup.appendChild(fakeHostedField);
+
+        this.context.getElementById = this.sandbox.stub().returns(fakeGroup);
+
+        CardView.prototype.hideFieldError.call(this.context, 'foo', 'errorMessage');
+
+        expect(this.context.hostedFieldsInstance.removeAttribute).to.have.been.calledWith({
+          field: 'foo',
+          attribute: 'aria-invalid'
+        });
+      });
+
+      it('does not remove hosted fields attributes on non hosted fields', function () {
+        var fakeInput = document.createElement('input');
+        var fakeGroup = document.createElement('div');
+
+        fakeGroup.setAttribute('data-braintree-id', 'foo-field-group');
+        fakeInput.id = 'braintree__card-view-input';
+        fakeGroup.appendChild(fakeInput);
+
+        this.context.getElementById = this.sandbox.stub().returns(fakeGroup);
+
+        CardView.prototype.hideFieldError.call(this.context, 'foo', 'errorMessage');
+
+        expect(this.context.hostedFieldsInstance.removeAttribute).to.not.have.been.called;
+      });
     });
   });
 
