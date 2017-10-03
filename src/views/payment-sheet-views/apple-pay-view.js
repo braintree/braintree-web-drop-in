@@ -65,12 +65,7 @@ ApplePayView.prototype._reportError = function (err) {
 ApplePayView.prototype._showPaymentSheet = function () {
   var self = this;
   var locale = self.model.merchantConfiguration.locale;
-  var request = self.applePayInstance.createPaymentRequest({
-    total: {
-      label: 'My Store', // TODO: use options passed in applePayConfiguration
-      amount: '19.99'
-    }
-  });
+  var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
   var session = new ApplePaySession(2, request); // eslint-disable-line no-undef
 
   // TODO: use options from merchant -
@@ -84,14 +79,12 @@ ApplePayView.prototype._showPaymentSheet = function () {
   session.onvalidatemerchant = function (event) {
     self.applePayInstance.performValidation({
       validationURL: event.validationURL,
-      displayName: 'My Store' // TODO: use merchant's display name
-    }, function (validationErr, merchantSession) {
-      if (validationErr) {
-        self._reportError(validationErr);
-        session.abort();
-        return;
-      }
-      session.completeMerchantValidation(merchantSession);
+      displayName: self.applePayConfiguration.displayName
+    }).then(function (validationData) {
+      session.completeMerchantValidation(validationData);
+    }).catch(function (validationErr) {
+      self._reportError(validationErr);
+      session.abort();
     });
   };
 

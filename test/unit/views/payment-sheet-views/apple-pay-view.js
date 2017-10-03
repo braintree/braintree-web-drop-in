@@ -20,6 +20,7 @@ describe('ApplePayView', function () {
     };
 
     this.div = document.createElement('div');
+
     this.fakeApplePaySession = {
       begin: this.sandbox.stub(),
       completeMerchantValidation: this.sandbox.stub()
@@ -30,6 +31,16 @@ describe('ApplePayView', function () {
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
 
+    this.fakePaymentRequest = {
+      countryCode: 'defined',
+      currencyCode: 'defined',
+      merchantCapabilities: ['defined'],
+      supportedNetworks: ['defined']
+    };
+    model.merchantConfiguration.applePay = {
+      paymentRequest: this.fakePaymentRequest,
+      displayName: 'Unit Test Display Name'
+    };
     this.applePayViewOptions = {
       client: fakeClient,
       element: document.body.querySelector('.braintree-sheet.braintree-applePay'),
@@ -37,7 +48,10 @@ describe('ApplePayView', function () {
       strings: {}
     };
 
-    this.fakeApplePayInstance = {};
+    this.fakeApplePayInstance = {
+      createPaymentRequest: this.sandbox.stub().returns({}),
+      performValidation: this.sandbox.stub().resolves()
+    };
     this.sandbox.stub(btApplePay, 'create').resolves(this.fakeApplePayInstance);
   });
 
@@ -113,50 +127,76 @@ describe('ApplePayView', function () {
         }));
       }.bind(this));
     });
-  });
 
-  describe('_showPaymentSheet', function () {
-    beforeEach(function () {
-      this.view = new ApplePayView(this.applePayViewOptions);
-      return this.view.initialize();
+    it('sets up a button click handler', function () {
+      return this.view.initialize().then(function () {
+        var button = document.querySelector('[data-braintree-id="apple-pay-button"]');
+
+        expect(typeof button.onclick).to.equal('function');
+      });
     });
 
-    it('creates an ApplePaySession with a payment request', function () {
-    });
+    describe('button click handler', function () {
+      beforeEach(function () {
+        var self = this;
 
-    describe('session.onvalidatemerchant', function () {
-      it('performs merchant validation', function () {
-        var stubEvent = {validationURL: 'fake'};
+        this.view = new ApplePayView(this.applePayViewOptions);
 
-        this.view.applePayInstance.createPaymentRequest = this.sandbox.stub().returns({});
-        this.view.applePayInstance.performValidation = this.sandbox.stub();
+        return this.view.initialize().then(function () {
+          var button = document.querySelector('[data-braintree-id="apple-pay-button"]');
 
-        this.view._showPaymentSheet();
-        this.fakeApplePaySession.onvalidatemerchant(stubEvent);
-
-        expect(this.view.applePayInstance.performValidation).to.be.calledWith({
-          validationURL: stubEvent.validationURL,
-          displayName: 'My Store'
+          self.buttonClickHandler = button.onclick;
         });
       });
 
-      it('completes merchant validation when validation succeeds', function () {
-        var fakeMerchantSession = {};
+      it('creates an ApplePaySession with the payment request', function () {
+        this.view.applePayInstance.createPaymentRequest = this.sandbox.stub().returns(this.fakePaymentRequest);
 
-        this.view.applePayInstance.performValidation.resolves(fakeMerchantSession);
+        this.buttonClickHandler();
 
-        this.view._showPaymentSheet();
-        this.fakeApplePaySession.onvalidatemerchant(stubEvent);
+        expect(this.view.applePayInstance.createPaymentRequest).to.be.calledWith(this.fakePaymentRequest);
+        expect(global.ApplePaySession).to.be.calledWith(2, this.fakePaymentRequest);
+      });
 
-        expect(this.view.applePayInstance.performValidation).to.be.calledWith({
-          validationURL: stubEvent.validationURL,
-          displayName: 'My Store'
+      describe('session.onvalidatemerchant', function () {
+        it('performs merchant validation', function () {
+          var stubEvent = {validationURL: 'fake'};
+
+          this.buttonClickHandler();
+          this.fakeApplePaySession.onvalidatemerchant(stubEvent);
+
+          expect(this.view.applePayInstance.performValidation).to.be.calledWith({
+            validationURL: stubEvent.validationURL,
+            displayName: 'Unit Test Display Name'
+          });
         });
 
-      });
-      it('reports an error when validation fails', function () {
-      });
-      it('aborts the session when validation fails', function () {
+        it('completes merchant validation when validation succeeds', function (done) {
+          var fakeValidationData = {};
+
+          this.fakeApplePayInstance.performValidation.resolves(fakeValidationData);
+          this.fakeApplePaySession.completeMerchantValidation = function (data) {
+            expect(data).to.equal(fakeValidationData);
+            done();
+          };
+
+          this.buttonClickHandler();
+          this.fakeApplePaySession.onvalidatemerchant({validationURL: 'fake'});
+        });
+
+        it('aborts session and reports an error when validation fails', function (done) {
+          var fakeError = new Error('fail.');
+
+          this.sandbox.stub(this.view.model, 'reportError');
+          this.fakeApplePayInstance.performValidation.rejects(fakeError);
+          this.fakeApplePaySession.abort = function () {
+            expect(this.view.model.reportError).to.be.calledWith(fakeError);
+            done();
+          }.bind(this);
+
+          this.buttonClickHandler();
+          this.fakeApplePaySession.onvalidatemerchant({validationURL: 'fake'});
+        });
       });
     });
   });

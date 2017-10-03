@@ -140,6 +140,18 @@ var VERSION = process.env.npm_package_version;
  * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
  */
 
+/** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
+ *
+ * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
+ */
+
+/**
+ * @typedef {object} ApplePayPaymentRequest An Apple Pay Payment Request object.
+ * @external ApplePayPaymentRequest
+ * @see {@link https://developer.apple.com/reference/applepayjs/1916082-applepay_js_data_types/paymentrequest PaymentRequest}
+ */
+
 /**
  * @static
  * @function create
