@@ -23,11 +23,14 @@ describe('ApplePayView', function () {
 
     this.fakeApplePaySession = {
       begin: this.sandbox.stub(),
-      completeMerchantValidation: this.sandbox.stub()
+      completeMerchantValidation: this.sandbox.stub(),
+      completePayment: this.sandbox.stub()
     };
 
     global.ApplePaySession = this.sandbox.stub().returns(this.fakeApplePaySession);
     global.ApplePaySession.canMakePayments = function () { return true; };
+    global.ApplePaySession.STATUS_FAILURE = 'failure';
+    global.ApplePaySession.STATUS_SUCCESS = 'success';
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
 
@@ -50,7 +53,8 @@ describe('ApplePayView', function () {
 
     this.fakeApplePayInstance = {
       createPaymentRequest: this.sandbox.stub().returns({}),
-      performValidation: this.sandbox.stub().resolves()
+      performValidation: this.sandbox.stub().resolves(),
+      tokenize: this.sandbox.stub().resolves()
     };
     this.sandbox.stub(btApplePay, 'create').resolves(this.fakeApplePayInstance);
   });
@@ -158,6 +162,14 @@ describe('ApplePayView', function () {
         expect(global.ApplePaySession).to.be.calledWith(2, this.fakePaymentRequest);
       });
 
+      it('begins the ApplePaySession', function () {
+        this.view.applePayInstance.createPaymentRequest = this.sandbox.stub().returns(this.fakePaymentRequest);
+
+        this.buttonClickHandler();
+
+        expect(this.fakeApplePaySession.begin).to.be.calledOnce;
+      });
+
       describe('session.onvalidatemerchant', function () {
         it('performs merchant validation', function () {
           var stubEvent = {validationURL: 'fake'};
@@ -196,6 +208,58 @@ describe('ApplePayView', function () {
 
           this.buttonClickHandler();
           this.fakeApplePaySession.onvalidatemerchant({validationURL: 'fake'});
+        });
+      });
+
+      describe('session.onpaymentauthorized', function () {
+        it('calls tokenize with the Apple Pay token', function () {
+          var stubEvent = {
+            payment: {token: 'foo'}
+          };
+
+          this.buttonClickHandler();
+          this.fakeApplePaySession.onpaymentauthorized(stubEvent);
+
+          expect(this.fakeApplePayInstance.tokenize).to.be.calledWith({token: 'foo'});
+        });
+
+        context('on tokenization success', function () {
+          it('adds payment method to model and completes payment on ApplePaySession with status success', function (done) {
+            var fakePayload = {foo: 'bar'};
+
+            this.fakeApplePayInstance.tokenize.resolves(fakePayload);
+            this.view.model.addPaymentMethod = function (payload) {
+              expect(this.fakeApplePaySession.completePayment).to.be.calledOnce;
+              expect(this.fakeApplePaySession.completePayment).to.be.calledWith(global.ApplePaySession.STATUS_SUCCESS);
+              expect(payload).to.equal(fakePayload);
+              done();
+            }.bind(this);
+
+            this.buttonClickHandler();
+            this.fakeApplePaySession.onpaymentauthorized({
+              payment: {token: 'foo'}
+            });
+          });
+        });
+
+        context('on tokenization failure', function () {
+          it('completes payment on ApplePaySession with status failure and reports the error', function (done) {
+            var fakeError = new Error('fail.');
+
+            this.sandbox.stub(this.view.model, 'reportError');
+            this.fakeApplePayInstance.tokenize.rejects(fakeError);
+            this.fakeApplePaySession.completePayment = function (status) {
+              expect(this.view.model.reportError).to.be.calledOnce;
+              expect(this.view.model.reportError).to.be.calledWith(fakeError);
+              expect(status).to.equal(global.ApplePaySession.STATUS_FAILURE);
+              done();
+            }.bind(this);
+
+            this.buttonClickHandler();
+            this.fakeApplePaySession.onpaymentauthorized({
+              payment: {token: 'foo'}
+            });
+          });
         });
       });
     });

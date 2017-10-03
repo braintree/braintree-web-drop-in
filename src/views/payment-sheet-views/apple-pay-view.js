@@ -92,14 +92,12 @@ ApplePayView.prototype._showPaymentSheet = function () {
     // TODO: optionally get shippingContact and other properties from event
     self.applePayInstance.tokenize({
       token: event.payment.token
-    }, function (tokenizeErr, payload) {
-      if (tokenizeErr) {
-        self._reportError(tokenizeErr);
-        session.completePayment(ApplePaySession.STATUS_FAILURE); // eslint-disable-line no-undef
-        return;
-      }
+    }).then(function (payload) {
       session.completePayment(ApplePaySession.STATUS_SUCCESS); // eslint-disable-line no-undef
       self.model.addPaymentMethod(payload);
+    }).catch(function (tokenizeErr) {
+      self._reportError(tokenizeErr);
+      session.completePayment(ApplePaySession.STATUS_FAILURE); // eslint-disable-line no-undef
     });
   };
 
