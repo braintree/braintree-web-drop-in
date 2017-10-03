@@ -20,8 +20,12 @@ describe('ApplePayView', function () {
     };
 
     this.div = document.createElement('div');
+    this.fakeApplePaySession = {
+      begin: this.sandbox.stub(),
+      completeMerchantValidation: this.sandbox.stub()
+    };
 
-    global.ApplePaySession = {};
+    global.ApplePaySession = this.sandbox.stub().returns(this.fakeApplePaySession);
     global.ApplePaySession.canMakePayments = function () { return true; };
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
@@ -108,6 +112,52 @@ describe('ApplePayView', function () {
           view: 'applePay'
         }));
       }.bind(this));
+    });
+  });
+
+  describe('_showPaymentSheet', function () {
+    beforeEach(function () {
+      this.view = new ApplePayView(this.applePayViewOptions);
+      return this.view.initialize();
+    });
+
+    it('creates an ApplePaySession with a payment request', function () {
+    });
+
+    describe('session.onvalidatemerchant', function () {
+      it('performs merchant validation', function () {
+        var stubEvent = {validationURL: 'fake'};
+
+        this.view.applePayInstance.createPaymentRequest = this.sandbox.stub().returns({});
+        this.view.applePayInstance.performValidation = this.sandbox.stub();
+
+        this.view._showPaymentSheet();
+        this.fakeApplePaySession.onvalidatemerchant(stubEvent);
+
+        expect(this.view.applePayInstance.performValidation).to.be.calledWith({
+          validationURL: stubEvent.validationURL,
+          displayName: 'My Store'
+        });
+      });
+
+      it('completes merchant validation when validation succeeds', function () {
+        var fakeMerchantSession = {};
+
+        this.view.applePayInstance.performValidation.resolves(fakeMerchantSession);
+
+        this.view._showPaymentSheet();
+        this.fakeApplePaySession.onvalidatemerchant(stubEvent);
+
+        expect(this.view.applePayInstance.performValidation).to.be.calledWith({
+          validationURL: stubEvent.validationURL,
+          displayName: 'My Store'
+        });
+
+      });
+      it('reports an error when validation fails', function () {
+      });
+      it('aborts the session when validation fails', function () {
+      });
     });
   });
 });
