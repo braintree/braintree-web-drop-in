@@ -410,8 +410,12 @@ Dropin.prototype._setUpThreeDSecure = function () {
 };
 
 Dropin.prototype._runThreeDSecure = function (nonce) {
-  return Promise.resolve({
-    nonce: nonce
+  return this._threeDSecureInstance.verifyCard({
+    nonce: nonce,
+    amount: this._merchantConfiguration.threeDSecure.amount,
+    showLoader: this._merchantConfiguration.threeDSecure.showLoader,
+    addFrame: function () { /* TODO */ },
+    removeFrame: function () { /* TODO */ }
   });
 };
 

@@ -923,6 +923,40 @@ describe('Dropin', function () {
     });
   });
 
+  describe('_runThreeDSecure', function () {
+    beforeEach(function () {
+      this.dropinOptions.merchantConfiguration.threeDSecure = {
+        showLoader: false,
+        amount: '10.00'
+      };
+
+      this.instance = new Dropin(this.dropinOptions);
+      this.instance._threeDSecureInstance = fake.threeDSecureInstance;
+      this.sandbox.stub(this.instance._threeDSecureInstance, 'verifyCard').resolves({
+        nonce: 'a-nonce',
+        liabilityShifted: true,
+        liablityShiftPossible: true
+      });
+    });
+
+    it('calls verifyCard', function () {
+      this.instance._runThreeDSecure('old-nonce').then(function (payload) {
+        expect(this.instance._threeDSecureInstance.verifyCard).to.be.calledOnce;
+        expect(this.instance._threeDSecureInstance.verifyCard).to.be.calledWith({
+          none: 'old-nonce',
+          amount: '10.00',
+          showLoader: false,
+          addFrame: this.sandbox.match.func,
+          removeFrame: this.sandbox.match.func
+        });
+
+        expect(payload.nonce).to.equal('a-nonce');
+        expect(payload.liabilityShifted).to.equal(true);
+        expect(payload.liablityShiftPossible).to.equal(true);
+      });
+    });
+  });
+
   describe('teardown', function () {
     beforeEach(function () {
       this.instance = new Dropin(this.dropinOptions);
