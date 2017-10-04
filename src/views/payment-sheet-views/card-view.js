@@ -50,9 +50,9 @@ CardView.prototype.initialize = function () {
   }
 
   if (this.hasCardholderName) {
-    this._setupCardholderName(cardholderNameField);
+    this._setupExtraInput('cardholder-name-field-group', this.model.merchantConfiguration.card.cardholderName.required);
   } else {
-    cardholderNameField.parentNode.removeChild(cardholderNameField);
+    this._removeExtraInput('cardholder-name-field-group');
   }
 
   this.model.asyncDependencyStarting();
@@ -74,38 +74,46 @@ CardView.prototype.initialize = function () {
   }.bind(this));
 };
 
-CardView.prototype._setupCardholderName = function (cardholderNameField) {
-  var cardholderNameOptions = this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName;
-  var cardholderNameContainer = cardholderNameField.querySelector('.braintree-form__hosted-field');
+CardView.prototype._setupExtraInput = function (fieldName, required) {
+  var self = this;
+  var field = this.getElementById(fieldName);
+  var input = field.querySelector('input');
+  var nameContainer = field.querySelector('.braintree-form__hosted-field');
 
-  this.cardholderNameInput.addEventListener('keyup', function () {
-    var hasContent = this.cardholderNameInput.value.length > 0;
+  input.addEventListener('keyup', function () {
+    var hasContent = input.value.length > 0;
 
-    classlist.toggle(cardholderNameContainer, 'braintree-form__field--valid', hasContent);
+    classlist.toggle(nameContainer, 'braintree-form__field--valid', hasContent);
 
-    if (!cardholderNameOptions.required) {
+    if (!required) {
       return;
     }
 
     if (hasContent) {
-      classlist.remove(cardholderNameField, 'braintree-form__field-group--has-error');
+      classlist.remove(field, 'braintree-form__field-group--has-error');
     }
 
-    this._sendRequestableEvent();
-  }.bind(this), false);
+    self._sendRequestableEvent();
+  }, false);
 
-  if (cardholderNameOptions.required) {
-    this.cardholderNameInput.addEventListener('blur', function () {
-      // the active element inside the blur event is the docuemnt.body
+  if (required) {
+    input.addEventListener('blur', function () {
+      // the active element inside the blur event is the document.body
       // by taking it out of the event loop, we can detect the new
       // active element (hosted field or other card view element)
       setTimeout(function () {
-        if (isCardViewElement() && this.cardholderNameInput.value.length === 0) {
-          classlist.add(cardholderNameField, 'braintree-form__field-group--has-error');
+        if (isCardViewElement() && input.value.length === 0) {
+          classlist.add(field, 'braintree-form__field-group--has-error');
         }
-      }.bind(this), 0);
-    }.bind(this), false);
+      }, 0);
+    }, false);
   }
+};
+
+CardView.prototype._removeExtraInput = function (braintreeId) {
+  var field = this.getElementById(braintreeId);
+
+  field.parentNode.removeChild(field);
 };
 
 CardView.prototype._sendRequestableEvent = function () {

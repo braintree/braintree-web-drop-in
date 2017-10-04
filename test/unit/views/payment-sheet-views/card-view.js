@@ -684,7 +684,9 @@ describe('CardView', function () {
         _onCardTypeChangeEvent: function () {},
         _onFocusEvent: function () {},
         _onNotEmptyEvent: function () {},
-        _onValidityChangeEvent: function () {}
+        _onValidityChangeEvent: function () {},
+        _setupExtraInput: function () {},
+        _removeExtraInput: function () {}
       };
 
       this.model = new DropinModel(fake.modelOptions());
