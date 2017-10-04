@@ -400,6 +400,8 @@ Dropin.prototype._setUpThreeDSecure = function () {
   this._model.asyncDependencyStarting();
   threeDSecure.create(config).then(function (instance) {
     self._threeDSecureInstance = instance;
+    self._threeDSecureModal = document.createElement('div');
+    self._threeDSecureModal.innerHTML = fs.readFileSync(__dirname + '/html/three-d-secure.html', 'utf8');
     self._model.asyncDependencyReady();
   }).catch(function (err) {
     self._model.cancelInitialization(new DropinError({
@@ -410,12 +412,20 @@ Dropin.prototype._setUpThreeDSecure = function () {
 };
 
 Dropin.prototype._runThreeDSecure = function (nonce) {
+  var self = this;
+
+  document.body.appendChild(self._threeDSecureModal);
+
   return this._threeDSecureInstance.verifyCard({
     nonce: nonce,
     amount: this._merchantConfiguration.threeDSecure.amount,
     showLoader: this._merchantConfiguration.threeDSecure.showLoader,
-    addFrame: function () { /* TODO */ },
-    removeFrame: function () { /* TODO */ }
+    addFrame: function (err, iframe) {
+      self._threeDSecureModal.querySelector('.braintree-three-d-secure__modal-body').appendChild(iframe);
+    },
+    removeFrame: function () {
+      self._threeDSecureModal.parentNode.removeChild(self._threeDSecureModal);
+    }
   });
 };
 
@@ -562,8 +572,14 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  */
 Dropin.prototype.requestPaymentMethod = function () {
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (this._threeDSecureInstance && payload.type === 'CREDIT_CARD' && payload.liabilityShifted == null) {
-      return this._runThreeDSecure(payload.nonce);
+    if (this._threeDSecureInstance && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
+      return this._runThreeDSecure(payload.nonce).then(function (newPayload) {
+        payload.nonce = newPayload.nonce;
+        payload.liabilityShifted = newPayload.liabilityShifted;
+        payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
+
+        return payload;
+      });
     }
 
     return payload;
@@ -707,6 +723,11 @@ function formatPaymentMethodPayload(paymentMethod) {
 
   if (paymentMethod.type === constants.paymentMethodTypes.card) {
     formattedPaymentMethod.description = paymentMethod.description;
+  }
+
+  if (paymentMethod.liabilityShiftPossible) {
+    formattedPaymentMethod.liabilityShifted = paymentMethod.liabilityShifted;
+    formattedPaymentMethod.liabilityShiftPossible = paymentMethod.liabilityShiftPossible;
   }
 
   if (paymentMethod.deviceData) {

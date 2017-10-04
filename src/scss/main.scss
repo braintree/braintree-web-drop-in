@@ -922,3 +922,43 @@ $loader-scale-duration: 300ms;
     position: absolute;
   }
 }
+
+/* =========================================================================
+   3D Secure
+   ========================================================================= */
+
+.braintree-three-d-secure {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999999;
+
+  .braintree-three-d-secure__backdrop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, .5);
+  }
+
+  .braintree-three-d-secure__modal {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    width: 400px;
+    max-width: 100%;
+    border-radius: 5px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+
+    iframe {
+      display: block;
+      margin: auto;
+    }
+  }
+}

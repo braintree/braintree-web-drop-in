@@ -932,6 +932,7 @@ describe('Dropin', function () {
 
       this.instance = new Dropin(this.dropinOptions);
       this.instance._threeDSecureInstance = fake.threeDSecureInstance;
+      this.sandbox.stub(document.body, 'appendChild');
       this.sandbox.stub(this.instance._threeDSecureInstance, 'verifyCard').resolves({
         nonce: 'a-nonce',
         liabilityShifted: true,
@@ -939,11 +940,19 @@ describe('Dropin', function () {
       });
     });
 
+    it('appends 3ds modal to body', function () {
+      this.instance._threeDSecureModal = {};
+      return this.instance._runThreeDSecure('old-nonce').then(function () {
+        expect(document.body.appendChild).to.be.calledOnce;
+        expect(document.body.appendChild).to.be.calledWith(this.instance._threeDSecureModal);
+      }.bind(this));
+    });
+
     it('calls verifyCard', function () {
-      this.instance._runThreeDSecure('old-nonce').then(function (payload) {
+      return this.instance._runThreeDSecure('old-nonce').then(function (payload) {
         expect(this.instance._threeDSecureInstance.verifyCard).to.be.calledOnce;
         expect(this.instance._threeDSecureInstance.verifyCard).to.be.calledWith({
-          none: 'old-nonce',
+          nonce: 'old-nonce',
           amount: '10.00',
           showLoader: false,
           addFrame: this.sandbox.match.func,
@@ -953,7 +962,44 @@ describe('Dropin', function () {
         expect(payload.nonce).to.equal('a-nonce');
         expect(payload.liabilityShifted).to.equal(true);
         expect(payload.liablityShiftPossible).to.equal(true);
-      });
+      }.bind(this));
+    });
+
+    it('adds iframe to dom', function () {
+      var appendChildSpy = this.sandbox.spy();
+
+      this.instance._threeDSecureModal = {
+        querySelector: this.sandbox.stub().returns({
+          appendChild: appendChildSpy
+        })
+      };
+
+      return this.instance._runThreeDSecure('old-nonce').then(function () {
+        var addFrameFunction = this.instance._threeDSecureInstance.verifyCard.args[0][0].addFrame;
+        var iframe = {};
+
+        addFrameFunction(null, iframe);
+
+        expect(appendChildSpy).to.be.calledWith(iframe);
+      }.bind(this));
+    });
+
+    it('removes iframe from dom', function () {
+      var removeChildSpy = this.sandbox.spy();
+
+      this.instance._threeDSecureModal = {
+        parentNode: {
+          removeChild: removeChildSpy
+        }
+      };
+
+      return this.instance._runThreeDSecure('old-nonce').then(function () {
+        var removeFrameFunction = this.instance._threeDSecureInstance.verifyCard.args[0][0].removeFrame;
+
+        removeFrameFunction();
+
+        expect(removeChildSpy).to.be.calledWith(this.instance._threeDSecureModal);
+      }.bind(this));
     });
   });
 
@@ -1110,7 +1156,7 @@ describe('Dropin', function () {
       var instance;
       var fakePayload = {
         nonce: 'cool-nonce',
-        type: 'CREDIT_CARD',
+        type: 'CreditCard',
         liabilityShifted: false
       };
 
@@ -1135,7 +1181,7 @@ describe('Dropin', function () {
       var instance;
       var fakePayload = {
         nonce: 'cool-nonce',
-        type: 'CREDIT_CARD'
+        type: 'CreditCard'
       };
 
       this.dropinOptions.merchantConfiguration.threeDSecure = {};
