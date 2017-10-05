@@ -402,6 +402,26 @@ Dropin.prototype._setUpThreeDSecure = function () {
     self._threeDSecureInstance = instance;
     self._threeDSecureModal = document.createElement('div');
     self._threeDSecureModal.innerHTML = fs.readFileSync(__dirname + '/html/three-d-secure.html', 'utf8');
+    // TODO - Add tests for the cancel flow
+    self._threeDSecureModal.querySelector('.braintree-three-d-secure__modal-close').addEventListener('click', function () {
+      self._threeDSecureInstance.cancelVerifyCard().then(function (payload) {
+        self._rejectThreeDSecure({
+          type: 'THREE_D_SECURE_CANCELLED',
+          // TODO <- need an update to bt-web that fixes the params for liablity to be on th etop level like we document
+          // when that update is in place, just switch this to payload: payload
+          payload: {
+            nonce: payload.nonce,
+            liabilityShifted: payload.threeDSecureInfo.liabilityShifted,
+            liabilityShiftPossible: payload.threeDSecureInfo.liabilityShiftPossible
+          }
+        });
+        self._cleanupThreeDSecureModal();
+      }).catch(function () {
+        // only reason this would reject
+        // is if there is no verificatin in progress
+        // so we just swallow the error
+      });
+    });
     self._model.asyncDependencyReady();
   }).catch(function (err) {
     self._model.cancelInitialization(new DropinError({
@@ -411,24 +431,52 @@ Dropin.prototype._setUpThreeDSecure = function () {
   });
 };
 
+Dropin.prototype._cleanupThreeDSecureModal = function () {
+  var iframe = this._threeDSecureModal.querySelector('iframe');
+
+  iframe.parentNode.removeChild(iframe);
+  this._threeDSecureModal.parentNode.removeChild(this._threeDSecureModal);
+};
+
+Dropin.prototype._waitForThreeDSecure = function () {
+  var self = this;
+
+  return new Promise(function (resolve, reject) {
+    self._resolveThreeDSecure = resolve;
+    self._rejectThreeDSecure = reject;
+  });
+};
+
 Dropin.prototype._runThreeDSecure = function (nonce) {
   var self = this;
 
   document.body.appendChild(self._threeDSecureModal);
 
-  return this._threeDSecureInstance.verifyCard({
-    nonce: nonce,
-    amount: this._merchantConfiguration.threeDSecure.amount,
-    showLoader: this._merchantConfiguration.threeDSecure.showLoader,
-    addFrame: function (err, iframe) {
-      self._threeDSecureModal.querySelector('.braintree-three-d-secure__modal-body').appendChild(iframe);
-    },
-    removeFrame: function () {
-      var iframe = self._threeDSecureModal.querySelector('iframe');
+  return Promise.all([
+    this._waitForThreeDSecure(),
+    this._threeDSecureInstance.verifyCard({
+      nonce: nonce,
+      amount: this._merchantConfiguration.threeDSecure.amount,
+      showLoader: this._merchantConfiguration.threeDSecure.showLoader,
+      addFrame: function (err, iframe) {
+        self._threeDSecureModal.querySelector('.braintree-three-d-secure__modal-body').appendChild(iframe);
+      },
+      removeFrame: function () {
+        self._cleanupThreeDSecureModal();
+      }
+    }).then(function (payload) {
+      self._resolveThreeDSecure();
 
-      iframe.parentNode.removeChild(iframe);
-      self._threeDSecureModal.parentNode.removeChild(self._threeDSecureModal);
+      return payload;
+    })
+  ]).then(function (result) {
+    return result[1];
+  }).catch(function (err) {
+    if (err.type === 'THREE_D_SECURE_CANCELLED') {
+      return Promise.resolve(err.payload);
     }
+
+    return Promise.reject(err);
   });
 };
 

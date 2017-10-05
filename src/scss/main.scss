@@ -960,5 +960,18 @@ $loader-scale-duration: 300ms;
       display: block;
       margin: auto;
     }
+
+    .braintree-three-d-secure__modal-close {
+      position: absolute;
+      cursor: pointer;
+      top: -5px;
+      right: -5px;
+      background: #444;
+      color: white;
+      padding: 2px;
+      width: 25px;
+      height: 25px;
+      border-radius: 100%;
+    }
   }
 }
