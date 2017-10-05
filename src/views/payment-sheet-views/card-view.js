@@ -43,7 +43,7 @@ CardView.prototype.initialize = function () {
       fieldName: 'cardholderName',
       enabled: Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName),
       required: Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName && this.model.merchantConfiguration.card.cardholderName.required),
-      checks: [
+      validations: [
         {
           isValid: function (input) {
             return input.length > 0;
@@ -106,8 +106,8 @@ CardView.prototype._setupExtraInput = function (extraInput) {
   input.addEventListener('keyup', function () {
     var valid = true;
 
-    extraInput.checks.forEach(function (inputCheck) {
-      valid = valid && inputCheck.isValid(input.value);
+    extraInput.validations.forEach(function (inputValidation) {
+      valid = valid && inputValidation.isValid(input.value);
     });
 
     classlist.toggle(nameContainer, 'braintree-form__field--valid', valid);
@@ -129,17 +129,15 @@ CardView.prototype._setupExtraInput = function (extraInput) {
       // by taking it out of the event loop, we can detect the new
       // active element (hosted field or other card view element)
       setTimeout(function () {
-        var check, i;
+        var hasFieldError = false;
 
         if (isCardViewElement()) {
-          for (i = 0; i < extraInput.checks.length; i++) {
-            check = extraInput.checks[i];
-
-            if (!check.isValid(input.value)) {
-              self.showFieldError(extraInput.fieldName, check.error);
-              break;
+          extraInput.validations.forEach(function (validation) {
+            if (!hasFieldError && !validation.isValid(input.value)) {
+              hasFieldError = true;
+              self.showFieldError(extraInput.fieldName, validation.error);
             }
-          }
+          });
         }
       }, 0);
     }, false);
@@ -260,7 +258,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
 };
 
 CardView.prototype._validateForm = function (showFieldErrors) {
-  var cardType, cardTypeSupported, state, extraInput, i;
+  var cardType, cardTypeSupported, state;
   var isValid = true;
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
@@ -308,33 +306,29 @@ CardView.prototype._validateForm = function (showFieldErrors) {
   }
 
   if (this.extraInputs) {
-    for (i = 0; i < this.extraInputs.length; i++) {
-      extraInput = this.extraInputs[i];
-
+    this.extraInputs.forEach(function (extraInput) {
       if (!extraInput.enabled) {
-        continue;
+        return;
       }
 
       isValid = isValid && this._validateExtraInput(extraInput);
-    }
+    }.bind(this));
   }
 
   return isValid;
 };
 
 CardView.prototype._validateExtraInput = function (extraInput) {
-  var i;
   var fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
   var field = this.getElementById(fieldNameKebab + '-field-group');
   var input = field.querySelector('input');
+  var valid = true;
 
-  for (i = 0; i < extraInput.checks.length; i++) {
-    if (!extraInput.checks[i].isValid(input.value)) {
-      return false;
-    }
-  }
+  extraInput.validations.forEach(function (validation) {
+    valid = valid && validation.isValid(input.value);
+  });
 
-  return true;
+  return valid;
 };
 
 CardView.prototype.getPaymentMethod = function () { // eslint-disable-line consistent-return

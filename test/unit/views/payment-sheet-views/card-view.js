@@ -1751,7 +1751,7 @@ describe('CardView', function () {
         fieldName: 'cardholderName',
         enabled: true,
         required: true,
-        checks: [{
+        validations: [{
           isValid: function (input) { return input.length > 0; },
           error: strings.fieldEmptyForCardholderName
         }]
@@ -1840,7 +1840,7 @@ describe('CardView', function () {
         fieldName: 'cardholderName',
         enabled: true,
         required: true,
-        checks: [{
+        validations: [{
           isValid: function (input) { return input.length > 0; },
           error: strings.fieldEmptyForCardholderName
         }, {
