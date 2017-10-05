@@ -1945,7 +1945,7 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('sets the aria-invalid attribute when a field error is shown', function () {
+    it('sets the aria-invalid attribute on a hosted field when a field error is shown', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1967,7 +1967,30 @@ describe('CardView', function () {
       });
     });
 
-    it('removes the aria-invalid attribute when a field error is hidden', function () {
+    it('set the aria-invalid attribute on an input when a field error is hidden', function () {
+      var input = {
+        id: {
+          indexOf: function () {
+            return 1;
+          }
+        },
+        setAttribute: this.sandbox.stub()
+      };
+      var fieldGroup = {
+        querySelector: function () {
+          return input;
+        }
+      };
+
+      this.context.getElementById = this.sandbox.stub().returns(fieldGroup);
+      this.sandbox.stub(classlist, 'add');
+
+      CardView.prototype.showFieldError.call(this.context, 'foo');
+
+      expect(input.setAttribute).to.be.calledWith('aria-invalid', true);
+    });
+
+    it('removes the aria-invalid attribute on a hosted field when a field error is hidden', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1986,6 +2009,29 @@ describe('CardView', function () {
         field: 'number',
         attribute: 'aria-invalid'
       });
+    });
+
+    it('removes the aria-invalid attribute on an input when a field error is hidden', function () {
+      var input = {
+        id: {
+          indexOf: function () {
+            return 1;
+          }
+        },
+        removeAttribute: this.sandbox.stub()
+      };
+      var fieldGroup = {
+        querySelector: function () {
+          return input;
+        }
+      };
+
+      this.context.getElementById = this.sandbox.stub().returns(fieldGroup);
+      this.sandbox.stub(classlist, 'remove');
+
+      CardView.prototype.hideFieldError.call(this.context, 'foo');
+
+      expect(input.removeAttribute).to.be.calledWith('aria-invalid');
     });
 
     it('calls hostedFieldsInstance.tokenize when form is valid', function () {

@@ -21,7 +21,7 @@ CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
 CardView.prototype.initialize = function () {
-  var cvvFieldGroup, i, postalCodeFieldGroup, extraInput;
+  var cvvFieldGroup, postalCodeFieldGroup;
   var cardholderNameField = this.getElementById('cardholder-name-field-group');
   var cardIcons = this.getElementById('card-view-icons');
   var hfOptions = this._generateHostedFieldsOptions();
@@ -69,15 +69,13 @@ CardView.prototype.initialize = function () {
     postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
   }
 
-  for (i = 0; i < this.extraInputs.length; i++) {
-    extraInput = this.extraInputs[i];
-
+  this.extraInputs.forEach(function (extraInput) {
     if (extraInput.enabled) {
       this._setupExtraInput(extraInput);
     } else {
       this._removeExtraInput(extraInput);
     }
-  }
+  }.bind(this));
 
   this.model.asyncDependencyStarting();
 
@@ -106,12 +104,11 @@ CardView.prototype._setupExtraInput = function (extraInput) {
   var nameContainer = field.querySelector('.braintree-form__hosted-field');
 
   input.addEventListener('keyup', function () {
-    var i;
     var valid = true;
 
-    for (i = 0; i < extraInput.checks.length; i++) {
-      valid = valid && extraInput.checks[i].isValid(input.value);
-    }
+    extraInput.checks.forEach(function (inputCheck) {
+      valid = valid && inputCheck.isValid(input.value);
+    });
 
     classlist.toggle(nameContainer, 'braintree-form__field--valid', valid);
 
@@ -427,7 +424,9 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
   fieldError = this.fieldErrors[field];
   fieldError.textContent = errorMessage;
 
-  if (!(input && isNormalFieldElement(input))) {
+  if (input && isNormalFieldElement(input)) {
+    input.setAttribute('aria-invalid', true);
+  } else {
     this.hostedFieldsInstance.setAttribute({
       field: field,
       attribute: 'aria-invalid',
@@ -446,7 +445,9 @@ CardView.prototype.hideFieldError = function (field) {
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
 
-  if (!(input && isNormalFieldElement(input))) {
+  if (input && isNormalFieldElement(input)) {
+    input.removeAttribute('aria-invalid');
+  } else {
     this.hostedFieldsInstance.removeAttribute({
       field: field,
       attribute: 'aria-invalid'
