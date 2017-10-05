@@ -424,6 +424,9 @@ Dropin.prototype._runThreeDSecure = function (nonce) {
       self._threeDSecureModal.querySelector('.braintree-three-d-secure__modal-body').appendChild(iframe);
     },
     removeFrame: function () {
+      var iframe = self._threeDSecureModal.querySelector('iframe');
+
+      iframe.parentNode.removeChild(iframe);
       self._threeDSecureModal.parentNode.removeChild(self._threeDSecureModal);
     }
   });

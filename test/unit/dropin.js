@@ -986,8 +986,14 @@ describe('Dropin', function () {
 
     it('removes iframe from dom', function () {
       var removeChildSpy = this.sandbox.spy();
+      var fakeIframe = {
+        parentNode: {
+          removeChild: this.sandbox.stub()
+        }
+      };
 
       this.instance._threeDSecureModal = {
+        querySelector: this.sandbox.stub().returns(fakeIframe),
         parentNode: {
           removeChild: removeChildSpy
         }
@@ -998,6 +1004,7 @@ describe('Dropin', function () {
 
         removeFrameFunction();
 
+        expect(fakeIframe.parentNode.removeChild).to.be.calledWith(fakeIframe);
         expect(removeChildSpy).to.be.calledWith(this.instance._threeDSecureModal);
       }.bind(this));
     });
