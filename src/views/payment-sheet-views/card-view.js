@@ -45,13 +45,8 @@ CardView.prototype.initialize = function () {
       required: Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName && this.model.merchantConfiguration.card.cardholderName.required),
       validations: [
         {
-          isValid: function (input) {
-            return input.length > 0;
-          },
-          error: this.strings.fieldEmptyForCardholderName
-        }, {
-          isValid: function (input) {
-            return input.length < 256;
+          isValid: function (value) {
+            return value.length < 256;
           },
           error: this.strings.fieldTooLongForCardholderName
         }
@@ -132,6 +127,11 @@ CardView.prototype._setupExtraInput = function (extraInput) {
         var hasFieldError = false;
 
         if (isCardViewElement()) {
+          if (input.value.length == 0) {
+              hasFieldError = true;
+              self.showFieldError(extraInput.fieldName, extraInput.requiredError);
+          }
+
           extraInput.validations.forEach(function (validation) {
             if (!hasFieldError && !validation.isValid(input.value)) {
               hasFieldError = true;
@@ -323,6 +323,10 @@ CardView.prototype._validateExtraInput = function (extraInput) {
   var field = this.getElementById(fieldNameKebab + '-field-group');
   var input = field.querySelector('input');
   var valid = true;
+
+  if (extraInput.required) {
+    valid = input.value.length > 0;
+  }
 
   extraInput.validations.forEach(function (validation) {
     valid = valid && validation.isValid(input.value);
