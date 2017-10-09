@@ -127,9 +127,9 @@ CardView.prototype._setupExtraInput = function (extraInput) {
         var hasFieldError = false;
 
         if (isCardViewElement()) {
-          if (input.value.length == 0) {
-              hasFieldError = true;
-              self.showFieldError(extraInput.fieldName, extraInput.requiredError);
+          if (input.value.length === 0) {
+            hasFieldError = true;
+            self.showFieldError(extraInput.fieldName, extraInput.requiredError);
           }
 
           extraInput.validations.forEach(function (validation) {
