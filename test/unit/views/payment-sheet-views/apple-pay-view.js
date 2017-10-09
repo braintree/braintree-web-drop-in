@@ -238,20 +238,59 @@ describe('ApplePayView', function () {
         });
 
         context('on tokenization success', function () {
-          it('adds payment method to model and completes payment on ApplePaySession with status success', function (done) {
-            var fakePayload = {foo: 'bar'};
-
-            this.fakeApplePayInstance.tokenize.resolves(fakePayload);
-            this.view.model.addPaymentMethod = function (payload) {
-              expect(this.fakeApplePaySession.completePayment).to.be.calledOnce;
-              expect(this.fakeApplePaySession.completePayment).to.be.calledWith(global.ApplePaySession.STATUS_SUCCESS);
-              expect(payload).to.equal(fakePayload);
+          it('completes payment on ApplePaySession with status success', function (done) {
+            this.fakeApplePayInstance.tokenize.resolves({foo: 'bar'});
+            this.fakeApplePaySession.completePayment = function (status) {
+              expect(status).to.equal(global.ApplePaySession.STATUS_SUCCESS);
               done();
-            }.bind(this);
+            };
 
             this.buttonClickHandler();
             this.fakeApplePaySession.onpaymentauthorized({
               payment: {token: 'foo'}
+            });
+          });
+
+          it('adds payment method to model', function (done) {
+            this.fakeApplePayInstance.tokenize.resolves({
+              nonce: 'fake-nonce',
+              type: 'ApplePayCard'
+            });
+            this.view.model.addPaymentMethod = function (payload) {
+              expect(payload.nonce).to.equal('fake-nonce');
+              expect(payload.type).to.equal('ApplePayCard');
+              expect(payload.payment.shippingContact).not.to.exist;
+              expect(payload.payment.billingContact).not.to.exist;
+              done();
+            };
+
+            this.buttonClickHandler();
+            this.fakeApplePaySession.onpaymentauthorized({
+              payment: {token: 'foo'}
+            });
+          });
+
+          it('provides shipping and billing contact in payment method when present in ApplePayPayment', function (done) {
+            var fakeShippingContact = {hey: 'now'};
+            var fakeBillingContact = {you: 'are an all-star'};
+
+            this.fakeApplePayInstance.tokenize.resolves({
+              nonce: 'fake-nonce',
+              type: 'ApplePayCard'
+            });
+            this.view.model.addPaymentMethod = function (payload) {
+              expect(payload.payment.shippingContact).to.equal(fakeShippingContact);
+              expect(payload.payment.billingContact).to.equal(fakeBillingContact);
+              done();
+            };
+
+            this.buttonClickHandler();
+            this.fakeApplePaySession.onpaymentauthorized({
+              payment: {
+                token: 'foo',
+                shippingContact: fakeShippingContact,
+                billingContact: fakeBillingContact
+              }
             });
           });
         });
