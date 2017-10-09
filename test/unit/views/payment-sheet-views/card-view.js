@@ -9,6 +9,7 @@ var fs = require('fs');
 var hostedFields = require('braintree-web/hosted-fields');
 var strings = require('../../../../src/translations/en_US');
 var transitionHelper = require('../../../../src/lib/transition-helper');
+var braintreeWebVersion = require('../../../../package.json').dependencies['braintree-web'];
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
@@ -26,7 +27,8 @@ describe('CardView', function () {
     this.element = document.body.querySelector('.braintree-sheet.braintree-card');
 
     this.client = {
-      getConfiguration: fake.configuration
+      getConfiguration: fake.configuration,
+      getVersion: function () { return braintreeWebVersion; }
     };
   });
 
