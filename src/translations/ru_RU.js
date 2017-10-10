@@ -21,7 +21,7 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "Проверьте правильность ввода данных и повторите попытку.",
   "hostedFieldsTokenizationNetworkErrorError": "Ошибка сети. Повторите попытку.",
   "hostedFieldsFieldsInvalidError": "Проверьте правильность ввода данных и повторите попытку.",
-  "paypalAccountTokenizationFailed": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
+  "paypalAccountTokenizationFailedError": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
   "paypalFlowFailedError": "Что-то пошло не так — не удалось подключиться к системе PayPal. Повторите попытку.",
   "paypalTokenizationRequestActiveError": "Выполняется авторизация платежа PayPal.",
   "unsupportedCardTypeError": "Этот тип карты не поддерживается. Попробуйте воспользоваться другой картой.",

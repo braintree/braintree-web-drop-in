@@ -21,7 +21,7 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "请检查您的信息，然后重试。",
   "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",
   "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
-  "paypalAccountTokenizationFailed": "添加PayPal账户时出错。请重试。",
+  "paypalAccountTokenizationFailedError": "添加PayPal账户时出错。请重试。",
   "paypalFlowFailedError": "连接到PayPal时出错。请重试。",
   "paypalTokenizationRequestActiveError": "PayPal付款授权已在进行中。",
   "unsupportedCardTypeError": "不支持该卡类型。请尝试其他卡。",

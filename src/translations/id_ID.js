@@ -21,7 +21,7 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "Periksa informasi Anda dan coba lagi.",
   "hostedFieldsTokenizationNetworkErrorError": "Masalah jaringan. Coba lagi.",
   "hostedFieldsFieldsInvalidError": "Periksa informasi Anda dan coba lagi.",
-  "paypalAccountTokenizationFailed": "Terjadi kesalahan saat menambahkan rekening PayPal. Coba lagi.",
+  "paypalAccountTokenizationFailedError": "Terjadi kesalahan saat menambahkan rekening PayPal. Coba lagi.",
   "paypalFlowFailedError": "Terjadi kesalahan saat menyambung ke PayPal. Coba lagi.",
   "paypalTokenizationRequestActiveError": "Otorisasi pembayaran PayPal sedang diproses.",
   "unsupportedCardTypeError": "Jenis kartu ini tidak didukung. Coba kartu lainnya.",

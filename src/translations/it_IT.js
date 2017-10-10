@@ -21,7 +21,7 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "Controlla e riprova.",
   "hostedFieldsTokenizationNetworkErrorError": "Errore di rete. Riprova.",
   "hostedFieldsFieldsInvalidError": "Controlla e riprova.",
-  "paypalAccountTokenizationFailed": "Si è verificato un errore collegando il conto PayPal. Riprova.",
+  "paypalAccountTokenizationFailedError": "Si è verificato un errore collegando il conto PayPal. Riprova.",
   "paypalFlowFailedError": "Si è verificato un errore di connessione a PayPal. Riprova.",
   "paypalTokenizationRequestActiveError": "L'autorizzazione di pagamento PayPal è già in corso.",
   "unsupportedCardTypeError": "Questo tipo di carta non è supportato. Prova con un'altra carta.",

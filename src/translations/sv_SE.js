@@ -21,7 +21,7 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "Kontrollera uppgifterna och försök igen.",
   "hostedFieldsTokenizationNetworkErrorError": "Nätverksfel. Försök igen.",
   "hostedFieldsFieldsInvalidError": "Kontrollera uppgifterna och försök igen.",
-  "paypalAccountTokenizationFailed": "Ett fel uppstod när PayPal-kontot skulle läggas till. Försök igen.",
+  "paypalAccountTokenizationFailedError": "Ett fel uppstod när PayPal-kontot skulle läggas till. Försök igen.",
   "paypalFlowFailedError": "Ett fel uppstod när anslutningen till PayPal skulle upprättas. Försök igen.",
   "paypalTokenizationRequestActiveError": "Betalningsgodkännandet för PayPal behandlas redan.",
   "unsupportedCardTypeError": "Den här korttypen stöds inte. Pröva med ett annat kort.",

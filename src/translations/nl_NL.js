@@ -21,7 +21,7 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "Controleer uw gegevens en probeer het opnieuw.",
   "hostedFieldsTokenizationNetworkErrorError": "Netwerkfout. Probeer het opnieuw.",
   "hostedFieldsFieldsInvalidError": "Controleer uw gegevens en probeer het opnieuw.",
-  "paypalAccountTokenizationFailed": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
+  "paypalAccountTokenizationFailedError": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
   "paypalFlowFailedError": "Er is iets misgegaan bij de verbinding met PayPal. Probeer het opnieuw.",
   "paypalTokenizationRequestActiveError": "De autorisatie van de PayPal-betaling is al in behandeling.",
   "unsupportedCardTypeError": "Dit type creditcard wordt niet ondersteund. Gebruik een andere creditcard.",

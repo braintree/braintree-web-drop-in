@@ -21,7 +21,7 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "請檢查你的資料並重試。",
   "hostedFieldsTokenizationNetworkErrorError": "網路錯誤。請重試。",
   "hostedFieldsFieldsInvalidError": "請檢查你的資料並重試。",
-  "paypalAccountTokenizationFailed": "新增 PayPal 帳戶時，系統發生錯誤。請重試。",
+  "paypalAccountTokenizationFailedError": "新增 PayPal 帳戶時，系統發生錯誤。請重試。",
   "paypalFlowFailedError": "連結至 PayPal 時，系統發生錯誤。請重試。",
   "paypalTokenizationRequestActiveError": "PayPal 支付款項的授權已在處理中。",
   "unsupportedCardTypeError": "不支援此卡片類型。請嘗試其他卡片。",
