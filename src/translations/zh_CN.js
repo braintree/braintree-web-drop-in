@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "此邮政编码无效。",
   "genericError": "我们遇到了一些问题",
   "hostedFieldsFailedTokenizationError": "请检查您的信息，然后重试。",
-  "hostedFieldTokenizationNetworkError": "网络错误。请重试。",
+  "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",
   "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
   "paypalAccountTokenizationFailed": "添加PayPal账户时出错。请重试。",
   "paypalFlowFailedError": "连接到PayPal时出错。请重试。",

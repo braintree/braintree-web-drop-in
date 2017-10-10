@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "此郵遞區號無效。",
   "genericError": "系統發生錯誤。",
   "hostedFieldsFailedTokenizationError": "請檢查你的資料並再試一次。",
-  "hostedFieldTokenizationNetworkError": "網絡錯誤。請重試。",
+  "hostedFieldsTokenizationNetworkErrorError": "網絡錯誤。請重試。",
   "hostedFieldsFieldsInvalidError": "請檢查你的資料並再試一次。",
   "paypalAccountTokenizationFailed": "加入 PayPal 帳戶時發生錯誤。請重試。",
   "paypalFlowFailedError": "連接 PayPal 時發生錯誤。請重試。",

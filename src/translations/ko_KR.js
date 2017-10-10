@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "이 우편번호가 올바르지 않습니다.",
   "genericError": "저희 쪽에 문제가 발생했습니다.",
   "hostedFieldsFailedTokenizationError": "정보를 확인하고 다시 시도해 주세요.",
-  "hostedFieldTokenizationNetworkError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
+  "hostedFieldsTokenizationNetworkErrorError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
   "hostedFieldsFieldsInvalidError": "정보를 확인하고 다시 시도해 주세요.",
   "paypalAccountTokenizationFailed": "PayPal 계정을 추가하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalFlowFailedError": "PayPal 계정을 연결하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",

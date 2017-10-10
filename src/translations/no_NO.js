@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "Dette postnummeret er ikke gyldig.",
   "genericError": "Noe gikk galt hos oss.",
   "hostedFieldsFailedTokenizationError": "Kontroller informasjonen og prøv på nytt.",
-  "hostedFieldTokenizationNetworkError": "Nettverksfeil. Prøv på nytt.",
+  "hostedFieldsTokenizationNetworkErrorError": "Nettverksfeil. Prøv på nytt.",
   "hostedFieldsFieldsInvalidError": "Kontroller informasjonen og prøv på nytt.",
   "paypalAccountTokenizationFailed": "Noe gikk galt da PayPal-kontoen ble lagt til. Prøv på nytt.",
   "paypalFlowFailedError": "Det oppsto et problem med tilkoblingen til PayPal. Prøv på nytt.",

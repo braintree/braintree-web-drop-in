@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "Este código postal no es válido.",
   "genericError": "Hemos tenido algún problema.",
   "hostedFieldsFailedTokenizationError": "Comprueba la información e inténtalo de nuevo.",
-  "hostedFieldTokenizationNetworkError": "Error de red. Inténtalo de nuevo.",
+  "hostedFieldsTokenizationNetworkErrorError": "Error de red. Inténtalo de nuevo.",
   "hostedFieldsFieldsInvalidError": "Comprueba la información e inténtalo de nuevo.",
   "paypalAccountTokenizationFailed": "Se ha producido un error al vincular la cuenta PayPal. Inténtalo de nuevo.",
   "paypalFlowFailedError": "Se ha producido un error al conectarse a PayPal. Inténtalo de nuevo.",

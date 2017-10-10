@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "Kode pos ini tidak valid.",
   "genericError": "Terjadi kesalahan pada sistem kami. ",
   "hostedFieldsFailedTokenizationError": "Periksa informasi Anda dan coba lagi.",
-  "hostedFieldTokenizationNetworkError": "Masalah jaringan. Coba lagi.",
+  "hostedFieldsTokenizationNetworkErrorError": "Masalah jaringan. Coba lagi.",
   "hostedFieldsFieldsInvalidError": "Periksa informasi Anda dan coba lagi.",
   "paypalAccountTokenizationFailed": "Terjadi kesalahan saat menambahkan rekening PayPal. Coba lagi.",
   "paypalFlowFailedError": "Terjadi kesalahan saat menyambung ke PayPal. Coba lagi.",

@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "This postcode is not valid.",
   "genericError": "Something went wrong on our end.",
   "hostedFieldsFailedTokenizationError": "Please check your information and try again.",
-  "hostedFieldTokenizationNetworkError": "Network error. Please try again.",
+  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
   "hostedFieldsFieldsInvalidError": "Please check your information and try again.",
   "paypalAccountTokenizationFailed": "Something went wrong while adding the PayPal account. Please try again.",
   "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",

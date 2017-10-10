@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "Deze postcode is ongeldig.",
   "genericError": "Er is iets fout gegaan.",
   "hostedFieldsFailedTokenizationError": "Controleer uw gegevens en probeer het opnieuw.",
-  "hostedFieldTokenizationNetworkError": "Netwerkfout. Probeer het opnieuw.",
+  "hostedFieldsTokenizationNetworkErrorError": "Netwerkfout. Probeer het opnieuw.",
   "hostedFieldsFieldsInvalidError": "Controleer uw gegevens en probeer het opnieuw.",
   "paypalAccountTokenizationFailed": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
   "paypalFlowFailedError": "Er is iets misgegaan bij de verbinding met PayPal. Probeer het opnieuw.",

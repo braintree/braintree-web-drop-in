@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "この郵便番号は無効です。",
   "genericError": "弊社側で問題が発生しました。",
   "hostedFieldsFailedTokenizationError": "情報を確認してもう一度お試しください。",
-  "hostedFieldTokenizationNetworkError": "ネットワークエラーです。もう一度お試しください。",
+  "hostedFieldsTokenizationNetworkErrorError": "ネットワークエラーです。もう一度お試しください。",
   "hostedFieldsFieldsInvalidError": "情報を確認してもう一度お試しください。",
   "paypalAccountTokenizationFailed": "PayPalアカウントの追加で問題が発生しました。もう一度お試しください。",
   "paypalFlowFailedError": "PayPalへの接続に問題が発生しました。もう一度お試しください。",

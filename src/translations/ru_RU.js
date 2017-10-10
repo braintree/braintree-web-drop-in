@@ -19,7 +19,7 @@ module.exports = {
   "fieldInvalidForPostalCode": "Этот почтовый индекс недействителен.",
   "genericError": "Возникла проблема с нашей стороны.",
   "hostedFieldsFailedTokenizationError": "Проверьте правильность ввода данных и повторите попытку.",
-  "hostedFieldTokenizationNetworkError": "Ошибка сети. Повторите попытку.",
+  "hostedFieldsTokenizationNetworkErrorError": "Ошибка сети. Повторите попытку.",
   "hostedFieldsFieldsInvalidError": "Проверьте правильность ввода данных и повторите попытку.",
   "paypalAccountTokenizationFailed": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
   "paypalFlowFailedError": "Что-то пошло не так — не удалось подключиться к системе PayPal. Повторите попытку.",
