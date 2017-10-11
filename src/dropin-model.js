@@ -213,7 +213,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
   } else if (paymentOption === 'paypalCredit') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
   } else if (paymentOption === 'applePay') {
-    return gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay);
+    return gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay) && window.ApplePaySession && ApplePaySession.canMakePayments(); // eslint-disable-line no-undef
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }
