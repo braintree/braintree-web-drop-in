@@ -81,14 +81,6 @@ This will run the tests from `spec` in the browsers specified in [`spec/sauce_he
 
 ## Translations
 
-There are a couple of scripts to help manage translated strings (found in `src/translations/`).
-
-To see if there are any translation strings present in `en_US.js` that are not included in other locales, run:
-
-```
-node ./scripts/check-missing-translations.js
-```
-
 If you need to update a key for a translation that you have already updated in `en_US`, run the following with the existing key and then the new key as arguments:
 
 ```
