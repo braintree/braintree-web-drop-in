@@ -205,6 +205,7 @@ function getSupportedPaymentOptions(options) {
 
 function isPaymentOptionEnabled(paymentOption, options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var applePayEnabled, applePayBrowserSupported;
 
   if (paymentOption === 'card') {
     return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
@@ -213,7 +214,17 @@ function isPaymentOptionEnabled(paymentOption, options) {
   } else if (paymentOption === 'paypalCredit') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
   } else if (paymentOption === 'applePay') {
-    return gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay) && window.ApplePaySession && ApplePaySession.canMakePayments(); // eslint-disable-line no-undef
+    applePayEnabled = gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay);
+    applePayBrowserSupported = window.ApplePaySession && ApplePaySession.canMakePayments(); // eslint-disable-line no-undef
+
+    if (!applePayEnabled) {
+      return false;
+    }
+    if (!applePayBrowserSupported) {
+      console.log('Browser does not support Apple Pay.');
+      return false;
+    }
+    return true;
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }

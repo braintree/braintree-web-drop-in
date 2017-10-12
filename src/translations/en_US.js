@@ -25,6 +25,8 @@ module.exports = {
   paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
   applePayAccountTokenizationFailedError: 'Something went wrong with Apple Pay. Please try again.',
+  applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
+  applePayBrowserNotSupported: 'Browser does not support Apple Pay.',
   applePayFlowFailedError: 'Something went wrong initializing Apple Pay. Please try again.',
   applePayTokenizationRequestActiveError: 'Apple Pay is already in progress.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',

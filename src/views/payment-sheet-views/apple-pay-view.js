@@ -32,7 +32,7 @@ ApplePayView.prototype.initialize = function () {
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
   if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) { // eslint-disable-line no-undef
-    self._reportSetupError(asyncDependencyTimeoutHandler, 'Browser does not support Apple Pay.');
+    self._reportSetupError(asyncDependencyTimeoutHandler, 'applePayBrowserNotSupported');
     return;
   }
 
