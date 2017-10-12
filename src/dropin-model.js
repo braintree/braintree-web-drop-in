@@ -1,5 +1,6 @@
 'use strict';
 
+var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('./lib/event-emitter');
 var constants = require('./constants');
@@ -224,6 +225,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
       console.log('Browser does not support Apple Pay.'); // eslint-disable-line no-console
       return false;
     }
+    analytics.sendEvent(options.client, 'apple-pay.available');
     return true;
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
