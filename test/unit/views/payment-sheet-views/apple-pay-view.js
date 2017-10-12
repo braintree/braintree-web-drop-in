@@ -29,6 +29,7 @@ describe('ApplePayView', function () {
 
     global.ApplePaySession = this.sandbox.stub().returns(this.fakeApplePaySession);
     global.ApplePaySession.canMakePayments = function () { return true; };
+    global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(true);
     global.ApplePaySession.STATUS_FAILURE = 'failure';
     global.ApplePaySession.STATUS_SUCCESS = 'success';
     this.div.innerHTML = mainHTML;
@@ -103,7 +104,7 @@ describe('ApplePayView', function () {
       error = this.view.model.asyncDependencyFailed.getCall(0).args[0].error;
       expect(viewID).to.equal(this.view.ID);
       expect(error).to.be.an.instanceof(DropinError);
-      expect(error.message).to.equal('Browser does not support Apple Pay.');
+      expect(error.message).to.equal('applePayBrowserNotSupported');
     });
 
     it('calls asyncDependencyFailed with an error when ApplePaySession.canMakePayments is false', function () {
@@ -119,7 +120,7 @@ describe('ApplePayView', function () {
       error = this.view.model.asyncDependencyFailed.getCall(0).args[0].error;
       expect(viewID).to.equal(this.view.ID);
       expect(error).to.be.an.instanceof(DropinError);
-      expect(error.message).to.equal('Browser does not support Apple Pay.');
+      expect(error.message).to.equal('applePayBrowserNotSupported');
     });
 
     it('creates an ApplePay component', function () {
@@ -143,6 +144,27 @@ describe('ApplePayView', function () {
           error: fakeError,
           view: 'applePay'
         }));
+      }.bind(this));
+    });
+
+    it('calls canMakePaymentsWithActiveCard with merchantIdentifier when active payment view is changed to Apple Pay', function () {
+      return this.view.initialize().then(function () {
+        this.view.model.changeActivePaymentView(this.view.ID);
+
+        expect(global.ApplePaySession.canMakePaymentsWithActiveCard).to.be.calledOnce;
+        expect(global.ApplePaySession.canMakePaymentsWithActiveCard).to.be.calledWith(this.fakeApplePayInstance.merchantIdentifier);
+      }.bind(this));
+    });
+
+    it('reports error when canMakePaymentsWithActiveCard returns false', function (done) {
+      global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(false);
+
+      this.view.initialize().then(function () {
+        this.view.model.reportError = function (err) {
+          expect(err).to.equal('applePayActiveCardError');
+          done();
+        };
+        this.view.model.changeActivePaymentView(this.view.ID);
       }.bind(this));
     });
 

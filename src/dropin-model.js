@@ -221,7 +221,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
       return false;
     }
     if (!applePayBrowserSupported) {
-      console.log('Browser does not support Apple Pay.');
+      console.log('Browser does not support Apple Pay.'); // eslint-disable-line no-console
       return false;
     }
     return true;

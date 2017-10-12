@@ -42,11 +42,11 @@ ApplePayView.prototype.initialize = function () {
     self.applePayInstance = applePayInstance;
 
     self.model.on('changeActivePaymentView', function (paymentViewID) {
-      if (paymentViewID != self.ID) {
+      if (paymentViewID !== self.ID) {
         return;
       }
 
-      ApplePaySession.canMakePaymentsWithActiveCard(self.applePayInstance.merchantIdentifier).then(function (canMakePayments) {
+      ApplePaySession.canMakePaymentsWithActiveCard(self.applePayInstance.merchantIdentifier).then(function (canMakePayments) { // eslint-disable-line no-undef
         if (!canMakePayments) {
           self._reportError('applePayActiveCardError');
         }
