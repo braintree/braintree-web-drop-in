@@ -929,10 +929,10 @@ $loader-scale-duration: 300ms;
 
 .braintree-three-d-secure {
   position: fixed;
+  right: 0;
+  left: 0;
   top: 0;
   bottom: 0;
-  left: 0;
-  right: 0;
   z-index: 999999;
 
   .braintree-three-d-secure__backdrop {
@@ -941,7 +941,15 @@ $loader-scale-duration: 300ms;
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, .5);
+    opacity: 0;
+    background: rgba(0, 0, 0, 0.3);
+    transition: all 3s;
+  }
+
+  &.show {
+    .braintree-three-d-secure__backdrop {
+      opacity: 1;
+    }
   }
 
   .braintree-three-d-secure__modal {
@@ -951,10 +959,34 @@ $loader-scale-duration: 300ms;
     background: white;
     width: 400px;
     max-width: 100%;
-    border-radius: 5px;
+    border-radius: 3px;
     margin: auto;
-    padding: 20px;
+    height: 400px;
+    width: 400px;
+    max-width: 100%;
+    padding: 0;
     text-align: center;
+    overflow: hidden;
+
+    .braintree-three-d-secure__modal-body {
+      position: relative;
+      background: white;
+    }
+
+    .braintree-three-d-secure__modal-header {
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      line-height: 1;
+      margin: 0;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: normal;
+      opacity: 0.8;
+      background: whitesmoke;
+      border-radius: 3px 3px 0 0;
+    }
 
     iframe {
       display: block;
@@ -962,16 +994,24 @@ $loader-scale-duration: 300ms;
     }
 
     .braintree-three-d-secure__modal-close {
+      color: lighten(black, 20%);
+      font-size: 35px;
+      font-weight: lighter;
+      line-height: 0;
+      border: 0;
+      background: transparent;
+      padding: 15px 0;
+      margin: 0;
+      transform: translateY(-3px);
+    }
+
+    .braintree-loader__indicator {
+      height: 72px;
+      width: 72px;
       position: absolute;
-      cursor: pointer;
-      top: -5px;
-      right: -5px;
-      background: #444;
-      color: white;
-      padding: 2px;
-      width: 25px;
-      height: 25px;
-      border-radius: 100%;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
     }
   }
 }

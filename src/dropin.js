@@ -451,6 +451,7 @@ Dropin.prototype._runThreeDSecure = function (nonce) {
   var self = this;
 
   document.body.appendChild(self._threeDSecureModal);
+  self._threeDSecureModal.querySelector('.braintree-three-d-secure__backdrop').style.opacity = 1;
 
   return Promise.all([
     this._waitForThreeDSecure(),
