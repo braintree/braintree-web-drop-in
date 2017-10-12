@@ -41,6 +41,18 @@ ApplePayView.prototype.initialize = function () {
 
     self.applePayInstance = applePayInstance;
 
+    self.model.on('changeActivePaymentView', function (paymentViewID) {
+      if (paymentViewID != self.ID) {
+        return;
+      }
+
+      ApplePaySession.canMakePaymentsWithActiveCard(self.applePayInstance.merchantIdentifier).then(function (canMakePayments) {
+        if (!canMakePayments) {
+          self._reportError('applePayActiveCardError');
+        }
+      });
+    });
+
     buttonDiv.onclick = self._showPaymentSheet.bind(self);
 
     self.model.asyncDependencyReady();
