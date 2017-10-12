@@ -168,6 +168,23 @@ describe('ApplePayView', function () {
       }.bind(this));
     });
 
+    it('defaults the Apple Pay button style to black', function () {
+      return this.view.initialize().then(function () {
+        var button = document.querySelector('[data-braintree-id="apple-pay-button"]');
+
+        expect(button.classList.contains('apple-pay-button-black')).to.be.true;
+      });
+    });
+
+    it('allows the Apple Pay button style to be customized', function () {
+      this.view.model.merchantConfiguration.applePay.buttonStyle = 'white';
+      return this.view.initialize().then(function () {
+        var button = document.querySelector('[data-braintree-id="apple-pay-button"]');
+
+        expect(button.classList.contains('apple-pay-button-white')).to.be.true;
+      });
+    });
+
     it('sets up a button click handler', function () {
       return this.view.initialize().then(function () {
         var button = document.querySelector('[data-braintree-id="apple-pay-button"]');

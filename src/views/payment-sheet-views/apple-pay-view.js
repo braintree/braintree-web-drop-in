@@ -54,6 +54,7 @@ ApplePayView.prototype.initialize = function () {
     });
 
     buttonDiv.onclick = self._showPaymentSheet.bind(self);
+    buttonDiv.classList.add('apple-pay-button-' + (self.model.merchantConfiguration.applePay.buttonStyle || 'black'));
 
     self.model.asyncDependencyReady();
     clearTimeout(asyncDependencyTimeoutHandler);
@@ -76,17 +77,8 @@ ApplePayView.prototype._reportError = function (err) {
 
 ApplePayView.prototype._showPaymentSheet = function () {
   var self = this;
-  var locale = self.model.merchantConfiguration.locale;
   var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
   var session = new ApplePaySession(2, request); // eslint-disable-line no-undef
-
-  // TODO: use options from merchant -
-  // button style
-  // locale
-
-  if (locale) {
-    // ...
-  }
 
   session.onvalidatemerchant = function (event) {
     self.applePayInstance.performValidation({

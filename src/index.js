@@ -142,6 +142,7 @@ var VERSION = process.env.npm_package_version;
 
 /** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
  *
+ * @param {string} [buttonStyle=`black`] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`. Default value is `black`.
  * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 128 characters. The system may display this name to the user.
  * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
  */
