@@ -78,3 +78,11 @@ npm run test:integration
 ```
 
 This will run the tests from `spec` in the browsers specified in [`spec/sauce_helper.rb`](./spec/sauce_helper.rb).
+
+## Translations
+
+If you need to update a key for a translation that you have already updated in `en_US`, run the following with the existing key and then the new key as arguments:
+
+```
+node ./scripts/update-translation-key.js OLD_KEY_NAME NEW_KEY_NAME
+```

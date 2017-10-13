@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Update braintree-web to v3.24.0
+- Fix errors that were not translated when using a locale
 
 1.8.0
 -----
