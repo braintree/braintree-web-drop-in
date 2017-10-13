@@ -1,5 +1,6 @@
 'use strict';
 
+var analytics = require('../../src/lib/analytics');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
 var fake = require('../helpers/fake');
@@ -20,6 +21,7 @@ describe('DropinModel', function () {
       },
       paymentMethods: []
     };
+    this.sandbox.stub(analytics, 'sendEvent');
   });
 
   describe('Constructor', function () {
