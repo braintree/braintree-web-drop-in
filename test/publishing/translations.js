@@ -28,7 +28,7 @@ describe('translations', function () {
 
       expect(translationKeys.length).to.equal(englishTranslationKeys.length);
 
-      englishTranslationKeys.forEach(function (translationkey) {
+      englishTranslationKeys.forEach(function (translationKey) {
         expect(translation[translationKey]).be.a('string');
       });
     });
