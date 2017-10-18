@@ -6,7 +6,6 @@ module.exports = {
   chooseAWayToPay: 'Choose a way to pay',
   otherWaysToPay: 'Other ways to pay',
   // Errors
-  browserNotSupported: 'Browser not supported.',
   fieldEmptyForCvv: 'Please fill out a CVV.',
   fieldEmptyForExpirationDate: 'Please fill out an expiration date.',
   fieldEmptyForCardholderName: 'Please fill out a cardholder name.',
