@@ -3,8 +3,10 @@ CHANGELOG
 
 unreleased
 ----------
-- Update braintree-web to v3.24.0
+- Update braintree-web to v3.24.1
+- Update paypal-checkout to v4.0.141
 - Fix errors that were not translated when using a locale
+- Update browser-detection to v1.7.0
 
 1.8.0
 -----

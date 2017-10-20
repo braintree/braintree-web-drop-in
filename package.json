@@ -61,8 +61,8 @@
     "vinyl-source-stream": "1.1.0"
   },
   "dependencies": {
-    "braintree-web": "3.24.0",
-    "@braintree/browser-detection": "1.6.0",
+    "braintree-web": "3.24.1",
+    "@braintree/browser-detection": "1.7.0",
     "promise-polyfill": "6.0.2",
     "@braintree/wrap-promise": "1.1.1"
   },
