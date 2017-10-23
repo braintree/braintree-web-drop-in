@@ -30,12 +30,6 @@ ApplePayView.prototype.initialize = function () {
       error: new DropinError('There was an error loading Apple Pay.')
     });
   }, ASYNC_DEPENDENCY_TIMEOUT);
-
-  if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) { // eslint-disable-line no-undef
-    self._reportSetupError(asyncDependencyTimeoutHandler, 'applePayBrowserNotSupported');
-    return;
-  }
-
   return btApplePay.create({client: this.client}).then(function (applePayInstance) { // eslint-disable-line consistent-return
     var buttonDiv = self.getElementById('apple-pay-button');
 

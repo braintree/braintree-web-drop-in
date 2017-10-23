@@ -13,7 +13,7 @@ var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8
 
 var paymentOptionAttributes = {
   applePay: {
-    icon: '#logoApplePay', // Get this
+    icon: '#logoApplePay',
     optionLabel: 'Paying with Apple Pay',
     optionTitle: strings['Apple Pay'],
     paymentOptionID: 'applePay'

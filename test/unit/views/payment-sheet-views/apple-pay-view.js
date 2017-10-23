@@ -91,38 +91,6 @@ describe('ApplePayView', function () {
       }.bind(this));
     });
 
-    it('calls asyncDependencyFailed with an error when an ApplePaySession is not present', function () {
-      var error, viewID;
-
-      global.ApplePaySession = null;
-      this.sandbox.stub(this.view.model, 'asyncDependencyFailed');
-
-      this.view.initialize();
-
-      expect(this.view.model.asyncDependencyFailed).to.be.calledOnce;
-      viewID = this.view.model.asyncDependencyFailed.getCall(0).args[0].view;
-      error = this.view.model.asyncDependencyFailed.getCall(0).args[0].error;
-      expect(viewID).to.equal(this.view.ID);
-      expect(error).to.be.an.instanceof(DropinError);
-      expect(error.message).to.equal('applePayBrowserNotSupported');
-    });
-
-    it('calls asyncDependencyFailed with an error when ApplePaySession.canMakePayments is false', function () {
-      var error, viewID;
-
-      global.ApplePaySession.canMakePayments = function () { return false; };
-      this.sandbox.stub(this.view.model, 'asyncDependencyFailed');
-
-      this.view.initialize();
-
-      expect(this.view.model.asyncDependencyFailed).to.be.calledOnce;
-      viewID = this.view.model.asyncDependencyFailed.getCall(0).args[0].view;
-      error = this.view.model.asyncDependencyFailed.getCall(0).args[0].error;
-      expect(viewID).to.equal(this.view.ID);
-      expect(error).to.be.an.instanceof(DropinError);
-      expect(error.message).to.equal('applePayBrowserNotSupported');
-    });
-
     it('creates an ApplePay component', function () {
       return this.view.initialize().then(function () {
         expect(btApplePay.create).to.be.calledWith(this.sandbox.match({
