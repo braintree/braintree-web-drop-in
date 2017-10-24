@@ -16,7 +16,7 @@ module.exports = {
   analyticsKinds: {
     CreditCard: 'card',
     PayPalAccount: 'paypal',
-    ApplePayCard: 'applepay' // TODO: check where this is used
+    ApplePayCard: 'applepay'
   },
   paymentMethodCardTypes: {
     Visa: 'visa',
