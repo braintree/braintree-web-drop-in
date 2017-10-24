@@ -23,11 +23,8 @@ module.exports = {
   paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
   paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
-  // bt.js has applePayTokenizationError, should this be that
-  applePayAccountTokenizationFailedError: 'Something went wrong with Apple Pay. Please try again.',
+  applePayTokenizationError: 'A network error occurred while processing the Apple Pay payment. Please try again.',
   applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
-  // Not in code or bt.js
-  applePayFlowFailedError: 'Something went wrong initializing Apple Pay. Please try again.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
   // Card form
   cardholderNameLabel: 'Cardholder Name',
