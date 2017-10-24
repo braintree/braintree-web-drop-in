@@ -6,7 +6,6 @@ var btApplePay = require('braintree-web/apple-pay');
 var DropinError = require('../../lib/dropin-error');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
-var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = ['locale'];
 
 function ApplePayView() {
@@ -18,18 +17,11 @@ ApplePayView.prototype.constructor = ApplePayView;
 ApplePayView.ID = ApplePayView.prototype.ID = paymentOptionIDs.applePay;
 
 ApplePayView.prototype.initialize = function () {
-  var asyncDependencyTimeoutHandler;
   var self = this;
 
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
 
   self.model.asyncDependencyStarting();
-  asyncDependencyTimeoutHandler = setTimeout(function () {
-    self.model.asyncDependencyFailed({
-      view: self.ID,
-      error: new DropinError('There was an error loading Apple Pay.')
-    });
-  }, ASYNC_DEPENDENCY_TIMEOUT);
   return btApplePay.create({client: this.client}).then(function (applePayInstance) { // eslint-disable-line consistent-return
     var buttonDiv = self.getElementById('apple-pay-button');
 
@@ -51,18 +43,12 @@ ApplePayView.prototype.initialize = function () {
     buttonDiv.classList.add('apple-pay-button-' + (self.model.merchantConfiguration.applePay.buttonStyle || 'black'));
 
     self.model.asyncDependencyReady();
-    clearTimeout(asyncDependencyTimeoutHandler);
   }).catch(function (err) {
-    self._reportSetupError(asyncDependencyTimeoutHandler, err);
+    self.model.asyncDependencyFailed({
+      view: self.ID,
+      error: new DropinError(err)
+    });
   });
-};
-
-ApplePayView.prototype._reportSetupError = function (asyncDependencyTimeoutHandler, err) {
-  this.model.asyncDependencyFailed({
-    view: this.ID,
-    error: new DropinError(err)
-  });
-  clearTimeout(asyncDependencyTimeoutHandler);
 };
 
 ApplePayView.prototype._reportError = function (err) {
