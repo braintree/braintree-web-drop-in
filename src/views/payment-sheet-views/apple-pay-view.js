@@ -6,8 +6,6 @@ var btApplePay = require('braintree-web/apple-pay');
 var DropinError = require('../../lib/dropin-error');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
-var READ_ONLY_CONFIGURATION_OPTIONS = ['locale'];
-
 function ApplePayView() {
   BaseView.apply(this, arguments);
 }
@@ -87,9 +85,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
 };
 
 ApplePayView.prototype.updateConfiguration = function (key, value) {
-  if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
-    this.applePayConfiguration[key] = value;
-  }
+  this.applePayConfiguration[key] = value;
 };
 
 module.exports = ApplePayView;
