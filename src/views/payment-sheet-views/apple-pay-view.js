@@ -22,6 +22,7 @@ ApplePayView.prototype.initialize = function () {
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
 
   self.model.asyncDependencyStarting();
+
   return btApplePay.create({client: this.client}).then(function (applePayInstance) { // eslint-disable-line consistent-return
     var buttonDiv = self.getElementById('apple-pay-button');
 
@@ -34,7 +35,7 @@ ApplePayView.prototype.initialize = function () {
 
       ApplePaySession.canMakePaymentsWithActiveCard(self.applePayInstance.merchantIdentifier).then(function (canMakePayments) { // eslint-disable-line no-undef
         if (!canMakePayments) {
-          self._reportError('applePayActiveCardError');
+          self.model.reportError('applePayActiveCardError');
         }
       });
     });
@@ -51,10 +52,6 @@ ApplePayView.prototype.initialize = function () {
   });
 };
 
-ApplePayView.prototype._reportError = function (err) {
-  this.model.reportError(err);
-};
-
 ApplePayView.prototype._showPaymentSheet = function () {
   var self = this;
   var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
@@ -67,7 +64,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
     }).then(function (validationData) {
       session.completeMerchantValidation(validationData);
     }).catch(function (validationErr) {
-      self._reportError(validationErr);
+      self.model.reportError(validationErr);
       session.abort();
     });
   };
@@ -80,7 +77,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
       payload.payment = event.payment;
       self.model.addPaymentMethod(payload);
     }).catch(function (tokenizeErr) {
-      self._reportError(tokenizeErr);
+      self.model.reportError(tokenizeErr);
       session.completePayment(ApplePaySession.STATUS_FAILURE); // eslint-disable-line no-undef
     });
   };
