@@ -86,3 +86,9 @@ If you need to update a key for a translation that you have already updated in `
 ```
 node ./scripts/update-translation-key.js OLD_KEY_NAME NEW_KEY_NAME
 ```
+
+If you have added strings to `en_US` that you need to get translated, run the following to get the formatted output:
+
+```
+node ./scripts/get-translation-strings.js
+```
