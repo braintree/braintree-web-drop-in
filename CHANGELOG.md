@@ -7,6 +7,7 @@ unreleased
 - Update paypal-checkout to v4.0.141
 - Fix errors that were not translated when using a locale
 - Update browser-detection to v1.7.0
+- Add Apple Pay
 
 1.8.0
 -----
