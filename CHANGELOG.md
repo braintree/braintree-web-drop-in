@@ -7,6 +7,8 @@ unreleased
 - Update paypal-checkout to v4.0.148
 - Fix errors that were not translated when using a locale
 - Update browser-detection to v1.7.0
+- Fix issue where the edges of card form inputs were not clickable
+  - This adds a label element to the Drop-in card form. If you have global styles for the label tag, it may affect the look of the Drop-in card form.
 
 1.8.0
 -----
