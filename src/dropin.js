@@ -407,12 +407,10 @@ Dropin.prototype._setUpThreeDSecure = function () {
       self._threeDSecureInstance.cancelVerifyCard().then(function (payload) {
         self._rejectThreeDSecure({
           type: 'THREE_D_SECURE_CANCELLED',
-          // TODO <- need an update to bt-web that fixes the params for liablity to be on th etop level like we document
-          // when that update is in place, just switch this to payload: payload
           payload: {
             nonce: payload.nonce,
-            liabilityShifted: payload.threeDSecureInfo.liabilityShifted,
-            liabilityShiftPossible: payload.threeDSecureInfo.liabilityShiftPossible
+            liabilityShifted: payload.liabilityShifted,
+            liabilityShiftPossible: payload.liabilityShiftPossible
           }
         });
         self._cleanupThreeDSecureModal();
