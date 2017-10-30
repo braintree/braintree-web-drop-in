@@ -401,7 +401,8 @@ Dropin.prototype._setUpThreeDSecure = function () {
   threeDSecure.create(config).then(function (instance) {
     self._threeDSecureInstance = instance;
     self._threeDSecureModal = document.createElement('div');
-    self._threeDSecureModal.innerHTML = fs.readFileSync(__dirname + '/html/three-d-secure.html', 'utf8');
+    self._threeDSecureModal.innerHTML = fs.readFileSync(__dirname + '/html/three-d-secure.html', 'utf8').replace('{{cardVerification}}', self._strings.cardVerification);
+
     // TODO - Add tests for the cancel flow
     self._threeDSecureModal.querySelector('.braintree-three-d-secure__modal-close').addEventListener('click', function () {
       self._threeDSecureInstance.cancelVerifyCard().then(function (payload) {
