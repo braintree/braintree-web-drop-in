@@ -1,6 +1,6 @@
 'use strict';
 
-var DropinError = require('../../../../src/lib/dropin-error');
+var DropinError = require('../../../src/lib/dropin-error');
 var BraintreeError = require('braintree-web/lib/braintree-error');
 
 describe('DropinError', function () {

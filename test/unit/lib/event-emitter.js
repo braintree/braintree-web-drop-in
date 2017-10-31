@@ -1,6 +1,6 @@
 'use strict';
 
-var EventEmitter = require('../../../../src/lib/event-emitter');
+var EventEmitter = require('../../../src/lib/event-emitter');
 
 describe('EventEmitter', function () {
   it('can emit when no one is listening', function () {

@@ -1,10 +1,10 @@
 'use strict';
 
-var analytics = require('../../../../src/lib/analytics');
-var atob = require('../../../../src/lib/polyfill').atob;
+var analytics = require('../../../src/lib/analytics');
+var atob = require('../../../src/lib/polyfill').atob;
 var braintreeClientVersion = require('braintree-web/client').VERSION;
-var constants = require('../../../../src/constants');
-var fake = require('../../../helpers/fake');
+var constants = require('../../../src/constants');
+var fake = require('../../helpers/fake');
 
 describe('analytics.sendEvent', function () {
   beforeEach(function () {
