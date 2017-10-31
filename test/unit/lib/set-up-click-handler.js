@@ -1,6 +1,6 @@
 'use strict';
 
-var addSelectionEventHandler = require('../../../../src/lib/add-selection-event-handler');
+var addSelectionEventHandler = require('../../../src/lib/add-selection-event-handler');
 
 describe('addSelectionEventHandler', function () {
   it('adds an event listener for click', function () {
