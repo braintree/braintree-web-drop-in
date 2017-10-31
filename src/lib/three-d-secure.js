@@ -70,6 +70,10 @@ ThreeDSecure.prototype.cancel = function () {
   });
 };
 
+ThreeDSecure.prototype.teardown = function () {
+  return this._instance.teardown();
+};
+
 ThreeDSecure.prototype._cleanupModal = function () {
   var iframe = this._modal.querySelector('iframe');
 

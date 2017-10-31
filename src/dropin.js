@@ -664,6 +664,17 @@ Dropin.prototype.teardown = function () {
     }.bind(this));
   }
 
+  if (this._threeDSecure) {
+    promise.then(function () {
+      return this._threeDSecure.teardown().catch(function (error) {
+        dataCollectorError = new DropinError({
+          message: 'Drop-in errored tearing down 3D Secure.',
+          braintreeWebError: error
+        });
+      });
+    }.bind(this));
+  }
+
   return promise.then(function () {
     return self._removeDropinWrapper();
   }).then(function () {

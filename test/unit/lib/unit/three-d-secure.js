@@ -216,4 +216,17 @@ describe('ThreeDSecure', function () {
       }.bind(this));
     });
   });
+
+  describe('teardown', function () {
+    it('calls teardown on 3ds instance', function () {
+      var tds = new ThreeDSecure({}, 'Card Verification');
+
+      tds._instance = this.threeDSecureInstance;
+      this.sandbox.stub(this.threeDSecureInstance, 'teardown').resolves();
+
+      return tds.teardown().then(function () {
+        expect(this.threeDSecureInstance.teardown).to.be.calledOnce;
+      }.bind(this));
+    });
+  });
 });

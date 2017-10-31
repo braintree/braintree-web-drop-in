@@ -964,6 +964,17 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('calls teardown on 3D Secure', function (done) {
+      this.instance._threeDSecure = {
+        teardown: this.sandbox.stub().resolves()
+      };
+
+      this.instance.teardown(function () {
+        expect(this.instance._threeDSecure.teardown).to.be.calledOnce;
+        done();
+      }.bind(this));
+    });
+
     it('passes errors from data collector teardown to callback', function (done) {
       var error = new Error('Data Collector failured');
 
@@ -973,6 +984,19 @@ describe('Dropin', function () {
 
       this.instance.teardown(function (err) {
         expect(err.message).to.equal('Drop-in errored tearing down Data Collector.');
+        done();
+      });
+    });
+
+    it('passes errors from 3D Secure teardown to callback', function (done) {
+      var error = new Error('3D Secure failured');
+
+      this.instance._threeDSecure = {
+        teardown: this.sandbox.stub().rejects(error)
+      };
+
+      this.instance.teardown(function (err) {
+        expect(err.message).to.equal('Drop-in errored tearing down 3D Secure.');
         done();
       });
     });
