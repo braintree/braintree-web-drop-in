@@ -19,10 +19,8 @@
     opacity: 0;
     background: rgba(0, 0, 0, 0.3);
     transition: all 3s;
-  }
 
-  &.show {
-    .braintree-three-d-secure__backdrop {
+    &.braintree-three-d-secure__frame_visible {
       opacity: 1;
     }
   }
@@ -30,7 +28,7 @@
   .braintree-three-d-secure__modal {
     position: relative;
     top: 50%;
-    transform: translateY(-50%);
+    transform: scale(0.8) translateY(-50%);
     background: white;
     width: 400px;
     max-width: 100%;
@@ -42,11 +40,24 @@
     padding: 0;
     text-align: center;
     overflow: hidden;
+    opacity: 0;
+    transition: all .5s;
+
+    &.braintree-three-d-secure__frame_visible {
+      transform: scale(1) translateY(-50%);
+      opacity: 1;
+    }
 
     .braintree-three-d-secure__modal-body {
       position: relative;
       background: white;
       z-index: 99999;
+      opacity: 0;
+      transition: opacity .5s;
+
+      &.braintree-three-d-secure__frame-active {
+        opacity: 1;
+      }
     }
 
     .braintree-three-d-secure__modal-header {
@@ -71,14 +82,6 @@
 
     .braintree-three-d-secure__modal-close {
       cursor: pointer;
-      color: lighten(black, 20%);
-      font-weight: lighter;
-      line-height: 0;
-      border: 0;
-      background: transparent;
-      padding: 15px 0;
-      margin: 0;
-      transform: translateY(-3px);
     }
 
     .braintree-loader__container {
@@ -91,4 +94,3 @@
     }
   }
 }
-

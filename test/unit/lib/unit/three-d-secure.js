@@ -2,6 +2,7 @@
 
 var fake = require('../../../helpers/fake');
 var threeDSecure = require('braintree-web/three-d-secure');
+var classlist = require('../../../../src/lib/classlist');
 var Promise = require('../../../../src/lib/promise');
 var ThreeDSecure = require('../../../../src/lib/three-d-secure');
 
@@ -10,6 +11,9 @@ describe('ThreeDSecure', function () {
     this.threeDSecureInstance = fake.threeDSecureInstance;
     this.sandbox.stub(this.threeDSecureInstance, 'verifyCard');
     this.sandbox.stub(this.threeDSecureInstance, 'cancelVerifyCard');
+
+    this.sandbox.stub(classlist, 'add');
+    this.sandbox.stub(classlist, 'remove');
   });
 
   describe('initialize', function () {
@@ -112,9 +116,14 @@ describe('ThreeDSecure', function () {
 
       return this.tds.verify('old-nonce').then(function () {
         var removeFrameFunction = this.threeDSecureInstance.verifyCard.args[0][0].removeFrame;
+        var clock = this.sandbox.useFakeTimers();
 
         removeFrameFunction();
 
+        // allow setTimeout to run for animation
+        clock.tick(500);
+        clock.restore();
+      }.bind(this)).then(function () {
         expect(fakeIframe.parentNode.removeChild).to.be.calledWith(fakeIframe);
         expect(removeChildSpy).to.be.calledWith(this.tds._modal);
       }.bind(this));
