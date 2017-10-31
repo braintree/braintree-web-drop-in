@@ -30,15 +30,17 @@ describe "Drop-in Hosted Fields Overrides" do
   end
 
   it "can override style configurations" do
-    options = '{"overrides":{"styles":{"input":{"font-size":"20px"}}}}'
+    options = '{"overrides":{"styles":{"input":{"font-size":"20px"},".number":{"font-size":"10px"}}}}'
     visit_dropin_url("?card=#{options}")
 
     click_option("card")
 
-    iframe = find("iframe[id='braintree-hosted-field-cvv']")
-
-    within_frame(iframe) do
+    within_frame(find("iframe[id='braintree-hosted-field-cvv']")) do
       expect(find("input").native.css_value("font-size")).to eq("20px")
+    end
+
+    within_frame(find("iframe[id='braintree-hosted-field-number']")) do
+      expect(find("input").native.css_value("font-size")).to eq("10px")
     end
   end
 end
