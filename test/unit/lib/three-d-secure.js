@@ -1,10 +1,10 @@
 'use strict';
 
-var fake = require('../../../helpers/fake');
+var fake = require('../../helpers/fake');
 var threeDSecure = require('braintree-web/three-d-secure');
-var classlist = require('../../../../src/lib/classlist');
-var Promise = require('../../../../src/lib/promise');
-var ThreeDSecure = require('../../../../src/lib/three-d-secure');
+var classlist = require('../../../src/lib/classlist');
+var Promise = require('../../../src/lib/promise');
+var ThreeDSecure = require('../../../src/lib/three-d-secure');
 
 describe('ThreeDSecure', function () {
   beforeEach(function () {
