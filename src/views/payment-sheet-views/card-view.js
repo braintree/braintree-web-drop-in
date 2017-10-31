@@ -207,6 +207,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
       }
 
       normalizeStyles(overrides.styles[style]);
+      options.styles[style] = options.styles[style] || {};
 
       assign(options.styles[style], overrides.styles[style]);
     });
