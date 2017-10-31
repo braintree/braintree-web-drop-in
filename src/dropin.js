@@ -42,6 +42,8 @@ var VERSION = process.env.npm_package_version;
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ * @property {?boolean} liablityShifted If 3D Secure is configured, whether or not liability did shift.
+ * @property {?boolean} liablityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
  */
 
 /**
@@ -549,6 +551,31 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  *    hiddenNonceInput.value = payload.nonce;
  *    hiddenDeviceDataInput.value = payload.deviceData;
  *    form.submit();
+ *  });
+ * });
+ *
+ * @example <caption>Requesting a payment method with 3D Secure</caption>
+ * var form = document.querySelector('#my-form');
+ * var hiddenNonceInput = document.querySelector('#my-nonce-input');
+ * var hiddenDeviceDataInput = document.querySelector('#my-device-data-input');
+ *
+ * form.addEventListener('submit', function (event) {
+ *  event.preventDefault();
+ *
+ *  dropinInstance.requestPaymentMethod(function (err, payload) {
+ *    if (err) {
+ *      // handle error
+ *      return;
+ *    }
+ *
+ *    if (payload.liabilityShifted || payload.type !== 'CreditCard') {
+ *      hiddenNonceInput.value = payload.nonce;
+ *      form.submit();
+ *    } else {
+ *      // decide if you will force the user to enter a different payment method
+ *      // if liablity was not shift
+ *      dropinInstance.clearSelectedPaymentMethod();
+ *    }
  *  });
  * });
  */
