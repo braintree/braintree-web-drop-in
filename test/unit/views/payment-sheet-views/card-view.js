@@ -1647,6 +1647,7 @@ describe('CardView', function () {
         }),
         removeAttribute: this.sandbox.stub(),
         setAttribute: this.sandbox.stub(),
+        setMessage: this.sandbox.stub(),
         tokenize: this.sandbox.stub().resolves({})
       };
       this.model = new DropinModel(fake.modelOptions());
@@ -1901,7 +1902,7 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('sets the aria-invalid attribute when a field error is shown', function () {
+    it('sets the aria-invalid attribute and set message when a field error is shown', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1914,16 +1915,20 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.showFieldError.call(this.context, 'number');
+      CardView.prototype.showFieldError.call(this.context, 'number', 'Example error message');
 
       expect(this.context.hostedFieldsInstance.setAttribute).to.be.calledWith({
         field: 'number',
         attribute: 'aria-invalid',
         value: true
       });
+      expect(this.context.hostedFieldsInstance.setMessage).to.be.calledWith({
+        field: 'number',
+        message: 'Example error message'
+      });
     });
 
-    it('removes the aria-invalid attribute when a field error is hidden', function () {
+    it('removes the aria-invalid attribute and message when a field error is hidden', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1941,6 +1946,10 @@ describe('CardView', function () {
       expect(this.context.hostedFieldsInstance.removeAttribute).to.be.calledWith({
         field: 'number',
         attribute: 'aria-invalid'
+      });
+      expect(this.context.hostedFieldsInstance.setMessage).to.be.calledWith({
+        field: 'number',
+        message: ''
       });
     });
 

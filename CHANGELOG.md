@@ -9,6 +9,8 @@ unreleased
 - Update browser-detection to v1.7.0
 - Fix issue where the edges of card form inputs were not clickable
   - This adds a label element to the Drop-in card form. If you have global styles for the label tag, it may affect the look of the Drop-in card form.
+- Fix issue where style overrides could not be applied if previous style rule did not exist
+- Improve accessibility for screenreaders when encountering field errors in card view
 - Add 3D Secure support
 
 1.8.0
