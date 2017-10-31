@@ -72,7 +72,8 @@ paypalInstance = {
 };
 
 threeDSecureInstance = {
-  verifyCard: function () {}
+  verifyCard: function () {},
+  cancelVerifyCard: function () {}
 };
 
 function modelOptions() {

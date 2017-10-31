@@ -15,7 +15,7 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
-var threeDSecure = require('braintree-web/three-d-secure');
+var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
@@ -395,88 +395,19 @@ Dropin.prototype._setUpDataCollector = function () {
 
 Dropin.prototype._setUpThreeDSecure = function () {
   var self = this;
-  var config = assign({}, self._merchantConfiguration.threeDSecure, {client: self._client});
+  var config = assign({}, this._merchantConfiguration.threeDSecure, {client: this._client});
 
   this._model.asyncDependencyStarting();
-  threeDSecure.create(config).then(function (instance) {
-    self._threeDSecureInstance = instance;
-    self._threeDSecureModal = document.createElement('div');
-    self._threeDSecureModal.innerHTML = fs.readFileSync(__dirname + '/html/three-d-secure.html', 'utf8').replace('{{cardVerification}}', self._strings.cardVerification);
 
-    // TODO - Add tests for the cancel flow
-    self._threeDSecureModal.querySelector('.braintree-three-d-secure__modal-close').addEventListener('click', function () {
-      self._threeDSecureInstance.cancelVerifyCard().then(function (payload) {
-        self._rejectThreeDSecure({
-          type: 'THREE_D_SECURE_CANCELLED',
-          payload: {
-            nonce: payload.nonce,
-            liabilityShifted: payload.liabilityShifted,
-            liabilityShiftPossible: payload.liabilityShiftPossible
-          }
-        });
-        self._cleanupThreeDSecureModal();
-      }).catch(function () {
-        // only reason this would reject
-        // is if there is no verificatin in progress
-        // so we just swallow the error
-      });
-    });
+  this._threeDSecure = new ThreeDSecure(config, this._strings.cardVerification);
+
+  this._threeDSecure.initialize().then(function () {
     self._model.asyncDependencyReady();
   }).catch(function (err) {
     self._model.cancelInitialization(new DropinError({
       message: '3D Secure failed to set up.',
       braintreeWebError: err
     }));
-  });
-};
-
-Dropin.prototype._cleanupThreeDSecureModal = function () {
-  var iframe = this._threeDSecureModal.querySelector('iframe');
-
-  iframe.parentNode.removeChild(iframe);
-  this._threeDSecureModal.parentNode.removeChild(this._threeDSecureModal);
-};
-
-Dropin.prototype._waitForThreeDSecure = function () {
-  var self = this;
-
-  return new Promise(function (resolve, reject) {
-    self._resolveThreeDSecure = resolve;
-    self._rejectThreeDSecure = reject;
-  });
-};
-
-Dropin.prototype._runThreeDSecure = function (nonce) {
-  var self = this;
-
-  document.body.appendChild(self._threeDSecureModal);
-  self._threeDSecureModal.querySelector('.braintree-three-d-secure__backdrop').style.opacity = 1;
-
-  return Promise.all([
-    this._waitForThreeDSecure(),
-    this._threeDSecureInstance.verifyCard({
-      nonce: nonce,
-      amount: this._merchantConfiguration.threeDSecure.amount,
-      showLoader: this._merchantConfiguration.threeDSecure.showLoader,
-      addFrame: function (err, iframe) {
-        self._threeDSecureModal.querySelector('.braintree-three-d-secure__modal-body').appendChild(iframe);
-      },
-      removeFrame: function () {
-        self._cleanupThreeDSecureModal();
-      }
-    }).then(function (payload) {
-      self._resolveThreeDSecure();
-
-      return payload;
-    })
-  ]).then(function (result) {
-    return result[1];
-  }).catch(function (err) {
-    if (err.type === 'THREE_D_SECURE_CANCELLED') {
-      return Promise.resolve(err.payload);
-    }
-
-    return Promise.reject(err);
   });
 };
 
@@ -623,8 +554,8 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  */
 Dropin.prototype.requestPaymentMethod = function () {
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (this._threeDSecureInstance && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
-      return this._runThreeDSecure(payload.nonce).then(function (newPayload) {
+    if (this._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
+      return this._threeDSecure.verify(payload.nonce).then(function (newPayload) {
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
