@@ -36,7 +36,7 @@
     max-width: 100%;
     border-radius: 3px;
     margin: auto;
-    height: 400px;
+    height: 450px;
     width: 400px;
     max-width: 100%;
     padding: 0;
@@ -46,6 +46,7 @@
     .braintree-three-d-secure__modal-body {
       position: relative;
       background: white;
+      z-index: 99999;
     }
 
     .braintree-three-d-secure__modal-header {
@@ -69,8 +70,8 @@
     }
 
     .braintree-three-d-secure__modal-close {
+      cursor: pointer;
       color: lighten(black, 20%);
-      font-size: 35px;
       font-weight: lighter;
       line-height: 0;
       border: 0;
@@ -80,7 +81,7 @@
       transform: translateY(-3px);
     }
 
-    .braintree-loader__indicator {
+    .braintree-loader__container {
       height: 72px;
       width: 72px;
       position: absolute;
