@@ -452,6 +452,8 @@
       margin-left: 6px; }
     .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field {
       position: relative; }
+      .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field label {
+        cursor: text; }
       .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field .braintree-form__icon-container {
         margin-top: -14px;
         position: absolute;
