@@ -5,7 +5,8 @@ var classlist = require('./classlist');
 var threeDSecure = require('braintree-web/three-d-secure');
 var Promise = require('./promise');
 
-function ThreeDSecure(merchantConfiguration, cardVerificationString) {
+function ThreeDSecure(client, merchantConfiguration, cardVerificationString) {
+  this._client = client;
   this._config = merchantConfiguration;
   this._modal = this._setupModal(cardVerificationString);
 }
@@ -13,7 +14,9 @@ function ThreeDSecure(merchantConfiguration, cardVerificationString) {
 ThreeDSecure.prototype.initialize = function () {
   var self = this;
 
-  return threeDSecure.create(this._config).then(function (instance) {
+  return threeDSecure.create({
+    client: this._client
+  }).then(function (instance) {
     self._instance = instance;
   });
 };
@@ -80,6 +83,10 @@ ThreeDSecure.prototype.cancel = function () {
     // is if there is no verificatin in progress
     // so we just swallow the error
   });
+};
+
+ThreeDSecure.prototype.updateConfiguration = function (key, value) {
+  this._config[key] = value;
 };
 
 ThreeDSecure.prototype.teardown = function () {

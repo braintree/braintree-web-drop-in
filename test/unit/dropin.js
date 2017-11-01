@@ -1206,7 +1206,7 @@ describe('Dropin', function () {
   });
 
   describe('updateConfiguration', function () {
-    it('does not update if a prop other than paypal or paypalCredit is used', function () {
+    it('does not update if a non-editiable prop is used', function () {
       var instance = new Dropin(this.dropinOptions);
 
       instance._mainView = {
@@ -1268,6 +1268,31 @@ describe('Dropin', function () {
       expect(instance._mainView.getView).to.be.calledOnce;
       expect(fakePayPalView.updateConfiguration).to.be.calledOnce;
       expect(fakePayPalView.updateConfiguration).to.be.calledWith('foo', 'bar');
+    });
+
+    it('updates if property is threeDSecure', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._threeDSecure = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      instance._mainView = {
+        getView: this.sandbox.stub()
+      };
+
+      instance.updateConfiguration('threeDSecure', 'amount', '15.00');
+
+      expect(instance._threeDSecure.updateConfiguration).to.be.calledOnce;
+      expect(instance._threeDSecure.updateConfiguration).to.be.calledWith('amount', '15.00');
+      expect(instance._mainView.getView).to.not.be.called;
+    });
+
+    it('does not update if property is threeDSecure, but there is no threeDSecure instance', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      expect(function () {
+        instance.updateConfiguration('threeDSecure', 'amount', '15.00');
+      }).to.not.throw();
     });
 
     it('removes saved paypal payment methods if they are not vaulted', function () {

@@ -23,7 +23,8 @@ var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
-  paymentOptionIDs.paypalCredit
+  paymentOptionIDs.paypalCredit,
+  'threeDSecure'
 ];
 var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
   paymentOptionIDs.paypal,
@@ -335,6 +336,14 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
     return;
   }
 
+  if (property === 'threeDSecure') {
+    if (this._threeDSecure) {
+      this._threeDSecure.updateConfiguration(key, value);
+    }
+
+    return;
+  }
+
   this._mainView.getView(property).updateConfiguration(key, value);
 
   if (UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED.indexOf(property) === -1) {
@@ -397,11 +406,11 @@ Dropin.prototype._setUpDataCollector = function () {
 
 Dropin.prototype._setUpThreeDSecure = function () {
   var self = this;
-  var config = assign({}, this._merchantConfiguration.threeDSecure, {client: this._client});
+  var config = assign({}, this._merchantConfiguration.threeDSecure);
 
   this._model.asyncDependencyStarting();
 
-  this._threeDSecure = new ThreeDSecure(config, this._strings.cardVerification);
+  this._threeDSecure = new ThreeDSecure(this._client, config, this._strings.cardVerification);
 
   this._threeDSecure.initialize().then(function () {
     self._model.asyncDependencyReady();

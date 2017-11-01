@@ -23,11 +23,14 @@ describe('ThreeDSecure', function () {
 
     it('sets up three d secure', function () {
       var config = {};
-      var tds = new ThreeDSecure(config, 'Card Verification');
+      var client = {};
+      var tds = new ThreeDSecure(client, config, 'Card Verification');
 
       return tds.initialize().then(function () {
         expect(threeDSecure.create).to.be.calledOnce;
-        expect(threeDSecure.create).to.be.calledWith(config);
+        expect(threeDSecure.create).to.be.calledWith({
+          client: client
+        });
         expect(tds._instance).to.equal(this.threeDSecureInstance);
       }.bind(this));
     });
@@ -41,7 +44,7 @@ describe('ThreeDSecure', function () {
         amount: '10.00'
       };
 
-      this.tds = new ThreeDSecure(this.config, 'Card Verification');
+      this.tds = new ThreeDSecure({}, this.config, 'Card Verification');
       this.tds._instance = this.threeDSecureInstance;
 
       this.sandbox.stub(document.body, 'appendChild');
@@ -166,7 +169,7 @@ describe('ThreeDSecure', function () {
 
   describe('cancel', function () {
     beforeEach(function () {
-      this.tds = new ThreeDSecure({}, 'Card Verification');
+      this.tds = new ThreeDSecure({}, {}, 'Card Verification');
       this.tds._instance = this.threeDSecureInstance;
       this.tds._rejectThreeDSecure = this.sandbox.stub();
       this.tds._cleanupModal = this.sandbox.stub();
@@ -228,7 +231,7 @@ describe('ThreeDSecure', function () {
 
   describe('teardown', function () {
     it('calls teardown on 3ds instance', function () {
-      var tds = new ThreeDSecure({}, 'Card Verification');
+      var tds = new ThreeDSecure({}, {}, 'Card Verification');
 
       tds._instance = this.threeDSecureInstance;
       this.sandbox.stub(this.threeDSecureInstance, 'teardown').resolves();
@@ -236,6 +239,16 @@ describe('ThreeDSecure', function () {
       return tds.teardown().then(function () {
         expect(this.threeDSecureInstance.teardown).to.be.calledOnce;
       }.bind(this));
+    });
+  });
+
+  describe('udpateConfiguration', function () {
+    it('updates configuration', function () {
+      var tds = new ThreeDSecure({}, {amount: '10.00', foo: 'bar'}, 'Card Verification');
+
+      tds.updateConfiguration('amount', '23.45');
+
+      expect(tds._config).to.deep.equal({amount: '23.45', foo: 'bar'});
     });
   });
 });
