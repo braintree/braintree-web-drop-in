@@ -280,18 +280,25 @@ var VERSION = process.env.npm_package_version;
  *   </body>
  * </html>
  * @example
- * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit</caption>
+ * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit, and Apple Pay</caption>
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
  *   container: '#dropin-container',
+ *   applePay: {
+ *     displayName: 'Merchant Name',
+ *     paymentRequest: {
+   *     label: 'Localized Name',
+ *       total: '10.00'
+ *     }
+ *   },
  *   paypal: {
  *     flow: 'checkout',
- *     amount: 10.00,
+ *     amount: '10.00',
  *     currency: 'USD'
  *   },
  *  paypalCredit: {
  *    flow: 'checkout',
- *    amount: 10.00,
+ *    amount: '10.00',
  *    currency: 'USD'
  *   }
  * }, function (err, dropinInstance) {
