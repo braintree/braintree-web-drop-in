@@ -21,7 +21,7 @@ ApplePayView.prototype.initialize = function () {
 
   self.model.asyncDependencyStarting();
 
-  return btApplePay.create({client: this.client}).then(function (applePayInstance) { // eslint-disable-line consistent-return
+  return btApplePay.create({client: this.client}).then(function (applePayInstance) {
     var buttonDiv = self.getElementById('apple-pay-button');
 
     self.applePayInstance = applePayInstance;
