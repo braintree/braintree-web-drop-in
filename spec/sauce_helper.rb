@@ -16,7 +16,7 @@ def select_browsers
   if !PLATFORM || PLATFORM == "desktop"
     browsers += [
       ["Windows 10", "chrome", 56], # chrome 57 has a bug where iframes can't have characters sent into them
-      ["Windows 10", "firefox", 47],
+      ["Windows 10", "firefox", nil],
       # the Safari driver can't send keys
       # to inputs in iframes. Both hosted
       # fields and paypal use iframe inputs

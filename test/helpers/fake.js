@@ -64,6 +64,7 @@ hostedFieldsInstance = {
   getState: getState,
   on: function () {},
   setAttribute: function () {},
+  setMessage: function () {},
   tokenize: function () {}
 };
 

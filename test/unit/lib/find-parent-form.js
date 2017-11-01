@@ -1,6 +1,6 @@
 'use strict';
 
-var findParentForm = require('../../../../src/lib/find-parent-form').findParentForm;
+var findParentForm = require('../../../src/lib/find-parent-form').findParentForm;
 
 describe('findParentForm', function () {
   it('returns undefined if the element has no parentNode', function () {

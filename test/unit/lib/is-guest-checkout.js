@@ -1,7 +1,7 @@
 'use strict';
 
-var fake = require('../../../helpers/fake');
-var isGuestCheckout = require('../../../../src/lib/is-guest-checkout');
+var fake = require('../../helpers/fake');
+var isGuestCheckout = require('../../../src/lib/is-guest-checkout');
 
 describe('isGuestCheckout', function () {
   it('returns true when given a client with a tokenization key', function () {

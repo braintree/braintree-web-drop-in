@@ -1,7 +1,7 @@
 'use strict';
 
-var browserDetection = require('../../../../src/lib/browser-detection');
-var onTransitionEnd = require('../../../../src/lib/transition-helper').onTransitionEnd;
+var browserDetection = require('../../../src/lib/browser-detection');
+var onTransitionEnd = require('../../../src/lib/transition-helper').onTransitionEnd;
 
 describe('onTransitionEnd', function () {
   beforeEach(function () {

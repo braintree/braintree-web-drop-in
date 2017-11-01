@@ -1,6 +1,6 @@
 'use strict';
 
-var classlist = require('../../../../src/lib/classlist');
+var classlist = require('../../../src/lib/classlist');
 
 describe('classlist', function () {
   beforeEach(function () {

@@ -1,6 +1,6 @@
 'use strict';
 
-var supportsFlexbox = require('../../../../src/lib/supports-flexbox');
+var supportsFlexbox = require('../../../src/lib/supports-flexbox');
 
 describe('supportsFlexbox', function () {
   beforeEach(function () {

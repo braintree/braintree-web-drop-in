@@ -3,10 +3,14 @@ CHANGELOG
 
 unreleased
 ----------
-- Update braintree-web to v3.24.1
-- Update paypal-checkout to v4.0.141
+- Update braintree-web to v3.25.0
+- Update paypal-checkout to v4.0.148
 - Fix errors that were not translated when using a locale
 - Update browser-detection to v1.7.0
+- Fix issue where the edges of card form inputs were not clickable
+  - This adds a label element to the Drop-in card form. If you have global styles for the label tag, it may affect the look of the Drop-in card form.
+- Fix issue where style overrides could not be applied if previous style rule did not exist
+- Improve accessibility for screenreaders when encountering field errors in card view
 - Add Apple Pay
 
 1.8.0

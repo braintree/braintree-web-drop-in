@@ -1,6 +1,6 @@
 'use strict';
 
-var kebabCaseToCamelCase = require('../../../../src/lib/kebab-case-to-camel-case');
+var kebabCaseToCamelCase = require('../../../src/lib/kebab-case-to-camel-case');
 
 describe('kebabCaseToCamelCase', function () {
   it('returns the element if no - in it', function () {
