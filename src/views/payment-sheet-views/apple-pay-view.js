@@ -31,7 +31,7 @@ ApplePayView.prototype.initialize = function () {
         return;
       }
 
-      ApplePaySession.canMakePaymentsWithActiveCard(self.applePayInstance.merchantIdentifier).then(function (canMakePayments) { // eslint-disable-line no-undef
+      global.ApplePaySession.canMakePaymentsWithActiveCard(self.applePayInstance.merchantIdentifier).then(function (canMakePayments) {
         if (!canMakePayments) {
           self.model.reportError('applePayActiveCardError');
         }
@@ -53,7 +53,7 @@ ApplePayView.prototype.initialize = function () {
 ApplePayView.prototype._showPaymentSheet = function () {
   var self = this;
   var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
-  var session = new ApplePaySession(2, request); // eslint-disable-line no-undef
+  var session = new global.ApplePaySession(2, request);
 
   session.onvalidatemerchant = function (event) {
     self.applePayInstance.performValidation({
@@ -71,12 +71,12 @@ ApplePayView.prototype._showPaymentSheet = function () {
     self.applePayInstance.tokenize({
       token: event.payment.token
     }).then(function (payload) {
-      session.completePayment(ApplePaySession.STATUS_SUCCESS); // eslint-disable-line no-undef
+      session.completePayment(global.ApplePaySession.STATUS_SUCCESS);
       payload.payment = event.payment;
       self.model.addPaymentMethod(payload);
     }).catch(function (tokenizeErr) {
       self.model.reportError(tokenizeErr);
-      session.completePayment(ApplePaySession.STATUS_FAILURE); // eslint-disable-line no-undef
+      session.completePayment(global.ApplePaySession.STATUS_FAILURE);
     });
   };
 
