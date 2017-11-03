@@ -1,9 +1,6 @@
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "變更付款方式",
-  "choosePaymentMethod": "選擇付款方式",
-  "savedPaymentMethods": "已儲存的付款方式",
   "payingWith": "付款方式為 {{paymentSource}}",
   "chooseAnotherWayToPay": "選擇其他付款方式",
   "chooseAWayToPay": "選擇付款方式",

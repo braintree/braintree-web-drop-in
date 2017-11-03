@@ -1,9 +1,6 @@
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "결제수단 변경",
-  "choosePaymentMethod": "결제수단 선택",
-  "savedPaymentMethods": "저장된 결제수단",
   "payingWith": "{{paymentSource}}(으)로 결제",
   "chooseAnotherWayToPay": "다른 결제수단 선택",
   "chooseAWayToPay": "결제수단 선택",

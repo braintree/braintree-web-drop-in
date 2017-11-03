@@ -1,9 +1,6 @@
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Zahlungsquelle ändern",
-  "choosePaymentMethod": "Zahlungsquelle auswählen",
-  "savedPaymentMethods": "Gespeicherte Zahlungsquellen",
   "payingWith": "Zahlen mit {{paymentSource}}",
   "chooseAnotherWayToPay": "Andere Zahlungsmethode wählen",
   "chooseAWayToPay": "Wie möchten Sie bezahlen?",

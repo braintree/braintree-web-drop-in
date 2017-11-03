@@ -1,9 +1,6 @@
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "支払方法を変更する",
-  "choosePaymentMethod": "支払方法を選択する",
-  "savedPaymentMethods": "保存済みの支払方法",
   "payingWith": "{{paymentSource}}で支払う",
   "chooseAnotherWayToPay": "別の支払方法を選択する",
   "chooseAWayToPay": "支払方法を選択する",

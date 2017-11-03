@@ -1,9 +1,6 @@
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "เปลี่ยนวิธีการชำระเงิน",
-  "choosePaymentMethod": "เลือกวิธีชำระเงิน",
-  "savedPaymentMethods": "วิธีการชำระเงินที่บันทึกไว้",
   "payingWith": "การชำระเงินด้วย {{paymentSource}}",
   "chooseAnotherWayToPay": "เลือกวิธีอื่นเพื่อชำระเงิน",
   "chooseAWayToPay": "เลือกวิธีชำระเงิน",
