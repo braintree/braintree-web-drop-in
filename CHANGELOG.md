@@ -3,6 +3,10 @@ CHANGELOG
 
 unreleased
 ----------
+- Add Apple Pay
+
+1.8.1
+-----
 - Update braintree-web to v3.25.0
 - Update paypal-checkout to v4.0.148
 - Fix errors that were not translated when using a locale
@@ -11,7 +15,6 @@ unreleased
   - This adds a label element to the Drop-in card form. If you have global styles for the label tag, it may affect the look of the Drop-in card form.
 - Fix issue where style overrides could not be applied if previous style rule did not exist
 - Improve accessibility for screenreaders when encountering field errors in card view
-- Add Apple Pay
 
 1.8.0
 -----

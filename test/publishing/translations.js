@@ -22,15 +22,15 @@ var locales = fs.readdirSync('./src/translations').filter(function (fileName) {
 
 describe('translations', function () {
   locales.forEach(function (key) {
-    xit(key + ' locale has a key for each english translation', function () {
+    it(key + ' locale has a key for each english translation', function () {
       var translation = require('../../src/translations/' + key);
       var translationKeys = Object.keys(translation);
-
-      expect(translationKeys.length).to.equal(englishTranslationKeys.length);
 
       englishTranslationKeys.forEach(function (translationKey) {
         expect(translation[translationKey]).be.a('string');
       });
+
+      expect(translationKeys.length).to.equal(englishTranslationKeys.length);
     });
   });
 });
