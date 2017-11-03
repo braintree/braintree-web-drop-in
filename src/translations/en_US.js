@@ -5,6 +5,7 @@ module.exports = {
   chooseAnotherWayToPay: 'Choose another way to pay',
   chooseAWayToPay: 'Choose a way to pay',
   otherWaysToPay: 'Other ways to pay',
+  cardVerification: 'Card Verification',
   // Errors
   fieldEmptyForCvv: 'Please fill out a CVV.',
   fieldEmptyForExpirationDate: 'Please fill out an expiration date.',
@@ -15,6 +16,7 @@ module.exports = {
   fieldInvalidForExpirationDate: 'This expiration date is not valid.',
   fieldInvalidForNumber: 'This card number is not valid.',
   fieldInvalidForPostalCode: 'This postal code is not valid.',
+  fieldTooLongForCardholderName: 'Cardholder name must be less than 256 characters.',
   genericError: 'Something went wrong on our end.',
   hostedFieldsFailedTokenizationError: 'Please check your information and try again.',
   hostedFieldsTokenizationCvvVerificationFailedError: 'Credit card verification failed. Please check your information and try again.',
@@ -23,6 +25,8 @@ module.exports = {
   paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
   paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
+  applePayTokenizationError: 'A network error occurred while processing the Apple Pay payment. Please try again.',
+  applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
   // Card form
   cardholderNameLabel: 'Cardholder Name',
@@ -41,6 +45,7 @@ module.exports = {
   Card: 'Card',
   PayPal: 'PayPal',
   'PayPal Credit': 'PayPal Credit',
+  'Apple Pay': 'Apple Pay',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',
