@@ -62,3 +62,11 @@ This is a full example of a Drop-in integration that only accepts credit cards.
 ## Browser support
 
 Drop-in is supported in all browsers supported by the [Braintree JavaScript Client SDK](http://braintree.github.io/braintree-web/current/#browser-support).
+
+## Releases
+
+Subscribe to our [Google Group](https://groups.google.com/forum/#!forum/braintree-sdk-announce) to be notified when SDK releases go out.
+
+## License
+
+Drop-in is open source and available under the MIT license. See the [LICENSE](LICENSE) file for more info.

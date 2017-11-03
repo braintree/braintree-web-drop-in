@@ -249,6 +249,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
       }
 
       normalizeStyles(overrides.styles[style]);
+      options.styles[style] = options.styles[style] || {};
 
       assign(options.styles[style], overrides.styles[style]);
     });
@@ -430,6 +431,10 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
       attribute: 'aria-invalid',
       value: true
     });
+    this.hostedFieldsInstance.setMessage({
+      field: field,
+      message: errorMessage
+    });
   }
 };
 
@@ -449,6 +454,10 @@ CardView.prototype.hideFieldError = function (field) {
     this.hostedFieldsInstance.removeAttribute({
       field: field,
       attribute: 'aria-invalid'
+    });
+    this.hostedFieldsInstance.setMessage({
+      field: field,
+      message: ''
     });
   }
 };

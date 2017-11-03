@@ -1,8 +1,8 @@
 'use strict';
 
-var createFromScriptTag = require('../../../../src/lib/create-from-script-tag');
-var findParentForm = require('../../../../src/lib/find-parent-form');
-var analytics = require('../../../../src/lib/analytics');
+var createFromScriptTag = require('../../../src/lib/create-from-script-tag');
+var findParentForm = require('../../../src/lib/find-parent-form');
+var analytics = require('../../../src/lib/analytics');
 
 describe('createFromScriptTag', function () {
   beforeEach(function () {

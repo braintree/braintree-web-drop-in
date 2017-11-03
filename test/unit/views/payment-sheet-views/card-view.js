@@ -9,6 +9,7 @@ var fs = require('fs');
 var hostedFields = require('braintree-web/hosted-fields');
 var strings = require('../../../../src/translations/en_US');
 var transitionHelper = require('../../../../src/lib/transition-helper');
+var braintreeWebVersion = require('../../../../package.json').dependencies['braintree-web'];
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
@@ -26,7 +27,8 @@ describe('CardView', function () {
     this.element = document.body.querySelector('.braintree-sheet.braintree-card');
 
     this.client = {
-      getConfiguration: fake.configuration
+      getConfiguration: fake.configuration,
+      getVersion: function () { return braintreeWebVersion; }
     };
   });
 
@@ -1646,6 +1648,7 @@ describe('CardView', function () {
         }),
         removeAttribute: this.sandbox.stub(),
         setAttribute: this.sandbox.stub(),
+        setMessage: this.sandbox.stub(),
         tokenize: this.sandbox.stub().resolves({})
       };
       this.model = new DropinModel(fake.modelOptions());
@@ -1945,7 +1948,7 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('sets the aria-invalid attribute on a hosted field when a field error is shown', function () {
+    it('sets the aria-invalid attribute and set message when a field error is shown', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -1958,16 +1961,20 @@ describe('CardView', function () {
         }
       });
 
-      CardView.prototype.showFieldError.call(this.context, 'number');
+      CardView.prototype.showFieldError.call(this.context, 'number', 'Example error message');
 
       expect(this.context.hostedFieldsInstance.setAttribute).to.be.calledWith({
         field: 'number',
         attribute: 'aria-invalid',
         value: true
       });
+      expect(this.context.hostedFieldsInstance.setMessage).to.be.calledWith({
+        field: 'number',
+        message: 'Example error message'
+      });
     });
 
-    it('set the aria-invalid attribute on an input when a field error is hidden', function () {
+    it('sets the aria-invalid attribute on an input when a field error is hidden', function () {
       var input = {
         id: {
           indexOf: function () {
@@ -1990,7 +1997,7 @@ describe('CardView', function () {
       expect(input.setAttribute).to.be.calledWith('aria-invalid', true);
     });
 
-    it('removes the aria-invalid attribute on a hosted field when a field error is hidden', function () {
+    it('removes the aria-invalid attribute and message when a field error is hidden', function () {
       this.context.hostedFieldsInstance.getState.returns({
         cards: [{type: 'visa'}],
         fields: {
@@ -2008,6 +2015,10 @@ describe('CardView', function () {
       expect(this.context.hostedFieldsInstance.removeAttribute).to.be.calledWith({
         field: 'number',
         attribute: 'aria-invalid'
+      });
+      expect(this.context.hostedFieldsInstance.setMessage).to.be.calledWith({
+        field: 'number',
+        message: ''
       });
     });
 
@@ -2178,7 +2189,8 @@ describe('CardView', function () {
         },
         hostedFieldsInstance: {
           setAttribute: this.sandbox.stub(),
-          removeAttribute: this.sandbox.stub()
+          removeAttribute: this.sandbox.stub(),
+          setMessage: this.sandbox.stub()
         },
         getElementById: this.sandbox.stub().returns({})
       };
