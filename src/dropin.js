@@ -566,14 +566,13 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  * @example <caption>Requesting a payment method with 3D Secure</caption>
  * var form = document.querySelector('#my-form');
  * var hiddenNonceInput = document.querySelector('#my-nonce-input');
- * var hiddenDeviceDataInput = document.querySelector('#my-device-data-input');
  *
  * form.addEventListener('submit', function (event) {
  *  event.preventDefault();
  *
  *  dropinInstance.requestPaymentMethod(function (err, payload) {
  *    if (err) {
- *      // handle error
+ *      // Handle error
  *      return;
  *    }
  *
@@ -581,8 +580,8 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  *      hiddenNonceInput.value = payload.nonce;
  *      form.submit();
  *    } else {
- *      // decide if you will force the user to enter a different payment method
- *      // if liablity was not shift
+ *      // Decide if you will force the user to enter a different payment method
+ *      // if liablity was not shifted
  *      dropinInstance.clearSelectedPaymentMethod();
  *    }
  *  });

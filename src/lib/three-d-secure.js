@@ -80,7 +80,7 @@ ThreeDSecure.prototype.cancel = function () {
     self._cleanupModal();
   }).catch(function () {
     // only reason this would reject
-    // is if there is no verificatin in progress
+    // is if there is no verification in progress
     // so we just swallow the error
   });
 };
