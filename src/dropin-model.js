@@ -181,7 +181,7 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
 
 function getSupportedPaymentOptions(options) {
   var result = [];
-  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit'];
+  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit', 'applePay'];
 
   if (!(paymentOptionPriority instanceof Array)) {
     throw new DropinError('paymentOptionPriority must be an array.');
@@ -205,6 +205,7 @@ function getSupportedPaymentOptions(options) {
 
 function isPaymentOptionEnabled(paymentOption, options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var applePayEnabled, applePayBrowserSupported;
 
   if (paymentOption === 'card') {
     return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
@@ -212,6 +213,12 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
   } else if (paymentOption === 'paypalCredit') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
+  } else if (paymentOption === 'applePay') {
+    applePayEnabled = gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay);
+    applePayBrowserSupported = global.ApplePaySession && global.ApplePaySession.canMakePayments();
+
+    if (!applePayEnabled || !applePayBrowserSupported) { return false; }
+    return true;
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }

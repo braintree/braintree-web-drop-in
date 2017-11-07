@@ -1,5 +1,6 @@
 'use strict';
 
+var analytics = require('../../src/lib/analytics');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
 var fake = require('../helpers/fake');
@@ -20,6 +21,7 @@ describe('DropinModel', function () {
       },
       paymentMethods: []
     };
+    this.sandbox.stub(analytics, 'sendEvent');
   });
 
   describe('Constructor', function () {
@@ -117,16 +119,19 @@ describe('DropinModel', function () {
         ]);
       });
 
-      it('supports cards, PayPal, and PayPal Credit and defaults to showing them in correct paymentOptionPriority', function () {
+      it('supports cards, PayPal, PayPal Credit, and Apple Pay and defaults to showing them in correct paymentOptionPriority', function () {
         var model;
 
+        global.ApplePaySession = this.sandbox.stub().returns({});
+        global.ApplePaySession.canMakePayments = function () { return true; };
         this.configuration.gatewayConfiguration.paypalEnabled = true;
         this.modelOptions.merchantConfiguration.paypal = true;
         this.modelOptions.merchantConfiguration.paypalCredit = true;
+        this.modelOptions.merchantConfiguration.applePay = true;
 
         model = new DropinModel(this.modelOptions);
 
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit']);
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'applePay']);
       });
 
       it('uses custom paymentOptionPriority of payment options', function () {
@@ -161,6 +166,29 @@ describe('DropinModel', function () {
         expect(function () {
           new DropinModel(this.modelOptions); // eslint-disable-line no-new
         }.bind(this)).to.throw('paymentOptionPriority: Invalid payment option specified.');
+      });
+
+      it('does not support Apple Pay when the browser does not support Apple Pay', function () {
+        var model;
+
+        delete global.ApplePaySession;
+        this.modelOptions.merchantConfiguration.applePay = true;
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
+      });
+
+      it('does not support Apple Pay when the device does not support Apple Pay', function () {
+        var model;
+
+        global.ApplePaySession = this.sandbox.stub().returns({});
+        global.ApplePaySession.canMakePayments = function () { return false; };
+        this.modelOptions.merchantConfiguration.applePay = true;
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
       });
     });
 
