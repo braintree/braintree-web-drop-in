@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Add 3D Secure support
+
 1.8.1
 -----
 - Update braintree-web to v3.25.0
