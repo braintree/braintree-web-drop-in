@@ -131,6 +131,12 @@ var VERSION = process.env.npm_package_version;
  * @param {boolean} [paypal] If true, PayPal fraud data collection is enabled. Required if `kount` parameter is not used.
  */
 
+/**
+ * @typedef {object} threeDSecureOptions The configuration options for 3D Secure. Requires [3D Secure](https://developers.braintreepayments.com/guides/3d-secure/overview) to be enabled in the Braintree gateway. The liability shift information will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
+ *
+ * @param {string} amount The amount to verify with 3D Secure.
+ */
+
 /** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
  * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
@@ -201,6 +207,9 @@ var VERSION = process.env.npm_package_version;
  *
  * See [`applePayCreateOptions`](#~applePayCreateOptions) for `applePay` options.
  * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
+ *
+ * @param {object} [options.threeDSecure] The configuration options for 3D Secure. See [`threeDSecureOptions`](#~threeDSecureOptions) for all `threeDSecure` options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
+ *
  * @param {boolean} [preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
  *
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
@@ -414,6 +423,16 @@ var VERSION = process.env.npm_package_version;
  *     cardholderName: {
  *       required: true
  *     }
+ *   }
+ * }, callback);
+ *
+ * @example
+ * <caption>Enabling 3D Secure</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   threeDSecure: {
+ *     amount: '10.00'
  *   }
  * }, callback);
  */

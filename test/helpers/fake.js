@@ -1,6 +1,6 @@
 'use strict';
 
-var clientToken, clientTokenWithCustomerID, hostedFieldsInstance, paypalInstance;
+var clientToken, clientTokenWithCustomerID, hostedFieldsInstance, paypalInstance, threeDSecureInstance;
 var tokenizationKey = 'development_testing_merchant_id';
 var braintreeVersion = require('braintree-web').VERSION;
 
@@ -73,6 +73,12 @@ paypalInstance = {
   tokenizePayment: function () {}
 };
 
+threeDSecureInstance = {
+  verifyCard: function () {},
+  cancelVerifyCard: function () {},
+  teardown: function () {}
+};
+
 function modelOptions() {
   return {
     client: {
@@ -92,6 +98,7 @@ module.exports = {
   configuration: configuration,
   hostedFieldsInstance: hostedFieldsInstance,
   paypalInstance: paypalInstance,
+  threeDSecureInstance: threeDSecureInstance,
   modelOptions: modelOptions,
   tokenizationKey: tokenizationKey
 };

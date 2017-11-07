@@ -3,7 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
-- Add Apple Pay
+- Add 3D Secure support
+- Add Apple Pay support
 
 1.8.1
 -----
