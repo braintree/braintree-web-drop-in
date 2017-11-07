@@ -300,6 +300,52 @@ $loader-scale-duration: 300ms;
 }
 
 /* =========================================================================
+   Apple Pay buttons
+   ========================================================================= */
+@supports (-webkit-appearance: -apple-pay-button) {
+    .apple-pay-button {
+        display: inline-block;
+        -webkit-appearance: -apple-pay-button;
+    }
+    .apple-pay-button-black {
+        -apple-pay-button-style: black;
+    }
+    .apple-pay-button-white {
+        -apple-pay-button-style: white;
+    }
+    .apple-pay-button-white-outline {
+        -apple-pay-button-style: white-outline;
+    }
+}
+@supports not (-webkit-appearance: -apple-pay-button) {
+    .apple-pay-button {
+        display: inline-block;
+        background-size: 100% 60%;
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
+        border-radius: 5px;
+        padding: 0px;
+        box-sizing: border-box;
+        min-width: 200px;
+        min-height: 32px;
+        max-height: 64px;
+    }
+    .apple-pay-button-black {
+        background-image: -webkit-named-image(apple-pay-logo-white);
+        background-color: black;
+    }
+    .apple-pay-button-white {
+        background-image: -webkit-named-image(apple-pay-logo-black);
+        background-color: white;
+    }
+    .apple-pay-button-white-with-line {
+        background-image: -webkit-named-image(apple-pay-logo-black);
+        background-color: white;
+        border: .5px solid black;
+    }
+}
+
+/* =========================================================================
    Sheets
    ========================================================================= */
 .braintree-sheet {
@@ -445,6 +491,14 @@ $loader-scale-duration: 300ms;
   text-align: center;
 
   .braintree-sheet__button--paypal {
+    margin: 0 auto;
+
+    iframe {
+      display: inline-block !important;
+    }
+  }
+
+  .braintree-sheet__button--apple-pay {
     margin: 0 auto;
 
     iframe {
@@ -773,7 +827,8 @@ $loader-scale-duration: 300ms;
 .braintree-show-methods .braintree-methods,
 .braintree-show-options .braintree-options,
 .braintree-show-paypal .braintree-paypal,
-.braintree-show-paypalCredit .braintree-paypalCredit {
+.braintree-show-paypalCredit .braintree-paypalCredit,
+.braintree-show-applePay .braintree-applePay {
   display: block;
   height: auto;
   overflow: visible;
@@ -829,7 +884,8 @@ $loader-scale-duration: 300ms;
 
 .braintree-show-card [data-braintree-id='other-ways-to-pay'],
 .braintree-show-methods [data-braintree-id='other-ways-to-pay'],
-.braintree-show-paypal [data-braintree-id='other-ways-to-pay'] {
+.braintree-show-paypal [data-braintree-id='other-ways-to-pay'],
+.braintree-show-applePay [data-braintree-id='other-ways-to-pay'] {
   display: block;
 }
 

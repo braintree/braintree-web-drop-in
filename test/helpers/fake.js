@@ -21,7 +21,8 @@ function configuration() {
       challenges: [],
       creditCards: {
         supportedCardTypes: ['American Express', 'Discover', 'JCB', 'MasterCard', 'Visa']
-      }
+      },
+      applePay: {}
     },
     analyticsMetadata: {
       sdkVersion: braintreeVersion,

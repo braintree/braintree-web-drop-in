@@ -62,6 +62,13 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
       html = html.replace(/@OPTION_TITLE/g, paymentSource);
       html = html.replace(/@CLASSNAME/g, '');
       break;
+    case paymentOptionIDs.applePay:
+      paymentSource = this.strings['Apple Pay'];
+      html = html.replace(/@ICON/g, 'logoApplePay');
+      html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(paymentSource));
+      html = html.replace(/@OPTION_TITLE/g, paymentSource);
+      html = html.replace(/@CLASSNAME/g, '');
+      break;
     default:
       break;
   }

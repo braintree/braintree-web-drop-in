@@ -24,11 +24,13 @@ var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
+  paymentOptionIDs.applePay,
   'threeDSecure'
 ];
 var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
   paymentOptionIDs.paypal,
-  paymentOptionIDs.paypalCredit
+  paymentOptionIDs.paypalCredit,
+  paymentOptionIDs.applePay
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;
@@ -37,7 +39,7 @@ var VERSION = process.env.npm_package_version;
  * @typedef {object} Dropin~cardPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the card.
  * @property {object} details Additional account details.
- * @property {string} details.cardType Type of card, e.g. Visa, MasterCard.
+ * @property {string} details.cardType Type of card, e.g. Visa, Mastercard.
  * @property {string} details.lastTwo Last two digits of card number.
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
@@ -52,6 +54,18 @@ var VERSION = process.env.npm_package_version;
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
  * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~applePayPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Apple Pay provided card.
+ * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
+ * @property {string} details.cardHolderName The name of the card holder.
+ * @property {string} details.dpanLastTwo Last two digits of card number.
+ * @property {string} description A human-readable description.
+ * @property {string} type The payment method type, always `ApplePayCard` when the method requested is an Apple Pay provided card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
 

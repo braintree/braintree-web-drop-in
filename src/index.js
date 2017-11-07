@@ -146,6 +146,19 @@ var VERSION = process.env.npm_package_version;
  * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
  */
 
+/** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
+ *
+ * @param {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
+ * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
+ */
+
+/**
+ * @typedef {object} ApplePayPaymentRequest An [Apple Pay Payment Request object](https://developer.apple.com/reference/applepayjs/1916082-applepay_js_data_types/paymentrequest).
+ * @external ApplePayPaymentRequest
+ * @see {@link https://developer.apple.com/reference/applepayjs/1916082-applepay_js_data_types/paymentrequest PaymentRequest}
+ */
+
 /**
  * @static
  * @function create
@@ -180,7 +193,7 @@ var VERSION = process.env.npm_package_version;
  * `zh_TW`.
  *
  * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
- * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit']`. Payment options omitted from this array will not be offered to the customer.
+ * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'applePay']`. Payment options omitted from this array will not be offered to the customer.
  *
  * @param {object} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards as a payment option, use `paymentOptionPriority`.
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
@@ -190,7 +203,9 @@ var VERSION = process.env.npm_package_version;
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live).
  *
  * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3).
+ * @param {object} [options.applePay] The configuration options for Apple Pay. To include an Apple Pay option in your Drop-in integration, include the `applePay` parameter and [enable Apple Pay in the Braintree Control Panel](https://developers.braintreepayments.com/guides/apple-pay/configuration/javascript/v3). If a user's browser does not support Apple Pay, the Apple Pay option will not be rendered. See [Apple's documentation](https://support.apple.com/en-us/HT201469) for browser and device support.
  *
+ * See [`applePayCreateOptions`](#~applePayCreateOptions) for `applePay` options.
  * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
  * @param {object} [options.threeDSecure] The configuration options for 3D Secure. See [`threeDSecureOptions`](#~threeDSecureOptions) for all `threeDSecure` options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
@@ -274,18 +289,25 @@ var VERSION = process.env.npm_package_version;
  *   </body>
  * </html>
  * @example
- * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit</caption>
+ * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit, and Apple Pay</caption>
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
  *   container: '#dropin-container',
+ *   applePay: {
+ *     displayName: 'Merchant Name',
+ *     paymentRequest: {
+   *     label: 'Localized Name',
+ *       total: '10.00'
+ *     }
+ *   },
  *   paypal: {
  *     flow: 'checkout',
- *     amount: 10.00,
+ *     amount: '10.00',
  *     currency: 'USD'
  *   },
  *  paypalCredit: {
  *    flow: 'checkout',
- *    amount: 10.00,
+ *    amount: '10.00',
  *    currency: 'USD'
  *   }
  * }, function (err, dropinInstance) {
