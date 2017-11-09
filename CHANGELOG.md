@@ -5,6 +5,7 @@ unreleased
 ----------
 - Add 3D Secure support
 - Add Apple Pay support
+- Limit cardholder name length to 255 characters
 
 1.8.1
 -----
