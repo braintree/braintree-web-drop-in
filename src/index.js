@@ -12,7 +12,6 @@
  * Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set:
  *
  * * `data-locale`
- * * `data-card.cardholder-name`
  * * `data-card.cardholder-name.required`
  * * `data-payment-option-priority`
  * * `data-data-collector.kount`
@@ -84,11 +83,11 @@
  * </form>
  *
  * @example
- * <caption>Including cardholder name field in card form</caption>
+ * <caption>Including an optional cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
  *   <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
- *    data-card.cardholder-name="true"
+ *    data-card.cardholder-name.required="false"
  *   ></script>
  *   <input type="submit" value="Purchase"></input>
  * </form>

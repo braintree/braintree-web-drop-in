@@ -12,8 +12,13 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'data-collector.kount',
   'data-collector.paypal',
 
+  // camelcase version was accidentally used initially.
+  // we add the kebab case version to match the docs, but
+  // we retain the camelcase version for backwards compatibility
   'card.cardholderName',
   'card.cardholderName.required',
+  'card.cardholder-name',
+  'card.cardholder-name.required',
 
   'paypal.amount',
   'paypal.currency',
