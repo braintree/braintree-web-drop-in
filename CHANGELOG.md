@@ -7,6 +7,7 @@ unreleased
 - Add Apple Pay support
 - Limit cardholder name length to 255 characters
 - Fix cardholder-name in script tag integration
+- Update braintree-web to v3.26.0
 
 1.8.1
 -----
