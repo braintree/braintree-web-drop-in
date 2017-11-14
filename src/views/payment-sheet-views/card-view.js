@@ -41,8 +41,9 @@ CardView.prototype.initialize = function () {
   this.extraInputs = [
     {
       fieldName: 'cardholderName',
-      enabled: Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName),
-      required: Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName && this.model.merchantConfiguration.card.cardholderName.required),
+      enabled: this.hasCardholderName,
+      required: this.hasCardholderName && this.model.merchantConfiguration.card.cardholderName.required,
+      requiredError: this.strings.fieldEmptyForCardholderName,
       validations: [
         {
           isValid: function (value) {
@@ -99,17 +100,9 @@ CardView.prototype._setupExtraInput = function (extraInput) {
   var nameContainer = field.querySelector('.braintree-form__hosted-field');
 
   input.addEventListener('keyup', function () {
-    var valid = true;
-
-    extraInput.validations.forEach(function (inputValidation) {
-      valid = valid && inputValidation.isValid(input.value);
-    });
+    var valid = self._validateExtraInput(extraInput, true);
 
     classlist.toggle(nameContainer, 'braintree-form__field--valid', valid);
-
-    if (!extraInput.required) {
-      return;
-    }
 
     if (valid) {
       self.hideFieldError(extraInput.fieldName);
@@ -124,20 +117,8 @@ CardView.prototype._setupExtraInput = function (extraInput) {
       // by taking it out of the event loop, we can detect the new
       // active element (hosted field or other card view element)
       setTimeout(function () {
-        var hasFieldError = false;
-
         if (isCardViewElement()) {
-          if (input.value.length === 0) {
-            hasFieldError = true;
-            self.showFieldError(extraInput.fieldName, extraInput.requiredError);
-          }
-
-          extraInput.validations.forEach(function (validation) {
-            if (!hasFieldError && !validation.isValid(input.value)) {
-              hasFieldError = true;
-              self.showFieldError(extraInput.fieldName, validation.error);
-            }
-          });
+          self._validateExtraInput(extraInput, true);
         }
       }, 0);
     }, false);
@@ -308,18 +289,22 @@ CardView.prototype._validateForm = function (showFieldErrors) {
 
   if (this.extraInputs) {
     this.extraInputs.forEach(function (extraInput) {
+      var fieldIsValid;
+
       if (!extraInput.enabled) {
         return;
       }
 
-      isValid = isValid && this._validateExtraInput(extraInput);
+      fieldIsValid = this._validateExtraInput(extraInput, showFieldErrors);
+
+      isValid = isValid && fieldIsValid;
     }.bind(this));
   }
 
   return isValid;
 };
 
-CardView.prototype._validateExtraInput = function (extraInput) {
+CardView.prototype._validateExtraInput = function (extraInput, showFieldError) {
   var fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
   var field = this.getElementById(fieldNameKebab + '-field-group');
   var input = field.querySelector('input');
@@ -327,11 +312,21 @@ CardView.prototype._validateExtraInput = function (extraInput) {
 
   if (extraInput.required) {
     valid = input.value.length > 0;
+
+    if (!valid && showFieldError) {
+      this.showFieldError(extraInput.fieldName, extraInput.requiredError);
+    }
   }
 
   extraInput.validations.forEach(function (validation) {
-    valid = valid && validation.isValid(input.value);
-  });
+    var validationPassed = validation.isValid(input.value);
+
+    if (!validationPassed && showFieldError) {
+      this.showFieldError(extraInput.fieldName, validation.error);
+    }
+
+    valid = valid && validationPassed;
+  }.bind(this));
 
   return valid;
 };
