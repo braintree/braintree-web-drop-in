@@ -1,14 +1,15 @@
 CHANGELOG
 =========
 
-unreleased
-----------
-- Add 3D Secure support
-- Add Apple Pay support
-- Limit cardholder name length to 255 characters
+1.9.0
+-----
+- Add 3D Secure support (#208)
+- Add Apple Pay support (#256)
+- Limit cardholder name length to 255 characters (#283)
 - Show error for cardholder name when attempting to tokenize (#318)
 - Fix cardholder-name in script tag integration
 - Update braintree-web to v3.26.0
+  - Fix issue where credit card cannot be pasted in on iOS devices (#299)
 
 1.8.1
 -----

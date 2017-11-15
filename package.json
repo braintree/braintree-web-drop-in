@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.9.0-rc.2",
+  "version": "1.9.0",
   "main": "src/index.js",
   "scripts": {
     "build": "gulp build",
