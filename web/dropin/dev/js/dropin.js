@@ -277,6 +277,386 @@ wrapPromise.wrapPrototype = function (target, options) {
 module.exports = wrapPromise;
 
 },{"./lib/deferred":14,"./lib/once":15,"./lib/promise-or-callback":16}],18:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var BraintreeError = require('../lib/braintree-error');
+var analytics = require('../lib/analytics');
+var errors = require('./errors');
+var Promise = require('../lib/promise');
+var wrapPromise = require('@braintree/wrap-promise');
+
+/**
+ * @typedef {object} ApplePay~tokenizePayload
+ * @property {string} nonce The payment method nonce.
+ * @property {object} details Additional details.
+ * @property {string} details.cardType Type of card, ex: Visa, MasterCard.
+ * @property {string} details.cardHolderName The name of the card holder.
+ * @property {string} details.dpanLastTwo Last two digits of card number.
+ * @property {string} description A human-readable description.
+ * @property {string} type The payment method type, always `ApplePayCard`.
+ * @property {object} binData Information about the card based on the bin.
+ * @property {string} binData.commercial Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.countryOfIssuance The country of issuance.
+ * @property {string} binData.debit Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.durbinRegulated Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.healthcare Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.issuingBank The issuing bank.
+ * @property {string} binData.payroll Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.prepaid Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.productId The product id.
+ */
+
+/**
+ * An Apple Pay Payment Authorization Event object.
+ * @typedef {object} ApplePayPaymentAuthorizedEvent
+ * @external ApplePayPaymentAuthorizedEvent
+ * @see {@link https://developer.apple.com/reference/applepayjs/applepaypaymentauthorizedevent ApplePayPaymentAuthorizedEvent}
+ */
+
+/**
+ * An Apple Pay Payment Request object.
+ * @typedef {object} ApplePayPaymentRequest
+ * @external ApplePayPaymentRequest
+ * @see {@link https://developer.apple.com/reference/applepayjs/1916082-applepay_js_data_types/paymentrequest PaymentRequest}
+ */
+
+/**
+ * @class
+ * @param {object} options Options
+ * @description <strong>You cannot use this constructor directly. Use {@link module:braintree-web/apple-pay.create|braintree.applePay.create} instead.</strong>
+ * @classdesc This class represents an Apple Pay component. Instances of this class have methods for validating the merchant server and tokenizing payments.
+ */
+function ApplePay(options) {
+  this._client = options.client;
+  /**
+   * @name ApplePay#merchantIdentifier
+   * @description A special merchant ID which represents the merchant association with Braintree. Required when using `ApplePaySession.canMakePaymentsWithActiveCard`.
+   * @example
+   * var promise = ApplePaySession.canMakePaymentsWithActiveCard(applePayInstance.merchantIdentifier);
+   * promise.then(function (canMakePaymentsWithActiveCard) {
+   *   if (canMakePaymentsWithActiveCard) {
+   *     // Set up Apple Pay buttons
+   *   }
+   * });
+   */
+  Object.defineProperty(this, 'merchantIdentifier', {
+    value: this._client.getConfiguration().gatewayConfiguration.applePayWeb.merchantIdentifier,
+    configurable: false,
+    writable: false
+  });
+}
+
+/**
+ * Merges a payment request with Braintree defaults to return an {external:ApplePayPaymentRequest}.
+ *
+ * The following properties are assigned to `paymentRequest` if not already defined. Their default values come from the Braintree gateway.
+ * - `countryCode`
+ * - `currencyCode`
+ * - `merchantCapabilities`
+ * - `supportedNetworks`
+ * @public
+ * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
+ * @returns {external:ApplePayPaymentRequest} The decorated `paymentRequest` object.
+ * @example
+ * var applePay = require('braintree-web/apple-pay');
+ *
+ * applePay.create({client: clientInstance}, function (applePayErr, applePayInstance) {
+ *   if (applePayErr) {
+ *     // Handle error here
+ *     return;
+ *   }
+ *
+ *   var paymentRequest = applePayInstance.createPaymentRequest({
+ *     total: {
+ *       label: 'My Company',
+ *       amount: '19.99'
+ *     }
+ *   });
+ *
+ *   var session = new ApplePaySession(2, paymentRequest);
+ *
+ *   // ...
+ */
+ApplePay.prototype.createPaymentRequest = function (paymentRequest) {
+  var applePay = this._client.getConfiguration().gatewayConfiguration.applePayWeb;
+  var defaults = {
+    countryCode: applePay.countryCode,
+    currencyCode: applePay.currencyCode,
+    merchantCapabilities: applePay.merchantCapabilities || ['supports3DS'],
+    supportedNetworks: applePay.supportedNetworks.map(function (network) {
+      return network === 'mastercard' ? 'masterCard' : network;
+    })
+  };
+
+  return Object.assign({}, defaults, paymentRequest);
+};
+
+/**
+ * Validates your merchant website, as required by `ApplePaySession` before payment can be authorized.
+ * @public
+ * @param {object} options Options
+ * @param {string} options.validationURL The validationURL fram an `ApplePayValidateMerchantEvent`.
+ * @param {string} options.displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {callback} [callback] The second argument, <code>data</code>, is the Apple Pay merchant session object. If no callback is provided, `performValidation` returns a promise.
+ * Pass the merchant session to your Apple Pay session's `completeMerchantValidation` method.
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ * @example
+ * var applePay = require('braintree-web/apple-pay');
+ *
+ * applePay.create({client: clientInstance}, function (applePayErr, applePayInstance) {
+ *   if (applePayErr) {
+ *     // Handle error here
+ *     return;
+ *   }
+ *
+ *   var paymentRequest = applePayInstance.createPaymentRequest({
+ *     total: {
+ *       label: 'My Company',
+ *       amount: '19.99'
+ *     }
+ *   });
+ *   var session = new ApplePaySession(2, paymentRequest);
+ *
+ *   session.onvalidatemerchant = function (event) {
+ *     applePayInstance.performValidation({
+ *       validationURL: event.validationURL,
+ *       displayName: 'My Great Store'
+ *     }, function (validationErr, validationData) {
+ *       if (validationErr) {
+ *         console.error(validationErr);
+ *         session.abort();
+ *         return;
+ *       }
+ *
+ *       session.completeMerchantValidation(validationData);
+ *     });
+ *   };
+ * });
+ */
+ApplePay.prototype.performValidation = function (options) {
+  var applePayWebSession;
+  var self = this;
+
+  if (!options || !options.validationURL) {
+    return Promise.reject(new BraintreeError(errors.APPLE_PAY_VALIDATION_URL_REQUIRED));
+  }
+
+  applePayWebSession = {
+    validationUrl: options.validationURL,
+    domainName: options.domainName || global.location.hostname,
+    merchantIdentifier: options.merchantIdentifier || this.merchantIdentifier
+  };
+
+  if (options.displayName != null) {
+    applePayWebSession.displayName = options.displayName;
+  }
+
+  return this._client.request({
+    method: 'post',
+    endpoint: 'apple_pay_web/sessions',
+    data: {
+      _meta: {source: 'apple-pay'},
+      applePayWebSession: applePayWebSession
+    }
+  }).then(function (response) {
+    analytics.sendEvent(self._client, 'applepay.performValidation.succeeded');
+
+    return Promise.resolve(response);
+  }).catch(function (err) {
+    analytics.sendEvent(self._client, 'applepay.performValidation.failed');
+
+    if (err.code === 'CLIENT_REQUEST_ERROR') {
+      return Promise.reject(new BraintreeError({
+        type: errors.APPLE_PAY_MERCHANT_VALIDATION_FAILED.type,
+        code: errors.APPLE_PAY_MERCHANT_VALIDATION_FAILED.code,
+        message: errors.APPLE_PAY_MERCHANT_VALIDATION_FAILED.message,
+        details: {
+          originalError: err.details.originalError
+        }
+      }));
+    }
+
+    return Promise.reject(new BraintreeError({
+      type: errors.APPLE_PAY_MERCHANT_VALIDATION_NETWORK.type,
+      code: errors.APPLE_PAY_MERCHANT_VALIDATION_NETWORK.code,
+      message: errors.APPLE_PAY_MERCHANT_VALIDATION_NETWORK.message,
+      details: {
+        originalError: err
+      }
+    }));
+  });
+};
+
+/**
+ * Tokenizes an Apple Pay payment. This will likely be called in your `ApplePaySession`'s `onpaymentauthorized` callback.
+ * @public
+ * @param {object} options Options
+ * @param {object} options.token The `payment.token` property of an {@link external:ApplePayPaymentAuthorizedEvent}.
+ * @param {callback} [callback] The second argument, <code>data</code>, is a {@link ApplePay~tokenizePayload|tokenizePayload}. If no callback is provided, `tokenize` returns a promise that resolves with a {@link ApplePay~tokenizePayload|tokenizePayload}.
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ * @example
+ * var applePay = require('braintree-web/apple-pay');
+ *
+ * applePay.create({client: clientInstance}, function (applePayErr, applePayInstance) {
+ *   if (applePayErr) {
+ *     // Handle error here
+ *     return;
+ *   }
+ *
+ *   var paymentRequest = applePayInstance.createPaymentRequest({
+ *     total: {
+ *       label: 'My Company',
+ *       amount: '19.99'
+ *     }
+ *   });
+ *   var session = new ApplePaySession(2, paymentRequest);
+ *
+ *   session.onpaymentauthorized = function (event) {
+ *     applePayInstance.tokenize({
+ *       token: event.payment.token
+ *     }, function (tokenizeErr, tokenizedPayload) {
+ *       if (tokenizeErr) {
+ *         session.completePayment(ApplePaySession.STATUS_FAILURE);
+ *         return;
+ *       }
+ *       session.completePayment(ApplePaySession.STATUS_SUCCESS);
+ *
+ *       // Send the tokenizedPayload to your server here!
+ *     });
+ *   };
+ *
+ *   // ...
+ * });
+ */
+ApplePay.prototype.tokenize = function (options) {
+  var self = this;
+
+  if (!options.token) {
+    return Promise.reject(new BraintreeError(errors.APPLE_PAY_PAYMENT_TOKEN_REQUIRED));
+  }
+
+  return this._client.request({
+    method: 'post',
+    endpoint: 'payment_methods/apple_payment_tokens',
+    data: {
+      _meta: {
+        source: 'apple-pay'
+      },
+      applePaymentToken: Object.assign({}, options.token, {
+        // The gateway requires this key to be base64-encoded.
+        paymentData: btoa(JSON.stringify(options.token.paymentData))
+      })
+    }
+  }).then(function (response) {
+    analytics.sendEvent(self._client, 'applepay.tokenize.succeeded');
+
+    return Promise.resolve(response.applePayCards[0]);
+  }).catch(function (err) {
+    analytics.sendEvent(self._client, 'applepay.tokenize.failed');
+
+    return Promise.reject(new BraintreeError({
+      type: errors.APPLE_PAY_TOKENIZATION.type,
+      code: errors.APPLE_PAY_TOKENIZATION.code,
+      message: errors.APPLE_PAY_TOKENIZATION.message,
+      details: {
+        originalError: err
+      }
+    }));
+  });
+};
+
+module.exports = wrapPromise.wrapPrototype(ApplePay);
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../lib/analytics":44,"../lib/braintree-error":48,"../lib/promise":67,"./errors":19,"@braintree/wrap-promise":17}],19:[function(require,module,exports){
+'use strict';
+
+var BraintreeError = require('../lib/braintree-error');
+
+module.exports = {
+  APPLE_PAY_NOT_ENABLED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'APPLE_PAY_NOT_ENABLED',
+    message: 'Apple Pay is not enabled for this merchant.'
+  },
+  APPLE_PAY_VALIDATION_URL_REQUIRED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'APPLE_PAY_VALIDATION_URL_REQUIRED',
+    message: 'performValidation must be called with a validationURL.'
+  },
+  APPLE_PAY_MERCHANT_VALIDATION_NETWORK: {
+    type: BraintreeError.types.NETWORK,
+    code: 'APPLE_PAY_MERCHANT_VALIDATION_NETWORK',
+    message: 'A network error occurred when validating the Apple Pay merchant.'
+  },
+  APPLE_PAY_MERCHANT_VALIDATION_FAILED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'APPLE_PAY_MERCHANT_VALIDATION_FAILED',
+    message: 'Make sure you have registered your domain name in the Braintree Control Panel.'
+  },
+  APPLE_PAY_PAYMENT_TOKEN_REQUIRED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'APPLE_PAY_PAYMENT_TOKEN_REQUIRED',
+    message: 'tokenize must be called with a payment token.'
+  },
+  APPLE_PAY_TOKENIZATION: {
+    type: BraintreeError.types.NETWORK,
+    code: 'APPLE_PAY_TOKENIZATION',
+    message: 'A network error occurred when processing the Apple Pay payment.'
+  }
+};
+
+},{"../lib/braintree-error":48}],20:[function(require,module,exports){
+'use strict';
+
+/**
+ * @module braintree-web/apple-pay
+ * @description Accept Apple Pay on the Web. *This component is currently in beta and is subject to change.*
+ */
+
+var BraintreeError = require('../lib/braintree-error');
+var ApplePay = require('./apple-pay');
+var analytics = require('../lib/analytics');
+var basicComponentVerification = require('../lib/basic-component-verification');
+var errors = require('./errors');
+var VERSION = "3.26.0";
+var Promise = require('../lib/promise');
+var wrapPromise = require('@braintree/wrap-promise');
+
+/**
+ * @static
+ * @function create
+ * @param {object} options Creation options:
+ * @param {Client} options.client A {@link Client} instance.
+ * @param {callback} [callback] The second argument, `data`, is the {@link ApplePay} instance. If no callback is provided, `create` returns a promise that resolves with the {@link ApplePay} instance.
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ */
+function create(options) {
+  return basicComponentVerification.verify({
+    name: 'Apple Pay',
+    client: options.client
+  }).then(function () {
+    if (!options.client.getConfiguration().gatewayConfiguration.applePayWeb) {
+      return Promise.reject(new BraintreeError(errors.APPLE_PAY_NOT_ENABLED));
+    }
+
+    analytics.sendEvent(options.client, 'applepay.initialized');
+
+    return new ApplePay(options);
+  });
+}
+
+module.exports = {
+  create: wrapPromise(create),
+  /**
+   * @description The current version of the SDK, i.e. `{@pkg version}`.
+   * @type {string}
+   */
+  VERSION: VERSION
+};
+
+},{"../lib/analytics":44,"../lib/basic-component-verification":46,"../lib/braintree-error":48,"../lib/promise":67,"./apple-pay":18,"./errors":19,"@braintree/wrap-promise":17}],21:[function(require,module,exports){
 'use strict';
 
 var isIe = require('@braintree/browser-detection/is-ie');
@@ -285,7 +665,7 @@ module.exports = {
   isIe: isIe
 };
 
-},{"@braintree/browser-detection/is-ie":4}],19:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ie":4}],22:[function(require,module,exports){
 'use strict';
 
 var request = require('./request');
@@ -531,6 +911,7 @@ Client.prototype.request = function (options, callback) {
 
       if (requestError) {
         reject(requestError);
+
         return;
       }
 
@@ -550,6 +931,7 @@ Client.prototype.request = function (options, callback) {
 
       callback(err, null, status);
     });
+
     return;
   }
 
@@ -607,14 +989,14 @@ Client.prototype.getVersion = function () {
 
 module.exports = Client;
 
-},{"../lib/add-metadata":40,"../lib/assign":42,"../lib/braintree-error":45,"../lib/constants":50,"../lib/convert-to-braintree-error":52,"../lib/deferred":54,"../lib/errors":57,"../lib/is-whitelisted-domain":59,"../lib/once":62,"../lib/promise":64,"./constants":20,"./errors":21,"./request":26}],20:[function(require,module,exports){
+},{"../lib/add-metadata":43,"../lib/assign":45,"../lib/braintree-error":48,"../lib/constants":53,"../lib/convert-to-braintree-error":55,"../lib/deferred":57,"../lib/errors":60,"../lib/is-whitelisted-domain":63,"../lib/once":66,"../lib/promise":67,"./constants":23,"./errors":24,"./request":29}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = {
   BRAINTREE_API_VERSION_HEADER: '2017-04-03'
 };
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../lib/braintree-error');
@@ -669,7 +1051,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":45}],22:[function(require,module,exports){
+},{"../lib/braintree-error":48}],25:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -677,7 +1059,7 @@ var BraintreeError = require('../lib/braintree-error');
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var request = require('./request');
-var uuid = require('../lib/uuid');
+var uuid = require('../lib/vendor/uuid');
 var constants = require('../lib/constants');
 var createAuthorizationData = require('../lib/create-authorization-data');
 var errors = require('./errors');
@@ -700,6 +1082,7 @@ function getConfiguration(options) {
       authData = createAuthorizationData(options.authorization);
     } catch (err) {
       reject(new BraintreeError(errors.CLIENT_INVALID_AUTHORIZATION));
+
       return;
     }
     attrs = authData.attrs;
@@ -731,6 +1114,7 @@ function getConfiguration(options) {
             originalError: err
           }
         }));
+
         return;
       }
 
@@ -751,13 +1135,13 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lib/braintree-error":45,"../lib/constants":50,"../lib/create-authorization-data":53,"../lib/promise":64,"../lib/uuid":67,"./errors":21,"./request":26,"@braintree/wrap-promise":17}],23:[function(require,module,exports){
+},{"../lib/braintree-error":48,"../lib/constants":53,"../lib/create-authorization-data":56,"../lib/promise":67,"../lib/vendor/uuid":71,"./errors":24,"./request":29,"@braintree/wrap-promise":17}],26:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../lib/braintree-error');
 var Client = require('./client');
 var getConfiguration = require('./get-configuration').getConfiguration;
-var VERSION = "3.25.0";
+var VERSION = "3.26.0";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var sharedErrors = require('../lib/errors');
@@ -826,7 +1210,7 @@ module.exports = {
   _clearCache: clearCache
 };
 
-},{"../lib/braintree-error":45,"../lib/errors":57,"../lib/promise":64,"./client":19,"./get-configuration":22,"@braintree/wrap-promise":17}],24:[function(require,module,exports){
+},{"../lib/braintree-error":48,"../lib/errors":60,"../lib/promise":67,"./client":22,"./get-configuration":25,"@braintree/wrap-promise":17}],27:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -876,6 +1260,7 @@ function _requestWithRetry(options, tcpRetryCount, cb) {
         if (tcpRetryCount < MAX_TCP_RETRYCOUNT && requestShouldRetry(status)) {
           tcpRetryCount++;
           _requestWithRetry(options, tcpRetryCount, cb);
+
           return;
         }
         callback(resBody || 'error', null, status || 500);
@@ -929,7 +1314,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/assign":42,"../../lib/querystring":65,"../browser-detection":18,"./parse-body":29,"./prep-body":30}],25:[function(require,module,exports){
+},{"../../lib/assign":45,"../../lib/querystring":68,"../browser-detection":21,"./parse-body":32,"./prep-body":33}],28:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -938,7 +1323,7 @@ module.exports = function getUserAgent() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 var ajaxIsAvaliable;
@@ -969,7 +1354,7 @@ module.exports = function (options, cb) {
   }
 };
 
-},{"../../lib/once":62,"./ajax-driver":24,"./get-user-agent":25,"./is-http":27,"./jsonp-driver":28}],27:[function(require,module,exports){
+},{"../../lib/once":66,"./ajax-driver":27,"./get-user-agent":28,"./is-http":30,"./jsonp-driver":31}],30:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -978,12 +1363,12 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 (function (global){
 'use strict';
 
 var head;
-var uuid = require('../../lib/uuid');
+var uuid = require('../../lib/vendor/uuid');
 var querystring = require('../../lib/querystring');
 var timeouts = {};
 
@@ -1090,7 +1475,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/querystring":65,"../../lib/uuid":67}],29:[function(require,module,exports){
+},{"../../lib/querystring":68,"../../lib/vendor/uuid":71}],32:[function(require,module,exports){
 'use strict';
 
 module.exports = function (body) {
@@ -1101,7 +1486,7 @@ module.exports = function (body) {
   return body;
 };
 
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -1116,7 +1501,7 @@ module.exports = function (method, body) {
   return body;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../../lib/braintree-error');
@@ -1155,7 +1540,7 @@ function _isValid(attribute, value) {
 
 module.exports = attributeValidationError;
 
-},{"../../lib/braintree-error":45,"../shared/constants":37,"../shared/errors":38}],32:[function(require,module,exports){
+},{"../../lib/braintree-error":48,"../shared/constants":40,"../shared/errors":41}],35:[function(require,module,exports){
 'use strict';
 
 var constants = require('../shared/constants');
@@ -1169,7 +1554,7 @@ module.exports = function composeUrl(assetsUrl, componentId, isDebug) {
     componentId;
 };
 
-},{"../../lib/use-min":66,"../shared/constants":37}],33:[function(require,module,exports){
+},{"../../lib/use-min":69,"../shared/constants":40}],36:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1182,7 +1567,7 @@ var composeUrl = require('./compose-url');
 var constants = require('../shared/constants');
 var errors = require('../shared/errors');
 var INTEGRATION_TIMEOUT_MS = require('../../lib/constants').INTEGRATION_TIMEOUT_MS;
-var uuid = require('../../lib/uuid');
+var uuid = require('../../lib/vendor/uuid');
 var findParentTags = require('../shared/find-parent-tags');
 var browserDetection = require('../shared/browser-detection');
 var events = constants.events;
@@ -2231,7 +2616,7 @@ HostedFields.prototype.getState = function () {
 module.exports = wrapPromise.wrapPrototype(HostedFields);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/analytics":41,"../../lib/braintree-error":45,"../../lib/bus":48,"../../lib/classlist":49,"../../lib/constants":50,"../../lib/convert-methods-to-error":51,"../../lib/destructor":55,"../../lib/errors":57,"../../lib/event-emitter":58,"../../lib/methods":61,"../../lib/promise":64,"../../lib/uuid":67,"../shared/browser-detection":36,"../shared/constants":37,"../shared/errors":38,"../shared/find-parent-tags":39,"./attribute-validation-error":31,"./compose-url":32,"./inject-frame":34,"@braintree/iframer":10,"@braintree/wrap-promise":17,"credit-card-type":72}],34:[function(require,module,exports){
+},{"../../lib/analytics":44,"../../lib/braintree-error":48,"../../lib/bus":51,"../../lib/classlist":52,"../../lib/constants":53,"../../lib/convert-methods-to-error":54,"../../lib/destructor":58,"../../lib/errors":60,"../../lib/event-emitter":61,"../../lib/methods":65,"../../lib/promise":67,"../../lib/vendor/uuid":71,"../shared/browser-detection":39,"../shared/constants":40,"../shared/errors":41,"../shared/find-parent-tags":42,"./attribute-validation-error":34,"./compose-url":35,"./inject-frame":37,"@braintree/iframer":10,"@braintree/wrap-promise":17,"credit-card-type":81}],37:[function(require,module,exports){
 'use strict';
 
 module.exports = function injectFrame(frame, container) {
@@ -2248,7 +2633,7 @@ module.exports = function injectFrame(frame, container) {
   return [frame, clearboth];
 };
 
-},{}],35:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 /** @module braintree-web/hosted-fields */
 
@@ -2257,7 +2642,7 @@ var basicComponentVerification = require('../lib/basic-component-verification');
 var supportsInputFormatting = require('restricted-input/supports-input-formatting');
 var wrapPromise = require('@braintree/wrap-promise');
 var Promise = require('../lib/promise');
-var VERSION = "3.25.0";
+var VERSION = "3.26.0";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -2476,7 +2861,7 @@ module.exports = {
   VERSION: VERSION
 };
 
-},{"../lib/basic-component-verification":43,"../lib/promise":64,"./external/hosted-fields":33,"@braintree/wrap-promise":17,"restricted-input/supports-input-formatting":76}],36:[function(require,module,exports){
+},{"../lib/basic-component-verification":46,"../lib/promise":67,"./external/hosted-fields":36,"@braintree/wrap-promise":17,"restricted-input/supports-input-formatting":85}],39:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -2485,13 +2870,13 @@ module.exports = {
   isIosWebview: require('@braintree/browser-detection/is-ios-webview')
 };
 
-},{"@braintree/browser-detection/is-ie9":6,"@braintree/browser-detection/is-ios":8,"@braintree/browser-detection/is-ios-webview":7}],37:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ie9":6,"@braintree/browser-detection/is-ios":8,"@braintree/browser-detection/is-ios-webview":7}],40:[function(require,module,exports){
 'use strict';
 /* eslint-disable no-reserved-keys */
 
 var enumerate = require('../../lib/enumerate');
 var errors = require('./errors');
-var VERSION = "3.25.0";
+var VERSION = "3.26.0";
 
 var constants = {
   VERSION: VERSION,
@@ -2611,7 +2996,7 @@ constants.events = enumerate([
 
 module.exports = constants;
 
-},{"../../lib/enumerate":56,"./errors":38}],38:[function(require,module,exports){
+},{"../../lib/enumerate":59,"./errors":41}],41:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../../lib/braintree-error');
@@ -2683,7 +3068,7 @@ module.exports = {
   }
 };
 
-},{"../../lib/braintree-error":45}],39:[function(require,module,exports){
+},{"../../lib/braintree-error":48}],42:[function(require,module,exports){
 'use strict';
 
 function findParentTags(element, tag) {
@@ -2703,7 +3088,7 @@ function findParentTags(element, tag) {
 
 module.exports = findParentTags;
 
-},{}],40:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 var createAuthorizationData = require('./create-authorization-data');
@@ -2737,7 +3122,7 @@ function addMetadata(configuration, data) {
 
 module.exports = addMetadata;
 
-},{"./constants":50,"./create-authorization-data":53,"./json-clone":60}],41:[function(require,module,exports){
+},{"./constants":53,"./create-authorization-data":56,"./json-clone":64}],44:[function(require,module,exports){
 'use strict';
 
 var constants = require('./constants');
@@ -2771,7 +3156,7 @@ module.exports = {
   sendEvent: sendAnalyticsEvent
 };
 
-},{"./add-metadata":40,"./constants":50}],42:[function(require,module,exports){
+},{"./add-metadata":43,"./constants":53}],45:[function(require,module,exports){
 'use strict';
 
 var assignNormalized = typeof Object.assign === 'function' ? Object.assign : assignPolyfill;
@@ -2796,13 +3181,13 @@ module.exports = {
   _assign: assignPolyfill
 };
 
-},{}],43:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
 var Promise = require('./promise');
 var sharedErrors = require('./errors');
-var VERSION = "3.25.0";
+var VERSION = "3.26.0";
 
 function basicComponentVerification(options) {
   var client, clientVersion, name;
@@ -2843,7 +3228,7 @@ module.exports = {
   verify: basicComponentVerification
 };
 
-},{"./braintree-error":45,"./errors":57,"./promise":64}],44:[function(require,module,exports){
+},{"./braintree-error":48,"./errors":60,"./promise":67}],47:[function(require,module,exports){
 'use strict';
 
 var once = require('./once');
@@ -2867,12 +3252,14 @@ module.exports = function (functions, cb) {
 
   if (length === 0) {
     callback(null);
+
     return;
   }
 
   function finish(err) {
     if (err) {
       callback(err);
+
       return;
     }
 
@@ -2887,7 +3274,7 @@ module.exports = function (functions, cb) {
   }
 };
 
-},{"./once":62}],45:[function(require,module,exports){
+},{"./once":66}],48:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('./enumerate');
@@ -2972,7 +3359,7 @@ BraintreeError.findRootError = function (err) {
 
 module.exports = BraintreeError;
 
-},{"./enumerate":56}],46:[function(require,module,exports){
+},{"./enumerate":59}],49:[function(require,module,exports){
 'use strict';
 
 var isWhitelistedDomain = require('../is-whitelisted-domain');
@@ -3004,7 +3391,7 @@ module.exports = {
   checkOrigin: checkOrigin
 };
 
-},{"../is-whitelisted-domain":59}],47:[function(require,module,exports){
+},{"../is-whitelisted-domain":63}],50:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('../enumerate');
@@ -3013,7 +3400,7 @@ module.exports = enumerate([
   'CONFIGURATION_REQUEST'
 ], 'bus:');
 
-},{"../enumerate":56}],48:[function(require,module,exports){
+},{"../enumerate":59}],51:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
@@ -3144,7 +3531,7 @@ BraintreeBus.events = events;
 
 module.exports = BraintreeBus;
 
-},{"../braintree-error":45,"./check-origin":46,"./events":47,"framebus":73}],49:[function(require,module,exports){
+},{"../braintree-error":48,"./check-origin":49,"./events":50,"framebus":82}],52:[function(require,module,exports){
 'use strict';
 
 function _classesOf(element) {
@@ -3183,10 +3570,10 @@ module.exports = {
   toggle: toggle
 };
 
-},{}],50:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.25.0";
+var VERSION = "3.26.0";
 var PLATFORM = 'web';
 
 module.exports = {
@@ -3200,7 +3587,7 @@ module.exports = {
   BRAINTREE_LIBRARY_VERSION: 'braintree/' + PLATFORM + '/' + VERSION
 };
 
-},{}],51:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
@@ -3218,7 +3605,7 @@ module.exports = function (instance, methodNames) {
   });
 };
 
-},{"./braintree-error":45,"./errors":57}],52:[function(require,module,exports){
+},{"./braintree-error":48,"./errors":60}],55:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
@@ -3240,10 +3627,10 @@ function convertToBraintreeError(originalErr, btErrorObject) {
 
 module.exports = convertToBraintreeError;
 
-},{"./braintree-error":45}],53:[function(require,module,exports){
+},{"./braintree-error":48}],56:[function(require,module,exports){
 'use strict';
 
-var atob = require('../lib/polyfill').atob;
+var atob = require('../lib/vendor/polyfill').atob;
 
 var apiUrls = {
   production: 'https://api.braintreegateway.com:443',
@@ -3287,7 +3674,7 @@ function createAuthorizationData(authorization) {
 
 module.exports = createAuthorizationData;
 
-},{"../lib/polyfill":63}],54:[function(require,module,exports){
+},{"../lib/vendor/polyfill":70}],57:[function(require,module,exports){
 'use strict';
 
 module.exports = function (fn) {
@@ -3301,7 +3688,7 @@ module.exports = function (fn) {
   };
 };
 
-},{}],55:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 'use strict';
 
 var batchExecuteFunctions = require('./batch-execute-functions');
@@ -3321,6 +3708,7 @@ Destructor.prototype.registerFunctionForTeardown = function (fn) {
 Destructor.prototype.teardown = function (callback) {
   if (this._isTearingDown) {
     callback(new Error('Destructor is already tearing down'));
+
     return;
   }
 
@@ -3338,7 +3726,7 @@ Destructor.prototype.teardown = function (callback) {
 
 module.exports = Destructor;
 
-},{"./batch-execute-functions":44}],56:[function(require,module,exports){
+},{"./batch-execute-functions":47}],59:[function(require,module,exports){
 'use strict';
 
 function enumerate(values, prefix) {
@@ -3346,13 +3734,14 @@ function enumerate(values, prefix) {
 
   return values.reduce(function (enumeration, value) {
     enumeration[value] = prefix + value;
+
     return enumeration;
   }, {});
 }
 
 module.exports = enumerate;
 
-},{}],57:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
@@ -3389,7 +3778,7 @@ module.exports = {
   }
 };
 
-},{"./braintree-error":45}],58:[function(require,module,exports){
+},{"./braintree-error":48}],61:[function(require,module,exports){
 'use strict';
 
 function EventEmitter() {
@@ -3419,7 +3808,22 @@ EventEmitter.prototype._emit = function (event) {
 
 module.exports = EventEmitter;
 
-},{}],59:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
+(function (global){
+'use strict';
+
+function isHTTPS(protocol) {
+  protocol = protocol || global.location.protocol;
+
+  return protocol === 'https:';
+}
+
+module.exports = {
+  isHTTPS: isHTTPS
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],63:[function(require,module,exports){
 'use strict';
 
 var parser;
@@ -3452,14 +3856,14 @@ function isWhitelistedDomain(url) {
 
 module.exports = isWhitelistedDomain;
 
-},{}],60:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 module.exports = function (value) {
   return JSON.parse(JSON.stringify(value));
 };
 
-},{}],61:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
 module.exports = function (obj) {
@@ -3468,50 +3872,9 @@ module.exports = function (obj) {
   });
 };
 
-},{}],62:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],63:[function(require,module,exports){
-(function (global){
-'use strict';
-
-var atobNormalized = typeof global.atob === 'function' ? global.atob : atob;
-
-function atob(base64String) {
-  var a, b, c, b1, b2, b3, b4, i;
-  var base64Matcher = new RegExp('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})([=]{1,2})?$');
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-  var result = '';
-
-  if (!base64Matcher.test(base64String)) {
-    throw new Error('Non base64 encoded input passed to window.atob polyfill');
-  }
-
-  i = 0;
-  do {
-    b1 = characters.indexOf(base64String.charAt(i++));
-    b2 = characters.indexOf(base64String.charAt(i++));
-    b3 = characters.indexOf(base64String.charAt(i++));
-    b4 = characters.indexOf(base64String.charAt(i++));
-
-    a = (b1 & 0x3F) << 2 | b2 >> 4 & 0x3;
-    b = (b2 & 0xF) << 4 | b3 >> 2 & 0xF;
-    c = (b3 & 0x3) << 6 | b4 & 0x3F;
-
-    result += String.fromCharCode(a) + (b ? String.fromCharCode(b) : '') + (c ? String.fromCharCode(c) : '');
-  } while (i < base64String.length);
-
-  return result;
-}
-
-module.exports = {
-  atob: function (base64String) {
-    return atobNormalized.call(global, base64String);
-  },
-  _atob: atob
-};
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],64:[function(require,module,exports){
+},{"dup":15}],67:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -3520,7 +3883,7 @@ var Promise = global.Promise || require('promise-polyfill');
 module.exports = Promise;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"promise-polyfill":74}],65:[function(require,module,exports){
+},{"promise-polyfill":83}],68:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -3534,10 +3897,12 @@ function _notEmpty(obj) {
   return false;
 }
 
+/* eslint-disable no-mixed-operators */
 function _isArray(value) {
   return value && typeof value === 'object' && typeof value.length === 'number' &&
     Object.prototype.toString.call(value) === '[object Array]' || false;
 }
+/* eslint-enable no-mixed-operators */
 
 function parse(url) {
   var query, params;
@@ -3556,6 +3921,7 @@ function parse(url) {
     var value = decodeURIComponent(parts[1]);
 
     toReturn[key] = value;
+
     return toReturn;
   }, {});
 
@@ -3611,7 +3977,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],66:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 'use strict';
 
 function useMin(isDebug) {
@@ -3620,7 +3986,48 @@ function useMin(isDebug) {
 
 module.exports = useMin;
 
-},{}],67:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var atobNormalized = typeof global.atob === 'function' ? global.atob : atob;
+
+function atob(base64String) {
+  var a, b, c, b1, b2, b3, b4, i;
+  var base64Matcher = new RegExp('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})([=]{1,2})?$');
+  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  var result = '';
+
+  if (!base64Matcher.test(base64String)) {
+    throw new Error('Non base64 encoded input passed to window.atob polyfill');
+  }
+
+  i = 0;
+  do {
+    b1 = characters.indexOf(base64String.charAt(i++));
+    b2 = characters.indexOf(base64String.charAt(i++));
+    b3 = characters.indexOf(base64String.charAt(i++));
+    b4 = characters.indexOf(base64String.charAt(i++));
+
+    a = (b1 & 0x3F) << 2 | b2 >> 4 & 0x3;
+    b = (b2 & 0xF) << 4 | b3 >> 2 & 0xF;
+    c = (b3 & 0x3) << 6 | b4 & 0x3F;
+
+    result += String.fromCharCode(a) + (b ? String.fromCharCode(b) : '') + (c ? String.fromCharCode(c) : '');
+  } while (i < base64String.length);
+
+  return result;
+}
+
+module.exports = {
+  atob: function (base64String) {
+    return atobNormalized.call(global, base64String);
+  },
+  _atob: atob
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],71:[function(require,module,exports){
 'use strict';
 
 function uuid() {
@@ -3634,7 +4041,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],68:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../lib/braintree-error');
@@ -3687,7 +4094,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":45}],69:[function(require,module,exports){
+},{"../lib/braintree-error":48}],73:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web/paypal-checkout
@@ -3701,7 +4108,7 @@ var errors = require('./errors');
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var PayPalCheckout = require('./paypal-checkout');
-var VERSION = "3.25.0";
+var VERSION = "3.26.0";
 
 /**
  * @static
@@ -3799,7 +4206,7 @@ module.exports = {
   VERSION: VERSION
 };
 
-},{"../lib/analytics":41,"../lib/basic-component-verification":43,"../lib/braintree-error":45,"../lib/promise":64,"./errors":68,"./paypal-checkout":70,"@braintree/wrap-promise":17}],70:[function(require,module,exports){
+},{"../lib/analytics":44,"../lib/basic-component-verification":46,"../lib/braintree-error":48,"../lib/promise":67,"./errors":72,"./paypal-checkout":74,"@braintree/wrap-promise":17}],74:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -4000,19 +4407,6 @@ PayPalCheckout.prototype.createPayment = function (options) {
  * @param {string} [tokenizeOptions.paymentId] Payment ID returned by PayPal `onAuthorize` callback.
  * @param {string} [tokenizeOptions.billingToken] Billing Token returned by PayPal `onAuthorize` callback.
  * @param {callback} [callback] The second argument, <code>payload</code>, is a {@link PayPalCheckout~tokenizePayload|tokenizePayload}. If no callback is provided, the promise resolves with a {@link PayPalCheckout~tokenizePayload|tokenizePayload}.
- * @example
- * // this paypal object is created by checkout.js
- * // see https://github.com/paypal/paypal-checkout
- * paypal.Button.render({
- *   onAuthorize: function (data, actions) {
- *     return paypalCheckoutInstance.tokenizePayment(data).then(function (payload) {
- *       // Submit payload.nonce to your server
- *     }).catch(function (err) {
- *       // handle error
- *     });
- *   },
- *   // Add other options, e.g. payment, env, locale
- * }, '#paypal-button');
  * @returns {Promise|void} Returns a promise if no callback is provided.
  */
 PayPalCheckout.prototype.tokenizePayment = function (tokenizeOptions) {
@@ -4154,7 +4548,7 @@ PayPalCheckout.prototype._formatTokenizePayload = function (response) {
 
 module.exports = wrapPromise.wrapPrototype(PayPalCheckout);
 
-},{"../lib/analytics":41,"../lib/braintree-error":45,"../lib/convert-to-braintree-error":52,"../lib/promise":64,"../paypal/shared/constants":71,"./errors":68,"@braintree/wrap-promise":17}],71:[function(require,module,exports){
+},{"../lib/analytics":44,"../lib/braintree-error":48,"../lib/convert-to-braintree-error":55,"../lib/promise":67,"../paypal/shared/constants":75,"./errors":72,"@braintree/wrap-promise":17}],75:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -4165,7 +4559,474 @@ module.exports = {
   }
 };
 
-},{}],72:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
+'use strict';
+
+var BraintreeError = require('../../lib/braintree-error');
+var analytics = require('../../lib/analytics');
+var assign = require('../../lib/assign').assign;
+var methods = require('../../lib/methods');
+var convertMethodsToError = require('../../lib/convert-methods-to-error');
+var constants = require('../shared/constants');
+var useMin = require('../../lib/use-min');
+var Bus = require('../../lib/bus');
+var uuid = require('../../lib/vendor/uuid');
+var deferred = require('../../lib/deferred');
+var errors = require('../shared/errors');
+var events = require('../shared/events');
+var VERSION = "3.26.0";
+var iFramer = require('@braintree/iframer');
+var Promise = require('../../lib/promise');
+var wrapPromise = require('@braintree/wrap-promise');
+
+var IFRAME_HEIGHT = 400;
+var IFRAME_WIDTH = 400;
+
+/**
+ * @typedef {object} ThreeDSecure~verifyPayload
+ * @property {string} nonce The new payment method nonce produced by the 3D Secure lookup. The original nonce passed into {@link ThreeDSecure#verifyCard|verifyCard} was consumed. This new nonce should be used to transact on your server.
+ * @property {object} details Additional account details.
+ * @property {string} details.cardType Type of card, ex: Visa, MasterCard.
+ * @property {string} details.lastFour Last four digits of card number.
+ * @property {string} details.lastTwo Last two digits of card number.
+ * @property {string} description A human-readable description.
+ * @property {boolean} liabilityShiftPossible Indicates whether the card was eligible for 3D Secure.
+ * @property {boolean} liabilityShifted Indicates whether the liability for fraud has been shifted away from the merchant.
+ */
+
+/**
+ * @class
+ * @param {object} options 3D Secure {@link module:braintree-web/three-d-secure.create create} options
+ * @description <strong>Do not use this constructor directly. Use {@link module:braintree-web/three-d-secure.create|braintree.threeDSecure.create} instead.</strong>
+ * @classdesc This class represents a ThreeDSecure component produced by {@link module:braintree-web/three-d-secure.create|braintree.threeDSecure.create}. Instances of this class have a method for launching a 3D Secure authentication flow.
+ */
+function ThreeDSecure(options) {
+  this._options = options;
+  this._assetsUrl = options.client.getConfiguration().gatewayConfiguration.assetsUrl;
+  this._isDebug = options.client.getConfiguration().isDebug;
+  this._client = options.client;
+}
+
+/**
+ * @callback ThreeDSecure~addFrameCallback
+ * @param {?BraintreeError} [err] `null` or `undefined` if there was no error.
+ * @param {HTMLIFrameElement} iframe An iframe element containing the bank's authentication page that you must put on your page.
+ * @description The callback used for options.addFrame in {@link ThreeDSecure#verifyCard|verifyCard}.
+ * @returns {void}
+ */
+
+/**
+ * @callback ThreeDSecure~removeFrameCallback
+ * @description The callback used for options.removeFrame in {@link ThreeDSecure#verifyCard|verifyCard}.
+ * @returns {void}
+ */
+
+/**
+ * Launch the 3D Secure login flow, returning a nonce payload.
+ * @public
+ * @param {object} options Options for card verification.
+ * @param {string} options.nonce A nonce referencing the card to be verified. For example, this can be a nonce that was returned by Hosted Fields.
+ * @param {number} options.amount The amount of the transaction in the current merchant account's currency. For example, if you are running a transaction of $123.45 US dollars, `amount` would be 123.45.
+ * @param {callback} options.addFrame This {@link ThreeDSecure~addFrameCallback|addFrameCallback} will be called when the bank frame needs to be added to your page.
+ * @param {callback} options.removeFrame This {@link ThreeDSecure~removeFrameCallback|removeFrameCallback} will be called when the bank frame needs to be removed from your page.
+ * @param {boolean} [options.showLoader=true] Whether to show the loader icon while the bank frame is loading.
+ * @param {callback} [callback] The second argument, <code>data</code>, is a {@link ThreeDSecure~verifyPayload|verifyPayload}. If no callback is provided, it will return a promise that resolves {@link ThreeDSecure~verifyPayload|verifyPayload}.
+
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ * @example
+ * <caption>Verifying an existing nonce with 3DS</caption>
+ * var my3DSContainer;
+ *
+ * threeDSecure.verifyCard({
+ *   nonce: existingNonce,
+ *   amount: 123.45,
+ *   addFrame: function (err, iframe) {
+ *     // Set up your UI and add the iframe.
+ *     my3DSContainer = document.createElement('div');
+ *     my3DSContainer.appendChild(iframe);
+ *     document.body.appendChild(my3DSContainer);
+ *   },
+ *   removeFrame: function () {
+ *     // Remove UI that you added in addFrame.
+ *     document.body.removeChild(my3DSContainer);
+ *   }
+ * }, function (err, payload) {
+ *   if (err) {
+ *     console.error(err);
+ *     return;
+ *   }
+ *
+ *   if (payload.liabilityShifted) {
+ *     // Liablity has shifted
+ *     submitNonceToServer(payload.nonce);
+ *   } else if (payload.liabilityShiftPossible) {
+ *     // Liablity may still be shifted
+ *     // Decide if you want to submit the nonce
+ *   } else {
+ *     // Liablity has not shifted and will not shift
+ *     // Decide if you want to submit the nonce
+ *   }
+ * });
+ */
+ThreeDSecure.prototype.verifyCard = function (options) {
+  var url, showLoader, addFrame, removeFrame, error, errorOption;
+  var self = this;
+
+  options = options || {};
+
+  if (this._verifyCardInProgress === true) {
+    error = errors.THREEDS_AUTHENTICATION_IN_PROGRESS;
+  } else if (!options.nonce) {
+    errorOption = 'a nonce';
+  } else if (!options.amount) {
+    errorOption = 'an amount';
+  } else if (typeof options.addFrame !== 'function') {
+    errorOption = 'an addFrame function';
+  } else if (typeof options.removeFrame !== 'function') {
+    errorOption = 'a removeFrame function';
+  }
+
+  if (errorOption) {
+    error = {
+      type: errors.THREEDS_MISSING_VERIFY_CARD_OPTION.type,
+      code: errors.THREEDS_MISSING_VERIFY_CARD_OPTION.code,
+      message: 'verifyCard options must include ' + errorOption + '.'
+    };
+  }
+
+  if (error) {
+    return Promise.reject(new BraintreeError(error));
+  }
+
+  showLoader = options.showLoader !== false;
+
+  this._verifyCardInProgress = true;
+
+  addFrame = deferred(options.addFrame);
+  removeFrame = deferred(options.removeFrame);
+
+  url = 'payment_methods/' + options.nonce + '/three_d_secure/lookup';
+
+  return this._client.request({
+    endpoint: url,
+    method: 'post',
+    data: {amount: options.amount}
+  }).then(function (response) {
+    self._lookupPaymentMethod = response.paymentMethod;
+
+    return new Promise(function (resolve, reject) {
+      self._verifyCardCallback = function (verifyErr, payload) {
+        self._verifyCardInProgress = false;
+
+        if (verifyErr) {
+          reject(verifyErr);
+        } else {
+          resolve(payload);
+        }
+      };
+
+      self._handleLookupResponse({
+        showLoader: showLoader,
+        lookupResponse: response,
+        addFrame: addFrame,
+        removeFrame: removeFrame
+      });
+    });
+  }).catch(function (err) {
+    self._verifyCardInProgress = false;
+
+    return Promise.reject(err);
+  });
+};
+
+/**
+ * Cancel the 3DS flow and return the verification payload if available.
+ * @public
+ * @param {callback} [callback] The second argument is a {@link ThreeDSecure~verifyPayload|verifyPayload}. If there is no verifyPayload (the initial lookup did not complete), an error will be returned. If no callback is passed, `cancelVerifyCard` will return a promise.
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ * @example
+ * threeDSecure.cancelVerifyCard(function (err, verifyPayload) {
+ *   if (err) {
+ *     // Handle error
+ *     console.log(err.message); // No verification payload available
+ *     return;
+ *   }
+ *
+ *   verifyPayload.nonce; // The nonce returned from the 3ds lookup call
+ *   verifyPayload.liabilityShifted; // boolean
+ *   verifyPayload.liabilityShiftPossible; // boolean
+ * });
+ */
+ThreeDSecure.prototype.cancelVerifyCard = function () {
+  var response;
+
+  this._verifyCardInProgress = false;
+
+  if (!this._lookupPaymentMethod) {
+    return Promise.reject(new BraintreeError(errors.THREEDS_NO_VERIFICATION_PAYLOAD));
+  }
+
+  response = assign({}, this._lookupPaymentMethod, {
+    liabilityShiftPossible: this._lookupPaymentMethod.threeDSecureInfo.liabilityShiftPossible,
+    liabilityShifted: this._lookupPaymentMethod.threeDSecureInfo.liabilityShifted,
+    verificationDetails: this._lookupPaymentMethod.threeDSecureInfo.verificationDetails
+  });
+
+  return Promise.resolve(response);
+};
+
+ThreeDSecure.prototype._handleLookupResponse = function (options) {
+  var lookupResponse = options.lookupResponse;
+
+  if (lookupResponse.lookup && lookupResponse.lookup.acsUrl && lookupResponse.lookup.acsUrl.length > 0) {
+    options.addFrame(null, this._createIframe({
+      showLoader: options.showLoader,
+      response: lookupResponse.lookup,
+      removeFrame: options.removeFrame
+    }));
+  } else {
+    this._verifyCardCallback(null, {
+      nonce: lookupResponse.paymentMethod.nonce,
+      liabilityShiftPossible: lookupResponse.threeDSecureInfo.liabilityShiftPossible,
+      liabilityShifted: lookupResponse.threeDSecureInfo.liabilityShifted,
+      verificationDetails: lookupResponse.threeDSecureInfo
+    });
+  }
+};
+
+ThreeDSecure.prototype._createIframe = function (options) {
+  var url, authenticationCompleteBaseUrl;
+  var parentURL = window.location.href;
+  var response = options.response;
+
+  this._bus = new Bus({
+    channel: uuid(),
+    merchantUrl: location.href
+  });
+
+  authenticationCompleteBaseUrl = this._assetsUrl + '/web/' + VERSION + '/html/three-d-secure-authentication-complete-frame.html?channel=' + encodeURIComponent(this._bus.channel) + '&';
+
+  if (parentURL.indexOf('#') > -1) {
+    parentURL = parentURL.split('#')[0];
+  }
+
+  this._bus.on(Bus.events.CONFIGURATION_REQUEST, function (reply) {
+    reply({
+      acsUrl: response.acsUrl,
+      pareq: response.pareq,
+      termUrl: response.termUrl + '&three_d_secure_version=' + VERSION + '&authentication_complete_base_url=' + encodeURIComponent(authenticationCompleteBaseUrl),
+      md: response.md,
+      parentUrl: parentURL
+    });
+  });
+
+  this._bus.on(events.AUTHENTICATION_COMPLETE, function (data) {
+    this._handleAuthResponse(data, options);
+  }.bind(this));
+
+  url = this._assetsUrl + '/web/' + VERSION + '/html/three-d-secure-bank-frame' + useMin(this._isDebug) + '.html?showLoader=' + options.showLoader;
+
+  this._bankIframe = iFramer({
+    src: url,
+    height: IFRAME_HEIGHT,
+    width: IFRAME_WIDTH,
+    name: constants.LANDING_FRAME_NAME + '_' + this._bus.channel
+  });
+
+  return this._bankIframe;
+};
+
+ThreeDSecure.prototype._handleAuthResponse = function (data, options) {
+  var authResponse = JSON.parse(data.auth_response);
+
+  this._bus.teardown();
+
+  options.removeFrame();
+
+  // This also has to be in a setTimeout so it executes after the `removeFrame`.
+  deferred(function () {
+    if (authResponse.success) {
+      this._verifyCardCallback(null, this._formatAuthResponse(authResponse.paymentMethod, authResponse.threeDSecureInfo));
+    } else if (authResponse.threeDSecureInfo && authResponse.threeDSecureInfo.liabilityShiftPossible) {
+      this._verifyCardCallback(null, this._formatAuthResponse(this._lookupPaymentMethod, authResponse.threeDSecureInfo));
+    } else {
+      this._verifyCardCallback(new BraintreeError({
+        type: BraintreeError.types.UNKNOWN,
+        code: 'UNKNOWN_AUTH_RESPONSE',
+        message: authResponse.error.message
+      }));
+    }
+  }.bind(this))();
+};
+
+ThreeDSecure.prototype._formatAuthResponse = function (paymentMethod, threeDSecureInfo) {
+  return {
+    nonce: paymentMethod.nonce,
+    details: paymentMethod.details,
+    description: paymentMethod.description,
+    liabilityShifted: threeDSecureInfo.liabilityShifted,
+    liabilityShiftPossible: threeDSecureInfo.liabilityShiftPossible
+  };
+};
+
+/**
+ * Cleanly remove anything set up by {@link module:braintree-web/three-d-secure.create|create}.
+ * @public
+ * @param {callback} [callback] Called on completion. If no callback is passed, `teardown` will return a promise.
+ * @example
+ * threeDSecure.teardown();
+ * @example <caption>With callback</caption>
+ * threeDSecure.teardown(function () {
+ *   // teardown is complete
+ * });
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ */
+ThreeDSecure.prototype.teardown = function () {
+  var iframeParent;
+
+  convertMethodsToError(this, methods(ThreeDSecure.prototype));
+
+  analytics.sendEvent(this._options.client, 'threedsecure.teardown-completed');
+
+  if (this._bus) {
+    this._bus.teardown();
+  }
+
+  if (this._bankIframe) {
+    iframeParent = this._bankIframe.parentNode;
+
+    if (iframeParent) {
+      iframeParent.removeChild(this._bankIframe);
+    }
+  }
+
+  return Promise.resolve();
+};
+
+module.exports = wrapPromise.wrapPrototype(ThreeDSecure);
+
+},{"../../lib/analytics":44,"../../lib/assign":45,"../../lib/braintree-error":48,"../../lib/bus":51,"../../lib/convert-methods-to-error":54,"../../lib/deferred":57,"../../lib/methods":65,"../../lib/promise":67,"../../lib/use-min":69,"../../lib/vendor/uuid":71,"../shared/constants":78,"../shared/errors":79,"../shared/events":80,"@braintree/iframer":10,"@braintree/wrap-promise":17}],77:[function(require,module,exports){
+'use strict';
+/** @module braintree-web/three-d-secure */
+
+var ThreeDSecure = require('./external/three-d-secure');
+var isHTTPS = require('../lib/is-https').isHTTPS;
+var basicComponentVerification = require('../lib/basic-component-verification');
+var BraintreeError = require('../lib/braintree-error');
+var analytics = require('../lib/analytics');
+var errors = require('./shared/errors');
+var VERSION = "3.26.0";
+var Promise = require('../lib/promise');
+var wrapPromise = require('@braintree/wrap-promise');
+
+/**
+ * @static
+ * @function create
+ * @param {object} options Creation options:
+ * @param {Client} options.client A {@link Client} instance.
+ * @param {callback} [callback] The second argument, `data`, is the {@link ThreeDSecure} instance. If no callback is provided, it returns a promise that resolves the {@link ThreeDSecure} instance.
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ */
+function create(options) {
+  return basicComponentVerification.verify({
+    name: '3D Secure',
+    client: options.client
+  }).then(function () {
+    var error, isProduction;
+    var config = options.client.getConfiguration();
+
+    if (!config.gatewayConfiguration.threeDSecureEnabled) {
+      error = errors.THREEDS_NOT_ENABLED;
+    }
+
+    if (config.authorizationType === 'TOKENIZATION_KEY') {
+      error = errors.THREEDS_CAN_NOT_USE_TOKENIZATION_KEY;
+    }
+
+    isProduction = config.gatewayConfiguration.environment === 'production';
+
+    if (isProduction && !isHTTPS()) {
+      error = errors.THREEDS_HTTPS_REQUIRED;
+    }
+
+    if (error) {
+      return Promise.reject(new BraintreeError(error));
+    }
+
+    analytics.sendEvent(options.client, 'threedsecure.initialized');
+
+    return new ThreeDSecure(options);
+  });
+}
+
+module.exports = {
+  create: wrapPromise(create),
+  /**
+   * @description The current version of the SDK, i.e. `{@pkg version}`.
+   * @type {string}
+   */
+  VERSION: VERSION
+};
+
+},{"../lib/analytics":44,"../lib/basic-component-verification":46,"../lib/braintree-error":48,"../lib/is-https":62,"../lib/promise":67,"./external/three-d-secure":76,"./shared/errors":79,"@braintree/wrap-promise":17}],78:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  LANDING_FRAME_NAME: 'braintreethreedsecurelanding'
+};
+
+},{}],79:[function(require,module,exports){
+'use strict';
+
+var BraintreeError = require('../../lib/braintree-error');
+
+module.exports = {
+  THREEDS_AUTHENTICATION_IN_PROGRESS: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_AUTHENTICATION_IN_PROGRESS',
+    message: 'Cannot call verifyCard while existing authentication is in progress.'
+  },
+  THREEDS_MISSING_VERIFY_CARD_OPTION: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_MISSING_VERIFY_CARD_OPTION'
+  },
+  THREEDS_NO_VERIFICATION_PAYLOAD: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_NO_VERIFICATION_PAYLOAD',
+    message: 'No verification payload available.'
+  },
+  THREEDS_NOT_ENABLED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_NOT_ENABLED',
+    message: '3D Secure is not enabled for this merchant.'
+  },
+  THREEDS_CAN_NOT_USE_TOKENIZATION_KEY: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_CAN_NOT_USE_TOKENIZATION_KEY',
+    message: '3D Secure can not use a tokenization key for authorization.'
+  },
+  THREEDS_HTTPS_REQUIRED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_HTTPS_REQUIRED',
+    message: '3D Secure requires HTTPS.'
+  },
+  THREEDS_TERM_URL_REQUIRES_BRAINTREE_DOMAIN: {
+    type: BraintreeError.types.INTERNAL,
+    code: 'THREEDS_TERM_URL_REQUIRES_BRAINTREE_DOMAIN',
+    message: 'Term Url must be on a Braintree domain.'
+  }
+};
+
+},{"../../lib/braintree-error":48}],80:[function(require,module,exports){
+'use strict';
+
+var enumerate = require('../../lib/enumerate');
+
+module.exports = enumerate([
+  'AUTHENTICATION_COMPLETE'
+], 'threedsecure:');
+
+},{"../../lib/enumerate":59}],81:[function(require,module,exports){
 'use strict';
 
 var types = {};
@@ -4276,7 +5137,7 @@ types[JCB] = {
   prefixPattern: /^(2|21|213|2131|1|18|180|1800|3|35)$/,
   exactPattern: /^(2131|1800|35)\d*$/,
   gaps: [4, 8, 12],
-  lengths: [16],
+  lengths: [16, 17, 18, 19],
   code: {
     name: CVV,
     size: 3
@@ -4354,7 +5215,7 @@ creditCardType.types = {
 
 module.exports = creditCardType;
 
-},{}],73:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -4632,7 +5493,7 @@ module.exports = creditCardType;
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],74:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 (function (root) {
 
   // Store setTimeout reference so promise-polyfill will be unaffected by
@@ -4867,7 +5728,7 @@ module.exports = creditCardType;
 
 })(this);
 
-},{}],75:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4912,7 +5773,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@braintree/browser-detection/is-android":1,"@braintree/browser-detection/is-chrome":2,"@braintree/browser-detection/is-ie9":6,"@braintree/browser-detection/is-ios":8}],76:[function(require,module,exports){
+},{"@braintree/browser-detection/is-android":1,"@braintree/browser-detection/is-chrome":2,"@braintree/browser-detection/is-ie9":6,"@braintree/browser-detection/is-ios":8}],85:[function(require,module,exports){
 'use strict';
 
 var device = require('./lib/device');
@@ -4922,23 +5783,26 @@ module.exports = function () {
   return !device.isSamsungBrowser();
 };
 
-},{"./lib/device":75}],77:[function(require,module,exports){
+},{"./lib/device":84}],86:[function(require,module,exports){
 'use strict';
 
 module.exports = {
   paymentOptionIDs: {
     card: 'card',
     paypal: 'paypal',
-    paypalCredit: 'paypalCredit'
+    paypalCredit: 'paypalCredit',
+    applePay: 'applePay'
   },
   paymentMethodTypes: {
     card: 'CreditCard',
     paypal: 'PayPalAccount',
-    paypalCredit: 'PayPalAccount'
+    paypalCredit: 'PayPalAccount',
+    applePay: 'ApplePayCard'
   },
   analyticsKinds: {
     CreditCard: 'card',
-    PayPalAccount: 'paypal'
+    PayPalAccount: 'paypal',
+    ApplePayCard: 'applepay'
   },
   paymentMethodCardTypes: {
     Visa: 'visa',
@@ -4974,7 +5838,8 @@ module.exports = {
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
 
-},{}],78:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
+(function (global){
 'use strict';
 
 var DropinError = require('./lib/dropin-error');
@@ -5158,7 +6023,7 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
 
 function getSupportedPaymentOptions(options) {
   var result = [];
-  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit'];
+  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit', 'applePay'];
 
   if (!(paymentOptionPriority instanceof Array)) {
     throw new DropinError('paymentOptionPriority must be an array.');
@@ -5182,6 +6047,7 @@ function getSupportedPaymentOptions(options) {
 
 function isPaymentOptionEnabled(paymentOption, options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var applePayEnabled, applePayBrowserSupported;
 
   if (paymentOption === 'card') {
     return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
@@ -5189,13 +6055,20 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
   } else if (paymentOption === 'paypalCredit') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
+  } else if (paymentOption === 'applePay') {
+    applePayEnabled = gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay);
+    applePayBrowserSupported = global.ApplePaySession && global.ApplePaySession.canMakePayments();
+
+    if (!applePayEnabled || !applePayBrowserSupported) { return false; }
+    return true;
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }
 
 module.exports = DropinModel;
 
-},{"./constants":77,"./lib/dropin-error":87,"./lib/event-emitter":88,"./lib/is-guest-checkout":90}],79:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./constants":86,"./lib/dropin-error":96,"./lib/event-emitter":97,"./lib/is-guest-checkout":99}],88:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -5214,32 +6087,38 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
+var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
-var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n            <div class=\"braintree-form__field\">\n              <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\">\n                <input id=\"braintree__card-view-input__cardholder-name\" type=\"text\" placeholder=\"{{cardholderNamePlaceholder}}\"/>\n              </div>\n              <div class=\"braintree-form__icon-container\">\n                <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                  <svg width=\"24\" height=\"24\">\n                    <use xlink:href=\"#iconError\"></use>\n                  </svg>\n                </div>\n              </div>\n            </div>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\">{{fieldEmptyForCardholderName}}</div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n            <div class=\"braintree-form__field\">\n              <label>\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n              </label>\n              <div class=\"braintree-form__icon-container\">\n                <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                  <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                  <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                  </svg>\n                </div>\n                <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                  <svg width=\"24\" height=\"24\">\n                    <use xlink:href=\"#iconError\"></use>\n                  </svg>\n                </div>\n              </div>\n            </div>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n              </div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n\n              <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{cvvLabel}}\n                <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n              </div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-toggle braintree-hidden\" tabindex=\"0\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n";
-var svgHTML = "<svg data-braintree-id=\"svgs\" style=\"display: none\">\n  <defs>\n    <symbol id=\"icon-visa\" viewBox=\"0 0 40 24\">\n      <title>Visa</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M0 22.033C0 23.12.892 24 1.992 24h36.016c1.1 0 1.992-.88 1.992-1.967V20.08H0v1.953z\" style=\"fill: #F8B600\" />\n      <path d=\"M0 3.92h40V1.967C40 .88 39.108 0 38.008 0H1.992C.892 0 0 .88 0 1.967V3.92zM19.596 7.885l-2.11 9.478H14.93l2.11-9.478h2.554zm10.743 6.12l1.343-3.56.773 3.56H30.34zm2.85 3.358h2.36l-2.063-9.478H31.31c-.492 0-.905.274-1.088.695l-3.832 8.783h2.682l.532-1.415h3.276l.31 1.415zm-6.667-3.094c.01-2.502-3.6-2.64-3.577-3.76.008-.338.345-.7 1.083-.793.365-.045 1.373-.08 2.517.425l.448-2.01c-.615-.214-1.405-.42-2.39-.42-2.523 0-4.3 1.288-4.313 3.133-.016 1.364 1.268 2.125 2.234 2.58.996.464 1.33.762 1.325 1.177-.006.636-.793.918-1.526.928-1.285.02-2.03-.333-2.623-.6l-.462 2.08c.598.262 1.7.49 2.84.502 2.682 0 4.437-1.273 4.445-3.243zM15.948 7.884l-4.138 9.478h-2.7L7.076 9.8c-.123-.466-.23-.637-.606-.834-.615-.32-1.63-.62-2.52-.806l.06-.275h4.345c.554 0 1.052.354 1.178.966l1.076 5.486 2.655-6.45h2.683z\" style=\"fill: #1A1F71\" />\n    </symbol>\n\n    <symbol id=\"icon-master-card\" viewBox=\"0 0 40 24\">\n      <title>MasterCard</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M11.085 22.2v-1.36c0-.522-.318-.863-.864-.863-.272 0-.568.09-.773.386-.16-.25-.386-.386-.727-.386-.228 0-.455.068-.637.318v-.272h-.478V22.2h.478v-1.202c0-.386.204-.567.523-.567.318 0 .478.205.478.568V22.2h.477v-1.202c0-.386.23-.567.524-.567.32 0 .478.205.478.568V22.2h.523zm7.075-2.177h-.774v-.658h-.478v.658h-.432v.43h.432v.998c0 .5.205.795.75.795.206 0 .433-.068.592-.16l-.136-.407c-.136.09-.296.114-.41.114-.227 0-.318-.137-.318-.363v-.976h.774v-.43zm4.048-.046c-.273 0-.454.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .204.023.295.046l.137-.454c-.09-.023-.228-.023-.32-.023zm-6.118.227c-.228-.16-.546-.227-.888-.227-.546 0-.91.272-.91.703 0 .363.274.567.75.635l.23.023c.25.045.385.113.385.227 0 .16-.182.272-.5.272-.32 0-.57-.113-.728-.227l-.228.363c.25.18.59.272.932.272.637 0 1-.295 1-.703 0-.385-.295-.59-.75-.658l-.227-.022c-.205-.023-.364-.068-.364-.204 0-.16.16-.25.41-.25.272 0 .545.114.682.182l.205-.386zm12.692-.227c-.273 0-.455.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .203.023.294.046L29.1 20c-.09-.023-.227-.023-.318-.023zm-6.096 1.134c0 .66.455 1.135 1.16 1.135.32 0 .546-.068.774-.25l-.228-.385c-.182.136-.364.204-.57.204-.385 0-.658-.272-.658-.703 0-.407.273-.68.66-.702.204 0 .386.068.568.204l.228-.385c-.228-.182-.455-.25-.774-.25-.705 0-1.16.477-1.16 1.134zm4.413 0v-1.087h-.48v.272c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.317 0 .545-.113.68-.317v.272h.48v-1.09zm-1.753 0c0-.384.25-.702.66-.702.387 0 .66.295.66.703 0 .387-.273.704-.66.704-.41-.022-.66-.317-.66-.703zm-5.71-1.133c-.636 0-1.09.454-1.09 1.134 0 .682.454 1.135 1.114 1.135.32 0 .638-.09.888-.295l-.228-.34c-.18.136-.41.227-.636.227-.296 0-.592-.136-.66-.522h1.615v-.18c.022-.704-.388-1.158-1.002-1.158zm0 .41c.297 0 .502.18.547.52h-1.137c.045-.295.25-.52.59-.52zm11.852.724v-1.95h-.48v1.135c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.68-.317v.272h.48v-1.09zm-1.752 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703zm-15.97 0v-1.087h-.476v.272c-.16-.204-.387-.318-.683-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.682-.317v.272h.477v-1.09zm-1.773 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703z\" style=\"fill: #000\" />\n      <path style=\"fill: #FF5F00\" d=\"M23.095 3.49H15.93v12.836h7.165\" />\n      <path d=\"M16.382 9.91c0-2.61 1.23-4.922 3.117-6.42-1.39-1.087-3.14-1.745-5.05-1.745-4.528 0-8.19 3.65-8.19 8.164 0 4.51 3.662 8.162 8.19 8.162 1.91 0 3.66-.657 5.05-1.746-1.89-1.474-3.118-3.81-3.118-6.417z\" style=\"fill: #EB001B\" />\n      <path d=\"M32.76 9.91c0 4.51-3.664 8.162-8.19 8.162-1.91 0-3.662-.657-5.05-1.746 1.91-1.496 3.116-3.81 3.116-6.417 0-2.61-1.228-4.922-3.116-6.42 1.388-1.087 3.14-1.745 5.05-1.745 4.526 0 8.19 3.674 8.19 8.164z\" style=\"fill: #F79E1B\" />\n    </symbol>\n\n    <symbol id=\"icon-unionpay\" viewBox=\"0 0 40 24\">\n      <title>Union Pay</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.877 2h8.126c1.135 0 1.84.93 1.575 2.077l-3.783 16.35c-.267 1.142-1.403 2.073-2.538 2.073H5.13c-1.134 0-1.84-.93-1.574-2.073L7.34 4.076C7.607 2.93 8.74 2 9.878 2z\" style=\"fill: #E21836\" />\n      <path d=\"M17.325 2h9.345c1.134 0 .623.93.356 2.077l-3.783 16.35c-.265 1.142-.182 2.073-1.32 2.073H12.58c-1.137 0-1.84-.93-1.574-2.073l3.783-16.35C15.056 2.93 16.19 2 17.324 2z\" style=\"fill: #00447B\" />\n      <path d=\"M26.3 2h8.126c1.136 0 1.84.93 1.575 2.077l-3.782 16.35c-.266 1.142-1.402 2.073-2.54 2.073h-8.122c-1.137 0-1.842-.93-1.574-2.073l3.78-16.35C24.03 2.93 25.166 2 26.303 2z\" style=\"fill: #007B84\" />\n      <path d=\"M27.633 14.072l-.99 3.3h.266l-.208.68h-.266l-.062.212h-.942l.064-.21H23.58l.193-.632h.194l1.005-3.35.2-.676h.962l-.1.34s.255-.184.498-.248c.242-.064 1.636-.088 1.636-.088l-.206.672h-.33zm-1.695 0l-.254.843s.285-.13.44-.172c.16-.04.395-.057.395-.057l.182-.614h-.764zm-.38 1.262l-.263.877s.29-.15.447-.196c.157-.037.396-.066.396-.066l.185-.614h-.766zm-.614 2.046h.767l.222-.74h-.765l-.223.74z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M28.055 13.4h1.027l.01.385c-.005.065.05.096.17.096h.208l-.19.637h-.555c-.48.035-.662-.172-.65-.406l-.02-.71zM28.193 16.415h-.978l.167-.566H28.5l.16-.517h-1.104l.19-.638h3.072l-.193.638h-1.03l-.16.516h1.032l-.17.565H29.18l-.2.24h.454l.11.712c.013.07.014.116.036.147.023.026.158.038.238.038h.137l-.21.694h-.348c-.054 0-.133-.004-.243-.01-.105-.008-.18-.07-.25-.105-.064-.03-.16-.11-.182-.24l-.11-.712-.507.7c-.162.222-.38.39-.748.39h-.712l.186-.62h.273c.078 0 .15-.03.2-.056.052-.023.098-.05.15-.126l.74-1.05zM17.478 14.867h2.59l-.19.622H18.84l-.16.53h1.06l-.194.64h-1.06l-.256.863c-.03.095.25.108.353.108l.53-.072-.212.71h-1.193c-.096 0-.168-.013-.272-.037-.1-.023-.145-.07-.19-.138-.043-.07-.11-.128-.064-.278l.343-1.143h-.588l.195-.65h.592l.156-.53h-.588l.188-.623zM19.223 13.75h1.063l-.194.65H18.64l-.157.136c-.067.066-.09.038-.18.087-.08.04-.254.123-.477.123h-.466l.19-.625h.14c.118 0 .198-.01.238-.036.046-.03.098-.096.157-.203l.267-.487h1.057l-.187.356zM20.74 13.4h.905l-.132.46s.286-.23.487-.313c.2-.075.65-.143.65-.143l1.464-.007-.498 1.672c-.085.286-.183.472-.244.555-.055.087-.12.16-.248.23-.124.066-.236.104-.34.115-.096.007-.244.01-.45.012h-1.41l-.4 1.324c-.037.13-.055.194-.03.23.02.03.068.066.135.066l.62-.06-.21.726h-.698c-.22 0-.383-.004-.495-.013-.108-.01-.22 0-.295-.058-.065-.058-.164-.133-.162-.21.007-.073.037-.192.082-.356l1.268-4.23zm1.922 1.69h-1.484l-.09.3h1.283c.152-.018.184.004.196-.003l.096-.297zm-1.402-.272s.29-.266.786-.353c.112-.022.82-.015.82-.015l.106-.357h-1.496l-.216.725z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M23.382 16.1l-.084.402c-.036.125-.067.22-.16.302-.1.084-.216.172-.488.172l-.502.02-.004.455c-.006.13.028.117.048.138.024.022.045.032.067.04l.157-.008.48-.028-.198.663h-.552c-.385 0-.67-.008-.765-.084-.092-.057-.105-.132-.103-.26l.035-1.77h.88l-.013.362h.212c.072 0 .12-.007.15-.026.027-.02.047-.048.06-.093l.087-.282h.692zM10.84 7.222c-.032.143-.596 2.763-.598 2.764-.12.53-.21.91-.508 1.152-.172.14-.37.21-.6.21-.37 0-.587-.185-.624-.537l-.007-.12.113-.712s.593-2.388.7-2.703c.002-.017.005-.026.007-.035-1.152.01-1.357 0-1.37-.018-.007.024-.037.173-.037.173l-.605 2.688-.05.23-.1.746c0 .22.042.4.13.553.275.485 1.06.557 1.504.557.573 0 1.11-.123 1.47-.345.63-.375.797-.962.944-1.48l.067-.267s.61-2.48.716-2.803c.003-.017.006-.026.01-.035-.835.01-1.08 0-1.16-.018zM14.21 12.144c-.407-.006-.55-.006-1.03.018l-.018-.036c.042-.182.087-.363.127-.548l.06-.25c.086-.39.173-.843.184-.98.007-.084.036-.29-.2-.29-.1 0-.203.048-.307.096-.058.207-.174.79-.23 1.055-.118.558-.126.62-.178.897l-.036.037c-.42-.006-.566-.006-1.05.018l-.024-.04c.08-.332.162-.668.24-.998.203-.9.25-1.245.307-1.702l.04-.028c.47-.067.585-.08 1.097-.185l.043.047-.077.287c.086-.052.168-.104.257-.15.242-.12.51-.155.658-.155.223 0 .468.062.57.323.098.232.034.52-.094 1.084l-.066.287c-.13.627-.152.743-.225 1.174l-.05.036zM15.87 12.144c-.245 0-.405-.006-.56 0-.153 0-.303.008-.532.018l-.013-.02-.015-.02c.062-.238.097-.322.128-.406.03-.084.06-.17.115-.41.072-.315.116-.535.147-.728.033-.187.052-.346.075-.53l.02-.014.02-.018c.244-.036.4-.057.56-.082.16-.024.32-.055.574-.103l.008.023.008.022c-.047.195-.094.39-.14.588-.047.197-.094.392-.137.587-.093.414-.13.57-.152.68-.02.105-.026.163-.063.377l-.022.02-.023.017zM19.542 10.728c.143-.633.033-.928-.108-1.11-.213-.273-.59-.36-.978-.36-.235 0-.793.023-1.23.43-.312.29-.458.687-.546 1.066-.088.387-.19 1.086.447 1.344.198.085.48.108.662.108.466 0 .945-.13 1.304-.513.278-.312.405-.775.448-.965zm-1.07-.046c-.02.106-.113.503-.24.673-.086.123-.19.198-.305.198-.033 0-.235 0-.238-.3-.003-.15.027-.304.063-.47.108-.478.236-.88.56-.88.255 0 .27.298.16.78zM29.536 12.187c-.493-.004-.635-.004-1.09.015l-.03-.037c.124-.472.248-.943.358-1.42.142-.62.175-.882.223-1.244l.037-.03c.49-.07.625-.09 1.135-.186l.015.044c-.093.388-.186.777-.275 1.166-.19.816-.258 1.23-.33 1.658l-.044.035z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M29.77 10.784c.144-.63-.432-.056-.525-.264-.14-.323-.052-.98-.62-1.2-.22-.085-.732.025-1.17.428-.31.29-.458.683-.544 1.062-.088.38-.19 1.078.444 1.328.2.085.384.11.567.103.638-.034 1.124-1.002 1.483-1.386.277-.303.326.115.368-.07zm-.974-.047c-.024.1-.117.503-.244.67-.083.117-.283.192-.397.192-.032 0-.232 0-.24-.3 0-.146.03-.3.067-.467.11-.47.235-.87.56-.87.254 0 .363.293.254.774zM22.332 12.144c-.41-.006-.55-.006-1.03.018l-.018-.036c.04-.182.087-.363.13-.548l.057-.25c.09-.39.176-.843.186-.98.008-.084.036-.29-.198-.29-.1 0-.203.048-.308.096-.057.207-.175.79-.232 1.055-.115.558-.124.62-.176.897l-.035.037c-.42-.006-.566-.006-1.05.018l-.022-.04.238-.998c.203-.9.25-1.245.307-1.702l.038-.028c.472-.067.587-.08 1.098-.185l.04.047-.073.287c.084-.052.17-.104.257-.15.24-.12.51-.155.655-.155.224 0 .47.062.575.323.095.232.03.52-.098 1.084l-.065.287c-.133.627-.154.743-.225 1.174l-.05.036zM26.32 8.756c-.07.326-.282.603-.554.736-.225.114-.498.123-.78.123h-.183l.013-.074.336-1.468.01-.076.007-.058.132.015.71.062c.275.105.388.38.31.74zM25.88 7.22l-.34.003c-.883.01-1.238.006-1.383-.012l-.037.182-.315 1.478-.793 3.288c.77-.01 1.088-.01 1.22.004l.21-1.024s.153-.644.163-.667c0 0 .047-.066.096-.092h.07c.665 0 1.417 0 2.005-.437.4-.298.675-.74.797-1.274.03-.132.054-.29.054-.446 0-.205-.04-.41-.16-.568-.3-.423-.896-.43-1.588-.433zM33.572 9.28l-.04-.043c-.502.1-.594.118-1.058.18l-.034.034-.005.023-.003-.007c-.345.803-.334.63-.615 1.26-.003-.03-.003-.048-.004-.077l-.07-1.37-.044-.043c-.53.1-.542.118-1.03.18l-.04.034-.006.056.003.007c.06.315.047.244.108.738.03.244.065.49.093.73.05.4.077.6.134 1.21-.328.55-.408.757-.722 1.238l.017.044c.478-.018.587-.018.94-.018l.08-.088c.265-.578 2.295-4.085 2.295-4.085zM16.318 9.62c.27-.19.304-.45.076-.586-.23-.137-.634-.094-.906.095-.273.186-.304.45-.075.586.228.134.633.094.905-.096z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M31.238 13.415l-.397.684c-.124.232-.357.407-.728.41l-.632-.01.184-.618h.124c.064 0 .11-.004.148-.022.03-.01.054-.035.08-.072l.233-.373h.988z\" style=\"fill: #FEFEFE\" />\n    </symbol>\n\n    <symbol id=\"icon-american-express\" viewBox=\"0 0 40 24\">\n      <title>American Express</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path style=\"fill: #1478BE\" d=\"M6.26 12.32h2.313L7.415 9.66M27.353 9.977h-3.738v1.23h3.666v1.384h-3.675v1.385h3.821v1.005c.623-.77 1.33-1.466 2.025-2.235l.707-.77c-.934-1.004-1.87-2.08-2.804-3.075v1.077z\" />\n      <path d=\"M38.25 7h-5.605l-1.328 1.4L30.072 7H16.984l-1.017 2.416L14.877 7h-9.58L1.25 16.5h4.826l.623-1.556h1.4l.623 1.556H29.99l1.327-1.483 1.328 1.483h5.605l-4.36-4.667L38.25 7zm-17.685 8.1h-1.557V9.883L16.673 15.1h-1.33L13.01 9.883l-.084 5.217H9.73l-.623-1.556h-3.27L5.132 15.1H3.42l2.884-6.772h2.42l2.645 6.233V8.33h2.646l2.107 4.51 1.868-4.51h2.575V15.1zm14.727 0h-2.024l-2.024-2.26-2.023 2.26H22.06V8.328H29.53l1.795 2.177 2.024-2.177h2.025L32.26 11.75l3.032 3.35z\" style=\"fill: #1478BE\" />\n    </symbol>\n\n    <symbol id=\"icon-jcb\" viewBox=\"0 0 40 24\">\n      <title>JCB</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M33.273 2.01h.013v17.062c-.004 1.078-.513 2.103-1.372 2.746-.63.47-1.366.67-2.14.67-.437 0-4.833.026-4.855 0-.01-.01 0-.07 0-.082v-6.82c0-.04.004-.064.033-.064h5.253c.867 0 1.344-.257 1.692-.61.44-.448.574-1.162.294-1.732-.24-.488-.736-.78-1.244-.913-.158-.04-.32-.068-.483-.083-.01 0-.064 0-.07-.006-.03-.034.023-.04.038-.046.102-.033.215-.042.32-.073.532-.164.993-.547 1.137-1.105.15-.577-.05-1.194-.524-1.552-.34-.257-.768-.376-1.187-.413-.43-.038-4.774-.022-5.21-.022-.072 0-.05-.02-.05-.09V5.63c0-.31.01-.616.073-.92.126-.592.41-1.144.815-1.59.558-.615 1.337-1.01 2.16-1.093.478-.048 4.89-.017 5.305-.017zm-4.06 8.616c.06.272-.01.567-.204.77-.173.176-.407.25-.648.253-.195.003-1.725 0-1.788 0l.003-1.645c.012-.027.02-.018.06-.018.097 0 1.713-.004 1.823.005.232.02.45.12.598.306.076.096.128.208.155.328zm-2.636 2.038h1.944c.242.002.47.063.652.228.226.204.327.515.283.815-.04.263-.194.5-.422.634-.187.112-.39.125-.6.125h-1.857v-1.8z\" style=\"fill: #53B230\" />\n      <path d=\"M6.574 13.89c-.06-.03-.06-.018-.07-.06-.006-.026-.005-8.365.003-8.558.04-.95.487-1.857 1.21-2.47.517-.434 1.16-.71 1.83-.778.396-.04.803-.018 1.2-.018.69 0 4.11-.013 4.12 0 .008.008.002 16.758 0 17.074-.003.956-.403 1.878-1.105 2.523-.506.465-1.15.77-1.83.86-.41.056-5.02.032-5.363.032-.066 0-.054.013-.066-.024-.01-.025 0-7 0-7.17.66.178 1.35.28 2.03.348.662.067 1.33.093 1.993.062.93-.044 1.947-.192 2.712-.762.32-.238.574-.553.73-.922.148-.353.2-.736.2-1.117 0-.348.006-3.93-.016-3.942-.023-.014-2.885-.015-2.9.012-.012.022 0 3.87 0 3.95-.003.47-.16.933-.514 1.252-.468.42-1.11.47-1.707.423-.687-.055-1.357-.245-1.993-.508-.157-.065-.312-.135-.466-.208z\" style=\"fill: #006CB9\" />\n      <path d=\"M15.95 9.835c-.025.02-.05.04-.072.06V6.05c0-.295-.012-.594.01-.888.12-1.593 1.373-2.923 2.944-3.126.382-.05 5.397-.042 5.41-.026.01.01 0 .062 0 .074v16.957c0 1.304-.725 2.52-1.89 3.1-.504.25-1.045.35-1.605.35-.322 0-4.757.015-4.834 0-.05-.01-.023.01-.035-.02-.007-.022 0-6.548 0-7.44v-.422c.554.48 1.256.75 1.96.908.536.12 1.084.176 1.63.196.537.02 1.076.01 1.61-.037.546-.05 1.088-.136 1.625-.244.137-.028.274-.057.41-.09.033-.006.17-.017.187-.044.013-.02 0-.097 0-.12v-1.324c-.582.292-1.19.525-1.83.652-.778.155-1.64.198-2.385-.123-.752-.326-1.2-1.024-1.274-1.837-.076-.837.173-1.716.883-2.212.736-.513 1.7-.517 2.553-.38.634.1 1.245.305 1.825.58.078.037.154.075.23.113V9.322c0-.02.013-.1 0-.118-.02-.028-.152-.038-.188-.046-.066-.016-.133-.03-.2-.045C22.38 9 21.84 8.908 21.3 8.85c-.533-.06-1.068-.077-1.603-.066-.542.01-1.086.054-1.62.154-.662.125-1.32.337-1.883.716-.085.056-.167.117-.245.18z\" style=\"fill: #E20138\" />\n    </symbol>\n\n    <symbol id=\"icon-discover\" viewBox=\"0 0 40 24\">\n      <title>Discover</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M38.995 11.75S27.522 20.1 6.5 23.5h31.495c.552 0 1-.448 1-1V11.75z\" style=\"fill: #F48024\" />\n      <path d=\"M5.332 11.758c-.338.305-.776.438-1.47.438h-.29V8.55h.29c.694 0 1.115.124 1.47.446.37.33.595.844.595 1.372 0 .53-.224 1.06-.595 1.39zM4.077 7.615H2.5v5.515h1.57c.833 0 1.435-.197 1.963-.637.63-.52 1-1.305 1-2.116 0-1.628-1.214-2.762-2.956-2.762zM7.53 13.13h1.074V7.616H7.53M11.227 9.732c-.645-.24-.834-.397-.834-.695 0-.347.338-.61.8-.61.322 0 .587.132.867.446l.562-.737c-.462-.405-1.015-.612-1.618-.612-.975 0-1.718.678-1.718 1.58 0 .76.346 1.15 1.355 1.513.42.148.635.247.743.314.215.14.322.34.322.57 0 .448-.354.78-.834.78-.51 0-.924-.258-1.17-.736l-.695.67c.495.726 1.09 1.05 1.907 1.05 1.116 0 1.9-.745 1.9-1.812 0-.876-.363-1.273-1.585-1.72zM13.15 10.377c0 1.62 1.27 2.877 2.907 2.877.462 0 .858-.09 1.347-.32v-1.267c-.43.43-.81.604-1.297.604-1.082 0-1.85-.785-1.85-1.9 0-1.06.792-1.895 1.8-1.895.512 0 .9.183 1.347.62V7.83c-.472-.24-.86-.34-1.322-.34-1.627 0-2.932 1.283-2.932 2.887zM25.922 11.32l-1.468-3.705H23.28l2.337 5.656h.578l2.38-5.655H27.41M29.06 13.13h3.046v-.934h-1.973v-1.488h1.9v-.934h-1.9V8.55h1.973v-.935H29.06M34.207 10.154h-.314v-1.67h.33c.67 0 1.034.28 1.034.818 0 .554-.364.852-1.05.852zm2.155-.91c0-1.033-.71-1.628-1.95-1.628H32.82v5.514h1.073v-2.215h.14l1.487 2.215h1.32l-1.733-2.323c.81-.165 1.255-.72 1.255-1.563z\" style=\"fill: #221F20\" />\n      <path d=\"M23.6 10.377c0 1.62-1.31 2.93-2.927 2.93-1.617.002-2.928-1.31-2.928-2.93s1.31-2.932 2.928-2.932c1.618 0 2.928 1.312 2.928 2.932z\" style=\"fill: #F48024\" />\n    </symbol>\n\n    <symbol id=\"icon-diners-club\" viewBox=\"0 0 40 24\">\n      <title>Diners Club</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.02 11.83c0-5.456 4.54-9.88 10.14-9.88 5.6 0 10.139 4.424 10.139 9.88-.002 5.456-4.54 9.88-10.14 9.88-5.6 0-10.14-4.424-10.14-9.88z\" style=\"fill: #FEFEFE\" />\n      <path style=\"fill: #FFF\" d=\"M32.522 22H8.5V1.5h24.022\" />\n      <path d=\"M25.02 11.732c-.003-2.534-1.607-4.695-3.868-5.55v11.102c2.26-.857 3.865-3.017 3.87-5.552zm-8.182 5.55V6.18c-2.26.86-3.86 3.017-3.867 5.55.007 2.533 1.61 4.69 3.868 5.55zm2.158-14.934c-5.25.002-9.503 4.202-9.504 9.384 0 5.182 4.254 9.38 9.504 9.382 5.25 0 9.504-4.2 9.505-9.382 0-5.182-4.254-9.382-9.504-9.384zM18.973 22C13.228 22.027 8.5 17.432 8.5 11.84 8.5 5.726 13.228 1.5 18.973 1.5h2.692c5.677 0 10.857 4.225 10.857 10.34 0 5.59-5.18 10.16-10.857 10.16h-2.692z\" style=\"fill: #004A97\" />\n    </symbol>\n\n    <symbol id=\"icon-maestro\" viewBox=\"0 0 40 24\">\n      <title>Maestro</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M14.67 22.39V21c.022-.465-.303-.86-.767-.882h-.116c-.3-.023-.603.14-.788.394-.164-.255-.442-.417-.743-.394-.256-.023-.51.116-.65.324v-.278h-.487v2.203h.487v-1.183c-.046-.278.162-.533.44-.58h.094c.325 0 .488.21.488.58v1.23h.487v-1.23c-.047-.278.162-.556.44-.58h.093c.325 0 .487.21.487.58v1.23l.534-.024zm2.712-1.09v-1.113h-.487v.28c-.162-.21-.417-.326-.695-.326-.65 0-1.16.51-1.16 1.16 0 .65.51 1.16 1.16 1.16.278 0 .533-.117.695-.325v.278h.487V21.3zm-1.786 0c.024-.37.348-.65.72-.626.37.023.65.348.626.72-.023.347-.302.625-.673.625-.372 0-.674-.28-.674-.65-.023-.047-.023-.047 0-.07zm12.085-1.16c.163 0 .325.024.465.094.14.046.278.14.37.255.117.115.186.23.256.37.117.3.117.626 0 .927-.046.14-.138.255-.254.37-.116.117-.232.186-.37.256-.303.116-.65.116-.952 0-.14-.046-.28-.14-.37-.255-.118-.116-.187-.232-.257-.37-.116-.302-.116-.627 0-.928.047-.14.14-.255.256-.37.115-.117.23-.187.37-.256.163-.07.325-.116.488-.093zm0 .465c-.092 0-.185.023-.278.046-.092.024-.162.094-.232.14-.07.07-.116.14-.14.232-.068.185-.068.394 0 .58.024.092.094.162.14.23.07.07.14.117.232.14.186.07.37.07.557 0 .092-.023.16-.092.23-.14.07-.068.117-.138.14-.23.07-.186.07-.395 0-.58-.023-.093-.093-.162-.14-.232-.07-.07-.138-.116-.23-.14-.094-.045-.187-.07-.28-.045zm-7.677.695c0-.695-.44-1.16-1.043-1.16-.65 0-1.16.534-1.137 1.183.023.65.534 1.16 1.183 1.136.325 0 .65-.093.905-.302l-.23-.348c-.187.14-.42.232-.65.232-.326.023-.627-.21-.673-.533h1.646v-.21zm-1.646-.21c.023-.3.278-.532.58-.532.3 0 .556.232.556.533h-1.136zm3.664-.346c-.207-.116-.44-.186-.695-.186-.255 0-.417.093-.417.255 0 .163.162.186.37.21l.233.022c.488.07.766.278.766.672 0 .395-.37.72-1.02.72-.348 0-.673-.094-.95-.28l.23-.37c.21.162.465.232.743.232.324 0 .51-.094.51-.28 0-.115-.117-.185-.395-.23l-.232-.024c-.487-.07-.765-.302-.765-.65 0-.44.37-.718.927-.718.325 0 .627.07.905.232l-.21.394zm2.32-.116h-.788v.997c0 .23.07.37.325.37.14 0 .3-.046.417-.115l.14.417c-.186.116-.395.162-.604.162-.58 0-.765-.302-.765-.812v-1.02h-.44v-.44h.44v-.673h.487v.672h.79v.44zm1.67-.51c.117 0 .233.023.35.07l-.14.463c-.093-.045-.21-.045-.302-.045-.325 0-.464.208-.464.58v1.25h-.487v-2.2h.487v.277c.116-.255.325-.37.557-.394z\" style=\"fill: #000\" />\n      <path style=\"fill: #7673C0\" d=\"M23.64 3.287h-7.305V16.41h7.306\" />\n      <path d=\"M16.8 9.848c0-2.55 1.183-4.985 3.2-6.56C16.384.435 11.12 1.06 8.29 4.7 5.435 8.32 6.06 13.58 9.703 16.41c3.038 2.387 7.283 2.387 10.32 0-2.04-1.578-3.223-3.99-3.223-6.562z\" style=\"fill: #EB001B\" />\n      <path d=\"M33.5 9.848c0 4.613-3.735 8.346-8.35 8.346-1.88 0-3.69-.626-5.15-1.785 3.618-2.83 4.245-8.092 1.415-11.71-.418-.532-.882-.996-1.415-1.413C23.618.437 28.883 1.06 31.736 4.7 32.873 6.163 33.5 7.994 33.5 9.85z\" style=\"fill: #00A1DF\" />\n    </symbol>\n\n    <symbol id=\"logoPayPal\" viewBox=\"0 0 48 29\">\n      <title>PayPal Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" />\n      <path d=\"M31.216 16.4c.394-.7.69-1.5.886-2.4.196-.8.196-1.6.1-2.2-.1-.7-.396-1.2-.79-1.7-.195-.3-.59-.5-.885-.7.1-.8.1-1.5 0-2.1-.1-.6-.394-1.1-.886-1.6-.885-1-2.56-1.6-4.922-1.6h-6.4c-.492 0-.787.3-.886.8l-2.658 17.2c0 .2 0 .3.1.4.097.1.294.2.393.2h4.036l-.295 1.8c0 .1 0 .3.1.4.098.1.195.2.393.2h3.35c.393 0 .688-.3.786-.7v-.2l.59-4.1v-.2c.1-.4.395-.7.788-.7h.59c1.675 0 3.152-.4 4.137-1.1.59-.5 1.083-1 1.478-1.7h-.002z\" style=\"fill: #263B80\" />\n      <path d=\"M21.364 9.4c0-.3.196-.5.492-.6.098-.1.196-.1.394-.1h5.02c.592 0 1.183 0 1.675.1.1 0 .295.1.394.1.098 0 .294.1.393.1.1 0 .1 0 .197.102.295.1.492.2.69.3.295-1.6 0-2.7-.887-3.8-.985-1.1-2.658-1.6-4.923-1.6h-6.4c-.49 0-.885.3-.885.8l-2.758 17.3c-.098.3.197.6.59.6h3.94l.985-6.4 1.083-6.9z\" style=\"fill: #263B80\" />\n      <path d=\"M30.523 9.4c0 .1 0 .3-.098.4-.887 4.4-3.742 5.9-7.484 5.9h-1.87c-.492 0-.787.3-.886.8l-.985 6.2-.296 1.8c0 .3.196.6.492.6h3.348c.394 0 .69-.3.787-.7v-.2l.592-4.1v-.2c.1-.4.394-.7.787-.7h.69c3.248 0 5.808-1.3 6.497-5.2.296-1.6.197-3-.69-3.9-.196-.3-.49-.5-.885-.7z\" style=\"fill: #159BD7\" />\n      <path d=\"M29.635 9c-.098 0-.295-.1-.394-.1-.098 0-.294-.1-.393-.1-.492-.102-1.083-.102-1.673-.102h-5.022c-.1 0-.197 0-.394.1-.198.1-.394.3-.492.6l-1.083 6.9v.2c.1-.5.492-.8.886-.8h1.87c3.742 0 6.598-1.5 7.484-5.9 0-.1 0-.3.098-.4-.196-.1-.492-.2-.69-.3 0-.1-.098-.1-.196-.1z\" style=\"fill: #232C65\" />\n    </symbol>\n\n    <symbol id=\"logoPayPalCredit\" viewBox=\"0 0 48 29\">\n      <title>PayPal Credit Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" fill-rule=\"nonzero\" />\n      <path d=\"M27.44 21.6h.518c1.377 0 2.67-.754 2.953-2.484.248-1.588-.658-2.482-2.14-2.482h-.38c-.093 0-.172.067-.187.16l-.763 4.805zm-1.254-6.646c.024-.158.16-.273.32-.273h2.993c2.47 0 4.2 1.942 3.81 4.436-.4 2.495-2.752 4.436-5.21 4.436h-3.05c-.116 0-.205-.104-.187-.218l1.323-8.38zM22.308 16.907l-.192 1.21h2.38c.116 0 .204.103.186.217l-.23 1.462c-.023.157-.16.273-.318.273h-2.048c-.16 0-.294.114-.32.27l-.203 1.26h2.52c.117 0 .205.102.187.217l-.228 1.46c-.025.16-.16.275-.32.275h-4.55c-.116 0-.204-.104-.186-.218l1.322-8.38c.025-.158.16-.273.32-.273h4.55c.116 0 .205.104.187.22l-.23 1.46c-.024.158-.16.274-.32.274H22.63c-.16 0-.295.115-.32.273M35.325 23.552h-1.81c-.115 0-.203-.104-.185-.218l1.322-8.38c.025-.158.16-.273.32-.273h1.81c.115 0 .203.104.185.22l-1.322 8.38c-.025.156-.16.272-.32.272M14.397 18.657h.224c.754 0 1.62-.14 1.777-1.106.158-.963-.345-1.102-1.15-1.104h-.326c-.097 0-.18.07-.197.168l-.326 2.043zm3.96 4.895h-2.37c-.102 0-.194-.058-.238-.15l-1.565-3.262h-.023l-.506 3.19c-.02.128-.13.222-.26.222h-1.86c-.116 0-.205-.104-.187-.218l1.33-8.432c.02-.128.13-.22.26-.22h3.222c1.753 0 2.953.834 2.66 2.728-.2 1.224-1.048 2.283-2.342 2.506l2.037 3.35c.076.125-.014.286-.16.286zM40.216 23.552h-1.808c-.116 0-.205-.104-.187-.218l1.06-6.7h-1.684c-.116 0-.205-.104-.187-.218l.228-1.462c.025-.157.16-.273.32-.273h5.62c.116 0 .205.104.186.22l-.228 1.46c-.025.158-.16.274-.32.274h-1.63l-1.05 6.645c-.025.156-.16.272-.32.272M11.467 17.202c-.027.164-.228.223-.345.104-.395-.405-.975-.62-1.6-.62-1.41 0-2.526 1.083-2.75 2.458-.21 1.4.588 2.41 2.022 2.41.592 0 1.22-.225 1.74-.6.144-.105.34.02.313.194l-.328 2.03c-.02.12-.108.22-.226.254-.702.207-1.24.355-1.9.355-3.823 0-4.435-3.266-4.238-4.655.553-3.894 3.712-4.786 5.65-4.678.623.034 1.182.117 1.73.323.177.067.282.25.252.436l-.32 1.99\" style=\"fill: #21306F\" />\n      <path d=\"M23.184 7.67c-.11.717-.657.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.105.123.137.305.097.557zm-.23-1.87h-1.998c-.137 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h1.024c.095 0 .177-.07.192-.164l.23-1.452c.02-.135.136-.235.273-.235h.63c1.317 0 2.076-.636 2.275-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51z\" style=\"fill: #0093C7\" />\n      <path d=\"M8.936 7.67c-.11.717-.656.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.104.123.136.305.096.557zm-.23-1.87H6.708c-.136 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h.955c.136 0 .252-.1.274-.234l.217-1.382c.02-.135.137-.235.274-.235h.633c1.316 0 2.075-.636 2.274-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51zM13.343 9.51c-.092.545-.526.912-1.08.912-.277 0-.5-.09-.642-.258-.14-.168-.193-.406-.148-.672.086-.542.527-.92 1.072-.92.27 0 .492.09.637.26.148.172.205.412.163.677zm1.334-1.863h-.957c-.082 0-.152.06-.164.14l-.042.268-.067-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.135 1.923-.092.56.038 1.097.356 1.47.29.344.708.487 1.204.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.017-.102-.06-.193-.163-.193z\" style=\"fill: #21306F\" />\n      <path d=\"M27.59 9.51c-.09.545-.525.912-1.078.912-.278 0-.5-.09-.643-.258-.142-.168-.195-.406-.15-.672.086-.542.526-.92 1.07-.92.273 0 .494.09.64.26.146.172.203.412.16.677zm1.334-1.863h-.956c-.082 0-.152.06-.164.14l-.043.268-.065-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.136 1.923-.092.56.038 1.097.355 1.47.292.344.71.487 1.205.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.015-.102-.063-.193-.166-.193z\" style=\"fill: #0093C7\" />\n      <path d=\"M19.77 7.647h-.96c-.092 0-.178.045-.23.122L17.254 9.72l-.562-1.877c-.035-.118-.143-.198-.266-.198h-.945c-.113 0-.194.112-.157.22l1.06 3.108-.997 1.404c-.078.11 0 .262.136.262h.96c.092 0 .177-.044.23-.12l3.196-4.614c.077-.11-.002-.26-.137-.26\" style=\"fill: #21306F\" />\n      <path d=\"M30.052 5.94l-.82 5.216c-.016.1.062.192.165.192h.824c.138 0 .254-.1.275-.234l.81-5.122c.015-.1-.064-.193-.166-.193h-.924c-.082 0-.15.06-.164.14\" style=\"fill: #0093C7\" />\n    </symbol>\n\n    <symbol id=\"iconCardFront\" viewBox=\"0 0 48 29\">\n      <title>Generic Card</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" style=\"fill: #FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" style=\"fill: #828282\" />\n      <rect style=\"fill: #828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect style=\"fill: #828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" style=\"fill: #828282\" />\n      <ellipse style=\"fill: #828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"iconCVVBack\" viewBox=\"0 0 40 24\">\n      <title>CVV Back</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\"/>\n      <path style=\"fill: #828282\" d=\"M0 5h40v4H0z\" />\n      <path d=\"M20 13.772v5.456c0 .423.37.772.82.772h13.36c.45 0 .82-.35.82-.772v-5.456c0-.423-.37-.772-.82-.772H20.82c-.45 0-.82.35-.82.772zm-1-.142c0-.9.76-1.63 1.68-1.63h13.64c.928 0 1.68.737 1.68 1.63v5.74c0 .9-.76 1.63-1.68 1.63H20.68c-.928 0-1.68-.737-1.68-1.63v-5.74z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"16.5\" r=\"1.5\" />\n    </symbol>\n\n    <symbol id=\"iconCVVFront\" viewBox=\"0 0 40 24\">\n      <title>CVV Front</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\" />\n      <path d=\"M16 5.772v5.456c0 .423.366.772.81.772h17.38c.444 0 .81-.348.81-.772V5.772C35 5.35 34.634 5 34.19 5H16.81c-.444 0-.81.348-.81.772zm-1-.142c0-.9.75-1.63 1.66-1.63h17.68c.917 0 1.66.737 1.66 1.63v5.74c0 .9-.75 1.63-1.66 1.63H16.66c-.917 0-1.66-.737-1.66-1.63V5.63z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"19.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"8.5\" r=\"1.5\" />\n      <path d=\"M4 7.833C4 7.47 4.476 7 4.89 7h6.22c.414 0 .89.47.89.833v3.334c0 .364-.476.833-.89.833H4.89c-.414 0-.89-.47-.89-.833V7.833zM4 18.5c0-.828.668-1.5 1.5-1.5h29c.828 0 1.5.666 1.5 1.5 0 .828-.668 1.5-1.5 1.5h-29c-.828 0-1.5-.666-1.5-1.5z\" style=\"fill: #828282\" />\n    </symbol>\n\n    <symbol id=\"iconCheck\" viewBox=\"0 0 42 32\">\n      <title>Check</title>\n      <path class=\"path1\" d=\"M14.379 29.76L39.741 3.415 36.194.001l-21.815 22.79-10.86-11.17L0 15.064z\" />\n    </symbol>\n\n    <symbol id=\"iconLockLoader\" viewBox=\"0 0 28 32\">\n      <title>Lock Loader</title>\n      <path d=\"M6 10V8c0-4.422 3.582-8 8-8 4.41 0 8 3.582 8 8v2h-4V7.995C18 5.79 16.205 4 14 4c-2.21 0-4 1.792-4 3.995V10H6zM.997 14c-.55 0-.997.445-.997.993v16.014c0 .548.44.993.997.993h26.006c.55 0 .997-.445.997-.993V14.993c0-.548-.44-.993-.997-.993H.997z\" />\n    </symbol>\n\n    <symbol id=\"iconError\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\n      <path d=\"M0 0h24v24H0z\" style=\"fill: none\" />\n      <path d=\"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z\" />\n    </symbol>\n  </defs>\n</svg>\n";
+var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"applePay\" class=\"braintree-applePay braintree-sheet\">\n        <div data-braintree-id=\"apple-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoApplePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Apple Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"apple-pay-button\" class=\"braintree-sheet__button--apple-pay apple-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n            <div class=\"braintree-form__field\">\n              <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\">\n                <input id=\"braintree__card-view-input__cardholder-name\" type=\"text\" placeholder=\"{{cardholderNamePlaceholder}}\"/>\n              </div>\n              <div class=\"braintree-form__icon-container\">\n                <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                  <svg width=\"24\" height=\"24\">\n                    <use xlink:href=\"#iconError\"></use>\n                  </svg>\n                </div>\n              </div>\n            </div>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n            <div class=\"braintree-form__field\">\n              <label>\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n              </label>\n              <div class=\"braintree-form__icon-container\">\n                <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                  <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                  <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                  </svg>\n                </div>\n                <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                  <svg width=\"24\" height=\"24\">\n                    <use xlink:href=\"#iconError\"></use>\n                  </svg>\n                </div>\n              </div>\n            </div>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n              </div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n\n              <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{cvvLabel}}\n                <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n              </div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-toggle braintree-hidden\" tabindex=\"0\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n";
+var svgHTML = "<svg data-braintree-id=\"svgs\" style=\"display: none\">\n  <defs>\n    <symbol id=\"icon-visa\" viewBox=\"0 0 40 24\">\n      <title>Visa</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M0 22.033C0 23.12.892 24 1.992 24h36.016c1.1 0 1.992-.88 1.992-1.967V20.08H0v1.953z\" style=\"fill: #F8B600\" />\n      <path d=\"M0 3.92h40V1.967C40 .88 39.108 0 38.008 0H1.992C.892 0 0 .88 0 1.967V3.92zM19.596 7.885l-2.11 9.478H14.93l2.11-9.478h2.554zm10.743 6.12l1.343-3.56.773 3.56H30.34zm2.85 3.358h2.36l-2.063-9.478H31.31c-.492 0-.905.274-1.088.695l-3.832 8.783h2.682l.532-1.415h3.276l.31 1.415zm-6.667-3.094c.01-2.502-3.6-2.64-3.577-3.76.008-.338.345-.7 1.083-.793.365-.045 1.373-.08 2.517.425l.448-2.01c-.615-.214-1.405-.42-2.39-.42-2.523 0-4.3 1.288-4.313 3.133-.016 1.364 1.268 2.125 2.234 2.58.996.464 1.33.762 1.325 1.177-.006.636-.793.918-1.526.928-1.285.02-2.03-.333-2.623-.6l-.462 2.08c.598.262 1.7.49 2.84.502 2.682 0 4.437-1.273 4.445-3.243zM15.948 7.884l-4.138 9.478h-2.7L7.076 9.8c-.123-.466-.23-.637-.606-.834-.615-.32-1.63-.62-2.52-.806l.06-.275h4.345c.554 0 1.052.354 1.178.966l1.076 5.486 2.655-6.45h2.683z\" style=\"fill: #1A1F71\" />\n    </symbol>\n\n    <symbol id=\"icon-master-card\" viewBox=\"0 0 40 24\">\n      <title>MasterCard</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M11.085 22.2v-1.36c0-.522-.318-.863-.864-.863-.272 0-.568.09-.773.386-.16-.25-.386-.386-.727-.386-.228 0-.455.068-.637.318v-.272h-.478V22.2h.478v-1.202c0-.386.204-.567.523-.567.318 0 .478.205.478.568V22.2h.477v-1.202c0-.386.23-.567.524-.567.32 0 .478.205.478.568V22.2h.523zm7.075-2.177h-.774v-.658h-.478v.658h-.432v.43h.432v.998c0 .5.205.795.75.795.206 0 .433-.068.592-.16l-.136-.407c-.136.09-.296.114-.41.114-.227 0-.318-.137-.318-.363v-.976h.774v-.43zm4.048-.046c-.273 0-.454.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .204.023.295.046l.137-.454c-.09-.023-.228-.023-.32-.023zm-6.118.227c-.228-.16-.546-.227-.888-.227-.546 0-.91.272-.91.703 0 .363.274.567.75.635l.23.023c.25.045.385.113.385.227 0 .16-.182.272-.5.272-.32 0-.57-.113-.728-.227l-.228.363c.25.18.59.272.932.272.637 0 1-.295 1-.703 0-.385-.295-.59-.75-.658l-.227-.022c-.205-.023-.364-.068-.364-.204 0-.16.16-.25.41-.25.272 0 .545.114.682.182l.205-.386zm12.692-.227c-.273 0-.455.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .203.023.294.046L29.1 20c-.09-.023-.227-.023-.318-.023zm-6.096 1.134c0 .66.455 1.135 1.16 1.135.32 0 .546-.068.774-.25l-.228-.385c-.182.136-.364.204-.57.204-.385 0-.658-.272-.658-.703 0-.407.273-.68.66-.702.204 0 .386.068.568.204l.228-.385c-.228-.182-.455-.25-.774-.25-.705 0-1.16.477-1.16 1.134zm4.413 0v-1.087h-.48v.272c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.317 0 .545-.113.68-.317v.272h.48v-1.09zm-1.753 0c0-.384.25-.702.66-.702.387 0 .66.295.66.703 0 .387-.273.704-.66.704-.41-.022-.66-.317-.66-.703zm-5.71-1.133c-.636 0-1.09.454-1.09 1.134 0 .682.454 1.135 1.114 1.135.32 0 .638-.09.888-.295l-.228-.34c-.18.136-.41.227-.636.227-.296 0-.592-.136-.66-.522h1.615v-.18c.022-.704-.388-1.158-1.002-1.158zm0 .41c.297 0 .502.18.547.52h-1.137c.045-.295.25-.52.59-.52zm11.852.724v-1.95h-.48v1.135c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.68-.317v.272h.48v-1.09zm-1.752 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703zm-15.97 0v-1.087h-.476v.272c-.16-.204-.387-.318-.683-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.682-.317v.272h.477v-1.09zm-1.773 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703z\" style=\"fill: #000\" />\n      <path style=\"fill: #FF5F00\" d=\"M23.095 3.49H15.93v12.836h7.165\" />\n      <path d=\"M16.382 9.91c0-2.61 1.23-4.922 3.117-6.42-1.39-1.087-3.14-1.745-5.05-1.745-4.528 0-8.19 3.65-8.19 8.164 0 4.51 3.662 8.162 8.19 8.162 1.91 0 3.66-.657 5.05-1.746-1.89-1.474-3.118-3.81-3.118-6.417z\" style=\"fill: #EB001B\" />\n      <path d=\"M32.76 9.91c0 4.51-3.664 8.162-8.19 8.162-1.91 0-3.662-.657-5.05-1.746 1.91-1.496 3.116-3.81 3.116-6.417 0-2.61-1.228-4.922-3.116-6.42 1.388-1.087 3.14-1.745 5.05-1.745 4.526 0 8.19 3.674 8.19 8.164z\" style=\"fill: #F79E1B\" />\n    </symbol>\n\n    <symbol id=\"icon-unionpay\" viewBox=\"0 0 40 24\">\n      <title>Union Pay</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.877 2h8.126c1.135 0 1.84.93 1.575 2.077l-3.783 16.35c-.267 1.142-1.403 2.073-2.538 2.073H5.13c-1.134 0-1.84-.93-1.574-2.073L7.34 4.076C7.607 2.93 8.74 2 9.878 2z\" style=\"fill: #E21836\" />\n      <path d=\"M17.325 2h9.345c1.134 0 .623.93.356 2.077l-3.783 16.35c-.265 1.142-.182 2.073-1.32 2.073H12.58c-1.137 0-1.84-.93-1.574-2.073l3.783-16.35C15.056 2.93 16.19 2 17.324 2z\" style=\"fill: #00447B\" />\n      <path d=\"M26.3 2h8.126c1.136 0 1.84.93 1.575 2.077l-3.782 16.35c-.266 1.142-1.402 2.073-2.54 2.073h-8.122c-1.137 0-1.842-.93-1.574-2.073l3.78-16.35C24.03 2.93 25.166 2 26.303 2z\" style=\"fill: #007B84\" />\n      <path d=\"M27.633 14.072l-.99 3.3h.266l-.208.68h-.266l-.062.212h-.942l.064-.21H23.58l.193-.632h.194l1.005-3.35.2-.676h.962l-.1.34s.255-.184.498-.248c.242-.064 1.636-.088 1.636-.088l-.206.672h-.33zm-1.695 0l-.254.843s.285-.13.44-.172c.16-.04.395-.057.395-.057l.182-.614h-.764zm-.38 1.262l-.263.877s.29-.15.447-.196c.157-.037.396-.066.396-.066l.185-.614h-.766zm-.614 2.046h.767l.222-.74h-.765l-.223.74z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M28.055 13.4h1.027l.01.385c-.005.065.05.096.17.096h.208l-.19.637h-.555c-.48.035-.662-.172-.65-.406l-.02-.71zM28.193 16.415h-.978l.167-.566H28.5l.16-.517h-1.104l.19-.638h3.072l-.193.638h-1.03l-.16.516h1.032l-.17.565H29.18l-.2.24h.454l.11.712c.013.07.014.116.036.147.023.026.158.038.238.038h.137l-.21.694h-.348c-.054 0-.133-.004-.243-.01-.105-.008-.18-.07-.25-.105-.064-.03-.16-.11-.182-.24l-.11-.712-.507.7c-.162.222-.38.39-.748.39h-.712l.186-.62h.273c.078 0 .15-.03.2-.056.052-.023.098-.05.15-.126l.74-1.05zM17.478 14.867h2.59l-.19.622H18.84l-.16.53h1.06l-.194.64h-1.06l-.256.863c-.03.095.25.108.353.108l.53-.072-.212.71h-1.193c-.096 0-.168-.013-.272-.037-.1-.023-.145-.07-.19-.138-.043-.07-.11-.128-.064-.278l.343-1.143h-.588l.195-.65h.592l.156-.53h-.588l.188-.623zM19.223 13.75h1.063l-.194.65H18.64l-.157.136c-.067.066-.09.038-.18.087-.08.04-.254.123-.477.123h-.466l.19-.625h.14c.118 0 .198-.01.238-.036.046-.03.098-.096.157-.203l.267-.487h1.057l-.187.356zM20.74 13.4h.905l-.132.46s.286-.23.487-.313c.2-.075.65-.143.65-.143l1.464-.007-.498 1.672c-.085.286-.183.472-.244.555-.055.087-.12.16-.248.23-.124.066-.236.104-.34.115-.096.007-.244.01-.45.012h-1.41l-.4 1.324c-.037.13-.055.194-.03.23.02.03.068.066.135.066l.62-.06-.21.726h-.698c-.22 0-.383-.004-.495-.013-.108-.01-.22 0-.295-.058-.065-.058-.164-.133-.162-.21.007-.073.037-.192.082-.356l1.268-4.23zm1.922 1.69h-1.484l-.09.3h1.283c.152-.018.184.004.196-.003l.096-.297zm-1.402-.272s.29-.266.786-.353c.112-.022.82-.015.82-.015l.106-.357h-1.496l-.216.725z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M23.382 16.1l-.084.402c-.036.125-.067.22-.16.302-.1.084-.216.172-.488.172l-.502.02-.004.455c-.006.13.028.117.048.138.024.022.045.032.067.04l.157-.008.48-.028-.198.663h-.552c-.385 0-.67-.008-.765-.084-.092-.057-.105-.132-.103-.26l.035-1.77h.88l-.013.362h.212c.072 0 .12-.007.15-.026.027-.02.047-.048.06-.093l.087-.282h.692zM10.84 7.222c-.032.143-.596 2.763-.598 2.764-.12.53-.21.91-.508 1.152-.172.14-.37.21-.6.21-.37 0-.587-.185-.624-.537l-.007-.12.113-.712s.593-2.388.7-2.703c.002-.017.005-.026.007-.035-1.152.01-1.357 0-1.37-.018-.007.024-.037.173-.037.173l-.605 2.688-.05.23-.1.746c0 .22.042.4.13.553.275.485 1.06.557 1.504.557.573 0 1.11-.123 1.47-.345.63-.375.797-.962.944-1.48l.067-.267s.61-2.48.716-2.803c.003-.017.006-.026.01-.035-.835.01-1.08 0-1.16-.018zM14.21 12.144c-.407-.006-.55-.006-1.03.018l-.018-.036c.042-.182.087-.363.127-.548l.06-.25c.086-.39.173-.843.184-.98.007-.084.036-.29-.2-.29-.1 0-.203.048-.307.096-.058.207-.174.79-.23 1.055-.118.558-.126.62-.178.897l-.036.037c-.42-.006-.566-.006-1.05.018l-.024-.04c.08-.332.162-.668.24-.998.203-.9.25-1.245.307-1.702l.04-.028c.47-.067.585-.08 1.097-.185l.043.047-.077.287c.086-.052.168-.104.257-.15.242-.12.51-.155.658-.155.223 0 .468.062.57.323.098.232.034.52-.094 1.084l-.066.287c-.13.627-.152.743-.225 1.174l-.05.036zM15.87 12.144c-.245 0-.405-.006-.56 0-.153 0-.303.008-.532.018l-.013-.02-.015-.02c.062-.238.097-.322.128-.406.03-.084.06-.17.115-.41.072-.315.116-.535.147-.728.033-.187.052-.346.075-.53l.02-.014.02-.018c.244-.036.4-.057.56-.082.16-.024.32-.055.574-.103l.008.023.008.022c-.047.195-.094.39-.14.588-.047.197-.094.392-.137.587-.093.414-.13.57-.152.68-.02.105-.026.163-.063.377l-.022.02-.023.017zM19.542 10.728c.143-.633.033-.928-.108-1.11-.213-.273-.59-.36-.978-.36-.235 0-.793.023-1.23.43-.312.29-.458.687-.546 1.066-.088.387-.19 1.086.447 1.344.198.085.48.108.662.108.466 0 .945-.13 1.304-.513.278-.312.405-.775.448-.965zm-1.07-.046c-.02.106-.113.503-.24.673-.086.123-.19.198-.305.198-.033 0-.235 0-.238-.3-.003-.15.027-.304.063-.47.108-.478.236-.88.56-.88.255 0 .27.298.16.78zM29.536 12.187c-.493-.004-.635-.004-1.09.015l-.03-.037c.124-.472.248-.943.358-1.42.142-.62.175-.882.223-1.244l.037-.03c.49-.07.625-.09 1.135-.186l.015.044c-.093.388-.186.777-.275 1.166-.19.816-.258 1.23-.33 1.658l-.044.035z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M29.77 10.784c.144-.63-.432-.056-.525-.264-.14-.323-.052-.98-.62-1.2-.22-.085-.732.025-1.17.428-.31.29-.458.683-.544 1.062-.088.38-.19 1.078.444 1.328.2.085.384.11.567.103.638-.034 1.124-1.002 1.483-1.386.277-.303.326.115.368-.07zm-.974-.047c-.024.1-.117.503-.244.67-.083.117-.283.192-.397.192-.032 0-.232 0-.24-.3 0-.146.03-.3.067-.467.11-.47.235-.87.56-.87.254 0 .363.293.254.774zM22.332 12.144c-.41-.006-.55-.006-1.03.018l-.018-.036c.04-.182.087-.363.13-.548l.057-.25c.09-.39.176-.843.186-.98.008-.084.036-.29-.198-.29-.1 0-.203.048-.308.096-.057.207-.175.79-.232 1.055-.115.558-.124.62-.176.897l-.035.037c-.42-.006-.566-.006-1.05.018l-.022-.04.238-.998c.203-.9.25-1.245.307-1.702l.038-.028c.472-.067.587-.08 1.098-.185l.04.047-.073.287c.084-.052.17-.104.257-.15.24-.12.51-.155.655-.155.224 0 .47.062.575.323.095.232.03.52-.098 1.084l-.065.287c-.133.627-.154.743-.225 1.174l-.05.036zM26.32 8.756c-.07.326-.282.603-.554.736-.225.114-.498.123-.78.123h-.183l.013-.074.336-1.468.01-.076.007-.058.132.015.71.062c.275.105.388.38.31.74zM25.88 7.22l-.34.003c-.883.01-1.238.006-1.383-.012l-.037.182-.315 1.478-.793 3.288c.77-.01 1.088-.01 1.22.004l.21-1.024s.153-.644.163-.667c0 0 .047-.066.096-.092h.07c.665 0 1.417 0 2.005-.437.4-.298.675-.74.797-1.274.03-.132.054-.29.054-.446 0-.205-.04-.41-.16-.568-.3-.423-.896-.43-1.588-.433zM33.572 9.28l-.04-.043c-.502.1-.594.118-1.058.18l-.034.034-.005.023-.003-.007c-.345.803-.334.63-.615 1.26-.003-.03-.003-.048-.004-.077l-.07-1.37-.044-.043c-.53.1-.542.118-1.03.18l-.04.034-.006.056.003.007c.06.315.047.244.108.738.03.244.065.49.093.73.05.4.077.6.134 1.21-.328.55-.408.757-.722 1.238l.017.044c.478-.018.587-.018.94-.018l.08-.088c.265-.578 2.295-4.085 2.295-4.085zM16.318 9.62c.27-.19.304-.45.076-.586-.23-.137-.634-.094-.906.095-.273.186-.304.45-.075.586.228.134.633.094.905-.096z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M31.238 13.415l-.397.684c-.124.232-.357.407-.728.41l-.632-.01.184-.618h.124c.064 0 .11-.004.148-.022.03-.01.054-.035.08-.072l.233-.373h.988z\" style=\"fill: #FEFEFE\" />\n    </symbol>\n\n    <symbol id=\"icon-american-express\" viewBox=\"0 0 40 24\">\n      <title>American Express</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path style=\"fill: #1478BE\" d=\"M6.26 12.32h2.313L7.415 9.66M27.353 9.977h-3.738v1.23h3.666v1.384h-3.675v1.385h3.821v1.005c.623-.77 1.33-1.466 2.025-2.235l.707-.77c-.934-1.004-1.87-2.08-2.804-3.075v1.077z\" />\n      <path d=\"M38.25 7h-5.605l-1.328 1.4L30.072 7H16.984l-1.017 2.416L14.877 7h-9.58L1.25 16.5h4.826l.623-1.556h1.4l.623 1.556H29.99l1.327-1.483 1.328 1.483h5.605l-4.36-4.667L38.25 7zm-17.685 8.1h-1.557V9.883L16.673 15.1h-1.33L13.01 9.883l-.084 5.217H9.73l-.623-1.556h-3.27L5.132 15.1H3.42l2.884-6.772h2.42l2.645 6.233V8.33h2.646l2.107 4.51 1.868-4.51h2.575V15.1zm14.727 0h-2.024l-2.024-2.26-2.023 2.26H22.06V8.328H29.53l1.795 2.177 2.024-2.177h2.025L32.26 11.75l3.032 3.35z\" style=\"fill: #1478BE\" />\n    </symbol>\n\n    <symbol id=\"icon-jcb\" viewBox=\"0 0 40 24\">\n      <title>JCB</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M33.273 2.01h.013v17.062c-.004 1.078-.513 2.103-1.372 2.746-.63.47-1.366.67-2.14.67-.437 0-4.833.026-4.855 0-.01-.01 0-.07 0-.082v-6.82c0-.04.004-.064.033-.064h5.253c.867 0 1.344-.257 1.692-.61.44-.448.574-1.162.294-1.732-.24-.488-.736-.78-1.244-.913-.158-.04-.32-.068-.483-.083-.01 0-.064 0-.07-.006-.03-.034.023-.04.038-.046.102-.033.215-.042.32-.073.532-.164.993-.547 1.137-1.105.15-.577-.05-1.194-.524-1.552-.34-.257-.768-.376-1.187-.413-.43-.038-4.774-.022-5.21-.022-.072 0-.05-.02-.05-.09V5.63c0-.31.01-.616.073-.92.126-.592.41-1.144.815-1.59.558-.615 1.337-1.01 2.16-1.093.478-.048 4.89-.017 5.305-.017zm-4.06 8.616c.06.272-.01.567-.204.77-.173.176-.407.25-.648.253-.195.003-1.725 0-1.788 0l.003-1.645c.012-.027.02-.018.06-.018.097 0 1.713-.004 1.823.005.232.02.45.12.598.306.076.096.128.208.155.328zm-2.636 2.038h1.944c.242.002.47.063.652.228.226.204.327.515.283.815-.04.263-.194.5-.422.634-.187.112-.39.125-.6.125h-1.857v-1.8z\" style=\"fill: #53B230\" />\n      <path d=\"M6.574 13.89c-.06-.03-.06-.018-.07-.06-.006-.026-.005-8.365.003-8.558.04-.95.487-1.857 1.21-2.47.517-.434 1.16-.71 1.83-.778.396-.04.803-.018 1.2-.018.69 0 4.11-.013 4.12 0 .008.008.002 16.758 0 17.074-.003.956-.403 1.878-1.105 2.523-.506.465-1.15.77-1.83.86-.41.056-5.02.032-5.363.032-.066 0-.054.013-.066-.024-.01-.025 0-7 0-7.17.66.178 1.35.28 2.03.348.662.067 1.33.093 1.993.062.93-.044 1.947-.192 2.712-.762.32-.238.574-.553.73-.922.148-.353.2-.736.2-1.117 0-.348.006-3.93-.016-3.942-.023-.014-2.885-.015-2.9.012-.012.022 0 3.87 0 3.95-.003.47-.16.933-.514 1.252-.468.42-1.11.47-1.707.423-.687-.055-1.357-.245-1.993-.508-.157-.065-.312-.135-.466-.208z\" style=\"fill: #006CB9\" />\n      <path d=\"M15.95 9.835c-.025.02-.05.04-.072.06V6.05c0-.295-.012-.594.01-.888.12-1.593 1.373-2.923 2.944-3.126.382-.05 5.397-.042 5.41-.026.01.01 0 .062 0 .074v16.957c0 1.304-.725 2.52-1.89 3.1-.504.25-1.045.35-1.605.35-.322 0-4.757.015-4.834 0-.05-.01-.023.01-.035-.02-.007-.022 0-6.548 0-7.44v-.422c.554.48 1.256.75 1.96.908.536.12 1.084.176 1.63.196.537.02 1.076.01 1.61-.037.546-.05 1.088-.136 1.625-.244.137-.028.274-.057.41-.09.033-.006.17-.017.187-.044.013-.02 0-.097 0-.12v-1.324c-.582.292-1.19.525-1.83.652-.778.155-1.64.198-2.385-.123-.752-.326-1.2-1.024-1.274-1.837-.076-.837.173-1.716.883-2.212.736-.513 1.7-.517 2.553-.38.634.1 1.245.305 1.825.58.078.037.154.075.23.113V9.322c0-.02.013-.1 0-.118-.02-.028-.152-.038-.188-.046-.066-.016-.133-.03-.2-.045C22.38 9 21.84 8.908 21.3 8.85c-.533-.06-1.068-.077-1.603-.066-.542.01-1.086.054-1.62.154-.662.125-1.32.337-1.883.716-.085.056-.167.117-.245.18z\" style=\"fill: #E20138\" />\n    </symbol>\n\n    <symbol id=\"icon-discover\" viewBox=\"0 0 40 24\">\n      <title>Discover</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M38.995 11.75S27.522 20.1 6.5 23.5h31.495c.552 0 1-.448 1-1V11.75z\" style=\"fill: #F48024\" />\n      <path d=\"M5.332 11.758c-.338.305-.776.438-1.47.438h-.29V8.55h.29c.694 0 1.115.124 1.47.446.37.33.595.844.595 1.372 0 .53-.224 1.06-.595 1.39zM4.077 7.615H2.5v5.515h1.57c.833 0 1.435-.197 1.963-.637.63-.52 1-1.305 1-2.116 0-1.628-1.214-2.762-2.956-2.762zM7.53 13.13h1.074V7.616H7.53M11.227 9.732c-.645-.24-.834-.397-.834-.695 0-.347.338-.61.8-.61.322 0 .587.132.867.446l.562-.737c-.462-.405-1.015-.612-1.618-.612-.975 0-1.718.678-1.718 1.58 0 .76.346 1.15 1.355 1.513.42.148.635.247.743.314.215.14.322.34.322.57 0 .448-.354.78-.834.78-.51 0-.924-.258-1.17-.736l-.695.67c.495.726 1.09 1.05 1.907 1.05 1.116 0 1.9-.745 1.9-1.812 0-.876-.363-1.273-1.585-1.72zM13.15 10.377c0 1.62 1.27 2.877 2.907 2.877.462 0 .858-.09 1.347-.32v-1.267c-.43.43-.81.604-1.297.604-1.082 0-1.85-.785-1.85-1.9 0-1.06.792-1.895 1.8-1.895.512 0 .9.183 1.347.62V7.83c-.472-.24-.86-.34-1.322-.34-1.627 0-2.932 1.283-2.932 2.887zM25.922 11.32l-1.468-3.705H23.28l2.337 5.656h.578l2.38-5.655H27.41M29.06 13.13h3.046v-.934h-1.973v-1.488h1.9v-.934h-1.9V8.55h1.973v-.935H29.06M34.207 10.154h-.314v-1.67h.33c.67 0 1.034.28 1.034.818 0 .554-.364.852-1.05.852zm2.155-.91c0-1.033-.71-1.628-1.95-1.628H32.82v5.514h1.073v-2.215h.14l1.487 2.215h1.32l-1.733-2.323c.81-.165 1.255-.72 1.255-1.563z\" style=\"fill: #221F20\" />\n      <path d=\"M23.6 10.377c0 1.62-1.31 2.93-2.927 2.93-1.617.002-2.928-1.31-2.928-2.93s1.31-2.932 2.928-2.932c1.618 0 2.928 1.312 2.928 2.932z\" style=\"fill: #F48024\" />\n    </symbol>\n\n    <symbol id=\"icon-diners-club\" viewBox=\"0 0 40 24\">\n      <title>Diners Club</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.02 11.83c0-5.456 4.54-9.88 10.14-9.88 5.6 0 10.139 4.424 10.139 9.88-.002 5.456-4.54 9.88-10.14 9.88-5.6 0-10.14-4.424-10.14-9.88z\" style=\"fill: #FEFEFE\" />\n      <path style=\"fill: #FFF\" d=\"M32.522 22H8.5V1.5h24.022\" />\n      <path d=\"M25.02 11.732c-.003-2.534-1.607-4.695-3.868-5.55v11.102c2.26-.857 3.865-3.017 3.87-5.552zm-8.182 5.55V6.18c-2.26.86-3.86 3.017-3.867 5.55.007 2.533 1.61 4.69 3.868 5.55zm2.158-14.934c-5.25.002-9.503 4.202-9.504 9.384 0 5.182 4.254 9.38 9.504 9.382 5.25 0 9.504-4.2 9.505-9.382 0-5.182-4.254-9.382-9.504-9.384zM18.973 22C13.228 22.027 8.5 17.432 8.5 11.84 8.5 5.726 13.228 1.5 18.973 1.5h2.692c5.677 0 10.857 4.225 10.857 10.34 0 5.59-5.18 10.16-10.857 10.16h-2.692z\" style=\"fill: #004A97\" />\n    </symbol>\n\n    <symbol id=\"icon-maestro\" viewBox=\"0 0 40 24\">\n      <title>Maestro</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M14.67 22.39V21c.022-.465-.303-.86-.767-.882h-.116c-.3-.023-.603.14-.788.394-.164-.255-.442-.417-.743-.394-.256-.023-.51.116-.65.324v-.278h-.487v2.203h.487v-1.183c-.046-.278.162-.533.44-.58h.094c.325 0 .488.21.488.58v1.23h.487v-1.23c-.047-.278.162-.556.44-.58h.093c.325 0 .487.21.487.58v1.23l.534-.024zm2.712-1.09v-1.113h-.487v.28c-.162-.21-.417-.326-.695-.326-.65 0-1.16.51-1.16 1.16 0 .65.51 1.16 1.16 1.16.278 0 .533-.117.695-.325v.278h.487V21.3zm-1.786 0c.024-.37.348-.65.72-.626.37.023.65.348.626.72-.023.347-.302.625-.673.625-.372 0-.674-.28-.674-.65-.023-.047-.023-.047 0-.07zm12.085-1.16c.163 0 .325.024.465.094.14.046.278.14.37.255.117.115.186.23.256.37.117.3.117.626 0 .927-.046.14-.138.255-.254.37-.116.117-.232.186-.37.256-.303.116-.65.116-.952 0-.14-.046-.28-.14-.37-.255-.118-.116-.187-.232-.257-.37-.116-.302-.116-.627 0-.928.047-.14.14-.255.256-.37.115-.117.23-.187.37-.256.163-.07.325-.116.488-.093zm0 .465c-.092 0-.185.023-.278.046-.092.024-.162.094-.232.14-.07.07-.116.14-.14.232-.068.185-.068.394 0 .58.024.092.094.162.14.23.07.07.14.117.232.14.186.07.37.07.557 0 .092-.023.16-.092.23-.14.07-.068.117-.138.14-.23.07-.186.07-.395 0-.58-.023-.093-.093-.162-.14-.232-.07-.07-.138-.116-.23-.14-.094-.045-.187-.07-.28-.045zm-7.677.695c0-.695-.44-1.16-1.043-1.16-.65 0-1.16.534-1.137 1.183.023.65.534 1.16 1.183 1.136.325 0 .65-.093.905-.302l-.23-.348c-.187.14-.42.232-.65.232-.326.023-.627-.21-.673-.533h1.646v-.21zm-1.646-.21c.023-.3.278-.532.58-.532.3 0 .556.232.556.533h-1.136zm3.664-.346c-.207-.116-.44-.186-.695-.186-.255 0-.417.093-.417.255 0 .163.162.186.37.21l.233.022c.488.07.766.278.766.672 0 .395-.37.72-1.02.72-.348 0-.673-.094-.95-.28l.23-.37c.21.162.465.232.743.232.324 0 .51-.094.51-.28 0-.115-.117-.185-.395-.23l-.232-.024c-.487-.07-.765-.302-.765-.65 0-.44.37-.718.927-.718.325 0 .627.07.905.232l-.21.394zm2.32-.116h-.788v.997c0 .23.07.37.325.37.14 0 .3-.046.417-.115l.14.417c-.186.116-.395.162-.604.162-.58 0-.765-.302-.765-.812v-1.02h-.44v-.44h.44v-.673h.487v.672h.79v.44zm1.67-.51c.117 0 .233.023.35.07l-.14.463c-.093-.045-.21-.045-.302-.045-.325 0-.464.208-.464.58v1.25h-.487v-2.2h.487v.277c.116-.255.325-.37.557-.394z\" style=\"fill: #000\" />\n      <path style=\"fill: #7673C0\" d=\"M23.64 3.287h-7.305V16.41h7.306\" />\n      <path d=\"M16.8 9.848c0-2.55 1.183-4.985 3.2-6.56C16.384.435 11.12 1.06 8.29 4.7 5.435 8.32 6.06 13.58 9.703 16.41c3.038 2.387 7.283 2.387 10.32 0-2.04-1.578-3.223-3.99-3.223-6.562z\" style=\"fill: #EB001B\" />\n      <path d=\"M33.5 9.848c0 4.613-3.735 8.346-8.35 8.346-1.88 0-3.69-.626-5.15-1.785 3.618-2.83 4.245-8.092 1.415-11.71-.418-.532-.882-.996-1.415-1.413C23.618.437 28.883 1.06 31.736 4.7 32.873 6.163 33.5 7.994 33.5 9.85z\" style=\"fill: #00A1DF\" />\n    </symbol>\n\n    <symbol id=\"logoPayPal\" viewBox=\"0 0 48 29\">\n      <title>PayPal Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" />\n      <path d=\"M31.216 16.4c.394-.7.69-1.5.886-2.4.196-.8.196-1.6.1-2.2-.1-.7-.396-1.2-.79-1.7-.195-.3-.59-.5-.885-.7.1-.8.1-1.5 0-2.1-.1-.6-.394-1.1-.886-1.6-.885-1-2.56-1.6-4.922-1.6h-6.4c-.492 0-.787.3-.886.8l-2.658 17.2c0 .2 0 .3.1.4.097.1.294.2.393.2h4.036l-.295 1.8c0 .1 0 .3.1.4.098.1.195.2.393.2h3.35c.393 0 .688-.3.786-.7v-.2l.59-4.1v-.2c.1-.4.395-.7.788-.7h.59c1.675 0 3.152-.4 4.137-1.1.59-.5 1.083-1 1.478-1.7h-.002z\" style=\"fill: #263B80\" />\n      <path d=\"M21.364 9.4c0-.3.196-.5.492-.6.098-.1.196-.1.394-.1h5.02c.592 0 1.183 0 1.675.1.1 0 .295.1.394.1.098 0 .294.1.393.1.1 0 .1 0 .197.102.295.1.492.2.69.3.295-1.6 0-2.7-.887-3.8-.985-1.1-2.658-1.6-4.923-1.6h-6.4c-.49 0-.885.3-.885.8l-2.758 17.3c-.098.3.197.6.59.6h3.94l.985-6.4 1.083-6.9z\" style=\"fill: #263B80\" />\n      <path d=\"M30.523 9.4c0 .1 0 .3-.098.4-.887 4.4-3.742 5.9-7.484 5.9h-1.87c-.492 0-.787.3-.886.8l-.985 6.2-.296 1.8c0 .3.196.6.492.6h3.348c.394 0 .69-.3.787-.7v-.2l.592-4.1v-.2c.1-.4.394-.7.787-.7h.69c3.248 0 5.808-1.3 6.497-5.2.296-1.6.197-3-.69-3.9-.196-.3-.49-.5-.885-.7z\" style=\"fill: #159BD7\" />\n      <path d=\"M29.635 9c-.098 0-.295-.1-.394-.1-.098 0-.294-.1-.393-.1-.492-.102-1.083-.102-1.673-.102h-5.022c-.1 0-.197 0-.394.1-.198.1-.394.3-.492.6l-1.083 6.9v.2c.1-.5.492-.8.886-.8h1.87c3.742 0 6.598-1.5 7.484-5.9 0-.1 0-.3.098-.4-.196-.1-.492-.2-.69-.3 0-.1-.098-.1-.196-.1z\" style=\"fill: #232C65\" />\n    </symbol>\n\n    <symbol id=\"logoPayPalCredit\" viewBox=\"0 0 48 29\">\n      <title>PayPal Credit Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" fill-rule=\"nonzero\" />\n      <path d=\"M27.44 21.6h.518c1.377 0 2.67-.754 2.953-2.484.248-1.588-.658-2.482-2.14-2.482h-.38c-.093 0-.172.067-.187.16l-.763 4.805zm-1.254-6.646c.024-.158.16-.273.32-.273h2.993c2.47 0 4.2 1.942 3.81 4.436-.4 2.495-2.752 4.436-5.21 4.436h-3.05c-.116 0-.205-.104-.187-.218l1.323-8.38zM22.308 16.907l-.192 1.21h2.38c.116 0 .204.103.186.217l-.23 1.462c-.023.157-.16.273-.318.273h-2.048c-.16 0-.294.114-.32.27l-.203 1.26h2.52c.117 0 .205.102.187.217l-.228 1.46c-.025.16-.16.275-.32.275h-4.55c-.116 0-.204-.104-.186-.218l1.322-8.38c.025-.158.16-.273.32-.273h4.55c.116 0 .205.104.187.22l-.23 1.46c-.024.158-.16.274-.32.274H22.63c-.16 0-.295.115-.32.273M35.325 23.552h-1.81c-.115 0-.203-.104-.185-.218l1.322-8.38c.025-.158.16-.273.32-.273h1.81c.115 0 .203.104.185.22l-1.322 8.38c-.025.156-.16.272-.32.272M14.397 18.657h.224c.754 0 1.62-.14 1.777-1.106.158-.963-.345-1.102-1.15-1.104h-.326c-.097 0-.18.07-.197.168l-.326 2.043zm3.96 4.895h-2.37c-.102 0-.194-.058-.238-.15l-1.565-3.262h-.023l-.506 3.19c-.02.128-.13.222-.26.222h-1.86c-.116 0-.205-.104-.187-.218l1.33-8.432c.02-.128.13-.22.26-.22h3.222c1.753 0 2.953.834 2.66 2.728-.2 1.224-1.048 2.283-2.342 2.506l2.037 3.35c.076.125-.014.286-.16.286zM40.216 23.552h-1.808c-.116 0-.205-.104-.187-.218l1.06-6.7h-1.684c-.116 0-.205-.104-.187-.218l.228-1.462c.025-.157.16-.273.32-.273h5.62c.116 0 .205.104.186.22l-.228 1.46c-.025.158-.16.274-.32.274h-1.63l-1.05 6.645c-.025.156-.16.272-.32.272M11.467 17.202c-.027.164-.228.223-.345.104-.395-.405-.975-.62-1.6-.62-1.41 0-2.526 1.083-2.75 2.458-.21 1.4.588 2.41 2.022 2.41.592 0 1.22-.225 1.74-.6.144-.105.34.02.313.194l-.328 2.03c-.02.12-.108.22-.226.254-.702.207-1.24.355-1.9.355-3.823 0-4.435-3.266-4.238-4.655.553-3.894 3.712-4.786 5.65-4.678.623.034 1.182.117 1.73.323.177.067.282.25.252.436l-.32 1.99\" style=\"fill: #21306F\" />\n      <path d=\"M23.184 7.67c-.11.717-.657.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.105.123.137.305.097.557zm-.23-1.87h-1.998c-.137 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h1.024c.095 0 .177-.07.192-.164l.23-1.452c.02-.135.136-.235.273-.235h.63c1.317 0 2.076-.636 2.275-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51z\" style=\"fill: #0093C7\" />\n      <path d=\"M8.936 7.67c-.11.717-.656.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.104.123.136.305.096.557zm-.23-1.87H6.708c-.136 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h.955c.136 0 .252-.1.274-.234l.217-1.382c.02-.135.137-.235.274-.235h.633c1.316 0 2.075-.636 2.274-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51zM13.343 9.51c-.092.545-.526.912-1.08.912-.277 0-.5-.09-.642-.258-.14-.168-.193-.406-.148-.672.086-.542.527-.92 1.072-.92.27 0 .492.09.637.26.148.172.205.412.163.677zm1.334-1.863h-.957c-.082 0-.152.06-.164.14l-.042.268-.067-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.135 1.923-.092.56.038 1.097.356 1.47.29.344.708.487 1.204.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.017-.102-.06-.193-.163-.193z\" style=\"fill: #21306F\" />\n      <path d=\"M27.59 9.51c-.09.545-.525.912-1.078.912-.278 0-.5-.09-.643-.258-.142-.168-.195-.406-.15-.672.086-.542.526-.92 1.07-.92.273 0 .494.09.64.26.146.172.203.412.16.677zm1.334-1.863h-.956c-.082 0-.152.06-.164.14l-.043.268-.065-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.136 1.923-.092.56.038 1.097.355 1.47.292.344.71.487 1.205.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.015-.102-.063-.193-.166-.193z\" style=\"fill: #0093C7\" />\n      <path d=\"M19.77 7.647h-.96c-.092 0-.178.045-.23.122L17.254 9.72l-.562-1.877c-.035-.118-.143-.198-.266-.198h-.945c-.113 0-.194.112-.157.22l1.06 3.108-.997 1.404c-.078.11 0 .262.136.262h.96c.092 0 .177-.044.23-.12l3.196-4.614c.077-.11-.002-.26-.137-.26\" style=\"fill: #21306F\" />\n      <path d=\"M30.052 5.94l-.82 5.216c-.016.1.062.192.165.192h.824c.138 0 .254-.1.275-.234l.81-5.122c.015-.1-.064-.193-.166-.193h-.924c-.082 0-.15.06-.164.14\" style=\"fill: #0093C7\" />\n    </symbol>\n\n    <symbol id=\"iconCardFront\" viewBox=\"0 0 48 29\">\n      <title>Generic Card</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" style=\"fill: #FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" style=\"fill: #828282\" />\n      <rect style=\"fill: #828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect style=\"fill: #828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" style=\"fill: #828282\" />\n      <ellipse style=\"fill: #828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"iconCVVBack\" viewBox=\"0 0 40 24\">\n      <title>CVV Back</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\"/>\n      <path style=\"fill: #828282\" d=\"M0 5h40v4H0z\" />\n      <path d=\"M20 13.772v5.456c0 .423.37.772.82.772h13.36c.45 0 .82-.35.82-.772v-5.456c0-.423-.37-.772-.82-.772H20.82c-.45 0-.82.35-.82.772zm-1-.142c0-.9.76-1.63 1.68-1.63h13.64c.928 0 1.68.737 1.68 1.63v5.74c0 .9-.76 1.63-1.68 1.63H20.68c-.928 0-1.68-.737-1.68-1.63v-5.74z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"16.5\" r=\"1.5\" />\n    </symbol>\n\n    <symbol id=\"iconCVVFront\" viewBox=\"0 0 40 24\">\n      <title>CVV Front</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\" />\n      <path d=\"M16 5.772v5.456c0 .423.366.772.81.772h17.38c.444 0 .81-.348.81-.772V5.772C35 5.35 34.634 5 34.19 5H16.81c-.444 0-.81.348-.81.772zm-1-.142c0-.9.75-1.63 1.66-1.63h17.68c.917 0 1.66.737 1.66 1.63v5.74c0 .9-.75 1.63-1.66 1.63H16.66c-.917 0-1.66-.737-1.66-1.63V5.63z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"19.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"8.5\" r=\"1.5\" />\n      <path d=\"M4 7.833C4 7.47 4.476 7 4.89 7h6.22c.414 0 .89.47.89.833v3.334c0 .364-.476.833-.89.833H4.89c-.414 0-.89-.47-.89-.833V7.833zM4 18.5c0-.828.668-1.5 1.5-1.5h29c.828 0 1.5.666 1.5 1.5 0 .828-.668 1.5-1.5 1.5h-29c-.828 0-1.5-.666-1.5-1.5z\" style=\"fill: #828282\" />\n    </symbol>\n\n    <symbol id=\"iconCheck\" viewBox=\"0 0 42 32\">\n      <title>Check</title>\n      <path class=\"path1\" d=\"M14.379 29.76L39.741 3.415 36.194.001l-21.815 22.79-10.86-11.17L0 15.064z\" />\n    </symbol>\n\n    <symbol id=\"iconLockLoader\" viewBox=\"0 0 28 32\">\n      <title>Lock Loader</title>\n      <path d=\"M6 10V8c0-4.422 3.582-8 8-8 4.41 0 8 3.582 8 8v2h-4V7.995C18 5.79 16.205 4 14 4c-2.21 0-4 1.792-4 3.995V10H6zM.997 14c-.55 0-.997.445-.997.993v16.014c0 .548.44.993.997.993h26.006c.55 0 .997-.445.997-.993V14.993c0-.548-.44-.993-.997-.993H.997z\" />\n    </symbol>\n\n    <symbol id=\"iconError\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\n      <path d=\"M0 0h24v24H0z\" style=\"fill: none\" />\n      <path d=\"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z\" />\n    </symbol>\n\n    <symbol id=\"logoApplePay\" viewBox=\"0 0 165.52 105.97\" width=\"24\">\n      <title>Apple Pay Logo</title>\n      <defs>\n      <style>\n        .cls-1{fill:#231f20;}.cls-2{fill:#fff;}\n      </style>\n      </defs>\n      <path id=\"_Path_\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M150.7 0h-139a20.78 20.78 0 0 0-3.12.3 10.51 10.51 0 0 0-3 1 9.94 9.94 0 0 0-4.31 4.32 10.46 10.46 0 0 0-1 3A20.65 20.65 0 0 0 0 11.7v82.57a20.64 20.64 0 0 0 .3 3.11 10.46 10.46 0 0 0 1 3 9.94 9.94 0 0 0 4.35 4.35 10.47 10.47 0 0 0 3 1 20.94 20.94 0 0 0 3.11.27h142.06a21 21 0 0 0 3.11-.27 10.48 10.48 0 0 0 3-1 9.94 9.94 0 0 0 4.35-4.35 10.4 10.4 0 0 0 1-3 20.63 20.63 0 0 0 .27-3.11V11.69a20.64 20.64 0 0 0-.27-3.11 10.4 10.4 0 0 0-1-3 9.94 9.94 0 0 0-4.35-4.35 10.52 10.52 0 0 0-3-1 20.84 20.84 0 0 0-3.1-.23h-1.43z\"/>\n      <path id=\"_Path_2\" data-name=\"&lt;Path&gt;\" class=\"cls-2\" d=\"M150.7 3.53h3.03a17.66 17.66 0 0 1 2.58.22 7 7 0 0 1 2 .65 6.41 6.41 0 0 1 2.8 2.81 6.88 6.88 0 0 1 .64 2 17.56 17.56 0 0 1 .22 2.58v82.38a17.54 17.54 0 0 1-.22 2.59 6.85 6.85 0 0 1-.64 2 6.41 6.41 0 0 1-2.81 2.81 6.92 6.92 0 0 1-2 .65 18 18 0 0 1-2.57.22H11.79a18 18 0 0 1-2.58-.22 6.94 6.94 0 0 1-2-.65 6.41 6.41 0 0 1-2.8-2.8 6.93 6.93 0 0 1-.65-2 17.47 17.47 0 0 1-.22-2.58v-82.4a17.49 17.49 0 0 1 .22-2.59 6.92 6.92 0 0 1 .65-2 6.41 6.41 0 0 1 2.8-2.8 7 7 0 0 1 2-.65 17.63 17.63 0 0 1 2.58-.22H150.7\"/>\n      <g id=\"_Group_\" data-name=\"&lt;Group&gt;\">\n      <g id=\"_Group_2\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Path_3\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M43.51 35.77a9.15 9.15 0 0 0 2.1-6.52 9.07 9.07 0 0 0-6 3.11 8.56 8.56 0 0 0-2.16 6.27 7.57 7.57 0 0 0 6.06-2.86\"/>\n      <path id=\"_Path_4\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M45.59 39.08c-3.35-.2-6.2 1.9-7.79 1.9s-4-1.8-6.7-1.75a9.87 9.87 0 0 0-8.4 5.1c-3.6 6.2-.95 15.4 2.55 20.45 1.7 2.5 3.75 5.25 6.45 5.15s3.55-1.65 6.65-1.65 4 1.65 6.7 1.6 4.55-2.5 6.25-5a22.2 22.2 0 0 0 2.8-5.75 9.08 9.08 0 0 1-5.45-8.25A9.26 9.26 0 0 1 53 43.13a9.57 9.57 0 0 0-7.45-4\"/>\n      </g>\n      <g id=\"_Group_3\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Compound_Path_\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M79 32.11c7.28 0 12.35 5 12.35 12.32S86.15 56.8 78.79 56.8h-8.06v12.82h-5.82V32.11zm-8.27 19.81h6.68c5.07 0 8-2.73 8-7.46S82.48 37 77.44 37h-6.71z\"/>\n      <path id=\"_Compound_Path_2\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M92.76 61.85c0-4.81 3.67-7.56 10.42-8l7.25-.44v-2.06c0-3-2-4.7-5.56-4.7-2.94 0-5.07 1.51-5.51 3.82h-5.24c.16-4.86 4.73-8.4 10.92-8.4 6.65 0 11 3.48 11 8.89v18.66h-5.38v-4.5h-.13a9.59 9.59 0 0 1-8.58 4.78c-5.42 0-9.19-3.22-9.19-8.05zm17.68-2.42v-2.11l-6.47.42c-3.64.23-5.54 1.59-5.54 4s2 3.77 5.07 3.77c3.95-.05 6.94-2.57 6.94-6.08z\"/>\n      <path id=\"_Compound_Path_3\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M121 79.65v-4.5a17.14 17.14 0 0 0 1.72.1c2.57 0 4-1.09 4.91-3.9l.52-1.66-9.88-27.29h6.08l6.86 22.15h.13l6.86-22.15h5.93l-10.21 28.67c-2.34 6.58-5 8.73-10.68 8.73a15.93 15.93 0 0 1-2.24-.15z\"/>\n      </g>\n      </g>\n    </symbol>\n\n    <symbol id=\"iconClose\" width=\"21\" height=\"21\" viewBox=\"0 0 21 21\" overflow=\"visible\">\n      <path d=\"M16 5.414L14.586 4 10 8.586 5.414 4 4 5.414 8.586 10 4 14.586 5.414 16 10 11.414 14.586 16 16 14.586 11.414 10\"/>\n    </symbol>\n  </defs>\n</svg>\n";
 
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
-  paymentOptionIDs.paypalCredit
+  paymentOptionIDs.paypalCredit,
+  paymentOptionIDs.applePay,
+  'threeDSecure'
 ];
 var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
   paymentOptionIDs.paypal,
-  paymentOptionIDs.paypalCredit
+  paymentOptionIDs.paypalCredit,
+  paymentOptionIDs.applePay
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-var VERSION = "1.8.1";
+var VERSION = "1.9.0";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the card.
  * @property {object} details Additional account details.
- * @property {string} details.cardType Type of card, e.g. Visa, MasterCard.
+ * @property {string} details.cardType Type of card, e.g. Visa, Mastercard.
  * @property {string} details.lastTwo Last two digits of card number.
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ * @property {?boolean} liablityShifted If 3D Secure is configured, whether or not liability did shift.
+ * @property {?boolean} liablityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
  */
 
 /**
@@ -5247,6 +6126,18 @@ var VERSION = "1.8.1";
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
  * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~applePayPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Apple Pay provided card.
+ * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
+ * @property {string} details.cardHolderName The name of the card holder.
+ * @property {string} details.dpanLastTwo Last two digits of card number.
+ * @property {string} description A human-readable description.
+ * @property {string} type The payment method type, always `ApplePayCard` when the method requested is an Apple Pay provided card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
 
@@ -5531,6 +6422,14 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
     return;
   }
 
+  if (property === 'threeDSecure') {
+    if (this._threeDSecure) {
+      this._threeDSecure.updateConfiguration(key, value);
+    }
+
+    return;
+  }
+
   this._mainView.getView(property).updateConfiguration(key, value);
 
   if (UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED.indexOf(property) === -1) {
@@ -5591,6 +6490,24 @@ Dropin.prototype._setUpDataCollector = function () {
   });
 };
 
+Dropin.prototype._setUpThreeDSecure = function () {
+  var self = this;
+  var config = assign({}, this._merchantConfiguration.threeDSecure);
+
+  this._model.asyncDependencyStarting();
+
+  this._threeDSecure = new ThreeDSecure(this._client, config, this._strings.cardVerification);
+
+  this._threeDSecure.initialize().then(function () {
+    self._model.asyncDependencyReady();
+  }).catch(function (err) {
+    self._model.cancelInitialization(new DropinError({
+      message: '3D Secure failed to set up.',
+      braintreeWebError: err
+    }));
+  });
+};
+
 Dropin.prototype._setUpDependenciesAndViews = function () {
   var braintreeWebVersion, dataCollectorScriptOptions;
 
@@ -5602,6 +6519,10 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
     };
 
     this._loadScript(dataCollectorScriptOptions, this._setUpDataCollector.bind(this));
+  }
+
+  if (this._merchantConfiguration.threeDSecure) {
+    this._setUpThreeDSecure();
   }
 
   this._mainView = new MainView({
@@ -5727,15 +6648,52 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
  *    form.submit();
  *  });
  * });
+ *
+ * @example <caption>Requesting a payment method with 3D Secure</caption>
+ * var form = document.querySelector('#my-form');
+ * var hiddenNonceInput = document.querySelector('#my-nonce-input');
+ *
+ * form.addEventListener('submit', function (event) {
+ *  event.preventDefault();
+ *
+ *  dropinInstance.requestPaymentMethod(function (err, payload) {
+ *    if (err) {
+ *      // Handle error
+ *      return;
+ *    }
+ *
+ *    if (payload.liabilityShifted || payload.type !== 'CreditCard') {
+ *      hiddenNonceInput.value = payload.nonce;
+ *      form.submit();
+ *    } else {
+ *      // Decide if you will force the user to enter a different payment method
+ *      // if liablity was not shifted
+ *      dropinInstance.clearSelectedPaymentMethod();
+ *    }
+ *  });
+ * });
  */
 Dropin.prototype.requestPaymentMethod = function () {
   return this._mainView.requestPaymentMethod().then(function (payload) {
+    if (this._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
+      return this._threeDSecure.verify(payload.nonce).then(function (newPayload) {
+        payload.nonce = newPayload.nonce;
+        payload.liabilityShifted = newPayload.liabilityShifted;
+        payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
+
+        return payload;
+      });
+    }
+
+    return payload;
+  }.bind(this)).then(function (payload) {
     if (this._dataCollectorInstance) {
       payload.deviceData = this._dataCollectorInstance.deviceData;
     }
-
+    return payload;
+  }.bind(this)).then(function (payload) {
     return formatPaymentMethodPayload(payload);
-  }.bind(this));
+  });
 };
 
 Dropin.prototype._removeStylesheet = function () {
@@ -5827,6 +6785,17 @@ Dropin.prototype.teardown = function () {
     }.bind(this));
   }
 
+  if (this._threeDSecure) {
+    promise.then(function () {
+      return this._threeDSecure.teardown().catch(function (error) {
+        dataCollectorError = new DropinError({
+          message: 'Drop-in errored tearing down 3D Secure.',
+          braintreeWebError: error
+        });
+      });
+    }.bind(this));
+  }
+
   return promise.then(function () {
     return self._removeDropinWrapper();
   }).then(function () {
@@ -5870,6 +6839,11 @@ function formatPaymentMethodPayload(paymentMethod) {
     formattedPaymentMethod.description = paymentMethod.description;
   }
 
+  if (paymentMethod.liabilityShiftPossible) {
+    formattedPaymentMethod.liabilityShifted = paymentMethod.liabilityShifted;
+    formattedPaymentMethod.liabilityShiftPossible = paymentMethod.liabilityShiftPossible;
+  }
+
   if (paymentMethod.deviceData) {
     formattedPaymentMethod.deviceData = paymentMethod.deviceData;
   }
@@ -5884,7 +6858,7 @@ function formatPaymentMethodPayload(paymentMethod) {
 module.exports = wrapPrototype(Dropin);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./constants":77,"./dropin-model":78,"./lib/analytics":82,"./lib/assign":83,"./lib/dropin-error":87,"./lib/event-emitter":88,"./lib/is-guest-checkout":90,"./lib/promise":93,"./lib/uuid":96,"./translations":106,"./views/main-view":122,"./views/payment-methods-view":124,"./views/payment-options-view":125,"@braintree/wrap-promise":17}],80:[function(require,module,exports){
+},{"./constants":86,"./dropin-model":87,"./lib/analytics":91,"./lib/assign":92,"./lib/dropin-error":96,"./lib/event-emitter":97,"./lib/is-guest-checkout":99,"./lib/promise":102,"./lib/three-d-secure":104,"./lib/uuid":106,"./translations":116,"./views/main-view":132,"./views/payment-methods-view":134,"./views/payment-options-view":135,"@braintree/wrap-promise":17}],89:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web-drop-in
@@ -5899,7 +6873,6 @@ module.exports = wrapPrototype(Dropin);
  * Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set:
  *
  * * `data-locale`
- * * `data-card.cardholder-name`
  * * `data-card.cardholder-name.required`
  * * `data-payment-option-priority`
  * * `data-data-collector.kount`
@@ -5971,11 +6944,11 @@ module.exports = wrapPrototype(Dropin);
  * </form>
  *
  * @example
- * <caption>Including cardholder name field in card form</caption>
+ * <caption>Including an optional cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
  *   <script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
- *    data-card.cardholder-name="true"
+ *    data-card.cardholder-name.required="false"
  *   ></script>
  *   <input type="submit" value="Purchase"></input>
  * </form>
@@ -6000,7 +6973,7 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = "1.8.1";
+var VERSION = "1.9.0";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -6018,6 +6991,12 @@ var VERSION = "1.8.1";
  * @param {boolean} [paypal] If true, PayPal fraud data collection is enabled. Required if `kount` parameter is not used.
  */
 
+/**
+ * @typedef {object} threeDSecureOptions The configuration options for 3D Secure. Requires [3D Secure](https://developers.braintreepayments.com/guides/3d-secure/overview) to be enabled in the Braintree gateway. The liability shift information will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
+ *
+ * @param {string} amount The amount to verify with 3D Secure.
+ */
+
 /** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
  * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
@@ -6025,6 +7004,19 @@ var VERSION = "1.8.1";
  * @param {string} [currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {string} [buttonStyle] The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles) are available.
  * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
+ */
+
+/** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
+ *
+ * @param {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
+ * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
+ */
+
+/**
+ * @typedef {object} ApplePayPaymentRequest An [Apple Pay Payment Request object](https://developer.apple.com/reference/applepayjs/1916082-applepay_js_data_types/paymentrequest).
+ * @external ApplePayPaymentRequest
+ * @see {@link https://developer.apple.com/reference/applepayjs/1916082-applepay_js_data_types/paymentrequest PaymentRequest}
  */
 
 /**
@@ -6061,7 +7053,7 @@ var VERSION = "1.8.1";
  * `zh_TW`.
  *
  * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
- * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit']`. Payment options omitted from this array will not be offered to the customer.
+ * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'applePay']`. Payment options omitted from this array will not be offered to the customer.
  *
  * @param {object} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards as a payment option, use `paymentOptionPriority`.
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
@@ -6071,8 +7063,13 @@ var VERSION = "1.8.1";
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live).
  *
  * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3).
+ * @param {object} [options.applePay] The configuration options for Apple Pay. To include an Apple Pay option in your Drop-in integration, include the `applePay` parameter and [enable Apple Pay in the Braintree Control Panel](https://developers.braintreepayments.com/guides/apple-pay/configuration/javascript/v3). If a user's browser does not support Apple Pay, the Apple Pay option will not be rendered. See [Apple's documentation](https://support.apple.com/en-us/HT201469) for browser and device support.
  *
+ * See [`applePayCreateOptions`](#~applePayCreateOptions) for `applePay` options.
  * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
+ *
+ * @param {object} [options.threeDSecure] The configuration options for 3D Secure. See [`threeDSecureOptions`](#~threeDSecureOptions) for all `threeDSecure` options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
+ *
  * @param {boolean} [preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
  *
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
@@ -6152,18 +7149,25 @@ var VERSION = "1.8.1";
  *   </body>
  * </html>
  * @example
- * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit</caption>
+ * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit, and Apple Pay</caption>
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
  *   container: '#dropin-container',
+ *   applePay: {
+ *     displayName: 'Merchant Name',
+ *     paymentRequest: {
+   *     label: 'Localized Name',
+ *       total: '10.00'
+ *     }
+ *   },
  *   paypal: {
  *     flow: 'checkout',
- *     amount: 10.00,
+ *     amount: '10.00',
  *     currency: 'USD'
  *   },
  *  paypalCredit: {
  *    flow: 'checkout',
- *    amount: 10.00,
+ *    amount: '10.00',
  *    currency: 'USD'
  *   }
  * }, function (err, dropinInstance) {
@@ -6281,6 +7285,16 @@ var VERSION = "1.8.1";
  *     }
  *   }
  * }, callback);
+ *
+ * @example
+ * <caption>Enabling 3D Secure</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   threeDSecure: {
+ *     amount: '10.00'
+ *   }
+ * }, callback);
  */
 
 function create(options) {
@@ -6346,7 +7360,7 @@ module.exports = {
   VERSION: VERSION
 };
 
-},{"./constants":77,"./dropin":79,"./lib/analytics":82,"./lib/create-from-script-tag":86,"./lib/dropin-error":87,"./lib/promise":93,"@braintree/wrap-promise":17,"braintree-web/client":23}],81:[function(require,module,exports){
+},{"./constants":86,"./dropin":88,"./lib/analytics":91,"./lib/create-from-script-tag":95,"./lib/dropin-error":96,"./lib/promise":102,"@braintree/wrap-promise":17,"braintree-web/client":26}],90:[function(require,module,exports){
 'use strict';
 
 function addSelectionEventHandler(element, func) {
@@ -6360,7 +7374,7 @@ function addSelectionEventHandler(element, func) {
 
 module.exports = addSelectionEventHandler;
 
-},{}],82:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 'use strict';
 
 var atob = require('./polyfill').atob;
@@ -6403,9 +7417,9 @@ module.exports = {
   sendEvent: sendAnalyticsEvent
 };
 
-},{"../constants":77,"./polyfill":92,"braintree-web/client":23}],83:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"dup":42}],84:[function(require,module,exports){
+},{"../constants":86,"./polyfill":101,"braintree-web/client":26}],92:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"dup":45}],93:[function(require,module,exports){
 'use strict';
 
 var isIe9 = require('@braintree/browser-detection/is-ie9');
@@ -6414,7 +7428,7 @@ module.exports = {
   isIe9: isIe9
 };
 
-},{"@braintree/browser-detection/is-ie9":6}],85:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ie9":6}],94:[function(require,module,exports){
 'use strict';
 
 function _classesOf(element) {
@@ -6463,7 +7477,7 @@ module.exports = {
   toggle: toggle
 };
 
-},{}],86:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 'use strict';
 
 var analytics = require('./analytics');
@@ -6478,8 +7492,13 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'data-collector.kount',
   'data-collector.paypal',
 
+  // camelcase version was accidentally used initially.
+  // we add the kebab case version to match the docs, but
+  // we retain the camelcase version for backwards compatibility
   'card.cardholderName',
   'card.cardholderName.required',
+  'card.cardholder-name',
+  'card.cardholder-name.required',
 
   'paypal.amount',
   'paypal.currency',
@@ -6588,7 +7607,7 @@ function createFromScriptTag(createFunction, scriptTag) {
 
 module.exports = createFromScriptTag;
 
-},{"./analytics":82,"./dropin-error":87,"./find-parent-form":89,"./kebab-case-to-camel-case":91,"./uuid":96}],87:[function(require,module,exports){
+},{"./analytics":91,"./dropin-error":96,"./find-parent-form":98,"./kebab-case-to-camel-case":100,"./uuid":106}],96:[function(require,module,exports){
 'use strict';
 
 function isBraintreeWebError(err) {
@@ -6616,9 +7635,9 @@ DropinError.prototype.constructor = DropinError;
 
 module.exports = DropinError;
 
-},{}],88:[function(require,module,exports){
-arguments[4][58][0].apply(exports,arguments)
-},{"dup":58}],89:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
+arguments[4][61][0].apply(exports,arguments)
+},{"dup":61}],98:[function(require,module,exports){
 'use strict';
 
 function findParentForm(element) {
@@ -6635,7 +7654,7 @@ module.exports = {
   findParentForm: findParentForm
 };
 
-},{}],90:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 'use strict';
 
 var atob = require('./polyfill').atob;
@@ -6651,7 +7670,7 @@ module.exports = function (client) {
   return true;
 };
 
-},{"./polyfill":92}],91:[function(require,module,exports){
+},{"./polyfill":101}],100:[function(require,module,exports){
 'use strict';
 
 function kebabCaseToCamelCase(kebab) {
@@ -6666,7 +7685,7 @@ function kebabCaseToCamelCase(kebab) {
 
 module.exports = kebabCaseToCamelCase;
 
-},{}],92:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -6705,9 +7724,9 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],93:[function(require,module,exports){
-arguments[4][64][0].apply(exports,arguments)
-},{"dup":64,"promise-polyfill":74}],94:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
+arguments[4][67][0].apply(exports,arguments)
+},{"dup":67,"promise-polyfill":83}],103:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -6728,7 +7747,148 @@ module.exports = function () {
   return Boolean(el.style.length);
 };
 
-},{}],95:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
+'use strict';
+
+
+var classlist = require('./classlist');
+var threeDSecure = require('braintree-web/three-d-secure');
+var Promise = require('./promise');
+
+function ThreeDSecure(client, merchantConfiguration, cardVerificationString) {
+  this._client = client;
+  this._config = merchantConfiguration;
+  this._modal = this._setupModal(cardVerificationString);
+}
+
+ThreeDSecure.prototype.initialize = function () {
+  var self = this;
+
+  return threeDSecure.create({
+    client: this._client
+  }).then(function (instance) {
+    self._instance = instance;
+  });
+};
+
+ThreeDSecure.prototype.verify = function (nonce) {
+  var self = this;
+
+  this._revealModal();
+
+  return Promise.all([
+    this._waitForThreeDSecure(),
+    this._instance.verifyCard({
+      nonce: nonce,
+      amount: this._config.amount,
+      showLoader: false,
+      addFrame: function (err, iframe) {
+        var count = 0;
+        var modalBody = self._modal.querySelector('.braintree-three-d-secure__modal-body');
+
+        iframe.onload = function () {
+          count++;
+
+          if (count === 2) {
+            classlist.add(modalBody, 'braintree-three-d-secure__frame-active');
+          }
+        };
+
+        modalBody.appendChild(iframe);
+      },
+      removeFrame: function () {
+        self._cleanupModal();
+      }
+    }).then(function (payload) {
+      self._resolveThreeDSecure();
+
+      return payload;
+    })
+  ]).then(function (result) {
+    return result[1];
+  }).catch(function (err) {
+    if (err.type === 'THREE_D_SECURE_CANCELLED') {
+      return Promise.resolve(err.payload);
+    }
+
+    return Promise.reject(err);
+  });
+};
+
+ThreeDSecure.prototype.cancel = function () {
+  var self = this;
+
+  return this._instance.cancelVerifyCard().then(function (payload) {
+    self._rejectThreeDSecure({
+      type: 'THREE_D_SECURE_CANCELLED',
+      payload: {
+        nonce: payload.nonce,
+        liabilityShifted: payload.liabilityShifted,
+        liabilityShiftPossible: payload.liabilityShiftPossible
+      }
+    });
+    self._cleanupModal();
+  }).catch(function () {
+    // only reason this would reject
+    // is if there is no verification in progress
+    // so we just swallow the error
+  });
+};
+
+ThreeDSecure.prototype.updateConfiguration = function (key, value) {
+  this._config[key] = value;
+};
+
+ThreeDSecure.prototype.teardown = function () {
+  return this._instance.teardown();
+};
+
+ThreeDSecure.prototype._cleanupModal = function () {
+  var iframe = this._modal.querySelector('iframe');
+
+  classlist.remove(this._modal.querySelector('.braintree-three-d-secure__modal'), 'braintree-three-d-secure__frame_visible');
+  classlist.remove(this._modal.querySelector('.braintree-three-d-secure__backdrop'), 'braintree-three-d-secure__frame_visible');
+
+  iframe.parentNode.removeChild(iframe);
+  setTimeout(function () {
+    this._modal.parentNode.removeChild(this._modal);
+  }.bind(this), 300);
+};
+
+ThreeDSecure.prototype._setupModal = function (cardVerificationString) {
+  var self = this;
+  var modal = document.createElement('div');
+
+  modal.innerHTML = "<div class=\"braintree-three-d-secure\">\n  <div class=\"braintree-three-d-secure__backdrop\"></div>\n  <div class=\"braintree-three-d-secure__modal\">\n    <div data-braintree-id=\"three-d-secure-loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"three-d-secure-loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n    <div class=\"braintree-three-d-secure__modal-header\">\n      {{cardVerification}}\n      <div class=\"braintree-three-d-secure__modal-close\">\n        <svg width=\"21\" height=\"21\">\n          <use xlink:href=\"#iconClose\"></use>\n        </svg>\n      </div>\n    </div>\n    <div class=\"braintree-three-d-secure__modal-body\">\n    </div>\n  </div>\n</div>\n"
+    .replace('{{cardVerification}}', cardVerificationString);
+
+  modal.querySelector('.braintree-three-d-secure__modal-close').addEventListener('click', function () {
+    self.cancel();
+  });
+
+  return modal;
+};
+
+ThreeDSecure.prototype._waitForThreeDSecure = function () {
+  var self = this;
+
+  return new Promise(function (resolve, reject) {
+    self._resolveThreeDSecure = resolve;
+    self._rejectThreeDSecure = reject;
+  });
+};
+
+ThreeDSecure.prototype._revealModal = function () {
+  document.body.appendChild(this._modal);
+  classlist.add(this._modal.querySelector('.braintree-three-d-secure__backdrop'), 'braintree-three-d-secure__frame_visible');
+  setTimeout(function () {
+    classlist.add(this._modal.querySelector('.braintree-three-d-secure__modal'), 'braintree-three-d-secure__frame_visible');
+  }.bind(this), 10);
+};
+
+module.exports = ThreeDSecure;
+
+},{"./classlist":94,"./promise":102,"braintree-web/three-d-secure":77}],105:[function(require,module,exports){
 'use strict';
 
 var browserDetection = require('./browser-detection');
@@ -6765,22 +7925,21 @@ module.exports = {
   onTransitionEnd: onTransitionEnd
 };
 
-},{"./browser-detection":84}],96:[function(require,module,exports){
-arguments[4][67][0].apply(exports,arguments)
-},{"dup":67}],97:[function(require,module,exports){
+},{"./browser-detection":93}],106:[function(require,module,exports){
+arguments[4][71][0].apply(exports,arguments)
+},{"dup":71}],107:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Skift betalingsmetode",
-  "choosePaymentMethod": "Vælg en betalingsmetode",
-  "savedPaymentMethods": "Gemte betalingsmetoder",
   "payingWith": "Betaler med {{paymentSource}}",
   "chooseAnotherWayToPay": "Vælg en anden betalingsmetode",
   "chooseAWayToPay": "Vælg, hvordan du vil betale",
   "otherWaysToPay": "Andre betalingsmetoder",
+  "cardVerification": "Bekræftelse af kort",
   "fieldEmptyForCvv": "Du skal angive kontrolcifrene.",
   "fieldEmptyForExpirationDate": "Du skal angive udløbsdatoen.",
   "fieldEmptyForCardholderName": "Du skal angive kortindehaverens navn.",
+  "fieldTooLongForCardholderName": "Kortejerens navn skal være mindre end 256 tegn.",
   "fieldEmptyForNumber": "Du skal angive et nummer.",
   "fieldEmptyForPostalCode": "Du skal angive et postnummer.",
   "fieldInvalidForCvv": "Sikkerhedskoden er ugyldig.",
@@ -6789,12 +7948,15 @@ module.exports = {
   "fieldInvalidForPostalCode": "Postnummeret er ugyldigt.",
   "genericError": "Der opstod fejl i vores system.",
   "hostedFieldsFailedTokenizationError": "Kontroller oplysningerne, og prøv igen.",
-  "hostedFieldsTokenizationNetworkErrorError": "Netværksfejl. Prøv igen.",
   "hostedFieldsFieldsInvalidError": "Kontroller oplysningerne, og prøv igen.",
+  "hostedFieldsTokenizationNetworkErrorError": "Netværksfejl. Prøv igen.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Bekræftelse af betalingskort blev ikke gennemført. Kontrollér oplysningerne, og prøv igen.",
   "paypalAccountTokenizationFailedError": "PayPal-kontoen blev ikke tilføjet. Prøv igen.",
   "paypalFlowFailedError": "Der kunne ikke oprettes forbindelse til PayPal. Prøv igen.",
   "paypalTokenizationRequestActiveError": "PayPal-betalingen er i gang med at blive autoriseret.",
   "unsupportedCardTypeError": "Korttypen understøttes ikke. Prøv et andet kort.",
+  "applePayTokenizationError": "Der opstod en netværksfejl under behandlingen af betalingen med Apple Pay. Prøv igen.",
+  "applePayActiveCardError": "Føj et understøttet kort til din Apple Pay e-pung.",
   "cardholderNameLabel": "Kortindehaverens navn",
   "cardNumberLabel": "Kortnummer",
   "cvvLabel": "Kontrolcifre",
@@ -6807,6 +7969,7 @@ module.exports = {
   "postalCodeLabel": "Postnummer",
   "payWithCard": "Betal med kort",
   "endingIn": "Slutter med ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "Kort",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
@@ -6820,20 +7983,19 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],98:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Zahlungsquelle ändern",
-  "choosePaymentMethod": "Zahlungsquelle auswählen",
-  "savedPaymentMethods": "Gespeicherte Zahlungsquellen",
   "payingWith": "Zahlen mit {{paymentSource}}",
   "chooseAnotherWayToPay": "Andere Zahlungsmethode wählen",
   "chooseAWayToPay": "Wie möchten Sie bezahlen?",
   "otherWaysToPay": "Andere Zahlungsmethoden",
+  "cardVerification": "Kartenbestätigung",
   "fieldEmptyForCvv": "Geben Sie die Kartenprüfnummer ein.",
   "fieldEmptyForExpirationDate": "Geben Sie das Ablaufdatum ein.",
-  "fieldEmptyForCardholderName": "Geben Sie den Name des Karteninhabers ein.",
+  "fieldEmptyForCardholderName": "Geben Sie den Namen des Karteninhabers ein.",
+  "fieldTooLongForCardholderName": "Der Name des Karteninhabers darf 255 Zeichen nicht übersteigen.",
   "fieldEmptyForNumber": "Geben Sie die Nummer ein.",
   "fieldEmptyForPostalCode": "Geben Sie die PLZ ein.",
   "fieldInvalidForCvv": "Die Kartenprüfnummer ist ungültig.",
@@ -6842,12 +8004,15 @@ module.exports = {
   "fieldInvalidForPostalCode": "Die PLZ ist ungültig.",
   "genericError": "Bei uns ist ein Problem aufgetreten.",
   "hostedFieldsFailedTokenizationError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
-  "hostedFieldsTokenizationNetworkErrorError": "Netzwerkfehler. Versuchen Sie es erneut.",
   "hostedFieldsFieldsInvalidError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+  "hostedFieldsTokenizationNetworkErrorError": "Netzwerkfehler. Versuchen Sie es erneut.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Überprüfung der Karte fehlgeschlagen. Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
   "paypalAccountTokenizationFailedError": "Beim Hinzufügen des PayPal-Kontos ist ein Problem aufgetreten. Versuchen Sie es erneut.",
   "paypalFlowFailedError": "Beim Verbinden mit PayPal ist ein Problem aufgetreten. Versuchen Sie es erneut.",
   "paypalTokenizationRequestActiveError": "Die PayPal-Zahlung wird bereits autorisiert.",
   "unsupportedCardTypeError": "Dieser Kreditkartentyp wird nicht unterstützt. Versuchen Sie es mit einer anderen Karte.",
+  "applePayTokenizationError": "Netzwerkfehler bei der Zahlungsabwicklung mit Apple Pay. Versuchen Sie es erneut.",
+  "applePayActiveCardError": "Fügen Sie der Apple-Pay-Börse eine unterstützte Kreditkarte hinzu.",
   "cardholderNameLabel": "Name des Karteninhabers",
   "cardNumberLabel": "Kartennummer",
   "cvvLabel": "Prüfnr.",
@@ -6860,6 +8025,7 @@ module.exports = {
   "postalCodeLabel": "PLZ",
   "payWithCard": "Mit Kreditkarte zahlen",
   "endingIn": "Mit den Endziffern ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "Kreditkarte",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
@@ -6873,20 +8039,19 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],99:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Change Payment Method",
-  "choosePaymentMethod": "Choose a payment method",
-  "savedPaymentMethods": "Saved payment methods",
   "payingWith": "Paying with {{paymentSource}}",
   "chooseAnotherWayToPay": "Choose another way to pay",
   "chooseAWayToPay": "Choose a way to pay",
   "otherWaysToPay": "Other ways to pay",
+  "cardVerification": "Card Verification",
   "fieldEmptyForCvv": "Please fill out a CVV.",
   "fieldEmptyForExpirationDate": "Please fill out an expiry date.",
   "fieldEmptyForCardholderName": "Please fill out a cardholder name.",
+  "fieldTooLongForCardholderName": "Cardholder name must be less than 256 characters.",
   "fieldEmptyForNumber": "Please fill out a number.",
   "fieldEmptyForPostalCode": "Please fill out a postcode.",
   "fieldInvalidForCvv": "This security code is not valid.",
@@ -6895,12 +8060,15 @@ module.exports = {
   "fieldInvalidForPostalCode": "This postcode is not valid.",
   "genericError": "Something went wrong on our end.",
   "hostedFieldsFailedTokenizationError": "Please check your information and try again.",
-  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
   "hostedFieldsFieldsInvalidError": "Please check your information and try again.",
+  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Please check your information and try again.",
   "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
   "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
   "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
   "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
+  "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
+  "applePayActiveCardError": "Link a supported card to your Apple Pay wallet.",
   "cardholderNameLabel": "Cardholder Name",
   "cardNumberLabel": "Card Number",
   "cvvLabel": "CVV",
@@ -6913,6 +8081,7 @@ module.exports = {
   "postalCodeLabel": "Postcode",
   "payWithCard": "Pay with credit or debit card",
   "endingIn": "Ending in ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "Card",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
@@ -6926,20 +8095,19 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],100:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Change Funding Source",
-  "choosePaymentMethod": "Choose a funding source",
-  "savedPaymentMethods": "Saved payment methods",
   "payingWith": "Paying with {{paymentSource}}",
   "chooseAnotherWayToPay": "Choose another way to pay",
   "chooseAWayToPay": "Choose a way to pay",
   "otherWaysToPay": "Other ways to pay",
+  "cardVerification": "Card Verification",
   "fieldEmptyForCvv": "Please fill in a CSC.",
   "fieldEmptyForExpirationDate": "Please fill in an expiry date.",
   "fieldEmptyForCardholderName": "Please fill in a cardholder name.",
+  "fieldTooLongForCardholderName": "Cardholder name must be less than 256 characters.",
   "fieldEmptyForNumber": "Please fill in a number.",
   "fieldEmptyForPostalCode": "Please fill in a postcode.",
   "fieldInvalidForCvv": "This security code is not valid.",
@@ -6948,12 +8116,15 @@ module.exports = {
   "fieldInvalidForPostalCode": "This postcode is not valid.",
   "genericError": "Something went wrong on our end.",
   "hostedFieldsFailedTokenizationError": "Please check your information and try again.",
-  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
   "hostedFieldsFieldsInvalidError": "Please check your information and try again.",
+  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Please check your information and try again.",
   "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
   "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
   "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
   "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
+  "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
+  "applePayActiveCardError": "Add a supported card to your Apple Pay wallet.",
   "cardholderNameLabel": "Cardholder Name",
   "cardNumberLabel": "Card Number",
   "cvvLabel": "CSC",
@@ -6966,6 +8137,7 @@ module.exports = {
   "postalCodeLabel": "Postcode",
   "payWithCard": "Pay with card",
   "endingIn": "Ending in ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "Card",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
@@ -6979,7 +8151,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],101:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -6987,6 +8159,7 @@ module.exports = {
   chooseAnotherWayToPay: 'Choose another way to pay',
   chooseAWayToPay: 'Choose a way to pay',
   otherWaysToPay: 'Other ways to pay',
+  cardVerification: 'Card Verification',
   // Errors
   fieldEmptyForCvv: 'Please fill out a CVV.',
   fieldEmptyForExpirationDate: 'Please fill out an expiration date.',
@@ -6997,6 +8170,7 @@ module.exports = {
   fieldInvalidForExpirationDate: 'This expiration date is not valid.',
   fieldInvalidForNumber: 'This card number is not valid.',
   fieldInvalidForPostalCode: 'This postal code is not valid.',
+  fieldTooLongForCardholderName: 'Cardholder name must be less than 256 characters.',
   genericError: 'Something went wrong on our end.',
   hostedFieldsFailedTokenizationError: 'Please check your information and try again.',
   hostedFieldsTokenizationCvvVerificationFailedError: 'Credit card verification failed. Please check your information and try again.',
@@ -7005,6 +8179,8 @@ module.exports = {
   paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
   paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
+  applePayTokenizationError: 'A network error occurred while processing the Apple Pay payment. Please try again.',
+  applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
   // Card form
   cardholderNameLabel: 'Cardholder Name',
@@ -7023,6 +8199,7 @@ module.exports = {
   Card: 'Card',
   PayPal: 'PayPal',
   'PayPal Credit': 'PayPal Credit',
+  'Apple Pay': 'Apple Pay',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',
@@ -7033,20 +8210,19 @@ module.exports = {
   UnionPay: 'UnionPay'
 };
 
-},{}],102:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Cambiar forma de pago",
-  "choosePaymentMethod": "Seleccionar forma de pago",
-  "savedPaymentMethods": "Formas de pago guardadas",
   "payingWith": "Pago con {{paymentSource}}",
   "chooseAnotherWayToPay": "Selecciona otra forma de pago.",
   "chooseAWayToPay": "Selecciona una forma de pago.",
   "otherWaysToPay": "Otras formas de pago",
+  "cardVerification": "Verificación de tarjeta",
   "fieldEmptyForCvv": "Escribe el código CVV.",
   "fieldEmptyForExpirationDate": "Escribe la fecha de vencimiento.",
   "fieldEmptyForCardholderName": "Escribe el nombre de un titular de la tarjeta.",
+  "fieldTooLongForCardholderName": "El nombre del titular de la tarjeta debe tener menos de 256 caracteres.",
   "fieldEmptyForNumber": "Escribe un número.",
   "fieldEmptyForPostalCode": "Escribe el código postal.",
   "fieldInvalidForCvv": "Este código de seguridad no es válido.",
@@ -7055,12 +8231,15 @@ module.exports = {
   "fieldInvalidForPostalCode": "Este código postal no es válido.",
   "genericError": "Hemos tenido algún problema.",
   "hostedFieldsFailedTokenizationError": "Comprueba la información e inténtalo de nuevo.",
-  "hostedFieldsTokenizationNetworkErrorError": "Error de red. Inténtalo de nuevo.",
   "hostedFieldsFieldsInvalidError": "Comprueba la información e inténtalo de nuevo.",
+  "hostedFieldsTokenizationNetworkErrorError": "Error de red. Inténtalo de nuevo.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Error de verificación de la tarjeta de crédito. Comprueba la información e inténtalo de nuevo.",
   "paypalAccountTokenizationFailedError": "Se ha producido un error al vincular la cuenta PayPal. Inténtalo de nuevo.",
   "paypalFlowFailedError": "Se ha producido un error al conectarse a PayPal. Inténtalo de nuevo.",
   "paypalTokenizationRequestActiveError": "Ya hay una autorización de pago de PayPal en curso.",
   "unsupportedCardTypeError": "No se admite este tipo de tarjeta. Prueba con otra tarjeta.",
+  "applePayTokenizationError": "Se ha producido un error de red al procesar el pago con Apple Pay. Inténtalo de nuevo.",
+  "applePayActiveCardError": "Añade una tarjeta admitida a tu Wallet de Apple Pay.",
   "cardholderNameLabel": "Nombre del titular de la tarjeta",
   "cardNumberLabel": "Número de tarjeta",
   "cvvLabel": "CVV",
@@ -7073,6 +8252,7 @@ module.exports = {
   "postalCodeLabel": "Código postal",
   "payWithCard": "Pagar con tarjeta",
   "endingIn": "Terminada en •• {{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "Tarjeta",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
@@ -7086,20 +8266,19 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],103:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Modifier le mode de paiement ",
-  "choosePaymentMethod": "Choisir un mode de paiement",
-  "savedPaymentMethods": "Modes de paiement enregistrés",
   "payingWith": "Payer avec {{paymentSource}}",
   "chooseAnotherWayToPay": "Choisir un autre mode de paiement",
   "chooseAWayToPay": "Choisir le mode de paiement",
   "otherWaysToPay": "Autres modes de paiement",
+  "cardVerification": "Vérification de la carte",
   "fieldEmptyForCvv": "Veuillez saisir un cryptogramme visuel.",
   "fieldEmptyForExpirationDate": "Veuillez saisir une date d'expiration.",
   "fieldEmptyForCardholderName": "Veuillez saisir un nom de titulaire de la carte.",
+  "fieldTooLongForCardholderName": "Le nom du titulaire de la carte doit contenir moins de 256 caractères.",
   "fieldEmptyForNumber": "Veuillez saisir un numéro.",
   "fieldEmptyForPostalCode": "Veuillez saisir un code postal.",
   "fieldInvalidForCvv": "Ce cryptogramme visuel n'est pas valide.",
@@ -7108,69 +8287,19 @@ module.exports = {
   "fieldInvalidForPostalCode": "Ce code postal n'est pas valide.",
   "genericError": "Une erreur s'est produite de notre côté.",
   "hostedFieldsFailedTokenizationError": "Vérifiez vos informations, puis réessayez.",
-  "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Veuillez réessayer.",
   "hostedFieldsFieldsInvalidError": "Vérifiez vos informations, puis réessayez.",
-  "paypalAccountTokenizationFailedError": "Une erreur s'est produite au cours de l'enregistrement du compte PayPal. Veuillez réessayer.",
+  "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Veuillez réessayer.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "La vérification de la carte de crédit a échoué. Vérifiez vos informations, puis réessayez.",
+  "paypalAccountTokenizationFailedError": "Une erreur s'est produite lors de l'enregistrement du compte PayPal. Veuillez réessayer.",
   "paypalFlowFailedError": "Une erreur s'est produite au cours de la connexion à PayPal. Veuillez réessayer.",
   "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
   "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Veuillez essayer une autre carte.",
+  "applePayTokenizationError": "Une erreur de réseau s'est produite lors du traitement du paiement avec Apple Pay. Veuillez réessayer.",
+  "applePayActiveCardError": "Ajoutez une carte prise en charge à Apple Pay.",
   "cardholderNameLabel": "Nom du titulaire de la carte",
-  "cardNumberLabel": "Numéro de carte ",
+  "cardNumberLabel": "Numéro de carte",
   "cvvLabel": "CVV",
   "cvvThreeDigitLabelSubheading": "(3 chiffres)",
-  "cvvFourDigitLabelSubheading": "(4 chiffres)",
-  "cardholderNamePlaceholder": "Nom du titulaire de la carte",
-  "expirationDateLabel": "Date d'expiration ",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "Code postal",
-  "payWithCard": "Payer par carte",
-  "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
-  "Card": "Carte",
-  "PayPal": "PayPal",
-  "PayPal Credit": "Crédit PayPal",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],104:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "Modifier le mode de paiement",
-  "choosePaymentMethod": "Choisir un mode de paiement",
-  "savedPaymentMethods": "Modes de paiement enregistrés",
-  "payingWith": "Payer avec {{paymentSource}}",
-  "chooseAnotherWayToPay": "Choisissez une autre façon de payer.",
-  "chooseAWayToPay": "Choisissez comment payer.",
-  "otherWaysToPay": "Autres façons de payer",
-  "fieldEmptyForCvv": "Entrez un cryptogramme visuel.",
-  "fieldEmptyForExpirationDate": "Entrez une date d'expiration.",
-  "fieldEmptyForCardholderName": "Entrez un nom du titulaire de la carte.",
-  "fieldEmptyForNumber": "Entrez un numéro.",
-  "fieldEmptyForPostalCode": "Entrez un code postal.",
-  "fieldInvalidForCvv": "Ce cryptogramme visuel n'est pas valide.",
-  "fieldInvalidForExpirationDate": "Cette date d'expiration n'est pas valide.",
-  "fieldInvalidForNumber": "Ce numéro de carte n'est pas valide.",
-  "fieldInvalidForPostalCode": "Ce code postal n'est pas valide.",
-  "genericError": "Une erreur est survenue.",
-  "hostedFieldsFailedTokenizationError": "Vérifiez vos informations et réessayez.",
-  "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Réessayez.",
-  "hostedFieldsFieldsInvalidError": "Vérifiez vos informations et réessayez.",
-  "paypalAccountTokenizationFailedError": "Une erreur est survenue lors de l'ajout du compte PayPal. Réessayez.",
-  "paypalFlowFailedError": "Une erreur est survenue lors de la connexion à PayPal. Réessayez.",
-  "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
-  "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Essayez une autre carte.",
-  "cardholderNameLabel": "Nom du titulaire de la carte",
-  "cardNumberLabel": "Nº de carte",
-  "cvvLabel": "Cryptogramme visuel",
-  "cvvThreeDigitLabelSubheading": "(3 chiffres)",
   "cvvFourDigitLabelSubheading": "(4 chiffres)",
   "cardholderNamePlaceholder": "Nom du titulaire de la carte",
   "expirationDateLabel": "Date d'expiration",
@@ -7179,6 +8308,7 @@ module.exports = {
   "postalCodeLabel": "Code postal",
   "payWithCard": "Payer par carte",
   "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "Carte",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
@@ -7192,34 +8322,92 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],105:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Ubah Metode Pembayaran",
-  "choosePaymentMethod": "Pilih metode pembayaran",
-  "savedPaymentMethods": "Metode Pembayaran Tersimpan",
+  "payingWith": "Payer avec {{paymentSource}}",
+  "chooseAnotherWayToPay": "Choisissez une autre façon de payer.",
+  "chooseAWayToPay": "Choisissez comment payer.",
+  "otherWaysToPay": "Autres façons de payer",
+  "cardVerification": "Vérification de la carte",
+  "fieldEmptyForCvv": "Entrez un cryptogramme visuel.",
+  "fieldEmptyForExpirationDate": "Entrez une date d'expiration.",
+  "fieldEmptyForCardholderName": "Entrez un nom du titulaire de la carte.",
+  "fieldTooLongForCardholderName": "Le nom du titulaire de la carte doit contenir moins de 256 caractères.",
+  "fieldEmptyForNumber": "Entrez un numéro.",
+  "fieldEmptyForPostalCode": "Entrez un code postal.",
+  "fieldInvalidForCvv": "Ce cryptogramme visuel n'est pas valide.",
+  "fieldInvalidForExpirationDate": "Cette date d'expiration n'est pas valide.",
+  "fieldInvalidForNumber": "Ce numéro de carte n'est pas valide.",
+  "fieldInvalidForPostalCode": "Ce code postal n'est pas valide.",
+  "genericError": "Une erreur est survenue.",
+  "hostedFieldsFailedTokenizationError": "Vérifiez vos informations et réessayez.",
+  "hostedFieldsFieldsInvalidError": "Vérifiez vos informations et réessayez.",
+  "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Réessayez.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Échec de vérification de la carte bancaire. Vérifiez vos informations et réessayez.",
+  "paypalAccountTokenizationFailedError": "Une erreur est survenue lors de l'ajout du compte PayPal. Réessayez.",
+  "paypalFlowFailedError": "Une erreur est survenue lors de la connexion à PayPal. Réessayez.",
+  "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
+  "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Essayez une autre carte.",
+  "applePayTokenizationError": "Une erreur réseau s'est produite lors du traitement du paiement Apple Pay. Réessayez.",
+  "applePayActiveCardError": "Enregistrez une carte prise en charge sur Apple Pay.",
+  "cardholderNameLabel": "Nom du titulaire de la carte",
+  "cardNumberLabel": "Nº de carte",
+  "cvvLabel": "Cryptogramme visuel",
+  "cvvThreeDigitLabelSubheading": "(3 chiffres)",
+  "cvvFourDigitLabelSubheading": "(4 chiffres)",
+  "cardholderNamePlaceholder": "Nom du titulaire de la carte",
+  "expirationDateLabel": "Date d'expiration",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "Code postal",
+  "payWithCard": "Payer par carte",
+  "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "Carte",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],115:[function(require,module,exports){
+'use strict';
+
+module.exports = {
   "payingWith": "Membayar dengan {{paymentSource}}",
   "chooseAnotherWayToPay": "Pilih metode pembayaran lain",
   "chooseAWayToPay": "Pilih metode pembayaran",
   "otherWaysToPay": "Metode pembayaran lain",
+  "cardVerification": "Verifikasi Kartu",
   "fieldEmptyForCvv": "Masukkan CVV.",
   "fieldEmptyForExpirationDate": "Masukkan tanggal akhir berlaku.",
   "fieldEmptyForCardholderName": "Masukkan nama pemegang kartu.",
+  "fieldTooLongForCardholderName": "Nama pemegang kartu harus kurang dari 256 karakter.",
   "fieldEmptyForNumber": "Masukkan nomor.",
   "fieldEmptyForPostalCode": "Masukkan kode pos.",
   "fieldInvalidForCvv": "Kode keamanan ini tidak valid.",
   "fieldInvalidForExpirationDate": "Tanggal akhir berlaku ini tidak valid.",
   "fieldInvalidForNumber": "Nomor kartu ini tidak valid.",
   "fieldInvalidForPostalCode": "Kode pos ini tidak valid.",
-  "genericError": "Terjadi kesalahan pada sistem kami. ",
+  "genericError": "Terjadi kesalahan pada sistem kami.",
   "hostedFieldsFailedTokenizationError": "Periksa informasi Anda dan coba lagi.",
-  "hostedFieldsTokenizationNetworkErrorError": "Masalah jaringan. Coba lagi.",
   "hostedFieldsFieldsInvalidError": "Periksa informasi Anda dan coba lagi.",
+  "hostedFieldsTokenizationNetworkErrorError": "Masalah jaringan. Coba lagi.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Verifikasi kartu kredit gagal. Periksa informasi Anda dan coba lagi.",
   "paypalAccountTokenizationFailedError": "Terjadi kesalahan saat menambahkan rekening PayPal. Coba lagi.",
   "paypalFlowFailedError": "Terjadi kesalahan saat menyambung ke PayPal. Coba lagi.",
   "paypalTokenizationRequestActiveError": "Otorisasi pembayaran PayPal sedang diproses.",
   "unsupportedCardTypeError": "Jenis kartu ini tidak didukung. Coba kartu lainnya.",
+  "applePayTokenizationError": "Terjadi kesalahan jaringan sewaktu memproses pembayaran melalui Apple Pay. Coba lagi.",
+  "applePayActiveCardError": "Tambahkan kartu yang didukung ke wallet Apple Pay.",
   "cardholderNameLabel": "Nama Pemegang Kartu",
   "cardNumberLabel": "Nomor Kartu",
   "cvvLabel": "CVV",
@@ -7232,6 +8420,7 @@ module.exports = {
   "postalCodeLabel": "Kode Pos",
   "payWithCard": "Bayar dengan kartu",
   "endingIn": "Berakhiran ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "Kartu",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
@@ -7245,7 +8434,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],106:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 /* eslint-disable camelcase */
 'use strict';
 
@@ -7276,20 +8465,19 @@ module.exports = {
 };
 /* eslint-enable camelcase */
 
-},{"./da_DK":97,"./de_DE":98,"./en_AU":99,"./en_GB":100,"./en_US":101,"./es_ES":102,"./fr_CA":103,"./fr_FR":104,"./id_ID":105,"./it_IT":107,"./ja_JP":108,"./ko_KR":109,"./nl_NL":110,"./no_NO":111,"./pl_PL":112,"./pt_BR":113,"./pt_PT":114,"./ru_RU":115,"./sv_SE":116,"./th_TH":117,"./zh_CN":118,"./zh_HK":119,"./zh_TW":120}],107:[function(require,module,exports){
+},{"./da_DK":107,"./de_DE":108,"./en_AU":109,"./en_GB":110,"./en_US":111,"./es_ES":112,"./fr_CA":113,"./fr_FR":114,"./id_ID":115,"./it_IT":117,"./ja_JP":118,"./ko_KR":119,"./nl_NL":120,"./no_NO":121,"./pl_PL":122,"./pt_BR":123,"./pt_PT":124,"./ru_RU":125,"./sv_SE":126,"./th_TH":127,"./zh_CN":128,"./zh_HK":129,"./zh_TW":130}],117:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "Modifica metodo di pagamento",
-  "choosePaymentMethod": "Scegli un metodo di pagamento",
-  "savedPaymentMethods": "Metodi di pagamento salvati",
   "payingWith": "Pagamento con {{paymentSource}}",
   "chooseAnotherWayToPay": "Scegli di pagare in un altro modo",
   "chooseAWayToPay": "Scegli come pagare",
   "otherWaysToPay": "Altri modi di pagare",
+  "cardVerification": "Codice di sicurezza",
   "fieldEmptyForCvv": "Immetti il codice di sicurezza (CVV).",
   "fieldEmptyForExpirationDate": "Immetti la data di scadenza.",
   "fieldEmptyForCardholderName": "Immetti il nome del titolare della carta.",
+  "fieldTooLongForCardholderName": "Il nome del titolare della carta deve avere meno di 256 caratteri.",
   "fieldEmptyForNumber": "Immetti il numero di carta.",
   "fieldEmptyForPostalCode": "Immetti il CAP.",
   "fieldInvalidForCvv": "Il codice di sicurezza non è valido.",
@@ -7298,12 +8486,15 @@ module.exports = {
   "fieldInvalidForPostalCode": "Il CAP non è valido.",
   "genericError": "Si è verificato un errore nei nostri sistemi.",
   "hostedFieldsFailedTokenizationError": "Controlla e riprova.",
-  "hostedFieldsTokenizationNetworkErrorError": "Errore di rete. Riprova.",
   "hostedFieldsFieldsInvalidError": "Controlla e riprova.",
-  "paypalAccountTokenizationFailedError": "Si è verificato un errore collegando il conto PayPal. Riprova.",
+  "hostedFieldsTokenizationNetworkErrorError": "Errore di rete. Riprova.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "La verifica della carta di credito non è andata a buon fine. Controlla i dati e riprova.",
+  "paypalAccountTokenizationFailedError": "Si è verificato un errore nel collegamento del conto PayPal. Riprova.",
   "paypalFlowFailedError": "Si è verificato un errore di connessione a PayPal. Riprova.",
   "paypalTokenizationRequestActiveError": "L'autorizzazione di pagamento PayPal è già in corso.",
   "unsupportedCardTypeError": "Questo tipo di carta non è supportato. Prova con un'altra carta.",
+  "applePayTokenizationError": "Si è verificato un errore di rete durante l'elaborazione del pagamento con Apple Pay. Riprova.",
+  "applePayActiveCardError": "Collega una carta supportata al tuo portafoglio Apple Pay.",
   "cardholderNameLabel": "Titolare della carta",
   "cardNumberLabel": "Numero di carta",
   "cvvLabel": "CVV",
@@ -7316,537 +8507,8 @@ module.exports = {
   "postalCodeLabel": "CAP",
   "payWithCard": "Paga con una carta",
   "endingIn": "Le cui ultime cifre sono ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "Carta",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],108:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "支払方法を変更する",
-  "choosePaymentMethod": "支払方法を選択する",
-  "savedPaymentMethods": "保存済みの支払方法",
-  "payingWith": "{{paymentSource}}で支払う",
-  "chooseAnotherWayToPay": "別の支払方法を選択する",
-  "chooseAWayToPay": "支払方法を選択する",
-  "otherWaysToPay": "その他の支払方法",
-  "fieldEmptyForCvv": "カード確認コードを入力してください。",
-  "fieldEmptyForExpirationDate": "有効期限を入力してください。",
-  "fieldEmptyForCardholderName": "カード保有者の名前を入力してください。",
-  "fieldEmptyForNumber": "番号を入力してください。",
-  "fieldEmptyForPostalCode": "郵便番号を入力してください。",
-  "fieldInvalidForCvv": "このセキュリティコードは無効です。",
-  "fieldInvalidForExpirationDate": "この有効期限は無効です。",
-  "fieldInvalidForNumber": "このカード番号は無効です。",
-  "fieldInvalidForPostalCode": "この郵便番号は無効です。",
-  "genericError": "弊社側で問題が発生しました。",
-  "hostedFieldsFailedTokenizationError": "情報を確認してもう一度お試しください。",
-  "hostedFieldsTokenizationNetworkErrorError": "ネットワークエラーです。もう一度お試しください。",
-  "hostedFieldsFieldsInvalidError": "情報を確認してもう一度お試しください。",
-  "paypalAccountTokenizationFailedError": "PayPalアカウントの追加で問題が発生しました。もう一度お試しください。",
-  "paypalFlowFailedError": "PayPalへの接続に問題が発生しました。もう一度お試しください。",
-  "paypalTokenizationRequestActiveError": "PayPal支払いの承認はすでに処理中です。",
-  "unsupportedCardTypeError": "このカードタイプはサポートされていません。別のカードをご使用ください。",
-  "cardholderNameLabel": "カード保有者の名前",
-  "cardNumberLabel": "カード番号",
-  "cvvLabel": "カード確認コード",
-  "cvvThreeDigitLabelSubheading": "(3桁)",
-  "cvvFourDigitLabelSubheading": "(4桁)",
-  "cardholderNamePlaceholder": "カード保有者の名前",
-  "expirationDateLabel": "有効期限",
-  "expirationDateLabelSubheading": "(MM/YY)",
-  "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "郵便番号",
-  "payWithCard": "カードで支払う",
-  "endingIn": "x-{{lastTwoCardDigits}}",
-  "Card": "カード",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "銀聯(UnionPay)"
-};
-
-},{}],109:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "결제수단 변경",
-  "choosePaymentMethod": "결제수단 선택",
-  "savedPaymentMethods": "저장된 결제수단",
-  "payingWith": "{{paymentSource}}(으)로 결제",
-  "chooseAnotherWayToPay": "다른 결제수단 선택",
-  "chooseAWayToPay": "결제수단 선택",
-  "otherWaysToPay": "다른 방법으로 결제",
-  "fieldEmptyForCvv": "CVV를 입력하세요.",
-  "fieldEmptyForExpirationDate": "만료일을 입력하세요.",
-  "fieldEmptyForCardholderName": "카드 소유자 이름을 입력하세요.",
-  "fieldEmptyForNumber": "번호를 입력하세요.",
-  "fieldEmptyForPostalCode": "우편번호를 입력하세요.",
-  "fieldInvalidForCvv": "이 보안 코드가 올바르지 않습니다.",
-  "fieldInvalidForExpirationDate": "이 만료일이 올바르지 않습니다.",
-  "fieldInvalidForNumber": "이 카드 번호가 올바르지 않습니다.",
-  "fieldInvalidForPostalCode": "이 우편번호가 올바르지 않습니다.",
-  "genericError": "저희 쪽에 문제가 발생했습니다.",
-  "hostedFieldsFailedTokenizationError": "정보를 확인하고 다시 시도해 주세요.",
-  "hostedFieldsTokenizationNetworkErrorError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
-  "hostedFieldsFieldsInvalidError": "정보를 확인하고 다시 시도해 주세요.",
-  "paypalAccountTokenizationFailedError": "PayPal 계정을 추가하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
-  "paypalFlowFailedError": "PayPal 계정을 연결하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
-  "paypalTokenizationRequestActiveError": "PayPal 결제 승인이 이미 진행 중입니다.",
-  "unsupportedCardTypeError": "이 카드 형식은 지원되지 않습니다. 다른 카드로 시도해 주세요.",
-  "cardholderNameLabel": "카드 소유자 이름",
-  "cardNumberLabel": "카드 번호",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3자리)",
-  "cvvFourDigitLabelSubheading": "(4자리)",
-  "cardholderNamePlaceholder": "카드 소유자 이름",
-  "expirationDateLabel": "만료일",
-  "expirationDateLabelSubheading": "(MM/YY)",
-  "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "우편번호",
-  "payWithCard": "카드로 결제",
-  "endingIn": "끝 번호: ••{{lastTwoCardDigits}}",
-  "Card": "카드",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],110:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "Betaalmethode wijzigen",
-  "choosePaymentMethod": "Kies een betaalmethode",
-  "savedPaymentMethods": "Opgeslagen betaalmethoden",
-  "payingWith": "Betalen met {{paymentSource}}",
-  "chooseAnotherWayToPay": "Kies een andere betaalmethode",
-  "chooseAWayToPay": "Kies een betaalwijze",
-  "otherWaysToPay": "Andere manieren om te betalen",
-  "fieldEmptyForCvv": "Vul een CSC in.",
-  "fieldEmptyForExpirationDate": "Vul een vervaldatum in.",
-  "fieldEmptyForCardholderName": "Vul een naam voor de kaarthouder in.",
-  "fieldEmptyForNumber": "Vul een nummer in.",
-  "fieldEmptyForPostalCode": "Vul een postcode in.",
-  "fieldInvalidForCvv": "Deze CSC is ongeldig.",
-  "fieldInvalidForExpirationDate": "Deze vervaldatum is ongeldig.",
-  "fieldInvalidForNumber": "Dit creditcardnummer is ongeldig.",
-  "fieldInvalidForPostalCode": "Deze postcode is ongeldig.",
-  "genericError": "Er is iets fout gegaan.",
-  "hostedFieldsFailedTokenizationError": "Controleer uw gegevens en probeer het opnieuw.",
-  "hostedFieldsTokenizationNetworkErrorError": "Netwerkfout. Probeer het opnieuw.",
-  "hostedFieldsFieldsInvalidError": "Controleer uw gegevens en probeer het opnieuw.",
-  "paypalAccountTokenizationFailedError": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
-  "paypalFlowFailedError": "Er is iets misgegaan bij de verbinding met PayPal. Probeer het opnieuw.",
-  "paypalTokenizationRequestActiveError": "De autorisatie van de PayPal-betaling is al in behandeling.",
-  "unsupportedCardTypeError": "Dit type creditcard wordt niet ondersteund. Gebruik een andere creditcard.",
-  "cardholderNameLabel": "Naam kaarthouder",
-  "cardNumberLabel": "Creditcardnummer",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 cijfers)",
-  "cvvFourDigitLabelSubheading": "(4 cijfers)",
-  "cardholderNamePlaceholder": "Naam kaarthouder",
-  "expirationDateLabel": "Vervaldatum",
-  "expirationDateLabelSubheading": "(MM/JJ)",
-  "expirationDatePlaceholder": "MM/JJ",
-  "postalCodeLabel": "Postcode",
-  "payWithCard": "Betalen met creditcard",
-  "endingIn": "Eindigend op •• {{lastTwoCardDigits}}",
-  "Card": "Creditcard",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],111:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "Endre betalingsmetode",
-  "choosePaymentMethod": "Velg en betalingsmetode",
-  "savedPaymentMethods": "Lagrede betalingsmetoder",
-  "payingWith": "Betaling med {{paymentSource}}",
-  "chooseAnotherWayToPay": "Velg en annen måte å betale på",
-  "chooseAWayToPay": "Velg betalingsmåte",
-  "otherWaysToPay": "Andre måter å betale på",
-  "fieldEmptyForCvv": "Oppgi en kortsikkerhetskode (CVV).",
-  "fieldEmptyForExpirationDate": "Oppgi en utløpsdato.",
-  "fieldEmptyForCardholderName": "Oppgi et navn for kortinnehaveren.",
-  "fieldEmptyForNumber": "Oppgi et nummer.",
-  "fieldEmptyForPostalCode": "Oppgi et postnummer.",
-  "fieldInvalidForCvv": "Denne sikkerhetskoden er ikke gyldig.",
-  "fieldInvalidForExpirationDate": "Denne utløpsdatoen er ikke gyldig.",
-  "fieldInvalidForNumber": "Dette kortnummeret er ikke gyldig.",
-  "fieldInvalidForPostalCode": "Dette postnummeret er ikke gyldig.",
-  "genericError": "Noe gikk galt hos oss.",
-  "hostedFieldsFailedTokenizationError": "Kontroller informasjonen og prøv på nytt.",
-  "hostedFieldsTokenizationNetworkErrorError": "Nettverksfeil. Prøv på nytt.",
-  "hostedFieldsFieldsInvalidError": "Kontroller informasjonen og prøv på nytt.",
-  "paypalAccountTokenizationFailedError": "Noe gikk galt da PayPal-kontoen ble lagt til. Prøv på nytt.",
-  "paypalFlowFailedError": "Det oppsto et problem med tilkoblingen til PayPal. Prøv på nytt.",
-  "paypalTokenizationRequestActiveError": "Godkjenning av PayPal-betalingen pågår allerede",
-  "unsupportedCardTypeError": "Denne korttypen støttes ikke. Prøv med et annet kort.",
-  "cardholderNameLabel": "Kortinnehaverens navn",
-  "cardNumberLabel": "Kortnummer",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 siffer)",
-  "cvvFourDigitLabelSubheading": "(4 siffer)",
-  "cardholderNamePlaceholder": "Kortinnehaverens navn",
-  "expirationDateLabel": "Utløpsdato",
-  "expirationDateLabelSubheading": "(MM/ÅÅ)",
-  "expirationDatePlaceholder": "MM/ÅÅ",
-  "postalCodeLabel": "Postnummer",
-  "payWithCard": "Betal med kort",
-  "endingIn": "Som slutter på •• {{lastTwoCardDigits}}",
-  "Card": "Kort",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],112:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "Zmień formę płatności",
-  "choosePaymentMethod": "Wybierz formę płatności",
-  "savedPaymentMethods": "Zapisane formy płatności",
-  "payingWith": "Forma płatności: {{paymentSource}}",
-  "chooseAnotherWayToPay": "Wybierz inną formę płatności",
-  "chooseAWayToPay": "Wybierz sposób płatności",
-  "otherWaysToPay": "Inne formy płatności",
-  "fieldEmptyForCvv": "Podaj kod bezpieczeństwa.",
-  "fieldEmptyForExpirationDate": "Podaj datę ważności.",
-  "fieldEmptyForCardholderName": "Podaj imię i nazwisko posiadacza karty.",
-  "fieldEmptyForNumber": "Podaj numer.",
-  "fieldEmptyForPostalCode": "Podaj kod pocztowy.",
-  "fieldInvalidForCvv": "Podany kod bezpieczeństwa jest nieprawidłowy.",
-  "fieldInvalidForExpirationDate": "Podana data ważności jest nieprawidłowa.",
-  "fieldInvalidForNumber": "Podany numer karty jest nieprawidłowy.",
-  "fieldInvalidForPostalCode": "Podany kod pocztowy jest nieprawidłowy.",
-  "genericError": "Wystąpił błąd po naszej stronie. ",
-  "hostedFieldsFailedTokenizationError": "Sprawdź swoje informacje i spróbuj ponownie.",
-  "hostedFieldsTokenizationNetworkErrorError": "Błąd sieci. Spróbuj ponownie.",
-  "hostedFieldsFieldsInvalidError": "Sprawdź swoje informacje i spróbuj ponownie.",
-  "paypalAccountTokenizationFailedError": "Coś poszło nie tak podczas dodawania konta PayPal. Spróbuj ponownie.",
-  "paypalFlowFailedError": "Coś poszło nie tak podczas łączenia z systemem PayPal. Spróbuj ponownie.",
-  "paypalTokenizationRequestActiveError": "Autoryzacja płatności PayPal jest już w trakcie realizacji.",
-  "unsupportedCardTypeError": "Ten typ karty nie jest obsługiwany. Spróbuj użyć innej karty.",
-  "cardholderNameLabel": "Imię i nazwisko posiadacza karty",
-  "cardNumberLabel": "Numer karty",
-  "cvvLabel": "Kod CVC",
-  "cvvThreeDigitLabelSubheading": "(3 cyfry)",
-  "cvvFourDigitLabelSubheading": "(4 cyfry)",
-  "cardholderNamePlaceholder": "Imię i nazwisko posiadacza karty",
-  "expirationDateLabel": "Data ważności",
-  "expirationDateLabelSubheading": "(MM/RR)",
-  "expirationDatePlaceholder": "MM/RR",
-  "postalCodeLabel": "Kod pocztowy",
-  "payWithCard": "Zapłać kartą",
-  "endingIn": "O numerze zakończonym cyframi •• {{lastTwoCardDigits}}",
-  "Card": "Karta",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],113:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "Alterar meio de pagamento",
-  "choosePaymentMethod": "Escolha um meio de pagamento",
-  "savedPaymentMethods": "Meios de pagamento salvos",
-  "payingWith": "Pagando com {{paymentSource}}",
-  "chooseAnotherWayToPay": "Escolher outro meio de pagamento",
-  "chooseAWayToPay": "Escolher um meio de pagamento",
-  "otherWaysToPay": "Outro meio de pagamento",
-  "fieldEmptyForCvv": "Informe o Código de Segurança.",
-  "fieldEmptyForExpirationDate": "Informe a data de vencimento.",
-  "fieldEmptyForCardholderName": "Informe o nome do titular do cartão.",
-  "fieldEmptyForNumber": "Informe um número.",
-  "fieldEmptyForPostalCode": "Informe um CEP.",
-  "fieldInvalidForCvv": "Este código de segurança não é válido.",
-  "fieldInvalidForExpirationDate": "Esta data de vencimento não é válida.",
-  "fieldInvalidForNumber": "O número do cartão não é válido.",
-  "fieldInvalidForPostalCode": "Este CEP não é válido.",
-  "genericError": "Ocorreu um erro.",
-  "hostedFieldsFailedTokenizationError": "Verifique as informações e tente novamente.",
-  "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
-  "hostedFieldsFieldsInvalidError": "Verifique as informações e tente novamente.",
-  "paypalAccountTokenizationFailedError": "Ocorreu um erro ao adicionar a conta do PayPal. Tente novamente.",
-  "paypalFlowFailedError": "Ocorreu um erro de conexão com o PayPal. Tente novamente.",
-  "paypalTokenizationRequestActiveError": "A autorização de pagamento do PayPal já está em andamento.",
-  "unsupportedCardTypeError": "Este tipo de cartão não é aceito. Experimente outro cartão.",
-  "cardholderNameLabel": "Nome do titular do cartão",
-  "cardNumberLabel": "Número do cartão",
-  "cvvLabel": "Cód. Seg.",
-  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
-  "cvvFourDigitLabelSubheading": "(4 dígitos)",
-  "cardholderNamePlaceholder": "Nome do titular do cartão",
-  "expirationDateLabel": "Data de vencimento",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "CEP",
-  "payWithCard": "Pague com seu cartão",
-  "endingIn": "Com final ••{{lastTwoCardDigits}}",
-  "Card": "Cartão",
-  "PayPal": "PayPal",
-  "PayPal Credit": "Crédito do PayPal",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],114:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "Alterar meio de pagamento",
-  "choosePaymentMethod": "Escolha um meio de pagamento",
-  "savedPaymentMethods": "Formas de pagamento guardadas",
-  "payingWith": "Pagar com {{paymentSource}}",
-  "chooseAnotherWayToPay": "Escolher outra forma de pagamento",
-  "chooseAWayToPay": "Escolha um meio de pagamento",
-  "otherWaysToPay": "Outras formas de pagamento",
-  "fieldEmptyForCvv": "Introduza o código CVV.",
-  "fieldEmptyForExpirationDate": "Introduza a data de validade.",
-  "fieldEmptyForCardholderName": "Introduza um nome do titular do cartão.",
-  "fieldEmptyForNumber": "Introduza um número.",
-  "fieldEmptyForPostalCode": "Introduza o código postal.",
-  "fieldInvalidForCvv": "Este código de segurança não é válido.",
-  "fieldInvalidForExpirationDate": "Esta data de validade não é correta.",
-  "fieldInvalidForNumber": "Este número de cartão não é válido.",
-  "fieldInvalidForPostalCode": "Este código postal não é válido.",
-  "genericError": "Tudo indica que ocorreu um problema.",
-  "hostedFieldsFailedTokenizationError": "Verifique os dados e tente novamente.",
-  "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
-  "hostedFieldsFieldsInvalidError": "Verifique os dados e tente novamente.",
-  "paypalAccountTokenizationFailedError": "Ocorreu um erro ao associar a conta PayPal. Tente novamente.",
-  "paypalFlowFailedError": "Ocorreu um erro na ligação com PayPal. Tente novamente.",
-  "paypalTokenizationRequestActiveError": "Já há uma autorização de pagamento PayPal em curso.",
-  "unsupportedCardTypeError": "Este tipo de cartão não é suportado. Tente usar outro cartão.",
-  "cardholderNameLabel": "Nome do titular do cartão",
-  "cardNumberLabel": "Número do cartão",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
-  "cvvFourDigitLabelSubheading": "(4 dígitos)",
-  "cardholderNamePlaceholder": "Nome do titular do cartão",
-  "expirationDateLabel": "Data de validade",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "Código postal",
-  "payWithCard": "Pagar com cartão",
-  "endingIn": "Terminado em ••{{lastTwoCardDigits}}",
-  "Card": "Cartão",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],115:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "Изменить способ оплаты",
-  "choosePaymentMethod": "Выберите способ оплаты",
-  "savedPaymentMethods": "Сохраненные способы оплаты",
-  "payingWith": "Способы оплаты: {{paymentSource}}",
-  "chooseAnotherWayToPay": "Выберите другой способ оплаты",
-  "chooseAWayToPay": "Выберите способ оплаты",
-  "otherWaysToPay": "Другие способы оплаты",
-  "fieldEmptyForCvv": "Укажите код безопасности.",
-  "fieldEmptyForExpirationDate": "Укажите дату окончания срока действия.",
-  "fieldEmptyForCardholderName": "Введите имя и фамилию владельца карты.",
-  "fieldEmptyForNumber": "Введите номер.",
-  "fieldEmptyForPostalCode": "Укажите почтовый индекс.",
-  "fieldInvalidForCvv": "Этот код безопасности недействителен.",
-  "fieldInvalidForExpirationDate": "Эта дата окончания срока действия недействительна.",
-  "fieldInvalidForNumber": "Этот номер карты недействителен.",
-  "fieldInvalidForPostalCode": "Этот почтовый индекс недействителен.",
-  "genericError": "Возникла проблема с нашей стороны.",
-  "hostedFieldsFailedTokenizationError": "Проверьте правильность ввода данных и повторите попытку.",
-  "hostedFieldsTokenizationNetworkErrorError": "Ошибка сети. Повторите попытку.",
-  "hostedFieldsFieldsInvalidError": "Проверьте правильность ввода данных и повторите попытку.",
-  "paypalAccountTokenizationFailedError": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
-  "paypalFlowFailedError": "Что-то пошло не так — не удалось подключиться к системе PayPal. Повторите попытку.",
-  "paypalTokenizationRequestActiveError": "Выполняется авторизация платежа PayPal.",
-  "unsupportedCardTypeError": "Этот тип карты не поддерживается. Попробуйте воспользоваться другой картой.",
-  "cardholderNameLabel": "Имя и фамилия владельца",
-  "cardNumberLabel": "Номер карты",
-  "cvvLabel": "Код безопасности",
-  "cvvThreeDigitLabelSubheading": "(3 цифры)",
-  "cvvFourDigitLabelSubheading": "(4 цифры)",
-  "cardholderNamePlaceholder": "Имя и фамилия владельца",
-  "expirationDateLabel": "Действует до",
-  "expirationDateLabelSubheading": "(ММ/ГГ)",
-  "expirationDatePlaceholder": "ММ/ГГ",
-  "postalCodeLabel": "Индекс",
-  "payWithCard": "Оплатить картой",
-  "endingIn": "Последние две цифры номера карты: ••{{lastTwoCardDigits}}",
-  "Card": "Карта",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],116:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "Ändra betalningsmetod",
-  "choosePaymentMethod": "Välj betalningsmetod",
-  "savedPaymentMethods": "Sparade betalningsmetoder",
-  "payingWith": "Betalas med {{paymentSource}}",
-  "chooseAnotherWayToPay": "Välj ett annat sätt att betala",
-  "chooseAWayToPay": "Välj hur du vill betala",
-  "otherWaysToPay": "Andra sätt att betala",
-  "fieldEmptyForCvv": "Fyll i en CVV-kod.",
-  "fieldEmptyForExpirationDate": "Fyll i ett utgångsdatum.",
-  "fieldEmptyForCardholderName": "Fyll i kortinnehavarens namn.",
-  "fieldEmptyForNumber": "Fyll i ett nummer.",
-  "fieldEmptyForPostalCode": "Fyll i ett postnummer.",
-  "fieldInvalidForCvv": "Den här säkerhetskoden är inte giltig.",
-  "fieldInvalidForExpirationDate": "Det här utgångsdatumet är inte giltigt.",
-  "fieldInvalidForNumber": "Det här kortnumret är inte giltigt.",
-  "fieldInvalidForPostalCode": "Det här postnumret är inte giltigt.",
-  "genericError": "Ett fel uppstod.",
-  "hostedFieldsFailedTokenizationError": "Kontrollera uppgifterna och försök igen.",
-  "hostedFieldsTokenizationNetworkErrorError": "Nätverksfel. Försök igen.",
-  "hostedFieldsFieldsInvalidError": "Kontrollera uppgifterna och försök igen.",
-  "paypalAccountTokenizationFailedError": "Ett fel uppstod när PayPal-kontot skulle läggas till. Försök igen.",
-  "paypalFlowFailedError": "Ett fel uppstod när anslutningen till PayPal skulle upprättas. Försök igen.",
-  "paypalTokenizationRequestActiveError": "Betalningsgodkännandet för PayPal behandlas redan.",
-  "unsupportedCardTypeError": "Den här korttypen stöds inte. Pröva med ett annat kort.",
-  "cardholderNameLabel": "Kortinnehavarens namn",
-  "cardNumberLabel": "Kortnummer",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 siffror)",
-  "cvvFourDigitLabelSubheading": "(4 siffror)",
-  "cardholderNamePlaceholder": "Kortinnehavarens namn",
-  "expirationDateLabel": "Utgångsdatum",
-  "expirationDateLabelSubheading": "(MM/ÅÅ)",
-  "expirationDatePlaceholder": "MM/ÅÅ",
-  "postalCodeLabel": "Postnummer",
-  "payWithCard": "Betala med kort",
-  "endingIn": "Slutar på ••{{lastTwoCardDigits}}",
-  "Card": "Kort",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal-kredit",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-},{}],117:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  "changePaymentMethod": "เปลี่ยนวิธีการชำระเงิน",
-  "choosePaymentMethod": "เลือกวิธีชำระเงิน",
-  "savedPaymentMethods": "วิธีการชำระเงินที่บันทึกไว้",
-  "payingWith": "การชำระเงินด้วย {{paymentSource}}",
-  "chooseAnotherWayToPay": "เลือกวิธีอื่นเพื่อชำระเงิน",
-  "chooseAWayToPay": "เลือกวิธีชำระเงิน",
-  "otherWaysToPay": "วิธีอื่นๆ ในการชำระเงิน",
-  "fieldEmptyForCvv": "โปรดกรอก CVV (รหัสการตรวจสอบยืนยันบัตร)",
-  "fieldEmptyForExpirationDate": "โปรดกรอกวันที่หมดอายุ",
-  "fieldEmptyForCardholderName": "โปรดกรอกชื่อเจ้าของบัตร",
-  "fieldEmptyForNumber": "โปรดกรอกหมายเลข",
-  "fieldEmptyForPostalCode": "โปรดกรอกรหัสไปรษณีย์",
-  "fieldInvalidForCvv": "รหัสความปลอดภัยนี้ไม่ถูกต้อง",
-  "fieldInvalidForExpirationDate": "วันที่หมดอายุนี้ไม่ถูกต้อง",
-  "fieldInvalidForNumber": "หมายเลขบัตรนี้ไม่ถูกต้อง",
-  "fieldInvalidForPostalCode": "รหัสไปรษณีย์นี้ไม่ถูกต้อง",
-  "genericError": "เกิดข้อผิดพลาดขึ้นในระบบของเรา",
-  "hostedFieldsFailedTokenizationError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
-  "hostedFieldsTokenizationNetworkErrorError": "ข้อผิดพลาดด้านเครือข่าย โปรดลองอีกครั้ง",
-  "hostedFieldsFieldsInvalidError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
-  "paypalAccountTokenizationFailedError": "เกิดข้อผิดพลาดในการเพิ่มบัญชี PayPal โปรดลองอีกครั้ง",
-  "paypalFlowFailedError": "เกิดข้อผิดพลาดในการเชื่อมต่อกับ PayPal โปรดลองอีกครั้ง",
-  "paypalTokenizationRequestActiveError": "การอนุญาตการชำระเงินของ PayPal อยู่ในระหว่างดำเนินการ",
-  "unsupportedCardTypeError": "ไม่รองรับบัตรประเภทนี้ โปรดลองใช้บัตรใบอื่น",
-  "cardholderNameLabel": "ชื่อเจ้าของบัตร",
-  "cardNumberLabel": "หมายเลขบัตร",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 หลัก)",
-  "cvvFourDigitLabelSubheading": "(4 หลัก)",
-  "cardholderNamePlaceholder": "ชื่อเจ้าของบัตร",
-  "expirationDateLabel": "วันหมดอายุ",
-  "expirationDateLabelSubheading": "(ดด/ปป)",
-  "expirationDatePlaceholder": "ดด/ปป",
-  "postalCodeLabel": "รหัสไปรษณีย์",
-  "payWithCard": "ชำระเงินด้วยบัตร",
-  "endingIn": "ลงท้ายด้วย ••{{lastTwoCardDigits}}",
-  "Card": "บัตร",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
   "American Express": "American Express",
@@ -7863,43 +8525,46 @@ module.exports = {
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "更改付款方式",
-  "choosePaymentMethod": "选择付款方式",
-  "savedPaymentMethods": "已保存的付款方式",
-  "payingWith": "正在使用{{paymentSource}}付款",
-  "chooseAnotherWayToPay": "选择其他付款方式",
-  "chooseAWayToPay": "选择付款方式",
-  "otherWaysToPay": "其他付款方式",
-  "fieldEmptyForCvv": "请填写CVV。",
-  "fieldEmptyForExpirationDate": "请填写有效期限。",
-  "fieldEmptyForCardholderName": "请填写持卡人的姓名。",
-  "fieldEmptyForNumber": "请填写一个号码。",
-  "fieldEmptyForPostalCode": "请填写邮政编码。",
-  "fieldInvalidForCvv": "此安全代码无效。",
-  "fieldInvalidForExpirationDate": "此有效期限无效。",
-  "fieldInvalidForNumber": "此卡号无效。",
-  "fieldInvalidForPostalCode": "此邮政编码无效。",
-  "genericError": "我们遇到了一些问题",
-  "hostedFieldsFailedTokenizationError": "请检查您的信息，然后重试。",
-  "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",
-  "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
-  "paypalAccountTokenizationFailedError": "添加PayPal账户时出错。请重试。",
-  "paypalFlowFailedError": "连接到PayPal时出错。请重试。",
-  "paypalTokenizationRequestActiveError": "PayPal付款授权已在进行中。",
-  "unsupportedCardTypeError": "不支持该卡类型。请尝试其他卡。",
-  "cardholderNameLabel": "持卡人姓名",
-  "cardNumberLabel": "卡号",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "（3位数）",
-  "cvvFourDigitLabelSubheading": "（4位数）",
-  "cardholderNamePlaceholder": "持卡人姓名",
-  "expirationDateLabel": "有效期限",
-  "expirationDateLabelSubheading": "（MM/YY）",
+  "payingWith": "{{paymentSource}}で支払う",
+  "chooseAnotherWayToPay": "別の支払方法を選択する",
+  "chooseAWayToPay": "支払方法を選択する",
+  "otherWaysToPay": "その他の支払方法",
+  "cardVerification": "カード確認",
+  "fieldEmptyForCvv": "カード確認コードを入力してください。",
+  "fieldEmptyForExpirationDate": "有効期限を入力してください。",
+  "fieldEmptyForCardholderName": "カード保有者の名前を入力してください。",
+  "fieldTooLongForCardholderName": "カード保有者の名前は256文字未満にしてください。",
+  "fieldEmptyForNumber": "番号を入力してください。",
+  "fieldEmptyForPostalCode": "郵便番号を入力してください。",
+  "fieldInvalidForCvv": "このセキュリティコードは無効です。",
+  "fieldInvalidForExpirationDate": "この有効期限は無効です。",
+  "fieldInvalidForNumber": "このカード番号は無効です。",
+  "fieldInvalidForPostalCode": "この郵便番号は無効です。",
+  "genericError": "弊社側で問題が発生しました。",
+  "hostedFieldsFailedTokenizationError": "情報を確認してもう一度お試しください。",
+  "hostedFieldsFieldsInvalidError": "情報を確認してもう一度お試しください。",
+  "hostedFieldsTokenizationNetworkErrorError": "ネットワークエラーです。もう一度お試しください。",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "クレジットカードの認証に失敗しました。情報を確認してもう一度お試しください。",
+  "paypalAccountTokenizationFailedError": "PayPalアカウントの追加で問題が発生しました。もう一度お試しください。",
+  "paypalFlowFailedError": "PayPalへの接続に問題が発生しました。もう一度お試しください。",
+  "paypalTokenizationRequestActiveError": "PayPal支払いの承認はすでに処理中です。",
+  "unsupportedCardTypeError": "このカードタイプはサポートされていません。別のカードをご使用ください。",
+  "applePayTokenizationError": "Apple Payの支払いを処理する際にネットワークエラーが発生しました。もう一度お試しください。",
+  "applePayActiveCardError": "Apple Payウォレットに対応しているカードを追加してください。",
+  "cardholderNameLabel": "カード保有者の名前",
+  "cardNumberLabel": "カード番号",
+  "cvvLabel": "カード確認コード",
+  "cvvThreeDigitLabelSubheading": "(3桁)",
+  "cvvFourDigitLabelSubheading": "(4桁)",
+  "cardholderNamePlaceholder": "カード保有者の名前",
+  "expirationDateLabel": "有効期限",
+  "expirationDateLabelSubheading": "(MM/YY)",
   "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "邮政编码",
-  "payWithCard": "用卡付款",
-  "endingIn": "尾号为{{lastTwoCardDigits}}",
-  "Card": "卡",
+  "postalCodeLabel": "郵便番号",
+  "payWithCard": "カードで支払う",
+  "endingIn": "x-{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "カード",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
   "American Express": "American Express",
@@ -7909,53 +8574,56 @@ module.exports = {
   "Visa": "Visa",
   "JCB": "JCB",
   "Maestro": "Maestro",
-  "UnionPay": "银联"
+  "UnionPay": "銀聯(UnionPay)"
 };
 
 },{}],119:[function(require,module,exports){
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "變更付款方式",
-  "choosePaymentMethod": "選擇付款方式",
-  "savedPaymentMethods": "已儲存的付款方式",
-  "payingWith": "付款方式為 {{paymentSource}}",
-  "chooseAnotherWayToPay": "選擇其他付款方式",
-  "chooseAWayToPay": "選擇付款方式",
-  "otherWaysToPay": "其他付款方式",
-  "fieldEmptyForCvv": "請填寫信用卡認證碼。",
-  "fieldEmptyForExpirationDate": "請填寫到期日。",
-  "fieldEmptyForCardholderName": "請填寫持卡人的名字。",
-  "fieldEmptyForNumber": "請填寫號碼。",
-  "fieldEmptyForPostalCode": "請填寫郵遞區號。",
-  "fieldInvalidForCvv": "此安全代碼無效。",
-  "fieldInvalidForExpirationDate": "此到期日無效。",
-  "fieldInvalidForNumber": "此卡號無效。",
-  "fieldInvalidForPostalCode": "此郵遞區號無效。",
-  "genericError": "系統發生錯誤。",
-  "hostedFieldsFailedTokenizationError": "請檢查你的資料並再試一次。",
-  "hostedFieldsTokenizationNetworkErrorError": "網絡錯誤。請重試。",
-  "hostedFieldsFieldsInvalidError": "請檢查你的資料並再試一次。",
-  "paypalAccountTokenizationFailedError": "加入 PayPal 帳戶時發生錯誤。請重試。",
-  "paypalFlowFailedError": "連接 PayPal 時發生錯誤。請重試。",
-  "paypalTokenizationRequestActiveError": "PayPal 付款授權已在處理中。",
-  "unsupportedCardTypeError": "不可使用此信用卡類型。請改用其他信用卡。",
-  "cardholderNameLabel": "持卡人名字",
-  "cardNumberLabel": "卡號",
-  "cvvLabel": "信用卡認證碼",
-  "cvvThreeDigitLabelSubheading": "（3 位數）",
-  "cvvFourDigitLabelSubheading": "（4 位數）",
-  "cardholderNamePlaceholder": "持卡人名字",
-  "expirationDateLabel": "到期日",
+  "payingWith": "{{paymentSource}}(으)로 결제",
+  "chooseAnotherWayToPay": "다른 결제수단 선택",
+  "chooseAWayToPay": "결제수단 선택",
+  "otherWaysToPay": "다른 방법으로 결제",
+  "cardVerification": "카드 인증",
+  "fieldEmptyForCvv": "CVV를 입력하세요.",
+  "fieldEmptyForExpirationDate": "만료일을 입력하세요.",
+  "fieldEmptyForCardholderName": "카드 소유자 이름을 입력하세요.",
+  "fieldTooLongForCardholderName": "카드 소유자 이름은 256자 미만이어야 합니다.",
+  "fieldEmptyForNumber": "번호를 입력하세요.",
+  "fieldEmptyForPostalCode": "우편번호를 입력하세요.",
+  "fieldInvalidForCvv": "이 보안 코드가 올바르지 않습니다.",
+  "fieldInvalidForExpirationDate": "이 만료일이 올바르지 않습니다.",
+  "fieldInvalidForNumber": "이 카드 번호가 올바르지 않습니다.",
+  "fieldInvalidForPostalCode": "이 우편번호가 올바르지 않습니다.",
+  "genericError": "저희 쪽에 문제가 발생했습니다.",
+  "hostedFieldsFailedTokenizationError": "정보를 확인하고 다시 시도해 주세요.",
+  "hostedFieldsFieldsInvalidError": "정보를 확인하고 다시 시도해 주세요.",
+  "hostedFieldsTokenizationNetworkErrorError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "신용카드 인증에 실패했습니다. 정보를 확인하고 다시 시도해 주세요.",
+  "paypalAccountTokenizationFailedError": "PayPal 계정을 추가하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
+  "paypalFlowFailedError": "PayPal 계정을 연결하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
+  "paypalTokenizationRequestActiveError": "PayPal 결제 승인이 이미 진행 중입니다.",
+  "unsupportedCardTypeError": "이 카드 형식은 지원되지 않습니다. 다른 카드로 시도해 주세요.",
+  "applePayTokenizationError": "Apple Pay 결제를 처리하는 동안 네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
+  "applePayActiveCardError": "Apple Pay 전자지갑에 지원되는 카드를 추가하세요.",
+  "cardholderNameLabel": "카드 소유자 이름",
+  "cardNumberLabel": "카드 번호",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3자리)",
+  "cvvFourDigitLabelSubheading": "(4자리)",
+  "cardholderNamePlaceholder": "카드 소유자 이름",
+  "expirationDateLabel": "만료일",
   "expirationDateLabelSubheading": "(MM/YY)",
   "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "郵遞區號",
-  "payWithCard": "使用信用卡付款",
-  "endingIn": "最後兩位數為••{{lastTwoCardDigits}}",
-  "Card": "信用卡",
+  "postalCodeLabel": "우편번호",
+  "payWithCard": "카드로 결제",
+  "endingIn": "끝 번호: ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "카드",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
-  "American Express": "美國運通",
+  "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
   "MasterCard": "Mastercard",
@@ -7969,16 +8637,575 @@ module.exports = {
 'use strict';
 
 module.exports = {
-  "changePaymentMethod": "變更支付購物款項方式",
-  "choosePaymentMethod": "選擇付款方式",
-  "savedPaymentMethods": "已儲存的付款方式",
+  "payingWith": "Betalen met {{paymentSource}}",
+  "chooseAnotherWayToPay": "Kies een andere betaalmethode",
+  "chooseAWayToPay": "Kies een betaalwijze",
+  "otherWaysToPay": "Andere manieren om te betalen",
+  "cardVerification": "Kaartcontrole",
+  "fieldEmptyForCvv": "Vul een CSC in.",
+  "fieldEmptyForExpirationDate": "Vul een vervaldatum in.",
+  "fieldEmptyForCardholderName": "Vul een naam voor de kaarthouder in.",
+  "fieldTooLongForCardholderName": "De naam van de kaarthouder moet korter zijn dan 256 tekens.",
+  "fieldEmptyForNumber": "Vul een nummer in.",
+  "fieldEmptyForPostalCode": "Vul een postcode in.",
+  "fieldInvalidForCvv": "Deze CSC is ongeldig.",
+  "fieldInvalidForExpirationDate": "Deze vervaldatum is ongeldig.",
+  "fieldInvalidForNumber": "Dit creditcardnummer is ongeldig.",
+  "fieldInvalidForPostalCode": "Deze postcode is ongeldig.",
+  "genericError": "Er is iets fout gegaan.",
+  "hostedFieldsFailedTokenizationError": "Controleer uw gegevens en probeer het opnieuw.",
+  "hostedFieldsFieldsInvalidError": "Controleer uw gegevens en probeer het opnieuw.",
+  "hostedFieldsTokenizationNetworkErrorError": "Netwerkfout. Probeer het opnieuw.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "De controle van de creditcard is mislukt. Controleer uw gegevens en probeer het opnieuw.",
+  "paypalAccountTokenizationFailedError": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
+  "paypalFlowFailedError": "Er is iets misgegaan bij de verbinding met PayPal. Probeer het opnieuw.",
+  "paypalTokenizationRequestActiveError": "De autorisatie van de PayPal-betaling is al in behandeling.",
+  "unsupportedCardTypeError": "Dit type creditcard wordt niet ondersteund. Gebruik een andere creditcard.",
+  "applePayTokenizationError": "Er is een netwerkfout opgetreden bij het verwerken van de Apple Pay-betaling. Probeer het opnieuw.",
+  "applePayActiveCardError": "Voeg een ondersteunde creditcard toe aan je Apple Pay-wallet.",
+  "cardholderNameLabel": "Naam kaarthouder",
+  "cardNumberLabel": "Creditcardnummer",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 cijfers)",
+  "cvvFourDigitLabelSubheading": "(4 cijfers)",
+  "cardholderNamePlaceholder": "Naam kaarthouder",
+  "expirationDateLabel": "Vervaldatum",
+  "expirationDateLabelSubheading": "(MM/JJ)",
+  "expirationDatePlaceholder": "MM/JJ",
+  "postalCodeLabel": "Postcode",
+  "payWithCard": "Betalen met creditcard",
+  "endingIn": "Eindigend op •• {{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "Creditcard",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],121:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "Betaling med {{paymentSource}}",
+  "chooseAnotherWayToPay": "Velg en annen måte å betale på",
+  "chooseAWayToPay": "Velg betalingsmåte",
+  "otherWaysToPay": "Andre måter å betale på",
+  "cardVerification": "Kortbekreftelse",
+  "fieldEmptyForCvv": "Oppgi en kortsikkerhetskode (CVV).",
+  "fieldEmptyForExpirationDate": "Oppgi en utløpsdato.",
+  "fieldEmptyForCardholderName": "Oppgi et navn for kortinnehaveren.",
+  "fieldTooLongForCardholderName": "Makslengden for kortinnehaverens navn er 256 tegn.",
+  "fieldEmptyForNumber": "Oppgi et nummer.",
+  "fieldEmptyForPostalCode": "Oppgi et postnummer.",
+  "fieldInvalidForCvv": "Denne sikkerhetskoden er ikke gyldig.",
+  "fieldInvalidForExpirationDate": "Denne utløpsdatoen er ikke gyldig.",
+  "fieldInvalidForNumber": "Dette kortnummeret er ikke gyldig.",
+  "fieldInvalidForPostalCode": "Dette postnummeret er ikke gyldig.",
+  "genericError": "Noe gikk galt hos oss.",
+  "hostedFieldsFailedTokenizationError": "Kontroller informasjonen og prøv på nytt.",
+  "hostedFieldsFieldsInvalidError": "Kontroller informasjonen og prøv på nytt.",
+  "hostedFieldsTokenizationNetworkErrorError": "Nettverksfeil. Prøv på nytt.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Bekreftelsen av betalingskortet mislyktes. Kontroller informasjonen og prøv på nytt.",
+  "paypalAccountTokenizationFailedError": "Noe gikk galt da PayPal-kontoen ble lagt til. Prøv på nytt.",
+  "paypalFlowFailedError": "Det oppsto et problem med tilkoblingen til PayPal. Prøv på nytt.",
+  "paypalTokenizationRequestActiveError": "Godkjenning av PayPal-betalingen pågår allerede",
+  "unsupportedCardTypeError": "Denne korttypen støttes ikke. Prøv med et annet kort.",
+  "applePayTokenizationError": "Det oppsto en nettverksfeil under behandlingen av Apple Pay-betalingen. Prøv på nytt.",
+  "applePayActiveCardError": "Legg til et kort som støttes i Apple Pay-lommeboken din.",
+  "cardholderNameLabel": "Kortinnehaverens navn",
+  "cardNumberLabel": "Kortnummer",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 siffer)",
+  "cvvFourDigitLabelSubheading": "(4 siffer)",
+  "cardholderNamePlaceholder": "Kortinnehaverens navn",
+  "expirationDateLabel": "Utløpsdato",
+  "expirationDateLabelSubheading": "(MM/ÅÅ)",
+  "expirationDatePlaceholder": "MM/ÅÅ",
+  "postalCodeLabel": "Postnummer",
+  "payWithCard": "Betal med kort",
+  "endingIn": "Som slutter på •• {{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "Kort",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],122:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "Forma płatności: {{paymentSource}}",
+  "chooseAnotherWayToPay": "Wybierz inną formę płatności",
+  "chooseAWayToPay": "Wybierz sposób płatności",
+  "otherWaysToPay": "Inne formy płatności",
+  "cardVerification": "Weryfikacja karty",
+  "fieldEmptyForCvv": "Podaj kod bezpieczeństwa.",
+  "fieldEmptyForExpirationDate": "Podaj datę ważności.",
+  "fieldEmptyForCardholderName": "Podaj imię i nazwisko posiadacza karty.",
+  "fieldTooLongForCardholderName": "Imię i nazwisko posiadacza karty musi mieć mniej niż 256 znaków.",
+  "fieldEmptyForNumber": "Podaj numer.",
+  "fieldEmptyForPostalCode": "Podaj kod pocztowy.",
+  "fieldInvalidForCvv": "Podany kod bezpieczeństwa jest nieprawidłowy.",
+  "fieldInvalidForExpirationDate": "Podana data ważności jest nieprawidłowa.",
+  "fieldInvalidForNumber": "Podany numer karty jest nieprawidłowy.",
+  "fieldInvalidForPostalCode": "Podany kod pocztowy jest nieprawidłowy.",
+  "genericError": "Wystąpił błąd po naszej stronie.",
+  "hostedFieldsFailedTokenizationError": "Sprawdź swoje informacje i spróbuj ponownie.",
+  "hostedFieldsFieldsInvalidError": "Sprawdź swoje informacje i spróbuj ponownie.",
+  "hostedFieldsTokenizationNetworkErrorError": "Błąd sieci. Spróbuj ponownie.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Weryfikacja karty kredytowej nie powiodła się. Sprawdź swoje informacje i spróbuj ponownie.",
+  "paypalAccountTokenizationFailedError": "Coś poszło nie tak podczas dodawania konta PayPal. Spróbuj ponownie.",
+  "paypalFlowFailedError": "Coś poszło nie tak podczas łączenia z systemem PayPal. Spróbuj ponownie.",
+  "paypalTokenizationRequestActiveError": "Autoryzacja płatności PayPal jest już w trakcie realizacji.",
+  "unsupportedCardTypeError": "Ten typ karty nie jest obsługiwany. Spróbuj użyć innej karty.",
+  "applePayTokenizationError": "Wystąpił błąd sieci podczas przetwarzania płatności Apple Pay. Spróbuj ponownie.",
+  "applePayActiveCardError": "Dodaj obsługiwaną kartę do portfela Apple Pay.",
+  "cardholderNameLabel": "Imię i nazwisko posiadacza karty",
+  "cardNumberLabel": "Numer karty",
+  "cvvLabel": "Kod CVC",
+  "cvvThreeDigitLabelSubheading": "(3 cyfry)",
+  "cvvFourDigitLabelSubheading": "(4 cyfry)",
+  "cardholderNamePlaceholder": "Imię i nazwisko posiadacza karty",
+  "expirationDateLabel": "Data ważności",
+  "expirationDateLabelSubheading": "(MM/RR)",
+  "expirationDatePlaceholder": "MM/RR",
+  "postalCodeLabel": "Kod pocztowy",
+  "payWithCard": "Zapłać kartą",
+  "endingIn": "O numerze zakończonym cyframi •• {{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "Karta",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],123:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "Pagando com {{paymentSource}}",
+  "chooseAnotherWayToPay": "Escolher outro meio de pagamento",
+  "chooseAWayToPay": "Escolher um meio de pagamento",
+  "otherWaysToPay": "Outro meio de pagamento",
+  "cardVerification": "Verificação do cartão",
+  "fieldEmptyForCvv": "Informe o Código de Segurança.",
+  "fieldEmptyForExpirationDate": "Informe a data de vencimento.",
+  "fieldEmptyForCardholderName": "Informe o nome do titular do cartão.",
+  "fieldTooLongForCardholderName": "O nome do titular do cartão deve ter menos de 256 caracteres.",
+  "fieldEmptyForNumber": "Informe um número.",
+  "fieldEmptyForPostalCode": "Informe um CEP.",
+  "fieldInvalidForCvv": "Este código de segurança não é válido.",
+  "fieldInvalidForExpirationDate": "Esta data de vencimento não é válida.",
+  "fieldInvalidForNumber": "O número do cartão não é válido.",
+  "fieldInvalidForPostalCode": "Este CEP não é válido.",
+  "genericError": "Ocorreu um erro.",
+  "hostedFieldsFailedTokenizationError": "Verifique as informações e tente novamente.",
+  "hostedFieldsFieldsInvalidError": "Verifique as informações e tente novamente.",
+  "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Falha ao verificar o cartão de crédito. Verifique as informações e tente novamente.",
+  "paypalAccountTokenizationFailedError": "Ocorreu um erro ao adicionar a conta do PayPal. Tente novamente.",
+  "paypalFlowFailedError": "Ocorreu um erro de conexão com o PayPal. Tente novamente.",
+  "paypalTokenizationRequestActiveError": "A autorização de pagamento do PayPal já está em andamento.",
+  "unsupportedCardTypeError": "Este tipo de cartão não é aceito. Experimente outro cartão.",
+  "applePayTokenizationError": "Ocorreu um erro de rede ao processar o pagamento com Apple Pay. Tente novamente.",
+  "applePayActiveCardError": "Adicione cartão suportado à sua carteira do Apple Pay.",
+  "cardholderNameLabel": "Nome do titular do cartão",
+  "cardNumberLabel": "Número do cartão",
+  "cvvLabel": "Cód. Seg.",
+  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
+  "cvvFourDigitLabelSubheading": "(4 dígitos)",
+  "cardholderNamePlaceholder": "Nome do titular do cartão",
+  "expirationDateLabel": "Data de vencimento",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "CEP",
+  "payWithCard": "Pague com seu cartão",
+  "endingIn": "Com final ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "Cartão",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],124:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "Pagar com {{paymentSource}}",
+  "chooseAnotherWayToPay": "Escolher outra forma de pagamento",
+  "chooseAWayToPay": "Escolha um meio de pagamento",
+  "otherWaysToPay": "Outras formas de pagamento",
+  "cardVerification": "Verificação de cartão",
+  "fieldEmptyForCvv": "Introduza o código CVV.",
+  "fieldEmptyForExpirationDate": "Introduza a data de validade.",
+  "fieldEmptyForCardholderName": "Introduza um nome do titular do cartão.",
+  "fieldTooLongForCardholderName": "O nome do titular do cartão tem de ter menos de 256 carateres.",
+  "fieldEmptyForNumber": "Introduza um número.",
+  "fieldEmptyForPostalCode": "Introduza o código postal.",
+  "fieldInvalidForCvv": "Este código de segurança não é válido.",
+  "fieldInvalidForExpirationDate": "Esta data de validade não é correta.",
+  "fieldInvalidForNumber": "Este número de cartão não é válido.",
+  "fieldInvalidForPostalCode": "Este código postal não é válido.",
+  "genericError": "Tudo indica que ocorreu um problema.",
+  "hostedFieldsFailedTokenizationError": "Verifique os dados e tente novamente.",
+  "hostedFieldsFieldsInvalidError": "Verifique os dados e tente novamente.",
+  "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "A verificação do cartão de crédito falhou. Verifique os dados e tente novamente.",
+  "paypalAccountTokenizationFailedError": "Ocorreu um erro ao associar a conta PayPal. Tente novamente.",
+  "paypalFlowFailedError": "Ocorreu um erro na ligação com PayPal. Tente novamente.",
+  "paypalTokenizationRequestActiveError": "Já há uma autorização de pagamento PayPal em curso.",
+  "unsupportedCardTypeError": "Este tipo de cartão não é suportado. Tente usar outro cartão.",
+  "applePayTokenizationError": "Ocorreu um erro de rede ao processar o pagamento com Apple Pay. Tente novamente.",
+  "applePayActiveCardError": "Adicione um cartão suportado à sua carteira Apple Pay.",
+  "cardholderNameLabel": "Nome do titular do cartão",
+  "cardNumberLabel": "Número do cartão",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
+  "cvvFourDigitLabelSubheading": "(4 dígitos)",
+  "cardholderNamePlaceholder": "Nome do titular do cartão",
+  "expirationDateLabel": "Data de validade",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "Código postal",
+  "payWithCard": "Pagar com cartão",
+  "endingIn": "Terminação em ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "Cartão",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],125:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "Способы оплаты: {{paymentSource}}",
+  "chooseAnotherWayToPay": "Выберите другой способ оплаты",
+  "chooseAWayToPay": "Выберите способ оплаты",
+  "otherWaysToPay": "Другие способы оплаты",
+  "cardVerification": "Проверка карты",
+  "fieldEmptyForCvv": "Укажите код безопасности.",
+  "fieldEmptyForExpirationDate": "Укажите дату окончания срока действия.",
+  "fieldEmptyForCardholderName": "Введите имя и фамилию владельца карты.",
+  "fieldTooLongForCardholderName": "Имя владельца карты должно содержать не более 256 символов.",
+  "fieldEmptyForNumber": "Введите номер.",
+  "fieldEmptyForPostalCode": "Укажите почтовый индекс.",
+  "fieldInvalidForCvv": "Этот код безопасности недействителен.",
+  "fieldInvalidForExpirationDate": "Эта дата окончания срока действия недействительна.",
+  "fieldInvalidForNumber": "Этот номер карты недействителен.",
+  "fieldInvalidForPostalCode": "Этот почтовый индекс недействителен.",
+  "genericError": "Возникла проблема с нашей стороны.",
+  "hostedFieldsFailedTokenizationError": "Проверьте правильность ввода данных и повторите попытку.",
+  "hostedFieldsFieldsInvalidError": "Проверьте правильность ввода данных и повторите попытку.",
+  "hostedFieldsTokenizationNetworkErrorError": "Ошибка сети. Повторите попытку.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Проверка банковской карты не выполнена. Проверьте правильность ввода данных и повторите попытку.",
+  "paypalAccountTokenizationFailedError": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
+  "paypalFlowFailedError": "Что-то пошло не так — не удалось подключиться к системе PayPal. Повторите попытку.",
+  "paypalTokenizationRequestActiveError": "Выполняется авторизация платежа PayPal.",
+  "unsupportedCardTypeError": "Этот тип карты не поддерживается. Попробуйте воспользоваться другой картой.",
+  "applePayTokenizationError": "При обработке платежа через Apple Pay возникла сетевая ошибка. Повторите попытку.",
+  "applePayActiveCardError": "Добавьте поддерживаемую карту к своему счету Apple Pay.",
+  "cardholderNameLabel": "Имя и фамилия владельца",
+  "cardNumberLabel": "Номер карты",
+  "cvvLabel": "Код безопасности",
+  "cvvThreeDigitLabelSubheading": "(3 цифры)",
+  "cvvFourDigitLabelSubheading": "(4 цифры)",
+  "cardholderNamePlaceholder": "Имя и фамилия владельца",
+  "expirationDateLabel": "Действует до",
+  "expirationDateLabelSubheading": "(ММ/ГГ)",
+  "expirationDatePlaceholder": "ММ/ГГ",
+  "postalCodeLabel": "Индекс",
+  "payWithCard": "Оплатить картой",
+  "endingIn": "Последние две цифры номера карты: ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "Карта",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],126:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "Betalas med {{paymentSource}}",
+  "chooseAnotherWayToPay": "Välj ett annat sätt att betala",
+  "chooseAWayToPay": "Välj hur du vill betala",
+  "otherWaysToPay": "Andra sätt att betala",
+  "cardVerification": "Kortverifiering",
+  "fieldEmptyForCvv": "Fyll i en CVV-kod.",
+  "fieldEmptyForExpirationDate": "Fyll i ett utgångsdatum.",
+  "fieldEmptyForCardholderName": "Fyll i kortinnehavarens namn.",
+  "fieldTooLongForCardholderName": "Kortinnehavarens namn måste vara kortare än 256 tecken.",
+  "fieldEmptyForNumber": "Fyll i ett nummer.",
+  "fieldEmptyForPostalCode": "Fyll i ett postnummer.",
+  "fieldInvalidForCvv": "Den här säkerhetskoden är inte giltig.",
+  "fieldInvalidForExpirationDate": "Det här utgångsdatumet är inte giltigt.",
+  "fieldInvalidForNumber": "Det här kortnumret är inte giltigt.",
+  "fieldInvalidForPostalCode": "Det här postnumret är inte giltigt.",
+  "genericError": "Ett fel uppstod.",
+  "hostedFieldsFailedTokenizationError": "Kontrollera uppgifterna och försök igen.",
+  "hostedFieldsFieldsInvalidError": "Kontrollera uppgifterna och försök igen.",
+  "hostedFieldsTokenizationNetworkErrorError": "Nätverksfel. Försök igen.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Verifieringen av betalkort misslyckades. Kontrollera uppgifterna och försök igen.",
+  "paypalAccountTokenizationFailedError": "Ett fel uppstod när PayPal-kontot skulle läggas till. Försök igen.",
+  "paypalFlowFailedError": "Ett fel uppstod när anslutningen till PayPal skulle upprättas. Försök igen.",
+  "paypalTokenizationRequestActiveError": "Betalningsgodkännandet för PayPal behandlas redan.",
+  "unsupportedCardTypeError": "Den här korttypen stöds inte. Pröva med ett annat kort.",
+  "applePayTokenizationError": "Ett nätverksfel inträffade när Apple Pay-betalningen skulle behandlas. Försök igen.",
+  "applePayActiveCardError": "Lägg till ett kort som stöds i Apple Pay-e-plånboken.",
+  "cardholderNameLabel": "Kortinnehavarens namn",
+  "cardNumberLabel": "Kortnummer",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 siffror)",
+  "cvvFourDigitLabelSubheading": "(4 siffror)",
+  "cardholderNamePlaceholder": "Kortinnehavarens namn",
+  "expirationDateLabel": "Utgångsdatum",
+  "expirationDateLabelSubheading": "(MM/ÅÅ)",
+  "expirationDatePlaceholder": "MM/ÅÅ",
+  "postalCodeLabel": "Postnummer",
+  "payWithCard": "Betala med kort",
+  "endingIn": "Slutar på ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "Kort",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],127:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "การชำระเงินด้วย {{paymentSource}}",
+  "chooseAnotherWayToPay": "เลือกวิธีอื่นเพื่อชำระเงิน",
+  "chooseAWayToPay": "เลือกวิธีชำระเงิน",
+  "otherWaysToPay": "วิธีอื่นๆ ในการชำระเงิน",
+  "cardVerification": "การตรวจสอบยืนยันบัตร",
+  "fieldEmptyForCvv": "โปรดกรอก CVV (รหัสการตรวจสอบยืนยันบัตร)",
+  "fieldEmptyForExpirationDate": "โปรดกรอกวันที่หมดอายุ",
+  "fieldEmptyForCardholderName": "โปรดกรอกชื่อเจ้าของบัตร",
+  "fieldTooLongForCardholderName": "ชื่อผู้ถือบัตรจะต้องไม่เกิน 256 อักขระ",
+  "fieldEmptyForNumber": "โปรดกรอกหมายเลข",
+  "fieldEmptyForPostalCode": "โปรดกรอกรหัสไปรษณีย์",
+  "fieldInvalidForCvv": "รหัสความปลอดภัยนี้ไม่ถูกต้อง",
+  "fieldInvalidForExpirationDate": "วันที่หมดอายุนี้ไม่ถูกต้อง",
+  "fieldInvalidForNumber": "หมายเลขบัตรนี้ไม่ถูกต้อง",
+  "fieldInvalidForPostalCode": "รหัสไปรษณีย์นี้ไม่ถูกต้อง",
+  "genericError": "เกิดข้อผิดพลาดขึ้นในระบบของเรา",
+  "hostedFieldsFailedTokenizationError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
+  "hostedFieldsFieldsInvalidError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
+  "hostedFieldsTokenizationNetworkErrorError": "ข้อผิดพลาดด้านเครือข่าย โปรดลองอีกครั้ง",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "การตรวจสอบยืนยันบัตรเครดิตล้มเหลว โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
+  "paypalAccountTokenizationFailedError": "เกิดข้อผิดพลาดในการเพิ่มบัญชี PayPal โปรดลองอีกครั้ง",
+  "paypalFlowFailedError": "เกิดข้อผิดพลาดในการเชื่อมต่อกับ PayPal โปรดลองอีกครั้ง",
+  "paypalTokenizationRequestActiveError": "การอนุญาตการชำระเงินของ PayPal อยู่ในระหว่างดำเนินการ",
+  "unsupportedCardTypeError": "ไม่รองรับบัตรประเภทนี้ โปรดลองใช้บัตรใบอื่น",
+  "applePayTokenizationError": "เกิดข้อผิดพลาดด้านเครือข่ายขึ้นขณะดำเนินการชำระเงินด้วย Apple Pay โปรดลองอีกครั้ง",
+  "applePayActiveCardError": "เพิ่มบัตรที่รองรับในกระเป๋าสตางค์ Apple Pay ของคุณ",
+  "cardholderNameLabel": "ชื่อเจ้าของบัตร",
+  "cardNumberLabel": "หมายเลขบัตร",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 หลัก)",
+  "cvvFourDigitLabelSubheading": "(4 หลัก)",
+  "cardholderNamePlaceholder": "ชื่อเจ้าของบัตร",
+  "expirationDateLabel": "วันหมดอายุ",
+  "expirationDateLabelSubheading": "(ดด/ปป)",
+  "expirationDatePlaceholder": "ดด/ปป",
+  "postalCodeLabel": "รหัสไปรษณีย์",
+  "payWithCard": "ชำระเงินด้วยบัตร",
+  "endingIn": "ลงท้ายด้วย ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "บัตร",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],128:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "正在使用{{paymentSource}}付款",
+  "chooseAnotherWayToPay": "选择其他付款方式",
+  "chooseAWayToPay": "选择付款方式",
+  "otherWaysToPay": "其他付款方式",
+  "cardVerification": "卡验证",
+  "fieldEmptyForCvv": "请填写CVV。",
+  "fieldEmptyForExpirationDate": "请填写有效期限。",
+  "fieldEmptyForCardholderName": "请填写持卡人的姓名。",
+  "fieldTooLongForCardholderName": "持卡人姓名必须少于256个字符。",
+  "fieldEmptyForNumber": "请填写一个号码。",
+  "fieldEmptyForPostalCode": "请填写邮政编码。",
+  "fieldInvalidForCvv": "此安全代码无效。",
+  "fieldInvalidForExpirationDate": "此有效期限无效。",
+  "fieldInvalidForNumber": "此卡号无效。",
+  "fieldInvalidForPostalCode": "此邮政编码无效。",
+  "genericError": "我们遇到了一些问题",
+  "hostedFieldsFailedTokenizationError": "请检查您的信息，然后重试。",
+  "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
+  "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡验证失败。请检查您的信息，然后重试。",
+  "paypalAccountTokenizationFailedError": "添加PayPal账户时出错。请重试。",
+  "paypalFlowFailedError": "连接到PayPal时出错。请重试。",
+  "paypalTokenizationRequestActiveError": "PayPal付款授权已在进行中。",
+  "unsupportedCardTypeError": "不支持该卡类型。请尝试其他卡。",
+  "applePayTokenizationError": "处理Apple Pay付款时出现网络错误。请重试。",
+  "applePayActiveCardError": "请添加受支持的卡到您的Apple Pay钱包。",
+  "cardholderNameLabel": "持卡人姓名",
+  "cardNumberLabel": "卡号",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "（3位数）",
+  "cvvFourDigitLabelSubheading": "（4位数）",
+  "cardholderNamePlaceholder": "持卡人姓名",
+  "expirationDateLabel": "有效期限",
+  "expirationDateLabelSubheading": "（MM/YY）",
+  "expirationDatePlaceholder": "MM/YY",
+  "postalCodeLabel": "邮政编码",
+  "payWithCard": "用卡付款",
+  "endingIn": "尾号为{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "卡",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "银联"
+};
+
+},{}],129:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  "payingWith": "付款方式為 {{paymentSource}}",
+  "chooseAnotherWayToPay": "選擇其他付款方式",
+  "chooseAWayToPay": "選擇付款方式",
+  "otherWaysToPay": "其他付款方式",
+  "cardVerification": "信用卡認證",
+  "fieldEmptyForCvv": "請填寫信用卡認證碼。",
+  "fieldEmptyForExpirationDate": "請填寫到期日。",
+  "fieldEmptyForCardholderName": "請填寫持卡人的名字。",
+  "fieldTooLongForCardholderName": "持卡人姓名必須少於 256 個字元。",
+  "fieldEmptyForNumber": "請填寫號碼。",
+  "fieldEmptyForPostalCode": "請填寫郵遞區號。",
+  "fieldInvalidForCvv": "此安全代碼無效。",
+  "fieldInvalidForExpirationDate": "此到期日無效。",
+  "fieldInvalidForNumber": "此卡號無效。",
+  "fieldInvalidForPostalCode": "此郵遞區號無效。",
+  "genericError": "系統發生錯誤。",
+  "hostedFieldsFailedTokenizationError": "請檢查你的資料並再試一次。",
+  "hostedFieldsFieldsInvalidError": "請檢查你的資料並再試一次。",
+  "hostedFieldsTokenizationNetworkErrorError": "網絡錯誤。請重試。",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡認證失敗。請檢查你的資料並再試一次。",
+  "paypalAccountTokenizationFailedError": "加入 PayPal 帳戶時發生錯誤。請重試。",
+  "paypalFlowFailedError": "連接 PayPal 時發生錯誤。請重試。",
+  "paypalTokenizationRequestActiveError": "PayPal 付款授權已在處理中。",
+  "unsupportedCardTypeError": "不可使用此信用卡類型。請改用其他信用卡。",
+  "applePayTokenizationError": "處理 Apple Pay 付款時發生網絡錯誤。請重試。",
+  "applePayActiveCardError": "在 Apple Pay 錢包中加入支援的信用卡。",
+  "cardholderNameLabel": "持卡人名字",
+  "cardNumberLabel": "卡號",
+  "cvvLabel": "信用卡認證碼",
+  "cvvThreeDigitLabelSubheading": "（3 位數）",
+  "cvvFourDigitLabelSubheading": "（4 位數）",
+  "cardholderNamePlaceholder": "持卡人名字",
+  "expirationDateLabel": "到期日",
+  "expirationDateLabelSubheading": "(MM/YY)",
+  "expirationDatePlaceholder": "月 / 年",
+  "postalCodeLabel": "郵遞區號",
+  "payWithCard": "使用信用卡付款",
+  "endingIn": "最後兩位數為••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Card": "信用卡",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+},{}],130:[function(require,module,exports){
+'use strict';
+
+module.exports = {
   "payingWith": "以 {{paymentSource}} 付款",
   "chooseAnotherWayToPay": "選擇支付款項的以其他方式付款",
   "chooseAWayToPay": "選擇支付款項的方式",
   "otherWaysToPay": "其他付款方式",
+  "cardVerification": "信用卡認證",
   "fieldEmptyForCvv": "請填妥信用卡驗證碼。",
   "fieldEmptyForExpirationDate": "請填妥到期日。",
   "fieldEmptyForCardholderName": "請填妥持卡人姓名。",
+  "fieldTooLongForCardholderName": "持卡人姓名不能超過 256 個字元。",
   "fieldEmptyForNumber": "請填妥號碼。",
   "fieldEmptyForPostalCode": "請填寫郵遞區號。",
   "fieldInvalidForCvv": "這組安全代碼無效。",
@@ -7987,12 +9214,15 @@ module.exports = {
   "fieldInvalidForPostalCode": "此郵遞區號無效。",
   "genericError": "我們的系統發生問題。",
   "hostedFieldsFailedTokenizationError": "請檢查你的資料並重試。",
-  "hostedFieldsTokenizationNetworkErrorError": "網路錯誤。請重試。",
   "hostedFieldsFieldsInvalidError": "請檢查你的資料並重試。",
+  "hostedFieldsTokenizationNetworkErrorError": "網路錯誤。請重試。",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡認證失敗。請檢查你的資料並重試。",
   "paypalAccountTokenizationFailedError": "新增 PayPal 帳戶時，系統發生錯誤。請重試。",
   "paypalFlowFailedError": "連結至 PayPal 時，系統發生錯誤。請重試。",
   "paypalTokenizationRequestActiveError": "PayPal 支付款項的授權已在處理中。",
   "unsupportedCardTypeError": "不支援此卡片類型。請嘗試其他卡片。",
+  "applePayTokenizationError": "在處理 Apple Pay 付款時發生網路錯誤。請重試。",
+  "applePayActiveCardError": "新增支援的卡片至你的 Apple Pay 錢包。",
   "cardholderNameLabel": "持卡人姓名",
   "cardNumberLabel": "卡號",
   "cvvLabel": "CVV",
@@ -8005,12 +9235,13 @@ module.exports = {
   "postalCodeLabel": "郵遞區號",
   "payWithCard": "使用信用卡 / 扣帳卡付款",
   "endingIn": "你的末兩碼為 •• {{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
   "Card": "信用卡或扣帳卡",
   "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "American Express": "美國運通",
+  "PayPal Credit": "PayPal 信貸",
+  "American Express": "美國運通 (American Express)",
   "Discover": "Discover",
-  "Diners Club": "Diners Club",
+  "Diners Club": "大來國際 (Diners Club)",
   "MasterCard": "Mastercard",
   "Visa": "Visa",
   "JCB": "JCB",
@@ -8018,7 +9249,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],121:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 'use strict';
 
 var assign = require('../lib/assign').assign;
@@ -8054,7 +9285,7 @@ BaseView.prototype.teardown = function () {
 
 module.exports = BaseView;
 
-},{"../constants":77,"../lib/assign":83,"../lib/dropin-error":87,"../lib/promise":93}],122:[function(require,module,exports){
+},{"../constants":86,"../lib/assign":92,"../lib/dropin-error":96,"../lib/promise":102}],132:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -8358,7 +9589,7 @@ function prefixShowClass(classname) {
 
 module.exports = MainView;
 
-},{"../constants":77,"../lib/add-selection-event-handler":81,"../lib/analytics":82,"../lib/classlist":85,"../lib/promise":93,"../lib/supports-flexbox":94,"../lib/transition-helper":95,"./base-view":121,"./payment-methods-view":124,"./payment-options-view":125,"./payment-sheet-views":128}],123:[function(require,module,exports){
+},{"../constants":86,"../lib/add-selection-event-handler":90,"../lib/analytics":91,"../lib/classlist":94,"../lib/promise":102,"../lib/supports-flexbox":103,"../lib/transition-helper":105,"./base-view":131,"./payment-methods-view":134,"./payment-options-view":135,"./payment-sheet-views":139}],133:[function(require,module,exports){
 'use strict';
 
 var BaseView = require('./base-view');
@@ -8379,7 +9610,7 @@ PaymentMethodView.prototype = Object.create(BaseView.prototype);
 PaymentMethodView.prototype.constructor = PaymentMethodView;
 
 PaymentMethodView.prototype._initialize = function () {
-  var endingInText;
+  var endingInText, lastTwo;
   var html = paymentMethodHTML;
   var paymentMethodCardTypes = constants.paymentMethodCardTypes;
   var paymentMethodTypes = constants.paymentMethodTypes;
@@ -8406,6 +9637,14 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@TITLE/g, this.paymentMethod.details.email)
         .replace(/@SUBTITLE/g, this.strings.PayPal);
       break;
+    case paymentMethodTypes.applePay:
+      lastTwo = this.paymentMethod.details.paymentInstrumentName.slice(-2);
+      endingInText = this.strings.endingIn.replace('{{lastTwoCardDigits}}', lastTwo);
+      html = html.replace(/@ICON/g, 'logoApplePay')
+        .replace(/@CLASSNAME/g, '')
+        .replace(/@TITLE/g, endingInText)
+        .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
+      break;
     default:
       break;
   }
@@ -8422,7 +9661,7 @@ PaymentMethodView.prototype.setActive = function (isActive) {
 
 module.exports = PaymentMethodView;
 
-},{"../constants":77,"../lib/add-selection-event-handler":81,"../lib/classlist":85,"./base-view":121}],124:[function(require,module,exports){
+},{"../constants":86,"../lib/add-selection-event-handler":90,"../lib/classlist":94,"./base-view":131}],134:[function(require,module,exports){
 'use strict';
 
 var BaseView = require('./base-view');
@@ -8434,7 +9673,8 @@ var Promise = require('../lib/promise');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
-  PayPalAccount: 'PayPal'
+  PayPalAccount: 'PayPal',
+  ApplePayCard: 'Apple Pay'
 };
 
 function PaymentMethodsView() {
@@ -8542,7 +9782,7 @@ PaymentMethodsView.prototype.requestPaymentMethod = function () {
 
 module.exports = PaymentMethodsView;
 
-},{"../constants":77,"../lib/classlist":85,"../lib/dropin-error":87,"../lib/promise":93,"./base-view":121,"./payment-method-view":123}],125:[function(require,module,exports){
+},{"../constants":86,"../lib/classlist":94,"../lib/dropin-error":96,"../lib/promise":102,"./base-view":131,"./payment-method-view":133}],135:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -8607,6 +9847,13 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
       html = html.replace(/@OPTION_TITLE/g, paymentSource);
       html = html.replace(/@CLASSNAME/g, '');
       break;
+    case paymentOptionIDs.applePay:
+      paymentSource = this.strings['Apple Pay'];
+      html = html.replace(/@ICON/g, 'logoApplePay');
+      html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(paymentSource));
+      html = html.replace(/@OPTION_TITLE/g, paymentSource);
+      html = html.replace(/@CLASSNAME/g, '');
+      break;
     default:
       break;
   }
@@ -8628,7 +9875,102 @@ PaymentOptionsView.prototype._generateOptionLabel = function (paymentSourceStrin
 
 module.exports = PaymentOptionsView;
 
-},{"../constants":77,"../lib/add-selection-event-handler":81,"../lib/analytics":82,"./base-view":121}],126:[function(require,module,exports){
+},{"../constants":86,"../lib/add-selection-event-handler":90,"../lib/analytics":91,"./base-view":131}],136:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var assign = require('../../lib/assign').assign;
+var BaseView = require('../base-view');
+var btApplePay = require('braintree-web/apple-pay');
+var DropinError = require('../../lib/dropin-error');
+var paymentOptionIDs = require('../../constants').paymentOptionIDs;
+
+function ApplePayView() {
+  BaseView.apply(this, arguments);
+}
+
+ApplePayView.prototype = Object.create(BaseView.prototype);
+ApplePayView.prototype.constructor = ApplePayView;
+ApplePayView.ID = ApplePayView.prototype.ID = paymentOptionIDs.applePay;
+
+ApplePayView.prototype.initialize = function () {
+  var self = this;
+
+  self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
+
+  self.model.asyncDependencyStarting();
+
+  return btApplePay.create({client: this.client}).then(function (applePayInstance) {
+    var buttonDiv = self.getElementById('apple-pay-button');
+
+    self.applePayInstance = applePayInstance;
+
+    self.model.on('changeActivePaymentView', function (paymentViewID) {
+      if (paymentViewID !== self.ID) {
+        return;
+      }
+
+      global.ApplePaySession.canMakePaymentsWithActiveCard(self.applePayInstance.merchantIdentifier).then(function (canMakePayments) {
+        if (!canMakePayments) {
+          self.model.reportError('applePayActiveCardError');
+        }
+      });
+    });
+
+    buttonDiv.onclick = self._showPaymentSheet.bind(self);
+    buttonDiv.classList.add('apple-pay-button-' + (self.model.merchantConfiguration.applePay.buttonStyle || 'black'));
+
+    self.model.asyncDependencyReady();
+  }).catch(function (err) {
+    self.model.asyncDependencyFailed({
+      view: self.ID,
+      error: new DropinError(err)
+    });
+  });
+};
+
+ApplePayView.prototype._showPaymentSheet = function () {
+  var self = this;
+  var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
+  var session = new global.ApplePaySession(2, request);
+
+  session.onvalidatemerchant = function (event) {
+    self.applePayInstance.performValidation({
+      validationURL: event.validationURL,
+      displayName: self.applePayConfiguration.displayName
+    }).then(function (validationData) {
+      session.completeMerchantValidation(validationData);
+    }).catch(function (validationErr) {
+      self.model.reportError(validationErr);
+      session.abort();
+    });
+  };
+
+  session.onpaymentauthorized = function (event) {
+    self.applePayInstance.tokenize({
+      token: event.payment.token
+    }).then(function (payload) {
+      session.completePayment(global.ApplePaySession.STATUS_SUCCESS);
+      payload.payment = event.payment;
+      self.model.addPaymentMethod(payload);
+    }).catch(function (tokenizeErr) {
+      self.model.reportError(tokenizeErr);
+      session.completePayment(global.ApplePaySession.STATUS_FAILURE);
+    });
+  };
+
+  session.begin();
+  return false;
+};
+
+ApplePayView.prototype.updateConfiguration = function (key, value) {
+  this.applePayConfiguration[key] = value;
+};
+
+module.exports = ApplePayView;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../../constants":86,"../../lib/assign":92,"../../lib/dropin-error":96,"../base-view":131,"braintree-web/apple-pay":20}],137:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -8730,7 +10072,7 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
 module.exports = BasePayPalView;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/assign":83,"../../lib/dropin-error":87,"../base-view":121,"braintree-web/paypal-checkout":69}],127:[function(require,module,exports){
+},{"../../lib/assign":92,"../../lib/dropin-error":96,"../base-view":131,"braintree-web/paypal-checkout":73}],138:[function(require,module,exports){
 'use strict';
 
 var assign = require('../../lib/assign').assign;
@@ -8771,6 +10113,22 @@ CardView.prototype.initialize = function () {
   this.cvvIconSvg = this.getElementById('cvv-icon-svg');
   this.cvvLabelDescriptor = this.getElementById('cvv-label-descriptor');
   this.fieldErrors = {};
+  this.extraInputs = [
+    {
+      fieldName: 'cardholderName',
+      enabled: this.hasCardholderName,
+      required: this.hasCardholderName && this.model.merchantConfiguration.card.cardholderName.required,
+      requiredError: this.strings.fieldEmptyForCardholderName,
+      validations: [
+        {
+          isValid: function (value) {
+            return value.length < 256;
+          },
+          error: this.strings.fieldTooLongForCardholderName
+        }
+      ]
+    }
+  ];
 
   if (!this.hasCVV) {
     cvvFieldGroup = this.getElementById('cvv-field-group');
@@ -8782,11 +10140,13 @@ CardView.prototype.initialize = function () {
     postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
   }
 
-  if (this.hasCardholderName) {
-    this._setupCardholderName(cardholderNameField);
-  } else {
-    cardholderNameField.parentNode.removeChild(cardholderNameField);
-  }
+  this.extraInputs.forEach(function (extraInput) {
+    if (extraInput.enabled) {
+      this._setupExtraInput(extraInput);
+    } else {
+      this._removeExtraInput(extraInput);
+    }
+  }.bind(this));
 
   this.model.asyncDependencyStarting();
 
@@ -8807,38 +10167,43 @@ CardView.prototype.initialize = function () {
   }.bind(this));
 };
 
-CardView.prototype._setupCardholderName = function (cardholderNameField) {
-  var cardholderNameOptions = this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName;
-  var cardholderNameContainer = cardholderNameField.querySelector('.braintree-form__hosted-field');
+CardView.prototype._setupExtraInput = function (extraInput) {
+  var self = this;
+  var fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
+  var field = this.getElementById(fieldNameKebab + '-field-group');
+  var input = field.querySelector('input');
+  var nameContainer = field.querySelector('.braintree-form__hosted-field');
 
-  this.cardholderNameInput.addEventListener('keyup', function () {
-    var hasContent = this.cardholderNameInput.value.length > 0;
+  input.addEventListener('keyup', function () {
+    var valid = self._validateExtraInput(extraInput, true);
 
-    classlist.toggle(cardholderNameContainer, 'braintree-form__field--valid', hasContent);
+    classlist.toggle(nameContainer, 'braintree-form__field--valid', valid);
 
-    if (!cardholderNameOptions.required) {
-      return;
+    if (valid) {
+      self.hideFieldError(extraInput.fieldName);
     }
 
-    if (hasContent) {
-      classlist.remove(cardholderNameField, 'braintree-form__field-group--has-error');
-    }
+    self._sendRequestableEvent();
+  }, false);
 
-    this._sendRequestableEvent();
-  }.bind(this), false);
-
-  if (cardholderNameOptions.required) {
-    this.cardholderNameInput.addEventListener('blur', function () {
-      // the active element inside the blur event is the docuemnt.body
+  if (extraInput.required) {
+    input.addEventListener('blur', function () {
+      // the active element inside the blur event is the document.body
       // by taking it out of the event loop, we can detect the new
       // active element (hosted field or other card view element)
       setTimeout(function () {
-        if (isCardViewElement() && this.cardholderNameInput.value.length === 0) {
-          classlist.add(cardholderNameField, 'braintree-form__field-group--has-error');
+        if (isCardViewElement()) {
+          self._validateExtraInput(extraInput, true);
         }
-      }.bind(this), 0);
-    }.bind(this), false);
+      }, 0);
+    }, false);
   }
+};
+
+CardView.prototype._removeExtraInput = function (extraInput) {
+  var field = this.getElementById(camelCaseToKebabCase(extraInput.fieldName) + '-field-group');
+
+  field.parentNode.removeChild(field);
 };
 
 CardView.prototype._sendRequestableEvent = function () {
@@ -8997,11 +10362,48 @@ CardView.prototype._validateForm = function (showFieldErrors) {
     }
   }
 
-  if (!this._validateCardholderName()) {
-    isValid = false;
+  if (this.extraInputs) {
+    this.extraInputs.forEach(function (extraInput) {
+      var fieldIsValid;
+
+      if (!extraInput.enabled) {
+        return;
+      }
+
+      fieldIsValid = this._validateExtraInput(extraInput, showFieldErrors);
+
+      isValid = isValid && fieldIsValid;
+    }.bind(this));
   }
 
   return isValid;
+};
+
+CardView.prototype._validateExtraInput = function (extraInput, showFieldError) {
+  var fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
+  var field = this.getElementById(fieldNameKebab + '-field-group');
+  var input = field.querySelector('input');
+  var valid = true;
+
+  if (extraInput.required) {
+    valid = input.value.length > 0;
+
+    if (!valid && showFieldError) {
+      this.showFieldError(extraInput.fieldName, extraInput.requiredError);
+    }
+  }
+
+  extraInput.validations.forEach(function (validation) {
+    var validationPassed = validation.isValid(input.value);
+
+    if (!validationPassed && showFieldError) {
+      this.showFieldError(extraInput.fieldName, validation.error);
+    }
+
+    valid = valid && validationPassed;
+  }.bind(this));
+
+  return valid;
 };
 
 CardView.prototype.getPaymentMethod = function () { // eslint-disable-line consistent-return
@@ -9080,6 +10482,7 @@ CardView.prototype.tokenize = function () {
 CardView.prototype.showFieldError = function (field, errorMessage) {
   var fieldError;
   var fieldGroup = this.getElementById(camelCaseToKebabCase(field) + '-field-group');
+  var input = fieldGroup.querySelector('input');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToKebabCase(field) + '-field-error');
@@ -9090,19 +10493,24 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
   fieldError = this.fieldErrors[field];
   fieldError.textContent = errorMessage;
 
-  this.hostedFieldsInstance.setAttribute({
-    field: field,
-    attribute: 'aria-invalid',
-    value: true
-  });
-  this.hostedFieldsInstance.setMessage({
-    field: field,
-    message: errorMessage
-  });
+  if (input && isNormalFieldElement(input)) {
+    input.setAttribute('aria-invalid', true);
+  } else {
+    this.hostedFieldsInstance.setAttribute({
+      field: field,
+      attribute: 'aria-invalid',
+      value: true
+    });
+    this.hostedFieldsInstance.setMessage({
+      field: field,
+      message: errorMessage
+    });
+  }
 };
 
 CardView.prototype.hideFieldError = function (field) {
   var fieldGroup = this.getElementById(camelCaseToKebabCase(field) + '-field-group');
+  var input = fieldGroup.querySelector('input');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToKebabCase(field) + '-field-error');
@@ -9110,14 +10518,18 @@ CardView.prototype.hideFieldError = function (field) {
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--has-error');
 
-  this.hostedFieldsInstance.removeAttribute({
-    field: field,
-    attribute: 'aria-invalid'
-  });
-  this.hostedFieldsInstance.setMessage({
-    field: field,
-    message: ''
-  });
+  if (input && isNormalFieldElement(input)) {
+    input.removeAttribute('aria-invalid');
+  } else {
+    this.hostedFieldsInstance.removeAttribute({
+      field: field,
+      attribute: 'aria-invalid'
+    });
+    this.hostedFieldsInstance.setMessage({
+      field: field,
+      message: ''
+    });
+  }
 };
 
 CardView.prototype.teardown = function () {
@@ -9126,14 +10538,6 @@ CardView.prototype.teardown = function () {
 
 CardView.prototype._generateFieldSelector = function (field) {
   return '#braintree--dropin__' + this.model.componentID + ' .braintree-form-' + field;
-};
-
-CardView.prototype._validateCardholderName = function () {
-  if (!this.hasCardholderName || !this.model.merchantConfiguration.card.cardholderName.required) {
-    return true;
-  }
-
-  return this.cardholderNameInput.value.length > 0;
 };
 
 CardView.prototype._onBlurEvent = function (event) {
@@ -9258,12 +10662,15 @@ CardView.prototype._isCardTypeSupported = function (cardType) {
   return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
 
+function isNormalFieldElement(element) {
+  return element.id.indexOf('braintree__card-view-input') !== -1;
+}
+
 function isCardViewElement() {
   var activeId = document.activeElement && document.activeElement.id;
   var isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
-  var isNormalFieldElement = activeId.indexOf('braintree__card-view-input') !== -1;
 
-  return isHostedFieldsElement || isNormalFieldElement;
+  return isHostedFieldsElement || isNormalFieldElement(document.activeElement);
 }
 
 function camelCaseToKebabCase(string) {
@@ -9284,7 +10691,7 @@ function normalizeStyles(styles) {
 
 module.exports = CardView;
 
-},{"../../constants":77,"../../lib/assign":83,"../../lib/classlist":85,"../../lib/dropin-error":87,"../../lib/promise":93,"../../lib/transition-helper":95,"../base-view":121,"braintree-web/hosted-fields":35}],128:[function(require,module,exports){
+},{"../../constants":86,"../../lib/assign":92,"../../lib/classlist":94,"../../lib/dropin-error":96,"../../lib/promise":102,"../../lib/transition-helper":105,"../base-view":131,"braintree-web/hosted-fields":38}],139:[function(require,module,exports){
 'use strict';
 
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
@@ -9294,10 +10701,11 @@ var result = {};
 result[paymentOptionIDs.card] = require('./card-view');
 result[paymentOptionIDs.paypal] = require('./paypal-view');
 result[paymentOptionIDs.paypalCredit] = require('./paypal-credit-view');
+result[paymentOptionIDs.applePay] = require('./apple-pay-view');
 
 module.exports = result;
 
-},{"../../constants":77,"./card-view":127,"./paypal-credit-view":129,"./paypal-view":130}],129:[function(require,module,exports){
+},{"../../constants":86,"./apple-pay-view":136,"./card-view":138,"./paypal-credit-view":140,"./paypal-view":141}],140:[function(require,module,exports){
 'use strict';
 
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
@@ -9315,7 +10723,7 @@ PayPalCreditView.ID = PayPalCreditView.prototype.ID = paymentOptionIDs.paypalCre
 
 module.exports = PayPalCreditView;
 
-},{"../../constants":77,"./base-paypal-view":126}],130:[function(require,module,exports){
+},{"../../constants":86,"./base-paypal-view":137}],141:[function(require,module,exports){
 'use strict';
 
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
@@ -9331,5 +10739,5 @@ PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
 
 module.exports = PayPalView;
 
-},{"../../constants":77,"./base-paypal-view":126}]},{},[80])(80)
+},{"../../constants":86,"./base-paypal-view":137}]},{},[89])(89)
 });

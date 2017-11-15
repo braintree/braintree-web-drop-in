@@ -268,6 +268,44 @@
     width: 100%; }
 
 /* =========================================================================
+   Apple Pay buttons
+   ========================================================================= */
+@supports (-webkit-appearance: -apple-pay-button) {
+  .apple-pay-button {
+    display: inline-block;
+    -webkit-appearance: -apple-pay-button; }
+  .apple-pay-button-black {
+    -apple-pay-button-style: black; }
+  .apple-pay-button-white {
+    -apple-pay-button-style: white; }
+  .apple-pay-button-white-outline {
+    -apple-pay-button-style: white-outline; } }
+
+@supports not (-webkit-appearance: -apple-pay-button) {
+  .apple-pay-button {
+    display: inline-block;
+    background-size: 100% 60%;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    border-radius: 5px;
+    padding: 0px;
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+    min-width: 200px;
+    min-height: 32px;
+    max-height: 64px; }
+  .apple-pay-button-black {
+    background-image: -webkit-named-image(apple-pay-logo-white);
+    background-color: black; }
+  .apple-pay-button-white {
+    background-image: -webkit-named-image(apple-pay-logo-black);
+    background-color: white; }
+  .apple-pay-button-white-with-line {
+    background-image: -webkit-named-image(apple-pay-logo-black);
+    background-color: white;
+    border: .5px solid black; } }
+
+/* =========================================================================
    Sheets
    ========================================================================= */
 .braintree-sheet {
@@ -412,6 +450,10 @@
   .braintree-sheet__content--button .braintree-sheet__button--paypal {
     margin: 0 auto; }
     .braintree-sheet__content--button .braintree-sheet__button--paypal iframe {
+      display: inline-block !important; }
+  .braintree-sheet__content--button .braintree-sheet__button--apple-pay {
+    margin: 0 auto; }
+    .braintree-sheet__content--button .braintree-sheet__button--apple-pay iframe {
       display: inline-block !important; }
 
 .braintree-form__field-group--has-error .braintree-form__icon-container {
@@ -682,7 +724,8 @@
 .braintree-show-methods .braintree-methods,
 .braintree-show-options .braintree-options,
 .braintree-show-paypal .braintree-paypal,
-.braintree-show-paypalCredit .braintree-paypalCredit {
+.braintree-show-paypalCredit .braintree-paypalCredit,
+.braintree-show-applePay .braintree-applePay {
   display: block;
   height: auto;
   overflow: visible;
@@ -735,7 +778,8 @@
 
 .braintree-show-card [data-braintree-id='other-ways-to-pay'],
 .braintree-show-methods [data-braintree-id='other-ways-to-pay'],
-.braintree-show-paypal [data-braintree-id='other-ways-to-pay'] {
+.braintree-show-paypal [data-braintree-id='other-ways-to-pay'],
+.braintree-show-applePay [data-braintree-id='other-ways-to-pay'] {
   display: block; }
 
 .braintree-loaded [data-braintree-id='methods'],
@@ -811,3 +855,93 @@
   margin-right: 0;
   right: 0;
   position: absolute; }
+
+/* =========================================================================
+   3D Secure
+   ========================================================================= */
+.braintree-three-d-secure {
+  position: fixed;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 999999; }
+  .braintree-three-d-secure .braintree-three-d-secure__backdrop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    background: rgba(0, 0, 0, 0.3);
+    -webkit-transition: all 3s;
+    transition: all 3s; }
+    .braintree-three-d-secure .braintree-three-d-secure__backdrop.braintree-three-d-secure__frame_visible {
+      opacity: 1; }
+  .braintree-three-d-secure .braintree-three-d-secure__modal {
+    position: relative;
+    top: 50%;
+    -webkit-transform: scale(0.8) translateY(-50%);
+            transform: scale(0.8) translateY(-50%);
+    background: white;
+    width: 400px;
+    max-width: 100%;
+    border-radius: 3px;
+    margin: auto;
+    height: 450px;
+    width: 400px;
+    max-width: 100%;
+    padding: 0;
+    text-align: center;
+    overflow: hidden;
+    opacity: 0;
+    -webkit-transition: all .5s;
+    transition: all .5s; }
+    .braintree-three-d-secure .braintree-three-d-secure__modal.braintree-three-d-secure__frame_visible {
+      -webkit-transform: scale(1) translateY(-50%);
+              transform: scale(1) translateY(-50%);
+      opacity: 1; }
+    .braintree-three-d-secure .braintree-three-d-secure__modal .braintree-three-d-secure__modal-body {
+      position: relative;
+      background: white;
+      z-index: 99999;
+      opacity: 0;
+      -webkit-transition: opacity .5s;
+      transition: opacity .5s; }
+      .braintree-three-d-secure .braintree-three-d-secure__modal .braintree-three-d-secure__modal-body.braintree-three-d-secure__frame-active {
+        opacity: 1; }
+    .braintree-three-d-secure .braintree-three-d-secure__modal .braintree-three-d-secure__modal-header {
+      color: black;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+          -ms-flex-align: center;
+              align-items: center;
+      -webkit-box-pack: justify;
+      -webkit-justify-content: space-between;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+      line-height: 1;
+      margin: 0;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: normal;
+      opacity: 0.8;
+      background: whitesmoke;
+      border-radius: 3px 3px 0 0; }
+    .braintree-three-d-secure .braintree-three-d-secure__modal iframe {
+      display: block;
+      margin: auto; }
+    .braintree-three-d-secure .braintree-three-d-secure__modal .braintree-three-d-secure__modal-close {
+      cursor: pointer; }
+    .braintree-three-d-secure .braintree-three-d-secure__modal .braintree-loader__container {
+      height: 72px;
+      width: 72px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -webkit-transform: translateX(-50%) translateY(-50%);
+              transform: translateX(-50%) translateY(-50%); }
