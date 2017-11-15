@@ -38,7 +38,7 @@ module.exports = {
   "expirationDatePlaceholder": "ММ/ГГ",
   "postalCodeLabel": "Индекс",
   "payWithCard": "Оплатить картой",
-  "endingIn": "Последние две цифры номера карты: ••{{LastTwoCardDigits}}",
+  "endingIn": "Последние две цифры номера карты: ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
   "Card": "Карта",
   "PayPal": "PayPal",
