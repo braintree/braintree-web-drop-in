@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      Home - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li  class="active" >
+        <a href="index.html">
+          
+          
+            <svg fill="#0095dd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      Braintree Drop-in Reference
+    </h3>
+
+    <h3>Classes</h3><ul><li id="Dropin-nav"><a href="Dropin.html">Dropin</a><ul class='methods'><li data-type="method" id="Dropin-clearSelectedPaymentMethod-nav"><a href="Dropin.html#clearSelectedPaymentMethod">clearSelectedPaymentMethod</a></li><li data-type="method" id="Dropin-isPaymentMethodRequestable-nav"><a href="Dropin.html#isPaymentMethodRequestable">isPaymentMethodRequestable</a></li><li data-type="method" id="Dropin-on-nav"><a href="Dropin.html#on">on</a></li><li data-type="method" id="Dropin-requestPaymentMethod-nav"><a href="Dropin.html#requestPaymentMethod">requestPaymentMethod</a></li><li data-type="method" id="Dropin-teardown-nav"><a href="Dropin.html#teardown">teardown</a></li><li data-type="method" id="Dropin-updateConfiguration-nav"><a href="Dropin.html#updateConfiguration">updateConfiguration</a></li></ul></li></ul><h3>Modules</h3><ul><li id="braintree-web-drop-in-nav"><a href="module-braintree-web-drop-in.html">braintree-web-drop-in</a><ul class='methods'><li data-type="method" id="braintree-web-drop-in-create-nav"><a href="module-braintree-web-drop-in.html#.create">create</a></li></ul></li></ul>
+  </nav>
+
+  <div id="main">
+    
+
+    
+      
+
+
+
+    
+
+      
+
+
+  <section class="readme">
+    <article>
+      <h1>Braintree Web Drop-in Reference <span>v1.9.1</span></h1><p><span class="rule"></span></p>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#setup">Setup</a></li>
+<li><a href="#usage">Usage</a><ul>
+<li><a href="#accepting-cards">Accepting cards</a></li>
+<li><a href="#accepting-paypal">Accepting PayPal</a></li>
+<li><a href="#localization">Localization</a></li>
+<li><a href="#events">Events</a></li>
+<li><a href="#styling">Styling</a></li>
+</ul>
+</li>
+<li><a href="#browser-support">Browser support</a></li>
+<li><a href="#additional-resources">Additional resources</a></li>
+</ul>
+<p><span class="rule"></span></p>
+<p><a id="overview"></a></p>
+<h2>Overview</h2><p>Drop-in is a pre-made payments UI for desktop and mobile browsers to be used with cards, PayPal, and PayPal Credit. It can be used as a one-time guest checkout or to offer saved payment methods with a client token created using a <a href="https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id">customer ID</a>.</p>
+<p>Test out our <a href="/braintree-web-drop-in">demo app</a> with one of our <a href="https://developers.braintreepayments.com/reference/general/testing/#no-credit-card-errors">test card numbers</a> or a <a href="https://developer.paypal.com/docs/classic/lifecycle/sb_create-accounts/">sandbox PayPal account</a>.</p>
+<p>If you have any feedback or questions, create a <a href="https://github.com/braintree/braintree-web-drop-in/issues">GitHub issue</a> or <a href="https://developers.braintreepayments.com/forms/contact">contact Braintree support</a>.</p>
+<p><a id="setup"></a></p>
+<h2>Setup</h2><p>The Drop-in source is available from our CDN, that you can include in your project with a script tag:</p>
+<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://js.braintreegateway.com/web/dropin/1.9.1/js/dropin.min.js&quot;>&lt;/script>
+
+&lt;script>
+braintree.dropin.create({ /* options */ }, callback);
+&lt;script></code></pre><p>You can also get Drop-in from <a href="https://www.npmjs.com/">npm</a>.</p>
+<pre class="prettyprint source lang-sh"><code>npm install --save braintree-web-drop-in</code></pre><pre class="prettyprint source lang-javascript"><code>var dropin = require('braintree-web-drop-in');
+
+dropin.create({ /* options */ }, callback);</code></pre><p><a id="usage"></a></p>
+<h2>Usage</h2><p>Drop-in provides a payment method object containing the <a href="https://developers.braintreepayments.com/start/overview#payment-method-nonce">payment method nonce</a> to send to your server. To get this object, use the <code>requestPaymentMethod</code> function.</p>
+<p>If you are using a <a href="module-braintree-web-drop-in.html">script tag integration</a>, a hidden <code>payment_method_nonce</code> input will be added to the form with the nonce value. The following instructions specify usage of a JavaScript integration.</p>
+<p><a id="accepting-cards"></a></p>
+<h3>Accepting cards</h3><p>By default, Drop-in is configured to accepted cards and does not require any additional parameters in the <a href="module-braintree-web-drop-in.html#.create"><code>create</code></a> call. If you are only accepting cards, Drop-in will appear as a card form. If you are accepting multiple payment options, Card will appear as an option in the list. CVV and Postal Code inputs are rendered conditionally based on <a href="https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules">AVS and CVV settings</a>.</p>
+<p>For credit cards, calling <a href="Dropin.html#requestPaymentMethod"><code>requestPaymentMethod</code></a> will attempt to validate the card form and will call the supplied callback with a payload, including the payment method nonce, if successful. If not successful, an error will be shown in the UI and the callback will be called with an error. Errors include invalid card details as well as card types not enabled by your merchant account.</p>
+<p>Use <a href="Dropin.html#on">events</a> to know when the card form could be considered valid. This does not necessarily mean the card form is complete, but it means it is considered valid by our client side validation.</p>
+<p><a id="accepting-paypal"></a></p>
+<h3>Accepting PayPal</h3><p>For PayPal and PayPal Credit, users will click the PayPal button and continue through the PayPal authentication flow. After successful completion, the PayPal account will be visible in the UI and that payment method can be requested. Use <a href="Dropin.html#on">events</a> to know when the authentication flow has been completed and the payment method can be requested.</p>
+<p>More details about PayPal and PayPal Credit can be found in the Braintree <a href="https://developers.braintreepayments.com/guides/paypal/overview/javascript/v3">developer docs</a>.</p>
+<p><a id="localization"></a></p>
+<h3>Localization</h3><p>To translate Drop-in into different languages, pass a <a href="module-braintree-web-drop-in.html#.create">supported locale code</a> in your <code>create</code> call:</p>
+<pre class="prettyprint source lang-js"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  selector: '#dropin-container',
+  locale: 'de_DE'
+}, callback);</code></pre><p><a id="events"></a></p>
+<h3>Events</h3><p>Use events to know whether or not a payment method is currently available from Drop-in. This can be used to dynamically enable and disable a submit button or automatically submit a nonce to your server after the PayPal flow has successfully completed.</p>
+<p>See <a href="Dropin.html#on"><code>on</code></a> for more details and an example of event usage.</p>
+<p><a id="styling"></a></p>
+<h3>Styling</h3><p>The stylesheet for Drop-in will load automatically when Drop-in is initialized.</p>
+<p>If you are using a custom build of Drop-in or would like to use an alternative stylesheet, you can provide a <code>link</code> tag on your page with the id <code>braintree-dropin-stylesheet</code>. This will prevent the external stylesheet from loading.</p>
+<p>If you are using npm to manage your assets and would prefer to use a local version of the CSS, you can use the dropin.css file found in <code>node_modules/braintree-web-drop-in/dropin.css</code> and put it on your page in a <code>link</code> tag with the id <code>braintree-dropin-stylesheet</code>.</p>
+<p><a id="browser-support"></a></p>
+<h2>Browser support</h2><p>Drop-in and the Braintree JS SDK have the same <a href="http://braintree.github.io/braintree-web/current/#browser-support">browser support</a>.</p>
+<p><a id="additional-resources"></a></p>
+<h2>Additional resources</h2><li><a href="https://developers.braintreepayments.com/guides/drop-in/javascript/v3">Braintree Drop-in Payment UI guide</a></li>
+<li><a href="https://github.com/braintree/braintree-web-drop-in"><code>braintree-web-drop-in</code> GitHub repo</a></li>
+    </article>
+  </section>
+
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+  
+</body>
+</html>

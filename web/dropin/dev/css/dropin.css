@@ -495,7 +495,9 @@
     .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field {
       position: relative; }
       .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field label {
-        cursor: text; }
+        cursor: text;
+        display: block;
+        margin: 0; }
       .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field .braintree-form__icon-container {
         margin-top: -14px;
         position: absolute;
