@@ -22,7 +22,7 @@ function configuration() {
       creditCards: {
         supportedCardTypes: ['American Express', 'Discover', 'JCB', 'MasterCard', 'Visa']
       },
-      applePay: {}
+      applePayWeb: {}
     },
     analyticsMetadata: {
       sdkVersion: braintreeVersion,
