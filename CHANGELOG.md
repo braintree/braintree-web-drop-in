@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-UNRELEASED
-----------
+1.9.1
+-----
 - Normalize label styles
  - Fixes styling applied by frameworks like Bootstrap
  Fix logic for Apple Pay being enabled (#324)
