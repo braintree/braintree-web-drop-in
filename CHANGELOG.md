@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+UNRELEASED
+----------
+- Normalize label styles
+ - Fixes styling applied by frameworks like Bootstrap
+
 1.9.0
 -----
 - Add 3D Secure support (#208)

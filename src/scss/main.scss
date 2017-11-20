@@ -565,6 +565,8 @@ $loader-scale-duration: 300ms;
 
       label {
         cursor: text;
+        display: block;
+        margin: 0;
       }
 
       .braintree-form__icon-container {
