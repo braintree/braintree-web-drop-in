@@ -214,7 +214,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
   } else if (paymentOption === 'paypalCredit') {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
   } else if (paymentOption === 'applePay') {
-    applePayEnabled = gatewayConfiguration.applePay && Boolean(options.merchantConfiguration.applePay);
+    applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
     applePayBrowserSupported = global.ApplePaySession && global.ApplePaySession.canMakePayments();
 
     if (!applePayEnabled || !applePayBrowserSupported) { return false; }
