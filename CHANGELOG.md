@@ -6,6 +6,7 @@ UNRELEASED
 - Normalize label styles
  - Fixes styling applied by frameworks like Bootstrap
  Fix logic for Apple Pay being enabled (#324)
+- Update checkout.js to v4.0.166
 
 1.9.0
 -----
