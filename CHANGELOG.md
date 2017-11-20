@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+==========
+
+Fix logic for Apple Pay being enabled (#324)
+
 1.9.0
 -----
 - Add 3D Secure support (#208)
