@@ -46,7 +46,7 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@SUBTITLE/g, this.strings.PayPal);
       break;
     case paymentMethodTypes.applePay:
-      lastTwo = this.paymentMethod.details.paymentInstrumentName.slice(-2);
+      lastTwo = this.paymentMethod.details.dpanLastTwo || this.paymentMethod.details.lastTwo;
       endingInText = this.strings.endingIn.replace('{{lastTwoCardDigits}}', lastTwo);
       html = html.replace(/@ICON/g, 'logoApplePay')
         .replace(/@CLASSNAME/g, '')

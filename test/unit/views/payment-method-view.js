@@ -84,13 +84,58 @@ describe('PaymentMethodView', function () {
       expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).to.be.false;
     });
 
-    it('sets the inner HTML correctly when the paymentMethod is a card from Apple Pay', function () {
+    it('sets the inner HTML correctly when the paymentMethod is a new card from Apple Pay', function () {
       var iconElement, iconContainer, labelElement;
       var paymentMethod = {
         type: 'ApplePayCard',
         details: {
           cardType: 'Visa',
+          dpanLastTwo: '92',
           paymentInstrumentName: 'Visa 0492'
+        }
+      };
+
+      this.context.paymentMethod = paymentMethod;
+
+      PaymentMethodView.prototype._initialize.call(this.context);
+
+      iconElement = this.context.element.querySelector('.braintree-method__logo use');
+      iconContainer = this.context.element.querySelector('.braintree-method__logo svg');
+      labelElement = this.context.element.querySelector('.braintree-method__label');
+
+      expect(iconElement.getAttribute('xlink:href')).to.equal('#logoApplePay');
+      expect(labelElement.textContent).to.contain('Ending in ••92');
+      expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('Visa');
+      expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).to.be.false;
+    });
+
+    it('sets the label correctly when the paymentMethod is a vaulted card from Apple Pay', function () {
+      var labelElement;
+      var paymentMethod = {
+        type: 'ApplePayCard',
+        details: {
+          cardType: 'Apple Pay - Visa',
+          lastTwo: '92'
+        }
+      };
+
+      this.context.paymentMethod = paymentMethod;
+
+      PaymentMethodView.prototype._initialize.call(this.context);
+
+      labelElement = this.context.element.querySelector('.braintree-method__label');
+
+      expect(labelElement.textContent).to.contain('Ending in ••92');
+    });
+
+    it('sets the inner HTML correctly when the paymentMethod is a saved card from Apple Pay', function () {
+      var iconElement, iconContainer, labelElement;
+      var paymentMethod = {
+        type: 'ApplePayCard',
+        details: {
+          cardType: 'Visa',
+          lastFour: '0492',
+          lastTwo: '92'
         }
       };
 
