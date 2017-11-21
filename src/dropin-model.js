@@ -215,11 +215,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
   } else if (paymentOption === 'applePay') {
     applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
-    try {
-      applePayBrowserSupported = global.ApplePaySession && global.ApplePaySession.canMakePayments();
-    } catch (e) {
-      applePayBrowserSupported = false;
-    }
+    applePayBrowserSupported = global.ApplePaySession && global.location.protocol === 'https:' && global.ApplePaySession.canMakePayments();
 
     if (!applePayEnabled || !applePayBrowserSupported) { return false; }
     return true;
