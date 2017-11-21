@@ -51,7 +51,7 @@ PaymentMethodView.prototype._initialize = function () {
       html = html.replace(/@ICON/g, 'logoApplePay')
         .replace(/@CLASSNAME/g, '')
         .replace(/@TITLE/g, endingInText)
-        .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
+        .replace(/@SUBTITLE/g, this.strings['Apple Pay']);
       break;
     default:
       break;
