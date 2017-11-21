@@ -3,6 +3,7 @@
 var analytics = require('../../src/lib/analytics');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
+var isHTTPS = require('../../src/lib/is-https');
 var fake = require('../helpers/fake');
 
 describe('DropinModel', function () {
@@ -22,6 +23,10 @@ describe('DropinModel', function () {
       paymentMethods: []
     };
     this.sandbox.stub(analytics, 'sendEvent');
+
+    this.sandbox.stub(isHTTPS, 'isHTTPS').returns(true);
+    global.ApplePaySession = this.sandbox.stub().returns({});
+    global.ApplePaySession.canMakePayments = this.sandbox.stub().returns(true);
   });
 
   describe('Constructor', function () {
@@ -122,8 +127,6 @@ describe('DropinModel', function () {
       it('supports cards, PayPal, PayPal Credit, and Apple Pay and defaults to showing them in correct paymentOptionPriority', function () {
         var model;
 
-        global.ApplePaySession = this.sandbox.stub().returns({});
-        global.ApplePaySession.canMakePayments = function () { return true; };
         this.configuration.gatewayConfiguration.paypalEnabled = true;
         this.modelOptions.merchantConfiguration.paypal = true;
         this.modelOptions.merchantConfiguration.paypalCredit = true;
@@ -182,8 +185,7 @@ describe('DropinModel', function () {
       it('does not support Apple Pay when the page is not loaded over https', function () {
         var model;
 
-        global.ApplePaySession = this.sandbox.stub().returns({});
-        global.ApplePaySession.canMakePayments = function () { if (global.location.protocol !== 'https:') { throw new Error('Apple Pay not supported without https'); } return true; };
+        isHTTPS.isHTTPS.returns(false);
         this.modelOptions.merchantConfiguration.applePay = true;
 
         model = new DropinModel(this.modelOptions);
@@ -194,8 +196,7 @@ describe('DropinModel', function () {
       it('does not support Apple Pay when the device does not support Apple Pay', function () {
         var model;
 
-        global.ApplePaySession = this.sandbox.stub().returns({});
-        global.ApplePaySession.canMakePayments = function () { return false; };
+        global.ApplePaySession.canMakePayments.returns(false);
         this.modelOptions.merchantConfiguration.applePay = true;
 
         model = new DropinModel(this.modelOptions);
