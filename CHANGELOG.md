@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Improve logic for enabling Apple Pay to only trigger with HTTPS (#328 thanks @maxsz)
+
 1.9.1
 -----
 - Normalize label styles
