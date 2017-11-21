@@ -179,6 +179,18 @@ describe('DropinModel', function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card']);
       });
 
+      it('does not support Apple Pay when the page is not loaded over https', function () {
+        var model;
+
+        global.ApplePaySession = this.sandbox.stub().returns({});
+        global.ApplePaySession.canMakePayments = function () { if (global.location.protocol !== 'https:') { throw new Error('Apple Pay not supported without https'); } return true; };
+        this.modelOptions.merchantConfiguration.applePay = true;
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
+      });
+
       it('does not support Apple Pay when the device does not support Apple Pay', function () {
         var model;
 
