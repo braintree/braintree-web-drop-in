@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+1.9.2
+-----
+- Fix error for saved ApplePay payment method
+
 1.9.1
 -----
 - Normalize label styles
