@@ -6,6 +6,7 @@ var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
+var isHTTPS = require('./lib/is-https');
 
 function DropinModel(options) {
   this.componentID = options.componentID;
@@ -215,10 +216,9 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
   } else if (paymentOption === 'applePay') {
     applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
-    applePayBrowserSupported = global.ApplePaySession && global.ApplePaySession.canMakePayments();
+    applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
 
-    if (!applePayEnabled || !applePayBrowserSupported) { return false; }
-    return true;
+    return applePayEnabled && applePayBrowserSupported;
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }

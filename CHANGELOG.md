@@ -1,9 +1,10 @@
 CHANGELOG
 =========
 
-1.9.2
------
-- Fix error for saved ApplePay payment method
+unreleased
+----------
+- Improve logic for enabling Apple Pay to only trigger with HTTPS (#328 thanks @maxsz)
+- Fix error for saved ApplePay payment method (#332 thanks @julka)
 
 1.9.1
 -----
