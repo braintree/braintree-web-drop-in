@@ -89,8 +89,9 @@ describe('PaymentMethodView', function () {
       var paymentMethod = {
         type: 'ApplePayCard',
         details: {
-          cardType: 'Visa',
-          paymentInstrumentName: 'Visa 0492'
+          cardType: 'Apple Pay - Visa',
+          lastFour: '0492',
+          lastTwo: '92'
         }
       };
 
