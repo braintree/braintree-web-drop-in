@@ -84,14 +84,13 @@ describe('PaymentMethodView', function () {
       expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).to.be.false;
     });
 
-    it('sets the inner HTML correctly when the paymentMethod is a card from Apple Pay', function () {
+    it('sets the inner HTML correctly when the paymentMethod is a new card from Apple Pay', function () {
       var iconElement, iconContainer, labelElement;
       var paymentMethod = {
         type: 'ApplePayCard',
         details: {
           cardType: 'Visa',
-          lastFour: '0492',
-          lastTwo: '92'
+          paymentInstrumentName: 'Visa 0492'
         }
       };
 
