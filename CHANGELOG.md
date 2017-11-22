@@ -1,9 +1,10 @@
 CHANGELOG
 =========
 
-1.9.2
------
-- Displays "Apple Pay" instead of "undefined" for saved Apple Pay payment methods
+unreleased
+----------
+- Improve logic for enabling Apple Pay to only trigger with HTTPS (#328 thanks @maxsz)
+- Displays "Apple Pay" instead of "undefined" for saved Apple Pay payment methods (#330 thanks @julka)
 
 1.9.1
 -----
