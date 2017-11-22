@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+1.9.2
+-----
+- Displays "Apple Pay" instead of "undefined" for saved Apple Pay payment methods
+
 1.9.1
 -----
 - Normalize label styles
