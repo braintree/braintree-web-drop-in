@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+==========
+- Update checkout.js to evergreen link
+
 1.9.2
 -----
 - Improve logic for enabling Apple Pay to only trigger with HTTPS (#328 thanks @maxsz)
