@@ -55,8 +55,12 @@ ThreeDSecure.prototype.verify = function (nonce) {
       return payload;
     })
   ]).then(function (result) {
+    self._cleanupModal();
+
     return result[1];
   }).catch(function (err) {
+    self._cleanupModal();
+
     if (err.type === 'THREE_D_SECURE_CANCELLED') {
       return Promise.resolve(err.payload);
     }
@@ -77,11 +81,12 @@ ThreeDSecure.prototype.cancel = function () {
         liabilityShiftPossible: payload.liabilityShiftPossible
       }
     });
-    self._cleanupModal();
-  }).catch(function () {
+  }).catch(function (err) {
     // only reason this would reject
     // is if there is no verification in progress
     // so we just swallow the error
+  }).then(function () {
+    self._cleanupModal();
   });
 };
 
@@ -99,9 +104,13 @@ ThreeDSecure.prototype._cleanupModal = function () {
   classlist.remove(this._modal.querySelector('.braintree-three-d-secure__modal'), 'braintree-three-d-secure__frame_visible');
   classlist.remove(this._modal.querySelector('.braintree-three-d-secure__backdrop'), 'braintree-three-d-secure__frame_visible');
 
-  iframe.parentNode.removeChild(iframe);
+  if (iframe && iframe.parentNode) {
+    iframe.parentNode.removeChild(iframe);
+  }
   setTimeout(function () {
-    this._modal.parentNode.removeChild(this._modal);
+    if (this._modal.parentNode) {
+      this._modal.parentNode.removeChild(this._modal);
+    }
   }.bind(this), 300);
 };
 
