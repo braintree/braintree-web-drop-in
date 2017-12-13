@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ==========
 - Update checkout.js to evergreen link
+- Fix issue where 3DS modal would not close when no bank frame is added (#335)
 
 1.9.2
 -----
