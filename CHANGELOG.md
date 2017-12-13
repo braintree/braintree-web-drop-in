@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ==========
 - Update checkout.js to evergreen link
+- Fix documentation for `preselectVaultedPaymentMethod`
 
 1.9.2
 -----
