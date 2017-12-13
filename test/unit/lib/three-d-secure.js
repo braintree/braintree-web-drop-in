@@ -224,7 +224,7 @@ describe('ThreeDSecure', function () {
 
       return this.tds.cancel().then(function () {
         expect(this.tds._rejectThreeDSecure).to.not.be.called;
-        expect(this.tds._cleanupModal).to.not.be.called;
+        expect(this.tds._cleanupModal).to.be.calledOnce;
       }.bind(this));
     });
   });

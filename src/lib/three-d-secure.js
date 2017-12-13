@@ -81,7 +81,7 @@ ThreeDSecure.prototype.cancel = function () {
         liabilityShiftPossible: payload.liabilityShiftPossible
       }
     });
-  }).catch(function (err) {
+  }).catch(function () {
     // only reason this would reject
     // is if there is no verification in progress
     // so we just swallow the error
