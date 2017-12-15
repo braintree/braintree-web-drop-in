@@ -5,6 +5,7 @@ unreleased
 ==========
 - Update checkout.js to evergreen link
 - Fix documentation for `preselectVaultedPaymentMethod`
+- Added a code of conduct
 
 1.9.2
 -----
