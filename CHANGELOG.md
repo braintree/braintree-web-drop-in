@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ==========
 - Update checkout.js to evergreen link
+- Update braintree-web to v3.27.0
 - Fix documentation for `preselectVaultedPaymentMethod`
 
 1.9.2
