@@ -4,6 +4,8 @@ CHANGELOG
 unreleased
 ==========
 - Update checkout.js to evergreen link
+- Update braintree-web to v3.27.0
+- Fix documentation for `preselectVaultedPaymentMethod`
 - Fix issue where 3DS modal would not close when no bank frame is added (#335)
 - Fix issue where liability shift information was only passed back if `liabilityShiftPossible` was true
 
