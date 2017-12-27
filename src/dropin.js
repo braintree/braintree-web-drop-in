@@ -767,7 +767,7 @@ function formatPaymentMethodPayload(paymentMethod) {
     formattedPaymentMethod.description = paymentMethod.description;
   }
 
-  if (paymentMethod.liabilityShiftPossible) {
+  if (typeof paymentMethod.liabilityShiftPossible === 'boolean') {
     formattedPaymentMethod.liabilityShifted = paymentMethod.liabilityShifted;
     formattedPaymentMethod.liabilityShiftPossible = paymentMethod.liabilityShiftPossible;
   }
