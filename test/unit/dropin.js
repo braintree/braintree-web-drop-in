@@ -9,11 +9,22 @@ var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
 var threeDSecure = require('braintree-web/three-d-secure');
 var ThreeDSecure = require('../../src/lib/three-d-secure');
+var Promise = require('../../src/lib/promise');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
 var braintreeWebVersion = require('../../package.json').dependencies['braintree-web'];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
+
+function delay(amount) {
+  amount = amount || 10;
+
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      resolve();
+    }, amount);
+  });
+}
 
 describe('Dropin', function () {
   beforeEach(function () {
@@ -180,11 +191,11 @@ describe('Dropin', function () {
       instance._initialize(function () {
         var paypalOption = this.container.querySelector('.braintree-option__paypal');
 
-        setTimeout(function () {
+        delay().then(function () {
           expect(paypalOption.className).to.include('braintree-disabled');
           expect(paypalOption.innerHTML).to.include(constants.errors.PAYPAL_NON_LINKED_SANDBOX);
           done();
-        }, 100);
+        });
       }.bind(this));
     });
 
@@ -352,7 +363,7 @@ describe('Dropin', function () {
           gatewayConfiguration: fake.configuration().gatewayConfiguration
         };
       };
-      this.client.request.yields(null, paymentMethodsPayload);
+      this.client.request.resolves(paymentMethodsPayload);
 
       this.sandbox.stub(analytics, 'sendEvent');
 
@@ -366,7 +377,7 @@ describe('Dropin', function () {
           data: {
             defaultFirst: 1
           }
-        }), this.sandbox.match.func);
+        }));
 
         done();
       }.bind(this));
@@ -394,7 +405,7 @@ describe('Dropin', function () {
           gatewayConfiguration: fake.configuration().gatewayConfiguration
         };
       };
-      this.client.request.yields(new Error('This failed'));
+      this.client.request.rejects(new Error('This failed'));
 
       this.sandbox.stub(analytics, 'sendEvent');
 
@@ -425,7 +436,7 @@ describe('Dropin', function () {
           gatewayConfiguration: fake.configuration().gatewayConfiguration
         };
       };
-      this.client.request.yields(null, paymentMethodsPayload);
+      this.client.request.resolves(paymentMethodsPayload);
 
       this.sandbox.stub(analytics, 'sendEvent');
 
@@ -454,7 +465,7 @@ describe('Dropin', function () {
           gatewayConfiguration: fake.configuration().gatewayConfiguration
         };
       };
-      this.client.request.yields(null, paymentMethodsPayload);
+      this.client.request.resolves(paymentMethodsPayload);
 
       this.sandbox.stub(analytics, 'sendEvent');
 
@@ -569,7 +580,9 @@ describe('Dropin', function () {
         done();
       });
 
-      instance._model._emit('asyncDependenciesReady');
+      delay().then(function () {
+        instance._model._emit('asyncDependenciesReady');
+      });
     });
 
     it('sends web.dropin.appeared event when async dependencies are ready', function (done) {
@@ -585,8 +598,10 @@ describe('Dropin', function () {
         done();
       });
 
-      instance._model.dependencySuccessCount = 2;
-      instance._model._emit('asyncDependenciesReady');
+      delay().then(function () {
+        instance._model.dependencySuccessCount = 2;
+        instance._model._emit('asyncDependenciesReady');
+      });
     });
 
     it('loads strings by default', function (done) {

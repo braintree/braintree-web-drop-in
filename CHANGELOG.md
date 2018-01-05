@@ -8,6 +8,7 @@ unreleased
 - Fix documentation for `preselectVaultedPaymentMethod`
 - Fix issue where 3DS modal would not close when no bank frame is added (#335)
 - Fix issue where liability shift information was only passed back if `liabilityShiftPossible` was true
+- Fix issue where vaulted Apple Pay methods were being displayed when they could not be used for transactions
 
 1.9.2
 -----
