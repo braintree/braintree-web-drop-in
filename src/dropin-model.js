@@ -8,6 +8,10 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var isHTTPS = require('./lib/is-https');
 
+var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
+  'ApplePayCard'
+];
+
 function DropinModel(options) {
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
@@ -168,7 +172,7 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
   var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
     var paymentMethodType = paymentMethodTypes[key];
 
-    if (paymentMethodType) {
+    if (canShowVaultedPaymentMethodType(paymentMethodType)) {
       array.push(paymentMethodType);
     }
 
@@ -221,6 +225,10 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return applePayEnabled && applePayBrowserSupported;
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
+}
+
+function canShowVaultedPaymentMethodType(paymentMethodType) {
+  return paymentMethodType && VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN.indexOf(paymentMethodType) === -1;
 }
 
 module.exports = DropinModel;

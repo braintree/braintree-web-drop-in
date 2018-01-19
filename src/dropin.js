@@ -270,7 +270,7 @@ Dropin.prototype._initialize = function (callback) {
   this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(this._dropinWrapper);
 
-  this._getVaultedPaymentMethods(function (paymentMethods) {
+  this._getVaultedPaymentMethods().then(function (paymentMethods) {
     var paypalRequired;
 
     try {
@@ -654,31 +654,27 @@ Dropin.prototype._injectStylesheet = function () {
   }
 };
 
-Dropin.prototype._getVaultedPaymentMethods = function (callback) {
+Dropin.prototype._getVaultedPaymentMethods = function () {
   if (isGuestCheckout(this._client)) {
-    callback([]);
-  } else {
-    this._client.request({
-      endpoint: 'payment_methods',
-      method: 'get',
-      data: {
-        defaultFirst: 1
-      }
-    }, function (err, paymentMethodsPayload) {
-      var paymentMethods;
-
-      if (err) {
-        paymentMethods = [];
-      } else {
-        paymentMethods = paymentMethodsPayload.paymentMethods.map(function (paymentMethod) {
-          paymentMethod.vaulted = true;
-          return paymentMethod;
-        }).map(formatPaymentMethodPayload);
-      }
-
-      callback(paymentMethods);
-    });
+    return Promise.resolve([]);
   }
+
+  return this._client.request({
+    endpoint: 'payment_methods',
+    method: 'get',
+    data: {
+      defaultFirst: 1
+    }
+  }).then(function (paymentMethodsPayload) {
+    var paymentMethods = paymentMethodsPayload.paymentMethods.map(function (paymentMethod) {
+      paymentMethod.vaulted = true;
+      return paymentMethod;
+    }).map(formatPaymentMethodPayload);
+
+    return Promise.resolve(paymentMethods);
+  }).catch(function () {
+    return Promise.resolve([]);
+  });
 };
 
 /**
