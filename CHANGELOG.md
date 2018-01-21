@@ -10,6 +10,7 @@ unreleased
 - Fix issue where 3DS modal would not close when no bank frame is added (#335)
 - Fix issue where liability shift information was only passed back if `liabilityShiftPossible` was true
 - Fix issue where vaulted Apple Pay methods were being displayed when they could not be used for transactions
+- Fix issue where script tag integration could not be instantiated when script tag was not a direct child of the form (#344)
 
 1.9.2
 -----
