@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-==========
+1.9.3
+-----
 - Update checkout.js to evergreen link
 - Update braintree-web to v3.28.0
 - Update promise-polyfill to v7.0.0
