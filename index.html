@@ -169,6 +169,12 @@
       config = Object.assign({}, defaultCreateObject, config);
     }
 
+    if (config.threeDSecure === true) {
+      config.threeDSecure = {
+        amount: '10.00'
+      }
+    }
+
     return config;
   }
 
