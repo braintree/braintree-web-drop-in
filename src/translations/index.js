@@ -14,6 +14,7 @@ module.exports = {
   it: require('./it_IT'),
   ja: require('./ja_JP'),
   ko: require('./ko_KR'),
+  kz: require('./kz_KZ'),
   nl: require('./nl_NL'),
   no: require('./no_NO'),
   pl: require('./pl_PL'),
