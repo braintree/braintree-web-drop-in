@@ -88,7 +88,7 @@ function createFromScriptTag(createFunction, scriptTag) {
     event.preventDefault();
   });
 
-  form.insertBefore(container, scriptTag);
+  scriptTag.parentNode.insertBefore(container, scriptTag);
 
   createOptions = {
     authorization: authorization,

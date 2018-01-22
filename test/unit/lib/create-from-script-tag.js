@@ -6,6 +6,9 @@ var analytics = require('../../../src/lib/analytics');
 
 describe('createFromScriptTag', function () {
   beforeEach(function () {
+    var container = document.createElement('div');
+
+    container.id = 'script-container';
     this.sandbox.stub(analytics, 'sendEvent');
     this.instance = {
       _client: 'fake-client',
@@ -15,13 +18,15 @@ describe('createFromScriptTag', function () {
     this.scriptTag.dataset.braintreeDropinAuthorization = 'an-authorization';
     this.createFunction = this.sandbox.stub().resolves(this.instance);
     this.fakeForm = {
-      insertBefore: this.sandbox.stub(),
       addEventListener: this.sandbox.stub(),
       appendChild: this.sandbox.stub(),
       querySelector: this.sandbox.stub(),
       submit: this.sandbox.stub()
     };
     this.sandbox.stub(findParentForm, 'findParentForm').returns(this.fakeForm);
+
+    container.appendChild(this.scriptTag);
+    this.sandbox.stub(this.scriptTag.parentNode, 'insertBefore');
   });
 
   it('returns early if no script tag is provided', function () {
@@ -67,8 +72,8 @@ describe('createFromScriptTag', function () {
     createFromScriptTag(this.createFunction, this.scriptTag);
 
     setTimeout(function () {
-      expect(this.fakeForm.insertBefore).to.be.calledOnce;
-      expect(this.fakeForm.insertBefore).to.be.calledWith(fakeContainer, this.scriptTag);
+      expect(this.scriptTag.parentNode.insertBefore).to.be.calledOnce;
+      expect(this.scriptTag.parentNode.insertBefore).to.be.calledWith(fakeContainer, this.scriptTag);
       done();
     }.bind(this));
   });
