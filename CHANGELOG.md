@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Update braintree-web to v3.28.1
+
 1.9.3
 -----
 - Update checkout.js to evergreen link
