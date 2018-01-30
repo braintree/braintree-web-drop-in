@@ -3,7 +3,7 @@ CHANGELOG
 
 unreleased
 ----------
-- Update braintree-web to v3.28.1
+- Update braintree-web to v3.29.0
 - Update jsdoc-template to v3.2.0
 
 1.9.3
