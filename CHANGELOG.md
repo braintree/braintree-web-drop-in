@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Update braintree-web to v3.28.1
+- Update jsdoc-template to v3.2.0
 
 1.9.3
 -----
