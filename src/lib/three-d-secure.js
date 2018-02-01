@@ -33,15 +33,10 @@ ThreeDSecure.prototype.verify = function (nonce) {
       amount: this._config.amount,
       showLoader: false,
       addFrame: function (err, iframe) {
-        var count = 0;
         var modalBody = self._modal.querySelector('.braintree-three-d-secure__modal-body');
 
         iframe.onload = function () {
-          count++;
-
-          if (count === 2) {
-            classlist.add(modalBody, 'braintree-three-d-secure__frame-active');
-          }
+          classlist.add(modalBody, 'braintree-three-d-secure__frame-active');
         };
 
         modalBody.appendChild(iframe);
