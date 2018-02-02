@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.9.4
+-----
 - Update braintree-web to v3.30.0
 - Update promise-polyfill to v7.0.2
 - Update jsdoc-template to v3.2.0
