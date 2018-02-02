@@ -3,7 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
-- Update braintree-web to v3.29.0
+- Update braintree-web to v3.30.0
+- Update promise-polyfill to v7.0.2
 - Update jsdoc-template to v3.2.0
 - Fix issue where 3DS modal would not appear (#352)
 
