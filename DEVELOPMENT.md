@@ -52,6 +52,233 @@ When developing, you can include a locally built CSS file on the page that will 
 <link rel="stylesheet" type="text/css" href="/path/to/local/dropin.css" id="braintree-dropin-stylesheet">
 ```
 
+## Adding new Payment Methods
+
+Adding a new payment method requires changing a number of files. For each of these sections, you will see an example of adding a fake payment method, `FooPay` to the file.
+
+### Constants
+
+There are a few constants that should be updated in [src/constants.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/constants.js).
+
+  * `paymentOptionIDs` - In this case, we'll add `fooPay: 'fooPay'` to the list
+  * `paymentMethodTypes` - For this, we need to map `fooPay` to whatever the Braintree Gateway lists the tokenization type as. So, if the Gateway lists it as `FooPayAccount`, we should add `fooPay: 'FooPayAccount'`
+  * `analyticsKinds` - The same is true here, if the Gateway uses `FooPayAccount`, then we add `fooPay: 'FooPayAccount'`
+
+### Translations
+
+Unless you need to translate error messages or other UI elements (see below), simply add your payment method name to [src/translations/en_US.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js). Braintree developers will have to work with PayPal to provide the translation files for them.
+
+```javascript
+'FooPay': 'FooPay'
+```
+
+### Drop-in Model
+
+The [src/dropin-model.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/dropin-model.js) must be updated so that Drop-in can check if the payment option is available for the customer to use.
+
+Primarilly, the `isPaymentOptionEnabled` function must be adjusted to account for the new payment method. It checks if the merchant is enabled for the particular payment method in the Braintree gateway, if the merchant has configured Drop-in to enable the payemnt method, and any other requirements the payment method may have to be used in Drop-in. For instance, if FooPay can only be used if the `FooPay` global exists on the window, we would probably add code that looks like this to `isPaymentOptionEnabled`.
+
+```javascript
+} else if (paymentOption === paymentOptionIDs.fooPay) {
+  return gatewayConfiguration.fooPay && Boolean(options.merchantConfiguration.fooPay) && global.FooPay;
+}
+```
+
+The payment option id will also need to be added to the `DEFAULT_PAYMENT_OPTION_PRIORITY` to determine the default order for displaying the payment method options.
+
+```javascript
+var DEFAULT_PAYMENT_OPTION_PRIORITY = [
+  // etc
+  paymentOptionIDs.applePay,
+  paymentOptionIDs.fooPay
+];
+```
+
+If a customer's vaulted payment methods cannot be used on the client (IE, ApplePay, GooglePay, Venmo), you must also add the payment method to the `VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN` array. For instance:
+
+```javascript
+var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
+  paymentMethodTypes.ApplePayCard,
+  paymentMethodTypes.FooPayAccount
+];
+```
+
+### Main View
+
+The [src/html/main.html](https://github.com/braintree/braintree-web-drop-in/blob/master/src/html/main.html) must be updated with a div for the payment method's view. This is the UI where the payment method is initiated by the customer (putting in card details, pushing the PayPal button, etc). In our example, FooPay requires a button for the customer to press to initate the flow.
+
+```html
+<div data-braintree-id="foo-pay" class="braintree-foo-pay braintree-sheet">
+  <div data-braintree-id="foo-pay-sheet-header" class="braintree-sheet__header">
+    <div class="braintree-sheet__header-label">
+      <div class="braintree-sheet__logo--header">
+        <svg height="24" width="40">
+        <use xlink:href="#logoFooPay"></use>
+        </svg>
+      </div>
+      <div class="braintree-sheet__label">{{FooPay}}</div>
+    </div>
+  </div>
+  <div class="braintree-sheet__content braintree-sheet__content--button">
+    <div data-braintree-id="foo-pay-button" class="braintree-sheet__button--foo-pay foo-pay-button"></div>
+  </div>
+</div>
+```
+
+We will also need to update [src/scss/main.scss](https://github.com/braintree/braintree-web-drop-in/blob/master/src/scss/main.scss) to make the payment sheet view visible when selected. Add `.braintree-show-{payment-method-name} .braintree-{payment-method-name}` to the list of classes in the "Dropin Visibility States" section.
+
+```css
+// etc
+.braintree-show-applePay .braintree-applePay,
+.braintree-show-fooPay .braintree-fooPay {
+  display: block;
+  height: auto;
+  overflow: visible;
+  visibility: visible;
+}
+```
+
+You will also need to add your payment method to the `.braintree-show-{payment-method-name} [data-braintree-id='other-ways-to-pay']` section.
+
+```css
+// etc
+.braintree-show-paypal [data-braintree-id='other-ways-to-pay'],
+.braintree-show-applePay [data-braintree-id='other-ways-to-pay'],
+.braintree-show-fooPay [data-braintree-id='other-ways-to-pay'] {
+  display: block;
+}
+```
+
+### Payment Option|Method Views
+
+You will need to add your payment method to the switch statement in [src/views/payment-method-view.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/views/payment-method-view.js).
+
+If your payment method is vaultable on the client, set the `@TITLE` to be an indentifier for the account. Such as a username, email, last 4 numbers of the account, etc. The `@SUBTITLE` will be the payment method name.
+
+```javascript
+case paymentMethodTypes.fooPay:
+  html = html.replace(/@ICON/g, 'logoFooPay')
+    .replace(/@CLASSNAME/g, '')
+    .replace(/@TITLE/g, this.paymentMethod.details.accountName)
+    .replace(/@SUBTITLE/g, this.strings.FooPay);
+  break;
+```
+
+If the payment method is not vaultable, there is no need to identify it, since you can only ever have one of that payment method type available. In that case, leave the `@SUBTITLE` as an empty string and set the `@TITLE` to the payment method name.
+
+```javascript
+case paymentMethodTypes.fooPay:
+  html = html.replace(/@ICON/g, 'logoFooPay')
+    .replace(/@CLASSNAME/g, '')
+    .replace(/@TITLE/g, this.strings.FooPay)
+    .replace(/@SUBTITLE/g, '');
+  break;
+```
+
+Similiarly, the switch statement in [src/views/payment-options-view.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/views/payment-options-view.js) will also need to be updated.
+
+```javascript
+case paymentOptionIDs.fooPay:
+  paymentSource = this.strings.FooPay;
+  html = html.replace(/@ICON/g, 'logoFooPay');
+  break;
+```
+
+### Sheet View
+
+Add a new file at src/views/payment-sheet-views/{payment-method-name}-view.js, this will be the JS portion of the view. This view will take care of setting up the Braintree component.
+
+If you need to collect form details, such as with a credit card or us bank account, include a `requestPaymentMethod` function.
+
+```javascript
+var BaseView = require('../base-view');
+var btFooPay = require('braintree-web/foo-pay');
+var classlist = require('../../lib/classlist');
+var DropinError = require('../../lib/dropin-error');
+var paymentOptionIDs = require('../../constants').paymentOptionIDs;
+
+function FooPayView() {
+  BaseView.apply(this, arguments);
+}
+
+FooPayView.prototype = Object.create(BaseView.prototype);
+FooPayView.prototype.constructor = FooPayView;
+FooPayView.ID = FooPayView.prototype.ID = paymentOptionIDs.fooPay;
+
+FooPayView.prototype.initialize = function () {
+  var self = this;
+
+  self.model.asyncDependencyStarting();
+
+  return btFooPay.create({
+    client: this.client
+  }).then(function (fooPayInstance) {
+    self.fooPayInstance = fooPayInstance;
+    self.model.asyncDependencyReady();
+  }).catch(function (err) {
+    self.model.asyncDependencyFailed({
+      view: self.ID,
+      error: new DropinError(err)
+    });
+  });
+};
+
+FooPayView.prototype.requestPaymentMethod = function () {
+  return this.fooPayInstance.tokenize();
+};
+```
+
+If your payment method is self contained, like PayPal or ApplePay, simply set up whatever your payment method needs to function, such as a button click to initialize the flow and call `this.model.addPaymentMethod` with the payload and `this.model.reportError` with the error.
+
+```javascript
+btFooPay.create({
+  client: this.client
+}).then(function (fooPayInstance) {
+  var btn = self.getElementById('foo-pay-button');
+
+  btn.addEventListener('click', function (event) {
+    event.preventDefault();
+
+    fooPayInstance.tokenize().then(function (payload) {
+      self.model.addPaymentMethod(payload);
+    }).catch(function (tokenizeErr) {
+      self.model.reportError(tokenizeErr);
+    });
+  });
+
+  self.model.asyncDependencyReady();
+}).catch(function (err) {
+  self.model.asyncDependencyFailed({
+    view: self.ID,
+    error: new DropinError(err)
+  });
+});
+```
+
+If you don't need to handle specific errors, you can let Drop-in populate a generic error. If you do need to handle a specific error, you can either pass the key of a specific string to use in the translation file. 
+
+Alternatively, you can pass the `BraintreeError` into `this.model.reportError` and create a translation string for the error code, where the property name is the camel cased version of the code with `Error` appended to it. (See `hostedFieldsTokenization` errors in [src/translations/en_US.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js) for examples).
+
+```javascript
+fooPayTokenizationFailedError: 'Something went wrong when connecting to FooPay.'
+```
+
+Add the payment method view to the index file at [src/views/payment-sheet-views/index.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/views/payment-sheet-views/index.js).
+
+```javascript
+result[paymentOptionIDs.fooPay] = require('./foo-pay-view');
+```
+
+Finally, we just need to add a map for the Gateway Payment Method Type to the translation string for that type in [src/views/payment-methods-view.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/views/payment-methods-view.js).
+
+```javascript
+var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
+  // etc
+  ApplePayCard: 'Apple Pay',
+  FooPayAccount: 'FooPay'
+};
+```
+
 ## Unit tests
 
 Run unit tests and lint:
