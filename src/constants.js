@@ -5,18 +5,21 @@ module.exports = {
     card: 'card',
     paypal: 'paypal',
     paypalCredit: 'paypalCredit',
-    applePay: 'applePay'
+    applePay: 'applePay',
+    venmo: 'venmo'
   },
   paymentMethodTypes: {
     card: 'CreditCard',
     paypal: 'PayPalAccount',
     paypalCredit: 'PayPalAccount',
-    applePay: 'ApplePayCard'
+    applePay: 'ApplePayCard',
+    venmo: 'VenmoAccount'
   },
   analyticsKinds: {
     CreditCard: 'card',
     PayPalAccount: 'paypal',
-    ApplePayCard: 'applepay'
+    ApplePayCard: 'applepay',
+    VenmoAccount: 'venmo'
   },
   paymentMethodCardTypes: {
     Visa: 'visa',

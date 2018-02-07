@@ -46,6 +46,7 @@ module.exports = {
   PayPal: 'PayPal',
   'PayPal Credit': 'PayPal Credit',
   'Apple Pay': 'Apple Pay',
+  'Venmo': 'Venmo',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',
