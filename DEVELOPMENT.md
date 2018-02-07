@@ -54,7 +54,7 @@ When developing, you can include a locally built CSS file on the page that will 
 
 ## Adding new Payment Methods
 
-Adding a new payment method requires changing a number of files. For each of these sections, you will see an example of adding a fake payment method, `FooPay` to the file.
+Adding a new payment method requires changing a number of files. For each of these sections, you will see an example of adding a fake payment method, `FooPay` to the file. *Note:* This guide may fall out of date as things change in the repo. If you find a mistake, please open a PR to fix it.
 
 ### Constants
 
@@ -76,7 +76,7 @@ Unless you need to translate error messages or other UI elements (see below), si
 
 The [src/dropin-model.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/dropin-model.js) must be updated so that Drop-in can check if the payment option is available for the customer to use.
 
-Primarilly, the `isPaymentOptionEnabled` function must be adjusted to account for the new payment method. It checks if the merchant is enabled for the particular payment method in the Braintree gateway, if the merchant has configured Drop-in to enable the payemnt method, and any other requirements the payment method may have to be used in Drop-in. For instance, if FooPay can only be used if the `FooPay` global exists on the window, we would probably add code that looks like this to `isPaymentOptionEnabled`.
+Primarily, the `isPaymentOptionEnabled` function must be adjusted to account for the new payment method. It checks if the merchant is enabled for the particular payment method in the Braintree gateway, if the merchant has configured Drop-in to enable the payemnt method, and any other requirements the payment method may have to be used in Drop-in. For instance, if FooPay can only be used if the `FooPay` global exists on the window, we would probably add code that looks like this to `isPaymentOptionEnabled`.
 
 ```javascript
 } else if (paymentOption === paymentOptionIDs.fooPay) {
@@ -88,13 +88,13 @@ The payment option id will also need to be added to the `DEFAULT_PAYMENT_OPTION_
 
 ```javascript
 var DEFAULT_PAYMENT_OPTION_PRIORITY = [
-  // etc
+  // ...
   paymentOptionIDs.applePay,
   paymentOptionIDs.fooPay
 ];
 ```
 
-If a customer's vaulted payment methods cannot be used on the client (IE, ApplePay, GooglePay, Venmo), you must also add the payment method to the `VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN` array. For instance:
+If a customer's vaulted payment methods cannot be used on the client (i.e., ApplePay, GooglePay, Venmo), you must also add the payment method to the `VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN` array. For instance:
 
 ```javascript
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
@@ -105,7 +105,7 @@ var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
 
 ### Main View
 
-The [src/html/main.html](https://github.com/braintree/braintree-web-drop-in/blob/master/src/html/main.html) must be updated with a div for the payment method's view. This is the UI where the payment method is initiated by the customer (putting in card details, pushing the PayPal button, etc). In our example, FooPay requires a button for the customer to press to initate the flow.
+The [src/html/main.html](https://github.com/braintree/braintree-web-drop-in/blob/master/src/html/main.html) must be updated with a div for the payment method's view. This is the UI where the payment method is initiated by the customer (filling the card form, pushing the PayPal button, etc). In our example, FooPay requires a button for the customer to press to initate the flow.
 
 ```html
 <div data-braintree-id="foo-pay" class="braintree-foo-pay braintree-sheet">
@@ -128,7 +128,7 @@ The [src/html/main.html](https://github.com/braintree/braintree-web-drop-in/blob
 We will also need to update [src/scss/main.scss](https://github.com/braintree/braintree-web-drop-in/blob/master/src/scss/main.scss) to make the payment sheet view visible when selected. Add `.braintree-show-{payment-method-name} .braintree-{payment-method-name}` to the list of classes in the "Dropin Visibility States" section.
 
 ```css
-// etc
+// ...
 .braintree-show-applePay .braintree-applePay,
 .braintree-show-fooPay .braintree-fooPay {
   display: block;
@@ -141,7 +141,7 @@ We will also need to update [src/scss/main.scss](https://github.com/braintree/br
 You will also need to add your payment method to the `.braintree-show-{payment-method-name} [data-braintree-id='other-ways-to-pay']` section.
 
 ```css
-// etc
+// ...
 .braintree-show-paypal [data-braintree-id='other-ways-to-pay'],
 .braintree-show-applePay [data-braintree-id='other-ways-to-pay'],
 .braintree-show-fooPay [data-braintree-id='other-ways-to-pay'] {
@@ -255,9 +255,11 @@ btFooPay.create({
 });
 ```
 
-If you don't need to handle specific errors, you can let Drop-in populate a generic error. If you do need to handle a specific error, you can either pass the key of a specific string to use in the translation file. 
+### Error Handling
 
-Alternatively, you can pass the `BraintreeError` into `this.model.reportError` and create a translation string for the error code, where the property name is the camel cased version of the code with `Error` appended to it. (See `hostedFieldsTokenization` errors in [src/translations/en_US.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js) for examples).
+If you don't need to handle specific errors, you can let Drop-in populate a generic error. If you do need to handle a specific error, you can pass the key of a specific string to use in the translation file. 
+
+Alternatively, you can pass the `BraintreeError` from braintree-web into `this.model.reportError` and create a translation string for the error code, where the property name is the camel cased version of the code with `Error` appended to it. (See `hostedFieldsTokenization` errors in [src/translations/en_US.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js) for examples).
 
 ```javascript
 fooPayTokenizationFailedError: 'Something went wrong when connecting to FooPay.'
@@ -273,7 +275,7 @@ Finally, we just need to add a map for the Gateway Payment Method Type to the tr
 
 ```javascript
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
-  // etc
+  // ...
   ApplePayCard: 'Apple Pay',
   FooPayAccount: 'FooPay'
 };
