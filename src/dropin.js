@@ -297,6 +297,9 @@ Dropin.prototype._initialize = function (callback) {
       if (this._model.dependencySuccessCount >= 1) {
         analytics.sendEvent(this._client, 'appeared');
         this._disableErroredPaymentMethods();
+
+        this._handleAppSwitch();
+
         callback(null, dropinInstance);
       } else {
         this._model.cancelInitialization(new DropinError('All payment options failed to load.'));
@@ -533,6 +536,15 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
       errorMessageDiv.textContent = error.message;
     }
   }.bind(this));
+};
+
+Dropin.prototype._handleAppSwitch = function () {
+  if (this._model.appSwitchError) {
+    this._mainView.setPrimaryView(this._model.appSwitchError.id);
+    this._model.reportError(this._model.appSwitchError.error);
+  } else if (this._model.appSwitchPayload) {
+    this._model.addPaymentMethod(this._model.appSwitchPayload);
+  }
 };
 
 /**

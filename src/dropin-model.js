@@ -139,6 +139,17 @@ DropinModel.prototype.getActivePaymentView = function () {
   return this._activePaymentView;
 };
 
+DropinModel.prototype.reportAppSwitchPayload = function (payload) {
+  this.appSwitchPayload = payload;
+};
+
+DropinModel.prototype.reportAppSwitchError = function (sheetId, error) {
+  this.appSwitchError = {
+    id: sheetId,
+    error: error
+  };
+};
+
 DropinModel.prototype.asyncDependencyStarting = function () {
   this.dependenciesInitializing++;
 };

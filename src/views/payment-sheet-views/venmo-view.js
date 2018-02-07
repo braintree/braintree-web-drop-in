@@ -3,6 +3,7 @@
 var BaseView = require('../base-view');
 var btVenmo = require('braintree-web/venmo');
 var DropinError = require('../../lib/dropin-error');
+var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
 function VenmoView() {
@@ -19,23 +20,32 @@ VenmoView.prototype.initialize = function () {
   self.model.asyncDependencyStarting();
 
   return btVenmo.create({
-    client: this.client,
-    allowNewBrowserTab: false
+    client: this.client
   }).then(function (venmoInstance) {
-    var button = self.getElementById('venmo-button');
-
     self.venmoInstance = venmoInstance;
+
+    if (!self.venmoInstance.hasTokenizationResult()) {
+      return Promise.resolve();
+    }
+
+    return self.venmoInstance.tokenize().then(function (payload) {
+      self.model.reportAppSwitchPayload(payload);
+    }).catch(function (err) {
+      if (self._isIgnorableError(err)) {
+        return;
+      }
+      self.model.reportAppSwitchError(paymentOptionIDs.venmo, err);
+    });
+  }).then(function () {
+    var button = self.getElementById('venmo-button');
 
     button.addEventListener('click', function (event) {
       event.preventDefault();
 
-      return venmoInstance.tokenize().then(function (payload) {
+      return self.venmoInstance.tokenize().then(function (payload) {
         self.model.addPaymentMethod(payload);
       }).catch(function (tokenizeErr) {
-        if (tokenizeErr.code === 'VENMO_APP_CANCELED') {
-          // customer cancels the flow in the app
-          // we don't emit an error because the customer
-          // initiated that action
+        if (self._isIgnorableError(tokenizeErr)) {
           return;
         }
 
@@ -50,6 +60,13 @@ VenmoView.prototype.initialize = function () {
       error: new DropinError(err)
     });
   });
+};
+
+VenmoView.prototype._isIgnorableError = function (error) {
+  // customer cancels the flow in the app
+  // we don't emit an error because the customer
+  // initiated that action
+  return error.code === 'VENMO_APP_CANCELED';
 };
 
 module.exports = VenmoView;

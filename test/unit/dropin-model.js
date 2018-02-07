@@ -433,6 +433,29 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('reportAppSwitchPayload', function () {
+    it('saves app switch payload to instance', function () {
+      var model = new DropinModel(this.modelOptions);
+      var payload = {nonce: 'fake-nonce'};
+
+      model.reportAppSwitchPayload(payload);
+
+      expect(model.appSwitchPayload).to.equal(payload);
+    });
+  });
+
+  describe('reportAppSwitchError', function () {
+    it('saves app switch error and view id', function () {
+      var model = new DropinModel(this.modelOptions);
+      var error = new Error('Error');
+
+      model.reportAppSwitchError('view-id', error);
+
+      expect(model.appSwitchError.id).to.equal('view-id');
+      expect(model.appSwitchError.error).to.equal(error);
+    });
+  });
+
   describe('asyncDependencyStarting', function () {
     beforeEach(function () {
       this.context = {

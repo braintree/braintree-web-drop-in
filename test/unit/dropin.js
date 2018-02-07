@@ -585,6 +585,54 @@ describe('Dropin', function () {
       });
     });
 
+    it('returns to app switch view that reported an error', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var error = new Error('error');
+
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+      this.sandbox.stub(DropinModel.prototype, 'reportError');
+
+      instance._initialize(function () {
+        expect(instance._model.reportError).to.be.calledOnce;
+        expect(instance._model.reportError).to.be.calledWith(error);
+        expect(instance._mainView.setPrimaryView).to.be.calledOnce;
+        expect(instance._mainView.setPrimaryView).to.be.calledWith('view-id');
+        done();
+      });
+
+      delay().then(function () {
+        instance._model.dependencySuccessCount = 1;
+        instance._model.appSwitchError = {
+          id: 'view-id',
+          error: error
+        };
+        this.sandbox.stub(instance._mainView, 'setPrimaryView');
+        instance._model._emit('asyncDependenciesReady');
+      }.bind(this));
+    });
+
+    it('adds payment method if app switch payload exists', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var payload = {nonce: 'fake-nonce'};
+
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+      this.sandbox.stub(DropinModel.prototype, 'addPaymentMethod');
+
+      instance._initialize(function () {
+        expect(instance._model.addPaymentMethod).to.be.calledOnce;
+        expect(instance._model.addPaymentMethod).to.be.calledWith(payload);
+        done();
+      });
+
+      delay().then(function () {
+        instance._model.dependencySuccessCount = 1;
+        instance._model.appSwitchPayload = payload;
+        instance._model._emit('asyncDependenciesReady');
+      });
+    });
+
     it('sends web.dropin.appeared event when async dependencies are ready', function (done) {
       var instance = new Dropin(this.dropinOptions);
 

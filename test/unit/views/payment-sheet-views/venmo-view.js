@@ -19,6 +19,8 @@ describe('VenmoView', function () {
     };
 
     this.model = new DropinModel(fake.modelOptions());
+    this.sandbox.stub(this.model, 'reportAppSwitchPayload');
+    this.sandbox.stub(this.model, 'reportAppSwitchError');
 
     this.div = document.createElement('div');
     this.div.innerHTML = mainHTML;
@@ -37,7 +39,8 @@ describe('VenmoView', function () {
       tokenize: this.sandbox.stub().resolves({
         type: 'VenmoAccount',
         nonce: 'fake-nonce'
-      })
+      }),
+      hasTokenizationResult: this.sandbox.stub().returns(false)
     };
     this.sandbox.stub(btVenmo, 'create').resolves(this.fakeVenmoInstance);
   });
@@ -76,10 +79,58 @@ describe('VenmoView', function () {
     it('creates an Venmo component', function () {
       return this.view.initialize().then(function () {
         expect(btVenmo.create).to.be.calledWith(this.sandbox.match({
-          client: this.view.client,
-          allowNewBrowserTab: false
+          client: this.view.client
         }));
         expect(this.view.venmoInstance).to.equal(this.fakeVenmoInstance);
+      }.bind(this));
+    });
+
+    it('checks if there is a tokenization result on the page already', function () {
+      return this.view.initialize().then(function () {
+        expect(this.fakeVenmoInstance.hasTokenizationResult).to.be.calledOnce;
+      }.bind(this));
+    });
+
+    it('reports app switch payload if page has a successful tokenization result', function () {
+      var payload = {type: 'VenmoAccount', nonce: 'fake-venmo-nonce'};
+
+      this.fakeVenmoInstance.hasTokenizationResult.returns(true);
+      this.fakeVenmoInstance.tokenize.resolves(payload);
+
+      return this.view.initialize().then(function () {
+        expect(this.fakeVenmoInstance.tokenize).to.be.calledOnce;
+        expect(this.model.reportAppSwitchPayload).to.be.calledOnce;
+        expect(this.model.reportAppSwitchPayload).to.be.calledWith(payload);
+        expect(this.model.reportAppSwitchError).to.not.be.called;
+      }.bind(this));
+    });
+
+    it('reports app switch error if page has an unsuccessful tokenization result', function () {
+      var error = new Error('failure');
+
+      this.fakeVenmoInstance.hasTokenizationResult.returns(true);
+      this.fakeVenmoInstance.tokenize.rejects(error);
+
+      return this.view.initialize().then(function () {
+        expect(this.fakeVenmoInstance.tokenize).to.be.calledOnce;
+        expect(this.model.reportAppSwitchError).to.be.calledOnce;
+        expect(this.model.reportAppSwitchError).to.be.calledWith('venmo', error);
+        expect(this.model.reportAppSwitchPayload).to.not.be.called;
+      }.bind(this));
+    });
+
+    it('does not report app switch error for VENMO_APP_CANCELLED error', function () {
+      var error = new Error('failure');
+
+      error.code = 'VENMO_APP_CANCELED';
+
+      this.fakeVenmoInstance.hasTokenizationResult.returns(true);
+      this.fakeVenmoInstance.tokenize.rejects(error);
+
+      return this.view.initialize().then(function () {
+        expect(this.fakeVenmoInstance.tokenize).to.be.calledOnce;
+        expect(this.model.reportAppSwitchError).to.not.be.called;
+        expect(this.model.reportAppSwitchPayload).to.not.be.called;
       }.bind(this));
     });
 
