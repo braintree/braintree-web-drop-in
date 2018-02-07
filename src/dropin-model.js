@@ -15,7 +15,8 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.card,
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
-  paymentOptionIDs.applePay
+  paymentOptionIDs.applePay,
+  paymentOptionIDs.venmo
 ];
 
 function DropinModel(options) {
@@ -216,7 +217,7 @@ function getSupportedPaymentOptions(options) {
 
 function isPaymentOptionEnabled(paymentOption, options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var applePayEnabled, applePayBrowserSupported;
+  var applePayEnabled, applePayBrowserSupported, venmoEnabled, venmoBrowserSupported;
 
   if (paymentOption === paymentOptionIDs.card) {
     return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
@@ -229,6 +230,11 @@ function isPaymentOptionEnabled(paymentOption, options) {
     applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
 
     return applePayEnabled && applePayBrowserSupported;
+  } else if (paymentOption === paymentOptionIDs.venmo) {
+    venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
+    venmoBrowserSupported = true; // TODO, switch to venmo.isBrowserSupported
+
+    return venmoEnabled && venmoBrowserSupported;
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }

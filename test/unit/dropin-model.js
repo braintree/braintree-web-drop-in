@@ -124,17 +124,18 @@ describe('DropinModel', function () {
         ]);
       });
 
-      it('supports cards, PayPal, PayPal Credit, and Apple Pay and defaults to showing them in correct paymentOptionPriority', function () {
+      it('supports cards, PayPal, PayPal Credit, Apple Pay, and Venmo and defaults to showing them in correct paymentOptionPriority', function () {
         var model;
 
         this.configuration.gatewayConfiguration.paypalEnabled = true;
         this.modelOptions.merchantConfiguration.paypal = true;
         this.modelOptions.merchantConfiguration.paypalCredit = true;
         this.modelOptions.merchantConfiguration.applePay = true;
+        this.modelOptions.merchantConfiguration.venmo = true;
 
         model = new DropinModel(this.modelOptions);
 
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'applePay']);
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'applePay', 'venmo']);
       });
 
       it('uses custom paymentOptionPriority of payment options', function () {
@@ -198,6 +199,16 @@ describe('DropinModel', function () {
 
         global.ApplePaySession.canMakePayments.returns(false);
         this.modelOptions.merchantConfiguration.applePay = true;
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
+      });
+
+      xit('does not support Venmo when the browser does not support Venmo', function () {
+        var model;
+
+        this.modelOptions.merchantConfiguration.venmo = true;
 
         model = new DropinModel(this.modelOptions);
 
