@@ -9,7 +9,7 @@ var isGuestCheckout = require('./lib/is-guest-checkout');
 var isHTTPS = require('./lib/is-https');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
-  paymentMethodTypes.ApplePayCard
+  paymentMethodTypes.applePay
 ];
 var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.card,

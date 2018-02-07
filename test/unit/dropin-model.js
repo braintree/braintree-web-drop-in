@@ -97,6 +97,25 @@ describe('DropinModel', function () {
           {type: 'CreditCard', details: {lastTwo: '11'}}
         ]);
       });
+
+      it('ignores payment vaulted payment methods that cannot be used client side', function () {
+        var model;
+
+        this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+        this.modelOptions.merchantConfiguration.applePay = true;
+        this.modelOptions.paymentMethods = [
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+          {type: 'ApplePayCard', details: {}}
+        ];
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model._paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+        ]);
+      });
     });
 
     describe('supported payment options', function () {
