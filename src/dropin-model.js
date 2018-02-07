@@ -9,7 +9,13 @@ var isGuestCheckout = require('./lib/is-guest-checkout');
 var isHTTPS = require('./lib/is-https');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
-  'ApplePayCard'
+  paymentMethodTypes.ApplePayCard
+];
+var DEFAULT_PAYMENT_OPTION_PRIORITY = [
+  paymentOptionIDs.card,
+  paymentOptionIDs.paypal,
+  paymentOptionIDs.paypalCredit,
+  paymentOptionIDs.applePay
 ];
 
 function DropinModel(options) {
@@ -186,7 +192,7 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
 
 function getSupportedPaymentOptions(options) {
   var result = [];
-  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit', 'applePay'];
+  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || DEFAULT_PAYMENT_OPTION_PRIORITY;
 
   if (!(paymentOptionPriority instanceof Array)) {
     throw new DropinError('paymentOptionPriority must be an array.');
@@ -212,13 +218,13 @@ function isPaymentOptionEnabled(paymentOption, options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
   var applePayEnabled, applePayBrowserSupported;
 
-  if (paymentOption === 'card') {
+  if (paymentOption === paymentOptionIDs.card) {
     return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
-  } else if (paymentOption === 'paypal') {
+  } else if (paymentOption === paymentOptionIDs.paypal) {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
-  } else if (paymentOption === 'paypalCredit') {
+  } else if (paymentOption === paymentOptionIDs.paypalCredit) {
     return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
-  } else if (paymentOption === 'applePay') {
+  } else if (paymentOption === paymentOptionIDs.applePay) {
     applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
     applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
 

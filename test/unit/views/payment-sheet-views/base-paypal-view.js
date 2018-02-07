@@ -472,19 +472,17 @@ describe('BasePayPalView', function () {
       }.bind(this));
     });
 
-    it('marks dependency as failed if error occurs before setup completes', function () {
+    it('marks dependency as failed if error occurs before setup completes', function (done) {
       var model = this.model;
 
       this.sandbox.stub(model, 'asyncDependencyFailed');
-      // we need a fake promise so that it neither resolves
-      // or rejects
       this.paypal.Button.render.returns({
-        then: this.sandbox.stub().returns({
-          'catch': this.sandbox.stub()
-        })
+        then: this.sandbox.stub()
       });
 
-      return this.view.initialize().then(function () {
+      this.view.initialize();
+
+      setTimeout(function () {
         var onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
         var err = new Error('Some error');
 
@@ -496,7 +494,8 @@ describe('BasePayPalView', function () {
           view: this.view.ID,
           error: err
         });
-      }.bind(this));
+        done();
+      }.bind(this), 10);
     });
 
     describe('with PayPal', function () {
@@ -602,7 +601,7 @@ describe('BasePayPalView', function () {
         }.bind(this));
       });
 
-      it('times out if the async dependency is never ready', function () {
+      it('times out if the async dependency is never ready', function (done) {
         var paypalError = new DropinError('There was an error connecting to PayPal.');
 
         this.sandbox.useFakeTimers();
@@ -610,69 +609,49 @@ describe('BasePayPalView', function () {
         this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
 
         this.paypal.Button.render.rejects();
-        this.view.initialize();
+
+        this.view.initialize().then(function () {
+          expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
+            view: this.view.ID,
+            error: paypalError
+          }));
+          done();
+        }.bind(this));
 
         this.sandbox.clock.tick(30001);
-
-        expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
-          view: this.view.ID,
-          error: paypalError
-        }));
       });
 
       it('does not timeout if async dependency sets up', function () {
         this.sandbox.useFakeTimers();
         this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
 
-        // promises can't resolve while using fake timers
-        // so we make a fake promise
-        PayPalCheckout.create.returns({
-          then: this.sandbox.stub().yields(this.paypalInstance).returns({
-            'catch': this.sandbox.stub()
-          })
-        });
-        this.paypal.Button.render.returns({
-          then: this.sandbox.stub().yields().returns({
-            'catch': this.sandbox.stub()
-          })
-        });
+        PayPalCheckout.create.resolves(this.paypalInstance);
+        this.paypal.Button.render.resolves();
 
-        this.view.initialize();
-        this.sandbox.clock.tick(10);
+        return this.view.initialize().then(function () {
+          this.sandbox.clock.tick(10);
 
-        this.sandbox.clock.tick(300001);
+          this.sandbox.clock.tick(300001);
 
-        expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.called;
+          expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.called;
+        }.bind(this));
       });
 
       it('does not timeout if async dependency failed early', function () {
-        var onErrorFunction, err;
-
         this.sandbox.useFakeTimers();
         this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
 
-        // promises can't resolve while using fake timers
-        // so we make a fake promise
-        PayPalCheckout.create.returns({
-          then: this.sandbox.stub().yields(this.paypalInstance).returns({
-            'catch': this.sandbox.stub()
-          })
-        });
+        PayPalCheckout.create.resolves(this.paypalInstance);
         this.paypal.Button.render.rejects();
 
-        this.view.initialize();
+        return this.view.initialize().then(function () {
+          this.sandbox.clock.tick(300500);
 
-        onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
-        err = new Error('Some error');
-
-        onErrorFunction(err);
-
-        this.sandbox.clock.tick(300500);
-
-        expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
-        expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.calledWithMatch({
-          err: new DropinError('There was an error connecting to PayPal.')
-        });
+          expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
+          expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.calledWithMatch({
+            err: new DropinError('There was an error connecting to PayPal.')
+          });
+        }.bind(this));
       });
     });
   });
