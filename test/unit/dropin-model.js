@@ -103,10 +103,12 @@ describe('DropinModel', function () {
 
         this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
         this.modelOptions.merchantConfiguration.applePay = true;
+        this.modelOptions.merchantConfiguration.venmo = true;
         this.modelOptions.paymentMethods = [
           {type: 'CreditCard', details: {lastTwo: '11'}},
           {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-          {type: 'ApplePayCard', details: {}}
+          {type: 'ApplePayCard', details: {}},
+          {type: 'VenmoAccount', details: {}}
         ];
 
         model = new DropinModel(this.modelOptions);
