@@ -255,16 +255,6 @@ btFooPay.create({
 });
 ```
 
-### Error Handling
-
-If you don't need to handle specific errors, you can let Drop-in populate a generic error. If you do need to handle a specific error, you can pass the key of a specific string to use in the translation file. 
-
-Alternatively, you can pass the `BraintreeError` from braintree-web into `this.model.reportError` and create a translation string for the error code, where the property name is the camel cased version of the code with `Error` appended to it. (See `hostedFieldsTokenization` errors in [src/translations/en_US.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js) for examples).
-
-```javascript
-fooPayTokenizationFailedError: 'Something went wrong when connecting to FooPay.'
-```
-
 Add the payment method view to the index file at [src/views/payment-sheet-views/index.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/views/payment-sheet-views/index.js).
 
 ```javascript
@@ -279,6 +269,17 @@ var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   ApplePayCard: 'Apple Pay',
   FooPayAccount: 'FooPay'
 };
+```
+
+
+### Error Handling
+
+If you don't need to handle specific errors, you can let Drop-in populate a generic error. If you do need to handle a specific error, you can pass the key of a specific string to use in the translation file. 
+
+Alternatively, you can pass the `BraintreeError` from braintree-web into `this.model.reportError` and create a translation string for the error code, where the property name is the camel cased version of the code with `Error` appended to it. (See `hostedFieldsTokenization` errors in [src/translations/en_US.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js) for examples).
+
+```javascript
+fooPayTokenizationFailedError: 'Something went wrong when connecting to FooPay.'
 ```
 
 ## Unit tests
