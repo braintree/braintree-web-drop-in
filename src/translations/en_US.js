@@ -27,6 +27,8 @@ module.exports = {
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
   applePayTokenizationError: 'A network error occurred while processing the Apple Pay payment. Please try again.',
   applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
+  venmoCancelledError: 'Something went wrong. Either you cancelled the app, or Venmo is not installed on your device.',
+  venmoAppFailedError: 'Venmo app could not be found on your device.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
   // Card form
   cardholderNameLabel: 'Cardholder Name',

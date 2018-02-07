@@ -18,7 +18,10 @@ VenmoView.prototype.initialize = function () {
 
   self.model.asyncDependencyStarting();
 
-  return btVenmo.create({client: this.client}).then(function (venmoInstance) {
+  return btVenmo.create({
+    client: this.client,
+    allowNewBrowserTab: false
+  }).then(function (venmoInstance) {
     var button = self.getElementById('venmo-button');
 
     self.venmoInstance = venmoInstance;
@@ -29,6 +32,13 @@ VenmoView.prototype.initialize = function () {
       return venmoInstance.tokenize().then(function (payload) {
         self.model.addPaymentMethod(payload);
       }).catch(function (tokenizeErr) {
+        if (tokenizeErr.code === 'VENMO_APP_CANCELED') {
+          // customer cancels the flow in the app
+          // we don't emit an error because the customer
+          // initiated that action
+          return;
+        }
+
         self.model.reportError(tokenizeErr);
       });
     });

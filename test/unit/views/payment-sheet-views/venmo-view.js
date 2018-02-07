@@ -76,7 +76,8 @@ describe('VenmoView', function () {
     it('creates an Venmo component', function () {
       return this.view.initialize().then(function () {
         expect(btVenmo.create).to.be.calledWith(this.sandbox.match({
-          client: this.view.client
+          client: this.view.client,
+          allowNewBrowserTab: false
         }));
         expect(this.view.venmoInstance).to.equal(this.fakeVenmoInstance);
       }.bind(this));
@@ -150,6 +151,18 @@ describe('VenmoView', function () {
         return this.clickHandler(this.fakeEvent).then(function () {
           expect(this.model.reportError).to.be.calledOnce;
           expect(this.model.reportError).to.be.calledWith(error);
+        }.bind(this));
+      });
+
+      it('ignores error if code is VENMO_APP_CANCELLED', function () {
+        var error = new Error('venmo failed');
+
+        error.code = 'VENMO_APP_CANCELED';
+
+        this.fakeVenmoInstance.tokenize.rejects(error);
+
+        return this.clickHandler(this.fakeEvent).then(function () {
+          expect(this.model.reportError).to.not.be.called;
         }.bind(this));
       });
     });
