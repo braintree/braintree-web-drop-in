@@ -1,5 +1,6 @@
 'use strict';
 
+var btVenmo = require('braintree-web/venmo');
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('./lib/event-emitter');
 var constants = require('./constants');
@@ -244,7 +245,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return applePayEnabled && applePayBrowserSupported;
   } else if (paymentOption === paymentOptionIDs.venmo) {
     venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
-    venmoBrowserSupported = true; // TODO, switch to venmo.isBrowserSupported
+    venmoBrowserSupported = btVenmo.isBrowserSupported();
 
     return venmoEnabled && venmoBrowserSupported;
   }

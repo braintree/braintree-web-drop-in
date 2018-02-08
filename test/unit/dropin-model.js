@@ -5,6 +5,7 @@ var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
 var isHTTPS = require('../../src/lib/is-https');
 var fake = require('../helpers/fake');
+var venmo = require('braintree-web/venmo');
 
 describe('DropinModel', function () {
   beforeEach(function () {
@@ -148,6 +149,7 @@ describe('DropinModel', function () {
       it('supports cards, PayPal, PayPal Credit, Apple Pay, and Venmo and defaults to showing them in correct paymentOptionPriority', function () {
         var model;
 
+        this.sandbox.stub(venmo, 'isBrowserSupported').returns(true);
         this.configuration.gatewayConfiguration.paypalEnabled = true;
         this.modelOptions.merchantConfiguration.paypal = true;
         this.modelOptions.merchantConfiguration.paypalCredit = true;
@@ -226,14 +228,21 @@ describe('DropinModel', function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card']);
       });
 
-      xit('does not support Venmo when the browser does not support Venmo', function () {
+      it('does not support Venmo when the browser does not support Venmo', function () {
         var model;
 
         this.modelOptions.merchantConfiguration.venmo = true;
+        this.sandbox.stub(venmo, 'isBrowserSupported').returns(false);
 
         model = new DropinModel(this.modelOptions);
 
         expect(model.supportedPaymentOptions).to.deep.equal(['card']);
+
+        venmo.isBrowserSupported.returns(true);
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'venmo']);
       });
     });
 
