@@ -54,8 +54,8 @@ PaymentMethodView.prototype._initialize = function () {
     case paymentMethodTypes.venmo:
       html = html.replace(/@ICON/g, 'logoVenmo')
         .replace(/@CLASSNAME/g, '')
-        .replace(/@TITLE/g, this.strings.Venmo)
-        .replace(/@SUBTITLE/g, '');
+        .replace(/@TITLE/g, this.paymentMethod.details.username)
+        .replace(/@SUBTITLE/g, this.strings.Venmo);
       break;
     default:
       break;

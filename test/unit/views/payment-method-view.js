@@ -113,7 +113,9 @@ describe('PaymentMethodView', function () {
       var iconElement, iconContainer, labelElement;
       var paymentMethod = {
         type: 'VenmoAccount',
-        details: {}
+        details: {
+          username: '@name'
+        }
       };
 
       this.context.paymentMethod = paymentMethod;
@@ -125,8 +127,8 @@ describe('PaymentMethodView', function () {
       labelElement = this.context.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).to.equal('#logoVenmo');
-      expect(labelElement.textContent).to.contain('Venmo');
-      expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('');
+      expect(labelElement.textContent).to.contain('@name');
+      expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('Venmo');
       expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).to.be.false;
     });
   });
