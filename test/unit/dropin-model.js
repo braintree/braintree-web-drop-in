@@ -244,6 +244,19 @@ describe('DropinModel', function () {
 
         expect(model.supportedPaymentOptions).to.deep.equal(['card', 'venmo']);
       });
+
+      it('passes merchant venmo configuratoin into isBrowserSupported', function () {
+        this.modelOptions.merchantConfiguration.venmo = {
+          allowNewBrowserTab: false
+        };
+        this.sandbox.stub(venmo, 'isBrowserSupported').returns(false);
+
+        new DropinModel(this.modelOptions); // eslint-disable-line no-new
+
+        expect(venmo.isBrowserSupported).to.be.calledWith({
+          allowNewBrowserTab: false
+        });
+      });
     });
 
     describe('isGuestCheckout', function () {

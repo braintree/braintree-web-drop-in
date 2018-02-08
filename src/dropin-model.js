@@ -245,7 +245,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
     return applePayEnabled && applePayBrowserSupported;
   } else if (paymentOption === paymentOptionIDs.venmo) {
     venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
-    venmoBrowserSupported = btVenmo.isBrowserSupported();
+    venmoBrowserSupported = btVenmo.isBrowserSupported(options.merchantConfiguration.venmo);
 
     return venmoEnabled && venmoBrowserSupported;
   }

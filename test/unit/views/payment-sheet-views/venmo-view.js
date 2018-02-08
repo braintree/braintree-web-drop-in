@@ -85,6 +85,17 @@ describe('VenmoView', function () {
       }.bind(this));
     });
 
+    it('passes in merchant configuration when creating venmo component', function () {
+      this.view.model.merchantConfiguration.venmo = {allowNewBrowserTab: false};
+
+      return this.view.initialize().then(function () {
+        expect(btVenmo.create).to.be.calledWith(this.sandbox.match({
+          client: this.view.client,
+          allowNewBrowserTab: false
+        }));
+      }.bind(this));
+    });
+
     it('checks if there is a tokenization result on the page already', function () {
       return this.view.initialize().then(function () {
         expect(this.fakeVenmoInstance.hasTokenizationResult).to.be.calledOnce;

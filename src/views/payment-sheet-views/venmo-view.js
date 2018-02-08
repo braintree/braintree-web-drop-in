@@ -1,5 +1,6 @@
 'use strict';
 
+var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btVenmo = require('braintree-web/venmo');
 var classlist = require('../../lib/classlist');
@@ -17,12 +18,11 @@ VenmoView.ID = VenmoView.prototype.ID = paymentOptionIDs.venmo;
 
 VenmoView.prototype.initialize = function () {
   var self = this;
+  var venmoConfiguration = assign({}, self.model.merchantConfiguration.venmo, {client: this.client});
 
   self.model.asyncDependencyStarting();
 
-  return btVenmo.create({
-    client: this.client
-  }).then(function (venmoInstance) {
+  return btVenmo.create(venmoConfiguration).then(function (venmoInstance) {
     self.venmoInstance = venmoInstance;
 
     if (!self.venmoInstance.hasTokenizationResult()) {
