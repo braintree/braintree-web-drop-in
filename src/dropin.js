@@ -70,6 +70,14 @@ var VERSION = process.env.npm_package_version;
  */
 
 /**
+ * @typedef {object} Dropin~venmoPayPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Venmo account.
+ * @property {string} details.username The venmo username.
+ * @property {string} type The payment method type, always `VenmoAccount` when the method requested is a Venmo account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
  * @typedef {object} Dropin~binData Information about the card based on the bin.
  * @property {string} commercial Possible values: 'Yes', 'No', 'Unknown'.
  * @property {string} countryOfIssuance The country of issuance.
@@ -552,7 +560,7 @@ Dropin.prototype._handleAppSwitch = function () {
  *
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
- * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
+ * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example <caption>Requesting a payment method</caption>
  * var form = document.querySelector('#my-form');
