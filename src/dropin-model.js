@@ -17,8 +17,8 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.card,
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
-  paymentOptionIDs.applePay,
-  paymentOptionIDs.venmo
+  paymentOptionIDs.venmo,
+  paymentOptionIDs.applePay
 ];
 
 function DropinModel(options) {

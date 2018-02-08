@@ -158,7 +158,7 @@ describe('DropinModel', function () {
 
         model = new DropinModel(this.modelOptions);
 
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'applePay', 'venmo']);
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay']);
       });
 
       it('uses custom paymentOptionPriority of payment options', function () {
