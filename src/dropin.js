@@ -72,7 +72,7 @@ var VERSION = process.env.npm_package_version;
 /**
  * @typedef {object} Dropin~venmoPayPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the Venmo account.
- * @property {string} details.username The venmo username.
+ * @property {string} details.username The Venmo username.
  * @property {string} type The payment method type, always `VenmoAccount` when the method requested is a Venmo account.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
