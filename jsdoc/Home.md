@@ -75,7 +75,7 @@ More details about PayPal and PayPal Credit can be found in the Braintree [devel
 
 <a id="accepting-venmo"></a>
 ### Accepting Venmo
-For Venmo, users will click the Venmo button on their mobile device, which will momentarilly switch the focus the Venmo app and back again. After successful completion, the Venmo account will be visible in the UI and that payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
+For Venmo, users will click the Venmo button on their mobile device, which will momentarily switch the focus the Venmo app and back again. After successful completion, the Venmo account will be visible in the UI and that payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
 More details Venmo can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/venmo/overview).
 
