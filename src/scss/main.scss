@@ -172,15 +172,11 @@ $loader-scale-duration: 300ms;
   margin-bottom: 13px;
 }
 
-.braintree-icon--rounded {
-  border-radius: 3px;
-  box-sizing: content-box;
-}
-
 .braintree-icon--bordered {
   background: #FFFFFF;
   border: 1px solid #BBBBBB;
-  @extend .braintree-icon--rounded
+  border-radius: 3px;
+  box-sizing: content-box;
 }
 
 /* =========================================================================

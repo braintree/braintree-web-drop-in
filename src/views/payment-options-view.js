@@ -61,7 +61,6 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
     case paymentOptionIDs.venmo:
       paymentSource = this.strings.Venmo;
       html = html.replace(/@ICON/g, 'logoVenmo');
-      html = html.replace(/@CLASSNAME/g, 'braintree-icon--rounded');
       break;
     default:
       break;
