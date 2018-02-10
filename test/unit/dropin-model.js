@@ -245,7 +245,7 @@ describe('DropinModel', function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card', 'venmo']);
       });
 
-      it('passes merchant venmo configuratoin into isBrowserSupported', function () {
+      it('passes merchant venmo configuration into isBrowserSupported', function () {
         this.modelOptions.merchantConfiguration.venmo = {
           allowNewBrowserTab: false
         };
