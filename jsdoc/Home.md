@@ -75,7 +75,7 @@ More details about PayPal and PayPal Credit can be found in the Braintree [devel
 
 <a id="accepting-venmo"></a>
 ### Accepting Venmo
-For Venmo, users will click the Venmo button on their mobile device, which will open up Venmo app to authenticate the purchase and then return back to the webpage. After successful completion, the Venmo account will be visible in the UI and that payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
+For Venmo, users will click the Venmo button on their mobile device, which will open up the Venmo app to authenticate the purchase and then return back to the webpage. After successful completion, the Venmo account will be visible in the UI and that payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
 More details about Venmo can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/venmo/overview).
 
@@ -83,7 +83,7 @@ More details about Venmo can be found in the Braintree [developer docs](https://
 ### Accepting Apple Pay
 For Apple Pay, users will click the Apple Pay button. After successful completion, the payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
-More about details Apple Pay can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/apple-pay/overview).
+More details about Apple Pay can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/apple-pay/overview).
 
 <a id="localization"></a>
 ### Localization
