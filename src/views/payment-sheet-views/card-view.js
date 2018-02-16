@@ -416,7 +416,16 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
   classlist.add(fieldGroup, 'braintree-form__field-group--has-error');
 
   fieldError = this.fieldErrors[field];
-  fieldError.textContent = errorMessage;
+  // we use innerHTML here instead of textContent
+  // so that merchants with non-utf-8 encodings
+  // can pass in translated field messages
+  // without the accent marks looking strange.
+  // A merchant could pass in and inject html,
+  // but they could also just modify the html
+  // themselves and the important bits, such
+  // as the Hosted Fields inputs, are protected
+  // in the iframes
+  fieldError.innerHTML = errorMessage;
 
   if (input && isNormalFieldElement(input)) {
     input.setAttribute('aria-invalid', true);
