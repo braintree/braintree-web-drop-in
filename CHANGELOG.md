@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix issue where non utf-8 encoded sites would show strange characters for card placeholders
+
 1.9.4
 -----
 - Update braintree-web to v3.30.0
