@@ -7,6 +7,7 @@ var classlist = require('../../lib/classlist');
 var constants = require('../../constants');
 var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
+var isUtf8 = require('../../lib/is-utf-8');
 var transitionHelper = require('../../lib/transition-helper');
 var Promise = require('../../lib/promise');
 
@@ -624,7 +625,7 @@ function normalizeStyles(styles) {
 }
 
 function addBullets(number) {
-  var bulletCharacter = global.document.characterSet.toLowerCase() === 'utf-8' ? '•' : '*';
+  var bulletCharacter = isUtf8() ? '•' : '*';
 
   return Array(number + 1).join(bulletCharacter);
 }

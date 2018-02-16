@@ -13,6 +13,7 @@ var paymentMethodsViewID = require('./views/payment-methods-view').ID;
 var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
+var isUtf8 = require('./lib/is-utf-8');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
 var ThreeDSecure = require('./lib/three-d-secure');
@@ -255,6 +256,11 @@ Dropin.prototype._initialize = function (callback) {
     localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
     this._strings = assign(this._strings, localizedStrings);
+  }
+
+  if (!isUtf8()) {
+    // non-utf-8 encodings often don't support the bullet character
+    this._strings.endingIn = this._strings.endingIn.replace(/•/g, '*');
   }
 
   if (this._merchantConfiguration.translations) {
