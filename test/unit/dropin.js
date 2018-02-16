@@ -642,6 +642,20 @@ describe('Dropin', function () {
       });
     });
 
+    it('sanitizes html in custom translations', function (done) {
+      var instance;
+
+      this.dropinOptions.merchantConfiguration.translations = {
+        chooseAnotherWayToPay: '<script>alert()</script>'
+      };
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        expect(instance._mainView.strings.chooseAnotherWayToPay).to.equal('&lt;script&gt;alert()&lt;/script&gt;');
+        done();
+      });
+    });
+
     it('uses locale with custom translations', function (done) {
       var instance;
 

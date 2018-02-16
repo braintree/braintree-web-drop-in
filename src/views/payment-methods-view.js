@@ -6,6 +6,7 @@ var DropinError = require('../lib/dropin-error');
 var classlist = require('../lib/classlist');
 var errors = require('../constants').errors;
 var Promise = require('../lib/promise');
+var sanitizeHtml = require('../lib/sanitize-html');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
@@ -97,7 +98,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
       this.activeMethodView = this.views[i];
-      this._headingLabel.textContent = this._getPaymentMethodString();
+      this._headingLabel.innerHTML = this._getPaymentMethodString();
       break;
     }
   }

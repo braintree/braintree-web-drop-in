@@ -8,6 +8,7 @@ var constants = require('../../constants');
 var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
 var isUtf8 = require('../../lib/is-utf-8');
+var sanitizeHtml = require('../../lib/sanitize-html');
 var transitionHelper = require('../../lib/transition-helper');
 var Promise = require('../../lib/promise');
 
@@ -417,15 +418,6 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
   classlist.add(fieldGroup, 'braintree-form__field-group--has-error');
 
   fieldError = this.fieldErrors[field];
-  // we use innerHTML here instead of textContent
-  // so that merchants with non-utf-8 encodings
-  // can pass in translated field messages
-  // without the accent marks looking strange.
-  // A merchant could pass in and inject html,
-  // but they could also just modify the html
-  // themselves and the important bits, such
-  // as the Hosted Fields inputs, are protected
-  // in the iframes
   fieldError.innerHTML = errorMessage;
 
   if (input && isNormalFieldElement(input)) {
@@ -516,7 +508,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 
   if (this.hasCVV) {
     this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
-    this.cvvLabelDescriptor.textContent = cvvDescriptor;
+    this.cvvLabelDescriptor.innerHTML = cvvDescriptor;
 
     if (!this._hasCustomCVVPlaceholder) {
       this.hostedFieldsInstance.setAttribute({
