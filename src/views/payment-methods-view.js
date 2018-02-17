@@ -6,7 +6,6 @@ var DropinError = require('../lib/dropin-error');
 var classlist = require('../lib/classlist');
 var errors = require('../constants').errors;
 var Promise = require('../lib/promise');
-var sanitizeHtml = require('../lib/sanitize-html');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',

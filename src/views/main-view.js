@@ -9,7 +9,6 @@ var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var Promise = require('../lib/promise');
-var sanitizeHtml = require('../lib/sanitize-html');
 var supportsFlexbox = require('../lib/supports-flexbox');
 var transitionHelper = require('../lib/transition-helper');
 

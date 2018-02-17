@@ -8,7 +8,6 @@ var constants = require('../../constants');
 var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
 var isUtf8 = require('../../lib/is-utf-8');
-var sanitizeHtml = require('../../lib/sanitize-html');
 var transitionHelper = require('../../lib/transition-helper');
 var Promise = require('../../lib/promise');
 
