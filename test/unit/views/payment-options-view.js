@@ -18,6 +18,12 @@ var paymentOptionAttributes = {
     optionTitle: strings['Apple Pay'],
     paymentOptionID: 'applePay'
   },
+  venmo: {
+    icon: '#logoVenmo',
+    optionLabel: 'Paying with Venmo',
+    optionTitle: strings.Venmo,
+    paymentOptionID: 'venmo'
+  },
   card: {
     className: 'braintree-icon--bordered',
     icon: '#iconCardFront',

@@ -226,7 +226,7 @@ describe('MainView', function () {
       var model = new DropinModel(fake.modelOptions());
       var wrapper = document.createElement('div');
 
-      model.supportedPaymentOptions = ['card', 'paypal', 'paypalCredit', 'applePay'];
+      model.supportedPaymentOptions = ['card', 'paypal', 'paypalCredit', 'applePay', 'venmo'];
 
       wrapper.innerHTML = templateHTML;
 

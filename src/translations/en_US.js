@@ -27,6 +27,8 @@ module.exports = {
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
   applePayTokenizationError: 'A network error occurred while processing the Apple Pay payment. Please try again.',
   applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
+  venmoCanceledError: 'Something went wrong. Ensure you have the most recent version of the Venmo app installed on your device and your browser supports switching to Venmo.',
+  venmoAppFailedError: 'The Venmo app could not be found on your device.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
   // Card form
   cardholderNameLabel: 'Cardholder Name',
@@ -46,6 +48,7 @@ module.exports = {
   PayPal: 'PayPal',
   'PayPal Credit': 'PayPal Credit',
   'Apple Pay': 'Apple Pay',
+  'Venmo': 'Venmo',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',

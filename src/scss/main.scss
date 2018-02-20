@@ -498,6 +498,14 @@ $loader-scale-duration: 300ms;
     }
   }
 
+  .braintree-sheet__button--venmo {
+    max-width: 100%;
+
+    use {
+      cursor: pointer;
+    }
+  }
+
   .braintree-sheet__button--apple-pay {
     margin: 0 auto;
 
@@ -830,7 +838,8 @@ $loader-scale-duration: 300ms;
 .braintree-show-options .braintree-options,
 .braintree-show-paypal .braintree-paypal,
 .braintree-show-paypalCredit .braintree-paypalCredit,
-.braintree-show-applePay .braintree-applePay {
+.braintree-show-applePay .braintree-applePay,
+.braintree-show-venmo .braintree-venmo {
   display: block;
   height: auto;
   overflow: visible;
@@ -887,7 +896,8 @@ $loader-scale-duration: 300ms;
 .braintree-show-card [data-braintree-id='other-ways-to-pay'],
 .braintree-show-methods [data-braintree-id='other-ways-to-pay'],
 .braintree-show-paypal [data-braintree-id='other-ways-to-pay'],
-.braintree-show-applePay [data-braintree-id='other-ways-to-pay'] {
+.braintree-show-applePay [data-braintree-id='other-ways-to-pay'],
+.braintree-show-venmo [data-braintree-id='other-ways-to-pay'] {
   display: block;
 }
 

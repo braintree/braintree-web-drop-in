@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Enable Pay with Venmo support
+
 1.9.4
 -----
 - Update braintree-web to v3.30.0
