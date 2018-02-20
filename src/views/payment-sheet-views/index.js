@@ -8,5 +8,6 @@ result[paymentOptionIDs.card] = require('./card-view');
 result[paymentOptionIDs.paypal] = require('./paypal-view');
 result[paymentOptionIDs.paypalCredit] = require('./paypal-credit-view');
 result[paymentOptionIDs.applePay] = require('./apple-pay-view');
+result[paymentOptionIDs.venmo] = require('./venmo-view');
 
 module.exports = result;

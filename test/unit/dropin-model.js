@@ -5,6 +5,7 @@ var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
 var isHTTPS = require('../../src/lib/is-https');
 var fake = require('../helpers/fake');
+var venmo = require('braintree-web/venmo');
 
 describe('DropinModel', function () {
   beforeEach(function () {
@@ -103,10 +104,12 @@ describe('DropinModel', function () {
 
         this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
         this.modelOptions.merchantConfiguration.applePay = true;
+        this.modelOptions.merchantConfiguration.venmo = true;
         this.modelOptions.paymentMethods = [
           {type: 'CreditCard', details: {lastTwo: '11'}},
           {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-          {type: 'ApplePayCard', details: {}}
+          {type: 'ApplePayCard', details: {}},
+          {type: 'VenmoAccount', details: {}}
         ];
 
         model = new DropinModel(this.modelOptions);
@@ -143,17 +146,19 @@ describe('DropinModel', function () {
         ]);
       });
 
-      it('supports cards, PayPal, PayPal Credit, and Apple Pay and defaults to showing them in correct paymentOptionPriority', function () {
+      it('supports cards, PayPal, PayPal Credit, Apple Pay, and Venmo and defaults to showing them in correct paymentOptionPriority', function () {
         var model;
 
+        this.sandbox.stub(venmo, 'isBrowserSupported').returns(true);
         this.configuration.gatewayConfiguration.paypalEnabled = true;
         this.modelOptions.merchantConfiguration.paypal = true;
         this.modelOptions.merchantConfiguration.paypalCredit = true;
         this.modelOptions.merchantConfiguration.applePay = true;
+        this.modelOptions.merchantConfiguration.venmo = true;
 
         model = new DropinModel(this.modelOptions);
 
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'applePay']);
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay']);
       });
 
       it('uses custom paymentOptionPriority of payment options', function () {
@@ -221,6 +226,36 @@ describe('DropinModel', function () {
         model = new DropinModel(this.modelOptions);
 
         expect(model.supportedPaymentOptions).to.deep.equal(['card']);
+      });
+
+      it('does not support Venmo when the browser does not support Venmo', function () {
+        var model;
+
+        this.modelOptions.merchantConfiguration.venmo = true;
+        this.sandbox.stub(venmo, 'isBrowserSupported').returns(false);
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
+
+        venmo.isBrowserSupported.returns(true);
+
+        model = new DropinModel(this.modelOptions);
+
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'venmo']);
+      });
+
+      it('passes merchant venmo configuration into isBrowserSupported', function () {
+        this.modelOptions.merchantConfiguration.venmo = {
+          allowNewBrowserTab: false
+        };
+        this.sandbox.stub(venmo, 'isBrowserSupported').returns(false);
+
+        new DropinModel(this.modelOptions); // eslint-disable-line no-new
+
+        expect(venmo.isBrowserSupported).to.be.calledWith({
+          allowNewBrowserTab: false
+        });
       });
     });
 
@@ -417,6 +452,29 @@ describe('DropinModel', function () {
       model._activePaymentMethod = 'this is my active payment method';
 
       expect(model.getActivePaymentMethod()).to.equal('this is my active payment method');
+    });
+  });
+
+  describe('reportAppSwitchPayload', function () {
+    it('saves app switch payload to instance', function () {
+      var model = new DropinModel(this.modelOptions);
+      var payload = {nonce: 'fake-nonce'};
+
+      model.reportAppSwitchPayload(payload);
+
+      expect(model.appSwitchPayload).to.equal(payload);
+    });
+  });
+
+  describe('reportAppSwitchError', function () {
+    it('saves app switch error and view id', function () {
+      var model = new DropinModel(this.modelOptions);
+      var error = new Error('Error');
+
+      model.reportAppSwitchError('view-id', error);
+
+      expect(model.appSwitchError.id).to.equal('view-id');
+      expect(model.appSwitchError.error).to.equal(error);
     });
   });
 

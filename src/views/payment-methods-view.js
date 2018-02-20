@@ -10,7 +10,8 @@ var Promise = require('../lib/promise');
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
   PayPalAccount: 'PayPal',
-  ApplePayCard: 'Apple Pay'
+  ApplePayCard: 'Apple Pay',
+  VenmoAccount: 'Venmo'
 };
 
 function PaymentMethodsView() {

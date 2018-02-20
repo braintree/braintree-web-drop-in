@@ -72,6 +72,14 @@ var VERSION = process.env.npm_package_version;
  */
 
 /**
+ * @typedef {object} Dropin~venmoPayPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Venmo account.
+ * @property {string} details.username The Venmo username.
+ * @property {string} type The payment method type, always `VenmoAccount` when the method requested is a Venmo account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
  * @typedef {object} Dropin~binData Information about the card based on the bin.
  * @property {string} commercial Possible values: 'Yes', 'No', 'Unknown'.
  * @property {string} countryOfIssuance The country of issuance.
@@ -306,6 +314,9 @@ Dropin.prototype._initialize = function (callback) {
       if (this._model.dependencySuccessCount >= 1) {
         analytics.sendEvent(this._client, 'appeared');
         this._disableErroredPaymentMethods();
+
+        this._handleAppSwitch();
+
         callback(null, dropinInstance);
       } else {
         this._model.cancelInitialization(new DropinError('All payment options failed to load.'));
@@ -544,12 +555,21 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
   }.bind(this));
 };
 
+Dropin.prototype._handleAppSwitch = function () {
+  if (this._model.appSwitchError) {
+    this._mainView.setPrimaryView(this._model.appSwitchError.id);
+    this._model.reportError(this._model.appSwitchError.error);
+  } else if (this._model.appSwitchPayload) {
+    this._model.addPaymentMethod(this._model.appSwitchPayload);
+  }
+};
+
 /**
  * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account.
  *
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
- * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
+ * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example <caption>Requesting a payment method</caption>
  * var form = document.querySelector('#my-form');

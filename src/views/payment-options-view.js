@@ -58,6 +58,10 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
       paymentSource = this.strings['Apple Pay'];
       html = html.replace(/@ICON/g, 'logoApplePay');
       break;
+    case paymentOptionIDs.venmo:
+      paymentSource = this.strings.Venmo;
+      html = html.replace(/@ICON/g, 'logoVenmo');
+      break;
     default:
       break;
   }

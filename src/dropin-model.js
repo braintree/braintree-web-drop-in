@@ -1,5 +1,6 @@
 'use strict';
 
+var btVenmo = require('braintree-web/venmo');
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('./lib/event-emitter');
 var constants = require('./constants');
@@ -9,12 +10,14 @@ var isGuestCheckout = require('./lib/is-guest-checkout');
 var isHTTPS = require('./lib/is-https');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
-  paymentMethodTypes.applePay
+  paymentMethodTypes.applePay,
+  paymentMethodTypes.venmo
 ];
 var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.card,
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
+  paymentOptionIDs.venmo,
   paymentOptionIDs.applePay
 ];
 
@@ -137,6 +140,17 @@ DropinModel.prototype.getActivePaymentView = function () {
   return this._activePaymentView;
 };
 
+DropinModel.prototype.reportAppSwitchPayload = function (payload) {
+  this.appSwitchPayload = payload;
+};
+
+DropinModel.prototype.reportAppSwitchError = function (sheetId, error) {
+  this.appSwitchError = {
+    id: sheetId,
+    error: error
+  };
+};
+
 DropinModel.prototype.asyncDependencyStarting = function () {
   this.dependenciesInitializing++;
 };
@@ -216,7 +230,7 @@ function getSupportedPaymentOptions(options) {
 
 function isPaymentOptionEnabled(paymentOption, options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var applePayEnabled, applePayBrowserSupported;
+  var applePayEnabled, applePayBrowserSupported, venmoEnabled, venmoBrowserSupported;
 
   if (paymentOption === paymentOptionIDs.card) {
     return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
@@ -229,6 +243,11 @@ function isPaymentOptionEnabled(paymentOption, options) {
     applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
 
     return applePayEnabled && applePayBrowserSupported;
+  } else if (paymentOption === paymentOptionIDs.venmo) {
+    venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
+    venmoBrowserSupported = btVenmo.isBrowserSupported(options.merchantConfiguration.venmo);
+
+    return venmoEnabled && venmoBrowserSupported;
   }
   throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
 }

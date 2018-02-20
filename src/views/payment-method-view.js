@@ -51,6 +51,12 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@TITLE/g, this.strings['Apple Pay'])
         .replace(/@SUBTITLE/g, '');
       break;
+    case paymentMethodTypes.venmo:
+      html = html.replace(/@ICON/g, 'logoVenmo')
+        .replace(/@CLASSNAME/g, '')
+        .replace(/@TITLE/g, this.paymentMethod.details.username)
+        .replace(/@SUBTITLE/g, this.strings.Venmo);
+      break;
     default:
       break;
   }

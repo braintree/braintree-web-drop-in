@@ -22,7 +22,12 @@ function configuration() {
       creditCards: {
         supportedCardTypes: ['American Express', 'Discover', 'JCB', 'MasterCard', 'Visa']
       },
-      applePayWeb: {}
+      applePayWeb: {},
+      payWithVenmo: {
+        accessToken: 'access_token$sandbox$id',
+        environment: 'sandbox',
+        merchantId: 'merchant-id'
+      }
     },
     analyticsMetadata: {
       sdkVersion: braintreeVersion,

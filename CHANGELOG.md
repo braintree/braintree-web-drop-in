@@ -3,6 +3,7 @@ CHANGELOG
 
 unreleased
 ----------
+- Enable Pay with Venmo support
 - Fix issue where non utf-8 encoded sites would show strange characters for card placeholders
 
 1.9.4
