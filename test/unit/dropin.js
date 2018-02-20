@@ -3,6 +3,7 @@
 var Dropin = require('../../src/dropin/');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
+var assets = require('../../src/lib/assets');
 var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
@@ -83,10 +84,10 @@ describe('Dropin', function () {
         setup: this.sandbox.stub()
       };
 
-      this.sandbox.stub(Dropin.prototype, '_loadScript').callsFake(function (options, callback) {
+      this.sandbox.stub(assets, 'loadScript').callsFake(function () {
         global.paypal = this.paypalCheckout;
 
-        callback();
+        return Promise.resolve();
       }.bind(this));
     });
 
@@ -528,7 +529,7 @@ describe('Dropin', function () {
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.not.have.been.called;
+        expect(assets.loadScript).to.not.have.been.called;
 
         done();
       });
@@ -539,14 +540,17 @@ describe('Dropin', function () {
       var paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        logLevel: DEFAULT_CHECKOUTJS_LOG_LEVEL
+        dataAttributes: {
+          'log-level': DEFAULT_CHECKOUTJS_LOG_LEVEL
+        }
       };
 
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.have.been.called;
-        expect(instance._loadScript.args[0][0]).to.deep.equal(paypalScriptOptions);
+        expect(assets.loadScript).to.have.been.calledOnce;
+        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
+        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(paypalScriptOptions);
 
         done();
       });
@@ -557,14 +561,17 @@ describe('Dropin', function () {
       var paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        logLevel: DEFAULT_CHECKOUTJS_LOG_LEVEL
+        dataAttributes: {
+          'log-level': DEFAULT_CHECKOUTJS_LOG_LEVEL
+        }
       };
 
       this.dropinOptions.merchantConfiguration.paypalCredit = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.have.been.called;
-        expect(instance._loadScript.args[0][0]).to.deep.equal(paypalScriptOptions);
+        expect(assets.loadScript).to.have.been.calledOnce;
+        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
+        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(paypalScriptOptions);
 
         done();
       });
@@ -753,7 +760,7 @@ describe('Dropin', function () {
       this.dropinOptions.merchantConfiguration.dataCollector = {kount: true};
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
-      this.sandbox.stub(Dropin.prototype, '_loadScript').yields();
+      this.sandbox.stub(assets, 'loadScript').resolves();
       this.sandbox.stub(Dropin.prototype, '_setUpDataCollector');
 
       global.braintree = {
@@ -772,7 +779,7 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.not.be.called;
+        expect(assets.loadScript).to.not.be.called;
 
         done();
       });
@@ -786,8 +793,9 @@ describe('Dropin', function () {
       };
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.be.calledOnce;
-        expect(instance._loadScript.args[0][0]).to.deep.equal(dataCollectorScriptOptions);
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
+        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(dataCollectorScriptOptions);
         expect(instance._setUpDataCollector).to.be.called;
 
         done();
@@ -802,7 +810,7 @@ describe('Dropin', function () {
       document.body.appendChild(script);
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.not.be.called;
+        expect(assets.loadScript).to.not.be.called;
 
         done();
       });
@@ -1830,56 +1838,6 @@ describe('Dropin', function () {
       instance._initialize(function () {
         instance._model._emit('paymentOptionSelected', {paymentOption: 'Foo'});
       });
-    });
-  });
-
-  describe('_loadScript', function () {
-    function noop() {}
-
-    beforeEach(function () {
-      this.scriptOptions = {
-        src: 'https://foobar.com/foo.js',
-        id: 'foobarbaz'
-      };
-
-      this.fakeDropinWrapper = {
-        appendChild: this.sandbox.stub()
-      };
-      this.fakeScript = {
-        addEventListener: this.sandbox.stub(),
-        setAttribute: this.sandbox.stub()
-      };
-
-      this.sandbox.stub(document, 'createElement').returns(this.fakeScript);
-    });
-
-    it('adds script to document', function () {
-      Dropin.prototype._loadScript.call({
-        _dropinWrapper: this.fakeDropinWrapper,
-        _merchantConfiguration: {
-          paypal: {}
-        }
-      }, this.scriptOptions, noop);
-
-      expect(this.fakeScript.src).to.equal('https://foobar.com/foo.js');
-      expect(this.fakeScript.async).to.equal(true);
-      expect(this.fakeScript.addEventListener).to.be.calledWith('load', noop);
-      expect(this.fakeScript.id).to.equal('foobarbaz');
-      expect(this.fakeDropinWrapper.appendChild).to.be.calledWith(this.fakeScript);
-    });
-
-    it('uses loglevel if present', function () {
-      this.scriptOptions.logLevel = 'customLogLevel';
-      Dropin.prototype._loadScript.call({
-        _dropinWrapper: this.fakeDropinWrapper,
-        _merchantConfiguration: {
-          paypal: {
-            logLevel: 'customLogLevel'
-          }
-        }
-      }, this.scriptOptions, noop);
-
-      expect(this.fakeScript.setAttribute).to.be.calledWith('data-log-level', 'customLogLevel');
     });
   });
 });

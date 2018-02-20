@@ -7,6 +7,7 @@ var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
+var assets = require('./lib/assets');
 var fs = require('fs');
 var MainView = require('./views/main-view');
 var paymentMethodsViewID = require('./views/payment-methods-view').ID;
@@ -228,6 +229,7 @@ Dropin.prototype._initialize = function (callback) {
   var localizedStrings, localizedHTML, paypalScriptOptions;
   var dropinInstance = this; // eslint-disable-line consistent-this
   var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
+  var setupPromise = Promise.resolve();
 
   this._injectStylesheet();
 
@@ -332,15 +334,19 @@ Dropin.prototype._initialize = function (callback) {
       paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        logLevel: this._merchantConfiguration.paypal && this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+        dataAttributes: {
+          'log-level': this._merchantConfiguration.paypal && this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+        }
       };
 
-      this._loadScript(paypalScriptOptions, function () {
-        this._setUpDependenciesAndViews();
+      setupPromise = setupPromise.then(function () {
+        return assets.loadScript(this._dropinWrapper, paypalScriptOptions);
       }.bind(this));
-    } else {
-      this._setUpDependenciesAndViews();
     }
+
+    setupPromise.then(function () {
+      return this._setUpDependenciesAndViews();
+    }.bind(this));
   }.bind(this));
 };
 
@@ -457,7 +463,7 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
       id: constants.DATA_COLLECTOR_SCRIPT_ID
     };
 
-    this._loadScript(dataCollectorScriptOptions, this._setUpDataCollector.bind(this));
+    assets.loadScript(this._dropinWrapper, dataCollectorScriptOptions).then(this._setUpDataCollector.bind(this));
   }
 
   if (this._merchantConfiguration.threeDSecure) {
@@ -503,20 +509,6 @@ Dropin.prototype._navigateToInitialView = function () {
 
 Dropin.prototype._supportsPaymentOption = function (paymentOption) {
   return this._model.supportedPaymentOptions.indexOf(paymentOption) !== -1;
-};
-
-Dropin.prototype._loadScript = function (options, callback) {
-  var script = document.createElement('script');
-
-  script.src = options.src;
-  script.id = options.id;
-  script.async = true;
-
-  if (options.logLevel) {
-    script.setAttribute('data-log-level', options.logLevel);
-  }
-  script.addEventListener('load', callback);
-  this._dropinWrapper.appendChild(script);
 };
 
 Dropin.prototype._disableErroredPaymentMethods = function () {
@@ -653,25 +645,17 @@ Dropin.prototype._removeStylesheet = function () {
 };
 
 Dropin.prototype._injectStylesheet = function () {
-  var stylesheet, stylesheetUrl, head, assetsUrl;
+  var stylesheetUrl, assetsUrl;
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
   assetsUrl = this._client.getConfiguration().gatewayConfiguration.assetsUrl;
   stylesheetUrl = assetsUrl + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
-  stylesheet = document.createElement('link');
-  head = document.head;
 
-  stylesheet.setAttribute('rel', 'stylesheet');
-  stylesheet.setAttribute('type', 'text/css');
-  stylesheet.setAttribute('href', stylesheetUrl);
-  stylesheet.setAttribute('id', constants.STYLESHEET_ID);
-
-  if (head.firstChild) {
-    head.insertBefore(stylesheet, head.firstChild);
-  } else {
-    head.appendChild(stylesheet);
-  }
+  assets.loadStylesheet({
+    href: stylesheetUrl,
+    id: constants.STYLESHEET_ID
+  });
 };
 
 Dropin.prototype._getVaultedPaymentMethods = function () {
