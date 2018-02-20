@@ -104,11 +104,13 @@ describe('DropinModel', function () {
 
         this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
         this.modelOptions.merchantConfiguration.applePay = true;
+        this.modelOptions.merchantConfiguration.googlePay = true;
         this.modelOptions.merchantConfiguration.venmo = true;
         this.modelOptions.paymentMethods = [
           {type: 'CreditCard', details: {lastTwo: '11'}},
           {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
           {type: 'ApplePayCard', details: {}},
+          {type: 'AndroidPayCard', details: {}},
           {type: 'VenmoAccount', details: {}}
         ];
 
@@ -146,7 +148,7 @@ describe('DropinModel', function () {
         ]);
       });
 
-      it('supports cards, PayPal, PayPal Credit, Apple Pay, and Venmo and defaults to showing them in correct paymentOptionPriority', function () {
+      it('supports cards, PayPal, PayPal Credit, Apple Pay, Google Pay, and Venmo and defaults to showing them in correct paymentOptionPriority', function () {
         var model;
 
         this.sandbox.stub(venmo, 'isBrowserSupported').returns(true);
@@ -154,11 +156,12 @@ describe('DropinModel', function () {
         this.modelOptions.merchantConfiguration.paypal = true;
         this.modelOptions.merchantConfiguration.paypalCredit = true;
         this.modelOptions.merchantConfiguration.applePay = true;
+        this.modelOptions.merchantConfiguration.googlePay = true;
         this.modelOptions.merchantConfiguration.venmo = true;
 
         model = new DropinModel(this.modelOptions);
 
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay']);
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']);
       });
 
       it('uses custom paymentOptionPriority of payment options', function () {

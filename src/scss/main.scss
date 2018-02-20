@@ -299,6 +299,11 @@ $loader-scale-duration: 300ms;
   }
 }
 
+[data-braintree-id="google-pay-button"] {
+  background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2241%22%20height%3D%2217%22%20xmlns%3D…2%2F%3E%3Cpath%20d%3D%22M0%200h41.285v18H0z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  width: 160px;
+}
+
 /* =========================================================================
    Apple Pay buttons
    ========================================================================= */
@@ -839,6 +844,7 @@ $loader-scale-duration: 300ms;
 .braintree-show-paypal .braintree-paypal,
 .braintree-show-paypalCredit .braintree-paypalCredit,
 .braintree-show-applePay .braintree-applePay,
+.braintree-show-googlePay .braintree-googlePay,
 .braintree-show-venmo .braintree-venmo {
   display: block;
   height: auto;
@@ -897,6 +903,7 @@ $loader-scale-duration: 300ms;
 .braintree-show-methods [data-braintree-id='other-ways-to-pay'],
 .braintree-show-paypal [data-braintree-id='other-ways-to-pay'],
 .braintree-show-applePay [data-braintree-id='other-ways-to-pay'],
+.braintree-show-googlePay [data-braintree-id='other-ways-to-pay'],
 .braintree-show-venmo [data-braintree-id='other-ways-to-pay'] {
   display: block;
 }

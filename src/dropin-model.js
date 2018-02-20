@@ -11,6 +11,7 @@ var isHTTPS = require('./lib/is-https');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
   paymentMethodTypes.applePay,
+  paymentMethodTypes.googlePay,
   paymentMethodTypes.venmo
 ];
 var DEFAULT_PAYMENT_OPTION_PRIORITY = [
@@ -18,7 +19,8 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
   paymentOptionIDs.venmo,
-  paymentOptionIDs.applePay
+  paymentOptionIDs.applePay,
+  paymentOptionIDs.googlePay
 ];
 
 function DropinModel(options) {
@@ -243,6 +245,8 @@ function isPaymentOptionEnabled(paymentOption, options) {
     applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
 
     return applePayEnabled && applePayBrowserSupported;
+  } else if (paymentOption === paymentOptionIDs.googlePay) {
+    return gatewayConfiguration.androidPay && Boolean(options.merchantConfiguration.googlePay);
   } else if (paymentOption === paymentOptionIDs.venmo) {
     venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
     venmoBrowserSupported = btVenmo.isBrowserSupported(options.merchantConfiguration.venmo);
