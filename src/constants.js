@@ -52,8 +52,10 @@ module.exports = {
   ANALYTICS_PREFIX: 'web.dropin.',
   CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT: 200,
   CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.min.js',
+  GOOGLE_PAYMENT_SOURCE: 'https://payments.developers.google.com/js/apis/pay.js',
   INTEGRATION: 'dropin2',
   PAYPAL_CHECKOUT_SCRIPT_ID: 'braintree-dropin-paypal-checkout-script',
+  GOOGLE_PAYMENT_SCRIPT_ID: 'braintree-dropin-google-payment-script',
   DATA_COLLECTOR_SCRIPT_ID: 'braintree-dropin-data-collector-script',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };

@@ -6,6 +6,7 @@ var GooglePayView = require('../../../../src/views/payment-sheet-views/google-pa
 var btGooglePay = require('braintree-web/google-payment');
 var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
+var assets = require('../../../../src/lib/assets');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 
@@ -36,17 +37,34 @@ describe('GooglePayView', function () {
     };
 
     this.fakeGooglePayInstance = {
-      createPaymentDataRequest: this.sandbox.stub().returns({}),
+      createPaymentDataRequest: this.sandbox.stub().returns({
+        allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
+      }),
       parseResponse: this.sandbox.stub().resolves({
         type: 'AndroidPayCard',
         nonce: 'google-pay-nonce'
       })
     };
     this.sandbox.stub(btGooglePay, 'create').resolves(this.fakeGooglePayInstance);
+    this.sandbox.stub(assets, 'loadScript').resolves();
+
+    this.FakePaymentClient = function FakePayment() {};
+    this.FakePaymentClient.prototype.isReadyToPay = this.sandbox.stub().resolves({result: true});
+    this.FakePaymentClient.prototype.loadPaymentData = this.sandbox.stub().resolves({});
+    this.FakePaymentClient.prototype.prefetchPaymentData = this.sandbox.stub().resolves();
+
+    global.google = {
+      payments: {
+        api: {
+          PaymentsClient: this.FakePaymentClient
+        }
+      }
+    };
   });
 
   afterEach(function () {
     document.body.removeChild(this.div);
+    delete global.google;
   });
 
   describe('Constructor', function () {
@@ -76,12 +94,39 @@ describe('GooglePayView', function () {
       }.bind(this));
     });
 
+    it('loads Google Payment script file when google global does not exist', function () {
+      delete global.google;
+
+      return this.view.initialize().then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith(this.view.element, {
+          id: 'braintree-dropin-google-payment-script',
+          src: 'https://payments.developers.google.com/js/apis/pay.js'
+        });
+      }.bind(this));
+    });
+
+    it('does not load Google Payment script file if global google pay object already exists', function () {
+      return this.view.initialize().then(function () {
+        expect(assets.loadScript).to.not.be.called;
+      });
+    });
+
     it('creates a GooglePay component', function () {
       return this.view.initialize().then(function () {
         expect(btGooglePay.create).to.be.calledWith(this.sandbox.match({
           client: this.view.client
         }));
         expect(this.view.googlePayInstance).to.equal(this.fakeGooglePayInstance);
+      }.bind(this));
+    });
+
+    it('calls isReadyToPay to check device compatibility', function () {
+      return this.view.initialize().then(function () {
+        expect(this.FakePaymentClient.prototype.isReadyToPay).to.be.calledOnce;
+        expect(this.FakePaymentClient.prototype.isReadyToPay).to.be.calledWith({
+          allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
+        });
       }.bind(this));
     });
 
