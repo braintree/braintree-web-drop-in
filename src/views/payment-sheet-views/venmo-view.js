@@ -74,4 +74,15 @@ VenmoView.prototype._isIgnorableError = function (error) {
   return error.code === 'VENMO_APP_CANCELED';
 };
 
+VenmoView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
+
+  if (!venmoEnabled) {
+    return Promise.resolve(false);
+  }
+
+  return Promise.resolve(btVenmo.isBrowserSupported(options.merchantConfiguration.venmo));
+};
+
 module.exports = VenmoView;
