@@ -227,18 +227,18 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 
 Dropin.prototype._initialize = function (callback) {
   var localizedStrings, localizedHTML, paypalScriptOptions;
-  var dropinInstance = this; // eslint-disable-line consistent-this
-  var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
+  var self = this; // eslint-disable-line consistent-self
+  var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
   var setupPromise = Promise.resolve();
 
-  this._injectStylesheet();
+  self._injectStylesheet();
 
   if (!container) {
-    analytics.sendEvent(this._client, 'configuration-error');
+    analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.container is required.'));
     return;
-  } else if (this._merchantConfiguration.container && this._merchantConfiguration.selector) {
-    analytics.sendEvent(this._client, 'configuration-error');
+  } else if (self._merchantConfiguration.container && self._merchantConfiguration.selector) {
+    analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('Must only have one options.selector or options.container.'));
     return;
   }
@@ -248,102 +248,102 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   if (!container || container.nodeType !== 1) {
-    analytics.sendEvent(this._client, 'configuration-error');
+    analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference a valid DOM node.'));
     return;
   }
 
   if (container.innerHTML.trim()) {
-    analytics.sendEvent(this._client, 'configuration-error');
+    analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference an empty DOM node.'));
     return;
   }
 
   // Backfill with `en`
-  this._strings = assign({}, translations.en);
-  if (this._merchantConfiguration.locale) {
-    localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
+  self._strings = assign({}, translations.en);
+  if (self._merchantConfiguration.locale) {
+    localizedStrings = translations[self._merchantConfiguration.locale] || translations[self._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
-    this._strings = assign(this._strings, localizedStrings);
+    self._strings = assign(self._strings, localizedStrings);
   }
 
-  if (this._merchantConfiguration.translations) {
-    this._strings = assign(this._strings, this._merchantConfiguration.translations);
+  if (self._merchantConfiguration.translations) {
+    self._strings = assign(self._strings, self._merchantConfiguration.translations);
   }
 
-  localizedHTML = Object.keys(this._strings).reduce(function (result, stringKey) {
-    var stringValue = this._strings[stringKey];
+  localizedHTML = Object.keys(self._strings).reduce(function (result, stringKey) {
+    var stringValue = self._strings[stringKey];
 
     return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
-  }.bind(this), mainHTML);
+  }, mainHTML);
 
-  this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
-  container.appendChild(this._dropinWrapper);
+  self._dropinWrapper.innerHTML = svgHTML + localizedHTML;
+  container.appendChild(self._dropinWrapper);
 
-  this._getVaultedPaymentMethods().then(function (paymentMethods) {
-    this._model = new DropinModel({
-      client: this._client,
-      componentID: this._componentID,
-      merchantConfiguration: this._merchantConfiguration,
+  self._getVaultedPaymentMethods().then(function (paymentMethods) {
+    self._model = new DropinModel({
+      client: self._client,
+      componentID: self._componentID,
+      merchantConfiguration: self._merchantConfiguration,
       paymentMethods: paymentMethods
     });
 
-    return this._model.setupPaymentMethodAvailability();
-  }.bind(this)).then(function () {
+    return self._model.setupPaymentMethodAvailability();
+  }).then(function () {
     var paypalRequired;
 
-    this._model.on('cancelInitialization', function (err) {
-      analytics.sendEvent(this._client, 'load-error');
-      this._dropinWrapper.innerHTML = '';
+    self._model.on('cancelInitialization', function (err) {
+      analytics.sendEvent(self._client, 'load-error');
+      self._dropinWrapper.innerHTML = '';
       callback(err);
-    }.bind(this));
+    });
 
-    this._model.on('asyncDependenciesReady', function () {
-      if (this._model.dependencySuccessCount >= 1) {
-        analytics.sendEvent(this._client, 'appeared');
-        this._disableErroredPaymentMethods();
+    self._model.on('asyncDependenciesReady', function () {
+      if (self._model.dependencySuccessCount >= 1) {
+        analytics.sendEvent(self._client, 'appeared');
+        self._disableErroredPaymentMethods();
 
-        this._handleAppSwitch();
+        self._handleAppSwitch();
 
-        callback(null, dropinInstance);
+        callback(null, self);
       } else {
-        this._model.cancelInitialization(new DropinError('All payment options failed to load.'));
+        self._model.cancelInitialization(new DropinError('All payment options failed to load.'));
       }
-    }.bind(this));
+    });
 
-    this._model.on('paymentMethodRequestable', function (event) {
-      this._emit('paymentMethodRequestable', event);
-    }.bind(this));
+    self._model.on('paymentMethodRequestable', function (event) {
+      self._emit('paymentMethodRequestable', event);
+    });
 
-    this._model.on('noPaymentMethodRequestable', function () {
-      this._emit('noPaymentMethodRequestable');
-    }.bind(this));
+    self._model.on('noPaymentMethodRequestable', function () {
+      self._emit('noPaymentMethodRequestable');
+    });
 
-    this._model.on('paymentOptionSelected', function (event) {
-      this._emit('paymentOptionSelected', event);
-    }.bind(this));
+    self._model.on('paymentOptionSelected', function (event) {
+      self._emit('paymentOptionSelected', event);
+    });
 
-    paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
+    paypalRequired = self._supportsPaymentOption(paymentOptionIDs.paypal) || self._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
     if (paypalRequired && !global.paypal) {
       paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
         dataAttributes: {
-          'log-level': this._merchantConfiguration.paypal && this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+          'log-level': self._merchantConfiguration.paypal && self._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
         }
       };
 
       setupPromise = setupPromise.then(function () {
-        return assets.loadScript(this._dropinWrapper, paypalScriptOptions);
-      }.bind(this));
+        return assets.loadScript(self._dropinWrapper, paypalScriptOptions);
+      });
     }
 
     return setupPromise;
-  }.bind(this)).then(function () {
-    return this._setUpDependenciesAndViews();
-  }.bind(this)).catch(function (err) {
-    dropinInstance.teardown().then(function () {
+  }).then(function () {
+    return self._setUpDependenciesAndViews();
+  }).catch(function (err) {
+    self.teardown().then(function () {
       callback(err);
     });
   });
