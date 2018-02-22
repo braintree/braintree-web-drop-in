@@ -18,32 +18,14 @@ GooglePayView.ID = GooglePayView.prototype.ID = constants.paymentOptionIDs.googl
 
 GooglePayView.prototype.initialize = function () {
   var self = this;
-  var initializePromise = Promise.resolve();
 
   self.googlePayConfiguration = assign({}, self.model.merchantConfiguration.googlePay);
 
   self.model.asyncDependencyStarting();
 
-  if (!global.google) {
-    initializePromise = initializePromise.then(function () {
-      return assets.loadScript(self.element, {
-        id: constants.GOOGLE_PAYMENT_SCRIPT_ID,
-        src: constants.GOOGLE_PAYMENT_SOURCE
-      });
-    });
-  }
-
-  return initializePromise.then(function () {
-    return btGooglePay.create({client: self.client});
-  }).then(function (googlePayInstance) {
+  return btGooglePay.create({client: self.client}).then(function (googlePayInstance) {
     self.googlePayInstance = googlePayInstance;
-    self.paymentsClient = new global.google.payments.api.PaymentsClient({
-      environment: self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'PRODUCTION' : 'TEST'
-    });
-
-    return self.paymentsClient.isReadyToPay({
-      allowedPaymentMethods: self.googlePayInstance.createPaymentDataRequest().allowedPaymentMethods
-    });
+    self.paymentsClient = createPaymentsClient(self.client);
   }).then(function () {
     // button handler
     // prefetch handler
@@ -59,5 +41,38 @@ GooglePayView.prototype.initialize = function () {
 GooglePayView.prototype.updateConfiguration = function (key, value) {
   this.googlePayConfiguration[key] = value;
 };
+
+GooglePayView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+
+  if (!(gatewayConfiguration.androidPay && Boolean(options.merchantConfiguration.googlePay))) {
+    return Promise.resolve(false);
+  }
+
+  return Promise.resolve().then(function () {
+    if (!global.google) {
+      return assets.loadScript(global.document.head, {
+        id: constants.GOOGLE_PAYMENT_SCRIPT_ID,
+        src: constants.GOOGLE_PAYMENT_SOURCE
+      });
+    }
+
+    return Promise.resolve();
+  }).then(function () {
+    var paymentsClient = createPaymentsClient(options.client);
+
+    return paymentsClient.isReadyToPay({
+      allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
+    });
+  }).then(function (response) {
+    return Boolean(response.result);
+  });
+};
+
+function createPaymentsClient(client) {
+  return new global.google.payments.api.PaymentsClient({
+    environment: client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'PRODUCTION' : 'TEST'
+  });
+}
 
 module.exports = GooglePayView;
