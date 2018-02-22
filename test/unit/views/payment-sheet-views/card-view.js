@@ -50,6 +50,7 @@ describe('CardView', function () {
       this.sandbox.stub(hostedFields, 'create').resolves(this.hostedFieldsInstance);
 
       this.model = new DropinModel(fake.modelOptions());
+      return this.model.setupPaymentMethodAvailability();
     });
 
     it('has cvv if supplied in challenges', function () {
@@ -617,6 +618,7 @@ describe('CardView', function () {
       this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
 
       this.model = new DropinModel(fake.modelOptions());
+      return this.model.setupPaymentMethodAvailability();
     });
 
     it('calls the callback with an error when tokenize fails', function () {
@@ -655,42 +657,45 @@ describe('CardView', function () {
 
   describe('Hosted Fields events', function () {
     beforeEach(function () {
-      this.context = {
-        element: this.element,
-        _generateFieldSelector: CardView.prototype._generateFieldSelector,
-        _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
-        _validateForm: this.sandbox.stub(),
-        _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
-        getElementById: BaseView.prototype.getElementById,
-        hideFieldError: CardView.prototype.hideFieldError,
-        showFieldError: CardView.prototype.showFieldError,
-        model: new DropinModel(fake.modelOptions()),
-        client: {
-          getConfiguration: function () {
-            return {
-              gatewayConfiguration: {
-                challenges: ['cvv'],
-                creditCards: {
-                  supportedCardTypes: []
-                }
-              }
-            };
-          }
-        },
-        strings: strings,
-        tokenize: CardView.prototype.tokenize,
-        _hideUnsupportedCardIcons: function () {},
-        _isCardTypeSupported: CardView.prototype._isCardTypeSupported,
-        _onBlurEvent: function () {},
-        _onCardTypeChangeEvent: function () {},
-        _onFocusEvent: function () {},
-        _onNotEmptyEvent: function () {},
-        _onValidityChangeEvent: function () {},
-        _setupExtraInput: function () {},
-        _removeExtraInput: function () {}
-      };
+      var self = this;
+      var model = new DropinModel(fake.modelOptions());
 
-      this.model = new DropinModel(fake.modelOptions());
+      return model.setupPaymentMethodAvailability().then(function () {
+        self.context = {
+          element: self.element,
+          _generateFieldSelector: CardView.prototype._generateFieldSelector,
+          _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
+          _validateForm: self.sandbox.stub(),
+          _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
+          getElementById: BaseView.prototype.getElementById,
+          hideFieldError: CardView.prototype.hideFieldError,
+          showFieldError: CardView.prototype.showFieldError,
+          model: model,
+          client: {
+            getConfiguration: function () {
+              return {
+                gatewayConfiguration: {
+                  challenges: ['cvv'],
+                  creditCards: {
+                    supportedCardTypes: []
+                  }
+                }
+              };
+            }
+          },
+          strings: strings,
+          tokenize: CardView.prototype.tokenize,
+          _hideUnsupportedCardIcons: function () {},
+          _isCardTypeSupported: CardView.prototype._isCardTypeSupported,
+          _onBlurEvent: function () {},
+          _onCardTypeChangeEvent: function () {},
+          _onFocusEvent: function () {},
+          _onNotEmptyEvent: function () {},
+          _onValidityChangeEvent: function () {},
+          _setupExtraInput: function () {},
+          _removeExtraInput: function () {}
+        };
+      });
     });
 
     describe('onFocusEvent', function () {
@@ -1633,9 +1638,11 @@ describe('CardView', function () {
 
   describe('tokenize', function () {
     beforeEach(function () {
-      this.fakeHostedFieldsInstance = {
-        clear: this.sandbox.stub(),
-        getState: this.sandbox.stub().returns({
+      var self = this;
+
+      self.fakeHostedFieldsInstance = {
+        clear: self.sandbox.stub(),
+        getState: self.sandbox.stub().returns({
           cards: [{type: 'visa'}],
           fields: {
             number: {
@@ -1646,35 +1653,37 @@ describe('CardView', function () {
             }
           }
         }),
-        removeAttribute: this.sandbox.stub(),
-        setAttribute: this.sandbox.stub(),
-        setMessage: this.sandbox.stub(),
-        tokenize: this.sandbox.stub().resolves({})
+        removeAttribute: self.sandbox.stub(),
+        setAttribute: self.sandbox.stub(),
+        setMessage: self.sandbox.stub(),
+        tokenize: self.sandbox.stub().resolves({})
       };
-      this.model = new DropinModel(fake.modelOptions());
+      self.model = new DropinModel(fake.modelOptions());
 
-      this.context = {
-        element: this.element,
-        getElementById: BaseView.prototype.getElementById,
-        hostedFieldsInstance: this.fakeHostedFieldsInstance,
-        fieldErrors: {},
-        model: this.model,
-        _validateForm: CardView.prototype._validateForm,
-        _validateExtraInput: CardView.prototype._validateExtraInput,
-        _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
-        _setupCardholderName: this.sandbox.stub(),
-        client: {
-          getConfiguration: fake.configuration
-        },
-        merchantConfiguration: {
-          authorization: fake.configuration().authorization,
-          card: {}
-        },
-        hasCardholderName: false,
-        showFieldError: CardView.prototype.showFieldError,
-        strings: strings
-      };
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
+      return self.model.setupPaymentMethodAvailability().then(function () {
+        self.context = {
+          element: self.element,
+          getElementById: BaseView.prototype.getElementById,
+          hostedFieldsInstance: self.fakeHostedFieldsInstance,
+          fieldErrors: {},
+          model: self.model,
+          _validateForm: CardView.prototype._validateForm,
+          _validateExtraInput: CardView.prototype._validateExtraInput,
+          _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
+          _setupCardholderName: self.sandbox.stub(),
+          client: {
+            getConfiguration: fake.configuration
+          },
+          merchantConfiguration: {
+            authorization: fake.configuration().authorization,
+            card: {}
+          },
+          hasCardholderName: false,
+          showFieldError: CardView.prototype.showFieldError,
+          strings: strings
+        };
+        self.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
+      });
     });
 
     it('clears the error on the model', function () {
