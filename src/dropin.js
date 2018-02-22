@@ -281,21 +281,16 @@ Dropin.prototype._initialize = function (callback) {
   container.appendChild(this._dropinWrapper);
 
   this._getVaultedPaymentMethods().then(function (paymentMethods) {
-    var paypalRequired;
+    this._model = new DropinModel({
+      client: this._client,
+      componentID: this._componentID,
+      merchantConfiguration: this._merchantConfiguration,
+      paymentMethods: paymentMethods
+    });
 
-    try {
-      this._model = new DropinModel({
-        client: this._client,
-        componentID: this._componentID,
-        merchantConfiguration: this._merchantConfiguration,
-        paymentMethods: paymentMethods
-      });
-    } catch (modelError) {
-      dropinInstance.teardown().then(function () {
-        callback(modelError);
-      });
-      return;
-    }
+    return this._model.setupPaymentMethodAvailability();
+  }.bind(this)).then(function () {
+    var paypalRequired;
 
     this._model.on('cancelInitialization', function (err) {
       analytics.sendEvent(this._client, 'load-error');
@@ -344,10 +339,14 @@ Dropin.prototype._initialize = function (callback) {
       }.bind(this));
     }
 
-    setupPromise.then(function () {
-      return this._setUpDependenciesAndViews();
-    }.bind(this));
-  }.bind(this));
+    return setupPromise;
+  }.bind(this)).then(function () {
+    return this._setUpDependenciesAndViews();
+  }.bind(this)).catch(function (err) {
+    dropinInstance.teardown().then(function () {
+      callback(err);
+    });
+  });
 };
 
 /**

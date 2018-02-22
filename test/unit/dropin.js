@@ -18,7 +18,7 @@ var braintreeWebVersion = require('../../package.json').dependencies['braintree-
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 
 function delay(amount) {
-  amount = amount || 10;
+  amount = amount || 100;
 
   return new Promise(function (resolve) {
     setTimeout(function () {
@@ -583,11 +583,12 @@ describe('Dropin', function () {
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
 
-      instance._initialize(function () {
-        done();
+      instance._initialize(function (err) {
+        done(err);
       });
 
       delay().then(function () {
+        instance._model.dependencySuccessCount = 1;
         instance._model._emit('asyncDependenciesReady');
       });
     });
