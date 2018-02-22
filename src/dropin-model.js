@@ -7,6 +7,8 @@ var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
+var Promise = require('./lib/promise');
+var GooglePayView = require('./views/payment-sheet-views/google-pay-view');
 var isHTTPS = require('./lib/is-https');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
@@ -32,10 +34,7 @@ function DropinModel(options) {
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
-
-  this.supportedPaymentOptions = getSupportedPaymentOptions(options);
-  this._paymentMethods = this._getSupportedPaymentMethods(options.paymentMethods);
-  this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
+  this._options = options;
 
   EventEmitter.call(this);
 }
@@ -43,6 +42,14 @@ function DropinModel(options) {
 DropinModel.prototype = Object.create(EventEmitter.prototype, {
   constructor: DropinModel
 });
+
+DropinModel.prototype.setupPaymentMethodAvailability = function () {
+  return getSupportedPaymentOptions(this._options).then(function (paymentOptions) {
+    this.supportedPaymentOptions = paymentOptions;
+    this._paymentMethods = this._getSupportedPaymentMethods(this._options.paymentMethods);
+    this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
+  }.bind(this));
+};
 
 DropinModel.prototype.isPaymentMethodRequestable = function () {
   return Boolean(this._paymentMethodIsRequestable);
@@ -207,8 +214,8 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
 };
 
 function getSupportedPaymentOptions(options) {
-  var result = [];
   var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || DEFAULT_PAYMENT_OPTION_PRIORITY;
+  var promises;
 
   if (!(paymentOptionPriority instanceof Array)) {
     throw new DropinError('paymentOptionPriority must be an array.');
@@ -217,43 +224,60 @@ function getSupportedPaymentOptions(options) {
   // Remove duplicates
   paymentOptionPriority = paymentOptionPriority.filter(function (item, pos) { return paymentOptionPriority.indexOf(item) === pos; });
 
-  paymentOptionPriority.forEach(function (paymentOption) {
-    if (isPaymentOptionEnabled(paymentOption, options)) {
-      result.push(paymentOptionIDs[paymentOption]);
-    }
+  promises = paymentOptionPriority.map(function (paymentOption) {
+    return getPaymentOption(paymentOption, options);
   });
 
-  if (result.length === 0) {
-    throw new DropinError('No valid payment options available.');
-  }
+  return Promise.all(promises).then(function (result) {
+    result = result.filter(function (item) {
+      return item.success;
+    });
 
-  return result;
+    if (result.length === 0) {
+      return Promise.reject(new DropinError('No valid payment options available.'));
+    }
+
+    return result.map(function (item) { return item.id; });
+  });
+}
+
+function getPaymentOption(paymentOption, options) {
+  return isPaymentOptionEnabled(paymentOption, options).then(function (success) {
+    return {
+      success: success,
+      id: paymentOptionIDs[paymentOption]
+    };
+  });
 }
 
 function isPaymentOptionEnabled(paymentOption, options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var applePayEnabled, applePayBrowserSupported, venmoEnabled, venmoBrowserSupported;
 
-  if (paymentOption === paymentOptionIDs.card) {
-    return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
-  } else if (paymentOption === paymentOptionIDs.paypal) {
-    return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
-  } else if (paymentOption === paymentOptionIDs.paypalCredit) {
-    return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
-  } else if (paymentOption === paymentOptionIDs.applePay) {
-    applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
-    applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
+  return Promise.resolve().then(function () {
+    var applePayEnabled, applePayBrowserSupported, venmoEnabled, venmoBrowserSupported;
 
-    return applePayEnabled && applePayBrowserSupported;
-  } else if (paymentOption === paymentOptionIDs.googlePay) {
-    return gatewayConfiguration.androidPay && Boolean(options.merchantConfiguration.googlePay);
-  } else if (paymentOption === paymentOptionIDs.venmo) {
-    venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
-    venmoBrowserSupported = btVenmo.isBrowserSupported(options.merchantConfiguration.venmo);
+    if (paymentOption === paymentOptionIDs.card) {
+      return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
+    } else if (paymentOption === paymentOptionIDs.paypal) {
+      return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
+    } else if (paymentOption === paymentOptionIDs.paypalCredit) {
+      return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
+    } else if (paymentOption === paymentOptionIDs.applePay) {
+      applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
+      applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
 
-    return venmoEnabled && venmoBrowserSupported;
-  }
-  throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
+      return applePayEnabled && applePayBrowserSupported;
+    } else if (paymentOption === paymentOptionIDs.googlePay) {
+      return GooglePayView.isEnabled(options);
+    } else if (paymentOption === paymentOptionIDs.venmo) {
+      venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
+      venmoBrowserSupported = btVenmo.isBrowserSupported(options.merchantConfiguration.venmo);
+
+      return venmoEnabled && venmoBrowserSupported;
+    }
+
+    return Promise.reject(new DropinError('paymentOptionPriority: Invalid payment option specified.'));
+  });
 }
 
 function canShowVaultedPaymentMethodType(paymentMethodType) {
