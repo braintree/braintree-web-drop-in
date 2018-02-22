@@ -34,14 +34,15 @@ describe('BasePayPalView', function () {
     this.sandbox.stub(this.model, 'reportError');
 
     this.configuration = fake.configuration();
+    this.fakeClient = {
+      getConfiguration: this.sandbox.stub().returns(this.configuration),
+      request: this.sandbox.spy()
+    };
     this.paypalViewOptions = {
       strings: {},
       element: this.element,
       model: this.model,
-      client: {
-        getConfiguration: this.sandbox.stub().returns(this.configuration),
-        request: this.sandbox.spy()
-      }
+      client: this.fakeClient
     };
     this.paypalInstance = {
       createPayment: this.sandbox.stub().resolves(),
@@ -693,6 +694,28 @@ describe('BasePayPalView', function () {
         flow: 'checkout',
         amount: '5.32',
         currency: 'USD'
+      });
+    });
+  });
+
+  describe('isEnabled', function () {
+    beforeEach(function () {
+      this.options = {
+        client: this.fakeClient
+      };
+    });
+
+    it('resolves true if merchant has PayPal enabled on the gateway', function () {
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(true);
+      });
+    });
+
+    it('resolves false if merchant does not have PayPal enabled on the gateway', function () {
+      this.configuration.gatewayConfiguration.paypalEnabled = false;
+
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
       });
     });
   });
