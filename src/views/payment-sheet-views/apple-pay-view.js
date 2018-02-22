@@ -4,6 +4,8 @@ var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btApplePay = require('braintree-web/apple-pay');
 var DropinError = require('../../lib/dropin-error');
+var isHTTPS = require('../../lib/is-https');
+var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
 function ApplePayView() {
@@ -86,6 +88,24 @@ ApplePayView.prototype._showPaymentSheet = function () {
 
 ApplePayView.prototype.updateConfiguration = function (key, value) {
   this.applePayConfiguration[key] = value;
+};
+
+ApplePayView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
+  var applePayBrowserSupported;
+
+  if (!applePayEnabled) {
+    return Promise.resolve(false);
+  }
+
+  applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS();
+
+  if (!applePayBrowserSupported) {
+    return Promise.resolve(false);
+  }
+
+  return Promise.resolve(Boolean(global.ApplePaySession.canMakePayments()));
 };
 
 module.exports = ApplePayView;
