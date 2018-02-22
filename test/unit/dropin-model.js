@@ -9,7 +9,7 @@ var fake = require('../helpers/fake');
 var throwIfResolves = require('../helpers/throw-if-resolves');
 var venmo = require('braintree-web/venmo');
 
-describe.only('DropinModel', function () {
+describe('DropinModel', function () {
   beforeEach(function () {
     this.configuration = fake.configuration();
 
