@@ -14,50 +14,53 @@ var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'u
 describe('ApplePayView', function () {
   beforeEach(function () {
     var model = new DropinModel(fake.modelOptions());
-    var fakeClient = {
-      getConfiguration: this.sandbox.stub().returns(fake.configuration()),
-      getVersion: function () {}
-    };
 
-    this.div = document.createElement('div');
+    return model.initialize().then(function () {
+      var fakeClient = {
+        getConfiguration: this.sandbox.stub().returns(fake.configuration()),
+        getVersion: function () {}
+      };
 
-    this.fakeApplePaySession = {
-      begin: this.sandbox.stub(),
-      completeMerchantValidation: this.sandbox.stub(),
-      completePayment: this.sandbox.stub()
-    };
+      this.div = document.createElement('div');
 
-    global.ApplePaySession = this.sandbox.stub().returns(this.fakeApplePaySession);
-    global.ApplePaySession.canMakePayments = function () { return true; };
-    global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(true);
-    global.ApplePaySession.STATUS_FAILURE = 'failure';
-    global.ApplePaySession.STATUS_SUCCESS = 'success';
-    this.div.innerHTML = mainHTML;
-    document.body.appendChild(this.div);
+      this.fakeApplePaySession = {
+        begin: this.sandbox.stub(),
+        completeMerchantValidation: this.sandbox.stub(),
+        completePayment: this.sandbox.stub()
+      };
 
-    this.fakePaymentRequest = {
-      countryCode: 'defined',
-      currencyCode: 'defined',
-      merchantCapabilities: ['defined'],
-      supportedNetworks: ['defined']
-    };
-    model.merchantConfiguration.applePay = {
-      paymentRequest: this.fakePaymentRequest,
-      displayName: 'Unit Test Display Name'
-    };
-    this.applePayViewOptions = {
-      client: fakeClient,
-      element: document.body.querySelector('.braintree-sheet.braintree-applePay'),
-      model: model,
-      strings: {}
-    };
+      global.ApplePaySession = this.sandbox.stub().returns(this.fakeApplePaySession);
+      global.ApplePaySession.canMakePayments = function () { return true; };
+      global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(true);
+      global.ApplePaySession.STATUS_FAILURE = 'failure';
+      global.ApplePaySession.STATUS_SUCCESS = 'success';
+      this.div.innerHTML = mainHTML;
+      document.body.appendChild(this.div);
 
-    this.fakeApplePayInstance = {
-      createPaymentRequest: this.sandbox.stub().returns({}),
-      performValidation: this.sandbox.stub().resolves(),
-      tokenize: this.sandbox.stub().resolves()
-    };
-    this.sandbox.stub(btApplePay, 'create').resolves(this.fakeApplePayInstance);
+      this.fakePaymentRequest = {
+        countryCode: 'defined',
+        currencyCode: 'defined',
+        merchantCapabilities: ['defined'],
+        supportedNetworks: ['defined']
+      };
+      model.merchantConfiguration.applePay = {
+        paymentRequest: this.fakePaymentRequest,
+        displayName: 'Unit Test Display Name'
+      };
+      this.applePayViewOptions = {
+        client: fakeClient,
+        element: document.body.querySelector('.braintree-sheet.braintree-applePay'),
+        model: model,
+        strings: {}
+      };
+
+      this.fakeApplePayInstance = {
+        createPaymentRequest: this.sandbox.stub().returns({}),
+        performValidation: this.sandbox.stub().resolves(),
+        tokenize: this.sandbox.stub().resolves()
+      };
+      this.sandbox.stub(btApplePay, 'create').resolves(this.fakeApplePayInstance);
+    }.bind(this));
   });
 
   afterEach(function () {
@@ -249,7 +252,10 @@ describe('ApplePayView', function () {
             this.fakeApplePayInstance.tokenize.resolves({foo: 'bar'});
             this.fakeApplePaySession.completePayment = function (status) {
               expect(status).to.equal(global.ApplePaySession.STATUS_SUCCESS);
-              done();
+
+              setTimeout(function () {
+                done();
+              }, 200);
             };
 
             this.buttonClickHandler();

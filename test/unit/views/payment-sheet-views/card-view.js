@@ -50,7 +50,7 @@ describe('CardView', function () {
       this.sandbox.stub(hostedFields, 'create').resolves(this.hostedFieldsInstance);
 
       this.model = new DropinModel(fake.modelOptions());
-      return this.model.setupPaymentMethodAvailability();
+      return this.model.initialize();
     });
 
     it('has cvv if supplied in challenges', function () {
@@ -650,7 +650,7 @@ describe('CardView', function () {
       this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
 
       this.model = new DropinModel(fake.modelOptions());
-      return this.model.setupPaymentMethodAvailability();
+      return this.model.initialize();
     });
 
     it('calls the callback with an error when tokenize fails', function () {
@@ -692,7 +692,7 @@ describe('CardView', function () {
       var self = this;
       var model = new DropinModel(fake.modelOptions());
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         self.context = {
           element: self.element,
           _generateFieldSelector: CardView.prototype._generateFieldSelector,
@@ -1692,7 +1692,7 @@ describe('CardView', function () {
       };
       self.model = new DropinModel(fake.modelOptions());
 
-      return self.model.setupPaymentMethodAvailability().then(function () {
+      return self.model.initialize().then(function () {
         self.context = {
           element: self.element,
           getElementById: BaseView.prototype.getElementById,

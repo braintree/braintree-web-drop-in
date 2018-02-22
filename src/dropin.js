@@ -288,7 +288,7 @@ Dropin.prototype._initialize = function (callback) {
       paymentMethods: paymentMethods
     });
 
-    return self._model.setupPaymentMethodAvailability();
+    return self._model.initialize();
   }).then(function () {
     var paypalRequired;
 

@@ -48,18 +48,21 @@ describe('PaymentMethodsView', function () {
       modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       model = new DropinModel(modelOptions);
-      paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: {
-          paypal: modelOptions.merchantConfiguration.paypal,
-          authorization: fake.clientTokenWithCustomerID
-        },
-        strings: strings
-      });
 
-      expect(paymentMethodsViews.views.length).to.equal(2);
-      expect(paymentMethodsViews.container.childElementCount).to.equal(2);
+      return model.initialize().then(function () {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: {
+            paypal: modelOptions.merchantConfiguration.paypal,
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        expect(paymentMethodsViews.views.length).to.equal(2);
+        expect(paymentMethodsViews.container.childElementCount).to.equal(2);
+      }.bind(this));
     });
 
     it('puts default payment method as first item in list', function () {
@@ -85,16 +88,19 @@ describe('PaymentMethodsView', function () {
       modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       model = new DropinModel(modelOptions);
-      paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: modelOptions.merchantConfiguration,
-        strings: strings
-      });
 
-      firstChildLabel = paymentMethodsViews.container.firstChild.querySelector('.braintree-method__label .braintree-method__label--small');
+      return model.initialize().then(function () {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: modelOptions.merchantConfiguration,
+          strings: strings
+        });
 
-      expect(firstChildLabel.textContent).to.equal(strings.PayPal);
+        firstChildLabel = paymentMethodsViews.container.firstChild.querySelector('.braintree-method__label .braintree-method__label--small');
+
+        expect(firstChildLabel.textContent).to.equal(strings.PayPal);
+      }.bind(this));
     });
 
     it('does not add payment methods if there are none', function () {
@@ -110,18 +116,21 @@ describe('PaymentMethodsView', function () {
       };
 
       model = new DropinModel(modelOptions);
-      methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
-      paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: {
-          authorization: fake.clientTokenWithCustomerID
-        },
-        strings: strings
-      });
 
-      expect(paymentMethodsViews.views.length).to.equal(0);
-      expect(methodsContainer.children.length).to.equal(0);
+      return model.initialize().then(function () {
+        methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
+        paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        expect(paymentMethodsViews.views.length).to.equal(0);
+        expect(methodsContainer.children.length).to.equal(0);
+      }.bind(this));
     });
 
     it('changes the payment method view when the active payment method changes', function () {
@@ -134,25 +143,28 @@ describe('PaymentMethodsView', function () {
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [{foo: 'bar'}, fakePaymentMethod];
       model = new DropinModel(modelOptions);
-      model.changeActivePaymentMethod({foo: 'bar'});
 
-      paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: {
-          authorization: fake.clientTokenWithCustomerID
-        },
-        strings: strings
-      });
+      return model.initialize().then(function () {
+        model.changeActivePaymentMethod({foo: 'bar'});
 
-      paymentMethodsViews._addPaymentMethod(fakePaymentMethod);
+        paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
 
-      model.changeActivePaymentMethod(fakePaymentMethod);
+        paymentMethodsViews._addPaymentMethod(fakePaymentMethod);
 
-      expect(paymentMethodsViews.activeMethodView.paymentMethod).to.equal(fakePaymentMethod);
-      this.sandbox.clock.tick(1001);
-      expect(paymentMethodsViews.activeMethodView.element.className).to.contain('braintree-method--active');
-      this.sandbox.clock.restore();
+        model.changeActivePaymentMethod(fakePaymentMethod);
+
+        expect(paymentMethodsViews.activeMethodView.paymentMethod).to.equal(fakePaymentMethod);
+        this.sandbox.clock.tick(1001);
+        expect(paymentMethodsViews.activeMethodView.element.className).to.contain('braintree-method--active');
+        this.sandbox.clock.restore();
+      }.bind(this));
     });
 
     it('updates the paying with label when the active payment method changes', function () {
@@ -164,25 +176,28 @@ describe('PaymentMethodsView', function () {
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [fakePayPal, fakeCard];
       model = new DropinModel(modelOptions);
-      model.isGuestCheckout = false;
 
-      paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: {
-          authorization: fake.clientTokenWithCustomerID
-        },
-        strings: strings
-      });
+      return model.initialize().then(function () {
+        model.isGuestCheckout = false;
 
-      paymentMethodsViews._addPaymentMethod(fakePayPal);
-      paymentMethodsViews._addPaymentMethod(fakeCard);
+        paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
 
-      model.changeActivePaymentMethod(fakeCard);
-      expect(paymentMethodsViews.getElementById('methods-label').textContent).to.equal('Paying with Card');
+        paymentMethodsViews._addPaymentMethod(fakePayPal);
+        paymentMethodsViews._addPaymentMethod(fakeCard);
 
-      model.changeActivePaymentMethod(fakePayPal);
-      expect(paymentMethodsViews.getElementById('methods-label').textContent).to.equal('Paying with PayPal');
+        model.changeActivePaymentMethod(fakeCard);
+        expect(paymentMethodsViews.getElementById('methods-label').textContent).to.equal('Paying with Card');
+
+        model.changeActivePaymentMethod(fakePayPal);
+        expect(paymentMethodsViews.getElementById('methods-label').textContent).to.equal('Paying with PayPal');
+      }.bind(this));
     });
   });
 
@@ -214,19 +229,22 @@ describe('PaymentMethodsView', function () {
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.paymentMethods = [this.fakePaymentMethod];
       model = new DropinModel(modelOptions);
-      paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: {
-          authorization: fake.clientTokenWithCustomerID
-        },
-        strings: strings
-      });
 
-      model.addPaymentMethod({foo: 'bar'});
+      return model.initialize().then(function () {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
 
-      expect(paymentMethodsViews.views.length).to.equal(2);
-      expect(methodsContainer.childElementCount).to.equal(2);
+        model.addPaymentMethod({foo: 'bar'});
+
+        expect(paymentMethodsViews.views.length).to.equal(2);
+        expect(methodsContainer.childElementCount).to.equal(2);
+      }.bind(this));
     });
 
     it('removes other payment methods in guest checkout', function () {
@@ -237,19 +255,22 @@ describe('PaymentMethodsView', function () {
       modelOptions.merchantConfiguration.authorization = fake.clientToken;
       modelOptions.paymentMethods = [this.fakePaymentMethod];
       model = new DropinModel(modelOptions);
-      paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: {
-          authorization: fake.clientToken
-        },
-        strings: strings
-      });
 
-      model.addPaymentMethod({foo: 'bar'});
+      return model.initialize().then(function () {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientToken
+          },
+          strings: strings
+        });
 
-      expect(paymentMethodsViews.views.length).to.equal(1);
-      expect(methodsContainer.childElementCount).to.equal(1);
+        model.addPaymentMethod({foo: 'bar'});
+
+        expect(paymentMethodsViews.views.length).to.equal(1);
+        expect(methodsContainer.childElementCount).to.equal(1);
+      }.bind(this));
     });
 
     it('does not try to remove a payment method if none exists in guest checkout', function () {
@@ -259,19 +280,22 @@ describe('PaymentMethodsView', function () {
 
       modelOptions.merchantConfiguration.authorization = fake.clientToken;
       model = new DropinModel(modelOptions);
-      paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: {
-          authorization: fake.clientToken
-        },
-        strings: strings
-      });
 
-      model.addPaymentMethod({foo: 'bar'});
+      return model.initialize().then(function () {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientToken
+          },
+          strings: strings
+        });
 
-      expect(paymentMethodsViews.views.length).to.equal(1);
-      expect(methodsContainer.childElementCount).to.equal(1);
+        model.addPaymentMethod({foo: 'bar'});
+
+        expect(paymentMethodsViews.views.length).to.equal(1);
+        expect(methodsContainer.childElementCount).to.equal(1);
+      }.bind(this));
     });
   });
 
@@ -283,20 +307,22 @@ describe('PaymentMethodsView', function () {
       modelOptions.merchantConfiguration.authorization = fake.clientToken;
       model = new DropinModel(modelOptions);
 
-      this.paymentMethodsViews = new PaymentMethodsView({
-        element: this.element,
-        model: model,
-        merchantConfiguration: {
-          authorization: fake.clientToken
-        },
-        strings: strings
-      });
-      this.activeMethodView = {
-        setActive: this.sandbox.stub()
-      };
+      return model.initialize().then(function () {
+        this.paymentMethodsViews = new PaymentMethodsView({
+          element: this.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientToken
+          },
+          strings: strings
+        });
+        this.activeMethodView = {
+          setActive: this.sandbox.stub()
+        };
 
-      this.paymentMethodsViews.activeMethodView = this.activeMethodView;
-      this.sandbox.stub(classlist, 'add');
+        this.paymentMethodsViews.activeMethodView = this.activeMethodView;
+        this.sandbox.stub(classlist, 'add');
+      }.bind(this));
     });
 
     it('sets the active method view to not active', function () {
@@ -333,24 +359,27 @@ describe('PaymentMethodsView', function () {
       };
 
       this.model = new DropinModel(fake.modelOptions());
-      this.paymentMethodsViews = new PaymentMethodsView({
-        element: document.createElement('div'),
-        model: this.model,
-        merchantConfiguration: {
-          authorization: fake.clientTokenWithCustomerID
-        },
-        strings: strings
-      });
-      this.paymentMethodsViews.views.push({
-        paymentMethod: this.fakePaymentMethod,
-        element: this.element
-      });
-      this.paymentMethodsViews.container = {
-        removeChild: this.sandbox.stub()
-      };
-      this.paymentMethodsViews._headingLabel = {
-        innerHTML: 'Paying with'
-      };
+
+      return this.model.initialize().then(function () {
+        this.paymentMethodsViews = new PaymentMethodsView({
+          element: document.createElement('div'),
+          model: this.model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+        this.paymentMethodsViews.views.push({
+          paymentMethod: this.fakePaymentMethod,
+          element: this.element
+        });
+        this.paymentMethodsViews.container = {
+          removeChild: this.sandbox.stub()
+        };
+        this.paymentMethodsViews._headingLabel = {
+          innerHTML: 'Paying with'
+        };
+      }.bind(this));
     });
 
     it('removes specified payment method from views', function () {
@@ -387,19 +416,21 @@ describe('PaymentMethodsView', function () {
       var element = document.createElement('div');
       var model = new DropinModel(fake.modelOptions());
 
-      element.innerHTML = mainHTML;
-      paymentMethodsViews = new PaymentMethodsView({
-        element: element,
-        model: model,
-        merchantConfiguration: {
-          authorization: fake.clientTokenWithCustomerID
-        },
-        strings: strings
-      });
+      return model.initialize().then(function () {
+        element.innerHTML = mainHTML;
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
 
-      paymentMethodsViews.activeMethodView = fakeActiveMethodView;
+        paymentMethodsViews.activeMethodView = fakeActiveMethodView;
 
-      return paymentMethodsViews.requestPaymentMethod().then(function (payload) {
+        return paymentMethodsViews.requestPaymentMethod();
+      }).then(function (payload) {
         expect(payload).to.equal(fakeActiveMethodView.paymentMethod);
       });
     });

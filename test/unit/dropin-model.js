@@ -85,7 +85,7 @@ describe('DropinModel', function () {
     });
   });
 
-  describe('setupPaymentMethodAvailability', function () {
+  describe('initialize', function () {
     it('sets existing payment methods as _paymentMethods', function () {
       var model;
 
@@ -93,7 +93,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([{type: 'CreditCard', details: {lastTwo: '11'}}]);
       });
     });
@@ -101,7 +101,7 @@ describe('DropinModel', function () {
     it('_paymentMethods is empty if no existing payment methods', function () {
       var model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([]);
       });
     });
@@ -119,7 +119,7 @@ describe('DropinModel', function () {
       this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([
           {type: 'CreditCard', details: {lastTwo: '11'}},
           {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
@@ -138,7 +138,7 @@ describe('DropinModel', function () {
       delete this.modelOptions.merchantConfiguration.paypal;
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([
           {type: 'CreditCard', details: {lastTwo: '11'}}
         ]);
@@ -162,7 +162,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([
           {type: 'CreditCard', details: {lastTwo: '11'}},
           {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
@@ -177,7 +177,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(throwIfResolves).catch(function (err) {
+      return model.initialize().then(throwIfResolves).catch(function (err) {
         expect(err.message).to.equal('No valid payment options available.');
       });
     });
@@ -191,7 +191,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(throwIfResolves).catch(function (err) {
+      return model.initialize().then(throwIfResolves).catch(function (err) {
         expect(err.message).to.equal('No valid payment options available.');
       });
     });
@@ -199,7 +199,7 @@ describe('DropinModel', function () {
     it('supports cards', function () {
       var model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal([
           'card'
         ]);
@@ -219,7 +219,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']);
       });
     });
@@ -233,7 +233,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
       });
     });
@@ -247,7 +247,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
       });
     });
@@ -261,7 +261,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(throwIfResolves).catch(function (err) {
+      return model.initialize().then(throwIfResolves).catch(function (err) {
         expect(err.message).to.equal('paymentOptionPriority: Invalid payment option specified.');
       });
     });
@@ -274,7 +274,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card']);
       });
     });
@@ -287,7 +287,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card']);
       });
     });
@@ -300,7 +300,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card']);
       });
     });
@@ -313,14 +313,14 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card']);
 
         venmo.isBrowserSupported.returns(true);
 
         model = new DropinModel(this.modelOptions);
 
-        return model.setupPaymentMethodAvailability();
+        return model.initialize();
       }.bind(this)).then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card', 'venmo']);
       });
@@ -336,7 +336,7 @@ describe('DropinModel', function () {
 
       model = new DropinModel(this.modelOptions); // eslint-disable-line no-new
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(venmo.isBrowserSupported).to.be.calledWith({
           allowNewBrowserTab: false
         });
@@ -347,7 +347,7 @@ describe('DropinModel', function () {
   describe('addPaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
-      return this.model.setupPaymentMethodAvailability();
+      return this.model.initialize();
     });
 
     it('adds a new payment method to _paymentMethods', function () {
@@ -381,7 +381,7 @@ describe('DropinModel', function () {
   describe('removePaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
-      return this.model.setupPaymentMethodAvailability();
+      return this.model.initialize();
     });
 
     it('removes a payment method from _paymentMethods', function () {
@@ -680,9 +680,9 @@ describe('DropinModel', function () {
     it('returns false initially if no payment methods are passed in', function () {
       var model = new DropinModel(this.modelOptions);
 
-      model.setupPaymentMethodAvailability();
+      model.initialize();
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.isPaymentMethodRequestable()).to.equal(false);
       });
     });
@@ -693,7 +693,7 @@ describe('DropinModel', function () {
       this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
       model = new DropinModel(this.modelOptions);
 
-      return model.setupPaymentMethodAvailability().then(function () {
+      return model.initialize().then(function () {
         expect(model.isPaymentMethodRequestable()).to.equal(true);
       });
     });

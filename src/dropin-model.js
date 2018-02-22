@@ -43,7 +43,7 @@ DropinModel.prototype = Object.create(EventEmitter.prototype, {
   constructor: DropinModel
 });
 
-DropinModel.prototype.setupPaymentMethodAvailability = function () {
+DropinModel.prototype.initialize = function () {
   return getSupportedPaymentOptions(this._options).then(function (paymentOptions) {
     this.supportedPaymentOptions = paymentOptions;
     this._paymentMethods = this._getSupportedPaymentMethods(this._options.paymentMethods);
