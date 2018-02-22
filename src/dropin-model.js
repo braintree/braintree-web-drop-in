@@ -1,6 +1,5 @@
 'use strict';
 
-var btVenmo = require('braintree-web/venmo');
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('./lib/event-emitter');
 var constants = require('./constants');
@@ -8,8 +7,7 @@ var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var Promise = require('./lib/promise');
-var GooglePayView = require('./views/payment-sheet-views/google-pay-view');
-var isHTTPS = require('./lib/is-https');
+var paymentSheetViews = require('./views/payment-sheet-views');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
   paymentMethodTypes.applePay,
@@ -251,32 +249,15 @@ function getPaymentOption(paymentOption, options) {
 }
 
 function isPaymentOptionEnabled(paymentOption, options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var SheetView = paymentSheetViews[paymentOptionIDs[paymentOption]];
 
-  return Promise.resolve().then(function () {
-    var applePayEnabled, applePayBrowserSupported, venmoEnabled, venmoBrowserSupported;
-
-    if (paymentOption === paymentOptionIDs.card) {
-      return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
-    } else if (paymentOption === paymentOptionIDs.paypal) {
-      return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
-    } else if (paymentOption === paymentOptionIDs.paypalCredit) {
-      return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
-    } else if (paymentOption === paymentOptionIDs.applePay) {
-      applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
-      applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
-
-      return applePayEnabled && applePayBrowserSupported;
-    } else if (paymentOption === paymentOptionIDs.googlePay) {
-      return GooglePayView.isEnabled(options);
-    } else if (paymentOption === paymentOptionIDs.venmo) {
-      venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
-      venmoBrowserSupported = btVenmo.isBrowserSupported(options.merchantConfiguration.venmo);
-
-      return venmoEnabled && venmoBrowserSupported;
-    }
-
+  if (!SheetView) {
     return Promise.reject(new DropinError('paymentOptionPriority: Invalid payment option specified.'));
+  }
+
+  return SheetView.isEnabled({
+    client: options.client,
+    merchantConfiguration: options.merchantConfiguration
   });
 }
 

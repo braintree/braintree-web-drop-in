@@ -2,12 +2,16 @@
 
 var analytics = require('../../src/lib/analytics');
 var DropinModel = require('../../src/dropin-model');
+var ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
+var CardView = require('../../src/views/payment-sheet-views/card-view');
 var GooglePayView = require('../../src/views/payment-sheet-views/google-pay-view');
+var PayPalView = require('../../src/views/payment-sheet-views/paypal-view');
+var PayPalCreditView = require('../../src/views/payment-sheet-views/paypal-credit-view');
+var VenmoView = require('../../src/views/payment-sheet-views/venmo-view');
 var EventEmitter = require('../../src/lib/event-emitter');
 var isHTTPS = require('../../src/lib/is-https');
 var fake = require('../helpers/fake');
 var throwIfResolves = require('../helpers/throw-if-resolves');
-var venmo = require('braintree-web/venmo');
 
 describe('DropinModel', function () {
   beforeEach(function () {
@@ -86,6 +90,15 @@ describe('DropinModel', function () {
   });
 
   describe('initialize', function () {
+    beforeEach(function () {
+      this.sandbox.stub(ApplePayView, 'isEnabled').resolves(true);
+      this.sandbox.stub(CardView, 'isEnabled').resolves(true);
+      this.sandbox.stub(GooglePayView, 'isEnabled').resolves(true);
+      this.sandbox.stub(PayPalView, 'isEnabled').resolves(true);
+      this.sandbox.stub(PayPalCreditView, 'isEnabled').resolves(true);
+      this.sandbox.stub(VenmoView, 'isEnabled').resolves(true);
+    });
+
     it('sets existing payment methods as _paymentMethods', function () {
       var model;
 
@@ -135,7 +148,9 @@ describe('DropinModel', function () {
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
       ];
 
-      delete this.modelOptions.merchantConfiguration.paypal;
+      PayPalView.isEnabled.resolves(false);
+      PayPalCreditView.isEnabled.resolves(false);
+
       model = new DropinModel(this.modelOptions);
 
       return model.initialize().then(function () {
@@ -148,10 +163,6 @@ describe('DropinModel', function () {
     it('ignores payment vaulted payment methods that cannot be used client side', function () {
       var model;
 
-      this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
-      this.modelOptions.merchantConfiguration.applePay = true;
-      this.modelOptions.merchantConfiguration.googlePay = true;
-      this.modelOptions.merchantConfiguration.venmo = true;
       this.modelOptions.paymentMethods = [
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
@@ -171,11 +182,14 @@ describe('DropinModel', function () {
     });
 
     it('rejects with an error when there are no payment options', function () {
-      var model;
+      var model = new DropinModel(this.modelOptions);
 
-      this.configuration.gatewayConfiguration.creditCards.supportedCardTypes = [];
-
-      model = new DropinModel(this.modelOptions);
+      ApplePayView.isEnabled.resolves(false);
+      CardView.isEnabled.resolves(false);
+      GooglePayView.isEnabled.resolves(false);
+      PayPalView.isEnabled.resolves(false);
+      PayPalCreditView.isEnabled.resolves(false);
+      VenmoView.isEnabled.resolves(false);
 
       return model.initialize().then(throwIfResolves).catch(function (err) {
         expect(err.message).to.equal('No valid payment options available.');
@@ -196,28 +210,8 @@ describe('DropinModel', function () {
       });
     });
 
-    it('supports cards', function () {
-      var model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model.supportedPaymentOptions).to.deep.equal([
-          'card'
-        ]);
-      });
-    });
-
     it('supports cards, PayPal, PayPal Credit, Apple Pay, Google Pay, and Venmo and defaults to showing them in correct paymentOptionPriority', function () {
-      var model;
-
-      this.sandbox.stub(venmo, 'isBrowserSupported').returns(true);
-      this.configuration.gatewayConfiguration.paypalEnabled = true;
-      this.modelOptions.merchantConfiguration.paypal = true;
-      this.modelOptions.merchantConfiguration.paypalCredit = true;
-      this.modelOptions.merchantConfiguration.applePay = true;
-      this.sandbox.stub(GooglePayView, 'isEnabled').resolves(true);
-      this.modelOptions.merchantConfiguration.venmo = true;
-
-      model = new DropinModel(this.modelOptions);
+      var model = new DropinModel(this.modelOptions);
 
       return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']);
@@ -252,6 +246,43 @@ describe('DropinModel', function () {
       });
     });
 
+    it('calls isEnabled on payment method view to determine if payment method is available', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(ApplePayView.isEnabled).to.be.calledOnce;
+        expect(ApplePayView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(CardView.isEnabled).to.be.calledOnce;
+        expect(CardView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(GooglePayView.isEnabled).to.be.calledOnce;
+        expect(GooglePayView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(PayPalView.isEnabled).to.be.calledOnce;
+        expect(PayPalView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(PayPalCreditView.isEnabled).to.be.calledOnce;
+        expect(PayPalCreditView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(VenmoView.isEnabled).to.be.calledOnce;
+        expect(VenmoView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+      }.bind(this));
+    });
+
     it('rejects with an error when an unrecognized payment option is specified', function () {
       var model;
 
@@ -263,83 +294,6 @@ describe('DropinModel', function () {
 
       return model.initialize().then(throwIfResolves).catch(function (err) {
         expect(err.message).to.equal('paymentOptionPriority: Invalid payment option specified.');
-      });
-    });
-
-    it('does not support Apple Pay when the browser does not support Apple Pay', function () {
-      var model;
-
-      delete global.ApplePaySession;
-      this.modelOptions.merchantConfiguration.applePay = true;
-
-      model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
-      });
-    });
-
-    it('does not support Apple Pay when the page is not loaded over https', function () {
-      var model;
-
-      isHTTPS.isHTTPS.returns(false);
-      this.modelOptions.merchantConfiguration.applePay = true;
-
-      model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
-      });
-    });
-
-    it('does not support Apple Pay when the device does not support Apple Pay', function () {
-      var model;
-
-      global.ApplePaySession.canMakePayments.returns(false);
-      this.modelOptions.merchantConfiguration.applePay = true;
-
-      model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
-      });
-    });
-
-    it('does not support Venmo when the browser does not support Venmo', function () {
-      var model;
-
-      this.modelOptions.merchantConfiguration.venmo = true;
-      this.sandbox.stub(venmo, 'isBrowserSupported').returns(false);
-
-      model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
-
-        venmo.isBrowserSupported.returns(true);
-
-        model = new DropinModel(this.modelOptions);
-
-        return model.initialize();
-      }.bind(this)).then(function () {
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'venmo']);
-      });
-    });
-
-    it('passes merchant venmo configuration into isBrowserSupported', function () {
-      var model;
-
-      this.modelOptions.merchantConfiguration.venmo = {
-        allowNewBrowserTab: false
-      };
-      this.sandbox.stub(venmo, 'isBrowserSupported').returns(false);
-
-      model = new DropinModel(this.modelOptions); // eslint-disable-line no-new
-
-      return model.initialize().then(function () {
-        expect(venmo.isBrowserSupported).to.be.calledWith({
-          allowNewBrowserTab: false
-        });
       });
     });
   });
@@ -679,8 +633,6 @@ describe('DropinModel', function () {
   describe('isPaymentMethodRequestable', function () {
     it('returns false initially if no payment methods are passed in', function () {
       var model = new DropinModel(this.modelOptions);
-
-      model.initialize();
 
       return model.initialize().then(function () {
         expect(model.isPaymentMethodRequestable()).to.equal(false);
