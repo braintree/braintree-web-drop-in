@@ -587,6 +587,12 @@ CardView.prototype._isCardTypeSupported = function (cardType) {
   return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
 
+CardView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+
+  return Promise.resolve(gatewayConfiguration.creditCards.supportedCardTypes.length > 0);
+};
+
 function isNormalFieldElement(element) {
   return element.id.indexOf('braintree__card-view-input') !== -1;
 }

@@ -27,7 +27,7 @@ describe('CardView', function () {
     this.element = document.body.querySelector('.braintree-sheet.braintree-card');
 
     this.client = {
-      getConfiguration: fake.configuration,
+      getConfiguration: this.sandbox.stub().returns(fake.configuration()),
       getVersion: function () { return braintreeWebVersion; }
     };
   });
@@ -609,6 +609,38 @@ describe('CardView', function () {
         expect(hostedFieldsConfiguredStyles['input::-ms-clear']).to.deep.equal({
           color: 'transparent'
         });
+      });
+    });
+  });
+
+  describe('isEnabled', function () {
+    beforeEach(function () {
+      this.fakeOptions = {
+        client: this.client
+      };
+    });
+
+    it('resovles with true when there is at least one supported card type', function () {
+      var configuration = fake.configuration();
+
+      configuration.gatewayConfiguration.creditCards.supportedCardTypes = ['visa'];
+
+      this.client.getConfiguration.returns(configuration);
+
+      return CardView.isEnabled(this.fakeOptions).then(function (result) {
+        expect(result).to.equal(true);
+      });
+    });
+
+    it('resovles with false when there are no supported card types', function () {
+      var configuration = fake.configuration();
+
+      configuration.gatewayConfiguration.creditCards.supportedCardTypes = [];
+
+      this.client.getConfiguration.returns(configuration);
+
+      return CardView.isEnabled(this.fakeOptions).then(function (result) {
+        expect(result).to.equal(false);
       });
     });
   });
