@@ -8,6 +8,7 @@ var constants = require('../../constants');
 var assets = require('../../lib/assets');
 var classlist = require('../../lib/classlist');
 var Promise = require('../../lib/promise');
+var analytics = require('../../lib/analytics');
 
 function GooglePayView() {
   BaseView.apply(this, arguments);
@@ -60,14 +61,19 @@ GooglePayView.prototype.tokenize = function () {
     tokenizePayload.rawResponse = rawResponse;
     self.model.addPaymentMethod(tokenizePayload);
   }).catch(function (err) {
+    var reportedError = err;
+
     if (err.statusCode === 'DEVELOPER_ERROR') {
       console.error(err); // eslint-disable-line no-console
-      err = 'developerError';
+      reportedError = 'developerError';
     } else if (err.statusCode === 'CANCELED') {
+      analytics.sendEvent(self.client, 'googlepay.loadPaymentData.canceled');
       return;
+    } else if (err.statusCode) {
+      analytics.sendEvent(self.client, 'googlepay.loadPaymentData.failed');
     }
 
-    self.model.reportError(err);
+    self.model.reportError(reportedError);
   });
 };
 

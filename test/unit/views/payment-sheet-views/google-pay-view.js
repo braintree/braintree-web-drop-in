@@ -6,6 +6,7 @@ var GooglePayView = require('../../../../src/views/payment-sheet-views/google-pa
 var btGooglePay = require('braintree-web/google-payment');
 var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
+var analytics = require('../../../../src/lib/analytics');
 var assets = require('../../../../src/lib/assets');
 var Promise = require('../../../../src/lib/promise');
 var fake = require('../../../helpers/fake');
@@ -70,6 +71,7 @@ describe('GooglePayView', function () {
       email: 'foo@example.com'
     };
     this.sandbox.stub(btGooglePay, 'create').resolves(this.fakeGooglePayInstance);
+    this.sandbox.stub(analytics, 'sendEvent');
 
     this.FakePaymentClient = function FakePayment() {};
     this.FakePaymentClient.prototype.isReadyToPay = this.sandbox.stub().resolves({result: true});
@@ -278,6 +280,18 @@ describe('GooglePayView', function () {
       });
     });
 
+    it('sends analytics when loadPaymentData call fails', function () {
+      var error = new Error('loadPaymentData error');
+
+      error.statusCode = 'CODE';
+      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(analytics.sendEvent).to.be.calledOnce;
+        expect(analytics.sendEvent).to.be.calledWith(this.fakeClient, 'googlepay.loadPaymentData.failed');
+      }.bind(this));
+    });
+
     it('does not report erorr if statusCode is CANCELLED', function () {
       var error = new Error('loadPaymentData error');
 
@@ -287,6 +301,39 @@ describe('GooglePayView', function () {
       return this.view.tokenize().then(function () {
         expect(this.view.model.reportError).to.not.be.called;
       }.bind(this));
+    });
+
+    it('sends cancelled event for Google Pay cancelation', function () {
+      var error = new Error('loadPaymentData error');
+
+      error.statusCode = 'CANCELED';
+      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(analytics.sendEvent).to.be.calledOnce;
+        expect(analytics.sendEvent).to.be.calledWith(this.fakeClient, 'googlepay.loadPaymentData.canceled');
+      }.bind(this));
+    });
+
+    it('does not send analytics event for developer error', function () {
+      var error = new Error('loadPaymentData error');
+
+      error.statusCode = 'DEVELOPER_ERROR';
+      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(analytics.sendEvent).to.not.be.called;
+      });
+    });
+
+    it('does not send analytics event for errors without a statusCode', function () {
+      var error = new Error('error');
+
+      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(analytics.sendEvent).to.not.be.called;
+      });
     });
 
     it('reports error if loadPaymentData rejects', function () {
