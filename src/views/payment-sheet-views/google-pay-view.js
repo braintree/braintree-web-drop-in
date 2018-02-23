@@ -45,12 +45,22 @@ GooglePayView.prototype.initialize = function () {
 GooglePayView.prototype.tokenize = function () {
   var self = this;
   var paymentDataRequest = self.googlePayInstance.createPaymentDataRequest(self.googlePayConfiguration);
+  var rawResponse;
 
   return self.paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
+    rawResponse = paymentData;
     return self.googlePayInstance.parseResponse(paymentData);
   }).then(function (tokenizePayload) {
+    tokenizePayload.rawResponse = rawResponse;
     self.model.addPaymentMethod(tokenizePayload);
   }).catch(function (err) {
+    if (err.statusCode === 'DEVELOPER_ERROR') {
+      console.error(err); // eslint-disable-line no-console
+      err = 'developerError';
+    } else if (err.statusCode === 'CANCELED') {
+      return;
+    }
+
     self.model.reportError(err);
   });
 };

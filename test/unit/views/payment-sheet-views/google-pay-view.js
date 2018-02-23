@@ -56,13 +56,24 @@ describe('GooglePayView', function () {
         nonce: 'google-pay-nonce'
       })
     };
+    this.fakeLoadPaymentDataResponse = {
+      cardInfo: {
+        cardNetwork: 'VISA',
+        cardDetails: '1111',
+        cardDescription: 'Visa •••• 1111',
+        cardClass: 'DEBIT'
+      },
+      paymentMethodToken: {
+        tokenizationType: 'PAYMENT_GATEWAY',
+        token: '{"androidPayCards":[{"type":"AndroidPayCard","nonce":"google-pay-nonce","description":"Android Pay","consumed":false,"details":{"cardType":"Visa","lastTwo":"11","lastFour":"1111"},"binData":{"prepaid":"No","healthcare":"Unknown","debit":"Unknown","durbinRegulated":"Unknown","commercial":"Unknown","payroll":"Unknown","issuingBank":"Unknown","countryOfIssuance":"","productId":"Unknown"}}]}'
+      },
+      email: 'foo@example.com'
+    };
     this.sandbox.stub(btGooglePay, 'create').resolves(this.fakeGooglePayInstance);
 
     this.FakePaymentClient = function FakePayment() {};
     this.FakePaymentClient.prototype.isReadyToPay = this.sandbox.stub().resolves({result: true});
-    this.FakePaymentClient.prototype.loadPaymentData = this.sandbox.stub().resolves({
-      gatewayResponse: 'foo'
-    });
+    this.FakePaymentClient.prototype.loadPaymentData = this.sandbox.stub().resolves(this.fakeLoadPaymentDataResponse);
     this.FakePaymentClient.prototype.prefetchPaymentData = this.sandbox.stub().resolves();
 
     global.google = {
@@ -226,9 +237,7 @@ describe('GooglePayView', function () {
     it('parses the response from loadPaymentData', function () {
       return this.view.tokenize().then(function () {
         expect(this.fakeGooglePayInstance.parseResponse).to.be.calledOnce;
-        expect(this.fakeGooglePayInstance.parseResponse).to.be.calledWith({
-          gatewayResponse: 'foo'
-        });
+        expect(this.fakeGooglePayInstance.parseResponse).to.be.calledWith(this.fakeLoadPaymentDataResponse);
       }.bind(this));
     });
 
@@ -237,8 +246,46 @@ describe('GooglePayView', function () {
         expect(this.view.model.addPaymentMethod).to.be.calledOnce;
         expect(this.view.model.addPaymentMethod).to.be.calledWith({
           type: 'AndroidPayCard',
-          nonce: 'google-pay-nonce'
+          nonce: 'google-pay-nonce',
+          rawResponse: this.fakeLoadPaymentDataResponse
         });
+      }.bind(this));
+    });
+
+    it('reports error as developerError if error statusCode is DEVELOPER_ERROR', function () {
+      var error = new Error('loadPaymentData error');
+
+      this.sandbox.stub(console, 'error');
+      error.statusCode = 'DEVELOPER_ERROR';
+      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(this.view.model.reportError).to.be.calledOnce;
+        expect(this.view.model.reportError).to.be.calledWith('developerError');
+      }.bind(this));
+    });
+
+    it('prints detailed error on console if error statusCode is DEVELOPER_ERROR', function () {
+      var error = new Error('loadPaymentData error');
+
+      this.sandbox.stub(console, 'error');
+      error.statusCode = 'DEVELOPER_ERROR';
+      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(console.error).to.be.calledOnce; // eslint-disable-line no-console
+        expect(console.error).to.be.calledWith(error); // eslint-disable-line no-console
+      });
+    });
+
+    it('does not report erorr if statusCode is CANCELLED', function () {
+      var error = new Error('loadPaymentData error');
+
+      error.statusCode = 'CANCELED';
+      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(this.view.model.reportError).to.not.be.called;
       }.bind(this));
     });
 

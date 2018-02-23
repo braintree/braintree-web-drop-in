@@ -1132,6 +1132,33 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('includes rawResponse if a Google Pay payment method', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var rawResponse = {foo: 'bar'};
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        details: {
+          foo: 'bar'
+        },
+        rawResponse: rawResponse,
+        type: 'AndroidPayCard',
+        binData: {
+          bin: 'data'
+        },
+        rogueParameter: 'baz'
+      };
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+
+        instance.requestPaymentMethod(function (err, payload) {
+          expect(payload.details.rawResponse).to.equal(rawResponse);
+
+          done();
+        });
+      }.bind(this));
+    });
+
     it('does not call 3D Secure if it is not enabled', function (done) {
       var fakePayload = {
         nonce: 'cool-nonce'

@@ -766,6 +766,10 @@ function formatPaymentMethodPayload(paymentMethod) {
     formattedPaymentMethod.description = paymentMethod.description;
   }
 
+  if (paymentMethod.type === constants.paymentMethodTypes.googlePay) {
+    formattedPaymentMethod.details.rawResponse = paymentMethod.rawResponse;
+  }
+
   if (typeof paymentMethod.liabilityShiftPossible === 'boolean') {
     formattedPaymentMethod.liabilityShifted = paymentMethod.liabilityShifted;
     formattedPaymentMethod.liabilityShiftPossible = paymentMethod.liabilityShiftPossible;
