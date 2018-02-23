@@ -26,12 +26,14 @@ var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
   paymentOptionIDs.applePay,
+  paymentOptionIDs.googlePay,
   'threeDSecure'
 ];
 var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
-  paymentOptionIDs.applePay
+  paymentOptionIDs.applePay,
+  paymentOptionIDs.googlePay
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;

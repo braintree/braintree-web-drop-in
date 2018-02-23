@@ -359,6 +359,32 @@ describe('GooglePayView', function () {
     });
   });
 
+  describe('updateConfiguration', function () {
+    beforeEach(function () {
+      this.view = new GooglePayView(this.googlePayViewOptions);
+
+      return this.view.initialize();
+    });
+
+    it('updates values in googlePayConfiguration', function () {
+      var newTransactionInfo = {
+        currencyCode: 'EU',
+        totalPriceStatus: 'FINAL',
+        totalPrice: '200.00'
+      };
+
+      expect(this.view.googlePayConfiguration.transactionInfo).to.deep.equal({
+        currencyCode: 'USD',
+        totalPriceStatus: 'FINAL',
+        totalPrice: '100.00'
+      });
+
+      this.view.updateConfiguration('transactionInfo', newTransactionInfo);
+
+      expect(this.view.googlePayConfiguration.transactionInfo).to.deep.equal(newTransactionInfo);
+    });
+  });
+
   describe('isEnabled', function () {
     beforeEach(function () {
       this.sandbox.stub(assets, 'loadScript').resolves();

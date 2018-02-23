@@ -1369,6 +1369,58 @@ describe('Dropin', function () {
       expect(fakePayPalView.updateConfiguration).to.be.calledWith('foo', 'bar');
     });
 
+    it('updates if view is applePay', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeApplePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('applePay').returns(fakeApplePayView);
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([])
+      };
+
+      instance.updateConfiguration('applePay', 'foo', 'bar');
+
+      expect(instance._mainView.getView).to.be.calledOnce;
+      expect(fakeApplePayView.updateConfiguration).to.be.calledOnce;
+      expect(fakeApplePayView.updateConfiguration).to.be.calledWith('foo', 'bar');
+    });
+
+    it('updates if view is googlePay', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeGooglePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('googlePay').returns(fakeGooglePayView);
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([])
+      };
+
+      instance.updateConfiguration('googlePay', 'foo', 'bar');
+
+      expect(instance._mainView.getView).to.be.calledOnce;
+      expect(fakeGooglePayView.updateConfiguration).to.be.calledOnce;
+      expect(fakeGooglePayView.updateConfiguration).to.be.calledWith('foo', 'bar');
+    });
+
     it('updates if property is threeDSecure', function () {
       var instance = new Dropin(this.dropinOptions);
 
@@ -1463,6 +1515,152 @@ describe('Dropin', function () {
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
       instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._model.removePaymentMethod).to.not.be.called;
+    });
+
+    it('removes saved applePay payment methods if they are not vaulted', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeApplePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'ApplePayCard'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'ApplePayCard', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'ApplePayCard'},
+          {nonce: '4', type: 'ApplePayCard', vaulted: true},
+          {nonce: '5', type: 'ApplePayCard'}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('applePay').returns(fakeApplePayView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('applePay', 'foo', 'bar');
+
+      expect(instance._model.getPaymentMethods).to.be.calledOnce;
+      expect(instance._model.removePaymentMethod).to.be.calledTwice;
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '3', type: 'ApplePayCard'});
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '5', type: 'ApplePayCard'});
+    });
+
+    it('does not call removePaymentMethod if no non-vaulted applePay accounts are avaialble', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeApplePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns(null)
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'ApplePayCard', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'ApplePayCard', vaulted: true}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('applePay').returns(fakeApplePayView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('applePay', 'foo', 'bar');
+
+      expect(instance._model.removePaymentMethod).to.not.be.called;
+    });
+
+    it('removes saved googlePay payment methods if they are not vaulted', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeGooglePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'AndroidPayCard'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'AndroidPayCard', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'AndroidPayCard'},
+          {nonce: '4', type: 'AndroidPayCard', vaulted: true},
+          {nonce: '5', type: 'AndroidPayCard'}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('googlePay').returns(fakeGooglePayView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('googlePay', 'foo', 'bar');
+
+      expect(instance._model.getPaymentMethods).to.be.calledOnce;
+      expect(instance._model.removePaymentMethod).to.be.calledTwice;
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '3', type: 'AndroidPayCard'});
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '5', type: 'AndroidPayCard'});
+    });
+
+    it('does not call removePaymentMethod if no non-vaulted googlePay accounts are avaialble', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeGooglePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns(null)
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'AndroidPayCard', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'AndroidPayCard', vaulted: true}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('googlePay').returns(fakeGooglePayView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('googlePay', 'foo', 'bar');
 
       expect(instance._model.removePaymentMethod).to.not.be.called;
     });
