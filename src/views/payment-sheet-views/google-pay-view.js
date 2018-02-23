@@ -27,14 +27,31 @@ GooglePayView.prototype.initialize = function () {
     self.googlePayInstance = googlePayInstance;
     self.paymentsClient = createPaymentsClient(self.client);
   }).then(function () {
-    // button handler
-    // prefetch handler
+    var buttonDiv = self.getElementById('google-pay-button');
+
+    buttonDiv.addEventListener('click', function (event) {
+      event.preventDefault();
+      self.tokenize();
+    });
     self.model.asyncDependencyReady();
   }).catch(function (err) {
     self.model.asyncDependencyFailed({
       view: self.ID,
       error: new DropinError(err)
     });
+  });
+};
+
+GooglePayView.prototype.tokenize = function () {
+  var self = this;
+  var paymentDataRequest = self.googlePayInstance.createPaymentDataRequest(self.googlePayConfiguration);
+
+  return self.paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
+    return self.googlePayInstance.parseResponse(paymentData);
+  }).then(function (tokenizePayload) {
+    self.model.addPaymentMethod(tokenizePayload);
+  }).catch(function (err) {
+    self.model.reportError(err);
   });
 };
 

@@ -26,7 +26,14 @@ describe('GooglePayView', function () {
     this.div.innerHTML = mainHTML;
     document.body.appendChild(this.div);
 
-    this.model.merchantConfiguration.googlePay = {};
+    this.model.merchantConfiguration.googlePay = {
+      merchantId: 'merchant-id',
+      transactionInfo: {
+        currencyCode: 'USD',
+        totalPriceStatus: 'FINAL',
+        totalPrice: '100.00'
+      }
+    };
     this.googlePayViewOptions = {
       client: this.fakeClient,
       element: document.body.querySelector('.braintree-sheet.braintree-googlePay'),
@@ -36,6 +43,12 @@ describe('GooglePayView', function () {
 
     this.fakeGooglePayInstance = {
       createPaymentDataRequest: this.sandbox.stub().returns({
+        merchantId: 'merchant-id',
+        transactionInfo: {
+          currencyCode: 'USD',
+          totalPriceStatus: 'FINAL',
+          totalPrice: '100.00'
+        },
         allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
       }),
       parseResponse: this.sandbox.stub().resolves({
@@ -47,7 +60,9 @@ describe('GooglePayView', function () {
 
     this.FakePaymentClient = function FakePayment() {};
     this.FakePaymentClient.prototype.isReadyToPay = this.sandbox.stub().resolves({result: true});
-    this.FakePaymentClient.prototype.loadPaymentData = this.sandbox.stub().resolves({});
+    this.FakePaymentClient.prototype.loadPaymentData = this.sandbox.stub().resolves({
+      gatewayResponse: 'foo'
+    });
     this.FakePaymentClient.prototype.prefetchPaymentData = this.sandbox.stub().resolves();
 
     global.google = {
@@ -146,6 +161,106 @@ describe('GooglePayView', function () {
           error: fakeError,
           view: 'googlePay'
         }));
+      }.bind(this));
+    });
+
+    it('sets up button to tokenize Google Pay', function () {
+      var button = {
+        addEventListener: this.sandbox.stub()
+      };
+
+      this.sandbox.stub(this.view, 'getElementById').returns(button);
+      this.sandbox.stub(this.view, 'tokenize');
+
+      return this.view.initialize().then(function () {
+        var handler = button.addEventListener.firstCall.args[1];
+
+        expect(button.addEventListener).to.be.calledOnce;
+        expect(button.addEventListener).to.be.calledWith('click', this.sandbox.match.func);
+
+        handler({preventDefault: this.sandbox.stub()});
+
+        expect(this.view.tokenize).to.be.calledOnce;
+      }.bind(this));
+    });
+  });
+
+  describe('tokenize', function () {
+    beforeEach(function () {
+      this.view = new GooglePayView(this.googlePayViewOptions);
+      this.sandbox.stub(this.view.model, 'addPaymentMethod');
+      this.sandbox.stub(this.view.model, 'reportError');
+
+      return this.view.initialize();
+    });
+
+    it('creates a paymentDataRequest from googlePayConfiguration', function () {
+      return this.view.tokenize().then(function () {
+        expect(this.fakeGooglePayInstance.createPaymentDataRequest).to.be.calledOnce;
+        expect(this.fakeGooglePayInstance.createPaymentDataRequest).to.be.calledWith({
+          merchantId: 'merchant-id',
+          transactionInfo: {
+            currencyCode: 'USD',
+            totalPriceStatus: 'FINAL',
+            totalPrice: '100.00'
+          }
+        });
+      }.bind(this));
+    });
+
+    it('calls loadPaymentData with paymentDataRequest', function () {
+      return this.view.tokenize().then(function () {
+        expect(this.FakePaymentClient.prototype.loadPaymentData).to.be.calledOnce;
+        expect(this.FakePaymentClient.prototype.loadPaymentData).to.be.calledWith({
+          merchantId: 'merchant-id',
+          transactionInfo: {
+            currencyCode: 'USD',
+            totalPriceStatus: 'FINAL',
+            totalPrice: '100.00'
+          },
+          allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
+        });
+      }.bind(this));
+    });
+
+    it('parses the response from loadPaymentData', function () {
+      return this.view.tokenize().then(function () {
+        expect(this.fakeGooglePayInstance.parseResponse).to.be.calledOnce;
+        expect(this.fakeGooglePayInstance.parseResponse).to.be.calledWith({
+          gatewayResponse: 'foo'
+        });
+      }.bind(this));
+    });
+
+    it('adds PaymentMethod to model', function () {
+      return this.view.tokenize().then(function () {
+        expect(this.view.model.addPaymentMethod).to.be.calledOnce;
+        expect(this.view.model.addPaymentMethod).to.be.calledWith({
+          type: 'AndroidPayCard',
+          nonce: 'google-pay-nonce'
+        });
+      }.bind(this));
+    });
+
+    it('reports error if loadPaymentData rejects', function () {
+      var error = new Error('loadPaymentData error');
+
+      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(this.view.model.reportError).to.be.calledOnce;
+        expect(this.view.model.reportError).to.be.calledWith(error);
+      }.bind(this));
+    });
+
+    it('reports error if parseResponse rejects', function () {
+      var error = new Error('parseResponse error');
+
+      this.fakeGooglePayInstance.parseResponse.rejects(error);
+
+      return this.view.tokenize().then(function () {
+        expect(this.view.model.reportError).to.be.calledOnce;
+        expect(this.view.model.reportError).to.be.calledWith(error);
       }.bind(this));
     });
   });
