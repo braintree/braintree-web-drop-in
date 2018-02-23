@@ -181,7 +181,7 @@ describe('GooglePayView', function () {
       };
 
       this.sandbox.stub(this.view, 'getElementById').returns(button);
-      this.sandbox.stub(this.view, 'tokenize');
+      this.sandbox.stub(this.view, 'tokenize').resolves({});
 
       return this.view.initialize().then(function () {
         var handler = button.addEventListener.firstCall.args[1];
