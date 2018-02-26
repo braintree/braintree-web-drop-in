@@ -3,7 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
-- Enable Pay with Venmo support
+- Enable Venmo support
+- Enable Google Pay support
 
 1.9.4
 -----
