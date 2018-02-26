@@ -473,17 +473,6 @@ describe('MainView', function () {
       expect(this.context.sheetErrorText.textContent).to.equal('Please check your information and try again.');
     });
 
-    it('shows the raw error message when the error has an unknown error code', function () {
-      var fakeError = {
-        code: 'AN_UNKNOWN_ERROR',
-        message: 'Some text we will use because we do not know this error code'
-      };
-
-      MainView.prototype.showSheetError.call(this.context, fakeError);
-
-      expect(this.context.sheetErrorText.textContent).to.equal('Something went wrong on our end.');
-    });
-
     it('shows a fallback error message when the error code is unknown and the error is missing a message', function () {
       var fakeError = {
         code: 'AN_UNKNOWN_ERROR'
@@ -492,6 +481,14 @@ describe('MainView', function () {
       MainView.prototype.showSheetError.call(this.context, fakeError);
 
       expect(this.context.sheetErrorText.textContent).to.equal('Something went wrong on our end.');
+    });
+
+    it('shows a developer error message when error is "developerError"', function () {
+      var fakeError = 'developerError';
+
+      MainView.prototype.showSheetError.call(this.context, fakeError);
+
+      expect(this.context.sheetErrorText.textContent).to.equal('Developer Error: Something went wrong. Check the console for details.');
     });
   });
 
