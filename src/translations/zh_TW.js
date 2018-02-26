@@ -46,6 +46,7 @@ module.exports = {
   "Card": "信用卡或扣帳卡",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal 信貸",
+  "Google Pay": "Google Pay",
   "American Express": "美國運通 (American Express)",
   "Discover": "Discover",
   "Diners Club": "大來國際 (Diners Club)",
