@@ -73,11 +73,29 @@ var VERSION = process.env.npm_package_version;
  */
 
 /**
- * @typedef {object} Dropin~venmoPayPaymentMethodPayload
+ * @typedef {object} Dropin~venmoPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the Venmo account.
  * @property {string} details.username The Venmo username.
  * @property {string} type The payment method type, always `VenmoAccount` when the method requested is a Venmo account.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~googlePayPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Google Pay card.
+ * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
+ * @property {string} details.lastFour The last 4 digits of the card.
+ * @property {string} details.lastTwo The last 2 digits of the card.
+ * @param {external:GooglePayPaymentData} details.rawPaymentData The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.
+ * @property {string} type The payment method type, always `AndroidPayCard` when the method requested is a Google Pay Card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} GooglePayPaymentData A [Google Pay Payment Data object](https://developers.google.com/pay/api/web/object-reference#PaymentData).
+ * @external GooglePayPaymentData
+ * @see {@link https://developers.google.com/pay/api/web/object-reference#PaymentData PaymentData}
  */
 
 /**
@@ -352,11 +370,11 @@ Dropin.prototype._initialize = function (callback) {
 };
 
 /**
- * Modify your configuration intially set in {@link module:braintree-web-drop-in|`dropin.create`}. Can be used for any `paypal` or `paypalCredit` property.
+ * Modify your configuration intially set in {@link module:braintree-web-drop-in|`dropin.create`}.
  *
  * If `updateConfiguration` is called after a user completes the PayPal authorization flow, any PayPal accounts not stored in the Vault record will be removed.
  * @public
- * @param {string} property The top-level property to update. Either `paypal` or `paypalCredit`.
+ * @param {string} property The top-level property to update. Either `paypal`, `paypalCredit`, `applePay`, or `googlePay`.
  * @param {string} key The key of the property to update, such as `amount` or `currency`.
  * @param {any} value The value of the property to update. Must be the type of the property specified in {@link module:braintree-web-drop-in|`dropin.create`}.
  * @returns {void}
@@ -549,11 +567,11 @@ Dropin.prototype._handleAppSwitch = function () {
 };
 
 /**
- * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account.
+ * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/).
  *
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
- * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
+ * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload}, a {@link Dropin~googlePayPaymentMethodPayload|googlePayPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example <caption>Requesting a payment method</caption>
  * var form = document.querySelector('#my-form');

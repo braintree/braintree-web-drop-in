@@ -315,6 +315,10 @@ Alternatively, you can pass the `BraintreeError` from braintree-web into `this.m
 fooPayTokenizationFailedError: 'Something went wrong when connecting to FooPay.'
 ```
 
+### Documentation
+
+Add documentation info to [src/dropin.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/dropin.js), [src/index.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/index.js), and [jsdoc/home.md](https://github.com/braintree/braintree-web-drop-in/blob/master/jsdoc/home.md)
+
 ## Unit tests
 
 Run unit tests and lint:

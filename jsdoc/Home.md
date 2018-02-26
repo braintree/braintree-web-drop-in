@@ -9,6 +9,7 @@
   * [Accepting PayPal](#accepting-paypal)
   * [Accepting Venmo](#accepting-venmo)
   * [Accepting Apple Pay](#accepting-apple-pay)
+  * [Accepting Google Pay](#accepting-google-pay)
   * [Localization](#localization)
   * [Events](#events)
   * [Styling](#styling)
@@ -84,6 +85,12 @@ More details about Venmo can be found in the Braintree [developer docs](https://
 For Apple Pay, users will click the Apple Pay button. After successful completion, the payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
 More details about Apple Pay can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/apple-pay/overview).
+
+<a id="accepting-google-pay"></a>
+### Accepting Google Pay
+For Google Pay, users will click the Google Pay button. After successful completion, the payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
+
+More details about Google Pay can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/google-pay/overview).
 
 <a id="localization"></a>
 ### Localization
