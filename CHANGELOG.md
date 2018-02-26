@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Enable Pay with Venmo support
+- Fix issue where card fields could not be focused by clicking on the corresponding label
 
 1.9.4
 -----
