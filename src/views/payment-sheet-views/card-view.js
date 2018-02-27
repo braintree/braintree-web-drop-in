@@ -7,6 +7,7 @@ var classlist = require('../../lib/classlist');
 var constants = require('../../constants');
 var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
+var isUtf8 = require('../../lib/is-utf-8');
 var transitionHelper = require('../../lib/transition-helper');
 var Promise = require('../../lib/promise');
 
@@ -150,7 +151,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     fields: {
       number: {
         selector: this._generateFieldSelector('number'),
-        placeholder: '•••• •••• •••• ••••'
+        placeholder: generateCardNumberPlaceholder()
       },
       expirationDate: {
         selector: this._generateFieldSelector('expiration'),
@@ -158,7 +159,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
       },
       cvv: {
         selector: this._generateFieldSelector('cvv'),
-        placeholder: '•••'
+        placeholder: addBullets(3)
       },
       postalCode: {
         selector: this._generateFieldSelector('postal-code')
@@ -416,7 +417,7 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
   classlist.add(fieldGroup, 'braintree-form__field-group--has-error');
 
   fieldError = this.fieldErrors[field];
-  fieldError.textContent = errorMessage;
+  fieldError.innerHTML = errorMessage;
 
   if (input && isNormalFieldElement(input)) {
     input.setAttribute('aria-invalid', true);
@@ -485,7 +486,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   var cardNumberHrefLink = '#iconCardFront';
   var cvvHrefLink = '#iconCVVBack';
   var cvvDescriptor = this.strings.cvvThreeDigitLabelSubheading;
-  var cvvPlaceholder = '•••';
+  var cvvPlaceholder = addBullets(3);
   var numberFieldGroup = this.getElementById('number-field-group');
 
   if (event.cards.length === 1) {
@@ -494,7 +495,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
     if (cardType === 'american-express') {
       cvvHrefLink = '#iconCVVFront';
       cvvDescriptor = this.strings.cvvFourDigitLabelSubheading;
-      cvvPlaceholder = '••••';
+      cvvPlaceholder = addBullets(4);
     }
     // Keep icon visible when field is not focused
     classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
@@ -506,7 +507,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 
   if (this.hasCVV) {
     this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
-    this.cvvLabelDescriptor.textContent = cvvDescriptor;
+    this.cvvLabelDescriptor.innerHTML = cvvDescriptor;
 
     if (!this._hasCustomCVVPlaceholder) {
       this.hostedFieldsInstance.setAttribute({
@@ -612,6 +613,18 @@ function normalizeStyles(styles) {
 
     styles[transformedKeyName] = styles[style];
   });
+}
+
+function addBullets(number) {
+  var bulletCharacter = isUtf8() ? '•' : '*';
+
+  return Array(number + 1).join(bulletCharacter);
+}
+
+function generateCardNumberPlaceholder() {
+  var four = addBullets(4);
+
+  return [four, four, four, four].join(' ');
 }
 
 module.exports = CardView;
