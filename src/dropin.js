@@ -787,7 +787,7 @@ function formatPaymentMethodPayload(paymentMethod) {
   }
 
   if (paymentMethod.type === constants.paymentMethodTypes.googlePay) {
-    formattedPaymentMethod.details.rawResponse = paymentMethod.rawResponse;
+    formattedPaymentMethod.details.rawPaymentData = paymentMethod.rawPaymentData;
   }
 
   if (typeof paymentMethod.liabilityShiftPossible === 'boolean') {

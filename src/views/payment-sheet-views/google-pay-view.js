@@ -52,13 +52,13 @@ GooglePayView.prototype.initialize = function () {
 GooglePayView.prototype.tokenize = function () {
   var self = this;
   var paymentDataRequest = self.googlePayInstance.createPaymentDataRequest(self.googlePayConfiguration);
-  var rawResponse;
+  var rawPaymentData;
 
   return self.paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
-    rawResponse = paymentData;
+    rawPaymentData = paymentData;
     return self.googlePayInstance.parseResponse(paymentData);
   }).then(function (tokenizePayload) {
-    tokenizePayload.rawResponse = rawResponse;
+    tokenizePayload.rawPaymentData = rawPaymentData;
     self.model.addPaymentMethod(tokenizePayload);
   }).catch(function (err) {
     var reportedError = err;

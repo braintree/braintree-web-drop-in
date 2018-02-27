@@ -249,7 +249,7 @@ describe('GooglePayView', function () {
         expect(this.view.model.addPaymentMethod).to.be.calledWith({
           type: 'AndroidPayCard',
           nonce: 'google-pay-nonce',
-          rawResponse: this.fakeLoadPaymentDataResponse
+          rawPaymentData: this.fakeLoadPaymentDataResponse
         });
       }.bind(this));
     });
