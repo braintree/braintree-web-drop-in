@@ -5,7 +5,6 @@ unreleased
 ----------
 - Enable Pay with Venmo support
 - Fix issue where non utf-8 encoded sites would show strange characters for card placeholders
-- Update nokogiri to 1.8.2
 
 1.9.4
 -----
