@@ -10,8 +10,10 @@ global.Promise = require('../../src/lib/promise');
 
 beforeEach(function () {
   this.sandbox = sinon.sandbox.create();
+  this._innerHTML = document.body.innerHTML;
 });
 
 afterEach(function () {
   this.sandbox.restore();
+  document.body.innerHTML = this._innerHTML;
 });

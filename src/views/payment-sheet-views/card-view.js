@@ -472,13 +472,22 @@ CardView.prototype._onBlurEvent = function (event) {
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
-  if (isCardViewElement() && field.isEmpty) {
+  if (shouldApplyFieldEmptyError(field)) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
   } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
     this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
+
+  setTimeout(function () {
+    // when focusing on a field by clicking the label,
+    // we need to wait a bit for the iframe to be
+    // focused properly before applying validations
+    if (shouldApplyFieldEmptyError(field)) {
+      this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
+    }
+  }.bind(this), 150);
 };
 
 CardView.prototype._onCardTypeChangeEvent = function (event) {
@@ -590,6 +599,10 @@ CardView.prototype._isCardTypeSupported = function (cardType) {
 
 function isNormalFieldElement(element) {
   return element.id.indexOf('braintree__card-view-input') !== -1;
+}
+
+function shouldApplyFieldEmptyError(field) {
+  return field.isEmpty && isCardViewElement();
 }
 
 function isCardViewElement() {

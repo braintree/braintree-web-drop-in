@@ -32,10 +32,6 @@ describe('CardView', function () {
     };
   });
 
-  afterEach(function () {
-    document.body.removeChild(this.div);
-  });
-
   describe('Constructor', function () {
     it('inherits from BaseView', function () {
       expect(new CardView({element: this.element})).to.be.an.instanceOf(BaseView);
@@ -868,6 +864,64 @@ describe('CardView', function () {
         return CardView.prototype.initialize.call(this.context).then(function () {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.be.true;
           expect(numberFieldError.textContent).to.equal('Please fill out a card number.');
+        });
+      });
+
+      it('sets the empty error when programatically focussing a hosted field (requires a setTimeout)', function (done) {
+        var fakeElement = document.createElement('div');
+        var fakeHostedField = document.createElement('iframe');
+        var fakeEvent = {
+          cards: [{type: 'visa'}],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: true,
+              isValid: false
+            }
+          }
+        };
+        var modelOptions = fake.modelOptions();
+        var hostedFieldsInstance = {
+          on: this.sandbox.stub().callsArgWith(1, fakeEvent),
+          setAttribute: this.sandbox.stub(),
+          setMessage: this.sandbox.stub()
+        };
+        var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
+
+        fakeHostedField.id = 'braintree-hosted-field-foo';
+        document.body.appendChild(fakeElement);
+        document.body.appendChild(fakeHostedField);
+        fakeElement.focus();
+
+        this.context.client.getConfiguration = function () {
+          return {
+            authorization: fake.clientToken,
+            authorizationType: 'CLIENT_TOKEN',
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: ['Visa']
+              }
+            }
+          };
+        };
+
+        modelOptions.client.getConfiguration = this.context.client.getConfiguration;
+
+        this.context.model = new DropinModel(modelOptions);
+
+        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
+
+        CardView.prototype.initialize.call(this.context).then(function () {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.equal(false);
+
+          fakeHostedField.focus();
+
+          setTimeout(function () {
+            expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).to.equal(true);
+            done();
+          }, 300);
         });
       });
 
