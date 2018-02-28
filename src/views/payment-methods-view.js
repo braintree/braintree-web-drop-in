@@ -98,7 +98,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
       this.activeMethodView = this.views[i];
-      this._headingLabel.textContent = this._getPaymentMethodString();
+      this._headingLabel.innerHTML = this._getPaymentMethodString();
       break;
     }
   }
