@@ -313,8 +313,8 @@ Dropin.prototype._initialize = function (callback) {
     var paypalRequired;
 
     self._model.on('cancelInitialization', function (err) {
-      analytics.sendEvent(self._client, 'load-error');
       self._dropinWrapper.innerHTML = '';
+      analytics.sendEvent(self._client, 'load-error');
       callback(err);
     });
 

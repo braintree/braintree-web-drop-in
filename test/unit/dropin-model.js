@@ -210,7 +210,7 @@ describe('DropinModel', function () {
       });
     });
 
-    it('supports cards, PayPal, PayPal Credit, Apple Pay, Google Pay, and Venmo and defaults to showing them in correct paymentOptionPriority', function () {
+    it('supports cards, PayPal, PayPal Credit, Venmo, Apple Pay and Google Pay and defaults to showing them in correct paymentOptionPriority', function () {
       var model = new DropinModel(this.modelOptions);
 
       return model.initialize().then(function () {
