@@ -247,7 +247,7 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 
 Dropin.prototype._initialize = function (callback) {
   var localizedStrings, localizedHTML, paypalScriptOptions;
-  var self = this; // eslint-disable-line consistent-self
+  var self = this;
   var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
   var setupPromise = Promise.resolve();
 
