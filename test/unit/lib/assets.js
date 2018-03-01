@@ -71,7 +71,7 @@ describe('assets', function () {
       loadStylesheet({
         id: 'stylesheet-id',
         href: 'stylesheet-href',
-        head: this.fakeHead
+        container: this.fakeHead
       });
 
       stylesheet = this.fakeHead.appendChild.firstCall.args[0];
@@ -89,7 +89,7 @@ describe('assets', function () {
       loadStylesheet({
         id: 'stylesheet-id-1',
         href: 'stylesheet-href',
-        head: this.fakeHead
+        container: this.fakeHead
       });
 
       stylesheet = this.fakeHead.insertBefore.firstCall.args[0];
@@ -105,7 +105,7 @@ describe('assets', function () {
       loadStylesheet({
         id: 'stylesheet-id-1',
         href: 'stylesheet-href',
-        head: this.fakeHead
+        container: this.fakeHead
       });
 
       stylesheet = this.fakeHead.appendChild.firstCall.args[0];
