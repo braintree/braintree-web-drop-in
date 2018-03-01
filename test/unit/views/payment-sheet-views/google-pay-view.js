@@ -318,6 +318,7 @@ describe('GooglePayView', function () {
     it('does not send analytics event for developer error', function () {
       var error = new Error('loadPaymentData error');
 
+      this.sandbox.stub(console, 'error');
       error.statusCode = 'DEVELOPER_ERROR';
       this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
 
