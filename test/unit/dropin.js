@@ -3,6 +3,7 @@
 var Dropin = require('../../src/dropin/');
 var DropinModel = require('../../src/dropin-model');
 var EventEmitter = require('../../src/lib/event-emitter');
+var assets = require('../../src/lib/assets');
 var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
 var hostedFields = require('braintree-web/hosted-fields');
@@ -17,7 +18,7 @@ var braintreeWebVersion = require('../../package.json').dependencies['braintree-
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 
 function delay(amount) {
-  amount = amount || 10;
+  amount = amount || 100;
 
   return new Promise(function (resolve) {
     setTimeout(function () {
@@ -83,10 +84,10 @@ describe('Dropin', function () {
         setup: this.sandbox.stub()
       };
 
-      this.sandbox.stub(Dropin.prototype, '_loadScript').callsFake(function (options, callback) {
+      this.sandbox.stub(assets, 'loadScript').callsFake(function () {
         global.paypal = this.paypalCheckout;
 
-        callback();
+        return Promise.resolve();
       }.bind(this));
     });
 
@@ -528,7 +529,7 @@ describe('Dropin', function () {
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.not.have.been.called;
+        expect(assets.loadScript).to.not.have.been.called;
 
         done();
       });
@@ -539,14 +540,17 @@ describe('Dropin', function () {
       var paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        logLevel: DEFAULT_CHECKOUTJS_LOG_LEVEL
+        dataAttributes: {
+          'log-level': DEFAULT_CHECKOUTJS_LOG_LEVEL
+        }
       };
 
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.have.been.called;
-        expect(instance._loadScript.args[0][0]).to.deep.equal(paypalScriptOptions);
+        expect(assets.loadScript).to.have.been.calledOnce;
+        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
+        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(paypalScriptOptions);
 
         done();
       });
@@ -557,14 +561,17 @@ describe('Dropin', function () {
       var paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        logLevel: DEFAULT_CHECKOUTJS_LOG_LEVEL
+        dataAttributes: {
+          'log-level': DEFAULT_CHECKOUTJS_LOG_LEVEL
+        }
       };
 
       this.dropinOptions.merchantConfiguration.paypalCredit = {flow: 'vault'};
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.have.been.called;
-        expect(instance._loadScript.args[0][0]).to.deep.equal(paypalScriptOptions);
+        expect(assets.loadScript).to.have.been.calledOnce;
+        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
+        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(paypalScriptOptions);
 
         done();
       });
@@ -576,11 +583,12 @@ describe('Dropin', function () {
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
 
-      instance._initialize(function () {
-        done();
+      instance._initialize(function (err) {
+        done(err);
       });
 
       delay().then(function () {
+        instance._model.dependencySuccessCount = 1;
         instance._model._emit('asyncDependenciesReady');
       });
     });
@@ -767,7 +775,7 @@ describe('Dropin', function () {
       this.dropinOptions.merchantConfiguration.dataCollector = {kount: true};
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
-      this.sandbox.stub(Dropin.prototype, '_loadScript').yields();
+      this.sandbox.stub(assets, 'loadScript').resolves();
       this.sandbox.stub(Dropin.prototype, '_setUpDataCollector');
 
       global.braintree = {
@@ -786,7 +794,7 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.not.be.called;
+        expect(assets.loadScript).to.not.be.called;
 
         done();
       });
@@ -800,8 +808,9 @@ describe('Dropin', function () {
       };
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.be.calledOnce;
-        expect(instance._loadScript.args[0][0]).to.deep.equal(dataCollectorScriptOptions);
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
+        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(dataCollectorScriptOptions);
         expect(instance._setUpDataCollector).to.be.called;
 
         done();
@@ -816,7 +825,7 @@ describe('Dropin', function () {
       document.body.appendChild(script);
 
       instance._initialize(function () {
-        expect(instance._loadScript).to.not.be.called;
+        expect(assets.loadScript).to.not.be.called;
 
         done();
       });
@@ -1137,6 +1146,33 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('includes rawPaymentData if a Google Pay payment method', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+      var rawPaymentData = {foo: 'bar'};
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        details: {
+          foo: 'bar'
+        },
+        rawPaymentData: rawPaymentData,
+        type: 'AndroidPayCard',
+        binData: {
+          bin: 'data'
+        },
+        rogueParameter: 'baz'
+      };
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+
+        instance.requestPaymentMethod(function (err, payload) {
+          expect(payload.details.rawPaymentData).to.equal(rawPaymentData);
+
+          done();
+        });
+      }.bind(this));
+    });
+
     it('does not call 3D Secure if it is not enabled', function (done) {
       var fakePayload = {
         nonce: 'cool-nonce'
@@ -1347,6 +1383,58 @@ describe('Dropin', function () {
       expect(fakePayPalView.updateConfiguration).to.be.calledWith('foo', 'bar');
     });
 
+    it('updates if view is applePay', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeApplePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('applePay').returns(fakeApplePayView);
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([])
+      };
+
+      instance.updateConfiguration('applePay', 'foo', 'bar');
+
+      expect(instance._mainView.getView).to.be.calledOnce;
+      expect(fakeApplePayView.updateConfiguration).to.be.calledOnce;
+      expect(fakeApplePayView.updateConfiguration).to.be.calledWith('foo', 'bar');
+    });
+
+    it('updates if view is googlePay', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeGooglePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('googlePay').returns(fakeGooglePayView);
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([])
+      };
+
+      instance.updateConfiguration('googlePay', 'foo', 'bar');
+
+      expect(instance._mainView.getView).to.be.calledOnce;
+      expect(fakeGooglePayView.updateConfiguration).to.be.calledOnce;
+      expect(fakeGooglePayView.updateConfiguration).to.be.calledWith('foo', 'bar');
+    });
+
     it('updates if property is threeDSecure', function () {
       var instance = new Dropin(this.dropinOptions);
 
@@ -1441,6 +1529,152 @@ describe('Dropin', function () {
       getViewStub.withArgs('methods').returns(fakeMethodsView);
 
       instance.updateConfiguration('paypal', 'foo', 'bar');
+
+      expect(instance._model.removePaymentMethod).to.not.be.called;
+    });
+
+    it('removes saved applePay payment methods if they are not vaulted', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeApplePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'ApplePayCard'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'ApplePayCard', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'ApplePayCard'},
+          {nonce: '4', type: 'ApplePayCard', vaulted: true},
+          {nonce: '5', type: 'ApplePayCard'}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('applePay').returns(fakeApplePayView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('applePay', 'foo', 'bar');
+
+      expect(instance._model.getPaymentMethods).to.be.calledOnce;
+      expect(instance._model.removePaymentMethod).to.be.calledTwice;
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '3', type: 'ApplePayCard'});
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '5', type: 'ApplePayCard'});
+    });
+
+    it('does not call removePaymentMethod if no non-vaulted applePay accounts are avaialble', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeApplePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns(null)
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'ApplePayCard', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'ApplePayCard', vaulted: true}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('applePay').returns(fakeApplePayView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('applePay', 'foo', 'bar');
+
+      expect(instance._model.removePaymentMethod).to.not.be.called;
+    });
+
+    it('removes saved googlePay payment methods if they are not vaulted', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeGooglePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns({
+          type: 'AndroidPayCard'
+        })
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'AndroidPayCard', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'AndroidPayCard'},
+          {nonce: '4', type: 'AndroidPayCard', vaulted: true},
+          {nonce: '5', type: 'AndroidPayCard'}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('googlePay').returns(fakeGooglePayView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('googlePay', 'foo', 'bar');
+
+      expect(instance._model.getPaymentMethods).to.be.calledOnce;
+      expect(instance._model.removePaymentMethod).to.be.calledTwice;
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '3', type: 'AndroidPayCard'});
+      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '5', type: 'AndroidPayCard'});
+    });
+
+    it('does not call removePaymentMethod if no non-vaulted googlePay accounts are avaialble', function () {
+      var instance = new Dropin(this.dropinOptions);
+      var getViewStub = this.sandbox.stub();
+      var fakeGooglePayView = {
+        updateConfiguration: this.sandbox.stub()
+      };
+      var fakeMethodsView = {
+        getPaymentMethod: this.sandbox.stub().returns(null)
+      };
+
+      instance._mainView = {
+        getView: getViewStub,
+        primaryView: {
+          ID: 'view'
+        }
+      };
+      instance._model = {
+        getPaymentMethods: this.sandbox.stub().returns([
+          {nonce: '1', type: 'AndroidPayCard', vaulted: true},
+          {nonce: '2', type: 'CreditCard', vaulted: true},
+          {nonce: '3', type: 'AndroidPayCard', vaulted: true}
+        ]),
+        removePaymentMethod: this.sandbox.stub()
+      };
+
+      getViewStub.withArgs('googlePay').returns(fakeGooglePayView);
+      getViewStub.withArgs('methods').returns(fakeMethodsView);
+
+      instance.updateConfiguration('googlePay', 'foo', 'bar');
 
       expect(instance._model.removePaymentMethod).to.not.be.called;
     });
@@ -1844,56 +2078,6 @@ describe('Dropin', function () {
       instance._initialize(function () {
         instance._model._emit('paymentOptionSelected', {paymentOption: 'Foo'});
       });
-    });
-  });
-
-  describe('_loadScript', function () {
-    function noop() {}
-
-    beforeEach(function () {
-      this.scriptOptions = {
-        src: 'https://foobar.com/foo.js',
-        id: 'foobarbaz'
-      };
-
-      this.fakeDropinWrapper = {
-        appendChild: this.sandbox.stub()
-      };
-      this.fakeScript = {
-        addEventListener: this.sandbox.stub(),
-        setAttribute: this.sandbox.stub()
-      };
-
-      this.sandbox.stub(document, 'createElement').returns(this.fakeScript);
-    });
-
-    it('adds script to document', function () {
-      Dropin.prototype._loadScript.call({
-        _dropinWrapper: this.fakeDropinWrapper,
-        _merchantConfiguration: {
-          paypal: {}
-        }
-      }, this.scriptOptions, noop);
-
-      expect(this.fakeScript.src).to.equal('https://foobar.com/foo.js');
-      expect(this.fakeScript.async).to.equal(true);
-      expect(this.fakeScript.addEventListener).to.be.calledWith('load', noop);
-      expect(this.fakeScript.id).to.equal('foobarbaz');
-      expect(this.fakeDropinWrapper.appendChild).to.be.calledWith(this.fakeScript);
-    });
-
-    it('uses loglevel if present', function () {
-      this.scriptOptions.logLevel = 'customLogLevel';
-      Dropin.prototype._loadScript.call({
-        _dropinWrapper: this.fakeDropinWrapper,
-        _merchantConfiguration: {
-          paypal: {
-            logLevel: 'customLogLevel'
-          }
-        }
-      }, this.scriptOptions, noop);
-
-      expect(this.fakeScript.setAttribute).to.be.calledWith('data-log-level', 'customLogLevel');
     });
   });
 });

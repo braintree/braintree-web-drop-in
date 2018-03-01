@@ -6,6 +6,7 @@ var ApplePayView = require('../../../../src/views/payment-sheet-views/apple-pay-
 var btApplePay = require('braintree-web/apple-pay');
 var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
+var isHTTPS = require('../../../../src/lib/is-https');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 
@@ -13,51 +14,54 @@ var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'u
 
 describe('ApplePayView', function () {
   beforeEach(function () {
-    var model = new DropinModel(fake.modelOptions());
-    var fakeClient = {
-      getConfiguration: this.sandbox.stub().returns(fake.configuration()),
-      getVersion: function () {}
-    };
+    this.model = new DropinModel(fake.modelOptions());
 
-    this.div = document.createElement('div');
+    return this.model.initialize().then(function () {
+      this.fakeClient = {
+        getConfiguration: this.sandbox.stub().returns(fake.configuration()),
+        getVersion: function () {}
+      };
 
-    this.fakeApplePaySession = {
-      begin: this.sandbox.stub(),
-      completeMerchantValidation: this.sandbox.stub(),
-      completePayment: this.sandbox.stub()
-    };
+      this.div = document.createElement('div');
 
-    global.ApplePaySession = this.sandbox.stub().returns(this.fakeApplePaySession);
-    global.ApplePaySession.canMakePayments = function () { return true; };
-    global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(true);
-    global.ApplePaySession.STATUS_FAILURE = 'failure';
-    global.ApplePaySession.STATUS_SUCCESS = 'success';
-    this.div.innerHTML = mainHTML;
-    document.body.appendChild(this.div);
+      this.fakeApplePaySession = {
+        begin: this.sandbox.stub(),
+        completeMerchantValidation: this.sandbox.stub(),
+        completePayment: this.sandbox.stub()
+      };
 
-    this.fakePaymentRequest = {
-      countryCode: 'defined',
-      currencyCode: 'defined',
-      merchantCapabilities: ['defined'],
-      supportedNetworks: ['defined']
-    };
-    model.merchantConfiguration.applePay = {
-      paymentRequest: this.fakePaymentRequest,
-      displayName: 'Unit Test Display Name'
-    };
-    this.applePayViewOptions = {
-      client: fakeClient,
-      element: document.body.querySelector('.braintree-sheet.braintree-applePay'),
-      model: model,
-      strings: {}
-    };
+      global.ApplePaySession = this.sandbox.stub().returns(this.fakeApplePaySession);
+      global.ApplePaySession.canMakePayments = this.sandbox.stub().returns(true);
+      global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(true);
+      global.ApplePaySession.STATUS_FAILURE = 'failure';
+      global.ApplePaySession.STATUS_SUCCESS = 'success';
+      this.div.innerHTML = mainHTML;
+      document.body.appendChild(this.div);
 
-    this.fakeApplePayInstance = {
-      createPaymentRequest: this.sandbox.stub().returns({}),
-      performValidation: this.sandbox.stub().resolves(),
-      tokenize: this.sandbox.stub().resolves()
-    };
-    this.sandbox.stub(btApplePay, 'create').resolves(this.fakeApplePayInstance);
+      this.fakePaymentRequest = {
+        countryCode: 'defined',
+        currencyCode: 'defined',
+        merchantCapabilities: ['defined'],
+        supportedNetworks: ['defined']
+      };
+      this.model.merchantConfiguration.applePay = {
+        paymentRequest: this.fakePaymentRequest,
+        displayName: 'Unit Test Display Name'
+      };
+      this.applePayViewOptions = {
+        client: this.fakeClient,
+        element: document.body.querySelector('.braintree-sheet.braintree-applePay'),
+        model: this.model,
+        strings: {}
+      };
+
+      this.fakeApplePayInstance = {
+        createPaymentRequest: this.sandbox.stub().returns({}),
+        performValidation: this.sandbox.stub().resolves(),
+        tokenize: this.sandbox.stub().resolves()
+      };
+      this.sandbox.stub(btApplePay, 'create').resolves(this.fakeApplePayInstance);
+    }.bind(this));
   });
 
   afterEach(function () {
@@ -249,7 +253,10 @@ describe('ApplePayView', function () {
             this.fakeApplePayInstance.tokenize.resolves({foo: 'bar'});
             this.fakeApplePaySession.completePayment = function (status) {
               expect(status).to.equal(global.ApplePaySession.STATUS_SUCCESS);
-              done();
+
+              setTimeout(function () {
+                done();
+              }, 200);
             };
 
             this.buttonClickHandler();
@@ -321,6 +328,66 @@ describe('ApplePayView', function () {
             });
           });
         });
+      });
+    });
+  });
+
+  describe('isEnabled', function () {
+    beforeEach(function () {
+      this.options = {
+        client: this.fakeClient,
+        merchantConfiguration: this.model.merchantConfiguration
+      };
+      this.sandbox.stub(isHTTPS, 'isHTTPS').returns(true);
+    });
+
+    it('resolves with false when Apple Pay is not enabled on the gateway', function () {
+      var configuration = fake.configuration();
+
+      delete configuration.gatewayConfiguration.applePayWeb;
+
+      this.fakeClient.getConfiguration.returns(configuration);
+
+      return ApplePayView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with false when Apple Pay is not enabled by merchant', function () {
+      delete this.options.merchantConfiguration.applePay;
+
+      return ApplePayView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with false when Apple Pay Session does not exist', function () {
+      delete global.ApplePaySession;
+
+      return ApplePayView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with false when not https', function () {
+      isHTTPS.isHTTPS.returns(false);
+
+      return ApplePayView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with false when device cannot make payments', function () {
+      global.ApplePaySession.canMakePayments.returns(false);
+
+      return ApplePayView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with true when everything is setup for Apple Pay', function () {
+      return ApplePayView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(true);
       });
     });
   });

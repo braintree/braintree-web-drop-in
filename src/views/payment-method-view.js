@@ -32,6 +32,12 @@ PaymentMethodView.prototype._initialize = function () {
   }.bind(this));
 
   switch (this.paymentMethod.type) {
+    case paymentMethodTypes.applePay:
+      html = html.replace(/@ICON/g, 'logoApplePay')
+        .replace(/@CLASSNAME/g, '')
+        .replace(/@TITLE/g, this.strings['Apple Pay'])
+        .replace(/@SUBTITLE/g, '');
+      break;
     case paymentMethodTypes.card:
       endingInText = this.strings.endingIn.replace('{{lastTwoCardDigits}}', this.paymentMethod.details.lastTwo);
       html = html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType])
@@ -39,17 +45,17 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@TITLE/g, endingInText)
         .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
       break;
+    case paymentMethodTypes.googlePay:
+      html = html.replace(/@ICON/g, 'logoGooglePay')
+        .replace(/@CLASSNAME/g, '')
+        .replace(/@TITLE/g, this.strings['Google Pay'])
+        .replace(/@SUBTITLE/g, '');
+      break;
     case paymentMethodTypes.paypal:
       html = html.replace(/@ICON/g, 'logoPayPal')
         .replace(/@CLASSNAME/g, '')
         .replace(/@TITLE/g, this.paymentMethod.details.email)
         .replace(/@SUBTITLE/g, this.strings.PayPal);
-      break;
-    case paymentMethodTypes.applePay:
-      html = html.replace(/@ICON/g, 'logoApplePay')
-        .replace(/@CLASSNAME/g, '')
-        .replace(/@TITLE/g, this.strings['Apple Pay'])
-        .replace(/@SUBTITLE/g, '');
       break;
     case paymentMethodTypes.venmo:
       html = html.replace(/@ICON/g, 'logoVenmo')

@@ -12,4 +12,38 @@ describe('PayPalView', function () {
   it('inherits from BasePayPalView', function () {
     expect(new PayPalView()).to.be.an.instanceOf(BasePayPalView);
   });
+
+  describe('isEnabled', function () {
+    beforeEach(function () {
+      this.options = {
+        merchantConfiguration: {
+          paypal: {}
+        }
+      };
+
+      this.sandbox.stub(BasePayPalView, 'isEnabled').resolves(true);
+    });
+
+    it('resolves false if base PayPal view resolves false', function () {
+      BasePayPalView.isEnabled.resolves(false);
+
+      return PayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves false if merchant did not configure paypal', function () {
+      delete this.options.merchantConfiguration.paypal;
+
+      return PayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves true if merchant enabled paypal', function () {
+      return PayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(true);
+      });
+    });
+  });
 });

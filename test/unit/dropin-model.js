@@ -2,10 +2,16 @@
 
 var analytics = require('../../src/lib/analytics');
 var DropinModel = require('../../src/dropin-model');
+var ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
+var CardView = require('../../src/views/payment-sheet-views/card-view');
+var GooglePayView = require('../../src/views/payment-sheet-views/google-pay-view');
+var PayPalView = require('../../src/views/payment-sheet-views/paypal-view');
+var PayPalCreditView = require('../../src/views/payment-sheet-views/paypal-credit-view');
+var VenmoView = require('../../src/views/payment-sheet-views/venmo-view');
 var EventEmitter = require('../../src/lib/event-emitter');
 var isHTTPS = require('../../src/lib/is-https');
 var fake = require('../helpers/fake');
-var venmo = require('braintree-web/venmo');
+var throwIfResolves = require('../helpers/throw-if-resolves');
 
 describe('DropinModel', function () {
   beforeEach(function () {
@@ -47,218 +53,6 @@ describe('DropinModel', function () {
       expect(model.merchantConfiguration).to.equal(this.modelOptions.merchantConfiguration);
     });
 
-    describe('payment methods', function () {
-      it('sets existing payment methods as _paymentMethods', function () {
-        var model;
-
-        this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model._paymentMethods).to.deep.equal([{type: 'CreditCard', details: {lastTwo: '11'}}]);
-      });
-
-      it('_paymentMethods is empty if no existing payment methods', function () {
-        var model = new DropinModel(this.modelOptions);
-
-        expect(model._paymentMethods).to.deep.equal([]);
-      });
-
-      it('ignores invalid payment methods', function () {
-        var model;
-
-        this.modelOptions.paymentMethods = [
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-          {type: 'InvalidMethod', details: {}},
-          {type: 'AlsoInvalidMethod', details: {}}
-        ];
-
-        this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
-        model = new DropinModel(this.modelOptions);
-
-        expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-        ]);
-      });
-
-      it('ignores valid, but disabled payment methods', function () {
-        var model;
-
-        this.modelOptions.paymentMethods = [
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-        ];
-
-        delete this.modelOptions.merchantConfiguration.paypal;
-        model = new DropinModel(this.modelOptions);
-
-        expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}}
-        ]);
-      });
-
-      it('ignores payment vaulted payment methods that cannot be used client side', function () {
-        var model;
-
-        this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
-        this.modelOptions.merchantConfiguration.applePay = true;
-        this.modelOptions.merchantConfiguration.venmo = true;
-        this.modelOptions.paymentMethods = [
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-          {type: 'ApplePayCard', details: {}},
-          {type: 'VenmoAccount', details: {}}
-        ];
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-        ]);
-      });
-    });
-
-    describe('supported payment options', function () {
-      it('throws an error when there are no payment options', function () {
-        this.configuration.gatewayConfiguration.creditCards.supportedCardTypes = [];
-
-        expect(function () {
-          new DropinModel(this.modelOptions); // eslint-disable-line no-new
-        }.bind(this)).to.throw('No valid payment options available.');
-      });
-
-      it('throws an error when paymentOptionPriority is an empty array', function () {
-        this.configuration.gatewayConfiguration.paypalEnabled = true;
-        this.modelOptions.merchantConfiguration.paypal = true;
-        this.modelOptions.merchantConfiguration.paymentOptionPriority = [];
-
-        expect(function () {
-          new DropinModel(this.modelOptions); // eslint-disable-line no-new
-        }.bind(this)).to.throw('No valid payment options available.');
-      });
-
-      it('supports cards', function () {
-        expect(new DropinModel(this.modelOptions).supportedPaymentOptions).to.deep.equal([
-          'card'
-        ]);
-      });
-
-      it('supports cards, PayPal, PayPal Credit, Apple Pay, and Venmo and defaults to showing them in correct paymentOptionPriority', function () {
-        var model;
-
-        this.sandbox.stub(venmo, 'isBrowserSupported').returns(true);
-        this.configuration.gatewayConfiguration.paypalEnabled = true;
-        this.modelOptions.merchantConfiguration.paypal = true;
-        this.modelOptions.merchantConfiguration.paypalCredit = true;
-        this.modelOptions.merchantConfiguration.applePay = true;
-        this.modelOptions.merchantConfiguration.venmo = true;
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay']);
-      });
-
-      it('uses custom paymentOptionPriority of payment options', function () {
-        var model;
-
-        this.configuration.gatewayConfiguration.paypalEnabled = true;
-        this.modelOptions.merchantConfiguration.paypal = true;
-        this.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'card'];
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
-      });
-
-      it('ignores duplicates', function () {
-        var model;
-
-        this.configuration.gatewayConfiguration.paypalEnabled = true;
-        this.modelOptions.merchantConfiguration.paypal = true;
-        this.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'paypal', 'card'];
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
-      });
-
-      it('throws an error when an unrecognized payment option is specified', function () {
-        this.configuration.gatewayConfiguration.paypalEnabled = true;
-        this.modelOptions.merchantConfiguration.paypal = true;
-        this.modelOptions.merchantConfiguration.paymentOptionPriority = ['foo', 'paypal', 'card'];
-
-        expect(function () {
-          new DropinModel(this.modelOptions); // eslint-disable-line no-new
-        }.bind(this)).to.throw('paymentOptionPriority: Invalid payment option specified.');
-      });
-
-      it('does not support Apple Pay when the browser does not support Apple Pay', function () {
-        var model;
-
-        delete global.ApplePaySession;
-        this.modelOptions.merchantConfiguration.applePay = true;
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
-      });
-
-      it('does not support Apple Pay when the page is not loaded over https', function () {
-        var model;
-
-        isHTTPS.isHTTPS.returns(false);
-        this.modelOptions.merchantConfiguration.applePay = true;
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
-      });
-
-      it('does not support Apple Pay when the device does not support Apple Pay', function () {
-        var model;
-
-        global.ApplePaySession.canMakePayments.returns(false);
-        this.modelOptions.merchantConfiguration.applePay = true;
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
-      });
-
-      it('does not support Venmo when the browser does not support Venmo', function () {
-        var model;
-
-        this.modelOptions.merchantConfiguration.venmo = true;
-        this.sandbox.stub(venmo, 'isBrowserSupported').returns(false);
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model.supportedPaymentOptions).to.deep.equal(['card']);
-
-        venmo.isBrowserSupported.returns(true);
-
-        model = new DropinModel(this.modelOptions);
-
-        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'venmo']);
-      });
-
-      it('passes merchant venmo configuration into isBrowserSupported', function () {
-        this.modelOptions.merchantConfiguration.venmo = {
-          allowNewBrowserTab: false
-        };
-        this.sandbox.stub(venmo, 'isBrowserSupported').returns(false);
-
-        new DropinModel(this.modelOptions); // eslint-disable-line no-new
-
-        expect(venmo.isBrowserSupported).to.be.calledWith({
-          allowNewBrowserTab: false
-        });
-      });
-    });
-
     describe('isGuestCheckout', function () {
       it('is true when given a tokenization key', function () {
         var model;
@@ -295,9 +89,219 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('initialize', function () {
+    beforeEach(function () {
+      this.sandbox.stub(ApplePayView, 'isEnabled').resolves(true);
+      this.sandbox.stub(CardView, 'isEnabled').resolves(true);
+      this.sandbox.stub(GooglePayView, 'isEnabled').resolves(true);
+      this.sandbox.stub(PayPalView, 'isEnabled').resolves(true);
+      this.sandbox.stub(PayPalCreditView, 'isEnabled').resolves(true);
+      this.sandbox.stub(VenmoView, 'isEnabled').resolves(true);
+    });
+
+    it('sets existing payment methods as _paymentMethods', function () {
+      var model;
+
+      this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model._paymentMethods).to.deep.equal([{type: 'CreditCard', details: {lastTwo: '11'}}]);
+      });
+    });
+
+    it('_paymentMethods is empty if no existing payment methods', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model._paymentMethods).to.deep.equal([]);
+      });
+    });
+
+    it('ignores invalid payment methods', function () {
+      var model;
+
+      this.modelOptions.paymentMethods = [
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'InvalidMethod', details: {}},
+        {type: 'AlsoInvalidMethod', details: {}}
+      ];
+
+      this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model._paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+        ]);
+      });
+    });
+
+    it('ignores valid, but disabled payment methods', function () {
+      var model;
+
+      this.modelOptions.paymentMethods = [
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ];
+
+      PayPalView.isEnabled.resolves(false);
+      PayPalCreditView.isEnabled.resolves(false);
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model._paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}}
+        ]);
+      });
+    });
+
+    it('ignores payment vaulted payment methods that cannot be used client side', function () {
+      var model;
+
+      this.modelOptions.paymentMethods = [
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'ApplePayCard', details: {}},
+        {type: 'AndroidPayCard', details: {}},
+        {type: 'VenmoAccount', details: {}}
+      ];
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model._paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+        ]);
+      });
+    });
+
+    it('rejects with an error when there are no payment options', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      ApplePayView.isEnabled.resolves(false);
+      CardView.isEnabled.resolves(false);
+      GooglePayView.isEnabled.resolves(false);
+      PayPalView.isEnabled.resolves(false);
+      PayPalCreditView.isEnabled.resolves(false);
+      VenmoView.isEnabled.resolves(false);
+
+      return model.initialize().then(throwIfResolves).catch(function (err) {
+        expect(err.message).to.equal('No valid payment options available.');
+      });
+    });
+
+    it('throws an error when paymentOptionPriority is an empty array', function () {
+      var model;
+
+      this.configuration.gatewayConfiguration.paypalEnabled = true;
+      this.modelOptions.merchantConfiguration.paypal = true;
+      this.modelOptions.merchantConfiguration.paymentOptionPriority = [];
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(throwIfResolves).catch(function (err) {
+        expect(err.message).to.equal('No valid payment options available.');
+      });
+    });
+
+    it('supports cards, PayPal, PayPal Credit, Venmo, Apple Pay and Google Pay and defaults to showing them in correct paymentOptionPriority', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']);
+      });
+    });
+
+    it('uses custom paymentOptionPriority of payment options', function () {
+      var model;
+
+      this.configuration.gatewayConfiguration.paypalEnabled = true;
+      this.modelOptions.merchantConfiguration.paypal = true;
+      this.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'card'];
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
+      });
+    });
+
+    it('ignores duplicates', function () {
+      var model;
+
+      this.configuration.gatewayConfiguration.paypalEnabled = true;
+      this.modelOptions.merchantConfiguration.paypal = true;
+      this.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'paypal', 'card'];
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model.supportedPaymentOptions).to.deep.equal(['paypal', 'card']);
+      });
+    });
+
+    it('calls isEnabled on payment method view to determine if payment method is available', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(ApplePayView.isEnabled).to.be.calledOnce;
+        expect(ApplePayView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(CardView.isEnabled).to.be.calledOnce;
+        expect(CardView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(GooglePayView.isEnabled).to.be.calledOnce;
+        expect(GooglePayView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(PayPalView.isEnabled).to.be.calledOnce;
+        expect(PayPalView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(PayPalCreditView.isEnabled).to.be.calledOnce;
+        expect(PayPalCreditView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+        expect(VenmoView.isEnabled).to.be.calledOnce;
+        expect(VenmoView.isEnabled).to.be.calledWith({
+          client: this.modelOptions.client,
+          merchantConfiguration: this.modelOptions.merchantConfiguration
+        });
+      }.bind(this));
+    });
+
+    it('rejects with an error when an unrecognized payment option is specified', function () {
+      var model;
+
+      this.configuration.gatewayConfiguration.paypalEnabled = true;
+      this.modelOptions.merchantConfiguration.paypal = true;
+      this.modelOptions.merchantConfiguration.paymentOptionPriority = ['foo', 'paypal', 'card'];
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(throwIfResolves).catch(function (err) {
+        expect(err.message).to.equal('paymentOptionPriority: Invalid payment option specified.');
+      });
+    });
+  });
+
   describe('addPaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
+      return this.model.initialize();
     });
 
     it('adds a new payment method to _paymentMethods', function () {
@@ -331,6 +335,7 @@ describe('DropinModel', function () {
   describe('removePaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
+      return this.model.initialize();
     });
 
     it('removes a payment method from _paymentMethods', function () {
@@ -629,7 +634,9 @@ describe('DropinModel', function () {
     it('returns false initially if no payment methods are passed in', function () {
       var model = new DropinModel(this.modelOptions);
 
-      expect(model.isPaymentMethodRequestable()).to.equal(false);
+      return model.initialize().then(function () {
+        expect(model.isPaymentMethodRequestable()).to.equal(false);
+      });
     });
 
     it('returns true initially if payment methods are passed in', function () {
@@ -638,7 +645,9 @@ describe('DropinModel', function () {
       this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
       model = new DropinModel(this.modelOptions);
 
-      expect(model.isPaymentMethodRequestable()).to.equal(true);
+      return model.initialize().then(function () {
+        expect(model.isPaymentMethodRequestable()).to.equal(true);
+      });
     });
   });
 

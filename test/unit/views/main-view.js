@@ -5,6 +5,7 @@ var ApplePayView = require('../../../src/views/payment-sheet-views/apple-pay-vie
 var BaseView = require('../../../src/views/base-view');
 var BasePayPalView = require('../../../src/views/payment-sheet-views/base-paypal-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
+var GooglePayView = require('../../../src/views/payment-sheet-views/google-pay-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var Promise = require('../../../src/lib/promise');
 var analytics = require('../../../src/lib/analytics');
@@ -74,14 +75,16 @@ describe('MainView', function () {
       var mainView;
       var model = new DropinModel(fake.modelOptions());
 
-      model.supportedPaymentOptions = ['card'];
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
 
-      this.mainViewOptions.model = model;
+        this.mainViewOptions.model = model;
 
-      mainView = new MainView(this.mainViewOptions);
+        mainView = new MainView(this.mainViewOptions);
 
-      expect(Object.keys(mainView._views)).to.contain(CardView.ID);
-      expect(mainView.primaryView.ID).to.equal(CardView.ID);
+        expect(Object.keys(mainView._views)).to.contain(CardView.ID);
+        expect(mainView.primaryView.ID).to.equal(CardView.ID);
+      }.bind(this));
     });
 
     it('creates a PaymentOptionsView if there are multiple payment options', function () {
@@ -90,15 +93,18 @@ describe('MainView', function () {
 
       modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
       model = new DropinModel(modelOptions);
-      model.supportedPaymentOptions = ['card', 'paypal'];
 
-      this.mainViewOptions.model = model;
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card', 'paypal'];
 
-      this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+        this.mainViewOptions.model = model;
 
-      mainView = new MainView(this.mainViewOptions);
+        this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
 
-      expect(Object.keys(mainView._views)).to.contain(PaymentOptionsView.ID);
+        mainView = new MainView(this.mainViewOptions);
+
+        expect(Object.keys(mainView._views)).to.contain(PaymentOptionsView.ID);
+      }.bind(this));
     });
 
     context('with vaulted payment methods', function () {
@@ -110,22 +116,25 @@ describe('MainView', function () {
 
         modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}, {type: 'PayPalAccount'}];
         this.model = new DropinModel(modelOptions);
-        this.model.supportedPaymentOptions = ['card', 'paypal'];
 
-        this.mainViewOptions = {
-          client: {
-            getConfiguration: fake.configuration,
-            getVersion: function () { return braintreeWebVersion; }
-          },
-          element: element,
-          merchantConfiguration: {
-            authorization: fake.tokenizationKey
-          },
-          model: this.model,
-          strings: strings
-        };
+        return this.model.initialize().then(function () {
+          this.model.supportedPaymentOptions = ['card', 'paypal'];
 
-        this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+          this.mainViewOptions = {
+            client: {
+              getConfiguration: fake.configuration,
+              getVersion: function () { return braintreeWebVersion; }
+            },
+            element: element,
+            merchantConfiguration: {
+              authorization: fake.tokenizationKey
+            },
+            model: this.model,
+            strings: strings
+          };
+
+          this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+        }.bind(this));
       });
 
       it('sets the first payment method to be the active payment method', function () {
@@ -166,17 +175,19 @@ describe('MainView', function () {
 
         this.model = new DropinModel(fake.modelOptions());
 
-        this.mainViewOptions = {
-          client: this.client,
-          element: element,
-          merchantConfiguration: {
-            authorization: fake.tokenizationKey
-          },
-          model: this.model,
-          strings: strings
-        };
+        return this.model.initialize().then(function () {
+          this.mainViewOptions = {
+            client: this.client,
+            element: element,
+            merchantConfiguration: {
+              authorization: fake.tokenizationKey
+            },
+            model: this.model,
+            strings: strings
+          };
 
-        this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+          this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+        }.bind(this));
       });
 
       it('sets PaymentOptionsViews as the primary view if there are multiple payment methods', function () {
@@ -226,21 +237,23 @@ describe('MainView', function () {
       var model = new DropinModel(fake.modelOptions());
       var wrapper = document.createElement('div');
 
-      model.supportedPaymentOptions = ['card', 'paypal', 'paypalCredit', 'applePay', 'venmo'];
-
       wrapper.innerHTML = templateHTML;
 
-      this.mainViewOptions = {
-        element: wrapper,
-        model: model,
-        client: this.client,
-        merchantConfiguration: {
-          authorization: fake.tokenizationKey
-        },
-        strings: strings
-      };
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card', 'paypal', 'paypalCredit', 'applePay', 'googlePay', 'venmo'];
 
-      this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+        this.mainViewOptions = {
+          element: wrapper,
+          model: model,
+          client: this.client,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          strings: strings
+        };
+
+        this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+      }.bind(this));
     });
 
     it('clears any errors', function () {
@@ -258,7 +271,8 @@ describe('MainView', function () {
       CardView,
       PaymentMethodsView,
       PaymentOptionsView,
-      PayPalView
+      PayPalView,
+      GooglePayView
     ].forEach(function (View) {
       describe('when given a ' + View.ID + 'view', function () {
         beforeEach(function () {
@@ -337,15 +351,18 @@ describe('MainView', function () {
               modelOptions.paymentMethods = [];
               modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
               model = new DropinModel(modelOptions);
-              model.supportedPaymentOptions = [sheetViewKey];
 
-              this.mainViewOptions.model = model;
+              return model.initialize().then(function () {
+                model.supportedPaymentOptions = [sheetViewKey];
 
-              mainView = new MainView(this.mainViewOptions);
+                this.mainViewOptions.model = model;
 
-              mainView.setPrimaryView(SheetView.ID);
+                mainView = new MainView(this.mainViewOptions);
 
-              expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
+                mainView.setPrimaryView(SheetView.ID);
+
+                expect(mainView.toggle.classList.contains('braintree-hidden')).to.be.true;
+              }.bind(this));
             });
           });
 
@@ -456,17 +473,6 @@ describe('MainView', function () {
       expect(this.context.sheetErrorText.textContent).to.equal('Please check your information and try again.');
     });
 
-    it('shows the raw error message when the error has an unknown error code', function () {
-      var fakeError = {
-        code: 'AN_UNKNOWN_ERROR',
-        message: 'Some text we will use because we do not know this error code'
-      };
-
-      MainView.prototype.showSheetError.call(this.context, fakeError);
-
-      expect(this.context.sheetErrorText.textContent).to.equal('Something went wrong on our end.');
-    });
-
     it('shows a fallback error message when the error code is unknown and the error is missing a message', function () {
       var fakeError = {
         code: 'AN_UNKNOWN_ERROR'
@@ -475,6 +481,14 @@ describe('MainView', function () {
       MainView.prototype.showSheetError.call(this.context, fakeError);
 
       expect(this.context.sheetErrorText.textContent).to.equal('Something went wrong on our end.');
+    });
+
+    it('shows a developer error message when error is "developerError"', function () {
+      var fakeError = 'developerError';
+
+      MainView.prototype.showSheetError.call(this.context, fakeError);
+
+      expect(this.context.sheetErrorText.textContent).to.equal('Developer Error: Something went wrong. Check the console for details.');
     });
   });
 
@@ -497,28 +511,31 @@ describe('MainView', function () {
   describe('dropinErrorState events', function () {
     beforeEach(function () {
       var element = document.createElement('div');
+      var model = new DropinModel(fake.modelOptions());
 
       element.innerHTML = templateHTML;
 
-      this.context = {
-        addView: this.sandbox.stub(),
-        element: element,
-        getElementById: BaseView.prototype.getElementById,
-        hideSheetError: this.sandbox.stub(),
-        hideLoadingIndicator: function () {},
-        model: new DropinModel(fake.modelOptions()),
-        client: {
-          getConfiguration: fake.configuration,
-          getVersion: function () { return braintreeWebVersion; }
-        },
-        setPrimaryView: this.sandbox.stub(),
-        showSheetError: this.sandbox.stub(),
-        toggleAdditionalOptions: function () {},
-        showLoadingIndicator: function () {},
-        strings: strings
-      };
+      return model.initialize().then(function () {
+        this.context = {
+          addView: this.sandbox.stub(),
+          element: element,
+          getElementById: BaseView.prototype.getElementById,
+          hideSheetError: this.sandbox.stub(),
+          hideLoadingIndicator: function () {},
+          model: model,
+          client: {
+            getConfiguration: fake.configuration,
+            getVersion: function () { return braintreeWebVersion; }
+          },
+          setPrimaryView: this.sandbox.stub(),
+          showSheetError: this.sandbox.stub(),
+          toggleAdditionalOptions: function () {},
+          showLoadingIndicator: function () {},
+          strings: strings
+        };
 
-      MainView.prototype._initialize.call(this.context);
+        MainView.prototype._initialize.call(this.context);
+      }.bind(this));
     });
 
     it('calls showSheetError when errorOccurred is emitted', function () {
@@ -568,33 +585,35 @@ describe('MainView', function () {
       this.element.innerHTML = templateHTML;
       this.model = new DropinModel(fake.modelOptions());
 
-      this.mainViewOptions = {
-        element: this.element,
-        model: this.model,
-        client: this.client,
-        merchantConfiguration: {
-          authorization: fake.tokenizationKey
-        },
-        strings: strings
-      };
+      return this.model.initialize().then(function () {
+        this.mainViewOptions = {
+          element: this.element,
+          model: this.model,
+          client: this.client,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          strings: strings
+        };
 
-      this.sandbox.stub(CardView.prototype, 'initialize');
-      this.sandbox.spy(MainView.prototype, 'hideLoadingIndicator');
+        this.sandbox.stub(CardView.prototype, 'initialize');
+        this.sandbox.spy(MainView.prototype, 'hideLoadingIndicator');
 
-      this.mainView = new MainView(this.mainViewOptions);
-      this.mainView._views = {
-        methods: {
-          onSelection: this.sandbox.stub()
-        },
-        card: {
-          getPaymentMethod: this.sandbox.stub(),
-          onSelection: this.sandbox.stub()
-        },
-        paypal: {
-          getPaymentMethod: this.sandbox.stub(),
-          onSelection: this.sandbox.stub()
-        }
-      };
+        this.mainView = new MainView(this.mainViewOptions);
+        this.mainView._views = {
+          methods: {
+            onSelection: this.sandbox.stub()
+          },
+          card: {
+            getPaymentMethod: this.sandbox.stub(),
+            onSelection: this.sandbox.stub()
+          },
+          paypal: {
+            getPaymentMethod: this.sandbox.stub(),
+            onSelection: this.sandbox.stub()
+          }
+        };
+      }.bind(this));
     });
 
     describe('for changeActivePaymentMethod', function () {
@@ -703,18 +722,23 @@ describe('MainView', function () {
 
   describe('additional options toggle', function () {
     beforeEach(function () {
+      var model = new DropinModel(fake.modelOptions());
+
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
-      this.mainViewOptions = {
-        element: this.wrapper,
-        client: this.client,
-        model: new DropinModel(fake.modelOptions()),
-        merchantConfiguration: {
-          authorization: fake.tokenizationKey
-        },
-        strings: strings
-      };
-      this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+
+      return model.initialize().then(function () {
+        this.mainViewOptions = {
+          element: this.wrapper,
+          client: this.client,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          strings: strings
+        };
+        this.sandbox.stub(PayPalCheckout, 'create').yields(null, {});
+      }.bind(this));
     });
 
     it('has an click event listener that calls toggleAdditionalOptions', function () {
@@ -782,14 +806,16 @@ describe('MainView', function () {
           modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
 
           this.mainViewOptions.model = new DropinModel(modelOptions);
-          this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
-          this.mainView = new MainView(this.mainViewOptions);
+          return this.mainViewOptions.model.initialize().then(function () {
+            this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
+            this.mainView = new MainView(this.mainViewOptions);
 
-          this.sandbox.spy(this.mainView, 'setPrimaryView');
+            this.sandbox.spy(this.mainView, 'setPrimaryView');
 
-          this.mainView.setPrimaryView(CardView.ID);
-          this.mainView.toggle.click();
-          this.sandbox.clock.tick(1);
+            this.mainView.setPrimaryView(CardView.ID);
+            this.mainView.toggle.click();
+            this.sandbox.clock.tick(1);
+          }.bind(this));
         });
 
         it('sets the PaymentMethodsView as the primary view', function () {
@@ -811,20 +837,24 @@ describe('MainView', function () {
 
   describe('requestPaymentMethod', function () {
     beforeEach(function () {
+      var model = new DropinModel(fake.modelOptions());
+
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
 
       this.sandbox.stub(analytics, 'sendEvent');
 
-      this.mainView = new MainView({
-        element: this.wrapper,
-        model: new DropinModel(fake.modelOptions()),
-        client: this.client,
-        merchantConfiguration: {
-          authorization: 'fake_tokenization_key'
-        },
-        strings: strings
-      });
+      return model.initialize().then(function () {
+        this.mainView = new MainView({
+          element: this.wrapper,
+          model: model,
+          client: this.client,
+          merchantConfiguration: {
+            authorization: 'fake_tokenization_key'
+          },
+          strings: strings
+        });
+      }.bind(this));
     });
 
     it('requests payment method from the primary view', function () {
@@ -882,20 +912,23 @@ describe('MainView', function () {
       beforeEach(function () {
         var model = new DropinModel(fake.modelOptions());
 
-        model.supportedPaymentOptions = ['card'];
-
         this.wrapper = document.createElement('div');
         this.wrapper.innerHTML = templateHTML;
         this.sandbox.stub(hostedFields, 'create').resolves(fake.HostedFieldsInstance);
-        this.mainView = new MainView({
-          element: this.wrapper,
-          client: this.client,
-          model: new DropinModel(fake.modelOptions()),
-          merchantConfiguration: {
-            authorization: fake.clientTokenWithCustomerID
-          },
-          strings: strings
-        });
+
+        return model.initialize().then(function () {
+          model.supportedPaymentOptions = ['card'];
+
+          this.mainView = new MainView({
+            element: this.wrapper,
+            client: this.client,
+            model: model,
+            merchantConfiguration: {
+              authorization: fake.clientTokenWithCustomerID
+            },
+            strings: strings
+          });
+        }.bind(this));
       });
 
       it('requests payment method from payment methods view', function () {

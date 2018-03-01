@@ -84,6 +84,31 @@ describe('PaymentMethodView', function () {
       expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).to.be.false;
     });
 
+    it('sets the inner HTML correctly when the paymentMethod is Google Pay', function () {
+      var iconElement, iconContainer, labelElement;
+      var paymentMethod = {
+        type: 'AndroidPayCard',
+        details: {
+          cardType: 'Visa',
+          dpanLastTwo: '92',
+          paymentInstrumentName: 'Visa 0492'
+        }
+      };
+
+      this.context.paymentMethod = paymentMethod;
+
+      PaymentMethodView.prototype._initialize.call(this.context);
+
+      iconElement = this.context.element.querySelector('.braintree-method__logo use');
+      iconContainer = this.context.element.querySelector('.braintree-method__logo svg');
+      labelElement = this.context.element.querySelector('.braintree-method__label');
+
+      expect(iconElement.getAttribute('xlink:href')).to.equal('#logoGooglePay');
+      expect(labelElement.textContent).to.contain('Google Pay');
+      expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('');
+      expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).to.be.false;
+    });
+
     it('sets the inner HTML correctly when the paymentMethod is Apple Pay', function () {
       var iconElement, iconContainer, labelElement;
       var paymentMethod = {

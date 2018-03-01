@@ -41,10 +41,18 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   div.setAttribute('tabindex', '0');
 
   switch (paymentOptionID) {
+    case paymentOptionIDs.applePay:
+      paymentSource = this.strings['Apple Pay'];
+      html = html.replace(/@ICON/g, 'logoApplePay');
+      break;
     case paymentOptionIDs.card:
       paymentSource = this.strings.Card;
       html = html.replace(/@ICON/g, 'iconCardFront');
       html = html.replace(/@CLASSNAME/g, 'braintree-icon--bordered');
+      break;
+    case paymentOptionIDs.googlePay:
+      paymentSource = this.strings['Google Pay'];
+      html = html.replace(/@ICON/g, 'logoGooglePay');
       break;
     case paymentOptionIDs.paypal:
       paymentSource = this.strings.PayPal;
@@ -53,10 +61,6 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
     case paymentOptionIDs.paypalCredit:
       paymentSource = this.strings['PayPal Credit'];
       html = html.replace(/@ICON/g, 'logoPayPalCredit');
-      break;
-    case paymentOptionIDs.applePay:
-      paymentSource = this.strings['Apple Pay'];
-      html = html.replace(/@ICON/g, 'logoApplePay');
       break;
     case paymentOptionIDs.venmo:
       paymentSource = this.strings.Venmo;

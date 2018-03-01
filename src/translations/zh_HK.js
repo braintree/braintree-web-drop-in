@@ -46,6 +46,7 @@ module.exports = {
   "Card": "信用卡",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",

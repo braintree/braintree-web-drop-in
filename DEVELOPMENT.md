@@ -272,6 +272,39 @@ var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
 ```
 
 
+### Update Configuration
+
+If your payment method has a configuration that can be updated after Drop-in has been created, but before tokenization occurs, such as updating the amount setting when authorizing a PayPal account, add an `updateConfiguration` method to the sheet view. If your payment method does not require this, skip this section.
+
+```javascript
+FooPayView.prototype.updateConfiguration = function (key, value) {
+  this.fooPayConfiguration[key] = value;
+};
+```
+
+Next, open [src/dropin.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/dropin.js) and update the `UPDATABLE_CONFIGURATION_OPTIONS` constant to include your payment method:
+
+```javascript
+var UPDATABLE_CONFIGURATION_OPTIONS = [
+  paymentOptionIDs.paypal,
+  paymentOptionIDs.paypalCredit,
+  // others
+  paymentOptionsIDs.fooPay
+];
+```
+
+Finally, if updating the configuration would invalidate the authorized payment method, add it to the `UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED` constant.
+
+```javascript
+var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
+  paymentOptionIDs.paypal,
+  paymentOptionIDs.paypalCredit,
+  // others
+  paymentOptionsIDs.fooPay
+];
+```
+
+
 ### Error Handling
 
 If you don't need to handle specific errors, you can let Drop-in populate a generic error. If you do need to handle a specific error, you can pass the key of a specific string to use in the translation file. 
@@ -281,6 +314,10 @@ Alternatively, you can pass the `BraintreeError` from braintree-web into `this.m
 ```javascript
 fooPayTokenizationFailedError: 'Something went wrong when connecting to FooPay.'
 ```
+
+### Documentation
+
+Add documentation info to [src/dropin.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/dropin.js), [src/index.js](https://github.com/braintree/braintree-web-drop-in/blob/master/src/index.js), and [jsdoc/home.md](https://github.com/braintree/braintree-web-drop-in/blob/master/jsdoc/home.md)
 
 ## Unit tests
 

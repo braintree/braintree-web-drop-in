@@ -4,6 +4,7 @@ var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
+var Promise = require('../../lib/promise');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
@@ -93,6 +94,12 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
   if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
     this.paypalConfiguration[key] = value;
   }
+};
+
+BasePayPalView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+
+  return Promise.resolve(gatewayConfiguration.paypalEnabled);
 };
 
 module.exports = BasePayPalView;

@@ -13,7 +13,7 @@ var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'u
 
 describe('VenmoView', function () {
   beforeEach(function () {
-    var fakeClient = {
+    this.fakeClient = {
       getConfiguration: this.sandbox.stub().returns(fake.configuration()),
       getVersion: function () {}
     };
@@ -29,7 +29,7 @@ describe('VenmoView', function () {
 
     this.model.merchantConfiguration.venmo = true;
     this.venmoViewOptions = {
-      client: fakeClient,
+      client: this.fakeClient,
       element: document.body.querySelector('.braintree-sheet.braintree-venmo'),
       model: this.model,
       strings: {}
@@ -226,6 +226,55 @@ describe('VenmoView', function () {
         return this.clickHandler(this.fakeEvent).then(function () {
           expect(this.model.reportError).to.not.be.called;
         }.bind(this));
+      });
+    });
+  });
+
+  describe('isEnabled', function () {
+    beforeEach(function () {
+      this.options = {
+        client: this.fakeClient,
+        merchantConfiguration: this.model.merchantConfiguration
+      };
+      this.sandbox.stub(btVenmo, 'isBrowserSupported').returns(true);
+    });
+
+    it('resolves with false when Venmo Pay is not enabled on the gateway', function () {
+      var configuration = fake.configuration();
+
+      delete configuration.gatewayConfiguration.payWithVenmo;
+
+      this.fakeClient.getConfiguration.returns(configuration);
+
+      return VenmoView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with false when Venmo Pay is not enabled by merchant', function () {
+      delete this.options.merchantConfiguration.venmo;
+
+      return VenmoView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with false when browser not supported by Venmo', function () {
+      var merchantConfig = this.options.merchantConfiguration.venmo = {
+        allowNewBrowserTab: false
+      };
+
+      btVenmo.isBrowserSupported.returns(false);
+
+      return VenmoView.isEnabled(this.options).then(function (result) {
+        expect(btVenmo.isBrowserSupported).to.be.calledWith(merchantConfig);
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with true when everything is setup for Venmo', function () {
+      return VenmoView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(true);
       });
     });
   });

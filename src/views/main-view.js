@@ -13,6 +13,7 @@ var supportsFlexbox = require('../lib/supports-flexbox');
 var transitionHelper = require('../lib/transition-helper');
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+var DEVELOPER_MISCONFIGURATION_MESSAGE = 'Developer Error: Something went wrong. Check the console for details.';
 
 function MainView() {
   BaseView.apply(this, arguments);
@@ -246,17 +247,17 @@ MainView.prototype.hideToggle = function () {
 };
 
 MainView.prototype.showSheetError = function (error) {
-  var translatedErrorMessage;
-  var errorMessage = this.strings.genericError;
+  var errorMessage;
+  var genericErrorMessage = this.strings.genericError;
 
   if (this.strings.hasOwnProperty(error)) {
-    translatedErrorMessage = this.strings[error];
+    errorMessage = this.strings[error];
   } else if (error && error.code) {
-    translatedErrorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
-  }
-
-  if (translatedErrorMessage) {
-    errorMessage = translatedErrorMessage;
+    errorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'] || genericErrorMessage;
+  } else if (error === 'developerError') {
+    errorMessage = DEVELOPER_MISCONFIGURATION_MESSAGE;
+  } else {
+    errorMessage = genericErrorMessage;
   }
 
   classlist.add(this.sheetContainer, 'braintree-sheet--has-error');

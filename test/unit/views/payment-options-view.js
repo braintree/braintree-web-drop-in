@@ -18,18 +18,18 @@ var paymentOptionAttributes = {
     optionTitle: strings['Apple Pay'],
     paymentOptionID: 'applePay'
   },
-  venmo: {
-    icon: '#logoVenmo',
-    optionLabel: 'Paying with Venmo',
-    optionTitle: strings.Venmo,
-    paymentOptionID: 'venmo'
-  },
   card: {
     className: 'braintree-icon--bordered',
     icon: '#iconCardFront',
     optionLabel: 'Paying with Card',
     optionTitle: strings.Card,
     paymentOptionID: 'card'
+  },
+  googlePay: {
+    icon: '#logoGooglePay',
+    optionLabel: 'Paying with Google Pay',
+    optionTitle: strings['Google Pay'],
+    paymentOptionID: 'googlePay'
   },
   paypal: {
     icon: '#logoPayPal',
@@ -42,6 +42,12 @@ var paymentOptionAttributes = {
     optionLabel: 'Paying with PayPal Credit',
     optionTitle: strings['PayPal Credit'],
     paymentOptionID: 'paypalCredit'
+  },
+  venmo: {
+    icon: '#logoVenmo',
+    optionLabel: 'Paying with Venmo',
+    optionTitle: strings.Venmo,
+    paymentOptionID: 'venmo'
   }
 };
 

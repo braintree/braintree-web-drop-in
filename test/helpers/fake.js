@@ -23,6 +23,7 @@ function configuration() {
         supportedCardTypes: ['American Express', 'Discover', 'JCB', 'MasterCard', 'Visa']
       },
       applePayWeb: {},
+      androidPay: {},
       payWithVenmo: {
         accessToken: 'access_token$sandbox$id',
         environment: 'sandbox',
