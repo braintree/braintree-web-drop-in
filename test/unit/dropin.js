@@ -549,8 +549,7 @@ describe('Dropin', function () {
 
       instance._initialize(function () {
         expect(assets.loadScript).to.have.been.calledOnce;
-        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
-        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(paypalScriptOptions);
+        expect(assets.loadScript.firstCall.args[0]).to.deep.equal(paypalScriptOptions);
 
         done();
       });
@@ -570,8 +569,7 @@ describe('Dropin', function () {
 
       instance._initialize(function () {
         expect(assets.loadScript).to.have.been.calledOnce;
-        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
-        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(paypalScriptOptions);
+        expect(assets.loadScript.firstCall.args[0]).to.deep.equal(paypalScriptOptions);
 
         done();
       });
@@ -809,8 +807,7 @@ describe('Dropin', function () {
 
       instance._initialize(function () {
         expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith(instance._dropinWrapper);
-        expect(assets.loadScript.firstCall.args[1]).to.deep.equal(dataCollectorScriptOptions);
+        expect(assets.loadScript.firstCall.args[0]).to.deep.equal(dataCollectorScriptOptions);
         expect(instance._setUpDataCollector).to.be.called;
 
         done();

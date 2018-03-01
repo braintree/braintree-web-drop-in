@@ -2,9 +2,10 @@
 
 var Promise = require('./promise');
 
-function loadScript(container, options) {
+function loadScript(options) {
   var script = document.createElement('script');
   var attrs = options.dataAttributes || {};
+  var container = options.container || document.head;
 
   script.src = options.src;
   script.id = options.id;

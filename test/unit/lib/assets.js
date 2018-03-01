@@ -15,7 +15,8 @@ describe('assets', function () {
     beforeEach(function () {
       this.options = {
         id: 'script-id',
-        src: 'script-src'
+        src: 'script-src',
+        container: this.fakeContainer
       };
       this.fakeScriptTag = {
         setAttribute: this.sandbox.stub(),
@@ -26,11 +27,11 @@ describe('assets', function () {
     });
 
     it('returns a promise that resolves when script has loaded', function () {
-      expect(loadScript(this.fakeContainer, this.options)).to.be.an.instanceof(Promise);
+      expect(loadScript(this.options)).to.be.an.instanceof(Promise);
     });
 
     it('appends a configured script tag to provided container', function () {
-      return loadScript(this.fakeContainer, this.options).then(function () {
+      return loadScript(this.options).then(function () {
         var scriptTag = this.fakeContainer.appendChild.firstCall.args[0];
 
         expect(scriptTag).to.equal(this.fakeScriptTag);
@@ -49,7 +50,7 @@ describe('assets', function () {
         foo: 'bar'
       };
 
-      return loadScript(this.fakeContainer, this.options).then(function () {
+      return loadScript(this.options).then(function () {
         expect(this.fakeScriptTag.setAttribute).to.be.calledTwice;
         expect(this.fakeScriptTag.setAttribute).to.be.calledWith('data-log-level', 'warn');
         expect(this.fakeScriptTag.setAttribute).to.be.calledWith('data-foo', 'bar');

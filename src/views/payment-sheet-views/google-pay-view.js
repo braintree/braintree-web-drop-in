@@ -90,7 +90,7 @@ GooglePayView.isEnabled = function (options) {
 
   return Promise.resolve().then(function () {
     if (!global.google) {
-      return assets.loadScript(global.document.head, {
+      return assets.loadScript({
         id: constants.GOOGLE_PAYMENT_SCRIPT_ID,
         src: constants.GOOGLE_PAYMENT_SOURCE
       });

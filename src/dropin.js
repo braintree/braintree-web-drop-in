@@ -364,7 +364,7 @@ Dropin.prototype._initialize = function (callback) {
       };
 
       setupPromise = setupPromise.then(function () {
-        return assets.loadScript(self._dropinWrapper, paypalScriptOptions);
+        return assets.loadScript(paypalScriptOptions);
       });
     }
 
@@ -491,7 +491,7 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
       id: constants.DATA_COLLECTOR_SCRIPT_ID
     };
 
-    assets.loadScript(this._dropinWrapper, dataCollectorScriptOptions).then(this._setUpDataCollector.bind(this));
+    assets.loadScript(dataCollectorScriptOptions).then(this._setUpDataCollector.bind(this));
   }
 
   if (this._merchantConfiguration.threeDSecure) {
