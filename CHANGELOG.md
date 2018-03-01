@@ -5,6 +5,8 @@ unreleased
 ----------
 - Enable Venmo support
 - Enable Google Pay support
+- Fix issue where non utf-8 encoded sites would show strange characters for card placeholders
+- Fix issue where card fields could not be focused by clicking on the corresponding label
 
 1.9.4
 -----

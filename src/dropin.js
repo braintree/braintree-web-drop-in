@@ -14,8 +14,10 @@ var paymentMethodsViewID = require('./views/payment-methods-view').ID;
 var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
+var isUtf8 = require('./lib/is-utf-8');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
+var sanitizeHtml = require('./lib/sanitize-html');
 var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
@@ -287,8 +289,15 @@ Dropin.prototype._initialize = function (callback) {
     self._strings = assign(self._strings, localizedStrings);
   }
 
+  if (!isUtf8()) {
+    // non-utf-8 encodings often don't support the bullet character
+    self._strings.endingIn = self._strings.endingIn.replace(/•/g, '*');
+  }
+
   if (self._merchantConfiguration.translations) {
-    self._strings = assign(self._strings, self._merchantConfiguration.translations);
+    Object.keys(self._merchantConfiguration.translations).forEach(function (key) {
+      self._strings[key] = sanitizeHtml(self._merchantConfiguration.translations[key]);
+    });
   }
 
   localizedHTML = Object.keys(self._strings).reduce(function (result, stringKey) {
@@ -552,7 +561,7 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
     if (error.code === 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED') {
       errorMessageDiv.innerHTML = constants.errors.PAYPAL_NON_LINKED_SANDBOX;
     } else {
-      errorMessageDiv.textContent = error.message;
+      errorMessageDiv.innerHTML = error.message;
     }
   }.bind(this));
 };
