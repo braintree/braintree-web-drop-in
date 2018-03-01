@@ -37,7 +37,6 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;
 
 /**
@@ -248,10 +247,9 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var localizedStrings, localizedHTML, paypalScriptOptions;
+  var localizedStrings, localizedHTML;
   var self = this;
   var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
-  var setupPromise = Promise.resolve();
 
   self._injectStylesheet();
 
@@ -319,8 +317,6 @@ Dropin.prototype._initialize = function (callback) {
 
     return self._model.initialize();
   }).then(function () {
-    var paypalRequired;
-
     self._model.on('cancelInitialization', function (err) {
       self._dropinWrapper.innerHTML = '';
       analytics.sendEvent(self._client, 'load-error');
@@ -352,24 +348,6 @@ Dropin.prototype._initialize = function (callback) {
       self._emit('paymentOptionSelected', event);
     });
 
-    paypalRequired = self._supportsPaymentOption(paymentOptionIDs.paypal) || self._supportsPaymentOption(paymentOptionIDs.paypalCredit);
-
-    if (paypalRequired && !global.paypal) {
-      paypalScriptOptions = {
-        src: constants.CHECKOUT_JS_SOURCE,
-        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        dataAttributes: {
-          'log-level': self._merchantConfiguration.paypal && self._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
-        }
-      };
-
-      setupPromise = setupPromise.then(function () {
-        return assets.loadScript(paypalScriptOptions);
-      });
-    }
-
-    return setupPromise;
-  }).then(function () {
     return self._setUpDependenciesAndViews();
   }).catch(function (err) {
     self.teardown().then(function () {

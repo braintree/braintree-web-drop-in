@@ -15,7 +15,6 @@ var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
 var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
 var braintreeWebVersion = require('../../package.json').dependencies['braintree-web'];
-var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 
 function delay(amount) {
   amount = amount || 100;
@@ -517,60 +516,6 @@ describe('Dropin', function () {
         script = document.querySelector('script[src="' + checkoutJsSource + '"]');
         expect(script).to.not.exist;
         expect(global.paypal).to.not.exist;
-        done();
-      });
-    });
-
-    it('does not load checkout.js if global paypal object is already on the page', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-
-      global.paypal = this.paypalCheckout;
-
-      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
-
-      instance._initialize(function () {
-        expect(assets.loadScript).to.not.have.been.called;
-
-        done();
-      });
-    });
-
-    it('loads checkout.js if PayPal is enabled', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var paypalScriptOptions = {
-        src: constants.CHECKOUT_JS_SOURCE,
-        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        dataAttributes: {
-          'log-level': DEFAULT_CHECKOUTJS_LOG_LEVEL
-        }
-      };
-
-      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
-
-      instance._initialize(function () {
-        expect(assets.loadScript).to.have.been.calledOnce;
-        expect(assets.loadScript.firstCall.args[0]).to.deep.equal(paypalScriptOptions);
-
-        done();
-      });
-    });
-
-    it('loads checkout.js if PayPal Credit is enabled', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var paypalScriptOptions = {
-        src: constants.CHECKOUT_JS_SOURCE,
-        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        dataAttributes: {
-          'log-level': DEFAULT_CHECKOUTJS_LOG_LEVEL
-        }
-      };
-
-      this.dropinOptions.merchantConfiguration.paypalCredit = {flow: 'vault'};
-
-      instance._initialize(function () {
-        expect(assets.loadScript).to.have.been.calledOnce;
-        expect(assets.loadScript.firstCall.args[0]).to.deep.equal(paypalScriptOptions);
-
         done();
       });
     });

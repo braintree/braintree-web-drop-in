@@ -4,10 +4,15 @@ var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
+var constants = require('../../constants');
+var assets = require('../../lib/assets');
 var Promise = require('../../lib/promise');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
+var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
+
+var paypalScriptLoadInProgressPromise;
 
 function BasePayPalView() {
   BaseView.apply(this, arguments);
@@ -99,7 +104,35 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
 BasePayPalView.isEnabled = function (options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
 
-  return Promise.resolve(gatewayConfiguration.paypalEnabled);
+  if (!gatewayConfiguration.paypalEnabled) {
+    return Promise.resolve(false);
+  }
+
+  if (global.paypal) {
+    return Promise.resolve(true);
+  }
+
+  if (paypalScriptLoadInProgressPromise) {
+    return paypalScriptLoadInProgressPromise;
+  }
+
+  paypalScriptLoadInProgressPromise = assets.loadScript({
+    src: constants.CHECKOUT_JS_SOURCE,
+    id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+    dataAttributes: {
+      'log-level': options.merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+    }
+  }).then(function () {
+    return Promise.resolve(true);
+  }).catch(function () {
+    return Promise.resolve(false);
+  }).then(function (result) {
+    paypalScriptLoadInProgressPromise = null;
+
+    return Promise.resolve(result);
+  });
+
+  return paypalScriptLoadInProgressPromise;
 };
 
 module.exports = BasePayPalView;
