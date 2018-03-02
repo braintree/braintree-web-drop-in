@@ -14,7 +14,6 @@ var DataCollector = require('../../src/lib/data-collector');
 var Promise = require('../../src/lib/promise');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
-var checkoutJsSource = constants.CHECKOUT_JS_SOURCE;
 var braintreeWebVersion = require('../../package.json').dependencies['braintree-web'];
 
 function delay(amount) {
@@ -481,39 +480,6 @@ describe('Dropin', function () {
 
       instance._initialize(function () {
         expect(instance._mainView).to.exist;
-        done();
-      });
-    });
-
-    it('creates a MainView if checkout.js is not required', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-
-      instance._initialize(function () {
-        expect(instance._mainView).to.exist;
-        done();
-      });
-    });
-
-    it('creates a MainView if checkout.js is required', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-
-      this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
-
-      instance._initialize(function (err, returned) {
-        expect(returned._mainView).to.exist;
-
-        done();
-      });
-    });
-
-    it('does not load checkout.js if PayPal is not required', function (done) {
-      var script;
-      var instance = new Dropin(this.dropinOptions);
-
-      instance._initialize(function () {
-        script = document.querySelector('script[src="' + checkoutJsSource + '"]');
-        expect(script).to.not.exist;
-        expect(global.paypal).to.not.exist;
         done();
       });
     });
