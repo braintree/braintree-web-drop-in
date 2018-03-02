@@ -64,9 +64,6 @@ describe('Dropin', function () {
     if (stylesheet) {
       stylesheet.parentNode.removeChild(stylesheet);
     }
-
-    delete global.braintree;
-    delete global.paypal;
   });
 
   describe('Constructor', function () {
