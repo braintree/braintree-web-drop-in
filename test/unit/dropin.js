@@ -10,6 +10,7 @@ var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
 var threeDSecure = require('braintree-web/three-d-secure');
 var ThreeDSecure = require('../../src/lib/three-d-secure');
+var DataCollector = require('../../src/lib/data-collector');
 var Promise = require('../../src/lib/promise');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
@@ -711,63 +712,31 @@ describe('Dropin', function () {
   });
 
   describe('loads data collector', function () {
-    function noop() {}
-
     beforeEach(function () {
-      this.deviceData = {correlationId: '123'};
       this.dropinOptions.merchantConfiguration.dataCollector = {kount: true};
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyReady');
-      this.sandbox.stub(assets, 'loadScript').resolves();
       this.sandbox.stub(Dropin.prototype, '_setUpDataCollector');
-
-      global.braintree = {
-        dataCollector: {
-          create: noop
-        }
-      };
-
-      this.sandbox.spy(global.braintree.dataCollector, 'create');
     });
 
-    it('does not load data collector if data collector is not enabled', function (done) {
+    it('does not load Data Collector if Data Collector is not enabled', function (done) {
       var instance;
 
       delete this.dropinOptions.merchantConfiguration.dataCollector;
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(assets.loadScript).to.not.be.called;
+        expect(instance._setUpDataCollector).to.not.be.called;
 
         done();
       });
     });
 
-    it('does load data collector if data collector is enabled', function (done) {
+    it('does load Data Collector if Data Collector is enabled', function (done) {
       var instance = new Dropin(this.dropinOptions);
-      var dataCollectorScriptOptions = {
-        src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
-        id: constants.DATA_COLLECTOR_SCRIPT_ID
-      };
 
       instance._initialize(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript.firstCall.args[0]).to.deep.equal(dataCollectorScriptOptions);
         expect(instance._setUpDataCollector).to.be.called;
-
-        done();
-      });
-    });
-
-    it('does not load data collector if data collector script is already loaded', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-      var script = document.createElement('script');
-
-      script.id = 'braintree-dropin-data-collector-script';
-      document.body.appendChild(script);
-
-      instance._initialize(function () {
-        expect(assets.loadScript).to.not.be.called;
 
         done();
       });
@@ -817,46 +786,45 @@ describe('Dropin', function () {
         },
         paymentMethods: ['card']
       });
-
-      global.braintree = {
-        dataCollector: {
-          create: this.sandbox.stub().resolves({deviceData: 'kount'})
-        }
-      };
+      this.sandbox.stub(DataCollector.prototype, 'initialize').resolves();
     });
 
-    it('sets up a data collector instance', function () {
+    it('sets up datacollector', function () {
       Dropin.prototype._setUpDataCollector.call({
         _client: this.client,
         _model: this.model,
+        _strings: {},
         _merchantConfiguration: {
-          dataCollector: {kount: true}
+          dataCollector: {
+            kount: true
+          }
         }
       });
 
-      expect(global.braintree.dataCollector.create).to.be.calledOnce;
-      expect(global.braintree.dataCollector.create).to.be.calledWith({
-        client: this.client,
-        kount: true
-      });
+      expect(DataCollector.prototype.initialize).to.be.calledOnce;
     });
 
-    it('fails initialization when data collector creation fails', function (done) {
-      var dataCollectorError = new Error('data collector failed');
+    it('fails initialization when Data Collection creation fails', function (done) {
+      var error = new Error('failed.');
 
       this.sandbox.spy(DropinModel.prototype, 'cancelInitialization');
 
-      global.braintree.dataCollector.create.rejects(dataCollectorError);
+      DataCollector.prototype.initialize.rejects(error);
 
       Dropin.prototype._setUpDataCollector.call({
         _client: this.client,
         _model: this.model,
+        _strings: {
+          cardVerification: 'Card Verification'
+        },
         _merchantConfiguration: {
-          dataCollector: {kount: true}
+          threeDSecure: {
+            foo: 'bar'
+          }
         }
       });
 
-      expect(global.braintree.dataCollector.create).to.be.calledOnce;
+      expect(DataCollector.prototype.initialize).to.be.calledOnce;
       setTimeout(function () {
         expect(DropinModel.prototype.cancelInitialization).to.be.called;
         done();
@@ -870,9 +838,14 @@ describe('Dropin', function () {
       Dropin.prototype._setUpDataCollector.call({
         _client: this.client,
         _merchantConfiguration: {
-          dataCollector: {kount: true}
+          threeDSecure: {
+            foo: 'bar'
+          }
         },
-        _model: this.model
+        _model: this.model,
+        _strings: {
+          cardVerification: 'Card Verification'
+        }
       }, noop);
 
       expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
@@ -910,7 +883,7 @@ describe('Dropin', function () {
       expect(ThreeDSecure.prototype.initialize).to.be.calledOnce;
     });
 
-    it('fails initialization when 3DS cration fails', function (done) {
+    it('fails initialization when 3DS creation fails', function (done) {
       var error = new Error('failed.');
 
       this.sandbox.spy(DropinModel.prototype, 'cancelInitialization');
@@ -982,12 +955,12 @@ describe('Dropin', function () {
     });
 
     it('calls teardown on dataCollector', function (done) {
-      this.instance._dataCollectorInstance = {
+      this.instance._dataCollector = {
         teardown: this.sandbox.stub().resolves()
       };
 
       this.instance.teardown(function () {
-        expect(this.instance._dataCollectorInstance.teardown).to.be.calledOnce;
+        expect(this.instance._dataCollector.teardown).to.be.calledOnce;
         done();
       }.bind(this));
     });
@@ -1006,7 +979,7 @@ describe('Dropin', function () {
     it('passes errors from data collector teardown to callback', function (done) {
       var error = new Error('Data Collector failured');
 
-      this.instance._dataCollectorInstance = {
+      this.instance._dataCollector = {
         teardown: this.sandbox.stub().rejects(error)
       };
 

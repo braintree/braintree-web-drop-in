@@ -1,6 +1,6 @@
 'use strict';
 
-var clientToken, clientTokenWithCustomerID, hostedFieldsInstance, paypalInstance, threeDSecureInstance;
+var clientToken, clientTokenWithCustomerID, fakeBTInstances;
 var tokenizationKey = 'development_testing_merchant_id';
 var braintreeVersion = require('braintree-web').VERSION;
 
@@ -66,23 +66,27 @@ clientTokenWithCustomerID = configuration().gatewayConfiguration;
 clientTokenWithCustomerID.authorizationFingerprint = 'encoded_auth_fingerprint&customer_id=abc123';
 clientTokenWithCustomerID = btoa(JSON.stringify(clientTokenWithCustomerID));
 
-hostedFieldsInstance = {
-  getState: getState,
-  on: function () {},
-  setAttribute: function () {},
-  setMessage: function () {},
-  tokenize: function () {}
-};
-
-paypalInstance = {
-  createPayment: function () {},
-  tokenizePayment: function () {}
-};
-
-threeDSecureInstance = {
-  verifyCard: function () {},
-  cancelVerifyCard: function () {},
-  teardown: function () {}
+fakeBTInstances = {
+  dataCollector: {
+    deviceData: 'device-data',
+    teardown: function () {}
+  },
+  hostedFields: {
+    getState: getState,
+    on: function () {},
+    setAttribute: function () {},
+    setMessage: function () {},
+    tokenize: function () {}
+  },
+  paypal: {
+    createPayment: function () {},
+    tokenizePayment: function () {}
+  },
+  threeDSecure: {
+    verifyCard: function () {},
+    cancelVerifyCard: function () {},
+    teardown: function () {}
+  }
 };
 
 function modelOptions() {
@@ -102,9 +106,10 @@ module.exports = {
   clientToken: clientToken,
   clientTokenWithCustomerID: clientTokenWithCustomerID,
   configuration: configuration,
-  hostedFieldsInstance: hostedFieldsInstance,
-  paypalInstance: paypalInstance,
-  threeDSecureInstance: threeDSecureInstance,
+  dataCollectorInstance: fakeBTInstances.dataCollector,
+  hostedFieldsInstance: fakeBTInstances.hostedFields,
+  paypalInstance: fakeBTInstances.paypal,
+  threeDSecureInstance: fakeBTInstances.threeDSecure,
   modelOptions: modelOptions,
   tokenizationKey: tokenizationKey
 };
