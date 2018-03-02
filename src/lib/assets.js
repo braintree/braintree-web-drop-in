@@ -15,8 +15,14 @@ function loadScript(options) {
     script.setAttribute('data-' + key, attrs[key]);
   });
 
-  return new Promise(function (resolve) {
+  return new Promise(function (resolve, reject) {
     script.addEventListener('load', resolve);
+    script.addEventListener('error', function () {
+      reject(new Error(options.src + ' failed to load.'));
+    });
+    script.addEventListener('abort', function () {
+      reject(new Error(options.src + ' has aborted.'));
+    });
     container.appendChild(script);
   });
 }
