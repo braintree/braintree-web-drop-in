@@ -106,7 +106,7 @@ describe "Drop-in card.cardholderName" do
   end
 
   describe "persistCardDataAfterTokenization" do
-    it "does not persist data by default", do
+    it "does not persist data by default" do
       visit_dropin_url
 
       click_option("card")
@@ -126,7 +126,7 @@ describe "Drop-in card.cardholderName" do
       expect(page).to have_button("Pay", disabled: true)
     end
 
-    it "persists card data after tokenization", do
+    it "persists card data after tokenization" do
       options = '{"persistCardDataAfterTokenization":true}'
       visit_dropin_url("?card=#{options}")
 
