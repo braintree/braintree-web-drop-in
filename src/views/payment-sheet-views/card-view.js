@@ -366,9 +366,13 @@ CardView.prototype.tokenize = function () {
   self._isTokenizing = true;
 
   return self.hostedFieldsInstance.tokenize(tokenizeOptions).then(function (payload) {
-    Object.keys(state.fields).forEach(function (field) {
-      self.hostedFieldsInstance.clear(field);
-    });
+    var persistCardData = self.model.merchantConfiguration.card && self.model.merchantConfiguration.card.persistCardDataAfterTokenization;
+
+    if (!persistCardData) {
+      Object.keys(state.fields).forEach(function (field) {
+        self.hostedFieldsInstance.clear(field);
+      });
+    }
 
     if (!self.model.isGuestCheckout) {
       payload.vaulted = true;
