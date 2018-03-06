@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.braintree || (g.braintree = {})).dropin = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.braintree || (g.braintree = {})).dropin = f()}})(function(){var define,module,exports;return (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -19,7 +19,7 @@ module.exports = function isChrome(ua) {
   return (ua.indexOf('Chrome') !== -1 || ua.indexOf('CriOS') !== -1) && !isEdge(ua) && !isSamsung(ua);
 };
 
-},{"./is-edge":3,"./is-samsung":9}],3:[function(require,module,exports){
+},{"./is-edge":3,"./is-samsung":12}],3:[function(require,module,exports){
 'use strict';
 
 module.exports = function isEdge(ua) {
@@ -59,6 +59,33 @@ module.exports = function isIe9(ua) {
 (function (global){
 'use strict';
 
+module.exports = function isIosFirefox(ua) {
+  ua = ua || global.navigator.userAgent;
+  return /FxiOS/i.test(ua);
+};
+
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],8:[function(require,module,exports){
+'use strict';
+
+var isIos = require('./is-ios');
+var webkitRegexp = /webkit/i;
+
+function isWebkit(ua) {
+  return ua.match(webkitRegexp);
+}
+
+module.exports = function isIosSafari(ua) {
+  ua = ua || navigator.userAgent;
+
+  return isIos(ua) && isWebkit(ua) && ua.indexOf('CriOS') === -1;
+};
+
+},{"./is-ios":10}],9:[function(require,module,exports){
+(function (global){
+'use strict';
+
 var isIos = require('./is-ios');
 
 // The Google Search iOS app is technically a webview and doesn't support popups.
@@ -78,7 +105,7 @@ module.exports = function isIosWebview(ua) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-ios":8}],8:[function(require,module,exports){
+},{"./is-ios":10}],10:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -88,7 +115,19 @@ module.exports = function isIos(ua) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var isIosFirefox = require('./is-ios-firefox');
+
+module.exports = function isMobileFirefox(ua) {
+  ua = ua || global.navigator.userAgent;
+  return isIosFirefox(ua) || /iPhone|iPod|iPad|Mobile|Tablet/i.test(ua) && /Firefox/i.test(ua);
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./is-ios-firefox":7}],12:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -98,7 +137,7 @@ module.exports = function isSamsungBrowser(ua) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var setAttributes = require('./lib/set-attributes');
@@ -123,7 +162,7 @@ module.exports = function createFrame(options) {
   return iframe;
 };
 
-},{"./lib/assign":11,"./lib/default-attributes":12,"./lib/set-attributes":13}],11:[function(require,module,exports){
+},{"./lib/assign":14,"./lib/default-attributes":15,"./lib/set-attributes":16}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = function assign(target) {
@@ -140,7 +179,7 @@ module.exports = function assign(target) {
   return target;
 }
 
-},{}],12:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -150,7 +189,7 @@ module.exports = {
   scrolling: 'no'
 };
 
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 module.exports = function setAttributes(element, attributes) {
@@ -169,7 +208,7 @@ module.exports = function setAttributes(element, attributes) {
   }
 };
 
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 function deferred(fn) {
@@ -185,7 +224,7 @@ function deferred(fn) {
 
 module.exports = deferred;
 
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 function once(fn) {
@@ -201,7 +240,7 @@ function once(fn) {
 
 module.exports = once;
 
-},{}],16:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 function promiseOrCallback(promise, callback) { // eslint-disable-line consistent-return
@@ -220,7 +259,7 @@ function promiseOrCallback(promise, callback) { // eslint-disable-line consisten
 
 module.exports = promiseOrCallback;
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var deferred = require('./lib/deferred');
@@ -276,7 +315,7 @@ wrapPromise.wrapPrototype = function (target, options) {
 
 module.exports = wrapPromise;
 
-},{"./lib/deferred":14,"./lib/once":15,"./lib/promise-or-callback":16}],18:[function(require,module,exports){
+},{"./lib/deferred":17,"./lib/once":18,"./lib/promise-or-callback":19}],21:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -589,7 +628,7 @@ ApplePay.prototype.teardown = function () {
 module.exports = wrapPromise.wrapPrototype(ApplePay);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lib/analytics":51,"../lib/braintree-error":55,"../lib/convert-methods-to-error":61,"../lib/methods":72,"../lib/promise":74,"./errors":19,"@braintree/wrap-promise":17}],19:[function(require,module,exports){
+},{"../lib/analytics":56,"../lib/braintree-error":60,"../lib/convert-methods-to-error":66,"../lib/methods":78,"../lib/promise":80,"./errors":22,"@braintree/wrap-promise":20}],22:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../lib/braintree-error');
@@ -627,7 +666,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":55}],20:[function(require,module,exports){
+},{"../lib/braintree-error":60}],23:[function(require,module,exports){
 'use strict';
 
 /**
@@ -640,7 +679,7 @@ var ApplePay = require('./apple-pay');
 var analytics = require('../lib/analytics');
 var basicComponentVerification = require('../lib/basic-component-verification');
 var errors = require('./errors');
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -676,7 +715,7 @@ module.exports = {
   VERSION: VERSION
 };
 
-},{"../lib/analytics":51,"../lib/basic-component-verification":53,"../lib/braintree-error":55,"../lib/promise":74,"./apple-pay":18,"./errors":19,"@braintree/wrap-promise":17}],21:[function(require,module,exports){
+},{"../lib/analytics":56,"../lib/basic-component-verification":58,"../lib/braintree-error":60,"../lib/promise":80,"./apple-pay":21,"./errors":22,"@braintree/wrap-promise":20}],24:[function(require,module,exports){
 'use strict';
 
 var isIe = require('@braintree/browser-detection/is-ie');
@@ -687,7 +726,7 @@ module.exports = {
   isIe9: isIe9
 };
 
-},{"@braintree/browser-detection/is-ie":4,"@braintree/browser-detection/is-ie9":6}],22:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ie":4,"@braintree/browser-detection/is-ie9":6}],25:[function(require,module,exports){
 'use strict';
 
 var GraphQL = require('./request/graphql');
@@ -1046,14 +1085,14 @@ Client.prototype.teardown = wrapPromise(function () {
 
 module.exports = Client;
 
-},{"../lib/add-metadata":50,"../lib/analytics":51,"../lib/assign":52,"../lib/braintree-error":55,"../lib/constants":60,"../lib/convert-methods-to-error":61,"../lib/convert-to-braintree-error":62,"../lib/deferred":64,"../lib/errors":67,"../lib/is-whitelisted-domain":70,"../lib/methods":72,"../lib/once":73,"../lib/promise":74,"./constants":23,"./errors":24,"./request":35,"./request/graphql":33,"@braintree/wrap-promise":17}],23:[function(require,module,exports){
+},{"../lib/add-metadata":55,"../lib/analytics":56,"../lib/assign":57,"../lib/braintree-error":60,"../lib/constants":65,"../lib/convert-methods-to-error":66,"../lib/convert-to-braintree-error":67,"../lib/deferred":69,"../lib/errors":72,"../lib/is-whitelisted-domain":76,"../lib/methods":78,"../lib/once":79,"../lib/promise":80,"./constants":26,"./errors":27,"./request":38,"./request/graphql":36,"@braintree/wrap-promise":20}],26:[function(require,module,exports){
 'use strict';
 
 module.exports = {
   BRAINTREE_API_VERSION_HEADER: '2017-04-03'
 };
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../lib/braintree-error');
@@ -1108,7 +1147,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":55}],25:[function(require,module,exports){
+},{"../lib/braintree-error":60}],28:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1192,13 +1231,13 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lib/braintree-error":55,"../lib/constants":60,"../lib/create-authorization-data":63,"../lib/promise":74,"../lib/vendor/uuid":78,"./errors":24,"./request":35,"@braintree/wrap-promise":17}],26:[function(require,module,exports){
+},{"../lib/braintree-error":60,"../lib/constants":65,"../lib/create-authorization-data":68,"../lib/promise":80,"../lib/vendor/uuid":84,"./errors":27,"./request":38,"@braintree/wrap-promise":20}],29:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../lib/braintree-error');
 var Client = require('./client');
 var getConfiguration = require('./get-configuration').getConfiguration;
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var sharedErrors = require('../lib/errors');
@@ -1267,7 +1306,7 @@ module.exports = {
   _clearCache: clearCache
 };
 
-},{"../lib/braintree-error":55,"../lib/errors":67,"../lib/promise":74,"./client":22,"./get-configuration":25,"@braintree/wrap-promise":17}],27:[function(require,module,exports){
+},{"../lib/braintree-error":60,"../lib/errors":72,"../lib/promise":80,"./client":25,"./get-configuration":28,"@braintree/wrap-promise":20}],30:[function(require,module,exports){
 'use strict';
 
 var querystring = require('../../lib/querystring');
@@ -1425,7 +1464,7 @@ module.exports = {
   request: request
 };
 
-},{"../../lib/assign":52,"../../lib/querystring":75,"../browser-detection":21,"./default-request":28,"./graphql/request":34,"./parse-body":38,"./prep-body":39,"./xhr":40}],28:[function(require,module,exports){
+},{"../../lib/assign":57,"../../lib/querystring":81,"../browser-detection":24,"./default-request":31,"./graphql/request":37,"./parse-body":41,"./prep-body":42,"./xhr":43}],31:[function(require,module,exports){
 'use strict';
 
 function DefaultRequest(options) {
@@ -1461,7 +1500,7 @@ DefaultRequest.prototype.determineStatus = function (status) {
 
 module.exports = DefaultRequest;
 
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1470,7 +1509,7 @@ module.exports = function getUserAgent() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 var errorResponseAdapter = require('./error');
@@ -1523,7 +1562,7 @@ function adaptTokenizeCreditCardResponseBody(body) {
 
 module.exports = creditCardTokenizationResponseAdapter;
 
-},{"./error":31}],31:[function(require,module,exports){
+},{"./error":34}],34:[function(require,module,exports){
 'use strict';
 
 function errorResponseAdapter(responseBody) {
@@ -1598,7 +1637,7 @@ function addFieldError(inputPath, errorDetail, fieldErrors) {
 
 module.exports = errorResponseAdapter;
 
-},{}],32:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 var assign = require('../../../../lib/assign').assign;
@@ -1682,7 +1721,7 @@ function creditCardTokenization(body) {
 
 module.exports = creditCardTokenization;
 
-},{"../../../../lib/assign":52}],33:[function(require,module,exports){
+},{"../../../../lib/assign":57}],36:[function(require,module,exports){
 'use strict';
 
 var browserDetection = require('../../browser-detection');
@@ -1750,7 +1789,7 @@ function containsBlacklistedKeys(body) {
 
 module.exports = GraphQL;
 
-},{"../../browser-detection":21}],34:[function(require,module,exports){
+},{"../../browser-detection":24}],37:[function(require,module,exports){
 'use strict';
 
 var BRAINTREE_VERSION = '2017-12-15';
@@ -1887,7 +1926,7 @@ function formatBodyKeys(originalBody) {
 
 module.exports = GraphQLRequest;
 
-},{"../../../lib/assign":52,"./adapters/credit-card-tokenization":30,"./generators/credit-card-tokenization":32}],35:[function(require,module,exports){
+},{"../../../lib/assign":57,"./adapters/credit-card-tokenization":33,"./generators/credit-card-tokenization":35}],38:[function(require,module,exports){
 'use strict';
 
 var ajaxIsAvaliable;
@@ -1918,7 +1957,7 @@ module.exports = function (options, cb) {
   }
 };
 
-},{"../../lib/once":73,"./ajax-driver":27,"./get-user-agent":29,"./is-http":36,"./jsonp-driver":37}],36:[function(require,module,exports){
+},{"../../lib/once":79,"./ajax-driver":30,"./get-user-agent":32,"./is-http":39,"./jsonp-driver":40}],39:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1927,7 +1966,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],37:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2039,7 +2078,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/querystring":75,"../../lib/vendor/uuid":78}],38:[function(require,module,exports){
+},{"../../lib/querystring":81,"../../lib/vendor/uuid":84}],41:[function(require,module,exports){
 'use strict';
 
 module.exports = function (body) {
@@ -2050,7 +2089,7 @@ module.exports = function (body) {
   return body;
 };
 
-},{}],39:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -2065,7 +2104,7 @@ module.exports = function (method, body) {
   return body;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2081,7 +2120,320 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],41:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
+'use strict';
+
+var analytics = require('../lib/analytics');
+var assign = require('../lib/assign').assign;
+var convertMethodsToError = require('../lib/convert-methods-to-error');
+var generateGooglePayConfiguration = require('../lib/generate-google-pay-configuration');
+var BraintreeError = require('../lib/braintree-error');
+var methods = require('../lib/methods');
+var Promise = require('../lib/promise');
+var wrapPromise = require('@braintree/wrap-promise');
+
+/**
+ * @typedef {object} GooglePayment~tokenizePayload
+ * @property {string} nonce The payment method nonce.
+ * @property {object} details Additional account details.
+ * @property {string} details.cardType Type of card, ex: Visa, MasterCard.
+ * @property {string} details.lastFour Last four digits of card number.
+ * @property {string} details.lastTwo Last two digits of card number.
+ * @property {string} description A human-readable description.
+ * @property {string} type The payment method type, `CreditCard` or `AndroidPayCard`.
+ * @property {object} binData Information about the card based on the bin.
+ * @property {string} binData.commercial Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.countryOfIssuance The country of issuance.
+ * @property {string} binData.debit Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.durbinRegulated Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.healthcare Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.issuingBank The issuing bank.
+ * @property {string} binData.payroll Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.prepaid Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.productId The product id.
+ */
+
+/**
+ * @class GooglePayment
+ * @param {object} options Google Payment {@link module:braintree-web/google-payment.create create} options.
+ * @description <strong>Do not use this constructor directly. Use {@link module:braintree-web/google-payment.create|braintree-web.google-payment.create} instead.</strong>
+ * @classdesc This class represents a Google Payment component produced by {@link module:braintree-web/google-payment.create|braintree-web/google-payment.create}. Instances of this class have methods for initializing the Google Pay flow.
+ *
+ * **Note:** This component is currently in beta and the API may include breaking changes when upgrading. Please review the [Changelog](https://github.com/braintree/braintree-web/blob/master/CHANGELOG.md) for upgrade steps whenever you upgrade the version of braintree-web.
+ */
+function GooglePayment(options) {
+  this._client = options.client;
+
+  this._braintreeGeneratedPaymentRequestConfiguration = generateGooglePayConfiguration(this._client.getConfiguration());
+}
+
+/**
+ * Create a configuration object for use in the `loadPaymentData` method.
+ * @public
+ * @param {object} overrides The supplied parameters for creating the Payment Data Request object. Only required parameters are the `merchantId` provided by Google and a `transactionInfo` object, but any of the parameters in the Payment Data Request can be overwritten. See https://developers.google.com/payments/web/object-reference#PaymentDataRequest
+ * @param {string} merchantId The merchant id provided by registering with Google.
+ * @param {object} transactionInfo See https://developers.google.com/payments/web/object-reference#TransactionInfo for more information.
+ * @example
+ * var configuration = googlePaymentInstance.createPaymentDataRequest({
+ *   merchantId: 'my-merchant-id-from-google',
+ *   transactionInfo: {
+ *     currencyCode: 'USD',
+ *     totalPriceStatus: 'FINAL',
+ *     totalPrice: '100.00'
+ *   }
+ * });
+ * var paymentsClient = new google.payments.api.PaymentsClient({
+ *   environment: 'TEST' // or 'PRODUCTION'
+ * })
+ *
+ * paymentsClient.loadPaymentData(paymentDataRequest).then(function (response) {
+ *   // handle response with googlePaymentInstance.parseResponse
+ *   // (see below)
+ * });
+ * @returns {object} Returns a configuration object for Google Payment Request.
+ */
+GooglePayment.prototype.createPaymentDataRequest = function (overrides) {
+  analytics.sendEvent(this._client, 'google-payment.createPaymentDataRequest');
+
+  return assign({}, this._braintreeGeneratedPaymentRequestConfiguration, overrides);
+};
+
+/**
+ * Parse the response from the tokenization.
+ * @public
+ * @param {object} response The response back from the Google Pay tokenization.
+ * @param {callback} [callback] The second argument, <code>data</code>, is a {@link GooglePay~tokenizePayload|tokenizePayload}. If no callback is provided, `parseResponse` returns a promise that resolves with a {@link GooglePayment~tokenizePayload|tokenizePayload}.
+ * @example with callback
+ * var paymentsClient = new google.payments.api.PaymentsClient({
+ *   environment: 'TEST' // or 'PRODUCTION'
+ * })
+ *
+ * paymentsClient.loadPaymentData(paymentDataRequestFromCreatePaymentDataRequest).then(function (response) {
+ *   googlePaymentInstance.parseResponse(response, function (err, data) {
+ *     if (err) {
+ *       // handle errors
+ *     }
+ *     // send parsedResponse.nonce to your server
+ *   });
+ * });
+ * @example with promise
+ * var paymentsClient = new google.payments.api.PaymentsClient({
+ *   environment: 'TEST' // or 'PRODUCTION'
+ * })
+ *
+ * paymentsClient.loadPaymentData(paymentDataRequestFromCreatePaymentDataRequest).then(function (response) {
+ *   return googlePaymentInstance.parseResponse(response);
+ * }).then(function (parsedResponse) {
+ *   // send parsedResponse.nonce to your server
+ * }).catch(function (err) {
+ *   // handle errors
+ * });
+ * @returns {Promise|void} Returns a promise that resolves the parsed response if no callback is provided.
+ */
+GooglePayment.prototype.parseResponse = function (response) {
+  var client = this._client;
+
+  return Promise.resolve().then(function () {
+    var payload;
+    var parsedResponse = JSON.parse(response.paymentMethodToken.token);
+    var error = parsedResponse.error;
+
+    if (error) {
+      return Promise.reject(error);
+    }
+
+    payload = parsedResponse.androidPayCards[0];
+    analytics.sendEvent(client, 'google-payment.parseResponse.succeeded');
+
+    return Promise.resolve({
+      nonce: payload.nonce,
+      type: payload.type,
+      description: payload.description,
+      details: {
+        cardType: payload.details.cardType,
+        lastFour: payload.details.lastFour,
+        lastTwo: payload.details.lastTwo
+      },
+      binData: payload.binData
+    });
+  }).catch(function (error) {
+    analytics.sendEvent(client, 'google-payment.parseResponse.failed');
+
+    return Promise.reject(new BraintreeError({
+      code: 'GOOGLE_PAYMENT_GATEWAY_ERROR',
+      message: 'There was an error when tokenizing the Google Pay payment method.',
+      type: BraintreeError.types.UNKNOWN,
+      details: {
+        originalError: error
+      }
+    }));
+  });
+};
+
+/**
+ * Cleanly tear down anything set up by {@link module:braintree-web/google-payment.create|create}.
+ * @public
+ * @param {callback} [callback] Called once teardown is complete. No data is returned if teardown completes successfully.
+ * @example
+ * googlePaymentInstance.teardown();
+ * @example <caption>With callback</caption>
+ * googlePaymentInstance.teardown(function () {
+ *   // teardown is complete
+ * });
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ */
+GooglePayment.prototype.teardown = function () {
+  convertMethodsToError(this, methods(GooglePayment.prototype));
+
+  return Promise.resolve();
+};
+
+module.exports = wrapPromise.wrapPrototype(GooglePayment);
+
+},{"../lib/analytics":56,"../lib/assign":57,"../lib/braintree-error":60,"../lib/convert-methods-to-error":66,"../lib/generate-google-pay-configuration":74,"../lib/methods":78,"../lib/promise":80,"@braintree/wrap-promise":20}],45:[function(require,module,exports){
+'use strict';
+/**
+ * @module braintree-web/google-payment
+ * @description A component to integrate with Google Pay. The majority of the integration uses [Google's pay.js JavaScript file](https://payments.developers.google.com/js/apis/pay.js). The Braintree component generates the configuration object necessary for Google Pay to initiate the Payment Request and parse the returned data to retrieve the payment method nonce which is used to process the transaction on the server.
+ *
+ * **Note:** This component is currently in beta and the API may include breaking changes when upgrading. Please review the [Changelog](https://github.com/braintree/braintree-web/blob/master/CHANGELOG.md) for upgrade steps whenever you upgrade the version of braintree-web.
+ * */
+
+var basicComponentVerification = require('../lib/basic-component-verification');
+var BraintreeError = require('../lib/braintree-error');
+var GooglePayment = require('./google-payment');
+var Promise = require('../lib/promise');
+var wrapPromise = require('@braintree/wrap-promise');
+var VERSION = "3.31.0";
+
+/**
+ * @static
+ * @function create
+ * @param {object} options Creation options:
+ * @param {Client} options.client A {@link Client} instance.
+ * @param {callback} [callback] The second argument, `data`, is the {@link GooglePayment} instance. If no callback is provided, `create` returns a promise that resolves with the {@link GooglePayment} instance.
+ * @example <caption>Simple Example</caption>
+ * // include https://payments.developers.google.com/js/apis/pay.js in a script tag
+ * // on your page to load the `google.api.PaymentsClient` global object.
+ *
+ * var paymentButton = document.querySelector('#google-pay-button');
+ * var paymentsClient = new google.payments.api.PaymentsClient({
+ *   environment: 'TEST' // or 'PRODUCTION'
+ * });
+ *
+ * braintree.client.create({
+ *   authorization: 'tokenization-key-or-client-token'
+ * }).then(function (clientInstance) {
+ *   return braintree.googlePayment.create({
+ *     client: clientInstance
+ *   });
+ * }).then(function (googlePaymentInstance) {
+ *   paymentButton.addEventListener('click', function (event) {
+ *     var paymentDataRequest;
+ *
+ *     event.preventDefault();
+ *
+ *     paymentDataRequest = googlePaymentInstance.createPaymentDataRequest({
+ *       merchantId: 'your-merchant-id-from-google',
+ *       transactionInfo: {
+ *         currencyCode: 'USD',
+ *         totalPriceStatus: 'FINAL',
+ *         totalPrice: '100.00'
+ *       }
+ *     });
+ *
+ *     paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
+ *       return googlePaymentInstance.parseResponse(paymentData);
+ *     }).then(function (result) {
+ *       // send result.nonce to your server
+ *     }).catch(function (err) {
+ *       // handle err
+ *     });
+ *   });
+ * });
+ * @example <caption>Check Browser and Customer Compatibility</caption>
+ * var paymentsClient = new google.payments.api.PaymentsClient({
+ *   environment: 'TEST' // or 'PRODUCTION'
+ * });
+ *
+ * function setupGooglePayButton(googlePaymentInstance) {
+ *   var button = document.createElement('button');
+ *
+ *   button.id = 'google-pay';
+ *   button.appendChild(document.createTextNode('Google Pay'));
+ *   button.addEventListener('click', function (event) {
+ *     var paymentRequestData;
+ *
+ *     event.preventDefault();
+ *
+ *     paymentDataRequest = googlePaymentInstance.createPaymentDataRequest({
+ *       merchantId: 'your-merchant-id-from-google',
+ *       transactionInfo: {
+ *         currencyCode: 'USD',
+ *         totalPriceStatus: 'FINAL',
+ *         totalPrice: '100.00' // your amount
+ *       }
+ *     });
+ *
+ *     paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
+ *       return googlePaymentInstance.parseResponse(paymentData);
+*       }).then(function (result) {
+ *       // send result.nonce to your server
+ *     }).catch(function (err) {
+ *       // handle errors
+ *     });
+ *   });
+ *
+ *   document.getElementById('container').appendChild(button);
+ * }
+ *
+ * braintree.client.create({
+ *   authorization: 'tokenization-key-or-client-token'
+ * }).then(function (clientInstance) {
+ *   return braintree.googlePayment.create({
+ *     client: clientInstance
+ *   });
+ * }).then(function (googlePaymentInstance) {
+ *   return paymentsClient.isReadyToPay({
+ *     allowedPaymentMethods: googlePaymentInstance.createPaymentDataRequest().allowedPaymentMethods
+ *   });
+ * }).then(function (response) {
+ *   if (response.result) {
+ *     setupGooglePayButton(googlePaymentInstance);
+ *   }
+ * }).catch(function (err) {
+ *   // handle setup errors
+ * });
+ *
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ */
+function create(options) {
+  return basicComponentVerification.verify({
+    name: 'Google Pay',
+    client: options.client
+  }).then(function () {
+    if (!options.client.getConfiguration().gatewayConfiguration.androidPay) {
+      return Promise.reject(new BraintreeError({
+        type: BraintreeError.types.MERCHANT,
+        code: 'GOOGLE_PAYMENT_NOT_ENABLED',
+        message: 'Google Pay is not enabled for this merchant.'
+      }));
+    }
+
+    return new GooglePayment(options);
+  });
+}
+
+module.exports = {
+  create: wrapPromise(create),
+  /**
+   * @description The current version of the SDK, i.e. `{@pkg version}`.
+   * @type {string}
+   */
+  VERSION: VERSION
+};
+
+},{"../lib/basic-component-verification":58,"../lib/braintree-error":60,"../lib/promise":80,"./google-payment":44,"@braintree/wrap-promise":20}],46:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../../lib/braintree-error');
@@ -2120,7 +2472,7 @@ function _isValid(attribute, value) {
 
 module.exports = attributeValidationError;
 
-},{"../../lib/braintree-error":55,"../shared/constants":47,"../shared/errors":48}],42:[function(require,module,exports){
+},{"../../lib/braintree-error":60,"../shared/constants":52,"../shared/errors":53}],47:[function(require,module,exports){
 'use strict';
 
 var constants = require('../shared/constants');
@@ -2134,7 +2486,7 @@ module.exports = function composeUrl(assetsUrl, componentId, isDebug) {
     componentId;
 };
 
-},{"../../lib/use-min":76,"../shared/constants":47}],43:[function(require,module,exports){
+},{"../../lib/use-min":82,"../shared/constants":52}],48:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -3199,7 +3551,7 @@ HostedFields.prototype.getState = function () {
 module.exports = wrapPromise.wrapPrototype(HostedFields);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/analytics":51,"../../lib/braintree-error":55,"../../lib/bus":58,"../../lib/classlist":59,"../../lib/constants":60,"../../lib/convert-methods-to-error":61,"../../lib/destructor":65,"../../lib/errors":67,"../../lib/event-emitter":68,"../../lib/methods":72,"../../lib/promise":74,"../../lib/vendor/uuid":78,"../shared/browser-detection":46,"../shared/constants":47,"../shared/errors":48,"../shared/find-parent-tags":49,"./attribute-validation-error":41,"./compose-url":42,"./inject-frame":44,"@braintree/iframer":10,"@braintree/wrap-promise":17,"credit-card-type":88}],44:[function(require,module,exports){
+},{"../../lib/analytics":56,"../../lib/braintree-error":60,"../../lib/bus":63,"../../lib/classlist":64,"../../lib/constants":65,"../../lib/convert-methods-to-error":66,"../../lib/destructor":70,"../../lib/errors":72,"../../lib/event-emitter":73,"../../lib/methods":78,"../../lib/promise":80,"../../lib/vendor/uuid":84,"../shared/browser-detection":51,"../shared/constants":52,"../shared/errors":53,"../shared/find-parent-tags":54,"./attribute-validation-error":46,"./compose-url":47,"./inject-frame":49,"@braintree/iframer":13,"@braintree/wrap-promise":20,"credit-card-type":100}],49:[function(require,module,exports){
 'use strict';
 
 module.exports = function injectFrame(frame, container) {
@@ -3216,7 +3568,7 @@ module.exports = function injectFrame(frame, container) {
   return [frame, clearboth];
 };
 
-},{}],45:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 /** @module braintree-web/hosted-fields */
 
@@ -3227,7 +3579,7 @@ var supportsInputFormatting = require('restricted-input/supports-input-formattin
 var wrapPromise = require('@braintree/wrap-promise');
 var BraintreeError = require('../lib/braintree-error');
 var Promise = require('../lib/promise');
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -3452,7 +3804,7 @@ module.exports = {
   VERSION: VERSION
 };
 
-},{"../lib/basic-component-verification":53,"../lib/braintree-error":55,"../lib/promise":74,"./external/hosted-fields":43,"./shared/errors":48,"@braintree/wrap-promise":17,"restricted-input/supports-input-formatting":92}],46:[function(require,module,exports){
+},{"../lib/basic-component-verification":58,"../lib/braintree-error":60,"../lib/promise":80,"./external/hosted-fields":48,"./shared/errors":53,"@braintree/wrap-promise":20,"restricted-input/supports-input-formatting":104}],51:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -3461,13 +3813,13 @@ module.exports = {
   isIosWebview: require('@braintree/browser-detection/is-ios-webview')
 };
 
-},{"@braintree/browser-detection/is-ie9":6,"@braintree/browser-detection/is-ios":8,"@braintree/browser-detection/is-ios-webview":7}],47:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ie9":6,"@braintree/browser-detection/is-ios":10,"@braintree/browser-detection/is-ios-webview":9}],52:[function(require,module,exports){
 'use strict';
 /* eslint-disable no-reserved-keys */
 
 var enumerate = require('../../lib/enumerate');
 var errors = require('./errors');
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 
 var constants = {
   VERSION: VERSION,
@@ -3588,7 +3940,7 @@ constants.events = enumerate([
 
 module.exports = constants;
 
-},{"../../lib/enumerate":66,"./errors":48}],48:[function(require,module,exports){
+},{"../../lib/enumerate":71,"./errors":53}],53:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../../lib/braintree-error');
@@ -3665,7 +4017,7 @@ module.exports = {
   }
 };
 
-},{"../../lib/braintree-error":55}],49:[function(require,module,exports){
+},{"../../lib/braintree-error":60}],54:[function(require,module,exports){
 'use strict';
 
 function findParentTags(element, tag) {
@@ -3685,7 +4037,7 @@ function findParentTags(element, tag) {
 
 module.exports = findParentTags;
 
-},{}],50:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 var createAuthorizationData = require('./create-authorization-data');
@@ -3719,7 +4071,7 @@ function addMetadata(configuration, data) {
 
 module.exports = addMetadata;
 
-},{"./constants":60,"./create-authorization-data":63,"./json-clone":71}],51:[function(require,module,exports){
+},{"./constants":65,"./create-authorization-data":68,"./json-clone":77}],56:[function(require,module,exports){
 'use strict';
 
 var constants = require('./constants');
@@ -3753,7 +4105,7 @@ module.exports = {
   sendEvent: sendAnalyticsEvent
 };
 
-},{"./add-metadata":50,"./constants":60}],52:[function(require,module,exports){
+},{"./add-metadata":55,"./constants":65}],57:[function(require,module,exports){
 'use strict';
 
 var assignNormalized = typeof Object.assign === 'function' ? Object.assign : assignPolyfill;
@@ -3778,13 +4130,13 @@ module.exports = {
   _assign: assignPolyfill
 };
 
-},{}],53:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
 var Promise = require('./promise');
 var sharedErrors = require('./errors');
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 
 function basicComponentVerification(options) {
   var client, clientVersion, name;
@@ -3825,7 +4177,7 @@ module.exports = {
   verify: basicComponentVerification
 };
 
-},{"./braintree-error":55,"./errors":67,"./promise":74}],54:[function(require,module,exports){
+},{"./braintree-error":60,"./errors":72,"./promise":80}],59:[function(require,module,exports){
 'use strict';
 
 var once = require('./once');
@@ -3871,7 +4223,7 @@ module.exports = function (functions, cb) {
   }
 };
 
-},{"./once":73}],55:[function(require,module,exports){
+},{"./once":79}],60:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('./enumerate');
@@ -3956,7 +4308,7 @@ BraintreeError.findRootError = function (err) {
 
 module.exports = BraintreeError;
 
-},{"./enumerate":66}],56:[function(require,module,exports){
+},{"./enumerate":71}],61:[function(require,module,exports){
 'use strict';
 
 var isWhitelistedDomain = require('../is-whitelisted-domain');
@@ -3988,7 +4340,7 @@ module.exports = {
   checkOrigin: checkOrigin
 };
 
-},{"../is-whitelisted-domain":70}],57:[function(require,module,exports){
+},{"../is-whitelisted-domain":76}],62:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('../enumerate');
@@ -3997,7 +4349,7 @@ module.exports = enumerate([
   'CONFIGURATION_REQUEST'
 ], 'bus:');
 
-},{"../enumerate":66}],58:[function(require,module,exports){
+},{"../enumerate":71}],63:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
@@ -4128,7 +4480,7 @@ BraintreeBus.events = events;
 
 module.exports = BraintreeBus;
 
-},{"../braintree-error":55,"./check-origin":56,"./events":57,"framebus":89}],59:[function(require,module,exports){
+},{"../braintree-error":60,"./check-origin":61,"./events":62,"framebus":101}],64:[function(require,module,exports){
 'use strict';
 
 function _classesOf(element) {
@@ -4167,10 +4519,10 @@ module.exports = {
   toggle: toggle
 };
 
-},{}],60:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 var PLATFORM = 'web';
 
 module.exports = {
@@ -4184,7 +4536,7 @@ module.exports = {
   BRAINTREE_LIBRARY_VERSION: 'braintree/' + PLATFORM + '/' + VERSION
 };
 
-},{}],61:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
@@ -4202,7 +4554,7 @@ module.exports = function (instance, methodNames) {
   });
 };
 
-},{"./braintree-error":55,"./errors":67}],62:[function(require,module,exports){
+},{"./braintree-error":60,"./errors":72}],67:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
@@ -4224,7 +4576,7 @@ function convertToBraintreeError(originalErr, btErrorObject) {
 
 module.exports = convertToBraintreeError;
 
-},{"./braintree-error":55}],63:[function(require,module,exports){
+},{"./braintree-error":60}],68:[function(require,module,exports){
 'use strict';
 
 var atob = require('../lib/vendor/polyfill').atob;
@@ -4271,7 +4623,7 @@ function createAuthorizationData(authorization) {
 
 module.exports = createAuthorizationData;
 
-},{"../lib/vendor/polyfill":77}],64:[function(require,module,exports){
+},{"../lib/vendor/polyfill":83}],69:[function(require,module,exports){
 'use strict';
 
 module.exports = function (fn) {
@@ -4285,7 +4637,7 @@ module.exports = function (fn) {
   };
 };
 
-},{}],65:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 'use strict';
 
 var batchExecuteFunctions = require('./batch-execute-functions');
@@ -4323,7 +4675,7 @@ Destructor.prototype.teardown = function (callback) {
 
 module.exports = Destructor;
 
-},{"./batch-execute-functions":54}],66:[function(require,module,exports){
+},{"./batch-execute-functions":59}],71:[function(require,module,exports){
 'use strict';
 
 function enumerate(values, prefix) {
@@ -4338,7 +4690,7 @@ function enumerate(values, prefix) {
 
 module.exports = enumerate;
 
-},{}],67:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
@@ -4375,7 +4727,7 @@ module.exports = {
   }
 };
 
-},{"./braintree-error":55}],68:[function(require,module,exports){
+},{"./braintree-error":60}],73:[function(require,module,exports){
 'use strict';
 
 function EventEmitter() {
@@ -4405,7 +4757,48 @@ EventEmitter.prototype._emit = function (event) {
 
 module.exports = EventEmitter;
 
-},{}],69:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
+'use strict';
+
+var VERSION = "3.31.0";
+
+module.exports = function (configuration) {
+  var isProduction = configuration.gatewayConfiguration.environment === 'production';
+  var androidPayConfiguration = configuration.gatewayConfiguration.androidPay;
+  var metadata = configuration.analyticsMetadata;
+  var data = {
+    environment: isProduction ? 'PRODUCTION' : 'TEST',
+    allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD'],
+    paymentMethodTokenizationParameters: {
+      tokenizationType: 'PAYMENT_GATEWAY',
+      parameters: {
+        gateway: 'braintree',
+        'braintree:merchantId': configuration.gatewayConfiguration.merchantId,
+        'braintree:authorizationFingerprint': androidPayConfiguration.googleAuthorizationFingerprint,
+        'braintree:apiVersion': 'v1',
+        'braintree:sdkVersion': VERSION,
+        'braintree:metadata': JSON.stringify({
+          source: metadata.source,
+          integration: metadata.integration,
+          sessionId: metadata.sessionId,
+          version: VERSION,
+          platform: metadata.platform
+        })
+      }
+    },
+    cardRequirements: {
+      allowedCardNetworks: androidPayConfiguration.supportedNetworks.map(function (card) { return card.toUpperCase(); })
+    }
+  };
+
+  if (configuration.authorizationType === 'TOKENIZATION_KEY') {
+    data.paymentMethodTokenizationParameters.parameters['braintree:clientKey'] = configuration.authorization;
+  }
+
+  return data;
+};
+
+},{}],75:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4420,7 +4813,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],70:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 'use strict';
 
 var parser;
@@ -4453,14 +4846,14 @@ function isWhitelistedDomain(url) {
 
 module.exports = isWhitelistedDomain;
 
-},{}],71:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 'use strict';
 
 module.exports = function (value) {
   return JSON.parse(JSON.stringify(value));
 };
 
-},{}],72:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 'use strict';
 
 module.exports = function (obj) {
@@ -4469,9 +4862,9 @@ module.exports = function (obj) {
   });
 };
 
-},{}],73:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],74:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"dup":18}],80:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4480,7 +4873,7 @@ var Promise = global.Promise || require('promise-polyfill');
 module.exports = Promise;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"promise-polyfill":90}],75:[function(require,module,exports){
+},{"promise-polyfill":102}],81:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4574,7 +4967,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],76:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 'use strict';
 
 function useMin(isDebug) {
@@ -4583,7 +4976,7 @@ function useMin(isDebug) {
 
 module.exports = useMin;
 
-},{}],77:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4624,7 +5017,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],78:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 'use strict';
 
 function uuid() {
@@ -4638,7 +5031,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],79:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../lib/braintree-error');
@@ -4691,7 +5084,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":55}],80:[function(require,module,exports){
+},{"../lib/braintree-error":60}],86:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web/paypal-checkout
@@ -4705,7 +5098,7 @@ var errors = require('./errors');
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var PayPalCheckout = require('./paypal-checkout');
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 
 /**
  * @static
@@ -4771,7 +5164,7 @@ module.exports = {
   VERSION: VERSION
 };
 
-},{"../lib/analytics":51,"../lib/basic-component-verification":53,"../lib/braintree-error":55,"../lib/promise":74,"./errors":79,"./paypal-checkout":81,"@braintree/wrap-promise":17}],81:[function(require,module,exports){
+},{"../lib/analytics":56,"../lib/basic-component-verification":58,"../lib/braintree-error":60,"../lib/promise":80,"./errors":85,"./paypal-checkout":87,"@braintree/wrap-promise":20}],87:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -5221,7 +5614,7 @@ PayPalCheckout.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(PayPalCheckout);
 
-},{"../lib/analytics":51,"../lib/braintree-error":55,"../lib/convert-methods-to-error":61,"../lib/convert-to-braintree-error":62,"../lib/methods":72,"../lib/promise":74,"../paypal/shared/constants":82,"./errors":79,"@braintree/wrap-promise":17}],82:[function(require,module,exports){
+},{"../lib/analytics":56,"../lib/braintree-error":60,"../lib/convert-methods-to-error":66,"../lib/convert-to-braintree-error":67,"../lib/methods":78,"../lib/promise":80,"../paypal/shared/constants":88,"./errors":85,"@braintree/wrap-promise":20}],88:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -5232,7 +5625,7 @@ module.exports = {
   }
 };
 
-},{}],83:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../../lib/braintree-error');
@@ -5247,7 +5640,7 @@ var uuid = require('../../lib/vendor/uuid');
 var deferred = require('../../lib/deferred');
 var errors = require('../shared/errors');
 var events = require('../shared/events');
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 var iFramer = require('@braintree/iframer');
 var Promise = require('../../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
@@ -5578,7 +5971,7 @@ ThreeDSecure.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(ThreeDSecure);
 
-},{"../../lib/analytics":51,"../../lib/assign":52,"../../lib/braintree-error":55,"../../lib/bus":58,"../../lib/convert-methods-to-error":61,"../../lib/deferred":64,"../../lib/methods":72,"../../lib/promise":74,"../../lib/use-min":76,"../../lib/vendor/uuid":78,"../shared/constants":85,"../shared/errors":86,"../shared/events":87,"@braintree/iframer":10,"@braintree/wrap-promise":17}],84:[function(require,module,exports){
+},{"../../lib/analytics":56,"../../lib/assign":57,"../../lib/braintree-error":60,"../../lib/bus":63,"../../lib/convert-methods-to-error":66,"../../lib/deferred":69,"../../lib/methods":78,"../../lib/promise":80,"../../lib/use-min":82,"../../lib/vendor/uuid":84,"../shared/constants":91,"../shared/errors":92,"../shared/events":93,"@braintree/iframer":13,"@braintree/wrap-promise":20}],90:[function(require,module,exports){
 'use strict';
 /** @module braintree-web/three-d-secure */
 
@@ -5588,7 +5981,7 @@ var basicComponentVerification = require('../lib/basic-component-verification');
 var BraintreeError = require('../lib/braintree-error');
 var analytics = require('../lib/analytics');
 var errors = require('./shared/errors');
-var VERSION = "3.30.0";
+var VERSION = "3.31.0";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -5641,14 +6034,14 @@ module.exports = {
   VERSION: VERSION
 };
 
-},{"../lib/analytics":51,"../lib/basic-component-verification":53,"../lib/braintree-error":55,"../lib/is-https":69,"../lib/promise":74,"./external/three-d-secure":83,"./shared/errors":86,"@braintree/wrap-promise":17}],85:[function(require,module,exports){
+},{"../lib/analytics":56,"../lib/basic-component-verification":58,"../lib/braintree-error":60,"../lib/is-https":75,"../lib/promise":80,"./external/three-d-secure":89,"./shared/errors":92,"@braintree/wrap-promise":20}],91:[function(require,module,exports){
 'use strict';
 
 module.exports = {
   LANDING_FRAME_NAME: 'braintreethreedsecurelanding'
 };
 
-},{}],86:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../../lib/braintree-error');
@@ -5690,7 +6083,7 @@ module.exports = {
   }
 };
 
-},{"../../lib/braintree-error":55}],87:[function(require,module,exports){
+},{"../../lib/braintree-error":60}],93:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('../../lib/enumerate');
@@ -5699,10 +6092,457 @@ module.exports = enumerate([
   'AUTHENTICATION_COMPLETE'
 ], 'threedsecure:');
 
-},{"../../lib/enumerate":66}],88:[function(require,module,exports){
+},{"../../lib/enumerate":71}],94:[function(require,module,exports){
+'use strict';
+/** @module braintree-web/venmo */
+
+var analytics = require('../lib/analytics');
+var basicComponentVerification = require('../lib/basic-component-verification');
+var errors = require('./shared/errors');
+var wrapPromise = require('@braintree/wrap-promise');
+var BraintreeError = require('../lib/braintree-error');
+var Venmo = require('./venmo');
+var Promise = require('../lib/promise');
+var supportsVenmo = require('./shared/supports-venmo');
+var VERSION = "3.31.0";
+
+/**
+ * @static
+ * @function create
+ * @param {object} options Creation options:
+ * @param {Client} options.client A {@link Client} instance.
+ * @param {boolean} [options.allowNewBrowserTab=true] This should be set to false if your payment flow requires returning to the same tab, e.g. single page applications. Doing so causes {@link Venmo#isBrowserSupported|isBrowserSupported} to return true only for mobile web browsers that support returning from the Venmo app to the same tab.
+ * @param {callback} [callback] The second argument, `data`, is the {@link Venmo} instance. If no callback is provided, `create` returns a promise that resolves with the {@link Venmo} instance.
+ * @example
+ * braintree.venmo.create({
+ *   client: clientInstance
+ * }).then(function (venmoInstance) {
+ *   // venmoInstance is ready to be used.
+ * }).catch(function (createErr) {
+ *   console.error('Error creating Venmo instance', createErr);
+ * });
+ * @returns {Promise|void} Returns the Venmo instance.
+ */
+function create(options) {
+  return basicComponentVerification.verify({
+    name: 'Venmo',
+    client: options.client
+  }).then(function () {
+    var instance;
+    var configuration = options.client.getConfiguration();
+
+    if (!configuration.gatewayConfiguration.payWithVenmo) {
+      return Promise.reject(new BraintreeError(errors.VENMO_NOT_ENABLED));
+    }
+
+    instance = new Venmo(options);
+
+    analytics.sendEvent(options.client, 'venmo.initialized');
+
+    return instance._initialize();
+  });
+}
+
+/**
+ * @static
+ * @function isBrowserSupported
+ * @param {object} [options] browser support options:
+ * @param {boolean} [options.allowNewBrowserTab=true] This should be set to false if your payment flow requires returning to the same tab, e.g. single page applications.
+ * @example
+ * if (braintree.venmo.isBrowserSupported()) {
+ *   // set up Venmo
+ * }
+ * @example <caption>Explicitly require browser support returning to the same tab</caption>
+ * if (braintree.venmo.isBrowserSupported({
+ *   allowNewBrowserTab: false
+ * })) {
+ *   // set up Venmo
+ * }
+ * @returns {boolean} Whether or not the browser supports Venmo.
+ */
+function isBrowserSupported(options) {
+  return supportsVenmo.isBrowserSupported(options);
+}
+
+module.exports = {
+  create: wrapPromise(create),
+  isBrowserSupported: isBrowserSupported,
+  /**
+   * @description The current version of the SDK, i.e. `{@pkg version}`.
+   * @type {string}
+   */
+  VERSION: VERSION
+};
+
+},{"../lib/analytics":56,"../lib/basic-component-verification":58,"../lib/braintree-error":60,"../lib/promise":80,"./shared/errors":97,"./shared/supports-venmo":98,"./venmo":99,"@braintree/wrap-promise":20}],95:[function(require,module,exports){
 'use strict';
 
+var isAndroid = require('@braintree/browser-detection/is-android');
+var isChrome = require('@braintree/browser-detection/is-chrome');
+var isIos = require('@braintree/browser-detection/is-ios');
+var isIosSafari = require('@braintree/browser-detection/is-ios-safari');
+var isSamsungBrowser = require('@braintree/browser-detection/is-samsung');
+var isMobileFirefox = require('@braintree/browser-detection/is-mobile-firefox');
+
+module.exports = {
+  isAndroid: isAndroid,
+  isChrome: isChrome,
+  isIos: isIos,
+  isIosSafari: isIosSafari,
+  isSamsungBrowser: isSamsungBrowser,
+  isMobileFirefox: isMobileFirefox
+};
+
+},{"@braintree/browser-detection/is-android":1,"@braintree/browser-detection/is-chrome":2,"@braintree/browser-detection/is-ios":10,"@braintree/browser-detection/is-ios-safari":8,"@braintree/browser-detection/is-mobile-firefox":11,"@braintree/browser-detection/is-samsung":12}],96:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  DOCUMENT_VISIBILITY_CHANGE_EVENT_DELAY: 500,
+  PROCESS_RESULTS_DELAY: 1000,
+  VENMO_OPEN_URL: 'https://venmo.com/braintree/checkout'
+};
+
+},{}],97:[function(require,module,exports){
+'use strict';
+
+var BraintreeError = require('../../lib/braintree-error');
+
+module.exports = {
+  VENMO_NOT_ENABLED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'VENMO_NOT_ENABLED',
+    message: 'Venmo is not enabled for this merchant.'
+  },
+  VENMO_TOKENIZATION_REQUEST_ACTIVE: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'VENMO_TOKENIZATION_REQUEST_ACTIVE',
+    message: 'Another tokenization request is active.'
+  },
+  VENMO_APP_FAILED: {
+    type: BraintreeError.types.UNKNOWN,
+    code: 'VENMO_APP_FAILED',
+    message: 'Venmo app encountered a problem.'
+  },
+  VENMO_APP_CANCELED: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'VENMO_APP_CANCELED',
+    message: 'Venmo app authorization was canceled.'
+  },
+  VENMO_CANCELED: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'VENMO_CANCELED',
+    message: 'User canceled Venmo authorization, or Venmo app is not available.'
+  }
+};
+
+},{"../../lib/braintree-error":60}],98:[function(require,module,exports){
+'use strict';
+
+var browserDetection = require('./browser-detection');
+
+function isBrowserSupported(options) {
+  var isAndroidChrome = browserDetection.isAndroid() && browserDetection.isChrome();
+  var isIosChrome = browserDetection.isIos() && browserDetection.isChrome();
+  var supportsReturnToSameTab = browserDetection.isIosSafari() || isAndroidChrome;
+  var supportsReturnToNewTab = isIosChrome || browserDetection.isSamsungBrowser() || browserDetection.isMobileFirefox();
+
+  options = options || {
+    allowNewBrowserTab: true
+  };
+
+  return supportsReturnToSameTab || (options.allowNewBrowserTab && supportsReturnToNewTab);
+}
+
+module.exports = {
+  isBrowserSupported: isBrowserSupported
+};
+
+},{"./browser-detection":95}],99:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var analytics = require('../lib/analytics');
+var isBrowserSupported = require('./shared/supports-venmo');
+var constants = require('./shared/constants');
+var errors = require('./shared/errors');
+var querystring = require('../lib/querystring');
+var methods = require('../lib/methods');
+var convertMethodsToError = require('../lib/convert-methods-to-error');
+var wrapPromise = require('@braintree/wrap-promise');
+var BraintreeError = require('../lib/braintree-error');
+var Promise = require('../lib/promise');
+var VERSION = "3.31.0";
+
+/**
+ * Venmo tokenize payload.
+ * @typedef {object} Venmo~tokenizePayload
+ * @property {string} nonce The payment method nonce.
+ * @property {string} type The payment method type, always `VenmoAccount`.
+ * @property {object} details Additional Venmo account details.
+ * @property {string} details.username Username of the Venmo account.
+ */
+
+/**
+ * @class
+ * @param {object} options The Venmo {@link module:braintree-web/venmo.create create} options.
+ * @description <strong>Do not use this constructor directly. Use {@link module:braintree-web/venmo.create|braintree-web.venmo.create} instead.</strong>
+ * @classdesc This class represents a Venmo component produced by {@link module:braintree-web/venmo.create|braintree-web/venmo.create}. Instances of this class have methods for tokenizing Venmo payments.
+ */
+function Venmo(options) {
+  var configuration;
+
+  this._client = options.client;
+  configuration = this._client.getConfiguration();
+  this._isDebug = configuration.isDebug;
+  this._assetsUrl = configuration.gatewayConfiguration.assetsUrl + '/web/' + VERSION;
+  this._allowNewBrowserTab = options.allowNewBrowserTab !== false;
+}
+
+Venmo.prototype._initialize = function () {
+  var currentUrl = global.location.href.replace(global.location.hash, '');
+  var params = querystring.parse(global.location.href);
+  var configuration = this._client.getConfiguration();
+  var venmoConfiguration = configuration.gatewayConfiguration.payWithVenmo;
+  var analyticsMetadata = this._client.getConfiguration().analyticsMetadata;
+  var braintreeData = {
+    _meta: {
+      version: analyticsMetadata.sdkVersion,
+      integration: analyticsMetadata.integration,
+      platform: analyticsMetadata.platform,
+      sessionId: analyticsMetadata.sessionId
+    }
+  };
+
+  params['x-success'] = currentUrl + '#venmoSuccess=1';
+  params['x-cancel'] = currentUrl + '#venmoCancel=1';
+  params['x-error'] = currentUrl + '#venmoError=1';
+  params.ua = global.navigator.userAgent;
+  /* eslint-disable camelcase */
+  params.braintree_merchant_id = venmoConfiguration.merchantId;
+  params.braintree_access_token = venmoConfiguration.accessToken;
+  params.braintree_environment = venmoConfiguration.environment;
+  params.braintree_sdk_data = btoa(JSON.stringify(braintreeData));
+  /* eslint-enable camelcase */
+
+  this._url = constants.VENMO_OPEN_URL + '?' + querystring.stringify(params);
+
+  return Promise.resolve(this);
+};
+
+/**
+ * Returns a boolean indicating whether the current browser supports Venmo as a payment method.
+ *
+ * If `options.allowNewBrowserTab` is false when calling {@link module:braintree-web/venmo.create|venmo.create}, this method will return true only for browsers known to support returning from the Venmo app to the same browser tab. Currently, this is limited to iOS Safari and Android Chrome.
+ * @public
+ * @returns {boolean} True if the current browser is supported, false if not.
+ */
+Venmo.prototype.isBrowserSupported = function () {
+  return isBrowserSupported.isBrowserSupported({
+    allowNewBrowserTab: this._allowNewBrowserTab
+  });
+};
+
+/**
+ * Returns a boolean indicating whether a Venmo tokenization result is ready to be processed immediately.
+ *
+ * This method should be called after initialization to see if the result of Venmo authorization is available. If it returns true, call {@link Venmo#tokenize|tokenize} immediately to process the results.
+ *
+ * @public
+ * @returns {boolean} True if the results of Venmo payment authorization are available and ready to process.
+ */
+Venmo.prototype.hasTokenizationResult = function () {
+  var params = getFragmentParameters();
+
+  return typeof (params.venmoSuccess || params.venmoError || params.venmoCancel) !== 'undefined';
+};
+
+/**
+ * Launches the Venmo flow and returns a nonce payload.
+ *
+ * If {@link Venmo#hasTokenizationResult|hasTokenizationResult} returns true, calling tokenize will immediately process and return the results without initiating the Venmo payment authorization flow.
+ *
+ * Only one Venmo flow can be active at a time. One way to achieve this is to disable your Venmo button while the flow is open.
+ * @public
+ * @param {callback} [callback] The second argument, <code>data</code>, is a {@link Venmo~tokenizePayload|tokenizePayload}. If no callback is provided, the method will return a Promise that resolves with a {@link Venmo~tokenizePayload|tokenizePayload}.
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ * @example
+ * button.addEventListener('click', function () {
+ *   // Disable the button so that we don't attempt to open multiple popups.
+ *   button.setAttribute('disabled', 'disabled');
+ *
+ *   // Because tokenize opens a new window, this must be called
+ *   // as a result of a user action, such as a button click.
+ *   venmoInstance.tokenize().then(function (payload) {
+ *     // Submit payload.nonce to your server
+ *     // Use payload.username to get the Venmo username and display any UI
+ *   }).catch(function (tokenizeError) {
+ *     // Handle flow errors or premature flow closure
+ *     switch (tokenizeErr.code) {
+ *       case 'VENMO_APP_CANCELED':
+ *         console.log('User canceled Venmo flow.');
+ *         break;
+ *       case 'VENMO_CANCELED':
+ *         console.log('User canceled Venmo, or Venmo app is not available.');
+ *         break;
+ *       default:
+ *         console.error('Error!', tokenizeErr);
+ *     }
+ *   }).then(function () {
+ *     button.removeAttribute('disabled');
+ *   });
+ * });
+ */
+Venmo.prototype.tokenize = function () {
+  var self = this;
+
+  if (this._tokenizationInProgress === true) {
+    return Promise.reject(new BraintreeError(errors.VENMO_TOKENIZATION_REQUEST_ACTIVE));
+  }
+
+  if (this.hasTokenizationResult()) {
+    return this._processResults();
+  }
+
+  return new Promise(function (resolve, reject) {
+    self._tokenizationInProgress = true;
+    self._previousHash = global.location.hash;
+
+    global.open(self._url);
+
+    // Subscribe to document visibility change events to detect when app switch
+    // has returned.
+    self._visibilityChangeListener = function () {
+      if (!global.document.hidden) {
+        self._tokenizationInProgress = false;
+
+        setTimeout(function () {
+          self._processResults().then(resolve).catch(reject).then(function () {
+            global.location.hash = self._previousHash;
+            self._removeVisibilityEventListener();
+            delete self._visibilityChangeListener;
+          });
+        }, constants.PROCESS_RESULTS_DELAY);
+      }
+    };
+
+    // Add a brief delay to ignore visibility change events that occur right before app switch
+    setTimeout(function () {
+      global.document.addEventListener(documentVisibilityChangeEventName(), self._visibilityChangeListener);
+    }, constants.DOCUMENT_VISIBILITY_CHANGE_EVENT_DELAY);
+  });
+};
+
+/**
+ * Cleanly tear down anything set up by {@link module:braintree-web/venmo.create|create}.
+ * @public
+ * @param {callback} [callback] Called once teardown is complete. No data is returned if teardown completes successfully.
+ * @example
+ * venmoInstance.teardown();
+ * @example <caption>With callback</caption>
+ * venmoInstance.teardown(function () {
+ *   // teardown is complete
+ * });
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ */
+Venmo.prototype.teardown = function () {
+  this._removeVisibilityEventListener();
+  convertMethodsToError(this, methods(Venmo.prototype));
+
+  return Promise.resolve();
+};
+
+Venmo.prototype._removeVisibilityEventListener = function () {
+  global.document.removeEventListener(documentVisibilityChangeEventName(), this._visibilityChangeListener);
+};
+
+Venmo.prototype._processResults = function () {
+  var self = this;
+  var params = getFragmentParameters();
+
+  return new Promise(function (resolve, reject) {
+    if (params.venmoSuccess) {
+      analytics.sendEvent(self._client, 'venmo.appswitch.handle.success');
+      resolve(formatTokenizePayload(params));
+    } else if (params.venmoError) {
+      analytics.sendEvent(self._client, 'venmo.appswitch.handle.error');
+      reject(new BraintreeError({
+        type: errors.VENMO_APP_FAILED.type,
+        code: errors.VENMO_APP_FAILED.code,
+        message: errors.VENMO_APP_FAILED.message,
+        details: {
+          originalError: {
+            message: decodeURIComponent(params.errorMessage),
+            code: params.errorCode
+          }
+        }
+      }));
+    } else if (params.venmoCancel) {
+      analytics.sendEvent(self._client, 'venmo.appswitch.handle.cancel');
+      reject(new BraintreeError(errors.VENMO_APP_CANCELED));
+    } else {
+      // User has either manually switched back to browser, or app is not available for app switch
+      analytics.sendEvent(self._client, 'venmo.appswitch.cancel-or-unavailable');
+      reject(new BraintreeError(errors.VENMO_CANCELED));
+    }
+
+    clearFragmentParameters();
+  });
+};
+
+function getFragmentParameters() {
+  var keyValuesArray = global.location.hash.substring(1).split('&');
+
+  return keyValuesArray.reduce(function (toReturn, keyValue) {
+    var parts = keyValue.split('=');
+    var key = decodeURIComponent(parts[0]);
+    var value = decodeURIComponent(parts[1]);
+
+    toReturn[key] = value;
+
+    return toReturn;
+  }, {});
+}
+
+function clearFragmentParameters() {
+  if (typeof global.history.replaceState === 'function') {
+    history.pushState({}, '', global.location.href.slice(0, global.location.href.indexOf('#')));
+  }
+}
+
+function formatTokenizePayload(fragmentParams, venmoAccountData) {
+  return {
+    nonce: venmoAccountData ? venmoAccountData.nonce : fragmentParams.paymentMethodNonce,
+    type: 'VenmoAccount',
+    details: {
+      username: fragmentParams.username
+    }
+  };
+}
+
+// From https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+function documentVisibilityChangeEventName() {
+  var visibilityChange;
+
+  if (typeof global.document.hidden !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
+    visibilityChange = 'visibilitychange';
+  } else if (typeof global.document.msHidden !== 'undefined') {
+    visibilityChange = 'msvisibilitychange';
+  } else if (typeof global.document.webkitHidden !== 'undefined') {
+    visibilityChange = 'webkitvisibilitychange';
+  }
+
+  return visibilityChange;
+}
+
+module.exports = wrapPromise.wrapPrototype(Venmo);
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../lib/analytics":56,"../lib/braintree-error":60,"../lib/convert-methods-to-error":66,"../lib/methods":78,"../lib/promise":80,"../lib/querystring":81,"./shared/constants":96,"./shared/errors":97,"./shared/supports-venmo":98,"@braintree/wrap-promise":20}],100:[function(require,module,exports){
+'use strict';
+
+var testOrder;
 var types = {};
+var customCards = {};
 var VISA = 'visa';
 var MASTERCARD = 'master-card';
 var AMERICAN_EXPRESS = 'american-express';
@@ -5715,7 +6555,7 @@ var CVV = 'CVV';
 var CID = 'CID';
 var CVC = 'CVC';
 var CVN = 'CVN';
-var testOrder = [
+var ORIGINAL_TEST_ORDER = [
   VISA,
   MASTERCARD,
   AMERICAN_EXPRESS,
@@ -5737,6 +6577,8 @@ function clone(originalObject) {
 
   return dupe;
 }
+
+testOrder = clone(ORIGINAL_TEST_ORDER);
 
 types[VISA] = {
   niceType: 'Visa',
@@ -5843,6 +6685,10 @@ types[MAESTRO] = {
   }
 };
 
+function findType(type) {
+  return customCards[type] || types[type];
+}
+
 function creditCardType(cardNumber) {
   var type, value, i;
   var prefixResults = [];
@@ -5854,7 +6700,7 @@ function creditCardType(cardNumber) {
 
   for (i = 0; i < testOrder.length; i++) {
     type = testOrder[i];
-    value = types[type];
+    value = findType(type);
 
     if (cardNumber.length === 0) {
       prefixResults.push(clone(value));
@@ -5872,7 +6718,45 @@ function creditCardType(cardNumber) {
 }
 
 creditCardType.getTypeInfo = function (type) {
-  return clone(types[type]);
+  return clone(findType(type));
+};
+
+function getCardPosition(name, ignoreErrorForNotExisting) {
+  var position = testOrder.indexOf(name);
+
+  if (!ignoreErrorForNotExisting && position === -1) {
+    throw new Error('"' + name + '" is not a supported card type.');
+  }
+
+  return position;
+}
+
+creditCardType.removeCard = function (name) {
+  var position = getCardPosition(name);
+
+  testOrder.splice(position, 1);
+};
+
+creditCardType.addCard = function (config) {
+  var existingCardPosition = getCardPosition(config.type, true);
+
+  customCards[config.type] = config;
+
+  if (existingCardPosition === -1) {
+    testOrder.push(config.type);
+  }
+};
+
+creditCardType.changeOrder = function (name, position) {
+  var currentPosition = getCardPosition(name);
+
+  testOrder.splice(currentPosition, 1);
+  testOrder.splice(position, 0, name);
+};
+
+creditCardType.resetModifications = function () {
+  testOrder = clone(ORIGINAL_TEST_ORDER);
+  customCards = {};
 };
 
 creditCardType.types = {
@@ -5888,7 +6772,7 @@ creditCardType.types = {
 
 module.exports = creditCardType;
 
-},{}],89:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 (function (global){
 'use strict';
 (function (root, factory) {
@@ -6166,7 +7050,7 @@ module.exports = creditCardType;
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],90:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 'use strict';
 
 // Store setTimeout reference so promise-polyfill will be unaffected by
@@ -6394,7 +7278,7 @@ Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
 
 module.exports = Promise;
 
-},{}],91:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -6439,7 +7323,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@braintree/browser-detection/is-android":1,"@braintree/browser-detection/is-chrome":2,"@braintree/browser-detection/is-ie9":6,"@braintree/browser-detection/is-ios":8}],92:[function(require,module,exports){
+},{"@braintree/browser-detection/is-android":1,"@braintree/browser-detection/is-chrome":2,"@braintree/browser-detection/is-ie9":6,"@braintree/browser-detection/is-ios":10}],104:[function(require,module,exports){
 'use strict';
 
 var device = require('./lib/device');
@@ -6449,7 +7333,7 @@ module.exports = function () {
   return !device.isSamsungBrowser();
 };
 
-},{"./lib/device":91}],93:[function(require,module,exports){
+},{"./lib/device":103}],105:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -6457,18 +7341,24 @@ module.exports = {
     card: 'card',
     paypal: 'paypal',
     paypalCredit: 'paypalCredit',
-    applePay: 'applePay'
+    applePay: 'applePay',
+    venmo: 'venmo',
+    googlePay: 'googlePay'
   },
   paymentMethodTypes: {
     card: 'CreditCard',
     paypal: 'PayPalAccount',
     paypalCredit: 'PayPalAccount',
-    applePay: 'ApplePayCard'
+    applePay: 'ApplePayCard',
+    venmo: 'VenmoAccount',
+    googlePay: 'AndroidPayCard'
   },
   analyticsKinds: {
     CreditCard: 'card',
     PayPalAccount: 'paypal',
-    ApplePayCard: 'applepay'
+    ApplePayCard: 'applepay',
+    VenmoAccount: 'venmo',
+    AndroidPayCard: 'googlepay'
   },
   paymentMethodCardTypes: {
     Visa: 'visa',
@@ -6498,14 +7388,15 @@ module.exports = {
   ANALYTICS_PREFIX: 'web.dropin.',
   CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT: 200,
   CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.min.js',
+  GOOGLE_PAYMENT_SOURCE: 'https://payments.developers.google.com/js/apis/pay.js',
   INTEGRATION: 'dropin2',
   PAYPAL_CHECKOUT_SCRIPT_ID: 'braintree-dropin-paypal-checkout-script',
+  GOOGLE_PAYMENT_SCRIPT_ID: 'braintree-dropin-google-payment-script',
   DATA_COLLECTOR_SCRIPT_ID: 'braintree-dropin-data-collector-script',
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
 
-},{}],94:[function(require,module,exports){
-(function (global){
+},{}],106:[function(require,module,exports){
 'use strict';
 
 var DropinError = require('./lib/dropin-error');
@@ -6514,10 +7405,21 @@ var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
-var isHTTPS = require('./lib/is-https');
+var Promise = require('./lib/promise');
+var paymentSheetViews = require('./views/payment-sheet-views');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
-  'ApplePayCard'
+  paymentMethodTypes.applePay,
+  paymentMethodTypes.googlePay,
+  paymentMethodTypes.venmo
+];
+var DEFAULT_PAYMENT_OPTION_PRIORITY = [
+  paymentOptionIDs.card,
+  paymentOptionIDs.paypal,
+  paymentOptionIDs.paypalCredit,
+  paymentOptionIDs.venmo,
+  paymentOptionIDs.applePay,
+  paymentOptionIDs.googlePay
 ];
 
 function DropinModel(options) {
@@ -6529,10 +7431,7 @@ function DropinModel(options) {
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
-
-  this.supportedPaymentOptions = getSupportedPaymentOptions(options);
-  this._paymentMethods = this._getSupportedPaymentMethods(options.paymentMethods);
-  this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
+  this._options = options;
 
   EventEmitter.call(this);
 }
@@ -6540,6 +7439,14 @@ function DropinModel(options) {
 DropinModel.prototype = Object.create(EventEmitter.prototype, {
   constructor: DropinModel
 });
+
+DropinModel.prototype.initialize = function () {
+  return getSupportedPaymentOptions(this._options).then(function (paymentOptions) {
+    this.supportedPaymentOptions = paymentOptions;
+    this._paymentMethods = this._getSupportedPaymentMethods(this._options.paymentMethods);
+    this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
+  }.bind(this));
+};
 
 DropinModel.prototype.isPaymentMethodRequestable = function () {
   return Boolean(this._paymentMethodIsRequestable);
@@ -6639,6 +7546,17 @@ DropinModel.prototype.getActivePaymentView = function () {
   return this._activePaymentView;
 };
 
+DropinModel.prototype.reportAppSwitchPayload = function (payload) {
+  this.appSwitchPayload = payload;
+};
+
+DropinModel.prototype.reportAppSwitchError = function (sheetId, error) {
+  this.appSwitchError = {
+    id: sheetId,
+    error: error
+  };
+};
+
 DropinModel.prototype.asyncDependencyStarting = function () {
   this.dependenciesInitializing++;
 };
@@ -6693,8 +7611,8 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
 };
 
 function getSupportedPaymentOptions(options) {
-  var result = [];
-  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || ['card', 'paypal', 'paypalCredit', 'applePay'];
+  var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || DEFAULT_PAYMENT_OPTION_PRIORITY;
+  var promises;
 
   if (!(paymentOptionPriority instanceof Array)) {
     throw new DropinError('paymentOptionPriority must be an array.');
@@ -6703,36 +7621,43 @@ function getSupportedPaymentOptions(options) {
   // Remove duplicates
   paymentOptionPriority = paymentOptionPriority.filter(function (item, pos) { return paymentOptionPriority.indexOf(item) === pos; });
 
-  paymentOptionPriority.forEach(function (paymentOption) {
-    if (isPaymentOptionEnabled(paymentOption, options)) {
-      result.push(paymentOptionIDs[paymentOption]);
-    }
+  promises = paymentOptionPriority.map(function (paymentOption) {
+    return getPaymentOption(paymentOption, options);
   });
 
-  if (result.length === 0) {
-    throw new DropinError('No valid payment options available.');
-  }
+  return Promise.all(promises).then(function (result) {
+    result = result.filter(function (item) {
+      return item.success;
+    });
 
-  return result;
+    if (result.length === 0) {
+      return Promise.reject(new DropinError('No valid payment options available.'));
+    }
+
+    return result.map(function (item) { return item.id; });
+  });
+}
+
+function getPaymentOption(paymentOption, options) {
+  return isPaymentOptionEnabled(paymentOption, options).then(function (success) {
+    return {
+      success: success,
+      id: paymentOptionIDs[paymentOption]
+    };
+  });
 }
 
 function isPaymentOptionEnabled(paymentOption, options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var applePayEnabled, applePayBrowserSupported;
+  var SheetView = paymentSheetViews[paymentOptionIDs[paymentOption]];
 
-  if (paymentOption === 'card') {
-    return gatewayConfiguration.creditCards.supportedCardTypes.length > 0;
-  } else if (paymentOption === 'paypal') {
-    return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypal);
-  } else if (paymentOption === 'paypalCredit') {
-    return gatewayConfiguration.paypalEnabled && Boolean(options.merchantConfiguration.paypalCredit);
-  } else if (paymentOption === 'applePay') {
-    applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
-    applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS() && global.ApplePaySession.canMakePayments();
-
-    return applePayEnabled && applePayBrowserSupported;
+  if (!SheetView) {
+    return Promise.reject(new DropinError('paymentOptionPriority: Invalid payment option specified.'));
   }
-  throw new DropinError('paymentOptionPriority: Invalid payment option specified.');
+
+  return SheetView.isEnabled({
+    client: options.client,
+    merchantConfiguration: options.merchantConfiguration
+  });
 }
 
 function canShowVaultedPaymentMethodType(paymentMethodType) {
@@ -6741,8 +7666,7 @@ function canShowVaultedPaymentMethodType(paymentMethodType) {
 
 module.exports = DropinModel;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./constants":93,"./lib/dropin-error":103,"./lib/event-emitter":104,"./lib/is-guest-checkout":106,"./lib/is-https":107}],95:[function(require,module,exports){
+},{"./constants":105,"./lib/dropin-error":116,"./lib/event-emitter":117,"./lib/is-guest-checkout":119,"./lib/promise":124,"./views/payment-sheet-views":163}],107:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -6753,33 +7677,38 @@ var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
 var isGuestCheckout = require('./lib/is-guest-checkout');
+var assets = require('./lib/assets');
 
 var MainView = require('./views/main-view');
 var paymentMethodsViewID = require('./views/payment-methods-view').ID;
 var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations');
+var isUtf8 = require('./lib/is-utf-8');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
+var sanitizeHtml = require('./lib/sanitize-html');
 var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
-var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"applePay\" class=\"braintree-applePay braintree-sheet\">\n        <div data-braintree-id=\"apple-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoApplePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Apple Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"apple-pay-button\" class=\"braintree-sheet__button--apple-pay apple-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n            <div class=\"braintree-form__field\">\n              <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\">\n                <input id=\"braintree__card-view-input__cardholder-name\" type=\"text\" placeholder=\"{{cardholderNamePlaceholder}}\"/>\n              </div>\n              <div class=\"braintree-form__icon-container\">\n                <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                  <svg width=\"24\" height=\"24\">\n                    <use xlink:href=\"#iconError\"></use>\n                  </svg>\n                </div>\n              </div>\n            </div>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n            <div class=\"braintree-form__field\">\n              <label>\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n              </label>\n              <div class=\"braintree-form__icon-container\">\n                <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                  <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                  <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                  </svg>\n                </div>\n                <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                  <svg width=\"24\" height=\"24\">\n                    <use xlink:href=\"#iconError\"></use>\n                  </svg>\n                </div>\n              </div>\n            </div>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n              </div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n\n              <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{cvvLabel}}\n                <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n              </div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <label>\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                </label>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-toggle braintree-hidden\" tabindex=\"0\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n";
-var svgHTML = "<svg data-braintree-id=\"svgs\" style=\"display: none\">\n  <defs>\n    <symbol id=\"icon-visa\" viewBox=\"0 0 40 24\">\n      <title>Visa</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M0 22.033C0 23.12.892 24 1.992 24h36.016c1.1 0 1.992-.88 1.992-1.967V20.08H0v1.953z\" style=\"fill: #F8B600\" />\n      <path d=\"M0 3.92h40V1.967C40 .88 39.108 0 38.008 0H1.992C.892 0 0 .88 0 1.967V3.92zM19.596 7.885l-2.11 9.478H14.93l2.11-9.478h2.554zm10.743 6.12l1.343-3.56.773 3.56H30.34zm2.85 3.358h2.36l-2.063-9.478H31.31c-.492 0-.905.274-1.088.695l-3.832 8.783h2.682l.532-1.415h3.276l.31 1.415zm-6.667-3.094c.01-2.502-3.6-2.64-3.577-3.76.008-.338.345-.7 1.083-.793.365-.045 1.373-.08 2.517.425l.448-2.01c-.615-.214-1.405-.42-2.39-.42-2.523 0-4.3 1.288-4.313 3.133-.016 1.364 1.268 2.125 2.234 2.58.996.464 1.33.762 1.325 1.177-.006.636-.793.918-1.526.928-1.285.02-2.03-.333-2.623-.6l-.462 2.08c.598.262 1.7.49 2.84.502 2.682 0 4.437-1.273 4.445-3.243zM15.948 7.884l-4.138 9.478h-2.7L7.076 9.8c-.123-.466-.23-.637-.606-.834-.615-.32-1.63-.62-2.52-.806l.06-.275h4.345c.554 0 1.052.354 1.178.966l1.076 5.486 2.655-6.45h2.683z\" style=\"fill: #1A1F71\" />\n    </symbol>\n\n    <symbol id=\"icon-master-card\" viewBox=\"0 0 40 24\">\n      <title>MasterCard</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M11.085 22.2v-1.36c0-.522-.318-.863-.864-.863-.272 0-.568.09-.773.386-.16-.25-.386-.386-.727-.386-.228 0-.455.068-.637.318v-.272h-.478V22.2h.478v-1.202c0-.386.204-.567.523-.567.318 0 .478.205.478.568V22.2h.477v-1.202c0-.386.23-.567.524-.567.32 0 .478.205.478.568V22.2h.523zm7.075-2.177h-.774v-.658h-.478v.658h-.432v.43h.432v.998c0 .5.205.795.75.795.206 0 .433-.068.592-.16l-.136-.407c-.136.09-.296.114-.41.114-.227 0-.318-.137-.318-.363v-.976h.774v-.43zm4.048-.046c-.273 0-.454.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .204.023.295.046l.137-.454c-.09-.023-.228-.023-.32-.023zm-6.118.227c-.228-.16-.546-.227-.888-.227-.546 0-.91.272-.91.703 0 .363.274.567.75.635l.23.023c.25.045.385.113.385.227 0 .16-.182.272-.5.272-.32 0-.57-.113-.728-.227l-.228.363c.25.18.59.272.932.272.637 0 1-.295 1-.703 0-.385-.295-.59-.75-.658l-.227-.022c-.205-.023-.364-.068-.364-.204 0-.16.16-.25.41-.25.272 0 .545.114.682.182l.205-.386zm12.692-.227c-.273 0-.455.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .203.023.294.046L29.1 20c-.09-.023-.227-.023-.318-.023zm-6.096 1.134c0 .66.455 1.135 1.16 1.135.32 0 .546-.068.774-.25l-.228-.385c-.182.136-.364.204-.57.204-.385 0-.658-.272-.658-.703 0-.407.273-.68.66-.702.204 0 .386.068.568.204l.228-.385c-.228-.182-.455-.25-.774-.25-.705 0-1.16.477-1.16 1.134zm4.413 0v-1.087h-.48v.272c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.317 0 .545-.113.68-.317v.272h.48v-1.09zm-1.753 0c0-.384.25-.702.66-.702.387 0 .66.295.66.703 0 .387-.273.704-.66.704-.41-.022-.66-.317-.66-.703zm-5.71-1.133c-.636 0-1.09.454-1.09 1.134 0 .682.454 1.135 1.114 1.135.32 0 .638-.09.888-.295l-.228-.34c-.18.136-.41.227-.636.227-.296 0-.592-.136-.66-.522h1.615v-.18c.022-.704-.388-1.158-1.002-1.158zm0 .41c.297 0 .502.18.547.52h-1.137c.045-.295.25-.52.59-.52zm11.852.724v-1.95h-.48v1.135c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.68-.317v.272h.48v-1.09zm-1.752 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703zm-15.97 0v-1.087h-.476v.272c-.16-.204-.387-.318-.683-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.682-.317v.272h.477v-1.09zm-1.773 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703z\" style=\"fill: #000\" />\n      <path style=\"fill: #FF5F00\" d=\"M23.095 3.49H15.93v12.836h7.165\" />\n      <path d=\"M16.382 9.91c0-2.61 1.23-4.922 3.117-6.42-1.39-1.087-3.14-1.745-5.05-1.745-4.528 0-8.19 3.65-8.19 8.164 0 4.51 3.662 8.162 8.19 8.162 1.91 0 3.66-.657 5.05-1.746-1.89-1.474-3.118-3.81-3.118-6.417z\" style=\"fill: #EB001B\" />\n      <path d=\"M32.76 9.91c0 4.51-3.664 8.162-8.19 8.162-1.91 0-3.662-.657-5.05-1.746 1.91-1.496 3.116-3.81 3.116-6.417 0-2.61-1.228-4.922-3.116-6.42 1.388-1.087 3.14-1.745 5.05-1.745 4.526 0 8.19 3.674 8.19 8.164z\" style=\"fill: #F79E1B\" />\n    </symbol>\n\n    <symbol id=\"icon-unionpay\" viewBox=\"0 0 40 24\">\n      <title>Union Pay</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.877 2h8.126c1.135 0 1.84.93 1.575 2.077l-3.783 16.35c-.267 1.142-1.403 2.073-2.538 2.073H5.13c-1.134 0-1.84-.93-1.574-2.073L7.34 4.076C7.607 2.93 8.74 2 9.878 2z\" style=\"fill: #E21836\" />\n      <path d=\"M17.325 2h9.345c1.134 0 .623.93.356 2.077l-3.783 16.35c-.265 1.142-.182 2.073-1.32 2.073H12.58c-1.137 0-1.84-.93-1.574-2.073l3.783-16.35C15.056 2.93 16.19 2 17.324 2z\" style=\"fill: #00447B\" />\n      <path d=\"M26.3 2h8.126c1.136 0 1.84.93 1.575 2.077l-3.782 16.35c-.266 1.142-1.402 2.073-2.54 2.073h-8.122c-1.137 0-1.842-.93-1.574-2.073l3.78-16.35C24.03 2.93 25.166 2 26.303 2z\" style=\"fill: #007B84\" />\n      <path d=\"M27.633 14.072l-.99 3.3h.266l-.208.68h-.266l-.062.212h-.942l.064-.21H23.58l.193-.632h.194l1.005-3.35.2-.676h.962l-.1.34s.255-.184.498-.248c.242-.064 1.636-.088 1.636-.088l-.206.672h-.33zm-1.695 0l-.254.843s.285-.13.44-.172c.16-.04.395-.057.395-.057l.182-.614h-.764zm-.38 1.262l-.263.877s.29-.15.447-.196c.157-.037.396-.066.396-.066l.185-.614h-.766zm-.614 2.046h.767l.222-.74h-.765l-.223.74z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M28.055 13.4h1.027l.01.385c-.005.065.05.096.17.096h.208l-.19.637h-.555c-.48.035-.662-.172-.65-.406l-.02-.71zM28.193 16.415h-.978l.167-.566H28.5l.16-.517h-1.104l.19-.638h3.072l-.193.638h-1.03l-.16.516h1.032l-.17.565H29.18l-.2.24h.454l.11.712c.013.07.014.116.036.147.023.026.158.038.238.038h.137l-.21.694h-.348c-.054 0-.133-.004-.243-.01-.105-.008-.18-.07-.25-.105-.064-.03-.16-.11-.182-.24l-.11-.712-.507.7c-.162.222-.38.39-.748.39h-.712l.186-.62h.273c.078 0 .15-.03.2-.056.052-.023.098-.05.15-.126l.74-1.05zM17.478 14.867h2.59l-.19.622H18.84l-.16.53h1.06l-.194.64h-1.06l-.256.863c-.03.095.25.108.353.108l.53-.072-.212.71h-1.193c-.096 0-.168-.013-.272-.037-.1-.023-.145-.07-.19-.138-.043-.07-.11-.128-.064-.278l.343-1.143h-.588l.195-.65h.592l.156-.53h-.588l.188-.623zM19.223 13.75h1.063l-.194.65H18.64l-.157.136c-.067.066-.09.038-.18.087-.08.04-.254.123-.477.123h-.466l.19-.625h.14c.118 0 .198-.01.238-.036.046-.03.098-.096.157-.203l.267-.487h1.057l-.187.356zM20.74 13.4h.905l-.132.46s.286-.23.487-.313c.2-.075.65-.143.65-.143l1.464-.007-.498 1.672c-.085.286-.183.472-.244.555-.055.087-.12.16-.248.23-.124.066-.236.104-.34.115-.096.007-.244.01-.45.012h-1.41l-.4 1.324c-.037.13-.055.194-.03.23.02.03.068.066.135.066l.62-.06-.21.726h-.698c-.22 0-.383-.004-.495-.013-.108-.01-.22 0-.295-.058-.065-.058-.164-.133-.162-.21.007-.073.037-.192.082-.356l1.268-4.23zm1.922 1.69h-1.484l-.09.3h1.283c.152-.018.184.004.196-.003l.096-.297zm-1.402-.272s.29-.266.786-.353c.112-.022.82-.015.82-.015l.106-.357h-1.496l-.216.725z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M23.382 16.1l-.084.402c-.036.125-.067.22-.16.302-.1.084-.216.172-.488.172l-.502.02-.004.455c-.006.13.028.117.048.138.024.022.045.032.067.04l.157-.008.48-.028-.198.663h-.552c-.385 0-.67-.008-.765-.084-.092-.057-.105-.132-.103-.26l.035-1.77h.88l-.013.362h.212c.072 0 .12-.007.15-.026.027-.02.047-.048.06-.093l.087-.282h.692zM10.84 7.222c-.032.143-.596 2.763-.598 2.764-.12.53-.21.91-.508 1.152-.172.14-.37.21-.6.21-.37 0-.587-.185-.624-.537l-.007-.12.113-.712s.593-2.388.7-2.703c.002-.017.005-.026.007-.035-1.152.01-1.357 0-1.37-.018-.007.024-.037.173-.037.173l-.605 2.688-.05.23-.1.746c0 .22.042.4.13.553.275.485 1.06.557 1.504.557.573 0 1.11-.123 1.47-.345.63-.375.797-.962.944-1.48l.067-.267s.61-2.48.716-2.803c.003-.017.006-.026.01-.035-.835.01-1.08 0-1.16-.018zM14.21 12.144c-.407-.006-.55-.006-1.03.018l-.018-.036c.042-.182.087-.363.127-.548l.06-.25c.086-.39.173-.843.184-.98.007-.084.036-.29-.2-.29-.1 0-.203.048-.307.096-.058.207-.174.79-.23 1.055-.118.558-.126.62-.178.897l-.036.037c-.42-.006-.566-.006-1.05.018l-.024-.04c.08-.332.162-.668.24-.998.203-.9.25-1.245.307-1.702l.04-.028c.47-.067.585-.08 1.097-.185l.043.047-.077.287c.086-.052.168-.104.257-.15.242-.12.51-.155.658-.155.223 0 .468.062.57.323.098.232.034.52-.094 1.084l-.066.287c-.13.627-.152.743-.225 1.174l-.05.036zM15.87 12.144c-.245 0-.405-.006-.56 0-.153 0-.303.008-.532.018l-.013-.02-.015-.02c.062-.238.097-.322.128-.406.03-.084.06-.17.115-.41.072-.315.116-.535.147-.728.033-.187.052-.346.075-.53l.02-.014.02-.018c.244-.036.4-.057.56-.082.16-.024.32-.055.574-.103l.008.023.008.022c-.047.195-.094.39-.14.588-.047.197-.094.392-.137.587-.093.414-.13.57-.152.68-.02.105-.026.163-.063.377l-.022.02-.023.017zM19.542 10.728c.143-.633.033-.928-.108-1.11-.213-.273-.59-.36-.978-.36-.235 0-.793.023-1.23.43-.312.29-.458.687-.546 1.066-.088.387-.19 1.086.447 1.344.198.085.48.108.662.108.466 0 .945-.13 1.304-.513.278-.312.405-.775.448-.965zm-1.07-.046c-.02.106-.113.503-.24.673-.086.123-.19.198-.305.198-.033 0-.235 0-.238-.3-.003-.15.027-.304.063-.47.108-.478.236-.88.56-.88.255 0 .27.298.16.78zM29.536 12.187c-.493-.004-.635-.004-1.09.015l-.03-.037c.124-.472.248-.943.358-1.42.142-.62.175-.882.223-1.244l.037-.03c.49-.07.625-.09 1.135-.186l.015.044c-.093.388-.186.777-.275 1.166-.19.816-.258 1.23-.33 1.658l-.044.035z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M29.77 10.784c.144-.63-.432-.056-.525-.264-.14-.323-.052-.98-.62-1.2-.22-.085-.732.025-1.17.428-.31.29-.458.683-.544 1.062-.088.38-.19 1.078.444 1.328.2.085.384.11.567.103.638-.034 1.124-1.002 1.483-1.386.277-.303.326.115.368-.07zm-.974-.047c-.024.1-.117.503-.244.67-.083.117-.283.192-.397.192-.032 0-.232 0-.24-.3 0-.146.03-.3.067-.467.11-.47.235-.87.56-.87.254 0 .363.293.254.774zM22.332 12.144c-.41-.006-.55-.006-1.03.018l-.018-.036c.04-.182.087-.363.13-.548l.057-.25c.09-.39.176-.843.186-.98.008-.084.036-.29-.198-.29-.1 0-.203.048-.308.096-.057.207-.175.79-.232 1.055-.115.558-.124.62-.176.897l-.035.037c-.42-.006-.566-.006-1.05.018l-.022-.04.238-.998c.203-.9.25-1.245.307-1.702l.038-.028c.472-.067.587-.08 1.098-.185l.04.047-.073.287c.084-.052.17-.104.257-.15.24-.12.51-.155.655-.155.224 0 .47.062.575.323.095.232.03.52-.098 1.084l-.065.287c-.133.627-.154.743-.225 1.174l-.05.036zM26.32 8.756c-.07.326-.282.603-.554.736-.225.114-.498.123-.78.123h-.183l.013-.074.336-1.468.01-.076.007-.058.132.015.71.062c.275.105.388.38.31.74zM25.88 7.22l-.34.003c-.883.01-1.238.006-1.383-.012l-.037.182-.315 1.478-.793 3.288c.77-.01 1.088-.01 1.22.004l.21-1.024s.153-.644.163-.667c0 0 .047-.066.096-.092h.07c.665 0 1.417 0 2.005-.437.4-.298.675-.74.797-1.274.03-.132.054-.29.054-.446 0-.205-.04-.41-.16-.568-.3-.423-.896-.43-1.588-.433zM33.572 9.28l-.04-.043c-.502.1-.594.118-1.058.18l-.034.034-.005.023-.003-.007c-.345.803-.334.63-.615 1.26-.003-.03-.003-.048-.004-.077l-.07-1.37-.044-.043c-.53.1-.542.118-1.03.18l-.04.034-.006.056.003.007c.06.315.047.244.108.738.03.244.065.49.093.73.05.4.077.6.134 1.21-.328.55-.408.757-.722 1.238l.017.044c.478-.018.587-.018.94-.018l.08-.088c.265-.578 2.295-4.085 2.295-4.085zM16.318 9.62c.27-.19.304-.45.076-.586-.23-.137-.634-.094-.906.095-.273.186-.304.45-.075.586.228.134.633.094.905-.096z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M31.238 13.415l-.397.684c-.124.232-.357.407-.728.41l-.632-.01.184-.618h.124c.064 0 .11-.004.148-.022.03-.01.054-.035.08-.072l.233-.373h.988z\" style=\"fill: #FEFEFE\" />\n    </symbol>\n\n    <symbol id=\"icon-american-express\" viewBox=\"0 0 40 24\">\n      <title>American Express</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path style=\"fill: #1478BE\" d=\"M6.26 12.32h2.313L7.415 9.66M27.353 9.977h-3.738v1.23h3.666v1.384h-3.675v1.385h3.821v1.005c.623-.77 1.33-1.466 2.025-2.235l.707-.77c-.934-1.004-1.87-2.08-2.804-3.075v1.077z\" />\n      <path d=\"M38.25 7h-5.605l-1.328 1.4L30.072 7H16.984l-1.017 2.416L14.877 7h-9.58L1.25 16.5h4.826l.623-1.556h1.4l.623 1.556H29.99l1.327-1.483 1.328 1.483h5.605l-4.36-4.667L38.25 7zm-17.685 8.1h-1.557V9.883L16.673 15.1h-1.33L13.01 9.883l-.084 5.217H9.73l-.623-1.556h-3.27L5.132 15.1H3.42l2.884-6.772h2.42l2.645 6.233V8.33h2.646l2.107 4.51 1.868-4.51h2.575V15.1zm14.727 0h-2.024l-2.024-2.26-2.023 2.26H22.06V8.328H29.53l1.795 2.177 2.024-2.177h2.025L32.26 11.75l3.032 3.35z\" style=\"fill: #1478BE\" />\n    </symbol>\n\n    <symbol id=\"icon-jcb\" viewBox=\"0 0 40 24\">\n      <title>JCB</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M33.273 2.01h.013v17.062c-.004 1.078-.513 2.103-1.372 2.746-.63.47-1.366.67-2.14.67-.437 0-4.833.026-4.855 0-.01-.01 0-.07 0-.082v-6.82c0-.04.004-.064.033-.064h5.253c.867 0 1.344-.257 1.692-.61.44-.448.574-1.162.294-1.732-.24-.488-.736-.78-1.244-.913-.158-.04-.32-.068-.483-.083-.01 0-.064 0-.07-.006-.03-.034.023-.04.038-.046.102-.033.215-.042.32-.073.532-.164.993-.547 1.137-1.105.15-.577-.05-1.194-.524-1.552-.34-.257-.768-.376-1.187-.413-.43-.038-4.774-.022-5.21-.022-.072 0-.05-.02-.05-.09V5.63c0-.31.01-.616.073-.92.126-.592.41-1.144.815-1.59.558-.615 1.337-1.01 2.16-1.093.478-.048 4.89-.017 5.305-.017zm-4.06 8.616c.06.272-.01.567-.204.77-.173.176-.407.25-.648.253-.195.003-1.725 0-1.788 0l.003-1.645c.012-.027.02-.018.06-.018.097 0 1.713-.004 1.823.005.232.02.45.12.598.306.076.096.128.208.155.328zm-2.636 2.038h1.944c.242.002.47.063.652.228.226.204.327.515.283.815-.04.263-.194.5-.422.634-.187.112-.39.125-.6.125h-1.857v-1.8z\" style=\"fill: #53B230\" />\n      <path d=\"M6.574 13.89c-.06-.03-.06-.018-.07-.06-.006-.026-.005-8.365.003-8.558.04-.95.487-1.857 1.21-2.47.517-.434 1.16-.71 1.83-.778.396-.04.803-.018 1.2-.018.69 0 4.11-.013 4.12 0 .008.008.002 16.758 0 17.074-.003.956-.403 1.878-1.105 2.523-.506.465-1.15.77-1.83.86-.41.056-5.02.032-5.363.032-.066 0-.054.013-.066-.024-.01-.025 0-7 0-7.17.66.178 1.35.28 2.03.348.662.067 1.33.093 1.993.062.93-.044 1.947-.192 2.712-.762.32-.238.574-.553.73-.922.148-.353.2-.736.2-1.117 0-.348.006-3.93-.016-3.942-.023-.014-2.885-.015-2.9.012-.012.022 0 3.87 0 3.95-.003.47-.16.933-.514 1.252-.468.42-1.11.47-1.707.423-.687-.055-1.357-.245-1.993-.508-.157-.065-.312-.135-.466-.208z\" style=\"fill: #006CB9\" />\n      <path d=\"M15.95 9.835c-.025.02-.05.04-.072.06V6.05c0-.295-.012-.594.01-.888.12-1.593 1.373-2.923 2.944-3.126.382-.05 5.397-.042 5.41-.026.01.01 0 .062 0 .074v16.957c0 1.304-.725 2.52-1.89 3.1-.504.25-1.045.35-1.605.35-.322 0-4.757.015-4.834 0-.05-.01-.023.01-.035-.02-.007-.022 0-6.548 0-7.44v-.422c.554.48 1.256.75 1.96.908.536.12 1.084.176 1.63.196.537.02 1.076.01 1.61-.037.546-.05 1.088-.136 1.625-.244.137-.028.274-.057.41-.09.033-.006.17-.017.187-.044.013-.02 0-.097 0-.12v-1.324c-.582.292-1.19.525-1.83.652-.778.155-1.64.198-2.385-.123-.752-.326-1.2-1.024-1.274-1.837-.076-.837.173-1.716.883-2.212.736-.513 1.7-.517 2.553-.38.634.1 1.245.305 1.825.58.078.037.154.075.23.113V9.322c0-.02.013-.1 0-.118-.02-.028-.152-.038-.188-.046-.066-.016-.133-.03-.2-.045C22.38 9 21.84 8.908 21.3 8.85c-.533-.06-1.068-.077-1.603-.066-.542.01-1.086.054-1.62.154-.662.125-1.32.337-1.883.716-.085.056-.167.117-.245.18z\" style=\"fill: #E20138\" />\n    </symbol>\n\n    <symbol id=\"icon-discover\" viewBox=\"0 0 40 24\">\n      <title>Discover</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M38.995 11.75S27.522 20.1 6.5 23.5h31.495c.552 0 1-.448 1-1V11.75z\" style=\"fill: #F48024\" />\n      <path d=\"M5.332 11.758c-.338.305-.776.438-1.47.438h-.29V8.55h.29c.694 0 1.115.124 1.47.446.37.33.595.844.595 1.372 0 .53-.224 1.06-.595 1.39zM4.077 7.615H2.5v5.515h1.57c.833 0 1.435-.197 1.963-.637.63-.52 1-1.305 1-2.116 0-1.628-1.214-2.762-2.956-2.762zM7.53 13.13h1.074V7.616H7.53M11.227 9.732c-.645-.24-.834-.397-.834-.695 0-.347.338-.61.8-.61.322 0 .587.132.867.446l.562-.737c-.462-.405-1.015-.612-1.618-.612-.975 0-1.718.678-1.718 1.58 0 .76.346 1.15 1.355 1.513.42.148.635.247.743.314.215.14.322.34.322.57 0 .448-.354.78-.834.78-.51 0-.924-.258-1.17-.736l-.695.67c.495.726 1.09 1.05 1.907 1.05 1.116 0 1.9-.745 1.9-1.812 0-.876-.363-1.273-1.585-1.72zM13.15 10.377c0 1.62 1.27 2.877 2.907 2.877.462 0 .858-.09 1.347-.32v-1.267c-.43.43-.81.604-1.297.604-1.082 0-1.85-.785-1.85-1.9 0-1.06.792-1.895 1.8-1.895.512 0 .9.183 1.347.62V7.83c-.472-.24-.86-.34-1.322-.34-1.627 0-2.932 1.283-2.932 2.887zM25.922 11.32l-1.468-3.705H23.28l2.337 5.656h.578l2.38-5.655H27.41M29.06 13.13h3.046v-.934h-1.973v-1.488h1.9v-.934h-1.9V8.55h1.973v-.935H29.06M34.207 10.154h-.314v-1.67h.33c.67 0 1.034.28 1.034.818 0 .554-.364.852-1.05.852zm2.155-.91c0-1.033-.71-1.628-1.95-1.628H32.82v5.514h1.073v-2.215h.14l1.487 2.215h1.32l-1.733-2.323c.81-.165 1.255-.72 1.255-1.563z\" style=\"fill: #221F20\" />\n      <path d=\"M23.6 10.377c0 1.62-1.31 2.93-2.927 2.93-1.617.002-2.928-1.31-2.928-2.93s1.31-2.932 2.928-2.932c1.618 0 2.928 1.312 2.928 2.932z\" style=\"fill: #F48024\" />\n    </symbol>\n\n    <symbol id=\"icon-diners-club\" viewBox=\"0 0 40 24\">\n      <title>Diners Club</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.02 11.83c0-5.456 4.54-9.88 10.14-9.88 5.6 0 10.139 4.424 10.139 9.88-.002 5.456-4.54 9.88-10.14 9.88-5.6 0-10.14-4.424-10.14-9.88z\" style=\"fill: #FEFEFE\" />\n      <path style=\"fill: #FFF\" d=\"M32.522 22H8.5V1.5h24.022\" />\n      <path d=\"M25.02 11.732c-.003-2.534-1.607-4.695-3.868-5.55v11.102c2.26-.857 3.865-3.017 3.87-5.552zm-8.182 5.55V6.18c-2.26.86-3.86 3.017-3.867 5.55.007 2.533 1.61 4.69 3.868 5.55zm2.158-14.934c-5.25.002-9.503 4.202-9.504 9.384 0 5.182 4.254 9.38 9.504 9.382 5.25 0 9.504-4.2 9.505-9.382 0-5.182-4.254-9.382-9.504-9.384zM18.973 22C13.228 22.027 8.5 17.432 8.5 11.84 8.5 5.726 13.228 1.5 18.973 1.5h2.692c5.677 0 10.857 4.225 10.857 10.34 0 5.59-5.18 10.16-10.857 10.16h-2.692z\" style=\"fill: #004A97\" />\n    </symbol>\n\n    <symbol id=\"icon-maestro\" viewBox=\"0 0 40 24\">\n      <title>Maestro</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M14.67 22.39V21c.022-.465-.303-.86-.767-.882h-.116c-.3-.023-.603.14-.788.394-.164-.255-.442-.417-.743-.394-.256-.023-.51.116-.65.324v-.278h-.487v2.203h.487v-1.183c-.046-.278.162-.533.44-.58h.094c.325 0 .488.21.488.58v1.23h.487v-1.23c-.047-.278.162-.556.44-.58h.093c.325 0 .487.21.487.58v1.23l.534-.024zm2.712-1.09v-1.113h-.487v.28c-.162-.21-.417-.326-.695-.326-.65 0-1.16.51-1.16 1.16 0 .65.51 1.16 1.16 1.16.278 0 .533-.117.695-.325v.278h.487V21.3zm-1.786 0c.024-.37.348-.65.72-.626.37.023.65.348.626.72-.023.347-.302.625-.673.625-.372 0-.674-.28-.674-.65-.023-.047-.023-.047 0-.07zm12.085-1.16c.163 0 .325.024.465.094.14.046.278.14.37.255.117.115.186.23.256.37.117.3.117.626 0 .927-.046.14-.138.255-.254.37-.116.117-.232.186-.37.256-.303.116-.65.116-.952 0-.14-.046-.28-.14-.37-.255-.118-.116-.187-.232-.257-.37-.116-.302-.116-.627 0-.928.047-.14.14-.255.256-.37.115-.117.23-.187.37-.256.163-.07.325-.116.488-.093zm0 .465c-.092 0-.185.023-.278.046-.092.024-.162.094-.232.14-.07.07-.116.14-.14.232-.068.185-.068.394 0 .58.024.092.094.162.14.23.07.07.14.117.232.14.186.07.37.07.557 0 .092-.023.16-.092.23-.14.07-.068.117-.138.14-.23.07-.186.07-.395 0-.58-.023-.093-.093-.162-.14-.232-.07-.07-.138-.116-.23-.14-.094-.045-.187-.07-.28-.045zm-7.677.695c0-.695-.44-1.16-1.043-1.16-.65 0-1.16.534-1.137 1.183.023.65.534 1.16 1.183 1.136.325 0 .65-.093.905-.302l-.23-.348c-.187.14-.42.232-.65.232-.326.023-.627-.21-.673-.533h1.646v-.21zm-1.646-.21c.023-.3.278-.532.58-.532.3 0 .556.232.556.533h-1.136zm3.664-.346c-.207-.116-.44-.186-.695-.186-.255 0-.417.093-.417.255 0 .163.162.186.37.21l.233.022c.488.07.766.278.766.672 0 .395-.37.72-1.02.72-.348 0-.673-.094-.95-.28l.23-.37c.21.162.465.232.743.232.324 0 .51-.094.51-.28 0-.115-.117-.185-.395-.23l-.232-.024c-.487-.07-.765-.302-.765-.65 0-.44.37-.718.927-.718.325 0 .627.07.905.232l-.21.394zm2.32-.116h-.788v.997c0 .23.07.37.325.37.14 0 .3-.046.417-.115l.14.417c-.186.116-.395.162-.604.162-.58 0-.765-.302-.765-.812v-1.02h-.44v-.44h.44v-.673h.487v.672h.79v.44zm1.67-.51c.117 0 .233.023.35.07l-.14.463c-.093-.045-.21-.045-.302-.045-.325 0-.464.208-.464.58v1.25h-.487v-2.2h.487v.277c.116-.255.325-.37.557-.394z\" style=\"fill: #000\" />\n      <path style=\"fill: #7673C0\" d=\"M23.64 3.287h-7.305V16.41h7.306\" />\n      <path d=\"M16.8 9.848c0-2.55 1.183-4.985 3.2-6.56C16.384.435 11.12 1.06 8.29 4.7 5.435 8.32 6.06 13.58 9.703 16.41c3.038 2.387 7.283 2.387 10.32 0-2.04-1.578-3.223-3.99-3.223-6.562z\" style=\"fill: #EB001B\" />\n      <path d=\"M33.5 9.848c0 4.613-3.735 8.346-8.35 8.346-1.88 0-3.69-.626-5.15-1.785 3.618-2.83 4.245-8.092 1.415-11.71-.418-.532-.882-.996-1.415-1.413C23.618.437 28.883 1.06 31.736 4.7 32.873 6.163 33.5 7.994 33.5 9.85z\" style=\"fill: #00A1DF\" />\n    </symbol>\n\n    <symbol id=\"logoPayPal\" viewBox=\"0 0 48 29\">\n      <title>PayPal Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" />\n      <path d=\"M31.216 16.4c.394-.7.69-1.5.886-2.4.196-.8.196-1.6.1-2.2-.1-.7-.396-1.2-.79-1.7-.195-.3-.59-.5-.885-.7.1-.8.1-1.5 0-2.1-.1-.6-.394-1.1-.886-1.6-.885-1-2.56-1.6-4.922-1.6h-6.4c-.492 0-.787.3-.886.8l-2.658 17.2c0 .2 0 .3.1.4.097.1.294.2.393.2h4.036l-.295 1.8c0 .1 0 .3.1.4.098.1.195.2.393.2h3.35c.393 0 .688-.3.786-.7v-.2l.59-4.1v-.2c.1-.4.395-.7.788-.7h.59c1.675 0 3.152-.4 4.137-1.1.59-.5 1.083-1 1.478-1.7h-.002z\" style=\"fill: #263B80\" />\n      <path d=\"M21.364 9.4c0-.3.196-.5.492-.6.098-.1.196-.1.394-.1h5.02c.592 0 1.183 0 1.675.1.1 0 .295.1.394.1.098 0 .294.1.393.1.1 0 .1 0 .197.102.295.1.492.2.69.3.295-1.6 0-2.7-.887-3.8-.985-1.1-2.658-1.6-4.923-1.6h-6.4c-.49 0-.885.3-.885.8l-2.758 17.3c-.098.3.197.6.59.6h3.94l.985-6.4 1.083-6.9z\" style=\"fill: #263B80\" />\n      <path d=\"M30.523 9.4c0 .1 0 .3-.098.4-.887 4.4-3.742 5.9-7.484 5.9h-1.87c-.492 0-.787.3-.886.8l-.985 6.2-.296 1.8c0 .3.196.6.492.6h3.348c.394 0 .69-.3.787-.7v-.2l.592-4.1v-.2c.1-.4.394-.7.787-.7h.69c3.248 0 5.808-1.3 6.497-5.2.296-1.6.197-3-.69-3.9-.196-.3-.49-.5-.885-.7z\" style=\"fill: #159BD7\" />\n      <path d=\"M29.635 9c-.098 0-.295-.1-.394-.1-.098 0-.294-.1-.393-.1-.492-.102-1.083-.102-1.673-.102h-5.022c-.1 0-.197 0-.394.1-.198.1-.394.3-.492.6l-1.083 6.9v.2c.1-.5.492-.8.886-.8h1.87c3.742 0 6.598-1.5 7.484-5.9 0-.1 0-.3.098-.4-.196-.1-.492-.2-.69-.3 0-.1-.098-.1-.196-.1z\" style=\"fill: #232C65\" />\n    </symbol>\n\n    <symbol id=\"logoPayPalCredit\" viewBox=\"0 0 48 29\">\n      <title>PayPal Credit Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" fill-rule=\"nonzero\" />\n      <path d=\"M27.44 21.6h.518c1.377 0 2.67-.754 2.953-2.484.248-1.588-.658-2.482-2.14-2.482h-.38c-.093 0-.172.067-.187.16l-.763 4.805zm-1.254-6.646c.024-.158.16-.273.32-.273h2.993c2.47 0 4.2 1.942 3.81 4.436-.4 2.495-2.752 4.436-5.21 4.436h-3.05c-.116 0-.205-.104-.187-.218l1.323-8.38zM22.308 16.907l-.192 1.21h2.38c.116 0 .204.103.186.217l-.23 1.462c-.023.157-.16.273-.318.273h-2.048c-.16 0-.294.114-.32.27l-.203 1.26h2.52c.117 0 .205.102.187.217l-.228 1.46c-.025.16-.16.275-.32.275h-4.55c-.116 0-.204-.104-.186-.218l1.322-8.38c.025-.158.16-.273.32-.273h4.55c.116 0 .205.104.187.22l-.23 1.46c-.024.158-.16.274-.32.274H22.63c-.16 0-.295.115-.32.273M35.325 23.552h-1.81c-.115 0-.203-.104-.185-.218l1.322-8.38c.025-.158.16-.273.32-.273h1.81c.115 0 .203.104.185.22l-1.322 8.38c-.025.156-.16.272-.32.272M14.397 18.657h.224c.754 0 1.62-.14 1.777-1.106.158-.963-.345-1.102-1.15-1.104h-.326c-.097 0-.18.07-.197.168l-.326 2.043zm3.96 4.895h-2.37c-.102 0-.194-.058-.238-.15l-1.565-3.262h-.023l-.506 3.19c-.02.128-.13.222-.26.222h-1.86c-.116 0-.205-.104-.187-.218l1.33-8.432c.02-.128.13-.22.26-.22h3.222c1.753 0 2.953.834 2.66 2.728-.2 1.224-1.048 2.283-2.342 2.506l2.037 3.35c.076.125-.014.286-.16.286zM40.216 23.552h-1.808c-.116 0-.205-.104-.187-.218l1.06-6.7h-1.684c-.116 0-.205-.104-.187-.218l.228-1.462c.025-.157.16-.273.32-.273h5.62c.116 0 .205.104.186.22l-.228 1.46c-.025.158-.16.274-.32.274h-1.63l-1.05 6.645c-.025.156-.16.272-.32.272M11.467 17.202c-.027.164-.228.223-.345.104-.395-.405-.975-.62-1.6-.62-1.41 0-2.526 1.083-2.75 2.458-.21 1.4.588 2.41 2.022 2.41.592 0 1.22-.225 1.74-.6.144-.105.34.02.313.194l-.328 2.03c-.02.12-.108.22-.226.254-.702.207-1.24.355-1.9.355-3.823 0-4.435-3.266-4.238-4.655.553-3.894 3.712-4.786 5.65-4.678.623.034 1.182.117 1.73.323.177.067.282.25.252.436l-.32 1.99\" style=\"fill: #21306F\" />\n      <path d=\"M23.184 7.67c-.11.717-.657.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.105.123.137.305.097.557zm-.23-1.87h-1.998c-.137 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h1.024c.095 0 .177-.07.192-.164l.23-1.452c.02-.135.136-.235.273-.235h.63c1.317 0 2.076-.636 2.275-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51z\" style=\"fill: #0093C7\" />\n      <path d=\"M8.936 7.67c-.11.717-.656.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.104.123.136.305.096.557zm-.23-1.87H6.708c-.136 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h.955c.136 0 .252-.1.274-.234l.217-1.382c.02-.135.137-.235.274-.235h.633c1.316 0 2.075-.636 2.274-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51zM13.343 9.51c-.092.545-.526.912-1.08.912-.277 0-.5-.09-.642-.258-.14-.168-.193-.406-.148-.672.086-.542.527-.92 1.072-.92.27 0 .492.09.637.26.148.172.205.412.163.677zm1.334-1.863h-.957c-.082 0-.152.06-.164.14l-.042.268-.067-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.135 1.923-.092.56.038 1.097.356 1.47.29.344.708.487 1.204.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.017-.102-.06-.193-.163-.193z\" style=\"fill: #21306F\" />\n      <path d=\"M27.59 9.51c-.09.545-.525.912-1.078.912-.278 0-.5-.09-.643-.258-.142-.168-.195-.406-.15-.672.086-.542.526-.92 1.07-.92.273 0 .494.09.64.26.146.172.203.412.16.677zm1.334-1.863h-.956c-.082 0-.152.06-.164.14l-.043.268-.065-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.136 1.923-.092.56.038 1.097.355 1.47.292.344.71.487 1.205.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.015-.102-.063-.193-.166-.193z\" style=\"fill: #0093C7\" />\n      <path d=\"M19.77 7.647h-.96c-.092 0-.178.045-.23.122L17.254 9.72l-.562-1.877c-.035-.118-.143-.198-.266-.198h-.945c-.113 0-.194.112-.157.22l1.06 3.108-.997 1.404c-.078.11 0 .262.136.262h.96c.092 0 .177-.044.23-.12l3.196-4.614c.077-.11-.002-.26-.137-.26\" style=\"fill: #21306F\" />\n      <path d=\"M30.052 5.94l-.82 5.216c-.016.1.062.192.165.192h.824c.138 0 .254-.1.275-.234l.81-5.122c.015-.1-.064-.193-.166-.193h-.924c-.082 0-.15.06-.164.14\" style=\"fill: #0093C7\" />\n    </symbol>\n\n    <symbol id=\"iconCardFront\" viewBox=\"0 0 48 29\">\n      <title>Generic Card</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" style=\"fill: #FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" style=\"fill: #828282\" />\n      <rect style=\"fill: #828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect style=\"fill: #828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" style=\"fill: #828282\" />\n      <ellipse style=\"fill: #828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"iconCVVBack\" viewBox=\"0 0 40 24\">\n      <title>CVV Back</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\"/>\n      <path style=\"fill: #828282\" d=\"M0 5h40v4H0z\" />\n      <path d=\"M20 13.772v5.456c0 .423.37.772.82.772h13.36c.45 0 .82-.35.82-.772v-5.456c0-.423-.37-.772-.82-.772H20.82c-.45 0-.82.35-.82.772zm-1-.142c0-.9.76-1.63 1.68-1.63h13.64c.928 0 1.68.737 1.68 1.63v5.74c0 .9-.76 1.63-1.68 1.63H20.68c-.928 0-1.68-.737-1.68-1.63v-5.74z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"16.5\" r=\"1.5\" />\n    </symbol>\n\n    <symbol id=\"iconCVVFront\" viewBox=\"0 0 40 24\">\n      <title>CVV Front</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\" />\n      <path d=\"M16 5.772v5.456c0 .423.366.772.81.772h17.38c.444 0 .81-.348.81-.772V5.772C35 5.35 34.634 5 34.19 5H16.81c-.444 0-.81.348-.81.772zm-1-.142c0-.9.75-1.63 1.66-1.63h17.68c.917 0 1.66.737 1.66 1.63v5.74c0 .9-.75 1.63-1.66 1.63H16.66c-.917 0-1.66-.737-1.66-1.63V5.63z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"19.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"8.5\" r=\"1.5\" />\n      <path d=\"M4 7.833C4 7.47 4.476 7 4.89 7h6.22c.414 0 .89.47.89.833v3.334c0 .364-.476.833-.89.833H4.89c-.414 0-.89-.47-.89-.833V7.833zM4 18.5c0-.828.668-1.5 1.5-1.5h29c.828 0 1.5.666 1.5 1.5 0 .828-.668 1.5-1.5 1.5h-29c-.828 0-1.5-.666-1.5-1.5z\" style=\"fill: #828282\" />\n    </symbol>\n\n    <symbol id=\"iconCheck\" viewBox=\"0 0 42 32\">\n      <title>Check</title>\n      <path class=\"path1\" d=\"M14.379 29.76L39.741 3.415 36.194.001l-21.815 22.79-10.86-11.17L0 15.064z\" />\n    </symbol>\n\n    <symbol id=\"iconLockLoader\" viewBox=\"0 0 28 32\">\n      <title>Lock Loader</title>\n      <path d=\"M6 10V8c0-4.422 3.582-8 8-8 4.41 0 8 3.582 8 8v2h-4V7.995C18 5.79 16.205 4 14 4c-2.21 0-4 1.792-4 3.995V10H6zM.997 14c-.55 0-.997.445-.997.993v16.014c0 .548.44.993.997.993h26.006c.55 0 .997-.445.997-.993V14.993c0-.548-.44-.993-.997-.993H.997z\" />\n    </symbol>\n\n    <symbol id=\"iconError\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\n      <path d=\"M0 0h24v24H0z\" style=\"fill: none\" />\n      <path d=\"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z\" />\n    </symbol>\n\n    <symbol id=\"logoApplePay\" viewBox=\"0 0 165.52 105.97\" width=\"24\">\n      <title>Apple Pay Logo</title>\n      <defs>\n      <style>\n        .cls-1{fill:#231f20;}.cls-2{fill:#fff;}\n      </style>\n      </defs>\n      <path id=\"_Path_\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M150.7 0h-139a20.78 20.78 0 0 0-3.12.3 10.51 10.51 0 0 0-3 1 9.94 9.94 0 0 0-4.31 4.32 10.46 10.46 0 0 0-1 3A20.65 20.65 0 0 0 0 11.7v82.57a20.64 20.64 0 0 0 .3 3.11 10.46 10.46 0 0 0 1 3 9.94 9.94 0 0 0 4.35 4.35 10.47 10.47 0 0 0 3 1 20.94 20.94 0 0 0 3.11.27h142.06a21 21 0 0 0 3.11-.27 10.48 10.48 0 0 0 3-1 9.94 9.94 0 0 0 4.35-4.35 10.4 10.4 0 0 0 1-3 20.63 20.63 0 0 0 .27-3.11V11.69a20.64 20.64 0 0 0-.27-3.11 10.4 10.4 0 0 0-1-3 9.94 9.94 0 0 0-4.35-4.35 10.52 10.52 0 0 0-3-1 20.84 20.84 0 0 0-3.1-.23h-1.43z\"/>\n      <path id=\"_Path_2\" data-name=\"&lt;Path&gt;\" class=\"cls-2\" d=\"M150.7 3.53h3.03a17.66 17.66 0 0 1 2.58.22 7 7 0 0 1 2 .65 6.41 6.41 0 0 1 2.8 2.81 6.88 6.88 0 0 1 .64 2 17.56 17.56 0 0 1 .22 2.58v82.38a17.54 17.54 0 0 1-.22 2.59 6.85 6.85 0 0 1-.64 2 6.41 6.41 0 0 1-2.81 2.81 6.92 6.92 0 0 1-2 .65 18 18 0 0 1-2.57.22H11.79a18 18 0 0 1-2.58-.22 6.94 6.94 0 0 1-2-.65 6.41 6.41 0 0 1-2.8-2.8 6.93 6.93 0 0 1-.65-2 17.47 17.47 0 0 1-.22-2.58v-82.4a17.49 17.49 0 0 1 .22-2.59 6.92 6.92 0 0 1 .65-2 6.41 6.41 0 0 1 2.8-2.8 7 7 0 0 1 2-.65 17.63 17.63 0 0 1 2.58-.22H150.7\"/>\n      <g id=\"_Group_\" data-name=\"&lt;Group&gt;\">\n      <g id=\"_Group_2\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Path_3\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M43.51 35.77a9.15 9.15 0 0 0 2.1-6.52 9.07 9.07 0 0 0-6 3.11 8.56 8.56 0 0 0-2.16 6.27 7.57 7.57 0 0 0 6.06-2.86\"/>\n      <path id=\"_Path_4\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M45.59 39.08c-3.35-.2-6.2 1.9-7.79 1.9s-4-1.8-6.7-1.75a9.87 9.87 0 0 0-8.4 5.1c-3.6 6.2-.95 15.4 2.55 20.45 1.7 2.5 3.75 5.25 6.45 5.15s3.55-1.65 6.65-1.65 4 1.65 6.7 1.6 4.55-2.5 6.25-5a22.2 22.2 0 0 0 2.8-5.75 9.08 9.08 0 0 1-5.45-8.25A9.26 9.26 0 0 1 53 43.13a9.57 9.57 0 0 0-7.45-4\"/>\n      </g>\n      <g id=\"_Group_3\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Compound_Path_\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M79 32.11c7.28 0 12.35 5 12.35 12.32S86.15 56.8 78.79 56.8h-8.06v12.82h-5.82V32.11zm-8.27 19.81h6.68c5.07 0 8-2.73 8-7.46S82.48 37 77.44 37h-6.71z\"/>\n      <path id=\"_Compound_Path_2\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M92.76 61.85c0-4.81 3.67-7.56 10.42-8l7.25-.44v-2.06c0-3-2-4.7-5.56-4.7-2.94 0-5.07 1.51-5.51 3.82h-5.24c.16-4.86 4.73-8.4 10.92-8.4 6.65 0 11 3.48 11 8.89v18.66h-5.38v-4.5h-.13a9.59 9.59 0 0 1-8.58 4.78c-5.42 0-9.19-3.22-9.19-8.05zm17.68-2.42v-2.11l-6.47.42c-3.64.23-5.54 1.59-5.54 4s2 3.77 5.07 3.77c3.95-.05 6.94-2.57 6.94-6.08z\"/>\n      <path id=\"_Compound_Path_3\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M121 79.65v-4.5a17.14 17.14 0 0 0 1.72.1c2.57 0 4-1.09 4.91-3.9l.52-1.66-9.88-27.29h6.08l6.86 22.15h.13l6.86-22.15h5.93l-10.21 28.67c-2.34 6.58-5 8.73-10.68 8.73a15.93 15.93 0 0 1-2.24-.15z\"/>\n      </g>\n      </g>\n    </symbol>\n\n    <symbol id=\"iconClose\" width=\"21\" height=\"21\" viewBox=\"0 0 21 21\" overflow=\"visible\">\n      <path d=\"M16 5.414L14.586 4 10 8.586 5.414 4 4 5.414 8.586 10 4 14.586 5.414 16 10 11.414 14.586 16 16 14.586 11.414 10\"/>\n    </symbol>\n  </defs>\n</svg>\n";
+var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"applePay\" class=\"braintree-applePay braintree-sheet\">\n        <div data-braintree-id=\"apple-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoApplePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Apple Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"apple-pay-button\" class=\"braintree-sheet__button--apple-pay apple-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"googlePay\" class=\"braintree-googlePay braintree-sheet\">\n        <div data-braintree-id=\"google-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoGooglePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Google Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <button type=\"button\" data-braintree-id=\"google-pay-button\" class=\"braintree-sheet__button--google-pay google-pay-button\"></button>\n        </div>\n      </div>\n      <div data-braintree-id=\"venmo\" class=\"braintree-venmo braintree-sheet\">\n        <div data-braintree-id=\"venmo-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoVenmo\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Venmo}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <svg data-braintree-id=\"venmo-button\" class=\"braintree-sheet__button--venmo\">\n            <use xlink:href=\"#buttonVenmo\"></use>\n          </svg>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <label for=\"braintree__card-view-input__cardholder-name\">\n              <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\">\n                  <input id=\"braintree__card-view-input__cardholder-name\" type=\"text\" placeholder=\"{{cardholderNamePlaceholder}}\"/>\n                </div>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <label>\n              <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                  <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n\n                <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\"></div>\n              </div>\n            </label>\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{cvvLabel}}\n                  <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                      <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                      <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                      </svg>\n                    </div>\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-toggle braintree-hidden\" tabindex=\"0\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n";
+var svgHTML = "<svg data-braintree-id=\"svgs\" style=\"display: none\">\n  <defs>\n    <symbol id=\"icon-visa\" viewBox=\"0 0 40 24\">\n      <title>Visa</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M0 22.033C0 23.12.892 24 1.992 24h36.016c1.1 0 1.992-.88 1.992-1.967V20.08H0v1.953z\" style=\"fill: #F8B600\" />\n      <path d=\"M0 3.92h40V1.967C40 .88 39.108 0 38.008 0H1.992C.892 0 0 .88 0 1.967V3.92zM19.596 7.885l-2.11 9.478H14.93l2.11-9.478h2.554zm10.743 6.12l1.343-3.56.773 3.56H30.34zm2.85 3.358h2.36l-2.063-9.478H31.31c-.492 0-.905.274-1.088.695l-3.832 8.783h2.682l.532-1.415h3.276l.31 1.415zm-6.667-3.094c.01-2.502-3.6-2.64-3.577-3.76.008-.338.345-.7 1.083-.793.365-.045 1.373-.08 2.517.425l.448-2.01c-.615-.214-1.405-.42-2.39-.42-2.523 0-4.3 1.288-4.313 3.133-.016 1.364 1.268 2.125 2.234 2.58.996.464 1.33.762 1.325 1.177-.006.636-.793.918-1.526.928-1.285.02-2.03-.333-2.623-.6l-.462 2.08c.598.262 1.7.49 2.84.502 2.682 0 4.437-1.273 4.445-3.243zM15.948 7.884l-4.138 9.478h-2.7L7.076 9.8c-.123-.466-.23-.637-.606-.834-.615-.32-1.63-.62-2.52-.806l.06-.275h4.345c.554 0 1.052.354 1.178.966l1.076 5.486 2.655-6.45h2.683z\" style=\"fill: #1A1F71\" />\n    </symbol>\n\n    <symbol id=\"icon-master-card\" viewBox=\"0 0 40 24\">\n      <title>MasterCard</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M11.085 22.2v-1.36c0-.522-.318-.863-.864-.863-.272 0-.568.09-.773.386-.16-.25-.386-.386-.727-.386-.228 0-.455.068-.637.318v-.272h-.478V22.2h.478v-1.202c0-.386.204-.567.523-.567.318 0 .478.205.478.568V22.2h.477v-1.202c0-.386.23-.567.524-.567.32 0 .478.205.478.568V22.2h.523zm7.075-2.177h-.774v-.658h-.478v.658h-.432v.43h.432v.998c0 .5.205.795.75.795.206 0 .433-.068.592-.16l-.136-.407c-.136.09-.296.114-.41.114-.227 0-.318-.137-.318-.363v-.976h.774v-.43zm4.048-.046c-.273 0-.454.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .204.023.295.046l.137-.454c-.09-.023-.228-.023-.32-.023zm-6.118.227c-.228-.16-.546-.227-.888-.227-.546 0-.91.272-.91.703 0 .363.274.567.75.635l.23.023c.25.045.385.113.385.227 0 .16-.182.272-.5.272-.32 0-.57-.113-.728-.227l-.228.363c.25.18.59.272.932.272.637 0 1-.295 1-.703 0-.385-.295-.59-.75-.658l-.227-.022c-.205-.023-.364-.068-.364-.204 0-.16.16-.25.41-.25.272 0 .545.114.682.182l.205-.386zm12.692-.227c-.273 0-.455.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .203.023.294.046L29.1 20c-.09-.023-.227-.023-.318-.023zm-6.096 1.134c0 .66.455 1.135 1.16 1.135.32 0 .546-.068.774-.25l-.228-.385c-.182.136-.364.204-.57.204-.385 0-.658-.272-.658-.703 0-.407.273-.68.66-.702.204 0 .386.068.568.204l.228-.385c-.228-.182-.455-.25-.774-.25-.705 0-1.16.477-1.16 1.134zm4.413 0v-1.087h-.48v.272c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.317 0 .545-.113.68-.317v.272h.48v-1.09zm-1.753 0c0-.384.25-.702.66-.702.387 0 .66.295.66.703 0 .387-.273.704-.66.704-.41-.022-.66-.317-.66-.703zm-5.71-1.133c-.636 0-1.09.454-1.09 1.134 0 .682.454 1.135 1.114 1.135.32 0 .638-.09.888-.295l-.228-.34c-.18.136-.41.227-.636.227-.296 0-.592-.136-.66-.522h1.615v-.18c.022-.704-.388-1.158-1.002-1.158zm0 .41c.297 0 .502.18.547.52h-1.137c.045-.295.25-.52.59-.52zm11.852.724v-1.95h-.48v1.135c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.68-.317v.272h.48v-1.09zm-1.752 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703zm-15.97 0v-1.087h-.476v.272c-.16-.204-.387-.318-.683-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.682-.317v.272h.477v-1.09zm-1.773 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703z\" style=\"fill: #000\" />\n      <path style=\"fill: #FF5F00\" d=\"M23.095 3.49H15.93v12.836h7.165\" />\n      <path d=\"M16.382 9.91c0-2.61 1.23-4.922 3.117-6.42-1.39-1.087-3.14-1.745-5.05-1.745-4.528 0-8.19 3.65-8.19 8.164 0 4.51 3.662 8.162 8.19 8.162 1.91 0 3.66-.657 5.05-1.746-1.89-1.474-3.118-3.81-3.118-6.417z\" style=\"fill: #EB001B\" />\n      <path d=\"M32.76 9.91c0 4.51-3.664 8.162-8.19 8.162-1.91 0-3.662-.657-5.05-1.746 1.91-1.496 3.116-3.81 3.116-6.417 0-2.61-1.228-4.922-3.116-6.42 1.388-1.087 3.14-1.745 5.05-1.745 4.526 0 8.19 3.674 8.19 8.164z\" style=\"fill: #F79E1B\" />\n    </symbol>\n\n    <symbol id=\"icon-unionpay\" viewBox=\"0 0 40 24\">\n      <title>Union Pay</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.877 2h8.126c1.135 0 1.84.93 1.575 2.077l-3.783 16.35c-.267 1.142-1.403 2.073-2.538 2.073H5.13c-1.134 0-1.84-.93-1.574-2.073L7.34 4.076C7.607 2.93 8.74 2 9.878 2z\" style=\"fill: #E21836\" />\n      <path d=\"M17.325 2h9.345c1.134 0 .623.93.356 2.077l-3.783 16.35c-.265 1.142-.182 2.073-1.32 2.073H12.58c-1.137 0-1.84-.93-1.574-2.073l3.783-16.35C15.056 2.93 16.19 2 17.324 2z\" style=\"fill: #00447B\" />\n      <path d=\"M26.3 2h8.126c1.136 0 1.84.93 1.575 2.077l-3.782 16.35c-.266 1.142-1.402 2.073-2.54 2.073h-8.122c-1.137 0-1.842-.93-1.574-2.073l3.78-16.35C24.03 2.93 25.166 2 26.303 2z\" style=\"fill: #007B84\" />\n      <path d=\"M27.633 14.072l-.99 3.3h.266l-.208.68h-.266l-.062.212h-.942l.064-.21H23.58l.193-.632h.194l1.005-3.35.2-.676h.962l-.1.34s.255-.184.498-.248c.242-.064 1.636-.088 1.636-.088l-.206.672h-.33zm-1.695 0l-.254.843s.285-.13.44-.172c.16-.04.395-.057.395-.057l.182-.614h-.764zm-.38 1.262l-.263.877s.29-.15.447-.196c.157-.037.396-.066.396-.066l.185-.614h-.766zm-.614 2.046h.767l.222-.74h-.765l-.223.74z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M28.055 13.4h1.027l.01.385c-.005.065.05.096.17.096h.208l-.19.637h-.555c-.48.035-.662-.172-.65-.406l-.02-.71zM28.193 16.415h-.978l.167-.566H28.5l.16-.517h-1.104l.19-.638h3.072l-.193.638h-1.03l-.16.516h1.032l-.17.565H29.18l-.2.24h.454l.11.712c.013.07.014.116.036.147.023.026.158.038.238.038h.137l-.21.694h-.348c-.054 0-.133-.004-.243-.01-.105-.008-.18-.07-.25-.105-.064-.03-.16-.11-.182-.24l-.11-.712-.507.7c-.162.222-.38.39-.748.39h-.712l.186-.62h.273c.078 0 .15-.03.2-.056.052-.023.098-.05.15-.126l.74-1.05zM17.478 14.867h2.59l-.19.622H18.84l-.16.53h1.06l-.194.64h-1.06l-.256.863c-.03.095.25.108.353.108l.53-.072-.212.71h-1.193c-.096 0-.168-.013-.272-.037-.1-.023-.145-.07-.19-.138-.043-.07-.11-.128-.064-.278l.343-1.143h-.588l.195-.65h.592l.156-.53h-.588l.188-.623zM19.223 13.75h1.063l-.194.65H18.64l-.157.136c-.067.066-.09.038-.18.087-.08.04-.254.123-.477.123h-.466l.19-.625h.14c.118 0 .198-.01.238-.036.046-.03.098-.096.157-.203l.267-.487h1.057l-.187.356zM20.74 13.4h.905l-.132.46s.286-.23.487-.313c.2-.075.65-.143.65-.143l1.464-.007-.498 1.672c-.085.286-.183.472-.244.555-.055.087-.12.16-.248.23-.124.066-.236.104-.34.115-.096.007-.244.01-.45.012h-1.41l-.4 1.324c-.037.13-.055.194-.03.23.02.03.068.066.135.066l.62-.06-.21.726h-.698c-.22 0-.383-.004-.495-.013-.108-.01-.22 0-.295-.058-.065-.058-.164-.133-.162-.21.007-.073.037-.192.082-.356l1.268-4.23zm1.922 1.69h-1.484l-.09.3h1.283c.152-.018.184.004.196-.003l.096-.297zm-1.402-.272s.29-.266.786-.353c.112-.022.82-.015.82-.015l.106-.357h-1.496l-.216.725z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M23.382 16.1l-.084.402c-.036.125-.067.22-.16.302-.1.084-.216.172-.488.172l-.502.02-.004.455c-.006.13.028.117.048.138.024.022.045.032.067.04l.157-.008.48-.028-.198.663h-.552c-.385 0-.67-.008-.765-.084-.092-.057-.105-.132-.103-.26l.035-1.77h.88l-.013.362h.212c.072 0 .12-.007.15-.026.027-.02.047-.048.06-.093l.087-.282h.692zM10.84 7.222c-.032.143-.596 2.763-.598 2.764-.12.53-.21.91-.508 1.152-.172.14-.37.21-.6.21-.37 0-.587-.185-.624-.537l-.007-.12.113-.712s.593-2.388.7-2.703c.002-.017.005-.026.007-.035-1.152.01-1.357 0-1.37-.018-.007.024-.037.173-.037.173l-.605 2.688-.05.23-.1.746c0 .22.042.4.13.553.275.485 1.06.557 1.504.557.573 0 1.11-.123 1.47-.345.63-.375.797-.962.944-1.48l.067-.267s.61-2.48.716-2.803c.003-.017.006-.026.01-.035-.835.01-1.08 0-1.16-.018zM14.21 12.144c-.407-.006-.55-.006-1.03.018l-.018-.036c.042-.182.087-.363.127-.548l.06-.25c.086-.39.173-.843.184-.98.007-.084.036-.29-.2-.29-.1 0-.203.048-.307.096-.058.207-.174.79-.23 1.055-.118.558-.126.62-.178.897l-.036.037c-.42-.006-.566-.006-1.05.018l-.024-.04c.08-.332.162-.668.24-.998.203-.9.25-1.245.307-1.702l.04-.028c.47-.067.585-.08 1.097-.185l.043.047-.077.287c.086-.052.168-.104.257-.15.242-.12.51-.155.658-.155.223 0 .468.062.57.323.098.232.034.52-.094 1.084l-.066.287c-.13.627-.152.743-.225 1.174l-.05.036zM15.87 12.144c-.245 0-.405-.006-.56 0-.153 0-.303.008-.532.018l-.013-.02-.015-.02c.062-.238.097-.322.128-.406.03-.084.06-.17.115-.41.072-.315.116-.535.147-.728.033-.187.052-.346.075-.53l.02-.014.02-.018c.244-.036.4-.057.56-.082.16-.024.32-.055.574-.103l.008.023.008.022c-.047.195-.094.39-.14.588-.047.197-.094.392-.137.587-.093.414-.13.57-.152.68-.02.105-.026.163-.063.377l-.022.02-.023.017zM19.542 10.728c.143-.633.033-.928-.108-1.11-.213-.273-.59-.36-.978-.36-.235 0-.793.023-1.23.43-.312.29-.458.687-.546 1.066-.088.387-.19 1.086.447 1.344.198.085.48.108.662.108.466 0 .945-.13 1.304-.513.278-.312.405-.775.448-.965zm-1.07-.046c-.02.106-.113.503-.24.673-.086.123-.19.198-.305.198-.033 0-.235 0-.238-.3-.003-.15.027-.304.063-.47.108-.478.236-.88.56-.88.255 0 .27.298.16.78zM29.536 12.187c-.493-.004-.635-.004-1.09.015l-.03-.037c.124-.472.248-.943.358-1.42.142-.62.175-.882.223-1.244l.037-.03c.49-.07.625-.09 1.135-.186l.015.044c-.093.388-.186.777-.275 1.166-.19.816-.258 1.23-.33 1.658l-.044.035z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M29.77 10.784c.144-.63-.432-.056-.525-.264-.14-.323-.052-.98-.62-1.2-.22-.085-.732.025-1.17.428-.31.29-.458.683-.544 1.062-.088.38-.19 1.078.444 1.328.2.085.384.11.567.103.638-.034 1.124-1.002 1.483-1.386.277-.303.326.115.368-.07zm-.974-.047c-.024.1-.117.503-.244.67-.083.117-.283.192-.397.192-.032 0-.232 0-.24-.3 0-.146.03-.3.067-.467.11-.47.235-.87.56-.87.254 0 .363.293.254.774zM22.332 12.144c-.41-.006-.55-.006-1.03.018l-.018-.036c.04-.182.087-.363.13-.548l.057-.25c.09-.39.176-.843.186-.98.008-.084.036-.29-.198-.29-.1 0-.203.048-.308.096-.057.207-.175.79-.232 1.055-.115.558-.124.62-.176.897l-.035.037c-.42-.006-.566-.006-1.05.018l-.022-.04.238-.998c.203-.9.25-1.245.307-1.702l.038-.028c.472-.067.587-.08 1.098-.185l.04.047-.073.287c.084-.052.17-.104.257-.15.24-.12.51-.155.655-.155.224 0 .47.062.575.323.095.232.03.52-.098 1.084l-.065.287c-.133.627-.154.743-.225 1.174l-.05.036zM26.32 8.756c-.07.326-.282.603-.554.736-.225.114-.498.123-.78.123h-.183l.013-.074.336-1.468.01-.076.007-.058.132.015.71.062c.275.105.388.38.31.74zM25.88 7.22l-.34.003c-.883.01-1.238.006-1.383-.012l-.037.182-.315 1.478-.793 3.288c.77-.01 1.088-.01 1.22.004l.21-1.024s.153-.644.163-.667c0 0 .047-.066.096-.092h.07c.665 0 1.417 0 2.005-.437.4-.298.675-.74.797-1.274.03-.132.054-.29.054-.446 0-.205-.04-.41-.16-.568-.3-.423-.896-.43-1.588-.433zM33.572 9.28l-.04-.043c-.502.1-.594.118-1.058.18l-.034.034-.005.023-.003-.007c-.345.803-.334.63-.615 1.26-.003-.03-.003-.048-.004-.077l-.07-1.37-.044-.043c-.53.1-.542.118-1.03.18l-.04.034-.006.056.003.007c.06.315.047.244.108.738.03.244.065.49.093.73.05.4.077.6.134 1.21-.328.55-.408.757-.722 1.238l.017.044c.478-.018.587-.018.94-.018l.08-.088c.265-.578 2.295-4.085 2.295-4.085zM16.318 9.62c.27-.19.304-.45.076-.586-.23-.137-.634-.094-.906.095-.273.186-.304.45-.075.586.228.134.633.094.905-.096z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M31.238 13.415l-.397.684c-.124.232-.357.407-.728.41l-.632-.01.184-.618h.124c.064 0 .11-.004.148-.022.03-.01.054-.035.08-.072l.233-.373h.988z\" style=\"fill: #FEFEFE\" />\n    </symbol>\n\n    <symbol id=\"icon-american-express\" viewBox=\"0 0 40 24\">\n      <title>American Express</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path style=\"fill: #1478BE\" d=\"M6.26 12.32h2.313L7.415 9.66M27.353 9.977h-3.738v1.23h3.666v1.384h-3.675v1.385h3.821v1.005c.623-.77 1.33-1.466 2.025-2.235l.707-.77c-.934-1.004-1.87-2.08-2.804-3.075v1.077z\" />\n      <path d=\"M38.25 7h-5.605l-1.328 1.4L30.072 7H16.984l-1.017 2.416L14.877 7h-9.58L1.25 16.5h4.826l.623-1.556h1.4l.623 1.556H29.99l1.327-1.483 1.328 1.483h5.605l-4.36-4.667L38.25 7zm-17.685 8.1h-1.557V9.883L16.673 15.1h-1.33L13.01 9.883l-.084 5.217H9.73l-.623-1.556h-3.27L5.132 15.1H3.42l2.884-6.772h2.42l2.645 6.233V8.33h2.646l2.107 4.51 1.868-4.51h2.575V15.1zm14.727 0h-2.024l-2.024-2.26-2.023 2.26H22.06V8.328H29.53l1.795 2.177 2.024-2.177h2.025L32.26 11.75l3.032 3.35z\" style=\"fill: #1478BE\" />\n    </symbol>\n\n    <symbol id=\"icon-jcb\" viewBox=\"0 0 40 24\">\n      <title>JCB</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M33.273 2.01h.013v17.062c-.004 1.078-.513 2.103-1.372 2.746-.63.47-1.366.67-2.14.67-.437 0-4.833.026-4.855 0-.01-.01 0-.07 0-.082v-6.82c0-.04.004-.064.033-.064h5.253c.867 0 1.344-.257 1.692-.61.44-.448.574-1.162.294-1.732-.24-.488-.736-.78-1.244-.913-.158-.04-.32-.068-.483-.083-.01 0-.064 0-.07-.006-.03-.034.023-.04.038-.046.102-.033.215-.042.32-.073.532-.164.993-.547 1.137-1.105.15-.577-.05-1.194-.524-1.552-.34-.257-.768-.376-1.187-.413-.43-.038-4.774-.022-5.21-.022-.072 0-.05-.02-.05-.09V5.63c0-.31.01-.616.073-.92.126-.592.41-1.144.815-1.59.558-.615 1.337-1.01 2.16-1.093.478-.048 4.89-.017 5.305-.017zm-4.06 8.616c.06.272-.01.567-.204.77-.173.176-.407.25-.648.253-.195.003-1.725 0-1.788 0l.003-1.645c.012-.027.02-.018.06-.018.097 0 1.713-.004 1.823.005.232.02.45.12.598.306.076.096.128.208.155.328zm-2.636 2.038h1.944c.242.002.47.063.652.228.226.204.327.515.283.815-.04.263-.194.5-.422.634-.187.112-.39.125-.6.125h-1.857v-1.8z\" style=\"fill: #53B230\" />\n      <path d=\"M6.574 13.89c-.06-.03-.06-.018-.07-.06-.006-.026-.005-8.365.003-8.558.04-.95.487-1.857 1.21-2.47.517-.434 1.16-.71 1.83-.778.396-.04.803-.018 1.2-.018.69 0 4.11-.013 4.12 0 .008.008.002 16.758 0 17.074-.003.956-.403 1.878-1.105 2.523-.506.465-1.15.77-1.83.86-.41.056-5.02.032-5.363.032-.066 0-.054.013-.066-.024-.01-.025 0-7 0-7.17.66.178 1.35.28 2.03.348.662.067 1.33.093 1.993.062.93-.044 1.947-.192 2.712-.762.32-.238.574-.553.73-.922.148-.353.2-.736.2-1.117 0-.348.006-3.93-.016-3.942-.023-.014-2.885-.015-2.9.012-.012.022 0 3.87 0 3.95-.003.47-.16.933-.514 1.252-.468.42-1.11.47-1.707.423-.687-.055-1.357-.245-1.993-.508-.157-.065-.312-.135-.466-.208z\" style=\"fill: #006CB9\" />\n      <path d=\"M15.95 9.835c-.025.02-.05.04-.072.06V6.05c0-.295-.012-.594.01-.888.12-1.593 1.373-2.923 2.944-3.126.382-.05 5.397-.042 5.41-.026.01.01 0 .062 0 .074v16.957c0 1.304-.725 2.52-1.89 3.1-.504.25-1.045.35-1.605.35-.322 0-4.757.015-4.834 0-.05-.01-.023.01-.035-.02-.007-.022 0-6.548 0-7.44v-.422c.554.48 1.256.75 1.96.908.536.12 1.084.176 1.63.196.537.02 1.076.01 1.61-.037.546-.05 1.088-.136 1.625-.244.137-.028.274-.057.41-.09.033-.006.17-.017.187-.044.013-.02 0-.097 0-.12v-1.324c-.582.292-1.19.525-1.83.652-.778.155-1.64.198-2.385-.123-.752-.326-1.2-1.024-1.274-1.837-.076-.837.173-1.716.883-2.212.736-.513 1.7-.517 2.553-.38.634.1 1.245.305 1.825.58.078.037.154.075.23.113V9.322c0-.02.013-.1 0-.118-.02-.028-.152-.038-.188-.046-.066-.016-.133-.03-.2-.045C22.38 9 21.84 8.908 21.3 8.85c-.533-.06-1.068-.077-1.603-.066-.542.01-1.086.054-1.62.154-.662.125-1.32.337-1.883.716-.085.056-.167.117-.245.18z\" style=\"fill: #E20138\" />\n    </symbol>\n\n    <symbol id=\"icon-discover\" viewBox=\"0 0 40 24\">\n      <title>Discover</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M38.995 11.75S27.522 20.1 6.5 23.5h31.495c.552 0 1-.448 1-1V11.75z\" style=\"fill: #F48024\" />\n      <path d=\"M5.332 11.758c-.338.305-.776.438-1.47.438h-.29V8.55h.29c.694 0 1.115.124 1.47.446.37.33.595.844.595 1.372 0 .53-.224 1.06-.595 1.39zM4.077 7.615H2.5v5.515h1.57c.833 0 1.435-.197 1.963-.637.63-.52 1-1.305 1-2.116 0-1.628-1.214-2.762-2.956-2.762zM7.53 13.13h1.074V7.616H7.53M11.227 9.732c-.645-.24-.834-.397-.834-.695 0-.347.338-.61.8-.61.322 0 .587.132.867.446l.562-.737c-.462-.405-1.015-.612-1.618-.612-.975 0-1.718.678-1.718 1.58 0 .76.346 1.15 1.355 1.513.42.148.635.247.743.314.215.14.322.34.322.57 0 .448-.354.78-.834.78-.51 0-.924-.258-1.17-.736l-.695.67c.495.726 1.09 1.05 1.907 1.05 1.116 0 1.9-.745 1.9-1.812 0-.876-.363-1.273-1.585-1.72zM13.15 10.377c0 1.62 1.27 2.877 2.907 2.877.462 0 .858-.09 1.347-.32v-1.267c-.43.43-.81.604-1.297.604-1.082 0-1.85-.785-1.85-1.9 0-1.06.792-1.895 1.8-1.895.512 0 .9.183 1.347.62V7.83c-.472-.24-.86-.34-1.322-.34-1.627 0-2.932 1.283-2.932 2.887zM25.922 11.32l-1.468-3.705H23.28l2.337 5.656h.578l2.38-5.655H27.41M29.06 13.13h3.046v-.934h-1.973v-1.488h1.9v-.934h-1.9V8.55h1.973v-.935H29.06M34.207 10.154h-.314v-1.67h.33c.67 0 1.034.28 1.034.818 0 .554-.364.852-1.05.852zm2.155-.91c0-1.033-.71-1.628-1.95-1.628H32.82v5.514h1.073v-2.215h.14l1.487 2.215h1.32l-1.733-2.323c.81-.165 1.255-.72 1.255-1.563z\" style=\"fill: #221F20\" />\n      <path d=\"M23.6 10.377c0 1.62-1.31 2.93-2.927 2.93-1.617.002-2.928-1.31-2.928-2.93s1.31-2.932 2.928-2.932c1.618 0 2.928 1.312 2.928 2.932z\" style=\"fill: #F48024\" />\n    </symbol>\n\n    <symbol id=\"icon-diners-club\" viewBox=\"0 0 40 24\">\n      <title>Diners Club</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.02 11.83c0-5.456 4.54-9.88 10.14-9.88 5.6 0 10.139 4.424 10.139 9.88-.002 5.456-4.54 9.88-10.14 9.88-5.6 0-10.14-4.424-10.14-9.88z\" style=\"fill: #FEFEFE\" />\n      <path style=\"fill: #FFF\" d=\"M32.522 22H8.5V1.5h24.022\" />\n      <path d=\"M25.02 11.732c-.003-2.534-1.607-4.695-3.868-5.55v11.102c2.26-.857 3.865-3.017 3.87-5.552zm-8.182 5.55V6.18c-2.26.86-3.86 3.017-3.867 5.55.007 2.533 1.61 4.69 3.868 5.55zm2.158-14.934c-5.25.002-9.503 4.202-9.504 9.384 0 5.182 4.254 9.38 9.504 9.382 5.25 0 9.504-4.2 9.505-9.382 0-5.182-4.254-9.382-9.504-9.384zM18.973 22C13.228 22.027 8.5 17.432 8.5 11.84 8.5 5.726 13.228 1.5 18.973 1.5h2.692c5.677 0 10.857 4.225 10.857 10.34 0 5.59-5.18 10.16-10.857 10.16h-2.692z\" style=\"fill: #004A97\" />\n    </symbol>\n\n    <symbol id=\"icon-maestro\" viewBox=\"0 0 40 24\">\n      <title>Maestro</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M14.67 22.39V21c.022-.465-.303-.86-.767-.882h-.116c-.3-.023-.603.14-.788.394-.164-.255-.442-.417-.743-.394-.256-.023-.51.116-.65.324v-.278h-.487v2.203h.487v-1.183c-.046-.278.162-.533.44-.58h.094c.325 0 .488.21.488.58v1.23h.487v-1.23c-.047-.278.162-.556.44-.58h.093c.325 0 .487.21.487.58v1.23l.534-.024zm2.712-1.09v-1.113h-.487v.28c-.162-.21-.417-.326-.695-.326-.65 0-1.16.51-1.16 1.16 0 .65.51 1.16 1.16 1.16.278 0 .533-.117.695-.325v.278h.487V21.3zm-1.786 0c.024-.37.348-.65.72-.626.37.023.65.348.626.72-.023.347-.302.625-.673.625-.372 0-.674-.28-.674-.65-.023-.047-.023-.047 0-.07zm12.085-1.16c.163 0 .325.024.465.094.14.046.278.14.37.255.117.115.186.23.256.37.117.3.117.626 0 .927-.046.14-.138.255-.254.37-.116.117-.232.186-.37.256-.303.116-.65.116-.952 0-.14-.046-.28-.14-.37-.255-.118-.116-.187-.232-.257-.37-.116-.302-.116-.627 0-.928.047-.14.14-.255.256-.37.115-.117.23-.187.37-.256.163-.07.325-.116.488-.093zm0 .465c-.092 0-.185.023-.278.046-.092.024-.162.094-.232.14-.07.07-.116.14-.14.232-.068.185-.068.394 0 .58.024.092.094.162.14.23.07.07.14.117.232.14.186.07.37.07.557 0 .092-.023.16-.092.23-.14.07-.068.117-.138.14-.23.07-.186.07-.395 0-.58-.023-.093-.093-.162-.14-.232-.07-.07-.138-.116-.23-.14-.094-.045-.187-.07-.28-.045zm-7.677.695c0-.695-.44-1.16-1.043-1.16-.65 0-1.16.534-1.137 1.183.023.65.534 1.16 1.183 1.136.325 0 .65-.093.905-.302l-.23-.348c-.187.14-.42.232-.65.232-.326.023-.627-.21-.673-.533h1.646v-.21zm-1.646-.21c.023-.3.278-.532.58-.532.3 0 .556.232.556.533h-1.136zm3.664-.346c-.207-.116-.44-.186-.695-.186-.255 0-.417.093-.417.255 0 .163.162.186.37.21l.233.022c.488.07.766.278.766.672 0 .395-.37.72-1.02.72-.348 0-.673-.094-.95-.28l.23-.37c.21.162.465.232.743.232.324 0 .51-.094.51-.28 0-.115-.117-.185-.395-.23l-.232-.024c-.487-.07-.765-.302-.765-.65 0-.44.37-.718.927-.718.325 0 .627.07.905.232l-.21.394zm2.32-.116h-.788v.997c0 .23.07.37.325.37.14 0 .3-.046.417-.115l.14.417c-.186.116-.395.162-.604.162-.58 0-.765-.302-.765-.812v-1.02h-.44v-.44h.44v-.673h.487v.672h.79v.44zm1.67-.51c.117 0 .233.023.35.07l-.14.463c-.093-.045-.21-.045-.302-.045-.325 0-.464.208-.464.58v1.25h-.487v-2.2h.487v.277c.116-.255.325-.37.557-.394z\" style=\"fill: #000\" />\n      <path style=\"fill: #7673C0\" d=\"M23.64 3.287h-7.305V16.41h7.306\" />\n      <path d=\"M16.8 9.848c0-2.55 1.183-4.985 3.2-6.56C16.384.435 11.12 1.06 8.29 4.7 5.435 8.32 6.06 13.58 9.703 16.41c3.038 2.387 7.283 2.387 10.32 0-2.04-1.578-3.223-3.99-3.223-6.562z\" style=\"fill: #EB001B\" />\n      <path d=\"M33.5 9.848c0 4.613-3.735 8.346-8.35 8.346-1.88 0-3.69-.626-5.15-1.785 3.618-2.83 4.245-8.092 1.415-11.71-.418-.532-.882-.996-1.415-1.413C23.618.437 28.883 1.06 31.736 4.7 32.873 6.163 33.5 7.994 33.5 9.85z\" style=\"fill: #00A1DF\" />\n    </symbol>\n\n    <symbol id=\"logoPayPal\" viewBox=\"0 0 48 29\">\n      <title>PayPal Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" />\n      <path d=\"M31.216 16.4c.394-.7.69-1.5.886-2.4.196-.8.196-1.6.1-2.2-.1-.7-.396-1.2-.79-1.7-.195-.3-.59-.5-.885-.7.1-.8.1-1.5 0-2.1-.1-.6-.394-1.1-.886-1.6-.885-1-2.56-1.6-4.922-1.6h-6.4c-.492 0-.787.3-.886.8l-2.658 17.2c0 .2 0 .3.1.4.097.1.294.2.393.2h4.036l-.295 1.8c0 .1 0 .3.1.4.098.1.195.2.393.2h3.35c.393 0 .688-.3.786-.7v-.2l.59-4.1v-.2c.1-.4.395-.7.788-.7h.59c1.675 0 3.152-.4 4.137-1.1.59-.5 1.083-1 1.478-1.7h-.002z\" style=\"fill: #263B80\" />\n      <path d=\"M21.364 9.4c0-.3.196-.5.492-.6.098-.1.196-.1.394-.1h5.02c.592 0 1.183 0 1.675.1.1 0 .295.1.394.1.098 0 .294.1.393.1.1 0 .1 0 .197.102.295.1.492.2.69.3.295-1.6 0-2.7-.887-3.8-.985-1.1-2.658-1.6-4.923-1.6h-6.4c-.49 0-.885.3-.885.8l-2.758 17.3c-.098.3.197.6.59.6h3.94l.985-6.4 1.083-6.9z\" style=\"fill: #263B80\" />\n      <path d=\"M30.523 9.4c0 .1 0 .3-.098.4-.887 4.4-3.742 5.9-7.484 5.9h-1.87c-.492 0-.787.3-.886.8l-.985 6.2-.296 1.8c0 .3.196.6.492.6h3.348c.394 0 .69-.3.787-.7v-.2l.592-4.1v-.2c.1-.4.394-.7.787-.7h.69c3.248 0 5.808-1.3 6.497-5.2.296-1.6.197-3-.69-3.9-.196-.3-.49-.5-.885-.7z\" style=\"fill: #159BD7\" />\n      <path d=\"M29.635 9c-.098 0-.295-.1-.394-.1-.098 0-.294-.1-.393-.1-.492-.102-1.083-.102-1.673-.102h-5.022c-.1 0-.197 0-.394.1-.198.1-.394.3-.492.6l-1.083 6.9v.2c.1-.5.492-.8.886-.8h1.87c3.742 0 6.598-1.5 7.484-5.9 0-.1 0-.3.098-.4-.196-.1-.492-.2-.69-.3 0-.1-.098-.1-.196-.1z\" style=\"fill: #232C65\" />\n    </symbol>\n\n    <symbol id=\"logoPayPalCredit\" viewBox=\"0 0 48 29\">\n      <title>PayPal Credit Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" fill-rule=\"nonzero\" />\n      <path d=\"M27.44 21.6h.518c1.377 0 2.67-.754 2.953-2.484.248-1.588-.658-2.482-2.14-2.482h-.38c-.093 0-.172.067-.187.16l-.763 4.805zm-1.254-6.646c.024-.158.16-.273.32-.273h2.993c2.47 0 4.2 1.942 3.81 4.436-.4 2.495-2.752 4.436-5.21 4.436h-3.05c-.116 0-.205-.104-.187-.218l1.323-8.38zM22.308 16.907l-.192 1.21h2.38c.116 0 .204.103.186.217l-.23 1.462c-.023.157-.16.273-.318.273h-2.048c-.16 0-.294.114-.32.27l-.203 1.26h2.52c.117 0 .205.102.187.217l-.228 1.46c-.025.16-.16.275-.32.275h-4.55c-.116 0-.204-.104-.186-.218l1.322-8.38c.025-.158.16-.273.32-.273h4.55c.116 0 .205.104.187.22l-.23 1.46c-.024.158-.16.274-.32.274H22.63c-.16 0-.295.115-.32.273M35.325 23.552h-1.81c-.115 0-.203-.104-.185-.218l1.322-8.38c.025-.158.16-.273.32-.273h1.81c.115 0 .203.104.185.22l-1.322 8.38c-.025.156-.16.272-.32.272M14.397 18.657h.224c.754 0 1.62-.14 1.777-1.106.158-.963-.345-1.102-1.15-1.104h-.326c-.097 0-.18.07-.197.168l-.326 2.043zm3.96 4.895h-2.37c-.102 0-.194-.058-.238-.15l-1.565-3.262h-.023l-.506 3.19c-.02.128-.13.222-.26.222h-1.86c-.116 0-.205-.104-.187-.218l1.33-8.432c.02-.128.13-.22.26-.22h3.222c1.753 0 2.953.834 2.66 2.728-.2 1.224-1.048 2.283-2.342 2.506l2.037 3.35c.076.125-.014.286-.16.286zM40.216 23.552h-1.808c-.116 0-.205-.104-.187-.218l1.06-6.7h-1.684c-.116 0-.205-.104-.187-.218l.228-1.462c.025-.157.16-.273.32-.273h5.62c.116 0 .205.104.186.22l-.228 1.46c-.025.158-.16.274-.32.274h-1.63l-1.05 6.645c-.025.156-.16.272-.32.272M11.467 17.202c-.027.164-.228.223-.345.104-.395-.405-.975-.62-1.6-.62-1.41 0-2.526 1.083-2.75 2.458-.21 1.4.588 2.41 2.022 2.41.592 0 1.22-.225 1.74-.6.144-.105.34.02.313.194l-.328 2.03c-.02.12-.108.22-.226.254-.702.207-1.24.355-1.9.355-3.823 0-4.435-3.266-4.238-4.655.553-3.894 3.712-4.786 5.65-4.678.623.034 1.182.117 1.73.323.177.067.282.25.252.436l-.32 1.99\" style=\"fill: #21306F\" />\n      <path d=\"M23.184 7.67c-.11.717-.657.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.105.123.137.305.097.557zm-.23-1.87h-1.998c-.137 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h1.024c.095 0 .177-.07.192-.164l.23-1.452c.02-.135.136-.235.273-.235h.63c1.317 0 2.076-.636 2.275-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51z\" style=\"fill: #0093C7\" />\n      <path d=\"M8.936 7.67c-.11.717-.656.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.104.123.136.305.096.557zm-.23-1.87H6.708c-.136 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h.955c.136 0 .252-.1.274-.234l.217-1.382c.02-.135.137-.235.274-.235h.633c1.316 0 2.075-.636 2.274-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51zM13.343 9.51c-.092.545-.526.912-1.08.912-.277 0-.5-.09-.642-.258-.14-.168-.193-.406-.148-.672.086-.542.527-.92 1.072-.92.27 0 .492.09.637.26.148.172.205.412.163.677zm1.334-1.863h-.957c-.082 0-.152.06-.164.14l-.042.268-.067-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.135 1.923-.092.56.038 1.097.356 1.47.29.344.708.487 1.204.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.017-.102-.06-.193-.163-.193z\" style=\"fill: #21306F\" />\n      <path d=\"M27.59 9.51c-.09.545-.525.912-1.078.912-.278 0-.5-.09-.643-.258-.142-.168-.195-.406-.15-.672.086-.542.526-.92 1.07-.92.273 0 .494.09.64.26.146.172.203.412.16.677zm1.334-1.863h-.956c-.082 0-.152.06-.164.14l-.043.268-.065-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.136 1.923-.092.56.038 1.097.355 1.47.292.344.71.487 1.205.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.015-.102-.063-.193-.166-.193z\" style=\"fill: #0093C7\" />\n      <path d=\"M19.77 7.647h-.96c-.092 0-.178.045-.23.122L17.254 9.72l-.562-1.877c-.035-.118-.143-.198-.266-.198h-.945c-.113 0-.194.112-.157.22l1.06 3.108-.997 1.404c-.078.11 0 .262.136.262h.96c.092 0 .177-.044.23-.12l3.196-4.614c.077-.11-.002-.26-.137-.26\" style=\"fill: #21306F\" />\n      <path d=\"M30.052 5.94l-.82 5.216c-.016.1.062.192.165.192h.824c.138 0 .254-.1.275-.234l.81-5.122c.015-.1-.064-.193-.166-.193h-.924c-.082 0-.15.06-.164.14\" style=\"fill: #0093C7\" />\n    </symbol>\n\n    <symbol id=\"iconCardFront\" viewBox=\"0 0 48 29\">\n      <title>Generic Card</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" style=\"fill: #FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" style=\"fill: #828282\" />\n      <rect style=\"fill: #828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect style=\"fill: #828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" style=\"fill: #828282\" />\n      <ellipse style=\"fill: #828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"iconCVVBack\" viewBox=\"0 0 40 24\">\n      <title>CVV Back</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\"/>\n      <path style=\"fill: #828282\" d=\"M0 5h40v4H0z\" />\n      <path d=\"M20 13.772v5.456c0 .423.37.772.82.772h13.36c.45 0 .82-.35.82-.772v-5.456c0-.423-.37-.772-.82-.772H20.82c-.45 0-.82.35-.82.772zm-1-.142c0-.9.76-1.63 1.68-1.63h13.64c.928 0 1.68.737 1.68 1.63v5.74c0 .9-.76 1.63-1.68 1.63H20.68c-.928 0-1.68-.737-1.68-1.63v-5.74z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"16.5\" r=\"1.5\" />\n    </symbol>\n\n    <symbol id=\"iconCVVFront\" viewBox=\"0 0 40 24\">\n      <title>CVV Front</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\" />\n      <path d=\"M16 5.772v5.456c0 .423.366.772.81.772h17.38c.444 0 .81-.348.81-.772V5.772C35 5.35 34.634 5 34.19 5H16.81c-.444 0-.81.348-.81.772zm-1-.142c0-.9.75-1.63 1.66-1.63h17.68c.917 0 1.66.737 1.66 1.63v5.74c0 .9-.75 1.63-1.66 1.63H16.66c-.917 0-1.66-.737-1.66-1.63V5.63z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"19.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"8.5\" r=\"1.5\" />\n      <path d=\"M4 7.833C4 7.47 4.476 7 4.89 7h6.22c.414 0 .89.47.89.833v3.334c0 .364-.476.833-.89.833H4.89c-.414 0-.89-.47-.89-.833V7.833zM4 18.5c0-.828.668-1.5 1.5-1.5h29c.828 0 1.5.666 1.5 1.5 0 .828-.668 1.5-1.5 1.5h-29c-.828 0-1.5-.666-1.5-1.5z\" style=\"fill: #828282\" />\n    </symbol>\n\n    <symbol id=\"iconCheck\" viewBox=\"0 0 42 32\">\n      <title>Check</title>\n      <path class=\"path1\" d=\"M14.379 29.76L39.741 3.415 36.194.001l-21.815 22.79-10.86-11.17L0 15.064z\" />\n    </symbol>\n\n    <symbol id=\"iconLockLoader\" viewBox=\"0 0 28 32\">\n      <title>Lock Loader</title>\n      <path d=\"M6 10V8c0-4.422 3.582-8 8-8 4.41 0 8 3.582 8 8v2h-4V7.995C18 5.79 16.205 4 14 4c-2.21 0-4 1.792-4 3.995V10H6zM.997 14c-.55 0-.997.445-.997.993v16.014c0 .548.44.993.997.993h26.006c.55 0 .997-.445.997-.993V14.993c0-.548-.44-.993-.997-.993H.997z\" />\n    </symbol>\n\n    <symbol id=\"iconError\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\n      <path d=\"M0 0h24v24H0z\" style=\"fill: none\" />\n      <path d=\"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z\" />\n    </symbol>\n\n    <symbol id=\"logoApplePay\" viewBox=\"0 0 165.52 105.97\" width=\"24\">\n      <title>Apple Pay Logo</title>\n      <defs>\n      <style>\n        .cls-1{fill:#231f20;}.cls-2{fill:#fff;}\n      </style>\n      </defs>\n      <path id=\"_Path_\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M150.7 0h-139a20.78 20.78 0 0 0-3.12.3 10.51 10.51 0 0 0-3 1 9.94 9.94 0 0 0-4.31 4.32 10.46 10.46 0 0 0-1 3A20.65 20.65 0 0 0 0 11.7v82.57a20.64 20.64 0 0 0 .3 3.11 10.46 10.46 0 0 0 1 3 9.94 9.94 0 0 0 4.35 4.35 10.47 10.47 0 0 0 3 1 20.94 20.94 0 0 0 3.11.27h142.06a21 21 0 0 0 3.11-.27 10.48 10.48 0 0 0 3-1 9.94 9.94 0 0 0 4.35-4.35 10.4 10.4 0 0 0 1-3 20.63 20.63 0 0 0 .27-3.11V11.69a20.64 20.64 0 0 0-.27-3.11 10.4 10.4 0 0 0-1-3 9.94 9.94 0 0 0-4.35-4.35 10.52 10.52 0 0 0-3-1 20.84 20.84 0 0 0-3.1-.23h-1.43z\"/>\n      <path id=\"_Path_2\" data-name=\"&lt;Path&gt;\" class=\"cls-2\" d=\"M150.7 3.53h3.03a17.66 17.66 0 0 1 2.58.22 7 7 0 0 1 2 .65 6.41 6.41 0 0 1 2.8 2.81 6.88 6.88 0 0 1 .64 2 17.56 17.56 0 0 1 .22 2.58v82.38a17.54 17.54 0 0 1-.22 2.59 6.85 6.85 0 0 1-.64 2 6.41 6.41 0 0 1-2.81 2.81 6.92 6.92 0 0 1-2 .65 18 18 0 0 1-2.57.22H11.79a18 18 0 0 1-2.58-.22 6.94 6.94 0 0 1-2-.65 6.41 6.41 0 0 1-2.8-2.8 6.93 6.93 0 0 1-.65-2 17.47 17.47 0 0 1-.22-2.58v-82.4a17.49 17.49 0 0 1 .22-2.59 6.92 6.92 0 0 1 .65-2 6.41 6.41 0 0 1 2.8-2.8 7 7 0 0 1 2-.65 17.63 17.63 0 0 1 2.58-.22H150.7\"/>\n      <g id=\"_Group_\" data-name=\"&lt;Group&gt;\">\n      <g id=\"_Group_2\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Path_3\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M43.51 35.77a9.15 9.15 0 0 0 2.1-6.52 9.07 9.07 0 0 0-6 3.11 8.56 8.56 0 0 0-2.16 6.27 7.57 7.57 0 0 0 6.06-2.86\"/>\n      <path id=\"_Path_4\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M45.59 39.08c-3.35-.2-6.2 1.9-7.79 1.9s-4-1.8-6.7-1.75a9.87 9.87 0 0 0-8.4 5.1c-3.6 6.2-.95 15.4 2.55 20.45 1.7 2.5 3.75 5.25 6.45 5.15s3.55-1.65 6.65-1.65 4 1.65 6.7 1.6 4.55-2.5 6.25-5a22.2 22.2 0 0 0 2.8-5.75 9.08 9.08 0 0 1-5.45-8.25A9.26 9.26 0 0 1 53 43.13a9.57 9.57 0 0 0-7.45-4\"/>\n      </g>\n      <g id=\"_Group_3\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Compound_Path_\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M79 32.11c7.28 0 12.35 5 12.35 12.32S86.15 56.8 78.79 56.8h-8.06v12.82h-5.82V32.11zm-8.27 19.81h6.68c5.07 0 8-2.73 8-7.46S82.48 37 77.44 37h-6.71z\"/>\n      <path id=\"_Compound_Path_2\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M92.76 61.85c0-4.81 3.67-7.56 10.42-8l7.25-.44v-2.06c0-3-2-4.7-5.56-4.7-2.94 0-5.07 1.51-5.51 3.82h-5.24c.16-4.86 4.73-8.4 10.92-8.4 6.65 0 11 3.48 11 8.89v18.66h-5.38v-4.5h-.13a9.59 9.59 0 0 1-8.58 4.78c-5.42 0-9.19-3.22-9.19-8.05zm17.68-2.42v-2.11l-6.47.42c-3.64.23-5.54 1.59-5.54 4s2 3.77 5.07 3.77c3.95-.05 6.94-2.57 6.94-6.08z\"/>\n      <path id=\"_Compound_Path_3\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M121 79.65v-4.5a17.14 17.14 0 0 0 1.72.1c2.57 0 4-1.09 4.91-3.9l.52-1.66-9.88-27.29h6.08l6.86 22.15h.13l6.86-22.15h5.93l-10.21 28.67c-2.34 6.58-5 8.73-10.68 8.73a15.93 15.93 0 0 1-2.24-.15z\"/>\n      </g>\n      </g>\n    </symbol>\n    <symbol id=\"logoGooglePay\" viewBox=\"0 0 60.51 24.04\">\n      <title>GooglePay_AcceptanceMark_RGB_60x24pt</title>\n      <path d=\"M28.67,11.76v7H26.43V1.42h5.92a5.39,5.39,0,0,1,3.84,1.51A5,5,0,0,1,36.44,10l-.25.26a5.35,5.35,0,0,1-3.84,1.48Zm0-8.2V9.62H32.4a2.93,2.93,0,0,0,2.21-.9A3,3,0,0,0,32.4,3.56Z\" fill=\"#5f6368\"/>\n      <path d=\"M42.93,6.52a5.56,5.56,0,0,1,3.91,1.32,4.71,4.71,0,0,1,1.43,3.63v7.32H46.13V17.14H46a4.28,4.28,0,0,1-3.69,2A4.83,4.83,0,0,1,39.06,18a3.74,3.74,0,0,1-1.32-2.92,3.52,3.52,0,0,1,1.39-2.93,5.87,5.87,0,0,1,3.73-1.09,6.65,6.65,0,0,1,3.27.72v-.51a2.5,2.5,0,0,0-.92-2,3.17,3.17,0,0,0-2.16-.81,3.4,3.4,0,0,0-2.95,1.57l-2-1.23A5.45,5.45,0,0,1,42.93,6.52ZM40,15.15a1.82,1.82,0,0,0,.74,1.46,2.74,2.74,0,0,0,1.74.58,3.58,3.58,0,0,0,2.51-1,3.26,3.26,0,0,0,1.11-2.45,4.54,4.54,0,0,0-2.91-.83,3.74,3.74,0,0,0-2.27.66A2,2,0,0,0,40,15.15Z\" fill=\"#5f6368\"/>\n      <path d=\"M60.52,6.9,53.07,24H50.76l2.77-6L48.63,6.91h2.43l3.54,8.54h0l3.44-8.54Z\" fill=\"#5f6368\"/>\n      <path d=\"M19.65,10.24a12.54,12.54,0,0,0-.17-2H10.06v3.84h5.39a4.61,4.61,0,0,1-2,3v2.49h3.22A9.75,9.75,0,0,0,19.65,10.24Z\" fill=\"#4285f4\"/>\n      <path d=\"M10.06,20a9.54,9.54,0,0,0,6.62-2.41l-3.22-2.49a6,6,0,0,1-3.4.95,6,6,0,0,1-5.6-4.12H1.15V14.5A10,10,0,0,0,10.06,20Z\" fill=\"#34a853\"/>\n      <path d=\"M4.46,11.92a6,6,0,0,1,0-3.82V5.53H1.15a10,10,0,0,0,0,9Z\" fill=\"#fbbc04\"/>\n      <path d=\"M10.06,4a5.44,5.44,0,0,1,3.83,1.5h0l2.85-2.85A9.58,9.58,0,0,0,10.06,0a10,10,0,0,0-8.91,5.5L4.46,8.1A6,6,0,0,1,10.06,4Z\" fill=\"#ea4335\"/>\n    </symbol>\n\n    <symbol id=\"logoVenmo\" viewBox=\"0 0 48 32\">\n      <title>Venmo</title>\n      <g fill=\"none\" fill-rule=\"evenodd\">\n        <rect fill=\"#3D95CE\" width=\"47.4074074\" height=\"31.6049383\" rx=\"3.16049383\"/>\n        <path d=\"M33.1851852,10.1131555 C33.1851852,14.8373944 29.2425262,20.9745161 26.0425868,25.2839506 L18.7337285,25.2839506 L15.8024691,7.35534396 L22.202175,6.73384536 L23.7519727,19.4912014 C25.2000422,17.0781163 26.9870326,13.2859484 26.9870326,10.7005 C26.9870326,9.28531656 26.7500128,8.32139205 26.3796046,7.52770719 L32.207522,6.32098765 C32.8813847,7.45939896 33.1851852,8.63196439 33.1851852,10.1131555 Z\" fill=\"#FFF\"/>\n      </g>\n    </symbol>\n    <symbol id=\"buttonVenmo\" viewBox=\"0 0 295 42\">\n      <g fill=\"none\" fill-rule=\"evenodd\">\n        <rect fill=\"#3D95CE\" width=\"295\" height=\"42\" rx=\"3\"/>\n        <path d=\"M11.3250791 0C11.7902741.780434316 12 1.58428287 12 2.59970884 12 5.838396 9.27822123 10.0456806 7.06917212 13L2.02356829 13 0 .709099732 4.41797878.283033306 5.48786751 9.02879887C6.48752911 7.3745159 7.72116169 4.77480706 7.72116169 3.00236102 7.72116169 2.03218642 7.55753727 1.37137098 7.30182933.827262801L11.3250791 0 11.3250791 0zM17.5051689 5.68512193C18.333931 5.68512193 20.4203856 5.28483546 20.4203856 4.03281548 20.4203856 3.43161451 20.0177536 3.13172102 19.5432882 3.13172102 18.7131868 3.13172102 17.6238766 4.18269796 17.5051689 5.68512193L17.5051689 5.68512193zM17.4102028 8.1647385C17.4102028 9.69351403 18.2153451 10.293301 19.2827401 10.293301 20.4451012 10.293301 21.5580312 9.99340752 23.0045601 9.21725797L22.4597224 13.1234575C21.440541 13.649203 19.8521716 14 18.310433 14 14.3996547 14 13 11.49596 13 8.36552446 13 4.30815704 15.2767521 0 19.9706358 0 22.554932 0 24 1.52864698 24 3.65720949 24.0002435 7.08869546 19.8287953 8.13992948 17.4102028 8.1647385L17.4102028 8.1647385zM37 2.84753211C37 3.32189757 36.9261179 4.00994664 36.8526108 4.45959542L35.4649774 12.9998782 30.9621694 12.9998782 32.2279161 5.1711436C32.2519185 4.95879931 32.3256755 4.53131032 32.3256755 4.29412759 32.3256755 3.72466988 31.9603904 3.5825794 31.5212232 3.5825794 30.9379171 3.5825794 30.3532359 3.84326124 29.9638234 4.03356751L28.5281854 13 24 13 26.0686989.213683657 29.9878258.213683657 30.0374555 1.23425123C30.9620444.641294408 32.1795365 3.90379019e-8 33.9069526 3.90379019e-8 36.1955476-.000243475057 37 1.1387937 37 2.84753211L37 2.84753211zM51.2981937 1.39967969C52.6582977.49918987 53.9425913 0 55.7133897 0 58.1518468 0 59 1.13900518 59 2.84769558 59 3.32204771 58.9223438 4.01007745 58.8448195 4.4597136L57.3830637 12.9997565 52.6328518 12.9997565 53.9932194 5.00577861C54.0182698 4.792101 54.0708756 4.53142648 54.0708756 4.36608506 54.0708756 3.72493046 53.6854953 3.58272222 53.2224587 3.58272222 52.6325881 3.58272222 52.0429812 3.81989829 51.6052587 4.03369766L50.0914245 12.9998782 45.3423992 12.9998782 46.7027668 5.00590037C46.7278172 4.79222275 46.7788409 4.53154824 46.7788409 4.36620681 46.7788409 3.72505221 46.3933287 3.58284398 45.9318743 3.58284398 45.3153711 3.58284398 44.7000546 3.84351849 44.2893602 4.03381941L42.7740757 13 38 13 40.1814929.214042876 44.2643098.214042876 44.3925941 1.28145692C45.3423992.641763367 46.6253743.000487014507 48.3452809.000487014507 49.8344603 0 50.8094476.593061916 51.2981937 1.39967969L51.2981937 1.39967969zM67.5285327 5.39061542C67.5285327 4.29258876 67.2694573 3.54396333 66.4936812 3.54396333 64.7759775 3.54396333 64.4232531 6.76273249 64.4232531 8.4093242 64.4232531 9.65848482 64.7530184 10.4315735 65.5285529 10.4315735 67.1521242 10.4315735 67.5285327 7.03707905 67.5285327 5.39061542L67.5285327 5.39061542zM60 8.21054461C60 3.96893154 62.1170713 0 66.988027 0 70.6583423 0 72 2.29633967 72 5.46592624 72 9.65835674 69.905767 14 64.9173573 14 61.2233579 14 60 11.4294418 60 8.21054461L60 8.21054461z\" transform=\"translate(112 14)\" fill=\"#FFF\"/>\n      </g>\n    </symbol>\n\n    <symbol id=\"iconClose\" width=\"21\" height=\"21\" viewBox=\"0 0 21 21\" overflow=\"visible\">\n      <path d=\"M16 5.414L14.586 4 10 8.586 5.414 4 4 5.414 8.586 10 4 14.586 5.414 16 10 11.414 14.586 16 16 14.586 11.414 10\"/>\n    </symbol>\n  </defs>\n</svg>\n";
 
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
   paymentOptionIDs.applePay,
+  paymentOptionIDs.googlePay,
   'threeDSecure'
 ];
 var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
-  paymentOptionIDs.applePay
+  paymentOptionIDs.applePay,
+  paymentOptionIDs.googlePay
 ];
 var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-var VERSION = "1.9.4";
+var VERSION = "1.10.0";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -6813,6 +7742,32 @@ var VERSION = "1.9.4";
  * @property {string} type The payment method type, always `ApplePayCard` when the method requested is an Apple Pay provided card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~venmoPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Venmo account.
+ * @property {string} details.username The Venmo username.
+ * @property {string} type The payment method type, always `VenmoAccount` when the method requested is a Venmo account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~googlePayPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Google Pay card.
+ * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
+ * @property {string} details.lastFour The last 4 digits of the card.
+ * @property {string} details.lastTwo The last 2 digits of the card.
+ * @param {external:GooglePayPaymentData} details.rawPaymentData The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.
+ * @property {string} type The payment method type, always `AndroidPayCard` when the method requested is a Google Pay Card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} GooglePayPaymentData A [Google Pay Payment Data object](https://developers.google.com/pay/api/web/object-reference#PaymentData).
+ * @external GooglePayPaymentData
+ * @see {@link https://developers.google.com/pay/api/web/object-reference#PaymentData PaymentData}
  */
 
 /**
@@ -6964,17 +7919,18 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 
 Dropin.prototype._initialize = function (callback) {
   var localizedStrings, localizedHTML, paypalScriptOptions;
-  var dropinInstance = this; // eslint-disable-line consistent-this
-  var container = this._merchantConfiguration.container || this._merchantConfiguration.selector;
+  var self = this;
+  var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
+  var setupPromise = Promise.resolve();
 
-  this._injectStylesheet();
+  self._injectStylesheet();
 
   if (!container) {
-    analytics.sendEvent(this._client, 'configuration-error');
+    analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.container is required.'));
     return;
-  } else if (this._merchantConfiguration.container && this._merchantConfiguration.selector) {
-    analytics.sendEvent(this._client, 'configuration-error');
+  } else if (self._merchantConfiguration.container && self._merchantConfiguration.selector) {
+    analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('Must only have one options.selector or options.container.'));
     return;
   }
@@ -6984,107 +7940,120 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   if (!container || container.nodeType !== 1) {
-    analytics.sendEvent(this._client, 'configuration-error');
+    analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference a valid DOM node.'));
     return;
   }
 
   if (container.innerHTML.trim()) {
-    analytics.sendEvent(this._client, 'configuration-error');
+    analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference an empty DOM node.'));
     return;
   }
 
   // Backfill with `en`
-  this._strings = assign({}, translations.en);
-  if (this._merchantConfiguration.locale) {
-    localizedStrings = translations[this._merchantConfiguration.locale] || translations[this._merchantConfiguration.locale.split('_')[0]];
+  self._strings = assign({}, translations.en);
+  if (self._merchantConfiguration.locale) {
+    localizedStrings = translations[self._merchantConfiguration.locale] || translations[self._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
-    this._strings = assign(this._strings, localizedStrings);
+    self._strings = assign(self._strings, localizedStrings);
   }
 
-  if (this._merchantConfiguration.translations) {
-    this._strings = assign(this._strings, this._merchantConfiguration.translations);
+  if (!isUtf8()) {
+    // non-utf-8 encodings often don't support the bullet character
+    self._strings.endingIn = self._strings.endingIn.replace(/•/g, '*');
   }
 
-  localizedHTML = Object.keys(this._strings).reduce(function (result, stringKey) {
-    var stringValue = this._strings[stringKey];
+  if (self._merchantConfiguration.translations) {
+    Object.keys(self._merchantConfiguration.translations).forEach(function (key) {
+      self._strings[key] = sanitizeHtml(self._merchantConfiguration.translations[key]);
+    });
+  }
+
+  localizedHTML = Object.keys(self._strings).reduce(function (result, stringKey) {
+    var stringValue = self._strings[stringKey];
 
     return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
-  }.bind(this), mainHTML);
+  }, mainHTML);
 
-  this._dropinWrapper.innerHTML = svgHTML + localizedHTML;
-  container.appendChild(this._dropinWrapper);
+  self._dropinWrapper.innerHTML = svgHTML + localizedHTML;
+  container.appendChild(self._dropinWrapper);
 
-  this._getVaultedPaymentMethods().then(function (paymentMethods) {
+  self._getVaultedPaymentMethods().then(function (paymentMethods) {
+    self._model = new DropinModel({
+      client: self._client,
+      componentID: self._componentID,
+      merchantConfiguration: self._merchantConfiguration,
+      paymentMethods: paymentMethods
+    });
+
+    return self._model.initialize();
+  }).then(function () {
     var paypalRequired;
 
-    try {
-      this._model = new DropinModel({
-        client: this._client,
-        componentID: this._componentID,
-        merchantConfiguration: this._merchantConfiguration,
-        paymentMethods: paymentMethods
-      });
-    } catch (modelError) {
-      dropinInstance.teardown().then(function () {
-        callback(modelError);
-      });
-      return;
-    }
-
-    this._model.on('cancelInitialization', function (err) {
-      analytics.sendEvent(this._client, 'load-error');
-      this._dropinWrapper.innerHTML = '';
+    self._model.on('cancelInitialization', function (err) {
+      self._dropinWrapper.innerHTML = '';
+      analytics.sendEvent(self._client, 'load-error');
       callback(err);
-    }.bind(this));
+    });
 
-    this._model.on('asyncDependenciesReady', function () {
-      if (this._model.dependencySuccessCount >= 1) {
-        analytics.sendEvent(this._client, 'appeared');
-        this._disableErroredPaymentMethods();
-        callback(null, dropinInstance);
+    self._model.on('asyncDependenciesReady', function () {
+      if (self._model.dependencySuccessCount >= 1) {
+        analytics.sendEvent(self._client, 'appeared');
+        self._disableErroredPaymentMethods();
+
+        self._handleAppSwitch();
+
+        callback(null, self);
       } else {
-        this._model.cancelInitialization(new DropinError('All payment options failed to load.'));
+        self._model.cancelInitialization(new DropinError('All payment options failed to load.'));
       }
-    }.bind(this));
+    });
 
-    this._model.on('paymentMethodRequestable', function (event) {
-      this._emit('paymentMethodRequestable', event);
-    }.bind(this));
+    self._model.on('paymentMethodRequestable', function (event) {
+      self._emit('paymentMethodRequestable', event);
+    });
 
-    this._model.on('noPaymentMethodRequestable', function () {
-      this._emit('noPaymentMethodRequestable');
-    }.bind(this));
+    self._model.on('noPaymentMethodRequestable', function () {
+      self._emit('noPaymentMethodRequestable');
+    });
 
-    this._model.on('paymentOptionSelected', function (event) {
-      this._emit('paymentOptionSelected', event);
-    }.bind(this));
+    self._model.on('paymentOptionSelected', function (event) {
+      self._emit('paymentOptionSelected', event);
+    });
 
-    paypalRequired = this._supportsPaymentOption(paymentOptionIDs.paypal) || this._supportsPaymentOption(paymentOptionIDs.paypalCredit);
+    paypalRequired = self._supportsPaymentOption(paymentOptionIDs.paypal) || self._supportsPaymentOption(paymentOptionIDs.paypalCredit);
 
     if (paypalRequired && !global.paypal) {
       paypalScriptOptions = {
         src: constants.CHECKOUT_JS_SOURCE,
         id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        logLevel: this._merchantConfiguration.paypal && this._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+        dataAttributes: {
+          'log-level': self._merchantConfiguration.paypal && self._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+        }
       };
 
-      this._loadScript(paypalScriptOptions, function () {
-        this._setUpDependenciesAndViews();
-      }.bind(this));
-    } else {
-      this._setUpDependenciesAndViews();
+      setupPromise = setupPromise.then(function () {
+        return assets.loadScript(self._dropinWrapper, paypalScriptOptions);
+      });
     }
-  }.bind(this));
+
+    return setupPromise;
+  }).then(function () {
+    return self._setUpDependenciesAndViews();
+  }).catch(function (err) {
+    self.teardown().then(function () {
+      callback(err);
+    });
+  });
 };
 
 /**
- * Modify your configuration intially set in {@link module:braintree-web-drop-in|`dropin.create`}. Can be used for any `paypal` or `paypalCredit` property.
+ * Modify your configuration intially set in {@link module:braintree-web-drop-in|`dropin.create`}.
  *
  * If `updateConfiguration` is called after a user completes the PayPal authorization flow, any PayPal accounts not stored in the Vault record will be removed.
  * @public
- * @param {string} property The top-level property to update. Either `paypal` or `paypalCredit`.
+ * @param {string} property The top-level property to update. Either `paypal`, `paypalCredit`, `applePay`, or `googlePay`.
  * @param {string} key The key of the property to update, such as `amount` or `currency`.
  * @param {any} value The value of the property to update. Must be the type of the property specified in {@link module:braintree-web-drop-in|`dropin.create`}.
  * @returns {void}
@@ -7192,7 +8161,7 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
       id: constants.DATA_COLLECTOR_SCRIPT_ID
     };
 
-    this._loadScript(dataCollectorScriptOptions, this._setUpDataCollector.bind(this));
+    assets.loadScript(this._dropinWrapper, dataCollectorScriptOptions).then(this._setUpDataCollector.bind(this));
   }
 
   if (this._merchantConfiguration.threeDSecure) {
@@ -7240,20 +8209,6 @@ Dropin.prototype._supportsPaymentOption = function (paymentOption) {
   return this._model.supportedPaymentOptions.indexOf(paymentOption) !== -1;
 };
 
-Dropin.prototype._loadScript = function (options, callback) {
-  var script = document.createElement('script');
-
-  script.src = options.src;
-  script.id = options.id;
-  script.async = true;
-
-  if (options.logLevel) {
-    script.setAttribute('data-log-level', options.logLevel);
-  }
-  script.addEventListener('load', callback);
-  this._dropinWrapper.appendChild(script);
-};
-
 Dropin.prototype._disableErroredPaymentMethods = function () {
   var paymentMethodOptionsElements;
   var failedDependencies = Object.keys(this._model.failedDependencies);
@@ -7276,17 +8231,26 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
     if (error.code === 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED') {
       errorMessageDiv.innerHTML = constants.errors.PAYPAL_NON_LINKED_SANDBOX;
     } else {
-      errorMessageDiv.textContent = error.message;
+      errorMessageDiv.innerHTML = error.message;
     }
   }.bind(this));
 };
 
+Dropin.prototype._handleAppSwitch = function () {
+  if (this._model.appSwitchError) {
+    this._mainView.setPrimaryView(this._model.appSwitchError.id);
+    this._model.reportError(this._model.appSwitchError.error);
+  } else if (this._model.appSwitchPayload) {
+    this._model.addPaymentMethod(this._model.appSwitchPayload);
+  }
+};
+
 /**
- * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/). The structure of this payment method object varies by type: a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} is returned when the payment method is a card, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload} is returned when the payment method is a PayPal account.
+ * Requests a payment method object which includes the payment method nonce used by by the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/).
  *
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
- * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload} or a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
+ * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload}, a {@link Dropin~googlePayPaymentMethodPayload|googlePayPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example <caption>Requesting a payment method</caption>
  * var form = document.querySelector('#my-form');
@@ -7379,25 +8343,17 @@ Dropin.prototype._removeStylesheet = function () {
 };
 
 Dropin.prototype._injectStylesheet = function () {
-  var stylesheet, stylesheetUrl, head, assetsUrl;
+  var stylesheetUrl, assetsUrl;
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
   assetsUrl = this._client.getConfiguration().gatewayConfiguration.assetsUrl;
   stylesheetUrl = assetsUrl + '/web/dropin/' + VERSION + '/css/dropin.css';
-  stylesheet = document.createElement('link');
-  head = document.head;
 
-  stylesheet.setAttribute('rel', 'stylesheet');
-  stylesheet.setAttribute('type', 'text/css');
-  stylesheet.setAttribute('href', stylesheetUrl);
-  stylesheet.setAttribute('id', constants.STYLESHEET_ID);
-
-  if (head.firstChild) {
-    head.insertBefore(stylesheet, head.firstChild);
-  } else {
-    head.appendChild(stylesheet);
-  }
+  assets.loadStylesheet({
+    href: stylesheetUrl,
+    id: constants.STYLESHEET_ID
+  });
 };
 
 Dropin.prototype._getVaultedPaymentMethods = function () {
@@ -7509,6 +8465,10 @@ function formatPaymentMethodPayload(paymentMethod) {
     formattedPaymentMethod.description = paymentMethod.description;
   }
 
+  if (paymentMethod.type === constants.paymentMethodTypes.googlePay) {
+    formattedPaymentMethod.details.rawPaymentData = paymentMethod.rawPaymentData;
+  }
+
   if (typeof paymentMethod.liabilityShiftPossible === 'boolean') {
     formattedPaymentMethod.liabilityShifted = paymentMethod.liabilityShifted;
     formattedPaymentMethod.liabilityShiftPossible = paymentMethod.liabilityShiftPossible;
@@ -7528,7 +8488,7 @@ function formatPaymentMethodPayload(paymentMethod) {
 module.exports = wrapPrototype(Dropin);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./constants":93,"./dropin-model":94,"./lib/analytics":98,"./lib/assign":99,"./lib/dropin-error":103,"./lib/event-emitter":104,"./lib/is-guest-checkout":106,"./lib/promise":110,"./lib/three-d-secure":112,"./lib/uuid":114,"./translations":124,"./views/main-view":140,"./views/payment-methods-view":142,"./views/payment-options-view":143,"@braintree/wrap-promise":17}],96:[function(require,module,exports){
+},{"./constants":105,"./dropin-model":106,"./lib/analytics":110,"./lib/assets":111,"./lib/assign":112,"./lib/dropin-error":116,"./lib/event-emitter":117,"./lib/is-guest-checkout":119,"./lib/is-utf-8":121,"./lib/promise":124,"./lib/sanitize-html":125,"./lib/three-d-secure":127,"./lib/uuid":129,"./translations":139,"./views/main-view":155,"./views/payment-methods-view":157,"./views/payment-options-view":158,"@braintree/wrap-promise":20}],108:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web-drop-in
@@ -7643,7 +8603,7 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = "1.9.4";
+var VERSION = "1.10.0";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -7683,10 +8643,27 @@ var VERSION = "1.9.4";
  * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
  */
 
+/** @typedef {object} googlePayCreateOptions The configuration options for Google Pay. Additional options from the few listed here are available, many have default values applied based on the settings found in the Braintree Gateway. For more information, see [Google's Documentation](https://developers.google.com/pay/api/web/object-reference#request-objects).
+ *
+ * @param {string} merchantId The ID provided by Google for processing transactions in production. Not necessary for testing in sandbox.
+ * @param {external:GooglePayTransactionInfo} transactionInfo The transaction details necessary for processing the payment.
+ */
+
 /**
  * @typedef {object} ApplePayPaymentRequest An [Apple Pay Payment Request object](https://developer.apple.com/reference/applepayjs/1916082-applepay_js_data_types/paymentrequest).
  * @external ApplePayPaymentRequest
  * @see {@link https://developer.apple.com/reference/applepayjs/1916082-applepay_js_data_types/paymentrequest PaymentRequest}
+ */
+
+/**
+ * @typedef {object} GooglePayTransactionInfo A [Google Pay TransactionInfo object](https://developers.google.com/pay/api/web/object-reference#TransactionInfo).
+ * @external GooglePayTransactionInfo
+ * @see {@link https://developers.google.com/pay/api/web/object-reference#TransactionInfo TransactionInfo}
+ */
+
+/** @typedef {object|boolean} venmoCreateOptions The configuration options for Venmo. If `true` is passed instead of a configuration object, the default settings listed will be used.
+ *
+ * @param {boolean} [allowNewBrowserTab=true] If false, it restricts supported browsers to those that can app switch to the Venmo app without opening a new tab.
  */
 
 /**
@@ -7723,7 +8700,7 @@ var VERSION = "1.9.4";
  * `zh_TW`.
  *
  * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
- * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'applePay']`. Payment options omitted from this array will not be offered to the customer.
+ * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'venmo', 'applePay']`. Payment options omitted from this array will not be offered to the customer.
  *
  * @param {object} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards as a payment option, use `paymentOptionPriority`.
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
@@ -7733,12 +8710,24 @@ var VERSION = "1.9.4";
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live).
  *
  * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3).
+ *
+ * @param {object|boolean} [options.venmo] The configuration options for Pay with Venmo. To include a Venmo option in your Drop-in integration, include the `venmo` parameter and [follow the documentation for setting up Venmo in the Braintree control panel](https://articles.braintreepayments.com/guides/payment-methods/venmo#setup). If a user's browser does not support Venmo, the Venmo option will not be rendered.
+ *
+ * See [`venmoCreateOptions`](#~venmoCreateOptions) for `venmo` options.
+ *
  * @param {object} [options.applePay] The configuration options for Apple Pay. To include an Apple Pay option in your Drop-in integration, include the `applePay` parameter and [enable Apple Pay in the Braintree Control Panel](https://developers.braintreepayments.com/guides/apple-pay/configuration/javascript/v3). If a user's browser does not support Apple Pay, the Apple Pay option will not be rendered. See [Apple's documentation](https://support.apple.com/en-us/HT201469) for browser and device support.
  *
  * See [`applePayCreateOptions`](#~applePayCreateOptions) for `applePay` options.
+ *
+ * @param {object} [options.googlePay] The configuration options for Google Pay. To include a Google Pay option in your Drop-in integration, include the `googlePay` parameter and [enable Google Pay in the Braintree Control Panel](https://developers.braintreepayments.com/guides/google-pay/configuration/javascript/v3). If a user's browser does not support Google Pay, the Google Pay option will not be rendered. See [Google's documentation](https://developers.google.com/pay/api/web/test-and-deploy) for browser and device support.
+ *
+ * See [`googlePayCreateOptions`](#~googlePayCreateOptions) for `googlePay` options.
+ *
  * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
  * @param {object} [options.threeDSecure] The configuration options for 3D Secure. See [`threeDSecureOptions`](#~threeDSecureOptions) for all `threeDSecure` options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
+ *
+ * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
  * @param {boolean} [options.preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
  *
@@ -7819,7 +8808,7 @@ var VERSION = "1.9.4";
  *   </body>
  * </html>
  * @example
- * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, and PayPal Credit, and Apple Pay</caption>
+ * <caption>Setting up a Drop-in instance to accept credit cards, PayPal, PayPal Credit, Venmo, and Apple Pay</caption>
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
  *   container: '#dropin-container',
@@ -7839,6 +8828,19 @@ var VERSION = "1.9.4";
  *    flow: 'checkout',
  *    amount: '10.00',
  *    currency: 'USD'
+ *   },
+ *   venmo: true
+ * }, function (err, dropinInstance) {
+ *   // Set up a handler to request a payment method and
+ *   // submit the payment method nonce to your server
+ * });
+ * @example
+ * <caption>Setting up a Drop-in instance to accept Venmo with restricted browser support</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   venmo: {
+ *     allowNewBrowserTab: false
  *   }
  * }, function (err, dropinInstance) {
  *   // Set up a handler to request a payment method and
@@ -8030,7 +9032,7 @@ module.exports = {
   VERSION: VERSION
 };
 
-},{"./constants":93,"./dropin":95,"./lib/analytics":98,"./lib/create-from-script-tag":102,"./lib/dropin-error":103,"./lib/promise":110,"@braintree/wrap-promise":17,"braintree-web/client":26}],97:[function(require,module,exports){
+},{"./constants":105,"./dropin":107,"./lib/analytics":110,"./lib/create-from-script-tag":115,"./lib/dropin-error":116,"./lib/promise":124,"@braintree/wrap-promise":20,"braintree-web/client":29}],109:[function(require,module,exports){
 'use strict';
 
 function addSelectionEventHandler(element, func) {
@@ -8044,7 +9046,7 @@ function addSelectionEventHandler(element, func) {
 
 module.exports = addSelectionEventHandler;
 
-},{}],98:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 'use strict';
 
 var atob = require('./polyfill').atob;
@@ -8087,9 +9089,53 @@ module.exports = {
   sendEvent: sendAnalyticsEvent
 };
 
-},{"../constants":93,"./polyfill":109,"braintree-web/client":26}],99:[function(require,module,exports){
-arguments[4][52][0].apply(exports,arguments)
-},{"dup":52}],100:[function(require,module,exports){
+},{"../constants":105,"./polyfill":123,"braintree-web/client":29}],111:[function(require,module,exports){
+'use strict';
+
+var Promise = require('./promise');
+
+function loadScript(container, options) {
+  var script = document.createElement('script');
+  var attrs = options.dataAttributes || {};
+
+  script.src = options.src;
+  script.id = options.id;
+  script.async = true;
+
+  Object.keys(attrs).forEach(function (key) {
+    script.setAttribute('data-' + key, attrs[key]);
+  });
+
+  return new Promise(function (resolve) {
+    script.addEventListener('load', resolve);
+    container.appendChild(script);
+  });
+}
+
+function loadStylesheet(options) {
+  var stylesheet = document.createElement('link');
+  var head = options.head || document.head;
+
+  stylesheet.setAttribute('rel', 'stylesheet');
+  stylesheet.setAttribute('type', 'text/css');
+  stylesheet.setAttribute('href', options.href);
+  stylesheet.setAttribute('id', options.id);
+
+  if (head.firstChild) {
+    head.insertBefore(stylesheet, head.firstChild);
+  } else {
+    head.appendChild(stylesheet);
+  }
+}
+
+module.exports = {
+  loadScript: loadScript,
+  loadStylesheet: loadStylesheet
+};
+
+},{"./promise":124}],112:[function(require,module,exports){
+arguments[4][57][0].apply(exports,arguments)
+},{"dup":57}],113:[function(require,module,exports){
 'use strict';
 
 var isIe9 = require('@braintree/browser-detection/is-ie9');
@@ -8098,7 +9144,7 @@ module.exports = {
   isIe9: isIe9
 };
 
-},{"@braintree/browser-detection/is-ie9":6}],101:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ie9":6}],114:[function(require,module,exports){
 'use strict';
 
 function _classesOf(element) {
@@ -8147,7 +9193,7 @@ module.exports = {
   toggle: toggle
 };
 
-},{}],102:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 'use strict';
 
 var analytics = require('./analytics');
@@ -8277,7 +9323,7 @@ function createFromScriptTag(createFunction, scriptTag) {
 
 module.exports = createFromScriptTag;
 
-},{"./analytics":98,"./dropin-error":103,"./find-parent-form":105,"./kebab-case-to-camel-case":108,"./uuid":114}],103:[function(require,module,exports){
+},{"./analytics":110,"./dropin-error":116,"./find-parent-form":118,"./kebab-case-to-camel-case":122,"./uuid":129}],116:[function(require,module,exports){
 'use strict';
 
 function isBraintreeWebError(err) {
@@ -8305,9 +9351,9 @@ DropinError.prototype.constructor = DropinError;
 
 module.exports = DropinError;
 
-},{}],104:[function(require,module,exports){
-arguments[4][68][0].apply(exports,arguments)
-},{"dup":68}],105:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
+arguments[4][73][0].apply(exports,arguments)
+},{"dup":73}],118:[function(require,module,exports){
 'use strict';
 
 function findParentForm(element) {
@@ -8324,7 +9370,7 @@ module.exports = {
   findParentForm: findParentForm
 };
 
-},{}],106:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 'use strict';
 
 var atob = require('./polyfill').atob;
@@ -8340,7 +9386,7 @@ module.exports = function (client) {
   return true;
 };
 
-},{"./polyfill":109}],107:[function(require,module,exports){
+},{"./polyfill":123}],120:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -8353,7 +9399,18 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],108:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
+(function (global){
+'use strict';
+
+module.exports = function (win) {
+  win = win || global;
+
+  return win.document.characterSet.toLowerCase() === 'utf-8';
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],122:[function(require,module,exports){
 'use strict';
 
 function kebabCaseToCamelCase(kebab) {
@@ -8368,7 +9425,7 @@ function kebabCaseToCamelCase(kebab) {
 
 module.exports = kebabCaseToCamelCase;
 
-},{}],109:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -8407,9 +9464,22 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],110:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"dup":74,"promise-polyfill":90}],111:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"dup":80,"promise-polyfill":102}],125:[function(require,module,exports){
+'use strict';
+
+module.exports = function (string) {
+  if (typeof string !== 'string') {
+    return '';
+  }
+
+  return string
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+};
+
+},{}],126:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -8430,7 +9500,7 @@ module.exports = function () {
   return Boolean(el.style.length);
 };
 
-},{}],112:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 'use strict';
 
 
@@ -8575,7 +9645,7 @@ ThreeDSecure.prototype._revealModal = function () {
 
 module.exports = ThreeDSecure;
 
-},{"./classlist":101,"./promise":110,"braintree-web/three-d-secure":84}],113:[function(require,module,exports){
+},{"./classlist":114,"./promise":124,"braintree-web/three-d-secure":90}],128:[function(require,module,exports){
 'use strict';
 
 var browserDetection = require('./browser-detection');
@@ -8612,9 +9682,9 @@ module.exports = {
   onTransitionEnd: onTransitionEnd
 };
 
-},{"./browser-detection":100}],114:[function(require,module,exports){
-arguments[4][78][0].apply(exports,arguments)
-},{"dup":78}],115:[function(require,module,exports){
+},{"./browser-detection":113}],129:[function(require,module,exports){
+arguments[4][84][0].apply(exports,arguments)
+},{"dup":84}],130:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -8637,13 +9707,15 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "Kontroller oplysningerne, og prøv igen.",
   "hostedFieldsFieldsInvalidError": "Kontroller oplysningerne, og prøv igen.",
   "hostedFieldsTokenizationNetworkErrorError": "Netværksfejl. Prøv igen.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Bekræftelse af betalingskort blev ikke gennemført. Kontrollér oplysningerne, og prøv igen.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Betalingskortet blev ikke bekræftet. Kontrollér oplysningerne, og prøv igen.",
   "paypalAccountTokenizationFailedError": "PayPal-kontoen blev ikke tilføjet. Prøv igen.",
   "paypalFlowFailedError": "Der kunne ikke oprettes forbindelse til PayPal. Prøv igen.",
   "paypalTokenizationRequestActiveError": "PayPal-betalingen er i gang med at blive autoriseret.",
+  "venmoCanceledError": "Der opstod en fejl. Sørg for, at du har den seneste version af Venmo-appen installeret på din enhed, og at din browser understøtter skift til Venmo.",
+  "venmoAppFailedError": "Venmo-appen blev ikke fundet på din enhed.",
   "unsupportedCardTypeError": "Korttypen understøttes ikke. Prøv et andet kort.",
   "applePayTokenizationError": "Der opstod en netværksfejl under behandlingen af betalingen med Apple Pay. Prøv igen.",
-  "applePayActiveCardError": "Føj et understøttet kort til din Apple Pay e-pung.",
+  "applePayActiveCardError": "Knyt et understøttet kort til din Apple Pay-e-pung.",
   "cardholderNameLabel": "Kortindehaverens navn",
   "cardNumberLabel": "Kortnummer",
   "cvvLabel": "Kontrolcifre",
@@ -8657,9 +9729,11 @@ module.exports = {
   "payWithCard": "Betal med kort",
   "endingIn": "Slutter med ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Kort",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -8670,7 +9744,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],116:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -8697,6 +9771,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Beim Hinzufügen des PayPal-Kontos ist ein Problem aufgetreten. Versuchen Sie es erneut.",
   "paypalFlowFailedError": "Beim Verbinden mit PayPal ist ein Problem aufgetreten. Versuchen Sie es erneut.",
   "paypalTokenizationRequestActiveError": "Die PayPal-Zahlung wird bereits autorisiert.",
+  "venmoCanceledError": "Etwas ist schief gelaufen. Vergewissern Sie sich, dass Sie die neueste Version der Venmo-App auf Ihrem Gerät installiert haben und Ihr Browser den Wechsel zu Venmo unterstützt.",
+  "venmoAppFailedError": "Die Venmo-App wurde auf Ihrem Gerät nicht gefunden.",
   "unsupportedCardTypeError": "Dieser Kreditkartentyp wird nicht unterstützt. Versuchen Sie es mit einer anderen Karte.",
   "applePayTokenizationError": "Netzwerkfehler bei der Zahlungsabwicklung mit Apple Pay. Versuchen Sie es erneut.",
   "applePayActiveCardError": "Fügen Sie der Apple-Pay-Börse eine unterstützte Kreditkarte hinzu.",
@@ -8713,9 +9789,11 @@ module.exports = {
   "payWithCard": "Mit Kreditkarte zahlen",
   "endingIn": "Mit den Endziffern ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Kreditkarte",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -8726,7 +9804,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],117:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -8734,7 +9812,7 @@ module.exports = {
   "chooseAnotherWayToPay": "Choose another way to pay",
   "chooseAWayToPay": "Choose a way to pay",
   "otherWaysToPay": "Other ways to pay",
-  "cardVerification": "Card Verification",
+  "cardVerification": "Card verification",
   "fieldEmptyForCvv": "Please fill out a CVV.",
   "fieldEmptyForExpirationDate": "Please fill out an expiry date.",
   "fieldEmptyForCardholderName": "Please fill out a cardholder name.",
@@ -8749,10 +9827,12 @@ module.exports = {
   "hostedFieldsFailedTokenizationError": "Please check your information and try again.",
   "hostedFieldsFieldsInvalidError": "Please check your information and try again.",
   "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Please check your information and try again.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Please check your entries and try again.",
   "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
   "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
   "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
+  "venmoCanceledError": "We're sorry, something seems to have gone wrong. Please ensure you have the most recent version of the Venmo app installed on your device and your browser supports the switch to Venmo.",
+  "venmoAppFailedError": "The Venmo app wasn't found on your device.",
   "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
   "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
   "applePayActiveCardError": "Link a supported card to your Apple Pay wallet.",
@@ -8769,9 +9849,11 @@ module.exports = {
   "payWithCard": "Pay with credit or debit card",
   "endingIn": "Ending in ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Card",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -8782,7 +9864,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],118:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -8809,6 +9891,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
   "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
   "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
+  "venmoCanceledError": "We're sorry, something seems to have gone wrong. Make sure you have the most recent version of the Venmo app installed on your device and your browser supports the switch to Venmo.",
+  "venmoAppFailedError": "The Venmo app isn't on your device.",
   "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
   "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
   "applePayActiveCardError": "Add a supported card to your Apple Pay wallet.",
@@ -8825,9 +9909,11 @@ module.exports = {
   "payWithCard": "Pay with card",
   "endingIn": "Ending in ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Card",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -8838,7 +9924,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],119:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -8868,6 +9954,8 @@ module.exports = {
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
   applePayTokenizationError: 'A network error occurred while processing the Apple Pay payment. Please try again.',
   applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
+  venmoCanceledError: 'Something went wrong. Ensure you have the most recent version of the Venmo app installed on your device and your browser supports switching to Venmo.',
+  venmoAppFailedError: 'The Venmo app could not be found on your device.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
   // Card form
   cardholderNameLabel: 'Cardholder Name',
@@ -8887,6 +9975,8 @@ module.exports = {
   PayPal: 'PayPal',
   'PayPal Credit': 'PayPal Credit',
   'Apple Pay': 'Apple Pay',
+  'Google Pay': 'Google Pay',
+  'Venmo': 'Venmo',
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',
@@ -8897,7 +9987,7 @@ module.exports = {
   UnionPay: 'UnionPay'
 };
 
-},{}],120:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -8924,6 +10014,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Se ha producido un error al vincular la cuenta PayPal. Inténtalo de nuevo.",
   "paypalFlowFailedError": "Se ha producido un error al conectarse a PayPal. Inténtalo de nuevo.",
   "paypalTokenizationRequestActiveError": "Ya hay una autorización de pago de PayPal en curso.",
+  "venmoCanceledError": "Ha habido un problema. Asegúrate de que tienes la versión más reciente de la aplicación de Venmo instalada en tu dispositivo y de que tu navegador es compatible con cambiar a Venmo.",
+  "venmoAppFailedError": "No se ha encontrado la aplicación de Venmo en tu dispositivo.",
   "unsupportedCardTypeError": "No se admite este tipo de tarjeta. Prueba con otra tarjeta.",
   "applePayTokenizationError": "Se ha producido un error de red al procesar el pago con Apple Pay. Inténtalo de nuevo.",
   "applePayActiveCardError": "Añade una tarjeta admitida a tu Wallet de Apple Pay.",
@@ -8938,11 +10030,13 @@ module.exports = {
   "expirationDatePlaceholder": "MM/AA",
   "postalCodeLabel": "Código postal",
   "payWithCard": "Pagar con tarjeta",
-  "endingIn": "Terminada en •• {{lastTwoCardDigits}}",
+  "endingIn": "Terminada en ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Tarjeta",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -8953,7 +10047,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],121:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -8980,6 +10074,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Une erreur s'est produite lors de l'enregistrement du compte PayPal. Veuillez réessayer.",
   "paypalFlowFailedError": "Une erreur s'est produite au cours de la connexion à PayPal. Veuillez réessayer.",
   "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
+  "venmoCanceledError": "Une erreur s'est produite. Assurez-vous que la version la plus récente de l'application Venmo est installée sur votre appareil et que votre navigateur prend Venmo en charge.",
+  "venmoAppFailedError": "L'application Venmo est introuvable sur votre appareil.",
   "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Veuillez essayer une autre carte.",
   "applePayTokenizationError": "Une erreur de réseau s'est produite lors du traitement du paiement avec Apple Pay. Veuillez réessayer.",
   "applePayActiveCardError": "Ajoutez une carte prise en charge à Apple Pay.",
@@ -8996,9 +10092,11 @@ module.exports = {
   "payWithCard": "Payer par carte",
   "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Carte",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9009,7 +10107,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],122:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9036,6 +10134,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Une erreur est survenue lors de l'ajout du compte PayPal. Réessayez.",
   "paypalFlowFailedError": "Une erreur est survenue lors de la connexion à PayPal. Réessayez.",
   "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
+  "venmoCanceledError": "Une erreur est survenue. Vérifiez que vous disposez de la dernière version de l'application Venmo sur votre appareil et que votre navigateur prend en charge la redirection vers Venmo.",
+  "venmoAppFailedError": "L'application Venmo est introuvable sur votre appareil.",
   "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Essayez une autre carte.",
   "applePayTokenizationError": "Une erreur réseau s'est produite lors du traitement du paiement Apple Pay. Réessayez.",
   "applePayActiveCardError": "Enregistrez une carte prise en charge sur Apple Pay.",
@@ -9052,9 +10152,11 @@ module.exports = {
   "payWithCard": "Payer par carte",
   "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Carte",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9065,7 +10167,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],123:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9092,6 +10194,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Terjadi kesalahan saat menambahkan rekening PayPal. Coba lagi.",
   "paypalFlowFailedError": "Terjadi kesalahan saat menyambung ke PayPal. Coba lagi.",
   "paypalTokenizationRequestActiveError": "Otorisasi pembayaran PayPal sedang diproses.",
+  "venmoCanceledError": "Terdapat kesalahan. Pastikan Anda telah menginstal aplikasi Venmo versi terbaru pada perangkat dan peramban Anda mendukung untuk beralih ke Venmo.",
+  "venmoAppFailedError": "Aplikasi Venmo tidak dapat ditemukan pada perangkat Anda.",
   "unsupportedCardTypeError": "Jenis kartu ini tidak didukung. Coba kartu lainnya.",
   "applePayTokenizationError": "Terjadi kesalahan jaringan sewaktu memproses pembayaran melalui Apple Pay. Coba lagi.",
   "applePayActiveCardError": "Tambahkan kartu yang didukung ke wallet Apple Pay.",
@@ -9108,9 +10212,11 @@ module.exports = {
   "payWithCard": "Bayar dengan kartu",
   "endingIn": "Berakhiran ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Kartu",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9121,7 +10227,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],124:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 /* eslint-disable camelcase */
 'use strict';
 
@@ -9152,7 +10258,7 @@ module.exports = {
 };
 /* eslint-enable camelcase */
 
-},{"./da_DK":115,"./de_DE":116,"./en_AU":117,"./en_GB":118,"./en_US":119,"./es_ES":120,"./fr_CA":121,"./fr_FR":122,"./id_ID":123,"./it_IT":125,"./ja_JP":126,"./ko_KR":127,"./nl_NL":128,"./no_NO":129,"./pl_PL":130,"./pt_BR":131,"./pt_PT":132,"./ru_RU":133,"./sv_SE":134,"./th_TH":135,"./zh_CN":136,"./zh_HK":137,"./zh_TW":138}],125:[function(require,module,exports){
+},{"./da_DK":130,"./de_DE":131,"./en_AU":132,"./en_GB":133,"./en_US":134,"./es_ES":135,"./fr_CA":136,"./fr_FR":137,"./id_ID":138,"./it_IT":140,"./ja_JP":141,"./ko_KR":142,"./nl_NL":143,"./no_NO":144,"./pl_PL":145,"./pt_BR":146,"./pt_PT":147,"./ru_RU":148,"./sv_SE":149,"./th_TH":150,"./zh_CN":151,"./zh_HK":152,"./zh_TW":153}],140:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9179,9 +10285,11 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Si è verificato un errore nel collegamento del conto PayPal. Riprova.",
   "paypalFlowFailedError": "Si è verificato un errore di connessione a PayPal. Riprova.",
   "paypalTokenizationRequestActiveError": "L'autorizzazione di pagamento PayPal è già in corso.",
+  "venmoCanceledError": "Si è verificato un errore. Assicurati di avere la versione più recente dell'app Venmo installata sul tuo dispositivo e che il browser supporti l'uso di Venmo.",
+  "venmoAppFailedError": "Impossibile trovare l'app Venmo sul dispositivo in uso.",
   "unsupportedCardTypeError": "Questo tipo di carta non è supportato. Prova con un'altra carta.",
   "applePayTokenizationError": "Si è verificato un errore di rete durante l'elaborazione del pagamento con Apple Pay. Riprova.",
-  "applePayActiveCardError": "Collega una carta supportata al tuo portafoglio Apple Pay.",
+  "applePayActiveCardError": "Collega una carta supportata al tuo Apple Pay Wallet.",
   "cardholderNameLabel": "Titolare della carta",
   "cardNumberLabel": "Numero di carta",
   "cvvLabel": "CVV",
@@ -9195,9 +10303,11 @@ module.exports = {
   "payWithCard": "Paga con una carta",
   "endingIn": "Le cui ultime cifre sono ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Carta",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9208,7 +10318,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],126:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9235,6 +10345,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "PayPalアカウントの追加で問題が発生しました。もう一度お試しください。",
   "paypalFlowFailedError": "PayPalへの接続に問題が発生しました。もう一度お試しください。",
   "paypalTokenizationRequestActiveError": "PayPal支払いの承認はすでに処理中です。",
+  "venmoCanceledError": "問題が発生しました。お客さまの端末にインストールされているVenmoアプリが最新のバージョンであること、お使いのブラウザがVenmoへの切り替えをサポートしていることを確認してください。",
+  "venmoAppFailedError": "お客さまの端末でVenmoアプリが見つかりませんでした。",
   "unsupportedCardTypeError": "このカードタイプはサポートされていません。別のカードをご使用ください。",
   "applePayTokenizationError": "Apple Payの支払いを処理する際にネットワークエラーが発生しました。もう一度お試しください。",
   "applePayActiveCardError": "Apple Payウォレットに対応しているカードを追加してください。",
@@ -9251,9 +10363,11 @@ module.exports = {
   "payWithCard": "カードで支払う",
   "endingIn": "x-{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "カード",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9264,7 +10378,7 @@ module.exports = {
   "UnionPay": "銀聯(UnionPay)"
 };
 
-},{}],127:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9291,6 +10405,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "PayPal 계정을 추가하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalFlowFailedError": "PayPal 계정을 연결하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalTokenizationRequestActiveError": "PayPal 결제 승인이 이미 진행 중입니다.",
+  "venmoCanceledError": "오류가 발생했습니다. 기기에 최신 버전의 Venmo 앱이 설치되어 있으며 브라우저가 Venmo로 전환 기능을 지원하는지 확인하세요.",
+  "venmoAppFailedError": "기기에서 Venmo 앱을 찾을 수 없습니다.",
   "unsupportedCardTypeError": "이 카드 형식은 지원되지 않습니다. 다른 카드로 시도해 주세요.",
   "applePayTokenizationError": "Apple Pay 결제를 처리하는 동안 네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
   "applePayActiveCardError": "Apple Pay 전자지갑에 지원되는 카드를 추가하세요.",
@@ -9307,9 +10423,11 @@ module.exports = {
   "payWithCard": "카드로 결제",
   "endingIn": "끝 번호: ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "카드",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9320,7 +10438,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],128:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9342,11 +10460,13 @@ module.exports = {
   "genericError": "Er is iets fout gegaan.",
   "hostedFieldsFailedTokenizationError": "Controleer uw gegevens en probeer het opnieuw.",
   "hostedFieldsFieldsInvalidError": "Controleer uw gegevens en probeer het opnieuw.",
-  "hostedFieldsTokenizationNetworkErrorError": "Netwerkfout. Probeer het opnieuw.",
+  "hostedFieldsTokenizationNetworkErrorError": "'Netwerkfout. Probeer het opnieuw.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "De controle van de creditcard is mislukt. Controleer uw gegevens en probeer het opnieuw.",
   "paypalAccountTokenizationFailedError": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
   "paypalFlowFailedError": "Er is iets misgegaan bij de verbinding met PayPal. Probeer het opnieuw.",
   "paypalTokenizationRequestActiveError": "De autorisatie van de PayPal-betaling is al in behandeling.",
+  "venmoCanceledError": "Er ging iets fout. Controleer of de meest recente versie van de Venmo-app op je apparaat is geïnstalleerd en dat je browser overschakelen naar Venmo ondersteunt.",
+  "venmoAppFailedError": "De Venmo-app is niet aangetroffen op je apparaat.",
   "unsupportedCardTypeError": "Dit type creditcard wordt niet ondersteund. Gebruik een andere creditcard.",
   "applePayTokenizationError": "Er is een netwerkfout opgetreden bij het verwerken van de Apple Pay-betaling. Probeer het opnieuw.",
   "applePayActiveCardError": "Voeg een ondersteunde creditcard toe aan je Apple Pay-wallet.",
@@ -9356,16 +10476,18 @@ module.exports = {
   "cvvThreeDigitLabelSubheading": "(3 cijfers)",
   "cvvFourDigitLabelSubheading": "(4 cijfers)",
   "cardholderNamePlaceholder": "Naam kaarthouder",
-  "expirationDateLabel": "Vervaldatum",
+  "expirationDateLabel": "VervaldatumB",
   "expirationDateLabelSubheading": "(MM/JJ)",
   "expirationDatePlaceholder": "MM/JJ",
   "postalCodeLabel": "Postcode",
   "payWithCard": "Betalen met creditcard",
-  "endingIn": "Eindigend op •• {{lastTwoCardDigits}}",
+  "endingIn": "Eindigend op ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Creditcard",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9376,7 +10498,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],129:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9403,6 +10525,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Noe gikk galt da PayPal-kontoen ble lagt til. Prøv på nytt.",
   "paypalFlowFailedError": "Det oppsto et problem med tilkoblingen til PayPal. Prøv på nytt.",
   "paypalTokenizationRequestActiveError": "Godkjenning av PayPal-betalingen pågår allerede",
+  "venmoCanceledError": "Noe gikk galt. Kontroller at du har installert den nyeste versjonen av Venmo-appen på enheten og at nettleseren din støtter bytte til Venmo.",
+  "venmoAppFailedError": "Finner ikke Venmo-appen på enheten.",
   "unsupportedCardTypeError": "Denne korttypen støttes ikke. Prøv med et annet kort.",
   "applePayTokenizationError": "Det oppsto en nettverksfeil under behandlingen av Apple Pay-betalingen. Prøv på nytt.",
   "applePayActiveCardError": "Legg til et kort som støttes i Apple Pay-lommeboken din.",
@@ -9417,11 +10541,13 @@ module.exports = {
   "expirationDatePlaceholder": "MM/ÅÅ",
   "postalCodeLabel": "Postnummer",
   "payWithCard": "Betal med kort",
-  "endingIn": "Som slutter på •• {{lastTwoCardDigits}}",
+  "endingIn": "Som slutter på ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Kort",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9432,7 +10558,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],130:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9459,6 +10585,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Coś poszło nie tak podczas dodawania konta PayPal. Spróbuj ponownie.",
   "paypalFlowFailedError": "Coś poszło nie tak podczas łączenia z systemem PayPal. Spróbuj ponownie.",
   "paypalTokenizationRequestActiveError": "Autoryzacja płatności PayPal jest już w trakcie realizacji.",
+  "venmoCanceledError": "Wystąpił problem. Upewnij się, czy na swoim urządzeniu masz zainstalowaną najnowszą wersję aplikacji Venmo i Twoja przeglądarka ją obsługuje.",
+  "venmoAppFailedError": "Nie można odnaleźć aplikacji Venmo na urządzeniu.",
   "unsupportedCardTypeError": "Ten typ karty nie jest obsługiwany. Spróbuj użyć innej karty.",
   "applePayTokenizationError": "Wystąpił błąd sieci podczas przetwarzania płatności Apple Pay. Spróbuj ponownie.",
   "applePayActiveCardError": "Dodaj obsługiwaną kartę do portfela Apple Pay.",
@@ -9473,11 +10601,13 @@ module.exports = {
   "expirationDatePlaceholder": "MM/RR",
   "postalCodeLabel": "Kod pocztowy",
   "payWithCard": "Zapłać kartą",
-  "endingIn": "O numerze zakończonym cyframi •• {{lastTwoCardDigits}}",
+  "endingIn": "O numerze zakończonym cyframi ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Karta",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9488,7 +10618,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],131:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9515,6 +10645,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Ocorreu um erro ao adicionar a conta do PayPal. Tente novamente.",
   "paypalFlowFailedError": "Ocorreu um erro de conexão com o PayPal. Tente novamente.",
   "paypalTokenizationRequestActiveError": "A autorização de pagamento do PayPal já está em andamento.",
+  "venmoCanceledError": "Ocorreu um erro. Certifique-se de ter a versão mais recente do aplicativo Venmo instalado no seu dispositivo e que o seu navegador suporte a mudança para o Venmo.",
+  "venmoAppFailedError": "Não foi possível encontrar o aplicativo Venmo no seu dispositivo.",
   "unsupportedCardTypeError": "Este tipo de cartão não é aceito. Experimente outro cartão.",
   "applePayTokenizationError": "Ocorreu um erro de rede ao processar o pagamento com Apple Pay. Tente novamente.",
   "applePayActiveCardError": "Adicione cartão suportado à sua carteira do Apple Pay.",
@@ -9531,9 +10663,11 @@ module.exports = {
   "payWithCard": "Pague com seu cartão",
   "endingIn": "Com final ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Cartão",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9544,7 +10678,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],132:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9571,6 +10705,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Ocorreu um erro ao associar a conta PayPal. Tente novamente.",
   "paypalFlowFailedError": "Ocorreu um erro na ligação com PayPal. Tente novamente.",
   "paypalTokenizationRequestActiveError": "Já há uma autorização de pagamento PayPal em curso.",
+  "venmoCanceledError": "Ocorreu um erro. Certifique-se de que tem a versão mais recente da aplicação Venmo instalada no seu dispositivo e que o navegador suporta a mudança para o Venmo.",
+  "venmoAppFailedError": "Não foi possível encontrar a aplicação Venmo no dispositivo.",
   "unsupportedCardTypeError": "Este tipo de cartão não é suportado. Tente usar outro cartão.",
   "applePayTokenizationError": "Ocorreu um erro de rede ao processar o pagamento com Apple Pay. Tente novamente.",
   "applePayActiveCardError": "Adicione um cartão suportado à sua carteira Apple Pay.",
@@ -9585,11 +10721,13 @@ module.exports = {
   "expirationDatePlaceholder": "MM/AA",
   "postalCodeLabel": "Código postal",
   "payWithCard": "Pagar com cartão",
-  "endingIn": "Terminação em ••{{lastTwoCardDigits}}",
+  "endingIn": "Que termina em ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Cartão",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9600,7 +10738,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],133:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9627,6 +10765,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
   "paypalFlowFailedError": "Что-то пошло не так — не удалось подключиться к системе PayPal. Повторите попытку.",
   "paypalTokenizationRequestActiveError": "Выполняется авторизация платежа PayPal.",
+  "venmoCanceledError": "Возникла ошибка. Просим вас убедиться, что у вас установлена новейшая версия приложения Venmo и ваш браузер поддерживает переключение к Venmo.",
+  "venmoAppFailedError": "Приложение Venmo не обнаружено на вашем устройстве.",
   "unsupportedCardTypeError": "Этот тип карты не поддерживается. Попробуйте воспользоваться другой картой.",
   "applePayTokenizationError": "При обработке платежа через Apple Pay возникла сетевая ошибка. Повторите попытку.",
   "applePayActiveCardError": "Добавьте поддерживаемую карту к своему счету Apple Pay.",
@@ -9641,11 +10781,13 @@ module.exports = {
   "expirationDatePlaceholder": "ММ/ГГ",
   "postalCodeLabel": "Индекс",
   "payWithCard": "Оплатить картой",
-  "endingIn": "Последние две цифры номера карты: ••{{lastTwoCardDigits}}",
+  "endingIn": "Заканчивается на ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Карта",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9656,7 +10798,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],134:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9683,6 +10825,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "Ett fel uppstod när PayPal-kontot skulle läggas till. Försök igen.",
   "paypalFlowFailedError": "Ett fel uppstod när anslutningen till PayPal skulle upprättas. Försök igen.",
   "paypalTokenizationRequestActiveError": "Betalningsgodkännandet för PayPal behandlas redan.",
+  "venmoCanceledError": "Något gick fel. Se till att du har den senaste versionen av Venmo-appen installerad på din enhet och att webbläsaren stöder att gå över till Venmo.",
+  "venmoAppFailedError": "Venmo-appen kunde inte hittas på din enhet.",
   "unsupportedCardTypeError": "Den här korttypen stöds inte. Pröva med ett annat kort.",
   "applePayTokenizationError": "Ett nätverksfel inträffade när Apple Pay-betalningen skulle behandlas. Försök igen.",
   "applePayActiveCardError": "Lägg till ett kort som stöds i Apple Pay-e-plånboken.",
@@ -9699,9 +10843,11 @@ module.exports = {
   "payWithCard": "Betala med kort",
   "endingIn": "Slutar på ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "Kort",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9712,7 +10858,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],135:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9739,6 +10885,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "เกิดข้อผิดพลาดในการเพิ่มบัญชี PayPal โปรดลองอีกครั้ง",
   "paypalFlowFailedError": "เกิดข้อผิดพลาดในการเชื่อมต่อกับ PayPal โปรดลองอีกครั้ง",
   "paypalTokenizationRequestActiveError": "การอนุญาตการชำระเงินของ PayPal อยู่ในระหว่างดำเนินการ",
+  "venmoCanceledError": "เกิดข้อผิดพลาดบางประการ ตรวจสอบว่าคุณมีแอป Venmo เวอร์ชันล่าสุดติดตั้งในอุปกรณ์ของคุณ และมีเบราเซอร์ที่รองรับ Venmo",
+  "venmoAppFailedError": "ไม่พบแอป Venmo บนอุปกรณ์ของคุณ",
   "unsupportedCardTypeError": "ไม่รองรับบัตรประเภทนี้ โปรดลองใช้บัตรใบอื่น",
   "applePayTokenizationError": "เกิดข้อผิดพลาดด้านเครือข่ายขึ้นขณะดำเนินการชำระเงินด้วย Apple Pay โปรดลองอีกครั้ง",
   "applePayActiveCardError": "เพิ่มบัตรที่รองรับในกระเป๋าสตางค์ Apple Pay ของคุณ",
@@ -9755,9 +10903,11 @@ module.exports = {
   "payWithCard": "ชำระเงินด้วยบัตร",
   "endingIn": "ลงท้ายด้วย ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "บัตร",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9768,7 +10918,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],136:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9795,6 +10945,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "添加PayPal账户时出错。请重试。",
   "paypalFlowFailedError": "连接到PayPal时出错。请重试。",
   "paypalTokenizationRequestActiveError": "PayPal付款授权已在进行中。",
+  "venmoCanceledError": "我们遇到了问题。请确保您的设备上已安装最新版本的Venmo应用，并且您的浏览器支持切换到Venmo。",
+  "venmoAppFailedError": "在您的设备上找不到Venmo应用。",
   "unsupportedCardTypeError": "不支持该卡类型。请尝试其他卡。",
   "applePayTokenizationError": "处理Apple Pay付款时出现网络错误。请重试。",
   "applePayActiveCardError": "请添加受支持的卡到您的Apple Pay钱包。",
@@ -9811,9 +10963,11 @@ module.exports = {
   "payWithCard": "用卡付款",
   "endingIn": "尾号为{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "卡",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9824,7 +10978,7 @@ module.exports = {
   "UnionPay": "银联"
 };
 
-},{}],137:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9851,6 +11005,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "加入 PayPal 帳戶時發生錯誤。請重試。",
   "paypalFlowFailedError": "連接 PayPal 時發生錯誤。請重試。",
   "paypalTokenizationRequestActiveError": "PayPal 付款授權已在處理中。",
+  "venmoCanceledError": "系統發生錯誤，請確保你已在裝置上安裝最新版本的 Venmo 應用程式，而且你的瀏覽器支援切換至 Venmo。",
+  "venmoAppFailedError": "在你的裝置上找不到 Venmo 應用程式。",
   "unsupportedCardTypeError": "不可使用此信用卡類型。請改用其他信用卡。",
   "applePayTokenizationError": "處理 Apple Pay 付款時發生網絡錯誤。請重試。",
   "applePayActiveCardError": "在 Apple Pay 錢包中加入支援的信用卡。",
@@ -9865,11 +11021,13 @@ module.exports = {
   "expirationDatePlaceholder": "月 / 年",
   "postalCodeLabel": "郵遞區號",
   "payWithCard": "使用信用卡付款",
-  "endingIn": "最後兩位數為••{{lastTwoCardDigits}}",
+  "endingIn": "最後兩位數為 ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "信用卡",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
@@ -9880,7 +11038,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],138:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9907,6 +11065,8 @@ module.exports = {
   "paypalAccountTokenizationFailedError": "新增 PayPal 帳戶時，系統發生錯誤。請重試。",
   "paypalFlowFailedError": "連結至 PayPal 時，系統發生錯誤。請重試。",
   "paypalTokenizationRequestActiveError": "PayPal 支付款項的授權已在處理中。",
+  "venmoCanceledError": "系統發生錯誤。確認你的裝置上裝有最新版本的 Venmo 應用程式，而且瀏覽器支援切換至 Venmo。",
+  "venmoAppFailedError": "你的裝置上找不到 Venmo 應用程式。",
   "unsupportedCardTypeError": "不支援此卡片類型。請嘗試其他卡片。",
   "applePayTokenizationError": "在處理 Apple Pay 付款時發生網路錯誤。請重試。",
   "applePayActiveCardError": "新增支援的卡片至你的 Apple Pay 錢包。",
@@ -9921,11 +11081,13 @@ module.exports = {
   "expirationDatePlaceholder": "月 / 年",
   "postalCodeLabel": "郵遞區號",
   "payWithCard": "使用信用卡 / 扣帳卡付款",
-  "endingIn": "你的末兩碼為 •• {{lastTwoCardDigits}}",
+  "endingIn": "你的末兩碼為 ••{{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
   "Card": "信用卡或扣帳卡",
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal 信貸",
+  "Google Pay": "Google Pay",
   "American Express": "美國運通 (American Express)",
   "Discover": "Discover",
   "Diners Club": "大來國際 (Diners Club)",
@@ -9936,7 +11098,7 @@ module.exports = {
   "UnionPay": "UnionPay"
 };
 
-},{}],139:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 'use strict';
 
 var assign = require('../lib/assign').assign;
@@ -9972,7 +11134,7 @@ BaseView.prototype.teardown = function () {
 
 module.exports = BaseView;
 
-},{"../constants":93,"../lib/assign":99,"../lib/dropin-error":103,"../lib/promise":110}],140:[function(require,module,exports){
+},{"../constants":105,"../lib/assign":112,"../lib/dropin-error":116,"../lib/promise":124}],155:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -9988,6 +11150,7 @@ var supportsFlexbox = require('../lib/supports-flexbox');
 var transitionHelper = require('../lib/transition-helper');
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+var DEVELOPER_MISCONFIGURATION_MESSAGE = 'Developer Error: Something went wrong. Check the console for details.';
 
 function MainView() {
   BaseView.apply(this, arguments);
@@ -10221,21 +11384,21 @@ MainView.prototype.hideToggle = function () {
 };
 
 MainView.prototype.showSheetError = function (error) {
-  var translatedErrorMessage;
-  var errorMessage = this.strings.genericError;
+  var errorMessage;
+  var genericErrorMessage = this.strings.genericError;
 
   if (this.strings.hasOwnProperty(error)) {
-    translatedErrorMessage = this.strings[error];
+    errorMessage = this.strings[error];
   } else if (error && error.code) {
-    translatedErrorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'];
-  }
-
-  if (translatedErrorMessage) {
-    errorMessage = translatedErrorMessage;
+    errorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'] || genericErrorMessage;
+  } else if (error === 'developerError') {
+    errorMessage = DEVELOPER_MISCONFIGURATION_MESSAGE;
+  } else {
+    errorMessage = genericErrorMessage;
   }
 
   classlist.add(this.sheetContainer, 'braintree-sheet--has-error');
-  this.sheetErrorText.textContent = errorMessage;
+  this.sheetErrorText.innerHTML = errorMessage;
 };
 
 MainView.prototype.hideSheetError = function () {
@@ -10276,7 +11439,7 @@ function prefixShowClass(classname) {
 
 module.exports = MainView;
 
-},{"../constants":93,"../lib/add-selection-event-handler":97,"../lib/analytics":98,"../lib/classlist":101,"../lib/promise":110,"../lib/supports-flexbox":111,"../lib/transition-helper":113,"./base-view":139,"./payment-methods-view":142,"./payment-options-view":143,"./payment-sheet-views":147}],141:[function(require,module,exports){
+},{"../constants":105,"../lib/add-selection-event-handler":109,"../lib/analytics":110,"../lib/classlist":114,"../lib/promise":124,"../lib/supports-flexbox":126,"../lib/transition-helper":128,"./base-view":154,"./payment-methods-view":157,"./payment-options-view":158,"./payment-sheet-views":163}],156:[function(require,module,exports){
 'use strict';
 
 var BaseView = require('./base-view');
@@ -10311,6 +11474,12 @@ PaymentMethodView.prototype._initialize = function () {
   }.bind(this));
 
   switch (this.paymentMethod.type) {
+    case paymentMethodTypes.applePay:
+      html = html.replace(/@ICON/g, 'logoApplePay')
+        .replace(/@CLASSNAME/g, '')
+        .replace(/@TITLE/g, this.strings['Apple Pay'])
+        .replace(/@SUBTITLE/g, '');
+      break;
     case paymentMethodTypes.card:
       endingInText = this.strings.endingIn.replace('{{lastTwoCardDigits}}', this.paymentMethod.details.lastTwo);
       html = html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType])
@@ -10318,17 +11487,23 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@TITLE/g, endingInText)
         .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
       break;
+    case paymentMethodTypes.googlePay:
+      html = html.replace(/@ICON/g, 'logoGooglePay')
+        .replace(/@CLASSNAME/g, '')
+        .replace(/@TITLE/g, this.strings['Google Pay'])
+        .replace(/@SUBTITLE/g, '');
+      break;
     case paymentMethodTypes.paypal:
       html = html.replace(/@ICON/g, 'logoPayPal')
         .replace(/@CLASSNAME/g, '')
         .replace(/@TITLE/g, this.paymentMethod.details.email)
         .replace(/@SUBTITLE/g, this.strings.PayPal);
       break;
-    case paymentMethodTypes.applePay:
-      html = html.replace(/@ICON/g, 'logoApplePay')
+    case paymentMethodTypes.venmo:
+      html = html.replace(/@ICON/g, 'logoVenmo')
         .replace(/@CLASSNAME/g, '')
-        .replace(/@TITLE/g, this.strings['Apple Pay'])
-        .replace(/@SUBTITLE/g, '');
+        .replace(/@TITLE/g, this.paymentMethod.details.username)
+        .replace(/@SUBTITLE/g, this.strings.Venmo);
       break;
     default:
       break;
@@ -10346,7 +11521,7 @@ PaymentMethodView.prototype.setActive = function (isActive) {
 
 module.exports = PaymentMethodView;
 
-},{"../constants":93,"../lib/add-selection-event-handler":97,"../lib/classlist":101,"./base-view":139}],142:[function(require,module,exports){
+},{"../constants":105,"../lib/add-selection-event-handler":109,"../lib/classlist":114,"./base-view":154}],157:[function(require,module,exports){
 'use strict';
 
 var BaseView = require('./base-view');
@@ -10359,7 +11534,9 @@ var Promise = require('../lib/promise');
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
   PayPalAccount: 'PayPal',
-  ApplePayCard: 'Apple Pay'
+  ApplePayCard: 'Apple Pay',
+  AndroidPayCard: 'Google Pay',
+  VenmoAccount: 'Venmo'
 };
 
 function PaymentMethodsView() {
@@ -10446,7 +11623,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
       this.activeMethodView = this.views[i];
-      this._headingLabel.textContent = this._getPaymentMethodString();
+      this._headingLabel.innerHTML = this._getPaymentMethodString();
       break;
     }
   }
@@ -10467,7 +11644,7 @@ PaymentMethodsView.prototype.requestPaymentMethod = function () {
 
 module.exports = PaymentMethodsView;
 
-},{"../constants":93,"../lib/classlist":101,"../lib/dropin-error":103,"../lib/promise":110,"./base-view":139,"./payment-method-view":141}],143:[function(require,module,exports){
+},{"../constants":105,"../lib/classlist":114,"../lib/dropin-error":116,"../lib/promise":124,"./base-view":154,"./payment-method-view":156}],158:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -10511,37 +11688,38 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   div.setAttribute('tabindex', '0');
 
   switch (paymentOptionID) {
+    case paymentOptionIDs.applePay:
+      paymentSource = this.strings['Apple Pay'];
+      html = html.replace(/@ICON/g, 'logoApplePay');
+      break;
     case paymentOptionIDs.card:
       paymentSource = this.strings.Card;
       html = html.replace(/@ICON/g, 'iconCardFront');
-      html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(paymentSource));
-      html = html.replace(/@OPTION_TITLE/g, paymentSource);
       html = html.replace(/@CLASSNAME/g, 'braintree-icon--bordered');
+      break;
+    case paymentOptionIDs.googlePay:
+      paymentSource = this.strings['Google Pay'];
+      html = html.replace(/@ICON/g, 'logoGooglePay');
       break;
     case paymentOptionIDs.paypal:
       paymentSource = this.strings.PayPal;
       html = html.replace(/@ICON/g, 'logoPayPal');
-      html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(this.strings.PayPal));
-      html = html.replace(/@OPTION_TITLE/g, this.strings.PayPal);
-      html = html.replace(/@CLASSNAME/g, '');
       break;
     case paymentOptionIDs.paypalCredit:
       paymentSource = this.strings['PayPal Credit'];
       html = html.replace(/@ICON/g, 'logoPayPalCredit');
-      html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(paymentSource));
-      html = html.replace(/@OPTION_TITLE/g, paymentSource);
-      html = html.replace(/@CLASSNAME/g, '');
       break;
-    case paymentOptionIDs.applePay:
-      paymentSource = this.strings['Apple Pay'];
-      html = html.replace(/@ICON/g, 'logoApplePay');
-      html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(paymentSource));
-      html = html.replace(/@OPTION_TITLE/g, paymentSource);
-      html = html.replace(/@CLASSNAME/g, '');
+    case paymentOptionIDs.venmo:
+      paymentSource = this.strings.Venmo;
+      html = html.replace(/@ICON/g, 'logoVenmo');
       break;
     default:
       break;
   }
+
+  html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(paymentSource));
+  html = html.replace(/@OPTION_TITLE/g, paymentSource);
+  html = html.replace(/@CLASSNAME/g, '');
 
   div.innerHTML = html;
 
@@ -10560,7 +11738,7 @@ PaymentOptionsView.prototype._generateOptionLabel = function (paymentSourceStrin
 
 module.exports = PaymentOptionsView;
 
-},{"../constants":93,"../lib/add-selection-event-handler":97,"../lib/analytics":98,"./base-view":139}],144:[function(require,module,exports){
+},{"../constants":105,"../lib/add-selection-event-handler":109,"../lib/analytics":110,"./base-view":154}],159:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -10568,6 +11746,8 @@ var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btApplePay = require('braintree-web/apple-pay');
 var DropinError = require('../../lib/dropin-error');
+var isHTTPS = require('../../lib/is-https');
+var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
 function ApplePayView() {
@@ -10652,10 +11832,28 @@ ApplePayView.prototype.updateConfiguration = function (key, value) {
   this.applePayConfiguration[key] = value;
 };
 
+ApplePayView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
+  var applePayBrowserSupported;
+
+  if (!applePayEnabled) {
+    return Promise.resolve(false);
+  }
+
+  applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS();
+
+  if (!applePayBrowserSupported) {
+    return Promise.resolve(false);
+  }
+
+  return Promise.resolve(Boolean(global.ApplePaySession.canMakePayments()));
+};
+
 module.exports = ApplePayView;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../constants":93,"../../lib/assign":99,"../../lib/dropin-error":103,"../base-view":139,"braintree-web/apple-pay":20}],145:[function(require,module,exports){
+},{"../../constants":105,"../../lib/assign":112,"../../lib/dropin-error":116,"../../lib/is-https":120,"../../lib/promise":124,"../base-view":154,"braintree-web/apple-pay":23}],160:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -10663,6 +11861,7 @@ var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
+var Promise = require('../../lib/promise');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
@@ -10754,10 +11953,16 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
   }
 };
 
+BasePayPalView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+
+  return Promise.resolve(gatewayConfiguration.paypalEnabled);
+};
+
 module.exports = BasePayPalView;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/assign":99,"../../lib/dropin-error":103,"../base-view":139,"braintree-web/paypal-checkout":80}],146:[function(require,module,exports){
+},{"../../lib/assign":112,"../../lib/dropin-error":116,"../../lib/promise":124,"../base-view":154,"braintree-web/paypal-checkout":86}],161:[function(require,module,exports){
 'use strict';
 
 var assign = require('../../lib/assign').assign;
@@ -10767,6 +11972,7 @@ var classlist = require('../../lib/classlist');
 var constants = require('../../constants');
 var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
+var isUtf8 = require('../../lib/is-utf-8');
 var transitionHelper = require('../../lib/transition-helper');
 var Promise = require('../../lib/promise');
 
@@ -10910,7 +12116,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     fields: {
       number: {
         selector: this._generateFieldSelector('number'),
-        placeholder: '•••• •••• •••• ••••'
+        placeholder: generateCardNumberPlaceholder()
       },
       expirationDate: {
         selector: this._generateFieldSelector('expiration'),
@@ -10918,7 +12124,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
       },
       cvv: {
         selector: this._generateFieldSelector('cvv'),
-        placeholder: '•••'
+        placeholder: addBullets(3)
       },
       postalCode: {
         selector: this._generateFieldSelector('postal-code')
@@ -11176,7 +12382,7 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
   classlist.add(fieldGroup, 'braintree-form__field-group--has-error');
 
   fieldError = this.fieldErrors[field];
-  fieldError.textContent = errorMessage;
+  fieldError.innerHTML = errorMessage;
 
   if (input && isNormalFieldElement(input)) {
     input.setAttribute('aria-invalid', true);
@@ -11231,13 +12437,22 @@ CardView.prototype._onBlurEvent = function (event) {
 
   classlist.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
-  if (isCardViewElement() && field.isEmpty) {
+  if (shouldApplyFieldEmptyError(field)) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
   } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
     this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
+
+  setTimeout(function () {
+    // when focusing on a field by clicking the label,
+    // we need to wait a bit for the iframe to be
+    // focused properly before applying validations
+    if (shouldApplyFieldEmptyError(field)) {
+      this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
+    }
+  }.bind(this), 150);
 };
 
 CardView.prototype._onCardTypeChangeEvent = function (event) {
@@ -11245,7 +12460,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   var cardNumberHrefLink = '#iconCardFront';
   var cvvHrefLink = '#iconCVVBack';
   var cvvDescriptor = this.strings.cvvThreeDigitLabelSubheading;
-  var cvvPlaceholder = '•••';
+  var cvvPlaceholder = addBullets(3);
   var numberFieldGroup = this.getElementById('number-field-group');
 
   if (event.cards.length === 1) {
@@ -11254,7 +12469,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
     if (cardType === 'american-express') {
       cvvHrefLink = '#iconCVVFront';
       cvvDescriptor = this.strings.cvvFourDigitLabelSubheading;
-      cvvPlaceholder = '••••';
+      cvvPlaceholder = addBullets(4);
     }
     // Keep icon visible when field is not focused
     classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
@@ -11266,7 +12481,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 
   if (this.hasCVV) {
     this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
-    this.cvvLabelDescriptor.textContent = cvvDescriptor;
+    this.cvvLabelDescriptor.innerHTML = cvvDescriptor;
 
     if (!this._hasCustomCVVPlaceholder) {
       this.hostedFieldsInstance.setAttribute({
@@ -11347,8 +12562,18 @@ CardView.prototype._isCardTypeSupported = function (cardType) {
   return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
 
+CardView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+
+  return Promise.resolve(gatewayConfiguration.creditCards.supportedCardTypes.length > 0);
+};
+
 function isNormalFieldElement(element) {
   return element.id.indexOf('braintree__card-view-input') !== -1;
+}
+
+function shouldApplyFieldEmptyError(field) {
+  return field.isEmpty && isCardViewElement();
 }
 
 function isCardViewElement() {
@@ -11374,23 +12599,158 @@ function normalizeStyles(styles) {
   });
 }
 
+function addBullets(number) {
+  var bulletCharacter = isUtf8() ? '•' : '*';
+
+  return Array(number + 1).join(bulletCharacter);
+}
+
+function generateCardNumberPlaceholder() {
+  var four = addBullets(4);
+
+  return [four, four, four, four].join(' ');
+}
+
 module.exports = CardView;
 
-},{"../../constants":93,"../../lib/assign":99,"../../lib/classlist":101,"../../lib/dropin-error":103,"../../lib/promise":110,"../../lib/transition-helper":113,"../base-view":139,"braintree-web/hosted-fields":45}],147:[function(require,module,exports){
+},{"../../constants":105,"../../lib/assign":112,"../../lib/classlist":114,"../../lib/dropin-error":116,"../../lib/is-utf-8":121,"../../lib/promise":124,"../../lib/transition-helper":128,"../base-view":154,"braintree-web/hosted-fields":50}],162:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var assign = require('../../lib/assign').assign;
+var BaseView = require('../base-view');
+var btGooglePay = require('braintree-web/google-payment');
+var DropinError = require('../../lib/dropin-error');
+var constants = require('../../constants');
+var assets = require('../../lib/assets');
+var classlist = require('../../lib/classlist');
+var Promise = require('../../lib/promise');
+var analytics = require('../../lib/analytics');
+
+function GooglePayView() {
+  BaseView.apply(this, arguments);
+}
+
+GooglePayView.prototype = Object.create(BaseView.prototype);
+GooglePayView.prototype.constructor = GooglePayView;
+GooglePayView.ID = GooglePayView.prototype.ID = constants.paymentOptionIDs.googlePay;
+
+GooglePayView.prototype.initialize = function () {
+  var self = this;
+
+  self.googlePayConfiguration = assign({}, self.model.merchantConfiguration.googlePay);
+
+  self.model.asyncDependencyStarting();
+
+  return btGooglePay.create({client: self.client}).then(function (googlePayInstance) {
+    self.googlePayInstance = googlePayInstance;
+    self.paymentsClient = createPaymentsClient(self.client);
+  }).then(function () {
+    var buttonDiv = self.getElementById('google-pay-button');
+
+    buttonDiv.addEventListener('click', function (event) {
+      event.preventDefault();
+
+      classlist.add(self.element, 'braintree-sheet--loading');
+
+      self.tokenize().then(function () {
+        classlist.remove(self.element, 'braintree-sheet--loading');
+      });
+    });
+    self.model.asyncDependencyReady();
+  }).catch(function (err) {
+    self.model.asyncDependencyFailed({
+      view: self.ID,
+      error: new DropinError(err)
+    });
+  });
+};
+
+GooglePayView.prototype.tokenize = function () {
+  var self = this;
+  var paymentDataRequest = self.googlePayInstance.createPaymentDataRequest(self.googlePayConfiguration);
+  var rawPaymentData;
+
+  return self.paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
+    rawPaymentData = paymentData;
+    return self.googlePayInstance.parseResponse(paymentData);
+  }).then(function (tokenizePayload) {
+    tokenizePayload.rawPaymentData = rawPaymentData;
+    self.model.addPaymentMethod(tokenizePayload);
+  }).catch(function (err) {
+    var reportedError = err;
+
+    if (err.statusCode === 'DEVELOPER_ERROR') {
+      console.error(err); // eslint-disable-line no-console
+      reportedError = 'developerError';
+    } else if (err.statusCode === 'CANCELED') {
+      analytics.sendEvent(self.client, 'googlepay.loadPaymentData.canceled');
+      return;
+    } else if (err.statusCode) {
+      analytics.sendEvent(self.client, 'googlepay.loadPaymentData.failed');
+    }
+
+    self.model.reportError(reportedError);
+  });
+};
+
+GooglePayView.prototype.updateConfiguration = function (key, value) {
+  this.googlePayConfiguration[key] = value;
+};
+
+GooglePayView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+
+  if (!(gatewayConfiguration.androidPay && Boolean(options.merchantConfiguration.googlePay))) {
+    return Promise.resolve(false);
+  }
+
+  return Promise.resolve().then(function () {
+    if (!global.google) {
+      return assets.loadScript(global.document.head, {
+        id: constants.GOOGLE_PAYMENT_SCRIPT_ID,
+        src: constants.GOOGLE_PAYMENT_SOURCE
+      });
+    }
+
+    return Promise.resolve();
+  }).then(function () {
+    var paymentsClient = createPaymentsClient(options.client);
+
+    return paymentsClient.isReadyToPay({
+      allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
+    });
+  }).then(function (response) {
+    return Boolean(response.result);
+  });
+};
+
+function createPaymentsClient(client) {
+  return new global.google.payments.api.PaymentsClient({
+    environment: client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'PRODUCTION' : 'TEST'
+  });
+}
+
+module.exports = GooglePayView;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../../constants":105,"../../lib/analytics":110,"../../lib/assets":111,"../../lib/assign":112,"../../lib/classlist":114,"../../lib/dropin-error":116,"../../lib/promise":124,"../base-view":154,"braintree-web/google-payment":45}],163:[function(require,module,exports){
 'use strict';
 
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
 var result = {};
 
+result[paymentOptionIDs.applePay] = require('./apple-pay-view');
 result[paymentOptionIDs.card] = require('./card-view');
+result[paymentOptionIDs.googlePay] = require('./google-pay-view');
 result[paymentOptionIDs.paypal] = require('./paypal-view');
 result[paymentOptionIDs.paypalCredit] = require('./paypal-credit-view');
-result[paymentOptionIDs.applePay] = require('./apple-pay-view');
+result[paymentOptionIDs.venmo] = require('./venmo-view');
 
 module.exports = result;
 
-},{"../../constants":93,"./apple-pay-view":144,"./card-view":146,"./paypal-credit-view":148,"./paypal-view":149}],148:[function(require,module,exports){
+},{"../../constants":105,"./apple-pay-view":159,"./card-view":161,"./google-pay-view":162,"./paypal-credit-view":164,"./paypal-view":165,"./venmo-view":166}],164:[function(require,module,exports){
 'use strict';
 
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
@@ -11406,9 +12766,14 @@ PayPalCreditView.prototype = Object.create(BasePayPalView.prototype);
 PayPalCreditView.prototype.constructor = PayPalCreditView;
 PayPalCreditView.ID = PayPalCreditView.prototype.ID = paymentOptionIDs.paypalCredit;
 
+PayPalCreditView.isEnabled = function (options) {
+  return BasePayPalView.isEnabled(options).then(function (enabled) {
+    return enabled && Boolean(options.merchantConfiguration.paypalCredit);
+  });
+};
 module.exports = PayPalCreditView;
 
-},{"../../constants":93,"./base-paypal-view":145}],149:[function(require,module,exports){
+},{"../../constants":105,"./base-paypal-view":160}],165:[function(require,module,exports){
 'use strict';
 
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
@@ -11422,7 +12787,103 @@ PayPalView.prototype = Object.create(BasePayPalView.prototype);
 PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
 
+PayPalView.isEnabled = function (options) {
+  return BasePayPalView.isEnabled(options).then(function (enabled) {
+    return enabled && Boolean(options.merchantConfiguration.paypal);
+  });
+};
+
 module.exports = PayPalView;
 
-},{"../../constants":93,"./base-paypal-view":145}]},{},[96])(96)
+},{"../../constants":105,"./base-paypal-view":160}],166:[function(require,module,exports){
+'use strict';
+
+var assign = require('../../lib/assign').assign;
+var BaseView = require('../base-view');
+var btVenmo = require('braintree-web/venmo');
+var classlist = require('../../lib/classlist');
+var DropinError = require('../../lib/dropin-error');
+var Promise = require('../../lib/promise');
+var paymentOptionIDs = require('../../constants').paymentOptionIDs;
+
+function VenmoView() {
+  BaseView.apply(this, arguments);
+}
+
+VenmoView.prototype = Object.create(BaseView.prototype);
+VenmoView.prototype.constructor = VenmoView;
+VenmoView.ID = VenmoView.prototype.ID = paymentOptionIDs.venmo;
+
+VenmoView.prototype.initialize = function () {
+  var self = this;
+  var venmoConfiguration = assign({}, self.model.merchantConfiguration.venmo, {client: this.client});
+
+  self.model.asyncDependencyStarting();
+
+  return btVenmo.create(venmoConfiguration).then(function (venmoInstance) {
+    self.venmoInstance = venmoInstance;
+
+    if (!self.venmoInstance.hasTokenizationResult()) {
+      return Promise.resolve();
+    }
+
+    return self.venmoInstance.tokenize().then(function (payload) {
+      self.model.reportAppSwitchPayload(payload);
+    }).catch(function (err) {
+      if (self._isIgnorableError(err)) {
+        return;
+      }
+      self.model.reportAppSwitchError(paymentOptionIDs.venmo, err);
+    });
+  }).then(function () {
+    var button = self.getElementById('venmo-button');
+
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+
+      classlist.add(self.element, 'braintree-sheet--loading');
+
+      return self.venmoInstance.tokenize().then(function (payload) {
+        self.model.addPaymentMethod(payload);
+      }).catch(function (tokenizeErr) {
+        if (self._isIgnorableError(tokenizeErr)) {
+          return;
+        }
+
+        self.model.reportError(tokenizeErr);
+      }).then(function () {
+        classlist.remove(self.element, 'braintree-sheet--loading');
+      });
+    });
+
+    self.model.asyncDependencyReady();
+  }).catch(function (err) {
+    self.model.asyncDependencyFailed({
+      view: self.ID,
+      error: new DropinError(err)
+    });
+  });
+};
+
+VenmoView.prototype._isIgnorableError = function (error) {
+  // customer cancels the flow in the app
+  // we don't emit an error because the customer
+  // initiated that action
+  return error.code === 'VENMO_APP_CANCELED';
+};
+
+VenmoView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
+
+  if (!venmoEnabled) {
+    return Promise.resolve(false);
+  }
+
+  return Promise.resolve(btVenmo.isBrowserSupported(options.merchantConfiguration.venmo));
+};
+
+module.exports = VenmoView;
+
+},{"../../constants":105,"../../lib/assign":112,"../../lib/classlist":114,"../../lib/dropin-error":116,"../../lib/promise":124,"../base-view":154,"braintree-web/venmo":94}]},{},[108])(108)
 });
