@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-unreleased
+1.10.0
 ----------
 - Enable Venmo support
 - Enable Google Pay support
