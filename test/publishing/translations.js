@@ -3,6 +3,7 @@
 var fs = require('fs');
 var expect = require('chai').expect;
 
+var translations = require('../../src/translations');
 var englishTranslation = require('../../src/translations/en_US');
 var englishTranslationKeys = Object.keys(englishTranslation);
 
@@ -32,5 +33,18 @@ describe('translations', function () {
 
       expect(translationKeys.length).to.equal(englishTranslationKeys.length);
     });
+  });
+
+  it('each 2 character alias corresponds to a translation object', function () {
+    Object.keys(translations.twoCharacterLocaleAliases).forEach(function (key) {
+      expect(translations.twoCharacterLocaleAliases[key]).to.be.an('object');
+    });
+  });
+
+  it('fiveCharacterLocales do not clobber twoCharacterLocalAliases', function () {
+    expect(Object.keys(translations.translations).length).to.eq(
+      Object.keys(translations.twoCharacterLocaleAliases).length +
+      Object.keys(translations.fiveCharacterLocales).length
+    );
   });
 });

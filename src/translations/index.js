@@ -22,7 +22,7 @@ var fiveCharacterLocales = {
   pt_BR: require('./pt_BR'),
   pt_PT: require('./pt_PT'),
   ru_RU: require('./ru_RU'),
-  sv_SV: require('./sv_SE'),
+  sv_SE: require('./sv_SE'),
   th_TH: require('./th_TH'),
   zh_CN: require('./zh_CN'),
   zh_HK: require('./zh_HK'),
