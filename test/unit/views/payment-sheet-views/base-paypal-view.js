@@ -4,6 +4,8 @@
 var BaseView = require('../../../../src/views/base-view');
 var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
+var Promise = require('../../../../src/lib/promise');
+var assets = require('../../../../src/lib/assets');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
@@ -701,14 +703,16 @@ describe('BasePayPalView', function () {
   describe('isEnabled', function () {
     beforeEach(function () {
       this.options = {
-        client: this.fakeClient
+        client: this.fakeClient,
+        merchantConfiguration: {
+          paypal: {}
+        }
       };
-    });
 
-    it('resolves true if merchant has PayPal enabled on the gateway', function () {
-      return BasePayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(true);
-      });
+      this.configuration.gatewayConfiguration.paypalEnabled = true;
+      global.paypal = {};
+
+      this.sandbox.stub(assets, 'loadScript').resolves();
     });
 
     it('resolves false if merchant does not have PayPal enabled on the gateway', function () {
@@ -716,6 +720,93 @@ describe('BasePayPalView', function () {
 
       return BasePayPalView.isEnabled(this.options).then(function (result) {
         expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves true if global.paypal exists', function () {
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(true);
+      });
+    });
+
+    it('skips loading paypal script if global.paypal exists', function () {
+      return BasePayPalView.isEnabled(this.options).then(function () {
+        expect(assets.loadScript).to.not.be.called;
+      });
+    });
+
+    it('loads paypal script if global.paypal does not exist', function () {
+      delete global.paypal;
+
+      return BasePayPalView.isEnabled(this.options).then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith({
+          src: 'https://www.paypalobjects.com/api/checkout.min.js',
+          id: 'braintree-dropin-paypal-checkout-script',
+          dataAttributes: {
+            'log-level': 'warn'
+          }
+        });
+      });
+    });
+
+    it('loads paypal script with merchant provided log level', function () {
+      delete global.paypal;
+
+      this.options.merchantConfiguration.paypal.logLevel = 'error';
+
+      return BasePayPalView.isEnabled(this.options).then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith({
+          src: 'https://www.paypalobjects.com/api/checkout.min.js',
+          id: 'braintree-dropin-paypal-checkout-script',
+          dataAttributes: {
+            'log-level': 'error'
+          }
+        });
+      });
+    });
+
+    it('resolves true after PayPal script is loaded', function () {
+      delete global.paypal;
+
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(result).to.equal(true);
+      });
+    });
+
+    it('resolves false if load script fails', function () {
+      delete global.paypal;
+
+      assets.loadScript.rejects();
+
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('returns existing promise if already in progress', function () {
+      var firstPromise, secondPromise;
+
+      delete global.paypal;
+
+      assets.loadScript.callsFake(function () {
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            resolve();
+          }, 10);
+        });
+      });
+
+      firstPromise = BasePayPalView.isEnabled(this.options);
+      secondPromise = BasePayPalView.isEnabled(this.options);
+
+      expect(firstPromise).to.equal(secondPromise);
+
+      return secondPromise.then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
       });
     });
   });

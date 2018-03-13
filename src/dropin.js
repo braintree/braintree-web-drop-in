@@ -18,6 +18,7 @@ var isUtf8 = require('./lib/is-utf-8');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
 var sanitizeHtml = require('./lib/sanitize-html');
+var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
@@ -37,7 +38,6 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 var VERSION = process.env.npm_package_version;
 
 /**
@@ -248,10 +248,9 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var localizedStrings, localizedHTML, paypalScriptOptions;
+  var localizedStrings, localizedHTML;
   var self = this;
   var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
-  var setupPromise = Promise.resolve();
 
   self._injectStylesheet();
 
@@ -319,8 +318,6 @@ Dropin.prototype._initialize = function (callback) {
 
     return self._model.initialize();
   }).then(function () {
-    var paypalRequired;
-
     self._model.on('cancelInitialization', function (err) {
       self._dropinWrapper.innerHTML = '';
       analytics.sendEvent(self._client, 'load-error');
@@ -352,24 +349,6 @@ Dropin.prototype._initialize = function (callback) {
       self._emit('paymentOptionSelected', event);
     });
 
-    paypalRequired = self._supportsPaymentOption(paymentOptionIDs.paypal) || self._supportsPaymentOption(paymentOptionIDs.paypalCredit);
-
-    if (paypalRequired && !global.paypal) {
-      paypalScriptOptions = {
-        src: constants.CHECKOUT_JS_SOURCE,
-        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        dataAttributes: {
-          'log-level': self._merchantConfiguration.paypal && self._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
-        }
-      };
-
-      setupPromise = setupPromise.then(function () {
-        return assets.loadScript(self._dropinWrapper, paypalScriptOptions);
-      });
-    }
-
-    return setupPromise;
-  }).then(function () {
     return self._setUpDependenciesAndViews();
   }).catch(function (err) {
     self.teardown().then(function () {
@@ -452,8 +431,9 @@ Dropin.prototype._setUpDataCollector = function () {
   var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
 
   this._model.asyncDependencyStarting();
-  global.braintree.dataCollector.create(config).then(function (instance) {
-    self._dataCollectorInstance = instance;
+  this._dataCollector = new DataCollector(config);
+
+  this._dataCollector.initialize().then(function () {
     self._model.asyncDependencyReady();
   }).catch(function (err) {
     self._model.cancelInitialization(new DropinError({
@@ -482,16 +462,8 @@ Dropin.prototype._setUpThreeDSecure = function () {
 };
 
 Dropin.prototype._setUpDependenciesAndViews = function () {
-  var braintreeWebVersion, dataCollectorScriptOptions;
-
-  if (this._merchantConfiguration.dataCollector && !document.querySelector('#' + constants.DATA_COLLECTOR_SCRIPT_ID)) {
-    braintreeWebVersion = this._client.getVersion();
-    dataCollectorScriptOptions = {
-      src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
-      id: constants.DATA_COLLECTOR_SCRIPT_ID
-    };
-
-    assets.loadScript(this._dropinWrapper, dataCollectorScriptOptions).then(this._setUpDataCollector.bind(this));
+  if (this._merchantConfiguration.dataCollector) {
+    this._setUpDataCollector();
   }
 
   if (this._merchantConfiguration.threeDSecure) {
@@ -655,8 +627,8 @@ Dropin.prototype.requestPaymentMethod = function () {
 
     return payload;
   }.bind(this)).then(function (payload) {
-    if (this._dataCollectorInstance) {
-      payload.deviceData = this._dataCollectorInstance.deviceData;
+    if (this._dataCollector) {
+      payload.deviceData = this._dataCollector.getDeviceData();
     }
     return payload;
   }.bind(this)).then(function (payload) {
@@ -716,7 +688,7 @@ Dropin.prototype._getVaultedPaymentMethods = function () {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
-  var mainviewTeardownError, dataCollectorError;
+  var teardownError;
   var promise = Promise.resolve();
   var self = this;
 
@@ -725,15 +697,15 @@ Dropin.prototype.teardown = function () {
   if (this._mainView) {
     promise.then(function () {
       return self._mainView.teardown().catch(function (err) {
-        mainviewTeardownError = err;
+        teardownError = err;
       });
     });
   }
 
-  if (this._dataCollectorInstance) {
+  if (this._dataCollector) {
     promise.then(function () {
-      return this._dataCollectorInstance.teardown().catch(function (error) {
-        dataCollectorError = new DropinError({
+      return this._dataCollector.teardown().catch(function (error) {
+        teardownError = new DropinError({
           message: 'Drop-in errored tearing down Data Collector.',
           braintreeWebError: error
         });
@@ -744,7 +716,7 @@ Dropin.prototype.teardown = function () {
   if (this._threeDSecure) {
     promise.then(function () {
       return this._threeDSecure.teardown().catch(function (error) {
-        dataCollectorError = new DropinError({
+        teardownError = new DropinError({
           message: 'Drop-in errored tearing down 3D Secure.',
           braintreeWebError: error
         });
@@ -755,10 +727,8 @@ Dropin.prototype.teardown = function () {
   return promise.then(function () {
     return self._removeDropinWrapper();
   }).then(function () {
-    if (mainviewTeardownError) {
-      return Promise.reject(mainviewTeardownError);
-    } else if (dataCollectorError) {
-      return Promise.reject(dataCollectorError);
+    if (teardownError) {
+      return Promise.reject(teardownError);
     }
 
     return Promise.resolve();

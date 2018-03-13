@@ -428,7 +428,7 @@ describe('GooglePayView', function () {
 
       return GooglePayView.isEnabled(this.fakeOptions).then(function () {
         expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith(global.document.head, {
+        expect(assets.loadScript).to.be.calledWith({
           id: 'braintree-dropin-google-payment-script',
           src: 'https://payments.developers.google.com/js/apis/pay.js'
         });

@@ -1,5 +1,6 @@
 'use strict';
 
+var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 var BasePayPalView = require('./base-paypal-view');
 
@@ -12,9 +13,11 @@ PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
 
 PayPalView.isEnabled = function (options) {
-  return BasePayPalView.isEnabled(options).then(function (enabled) {
-    return enabled && Boolean(options.merchantConfiguration.paypal);
-  });
+  if (!options.merchantConfiguration.paypal) {
+    return Promise.resolve(false);
+  }
+
+  return BasePayPalView.isEnabled(options);
 };
 
 module.exports = PayPalView;
