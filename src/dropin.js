@@ -530,11 +530,8 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 
     div.classList.add('braintree-disabled');
     div.removeEventListener('click', clickHandler);
-    if (error.code === 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED') {
-      errorMessageDiv.innerHTML = constants.errors.PAYPAL_NON_LINKED_SANDBOX;
-    } else {
-      errorMessageDiv.innerHTML = error.message;
-    }
+    errorMessageDiv.innerHTML = constants.errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
+    console.error(error); // eslint-disable-line no-console
   }.bind(this));
 };
 
