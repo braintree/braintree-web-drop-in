@@ -228,11 +228,11 @@ describe('BasePayPalView', function () {
     });
 
     it('calls paypalInstance.createPayment with a locale if one is provided', function () {
-      var fakeLocaleCode = 'fake_LOCALE';
+      var localeCode = 'fr_FR';
       var paypalInstance = this.paypalInstance;
       var model = this.model;
 
-      model.merchantConfiguration.locale = fakeLocaleCode;
+      model.merchantConfiguration.locale = localeCode;
 
       this.paypal.Button.render.resolves();
 
@@ -242,22 +242,94 @@ describe('BasePayPalView', function () {
         return paymentFunction().then(function () {
           expect(paypalInstance.createPayment).to.be.calledOnce;
           expect(paypalInstance.createPayment).to.be.calledWithMatch({
-            locale: 'fake_LOCALE'
+            locale: 'fr_FR'
           });
         });
       }.bind(this));
     });
 
     it('calls paypal.Button.render with a locale if one is provided', function () {
-      var fakeLocaleCode = 'fake_LOCALE';
+      var localeCode = 'fr_FR';
       var model = this.model;
       var view = this.view;
 
-      model.merchantConfiguration.locale = fakeLocaleCode;
+      model.merchantConfiguration.locale = localeCode;
 
       return view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
-          locale: 'fake_LOCALE'
+          locale: 'fr_FR'
+        });
+      }.bind(this));
+    });
+
+    it('docs not call paypalInstance.createPayment with locale when an invalid locale is provided', function () {
+      var invalidLocaleCode = 'en_FOO';
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+
+      model.merchantConfiguration.locale = invalidLocaleCode;
+
+      this.paypal.Button.render.resolves();
+
+      return this.view.initialize().then(function () {
+        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
+
+        return paymentFunction().then(function () {
+          expect(paypalInstance.createPayment).to.be.calledOnce;
+          expect(paypalInstance.createPayment).to.not.be.calledWithMatch({
+            locale: invalidLocaleCode
+          });
+        });
+      }.bind(this));
+    });
+
+    it('does not call paypal.Button.render with locale when an invalid locale is provided', function () {
+      var invalidLocaleCode = 'en_FOO';
+      var model = this.model;
+      var view = this.view;
+
+      model.merchantConfiguration.locale = invalidLocaleCode;
+
+      return view.initialize().then(function () {
+        expect(this.paypal.Button.render).to.be.calledOnce;
+        expect(this.paypal.Button.render).to.not.be.calledWithMatch({
+          locale: invalidLocaleCode
+        });
+      }.bind(this));
+    });
+
+    it('docs not call paypalInstance.createPayment with locale when 2 character locale is provided', function () {
+      var invalidLocaleCode = 'fr';
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+
+      model.merchantConfiguration.locale = invalidLocaleCode;
+
+      this.paypal.Button.render.resolves();
+
+      return this.view.initialize().then(function () {
+        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
+
+        return paymentFunction().then(function () {
+          expect(paypalInstance.createPayment).to.be.calledOnce;
+          expect(paypalInstance.createPayment).to.not.be.calledWithMatch({
+            locale: invalidLocaleCode
+          });
+        });
+      }.bind(this));
+    });
+
+    it('does not call paypal.Button.render with locale when 2 character locale is provided', function () {
+      var invalidLocaleCode = 'fr';
+      var model = this.model;
+      var view = this.view;
+
+      model.merchantConfiguration.locale = invalidLocaleCode;
+
+      return view.initialize().then(function () {
+        expect(this.paypal.Button.render).to.be.calledOnce;
+        expect(this.paypal.Button.render).to.not.be.calledWithMatch({
+          locale: invalidLocaleCode
         });
       }.bind(this));
     });

@@ -6,6 +6,7 @@ var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
 var constants = require('../../constants');
 var assets = require('../../lib/assets');
+var translations = require('../../translations').fiveCharacterLocales;
 var Promise = require('../../lib/promise');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
@@ -51,7 +52,6 @@ BasePayPalView.prototype.initialize = function () {
       env: environment,
       style: self.paypalConfiguration.buttonStyle || {},
       commit: self.paypalConfiguration.commit,
-      locale: locale,
       payment: function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
       },
@@ -66,8 +66,9 @@ BasePayPalView.prototype.initialize = function () {
       onError: reportError
     };
 
-    if (locale) {
+    if (locale && locale in translations) {
       self.paypalConfiguration.locale = locale;
+      checkoutJSConfiguration.locale = locale;
     }
 
     if (isCredit) {
