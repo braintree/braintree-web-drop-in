@@ -1969,6 +1969,17 @@ describe('CardView', function () {
       }.bind(this));
     });
 
+    it('reports a duplicate card error to DropinModel when tokenization returns an error', function () {
+      var fakeError = {code: 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE'};
+
+      this.context.hostedFieldsInstance.tokenize.rejects(fakeError);
+      this.sandbox.stub(this.context.model, 'reportError');
+
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.context.model.reportError).to.be.calledWith('hostedFieldsDuplicateCardError');
+      }.bind(this));
+    });
+
     it('shows unsupported card field error when attempting to use an unsupported card and reports an error', function () {
       var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
 
@@ -2034,12 +2045,6 @@ describe('CardView', function () {
         expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;
         expect(numberFieldError.textContent).to.equal('This card number is not valid.');
         expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
-      }.bind(this));
-    });
-
-    it('calls hostedFieldsInstance.tokenize when form is valid', function () {
-      return CardView.prototype.tokenize.call(this.context).then(function () {
-        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledOnce;
       }.bind(this));
     });
 

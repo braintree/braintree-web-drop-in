@@ -18,6 +18,7 @@ module.exports = {
   fieldInvalidForPostalCode: 'This postal code is not valid.',
   fieldTooLongForCardholderName: 'Cardholder name must be less than 256 characters.',
   genericError: 'Something went wrong on our end.',
+  hostedFieldsDuplicateCardError: 'This credit card already exists as a saved payment method.',
   hostedFieldsFailedTokenizationError: 'Please check your information and try again.',
   hostedFieldsTokenizationCvvVerificationFailedError: 'Credit card verification failed. Please check your information and try again.',
   hostedFieldsTokenizationNetworkErrorError: 'Network error. Please try again.',
