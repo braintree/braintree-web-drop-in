@@ -50,18 +50,15 @@ module PayPal
 
   def login_to_paypal
     expect(page).to have_text("Pay with PayPal", wait: 30)
+    split_login = first('#splitEmail')
 
-    login_iframe = find("#injectedUnifiedLogin iframe")
+    fill_in("email", :with => ENV["PAYPAL_USERNAME"])
 
-    within_frame login_iframe do
-      fill_in("email", :with => ENV["PAYPAL_USERNAME"])
-      fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
+    click_button("btnNext") unless split_login.nil?
 
-      sleep 1
+    fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
+    click_button("btnLogin")
 
-      click_button("btnLogin")
-    end
-
-    expect(page).to have_selector("#confirmButtonTop")
+    expect(page).to have_selector('#confirmButtonTop')
   end
 end
