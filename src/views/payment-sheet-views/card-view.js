@@ -396,11 +396,7 @@ CardView.prototype.tokenize = function () {
     });
   }).catch(function (err) {
     self._isTokenizing = false;
-    if (err.code === 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE') {
-      self.model.reportError('hostedFieldsDuplicateCardError');
-    } else {
-      self.model.reportError(err);
-    }
+    self.model.reportError(err);
     classlist.remove(self.element, 'braintree-sheet--loading');
     return Promise.reject(new DropinError({
       message: constants.errors.NO_PAYMENT_METHOD_ERROR,

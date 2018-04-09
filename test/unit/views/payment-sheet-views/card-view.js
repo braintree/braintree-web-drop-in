@@ -1976,7 +1976,7 @@ describe('CardView', function () {
       this.sandbox.stub(this.context.model, 'reportError');
 
       return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
-        expect(this.context.model.reportError).to.be.calledWith('hostedFieldsDuplicateCardError');
+        expect(this.context.model.reportError).to.be.calledWith(fakeError);
       }.bind(this));
     });
 

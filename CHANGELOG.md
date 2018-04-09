@@ -5,6 +5,7 @@ unreleased
 ----------
 - Use generic error with console log when a payment method fails to set up
 - Fix issue where Mastercard was displayed as MasterCard
+- Report error for duplicate payment method error
 
 1.10.0
 ------
