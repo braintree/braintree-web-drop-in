@@ -85,6 +85,7 @@ describe('Dropin', function () {
 
         return Promise.resolve();
       }.bind(this));
+      this.sandbox.stub(console, 'error');
     });
 
     it('errors out if no selector or container are given', function (done) {
@@ -169,16 +170,14 @@ describe('Dropin', function () {
         var paypalOption = this.container.querySelector('.braintree-option__paypal');
 
         expect(paypalOption.className).to.include('braintree-disabled');
-        expect(paypalOption.innerHTML).to.include('PayPal Error');
+        expect(paypalOption.innerHTML).to.include('Developer Error: Something went wrong. Check the console for details.');
         done();
       }.bind(this));
     });
 
-    it('shows PayPal linked sandbox error in option', function (done) {
+    it('logs specific error in the console', function (done) {
       var instance;
       var paypalError = new Error('PayPal Error');
-
-      paypalError.code = 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED';
 
       paypalCheckout.create.rejects(paypalError);
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
@@ -186,14 +185,10 @@ describe('Dropin', function () {
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        var paypalOption = this.container.querySelector('.braintree-option__paypal');
-
-        delay().then(function () {
-          expect(paypalOption.className).to.include('braintree-disabled');
-          expect(paypalOption.innerHTML).to.include(constants.errors.PAYPAL_NON_LINKED_SANDBOX);
-          done();
-        });
-      }.bind(this));
+        expect(console.error).to.be.calledOnce; // eslint-disable-line no-console
+        expect(console.error).to.be.calledWith(paypalError); // eslint-disable-line no-console
+        done();
+      });
     });
 
     it('throws an error with a container that points to a nonexistent DOM node', function (done) {

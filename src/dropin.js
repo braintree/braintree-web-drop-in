@@ -13,7 +13,7 @@ var MainView = require('./views/main-view');
 var paymentMethodsViewID = require('./views/payment-methods-view').ID;
 var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
-var translations = require('./translations');
+var translations = require('./translations').translations;
 var isUtf8 = require('./lib/is-utf-8');
 var uuid = require('./lib/uuid');
 var Promise = require('./lib/promise');
@@ -530,11 +530,8 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 
     div.classList.add('braintree-disabled');
     div.removeEventListener('click', clickHandler);
-    if (error.code === 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED') {
-      errorMessageDiv.innerHTML = constants.errors.PAYPAL_NON_LINKED_SANDBOX;
-    } else {
-      errorMessageDiv.innerHTML = error.message;
-    }
+    errorMessageDiv.innerHTML = constants.errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
+    console.error(error); // eslint-disable-line no-console
   }.bind(this));
 };
 

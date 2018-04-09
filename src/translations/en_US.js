@@ -54,7 +54,7 @@ module.exports = {
   'American Express': 'American Express',
   Discover: 'Discover',
   'Diners Club': 'Diners Club',
-  MasterCard: 'MasterCard',
+  MasterCard: 'Mastercard',
   Visa: 'Visa',
   JCB: 'JCB',
   Maestro: 'Maestro',
