@@ -17,7 +17,7 @@ module.exports = {
   fieldInvalidForNumber: 'Številka kartice ni veljavna.',
   fieldInvalidForPostalCode: 'Poštna številka ni veljavna.',
   fieldTooLongForCardholderName: 'Ime imetnika kartice mora imeti manj kot 256 znakov.',
-  genericError: 'Prišlo je do naše napake.',
+  genericError: 'Prišlo je do napake.',
   hostedFieldsFailedTokenizationError: 'Prosimo preverite svoje podatke in poskusite ponovno.',
   hostedFieldsTokenizationCvvVerificationFailedError: 'Preverjanje kreditne kartice ni uspelo. Prosimo preverite svoje podatke in poskusite ponovno.',
   hostedFieldsTokenizationNetworkErrorError: 'Napaka v omrežju. Prosimo poskusite ponovno.',
