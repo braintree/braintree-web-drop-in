@@ -372,6 +372,10 @@ CardView.prototype.tokenize = function () {
       Object.keys(state.fields).forEach(function (field) {
         self.hostedFieldsInstance.clear(field);
       });
+
+      if (self.hasCardholderName) {
+        self.cardholderNameInput.value = '';
+      }
     }
 
     if (!self.model.isGuestCheckout) {

@@ -2213,7 +2213,19 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('does not clear fields after successful tokenization if merchant configuration includes clearFieldsAfterTokenization', function () {
+    it('clears cardholder name field if it exists after successful tokenization', function () {
+      this.context.hostedFieldsInstance.tokenize.resolves({nonce: 'foo'});
+      this.context.hasCardholderName = true;
+      this.context.cardholderNameInput = {
+        value: 'Some value'
+      };
+
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.cardholderNameInput.value).to.equal('');
+      }.bind(this));
+    });
+
+    it('does not clear fields after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false', function () {
       this.model.merchantConfiguration.card = {
         clearFieldsAfterTokenization: false
       };
@@ -2221,6 +2233,21 @@ describe('CardView', function () {
 
       return CardView.prototype.tokenize.call(this.context).then(function () {
         expect(this.context.hostedFieldsInstance.clear).to.not.be.called;
+      }.bind(this));
+    });
+
+    it('does not clear cardholder name field after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false', function () {
+      this.model.merchantConfiguration.card = {
+        clearFieldsAfterTokenization: false
+      };
+      this.context.hasCardholderName = true;
+      this.context.cardholderNameInput = {
+        value: 'Some value'
+      };
+      this.context.hostedFieldsInstance.tokenize.resolves({nonce: 'foo'});
+
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.cardholderNameInput.value).to.equal('Some value');
       }.bind(this));
     });
 
