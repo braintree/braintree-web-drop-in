@@ -2213,9 +2213,9 @@ describe('CardView', function () {
       }.bind(this));
     });
 
-    it('does not clear fields after successful tokenization if merchant configuration includes persistCardDataAfterTokenization', function () {
+    it('does not clear fields after successful tokenization if merchant configuration includes clearFieldsAfterTokenization', function () {
       this.model.merchantConfiguration.card = {
-        persistCardDataAfterTokenization: true
+        clearFieldsAfterTokenization: false
       };
       this.context.hostedFieldsInstance.tokenize.resolves({nonce: 'foo'});
 

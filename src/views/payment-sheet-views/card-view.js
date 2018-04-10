@@ -366,9 +366,9 @@ CardView.prototype.tokenize = function () {
   self._isTokenizing = true;
 
   return self.hostedFieldsInstance.tokenize(tokenizeOptions).then(function (payload) {
-    var persistCardData = self.model.merchantConfiguration.card && self.model.merchantConfiguration.card.persistCardDataAfterTokenization;
+    var retainCardFields = self.model.merchantConfiguration.card && self.model.merchantConfiguration.card.clearFieldsAfterTokenization === false;
 
-    if (!persistCardData) {
+    if (!retainCardFields) {
       Object.keys(state.fields).forEach(function (field) {
         self.hostedFieldsInstance.clear(field);
       });
