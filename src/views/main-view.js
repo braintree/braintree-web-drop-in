@@ -13,7 +13,7 @@ var supportsFlexbox = require('../lib/supports-flexbox');
 var transitionHelper = require('../lib/transition-helper');
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
-var DEVELOPER_MISCONFIGURATION_MESSAGE = 'Developer Error: Something went wrong. Check the console for details.';
+var DEVELOPER_MISCONFIGURATION_MESSAGE = require('../constants').errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
 
 function MainView() {
   BaseView.apply(this, arguments);

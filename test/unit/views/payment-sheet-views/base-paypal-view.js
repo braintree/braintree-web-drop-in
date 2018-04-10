@@ -4,6 +4,8 @@
 var BaseView = require('../../../../src/views/base-view');
 var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
+var Promise = require('../../../../src/lib/promise');
+var assets = require('../../../../src/lib/assets');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
@@ -226,11 +228,11 @@ describe('BasePayPalView', function () {
     });
 
     it('calls paypalInstance.createPayment with a locale if one is provided', function () {
-      var fakeLocaleCode = 'fake_LOCALE';
+      var localeCode = 'fr_FR';
       var paypalInstance = this.paypalInstance;
       var model = this.model;
 
-      model.merchantConfiguration.locale = fakeLocaleCode;
+      model.merchantConfiguration.locale = localeCode;
 
       this.paypal.Button.render.resolves();
 
@@ -240,22 +242,94 @@ describe('BasePayPalView', function () {
         return paymentFunction().then(function () {
           expect(paypalInstance.createPayment).to.be.calledOnce;
           expect(paypalInstance.createPayment).to.be.calledWithMatch({
-            locale: 'fake_LOCALE'
+            locale: 'fr_FR'
           });
         });
       }.bind(this));
     });
 
     it('calls paypal.Button.render with a locale if one is provided', function () {
-      var fakeLocaleCode = 'fake_LOCALE';
+      var localeCode = 'fr_FR';
       var model = this.model;
       var view = this.view;
 
-      model.merchantConfiguration.locale = fakeLocaleCode;
+      model.merchantConfiguration.locale = localeCode;
 
       return view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
-          locale: 'fake_LOCALE'
+          locale: 'fr_FR'
+        });
+      }.bind(this));
+    });
+
+    it('docs not call paypalInstance.createPayment with locale when an invalid locale is provided', function () {
+      var invalidLocaleCode = 'en_FOO';
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+
+      model.merchantConfiguration.locale = invalidLocaleCode;
+
+      this.paypal.Button.render.resolves();
+
+      return this.view.initialize().then(function () {
+        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
+
+        return paymentFunction().then(function () {
+          expect(paypalInstance.createPayment).to.be.calledOnce;
+          expect(paypalInstance.createPayment).to.not.be.calledWithMatch({
+            locale: invalidLocaleCode
+          });
+        });
+      }.bind(this));
+    });
+
+    it('does not call paypal.Button.render with locale when an invalid locale is provided', function () {
+      var invalidLocaleCode = 'en_FOO';
+      var model = this.model;
+      var view = this.view;
+
+      model.merchantConfiguration.locale = invalidLocaleCode;
+
+      return view.initialize().then(function () {
+        expect(this.paypal.Button.render).to.be.calledOnce;
+        expect(this.paypal.Button.render).to.not.be.calledWithMatch({
+          locale: invalidLocaleCode
+        });
+      }.bind(this));
+    });
+
+    it('docs not call paypalInstance.createPayment with locale when 2 character locale is provided', function () {
+      var invalidLocaleCode = 'fr';
+      var paypalInstance = this.paypalInstance;
+      var model = this.model;
+
+      model.merchantConfiguration.locale = invalidLocaleCode;
+
+      this.paypal.Button.render.resolves();
+
+      return this.view.initialize().then(function () {
+        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
+
+        return paymentFunction().then(function () {
+          expect(paypalInstance.createPayment).to.be.calledOnce;
+          expect(paypalInstance.createPayment).to.not.be.calledWithMatch({
+            locale: invalidLocaleCode
+          });
+        });
+      }.bind(this));
+    });
+
+    it('does not call paypal.Button.render with locale when 2 character locale is provided', function () {
+      var invalidLocaleCode = 'fr';
+      var model = this.model;
+      var view = this.view;
+
+      model.merchantConfiguration.locale = invalidLocaleCode;
+
+      return view.initialize().then(function () {
+        expect(this.paypal.Button.render).to.be.calledOnce;
+        expect(this.paypal.Button.render).to.not.be.calledWithMatch({
+          locale: invalidLocaleCode
         });
       }.bind(this));
     });
@@ -701,14 +775,16 @@ describe('BasePayPalView', function () {
   describe('isEnabled', function () {
     beforeEach(function () {
       this.options = {
-        client: this.fakeClient
+        client: this.fakeClient,
+        merchantConfiguration: {
+          paypal: {}
+        }
       };
-    });
 
-    it('resolves true if merchant has PayPal enabled on the gateway', function () {
-      return BasePayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(true);
-      });
+      this.configuration.gatewayConfiguration.paypalEnabled = true;
+      global.paypal = {};
+
+      this.sandbox.stub(assets, 'loadScript').resolves();
     });
 
     it('resolves false if merchant does not have PayPal enabled on the gateway', function () {
@@ -716,6 +792,93 @@ describe('BasePayPalView', function () {
 
       return BasePayPalView.isEnabled(this.options).then(function (result) {
         expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves true if global.paypal exists', function () {
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(true);
+      });
+    });
+
+    it('skips loading paypal script if global.paypal exists', function () {
+      return BasePayPalView.isEnabled(this.options).then(function () {
+        expect(assets.loadScript).to.not.be.called;
+      });
+    });
+
+    it('loads paypal script if global.paypal does not exist', function () {
+      delete global.paypal;
+
+      return BasePayPalView.isEnabled(this.options).then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith({
+          src: 'https://www.paypalobjects.com/api/checkout.min.js',
+          id: 'braintree-dropin-paypal-checkout-script',
+          dataAttributes: {
+            'log-level': 'warn'
+          }
+        });
+      });
+    });
+
+    it('loads paypal script with merchant provided log level', function () {
+      delete global.paypal;
+
+      this.options.merchantConfiguration.paypal.logLevel = 'error';
+
+      return BasePayPalView.isEnabled(this.options).then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith({
+          src: 'https://www.paypalobjects.com/api/checkout.min.js',
+          id: 'braintree-dropin-paypal-checkout-script',
+          dataAttributes: {
+            'log-level': 'error'
+          }
+        });
+      });
+    });
+
+    it('resolves true after PayPal script is loaded', function () {
+      delete global.paypal;
+
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(result).to.equal(true);
+      });
+    });
+
+    it('resolves false if load script fails', function () {
+      delete global.paypal;
+
+      assets.loadScript.rejects();
+
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('returns existing promise if already in progress', function () {
+      var firstPromise, secondPromise;
+
+      delete global.paypal;
+
+      assets.loadScript.callsFake(function () {
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            resolve();
+          }, 10);
+        });
+      });
+
+      firstPromise = BasePayPalView.isEnabled(this.options);
+      secondPromise = BasePayPalView.isEnabled(this.options);
+
+      expect(firstPromise).to.equal(secondPromise);
+
+      return secondPromise.then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
       });
     });
   });

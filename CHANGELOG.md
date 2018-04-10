@@ -3,11 +3,17 @@ CHANGELOG
 
 unreleased
 ----------
+- Use generic error with console log when a payment method fails to set up
+- Fix issue where Mastercard was displayed as MasterCard
+- Allow card form to not be cleared after succesful tokenization with `card.persistCardDataAfterTokenization`
+
+1.10.0
+------
 - Enable Venmo support
 - Enable Google Pay support
 - Fix issue where non utf-8 encoded sites would show strange characters for card placeholders
 - Fix issue where card fields could not be focused by clicking on the corresponding label
-- Allow card form to not be cleared after succesful tokenization with `card.persistCardDataAfterTokenization`
+- Update braintree-web to v3.31.0
 
 1.9.4
 -----
