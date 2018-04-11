@@ -258,6 +258,8 @@ function isPaymentOptionEnabled(paymentOption, options) {
   return SheetView.isEnabled({
     client: options.client,
     merchantConfiguration: options.merchantConfiguration
+  }).catch(function () {
+    return Promise.resolve(false);
   });
 }
 

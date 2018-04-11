@@ -160,6 +160,26 @@ describe('DropinModel', function () {
       });
     });
 
+    it('ignores payment methods that have errored when calling isEnabled', function () {
+      var model;
+
+      this.modelOptions.paymentMethods = [
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ];
+
+      PayPalView.isEnabled.rejects(new Error('fail'));
+      PayPalCreditView.isEnabled.resolves(false);
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(model._paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}}
+        ]);
+      });
+    });
+
     it('ignores payment vaulted payment methods that cannot be used client side', function () {
       var model;
 
@@ -215,6 +235,16 @@ describe('DropinModel', function () {
 
       return model.initialize().then(function () {
         expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']);
+      });
+    });
+
+    it('marks payment method as unsupported if isEnabled rejects', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      GooglePayView.isEnabled.rejects(new Error('no google pay'));
+
+      return model.initialize().then(function () {
+        expect(model.supportedPaymentOptions).to.deep.equal(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay']);
       });
     });
 
