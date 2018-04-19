@@ -7,6 +7,8 @@ unreleased
 - Fix issue where Mastercard was displayed as MasterCard
 - Allow card form to not be cleared after succesful tokenization with `card.clearFieldsAfterTokenization`
 - Fix atob polyfill
+- Update braintree-web to v3.32.1
+
 
 1.10.0
 ------
