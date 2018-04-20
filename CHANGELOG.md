@@ -9,7 +9,6 @@ unreleased
 - Fix atob polyfill
 - Update braintree-web to v3.32.1
 
-
 1.10.0
 ------
 - Enable Venmo support
