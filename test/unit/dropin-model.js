@@ -163,6 +163,7 @@ describe('DropinModel', function () {
     it('ignores payment methods that have errored when calling isEnabled', function () {
       var model;
 
+      this.sandbox.stub(console, 'error');
       this.modelOptions.paymentMethods = [
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
@@ -177,6 +178,28 @@ describe('DropinModel', function () {
         expect(model._paymentMethods).to.deep.equal([
           {type: 'CreditCard', details: {lastTwo: '11'}}
         ]);
+      });
+    });
+
+    it('calls console.error with error if isEnabled errors', function () {
+      var error = new Error('fail');
+      var model;
+
+      this.sandbox.stub(console, 'error');
+      this.modelOptions.paymentMethods = [
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ];
+
+      PayPalView.isEnabled.rejects(error);
+      PayPalCreditView.isEnabled.resolves(false);
+
+      model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(console.error).to.be.calledTwice; // eslint-disable-line no-console
+        expect(console.error).to.be.calledWith('paypal view errored when checking if it was supported.'); // eslint-disable-line no-console
+        expect(console.error).to.be.calledWith(error); // eslint-disable-line no-console
       });
     });
 
