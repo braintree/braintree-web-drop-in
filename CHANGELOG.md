@@ -8,6 +8,7 @@ unreleased
 - Allow card form to not be cleared after succesful tokenization with `card.clearFieldsAfterTokenization`
 - Fix atob polyfill
 - Update braintree-web to v3.32.1
+- Fix issue where Drop-in would fail to load if something blocked an external script from loading (#379)
 
 1.10.0
 ------

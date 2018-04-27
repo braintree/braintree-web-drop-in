@@ -258,6 +258,10 @@ function isPaymentOptionEnabled(paymentOption, options) {
   return SheetView.isEnabled({
     client: options.client,
     merchantConfiguration: options.merchantConfiguration
+  }).catch(function (error) {
+    console.error(SheetView.ID + ' view errored when checking if it was supported.'); // eslint-disable-line no-console
+    console.error(error); // eslint-disable-line no-console
+    return Promise.resolve(false);
   });
 }
 
