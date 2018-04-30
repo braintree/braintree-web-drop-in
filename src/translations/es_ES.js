@@ -17,6 +17,7 @@ module.exports = {
   "fieldInvalidForNumber": "Este número de tarjeta no es válido.",
   "fieldInvalidForPostalCode": "Este código postal no es válido.",
   "genericError": "Hemos tenido algún problema.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Esta tarjeta de crédito ya existe como forma de pago guardada.",
   "hostedFieldsFailedTokenizationError": "Comprueba la información e inténtalo de nuevo.",
   "hostedFieldsFieldsInvalidError": "Comprueba la información e inténtalo de nuevo.",
   "hostedFieldsTokenizationNetworkErrorError": "Error de red. Inténtalo de nuevo.",

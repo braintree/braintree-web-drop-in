@@ -17,6 +17,7 @@ module.exports = {
   "fieldInvalidForNumber": "此卡号无效。",
   "fieldInvalidForPostalCode": "此邮政编码无效。",
   "genericError": "我们遇到了一些问题",
+  "hostedFieldsTokenizationFailOnDuplicateError": "此信用卡已作为保存后的付款方式存在。",
   "hostedFieldsFailedTokenizationError": "请检查您的信息，然后重试。",
   "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
   "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",

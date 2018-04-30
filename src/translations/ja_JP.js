@@ -17,6 +17,7 @@ module.exports = {
   "fieldInvalidForNumber": "このカード番号は無効です。",
   "fieldInvalidForPostalCode": "この郵便番号は無効です。",
   "genericError": "弊社側で問題が発生しました。",
+  "hostedFieldsTokenizationFailOnDuplicateError": "このクレジットカードは、保存済みの支払方法としてすでに登録されています。",
   "hostedFieldsFailedTokenizationError": "情報を確認してもう一度お試しください。",
   "hostedFieldsFieldsInvalidError": "情報を確認してもう一度お試しください。",
   "hostedFieldsTokenizationNetworkErrorError": "ネットワークエラーです。もう一度お試しください。",

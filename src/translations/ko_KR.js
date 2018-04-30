@@ -17,6 +17,7 @@ module.exports = {
   "fieldInvalidForNumber": "이 카드 번호가 올바르지 않습니다.",
   "fieldInvalidForPostalCode": "이 우편번호가 올바르지 않습니다.",
   "genericError": "저희 쪽에 문제가 발생했습니다.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "저장된 결제수단에 이미 이 신용카드가 존재합니다.",
   "hostedFieldsFailedTokenizationError": "정보를 확인하고 다시 시도해 주세요.",
   "hostedFieldsFieldsInvalidError": "정보를 확인하고 다시 시도해 주세요.",
   "hostedFieldsTokenizationNetworkErrorError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
