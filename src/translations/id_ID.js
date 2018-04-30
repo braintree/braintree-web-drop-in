@@ -17,6 +17,7 @@ module.exports = {
   "fieldInvalidForNumber": "Nomor kartu ini tidak valid.",
   "fieldInvalidForPostalCode": "Kode pos ini tidak valid.",
   "genericError": "Terjadi kesalahan pada sistem kami.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Kartu kredit ini sudah dimasukkan sebagai metode pembayaran tersimpan.",
   "hostedFieldsFailedTokenizationError": "Periksa informasi Anda dan coba lagi.",
   "hostedFieldsFieldsInvalidError": "Periksa informasi Anda dan coba lagi.",
   "hostedFieldsTokenizationNetworkErrorError": "Masalah jaringan. Coba lagi.",

@@ -404,6 +404,10 @@ CardView.prototype.tokenize = function () {
     });
   }).catch(function (err) {
     self._isTokenizing = false;
+    // this is a little magical, but if the code property exists
+    // in the translations with the word Error appended to the end,
+    // then reportError will automatically print that translation.
+    // See https://github.com/braintree/braintree-web-drop-in/blob/6ecba73f2f16e8b7ae2119702ac162a1a985908e/src/views/main-view.js#L255-L256
     self.model.reportError(err);
     classlist.remove(self.element, 'braintree-sheet--loading');
     return Promise.reject(new DropinError({

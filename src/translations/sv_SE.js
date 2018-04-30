@@ -17,6 +17,7 @@ module.exports = {
   "fieldInvalidForNumber": "Det här kortnumret är inte giltigt.",
   "fieldInvalidForPostalCode": "Det här postnumret är inte giltigt.",
   "genericError": "Ett fel uppstod.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Det här betalkortet finns redan som en sparad betalningsmetod.",
   "hostedFieldsFailedTokenizationError": "Kontrollera uppgifterna och försök igen.",
   "hostedFieldsFieldsInvalidError": "Kontrollera uppgifterna och försök igen.",
   "hostedFieldsTokenizationNetworkErrorError": "Nätverksfel. Försök igen.",

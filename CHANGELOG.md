@@ -9,6 +9,7 @@ unreleased
 - Fix atob polyfill
 - Update braintree-web to v3.32.1
 - Fix issue where Drop-in would fail to load if something blocked an external script from loading (#379)
+- Report error for duplicate payment method error
 
 1.10.0
 ------

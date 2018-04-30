@@ -17,6 +17,7 @@ module.exports = {
   "fieldInvalidForNumber": "Die Kreditkartennummer ist ungültig.",
   "fieldInvalidForPostalCode": "Die PLZ ist ungültig.",
   "genericError": "Bei uns ist ein Problem aufgetreten.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Diese Kreditkarte ist bereits als gespeicherte Zahlungsmethode vorhanden.",
   "hostedFieldsFailedTokenizationError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
   "hostedFieldsFieldsInvalidError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
   "hostedFieldsTokenizationNetworkErrorError": "Netzwerkfehler. Versuchen Sie es erneut.",
