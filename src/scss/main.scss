@@ -25,6 +25,7 @@ $loader-scale-duration: 300ms;
 [data-braintree-id='wrapper'] {
   // dropin.js has display = 'none' to prevent flicker before CSS has loaded
   display: block !important;
+  position: relative;
 }
 
 .braintree-dropin * {
@@ -835,10 +836,7 @@ $loader-scale-duration: 300ms;
   opacity: 0;
 }
 
-/* =========================================================================
-   Toggle
-   ========================================================================= */
-.braintree-toggle {
+.braintree-large-button {
   background: $background-color;
   border-radius: $radius-default;
   color: $text-color;
@@ -887,6 +885,7 @@ $loader-scale-duration: 300ms;
 
 
 [data-braintree-id='methods-label'],
+[data-braintree-id='methods-edit'],
 [data-braintree-id='choose-a-way-to-pay'] {
   position: absolute;
   transform: translateY(30px);
@@ -895,9 +894,16 @@ $loader-scale-duration: 300ms;
 }
 
 .braintree-show-methods [data-braintree-id='methods-label'],
+.braintree-show-methods [data-braintree-id='methods-edit'],
 .braintree-show-options [data-braintree-id='choose-a-way-to-pay'] {
   transform: none;
   visibility: visible;
+}
+
+.braintree-show-methods [data-braintree-id='methods-edit'] {
+  right: 5px;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .braintree-show-methods [data-braintree-id='methods-label'].braintree-no-payment-method-selected {

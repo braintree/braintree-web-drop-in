@@ -117,9 +117,7 @@ MainView.prototype._initialize = function () {
     }
   }.bind(this));
 
-  this.model.on('enableEditMode', function () {
-    // TODO set edit-payment-methods-view as primary
-  });
+  this.model.on('enableEditMode', this.enableEditMode.bind(this));
 
   this.model.on('disableEditMode', function () {
     // TODO set primary view back to payment methods/options/single sheet view
@@ -296,6 +294,11 @@ MainView.prototype.teardown = function () {
 
     return Promise.resolve();
   });
+};
+
+MainView.prototype.enableEditMode = function () {
+  this.paymentMethodsViews.enableEditMode();
+  this.hideToggle();
 };
 
 function snakeCaseToCamelCase(s) {

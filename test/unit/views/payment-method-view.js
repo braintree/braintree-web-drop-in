@@ -33,7 +33,8 @@ describe('PaymentMethodView', function () {
   describe('_initialize', function () {
     beforeEach(function () {
       this.context = {
-        strings: strings
+        strings: strings,
+        _choosePaymentMethod: this.sandbox.stub()
       };
     });
 
@@ -198,6 +199,36 @@ describe('PaymentMethodView', function () {
       this.sandbox.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
+    });
+  });
+
+  describe('edit mode', function () {
+    it('does not call model.changeActivePaymentMethod in click handler when in edit mode', function () {
+      var view = new PaymentMethodView({
+        model: {
+          changeActivePaymentMethod: this.sandbox.stub()
+        },
+        paymentMethod: {
+          type: 'Foo',
+          nonce: 'nonce'
+        }
+      });
+
+      view._choosePaymentMethod();
+
+      expect(view.model.changeActivePaymentMethod).to.be.calledOnce;
+
+      view.model.changeActivePaymentMethod.resetHistory();
+
+      view.enableEditMode();
+      view._choosePaymentMethod();
+
+      expect(view.model.changeActivePaymentMethod).to.not.be.called;
+
+      view.disableEditMode();
+      view._choosePaymentMethod();
+
+      expect(view.model.changeActivePaymentMethod).to.be.calledOnce;
     });
   });
 });

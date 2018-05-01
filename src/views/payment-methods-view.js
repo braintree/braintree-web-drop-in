@@ -6,6 +6,7 @@ var DropinError = require('../lib/dropin-error');
 var classlist = require('../lib/classlist');
 var errors = require('../constants').errors;
 var Promise = require('../lib/promise');
+var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
@@ -32,6 +33,8 @@ PaymentMethodsView.prototype._initialize = function () {
   this.views = [];
   this.container = this.getElementById('methods-container');
   this._headingLabel = this.getElementById('methods-label');
+  this._editButton = this.getElementById('methods-edit');
+  this._doneEdittingButton = this.getElementById('done-edit');
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
@@ -40,6 +43,13 @@ PaymentMethodsView.prototype._initialize = function () {
   for (i = paymentMethods.length - 1; i >= 0; i--) {
     this._addPaymentMethod(paymentMethods[i]);
   }
+
+  addSelectionEventHandler(this._editButton, function () {
+    this.model.enableEditMode();
+  }.bind(this));
+  addSelectionEventHandler(this._doneEdittingButton, function () {
+    this.model.disableEditMode();
+  }.bind(this));
 };
 
 PaymentMethodsView.prototype.removeActivePaymentMethod = function () {
@@ -56,6 +66,18 @@ PaymentMethodsView.prototype._getPaymentMethodString = function () {
   var paymentMethodTypeString = this.strings[stringKey];
 
   return this.strings.payingWith.replace('{{paymentSource}}', paymentMethodTypeString);
+};
+
+PaymentMethodsView.prototype.enableEditMode = function () {
+  classlist.remove(this.container, 'braintree-methods--active');
+  classlist.add(this.container, 'braintree-methods--edit');
+
+  classlist.add(this._editButton, 'braintree-hidden');
+  classlist.remove(this._doneEdittingButton, 'braintree-hidden');
+
+  this.views.forEach(function (view) {
+    view.enableEditMode();
+  });
 };
 
 PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {

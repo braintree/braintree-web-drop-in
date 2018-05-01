@@ -552,6 +552,8 @@ describe('MainView', function () {
           addView: this.sandbox.stub(),
           element: element,
           getElementById: BaseView.prototype.getElementById,
+          enableEditMode: this.sandbox.stub(),
+          disableEditMode: this.sandbox.stub(),
           hideSheetError: this.sandbox.stub(),
           hideLoadingIndicator: function () {},
           model: model,
@@ -1046,6 +1048,45 @@ describe('MainView', function () {
       };
 
       expect(MainView.prototype.getOptionsElements.call(context)).to.equal(elements);
+    });
+  });
+
+  describe('enableEditMode', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = new DropinModel(fake.modelOptions());
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+      }.bind(this));
+    });
+
+    it('enables edit mode on the payment methods view', function () {
+      this.sandbox.stub(this.mainView.paymentMethodsViews, 'enableEditMode');
+
+      this.mainView.enableEditMode();
+
+      expect(this.mainView.paymentMethodsViews.enableEditMode).to.be.calledOnce;
+    });
+
+    it('hides the toggle button', function () {
+      this.sandbox.stub(this.mainView, 'hideToggle');
+
+      this.mainView.enableEditMode();
+
+      expect(this.mainView.hideToggle).to.be.calledOnce;
     });
   });
 });

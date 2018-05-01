@@ -1,5 +1,6 @@
 <div class="braintree-dropin">
   <div data-braintree-id="methods-label" class="braintree-heading">&nbsp;</div>
+  <div data-braintree-id="methods-edit" class="braintree-heading">{{edit}}</div>
   <div data-braintree-id="choose-a-way-to-pay" class="braintree-heading">{{chooseAWayToPay}}</div>
   <div class="braintree-placeholder">&nbsp;</div>
 
@@ -230,7 +231,11 @@
     <div data-braintree-id="other-ways-to-pay" class="braintree-heading">{{otherWaysToPay}}</div>
   </div>
 
-  <div data-braintree-id="toggle" class="braintree-toggle braintree-hidden" tabindex="0">
+  <div data-braintree-id="toggle" class="braintree-large-button braintree-toggle braintree-hidden" tabindex="0">
     <span>{{chooseAnotherWayToPay}}</span>
+  </div>
+
+  <div data-braintree-id="done-edit" class="braintree-large-button braintree-done-edit braintree-hidden" tabindex="0">
+    <span>{{doneEditting}}</span>
   </div>
 </div>
