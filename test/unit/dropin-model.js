@@ -860,4 +860,26 @@ describe('DropinModel', function () {
       });
     });
   });
+
+  describe('Edit mode', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('model.enableEditMode emits an enableEditMode event', function () {
+      this.model.enableEditMode();
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('enableEditMode');
+    });
+
+    it('model.disableEditMode emits an disableEditMode event', function () {
+      this.model.disableEditMode();
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('disableEditMode');
+    });
+  });
 });

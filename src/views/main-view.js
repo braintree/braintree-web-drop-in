@@ -117,6 +117,14 @@ MainView.prototype._initialize = function () {
     }
   }.bind(this));
 
+  this.model.on('enableEditMode', function () {
+    // TODO set edit-payment-methods-view as primary
+  });
+
+  this.model.on('disableEditMode', function () {
+    // TODO set primary view back to payment methods/options/single sheet view
+  });
+
   if (hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
       client: this.client,

@@ -94,6 +94,14 @@ DropinModel.prototype.selectPaymentOption = function (paymentViewID) {
   });
 };
 
+DropinModel.prototype.enableEditMode = function () {
+  this._emit('enableEditMode');
+};
+
+DropinModel.prototype.disableEditMode = function () {
+  this._emit('disableEditMode');
+};
+
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
   var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
   var typeHasNotChanged = options.type === this._paymentMethodRequestableType;

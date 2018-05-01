@@ -107,6 +107,38 @@ describe('MainView', function () {
       }.bind(this));
     });
 
+    it('listens for enableEditMode', function () {
+      var mainView;
+      var model = new DropinModel(fake.modelOptions());
+
+      return model.initialize().then(function () {
+        this.sandbox.stub(model, 'on');
+        model.supportedPaymentOptions = ['card'];
+
+        this.mainViewOptions.model = model;
+
+        mainView = new MainView(this.mainViewOptions);
+
+        expect(mainView.model.on).to.be.calledWith('enableEditMode', this.sandbox.match.func);
+      }.bind(this));
+    });
+
+    it('listens for disableEditMode', function () {
+      var mainView;
+      var model = new DropinModel(fake.modelOptions());
+
+      return model.initialize().then(function () {
+        this.sandbox.stub(model, 'on');
+        model.supportedPaymentOptions = ['card'];
+
+        this.mainViewOptions.model = model;
+
+        mainView = new MainView(this.mainViewOptions);
+
+        expect(mainView.model.on).to.be.calledWith('disableEditMode', this.sandbox.match.func);
+      }.bind(this));
+    });
+
     context('with vaulted payment methods', function () {
       beforeEach(function () {
         var modelOptions = fake.modelOptions();
