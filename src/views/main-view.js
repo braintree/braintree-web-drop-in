@@ -119,9 +119,7 @@ MainView.prototype._initialize = function () {
 
   this.model.on('enableEditMode', this.enableEditMode.bind(this));
 
-  this.model.on('disableEditMode', function () {
-    // TODO set primary view back to payment methods/options/single sheet view
-  });
+  this.model.on('disableEditMode', this.disableEditMode.bind(this));
 
   if (hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
@@ -299,6 +297,11 @@ MainView.prototype.teardown = function () {
 MainView.prototype.enableEditMode = function () {
   this.paymentMethodsViews.enableEditMode();
   this.hideToggle();
+};
+
+MainView.prototype.disableEditMode = function () {
+  this.paymentMethodsViews.disableEditMode();
+  this.showToggle();
 };
 
 function snakeCaseToCamelCase(s) {

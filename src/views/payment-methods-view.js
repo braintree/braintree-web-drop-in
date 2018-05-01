@@ -80,6 +80,18 @@ PaymentMethodsView.prototype.enableEditMode = function () {
   });
 };
 
+PaymentMethodsView.prototype.disableEditMode = function () {
+  classlist.add(this.container, 'braintree-methods--active');
+  classlist.remove(this.container, 'braintree-methods--edit');
+
+  classlist.remove(this._editButton, 'braintree-hidden');
+  classlist.add(this._doneEdittingButton, 'braintree-hidden');
+
+  this.views.forEach(function (view) {
+    view.disableEditMode();
+  });
+};
+
 PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
   var paymentMethodView = new PaymentMethodView({
     model: this.model,

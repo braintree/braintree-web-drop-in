@@ -1089,4 +1089,43 @@ describe('MainView', function () {
       expect(this.mainView.hideToggle).to.be.calledOnce;
     });
   });
+
+  describe('disableEditMode', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = new DropinModel(fake.modelOptions());
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+      }.bind(this));
+    });
+
+    it('disables edit mode on the payment methods view', function () {
+      this.sandbox.stub(this.mainView.paymentMethodsViews, 'disableEditMode');
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.paymentMethodsViews.disableEditMode).to.be.calledOnce;
+    });
+
+    it('hides the toggle button', function () {
+      this.sandbox.stub(this.mainView, 'showToggle');
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.showToggle).to.be.calledOnce;
+    });
+  });
 });

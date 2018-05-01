@@ -477,4 +477,46 @@ describe('PaymentMethodsView', function () {
       }.bind(this));
     });
   });
+
+  describe('disableEditMode', function () {
+    it('calls disableEditMode on each payment method view', function () {
+      var model, paymentMethodsViews;
+      var modelOptions = fake.modelOptions();
+      var element = document.createElement('div');
+
+      element.innerHTML = mainHTML;
+
+      modelOptions.client.getConfiguration = function () {
+        return {
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
+        };
+      };
+      modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}, {type: 'PayPalAccount', details: {email: 'wow@example.com'}}, {type: 'UnsupportedPaymentMethod'}];
+      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      model = new DropinModel(modelOptions);
+
+      return model.initialize().then(function () {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            paypal: modelOptions.merchantConfiguration.paypal,
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        this.sandbox.stub(paymentMethodsViews.views[0], 'disableEditMode');
+        this.sandbox.stub(paymentMethodsViews.views[1], 'disableEditMode');
+
+        paymentMethodsViews.disableEditMode();
+
+        expect(paymentMethodsViews.views[0].disableEditMode).to.be.calledOnce;
+        expect(paymentMethodsViews.views[1].disableEditMode).to.be.calledOnce;
+      }.bind(this));
+    });
+  });
 });
