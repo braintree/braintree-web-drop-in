@@ -7,7 +7,8 @@ module.exports = {
   otherWaysToPay: 'Other ways to pay',
   edit: 'Edit',
   doneEditting: 'Done',
-  paymentMethodCouldNotBeRemoved: 'Something went wrong. Payment method could not be removed',
+  hasSubscription: 'This payment method is associated with a recurring charge and cannot be deleted.',
+  paymentMethodCouldNotBeRemoved: 'Something went wrong. Payment method could not be removed.',
   cardVerification: 'Card Verification',
   // Errors
   fieldEmptyForCvv: 'Please fill out a CVV.',

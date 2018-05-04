@@ -18,6 +18,10 @@ $curve-springy: cubic-bezier(0.43, 0.48, 0.62, 1.07);
 $curve-easeOutBack: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 $loader-scale-duration: 300ms;
 
+@mixin disabled {
+  cursor: not-allowed;
+}
+
 /* =========================================================================
    General
    ========================================================================= */
@@ -256,7 +260,7 @@ $loader-scale-duration: 300ms;
 
   &.braintree-disabled {
     background: #EAEAEA;
-    cursor: not-allowed;
+    @include disabled;
 
     &:hover .braintree-option__label {
       font-weight: normal;
@@ -726,6 +730,36 @@ $loader-scale-duration: 300ms;
   transition: opacity 300ms, width 200ms $curve-easeOutBack, border-color 300ms, border-radius 300ms;
   width: 98%;
   z-index: 0;
+
+  &.braintree-method--disabled {
+    .braintree-method__delete-container {
+      position: relative;
+      background: darken(#EAEAEA, 20%);
+      @include disabled;
+
+      .braintree-method__disabled-description {
+        position: absolute;
+        background: rgba(0, 0, 0, .7);
+        right: -5px;
+        z-index: 999999;
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+        top: 1px;
+        width: 250px;
+      }
+
+      &:hover .braintree-method__disabled-description {
+        display: block;
+      }
+    }
+  }
+
+  .braintree-method__disabled-description {
+    text-align: right;
+    font-size: 12px;
+    display: none;
+  }
 
   &:hover .braintree-method__label {
     font-weight: 500;
