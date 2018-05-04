@@ -295,6 +295,7 @@ MainView.prototype.teardown = function () {
 };
 
 MainView.prototype.enableEditMode = function () {
+  this.setPrimaryView(this.paymentMethodsViews.ID);
   this.paymentMethodsViews.enableEditMode();
   this.hideToggle();
 };
