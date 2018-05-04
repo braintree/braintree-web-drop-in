@@ -10,6 +10,7 @@ unreleased
 - Update braintree-web to v3.32.1
 - Fix issue where Drop-in would fail to load if something blocked an external script from loading (#379)
 - Report error for duplicate payment method error
+- Fix issue where Drop-in would throw an error if another Google script was included on the page
 
 1.10.0
 ------
