@@ -764,7 +764,7 @@ $loader-scale-duration: 300ms;
     }
   }
 
-  .braintree-method__check {
+  .braintree-method__icon {
     background-color: $background-color;
     border-radius: 100px;
     fill: $background-color;
@@ -801,6 +801,9 @@ $loader-scale-duration: 300ms;
 
   .braintree-method__check {
     background-color: $highlight-color;
+  }
+
+  .braintree-method__icon {
     fill: white;
     transform: scale(1);
   }
@@ -810,8 +813,19 @@ $loader-scale-duration: 300ms;
   }
 }
 
+.braintree-method__delete-container {
+  background-color: $error-color; // TODO, move this to svg
+  border-radius: 100%;
+  display: none;
+}
 
-.braintree-method__check-container {
+.braintree-methods--edit {
+  .braintree-method__delete-container {
+    display: block;
+  }
+}
+
+.braintree-method__icon-container {
   position: relative;
 
   &:before {
@@ -1025,16 +1039,16 @@ $loader-scale-duration: 300ms;
     clear: both;
   }
 
-  .braintree-method__check-container {
+  .braintree-method__icon-container {
     float: right;
     position: relative;
   }
 
-  .braintree-method__check-container:before {
+  .braintree-method__icon-container:before {
     right: 0;
   }
 
-  .braintree-method__check {
+  .braintree-method__icon {
     margin-right: 0;
     right: 0;
     position: absolute;

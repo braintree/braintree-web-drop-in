@@ -67,6 +67,10 @@ PaymentMethodView.prototype._initialize = function () {
 
   this.element.innerHTML = html;
   this.checkMark = this.element.querySelector('.braintree-method__check-container');
+  addSelectionEventHandler(this.element.querySelector('.braintree-method__delete-container'), function () {
+    // TODO: open confirmation dialog
+    console.log(this.paymentMethod)
+  }.bind(this));
 };
 
 PaymentMethodView.prototype.setActive = function (isActive) {
