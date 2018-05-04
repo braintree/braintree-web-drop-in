@@ -109,7 +109,7 @@ BasePayPalView.isEnabled = function (options) {
     return Promise.resolve(false);
   }
 
-  if (!(global.paypal && global.paypal.Button)) {
+  if (global.paypal && global.paypal.Button) {
     return Promise.resolve(true);
   }
 
