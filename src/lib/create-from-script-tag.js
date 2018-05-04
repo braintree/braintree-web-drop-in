@@ -23,10 +23,12 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'paypal.amount',
   'paypal.currency',
   'paypal.flow',
+  'paypal.landing-page-type',
 
   'paypal-credit.amount',
   'paypal-credit.currency',
-  'paypal-credit.flow'
+  'paypal-credit.flow',
+  'paypal-credit.landing-page-type'
 ];
 
 function injectHiddenInput(name, value, form) {

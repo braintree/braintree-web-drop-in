@@ -111,12 +111,14 @@
     paypal: {
       flow: 'checkout',
       amount: '10.00', // be sure to validate this amount on your server
-      currency: 'USD'
+      currency: 'USD',
+      landingPageType: 'login' // hard code this so we get a consistent experience for e2e tests
     },
     paypalCredit: {
       flow: 'checkout',
       amount: '10.00',
-      currency: 'USD'
+      currency: 'USD',
+      landingPageType: 'login' // hard code this so we get a consistent experience for e2e tests
     }
   };
   var dropinInstance;

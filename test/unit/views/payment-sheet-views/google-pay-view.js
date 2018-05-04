@@ -435,6 +435,31 @@ describe('GooglePayView', function () {
       });
     });
 
+    it('loads Google Payment script file when the payment client on google global does not exist', function () {
+      var storedFakeGoogle = global.google;
+
+      delete global.google;
+      global.google = {
+        payments: {
+          api: {}
+        }
+      };
+
+      assets.loadScript.callsFake(function () {
+        global.google = storedFakeGoogle;
+
+        return Promise.resolve();
+      });
+
+      return GooglePayView.isEnabled(this.fakeOptions).then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith({
+          id: 'braintree-dropin-google-payment-script',
+          src: 'https://payments.developers.google.com/js/apis/pay.js'
+        });
+      });
+    });
+
     it('does not load Google Payment script file if global google pay object already exists', function () {
       return GooglePayView.isEnabled(this.fakeOptions).then(function () {
         expect(assets.loadScript).to.not.be.called;
