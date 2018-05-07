@@ -208,6 +208,7 @@ describe('PaymentMethodView', function () {
         model: {
           changeActivePaymentMethod: this.sandbox.stub()
         },
+        strings: strings,
         paymentMethod: {
           type: 'Foo',
           nonce: 'nonce'

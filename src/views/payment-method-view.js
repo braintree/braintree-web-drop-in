@@ -29,7 +29,7 @@ PaymentMethodView.prototype._initialize = function () {
 
   addSelectionEventHandler(this.element, this._choosePaymentMethod.bind(this));
 
-  html = html.replace(/@DISABLE_MESSAGE/g, this.strings.hasSubscription)
+  html = html.replace(/@DISABLE_MESSAGE/g, this.strings.hasSubscription);
 
   switch (this.paymentMethod.type) {
     case paymentMethodTypes.applePay:
@@ -71,7 +71,7 @@ PaymentMethodView.prototype._initialize = function () {
   this.checkMark = this.element.querySelector('.braintree-method__check-container');
   addSelectionEventHandler(this.element.querySelector('.braintree-method__delete-container'), function () {
     // TODO: open confirmation dialog
-    console.log(this.paymentMethod)
+    console.log(this.paymentMethod);
   }.bind(this));
 };
 
