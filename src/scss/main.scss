@@ -878,6 +878,10 @@ $loader-scale-duration: 300ms;
   margin: 0 auto 13px auto;
 }
 
+.braintree-delete-confirmation {
+  display: none;
+}
+
 .braintree-methods-initial {
   display: none;
   max-height: 0;
@@ -919,6 +923,7 @@ $loader-scale-duration: 300ms;
    ========================================================================= */
 .braintree-show-card .braintree-card,
 .braintree-show-methods .braintree-methods,
+.braintree-show-delete-confirmation .braintree-delete-confirmation,
 .braintree-show-options .braintree-options,
 .braintree-show-paypal .braintree-paypal,
 .braintree-show-paypalCredit .braintree-paypalCredit,
