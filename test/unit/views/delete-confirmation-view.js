@@ -2,8 +2,6 @@
 
 var BaseView = require('../../../src/views/base-view');
 var DeleteConfirmationView = require('../../../src/views/delete-confirmation-view');
-var DropinModel = require('../../../src/dropin-model');
-var fake = require('../../helpers/fake');
 var fs = require('fs');
 var strings = require('../../../src/translations/en_US');
 
@@ -17,7 +15,7 @@ describe('DeleteConfirmationView', function () {
 
   describe('Constructor', function () {
     beforeEach(function () {
-      this.sandbox.stub(PaymentMethodsView.prototype, '_initialize');
+      this.sandbox.stub(DeleteConfirmationView.prototype, '_initialize');
     });
 
     it('inherits from BaseView', function () {
@@ -31,9 +29,73 @@ describe('DeleteConfirmationView', function () {
     });
   });
 
-  describe('_initialize', function () {
-  });
-
   describe('applyPaymentMethod', function () {
+    beforeEach(function () {
+      var model = {
+      };
+      var client = {
+      };
+
+      this.view = new DeleteConfirmationView({
+        element: this.element.querySelector('[data-braintree-id="delete-confirmation"]'),
+        model: model,
+        client: client,
+        strings: strings
+      });
+    });
+
+    it('applies credit card payment method delete confirmation message', function () {
+      var paymentMethod = {
+        nonce: 'a-nonce',
+        type: 'CreditCard',
+        details: {
+          lastFour: '1234',
+          description: 'A card ending in 1234'
+        }
+      };
+
+      this.view.applyPaymentMethod(paymentMethod);
+
+      expect(this.view._messageBox.innerText).to.equal('Are you sure you want to delete card ending in 1234?');
+    });
+
+    it('applies PayPal payment method delete confirmation message', function () {
+      var paymentMethod = {
+        nonce: 'a-nonce',
+        type: 'PayPalAccount',
+        details: {
+          email: 'foo@bar.com'
+        }
+      };
+
+      this.view.applyPaymentMethod(paymentMethod);
+
+      expect(this.view._messageBox.innerText).to.equal('Are you sure you want to delete PayPal account with email foo@bar.com?');
+    });
+
+    it('applies Venmo payment method delete confirmation message', function () {
+      var paymentMethod = {
+        nonce: 'a-nonce',
+        type: 'VenmoAccount',
+        details: {
+          username: 'foobar'
+        }
+      };
+
+      this.view.applyPaymentMethod(paymentMethod);
+
+      expect(this.view._messageBox.innerText).to.equal('Are you sure you want to delete Venmo account with username foobar?');
+    });
+
+    it('applies generic payment method message for non-card, venmo or paypal accounts', function () {
+      var paymentMethod = {
+        nonce: 'a-nonce',
+        type: 'SomeMethod'
+      };
+
+      this.view.applyPaymentMethod(paymentMethod);
+
+      expect(this.view._messageBox.innerText).to.equal('Are you sure you want to delete this payment method?');
+    });
   });
 });

@@ -25,7 +25,7 @@ var braintreeWebVersion = require('../../../package.json').dependencies['braintr
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 
-describe.only('MainView', function () {
+describe('MainView', function () {
   beforeEach(function () {
     this.client = {
       getConfiguration: fake.configuration,
