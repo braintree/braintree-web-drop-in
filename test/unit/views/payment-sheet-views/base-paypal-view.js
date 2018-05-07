@@ -782,7 +782,9 @@ describe('BasePayPalView', function () {
       };
 
       this.configuration.gatewayConfiguration.paypalEnabled = true;
-      global.paypal = {};
+      global.paypal = {
+        Button: {}
+      };
 
       this.sandbox.stub(assets, 'loadScript').resolves();
     });
