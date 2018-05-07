@@ -25,7 +25,7 @@ var braintreeWebVersion = require('../../../package.json').dependencies['braintr
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 
-describe('MainView', function () {
+describe.only('MainView', function () {
   beforeEach(function () {
     this.client = {
       getConfiguration: fake.configuration,
@@ -136,6 +136,22 @@ describe('MainView', function () {
         mainView = new MainView(this.mainViewOptions);
 
         expect(mainView.model.on).to.be.calledWith('disableEditMode', this.sandbox.match.func);
+      }.bind(this));
+    });
+
+    it('listens for confirmPaymentMethodDeletion', function () {
+      var mainView;
+      var model = new DropinModel(fake.modelOptions());
+
+      return model.initialize().then(function () {
+        this.sandbox.stub(model, 'on');
+        model.supportedPaymentOptions = ['card'];
+
+        this.mainViewOptions.model = model;
+
+        mainView = new MainView(this.mainViewOptions);
+
+        expect(mainView.model.on).to.be.calledWith('confirmPaymentMethodDeletion', this.sandbox.match.func);
       }.bind(this));
     });
 
@@ -554,6 +570,7 @@ describe('MainView', function () {
           getElementById: BaseView.prototype.getElementById,
           enableEditMode: this.sandbox.stub(),
           disableEditMode: this.sandbox.stub(),
+          openConfirmPaymentMethodDeletionDialog: this.sandbox.stub(),
           hideSheetError: this.sandbox.stub(),
           hideLoadingIndicator: function () {},
           model: model,
@@ -1126,6 +1143,50 @@ describe('MainView', function () {
       this.mainView.disableEditMode();
 
       expect(this.mainView.showToggle).to.be.calledOnce;
+    });
+  });
+
+  describe('confirmPaymentMethodDeletion', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = new DropinModel(fake.modelOptions());
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+
+        this.sandbox.stub(this.mainView.deleteConfirmationView, 'applyPaymentMethod');
+        this.sandbox.stub(this.mainView, 'setPrimaryView');
+      }.bind(this));
+    });
+
+    it('updates delete confirmation view with payment method', function () {
+      var paymentMethod = {nonce: 'a-nonce'};
+
+      this.mainView.openConfirmPaymentMethodDeletionDialog(paymentMethod);
+
+      expect(this.mainView.deleteConfirmationView.applyPaymentMethod).to.be.calledOnce;
+      expect(this.mainView.deleteConfirmationView.applyPaymentMethod).to.be.calledWith(paymentMethod);
+    });
+
+    it('sets primary view to delete confirmation view', function () {
+      var paymentMethod = {nonce: 'a-nonce'};
+
+      this.mainView.openConfirmPaymentMethodDeletionDialog(paymentMethod);
+
+      expect(this.mainView.setPrimaryView).to.be.calledOnce;
+      expect(this.mainView.setPrimaryView).to.be.calledWith('delete-confirmation');
     });
   });
 });

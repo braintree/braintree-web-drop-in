@@ -7,6 +7,7 @@ var classlist = require('../lib/classlist');
 var sheetViews = require('./payment-sheet-views');
 var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
+var DeleteConfirmationView = require('./delete-confirmation-view');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var Promise = require('../lib/promise');
 var supportsFlexbox = require('../lib/supports-flexbox');
@@ -80,6 +81,14 @@ MainView.prototype._initialize = function () {
   });
   this.addView(this.paymentMethodsViews);
 
+  this.deleteConfirmationView = new DeleteConfirmationView({
+    element: this.getElementById('delete-confirmation'),
+    model: this.model,
+    client: this.client,
+    strings: this.strings
+  });
+  this.addView(this.deleteConfirmationView);
+
   addSelectionEventHandler(this.toggle, this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
@@ -120,6 +129,8 @@ MainView.prototype._initialize = function () {
   this.model.on('enableEditMode', this.enableEditMode.bind(this));
 
   this.model.on('disableEditMode', this.disableEditMode.bind(this));
+
+  this.model.on('confirmPaymentMethodDeletion', this.openConfirmPaymentMethodDeletionDialog.bind(this));
 
   if (hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
@@ -303,6 +314,11 @@ MainView.prototype.enableEditMode = function () {
 MainView.prototype.disableEditMode = function () {
   this.paymentMethodsViews.disableEditMode();
   this.showToggle();
+};
+
+MainView.prototype.openConfirmPaymentMethodDeletionDialog = function (paymentMethod) {
+  this.deleteConfirmationView.applyPaymentMethod(paymentMethod);
+  this.setPrimaryView(this.deleteConfirmationView.ID);
 };
 
 function snakeCaseToCamelCase(s) {

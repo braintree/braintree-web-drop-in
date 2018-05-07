@@ -102,6 +102,10 @@ DropinModel.prototype.disableEditMode = function () {
   this._emit('disableEditMode');
 };
 
+DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {
+  this._emit('confirmPaymentMethodDeletion', paymentMethod);
+};
+
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
   var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
   var typeHasNotChanged = options.type === this._paymentMethodRequestableType;

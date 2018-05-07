@@ -875,11 +875,22 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.be.calledWith('enableEditMode');
     });
 
-    it('model.disableEditMode emits an disableEditMode event', function () {
+    it('model.disableEditMode emits a disableEditMode event', function () {
       this.model.disableEditMode();
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('disableEditMode');
+    });
+
+    it('model.confirmPaymentMethodDeletion emits a confirmPaymentMethodDeletion event', function () {
+      var paymentMethod = {
+        nonce: '123-fake-nonce'
+      };
+
+      this.model.confirmPaymentMethodDeletion(paymentMethod);
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('confirmPaymentMethodDeletion', paymentMethod);
     });
   });
 });

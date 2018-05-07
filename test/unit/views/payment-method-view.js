@@ -34,6 +34,7 @@ describe('PaymentMethodView', function () {
     beforeEach(function () {
       this.context = {
         strings: strings,
+        _selectDelete: this.sandbox.stub(),
         _choosePaymentMethod: this.sandbox.stub()
       };
     });
@@ -230,6 +231,26 @@ describe('PaymentMethodView', function () {
       view._choosePaymentMethod();
 
       expect(view.model.changeActivePaymentMethod).to.be.calledOnce;
+    });
+
+    it('calls model.confirmPaymentMethodDeletion when delete icon is clicked', function () {
+      var fakeModel = {
+        confirmPaymentMethodDeletion: this.sandbox.stub()
+      };
+      var paymentMethod = {
+        type: 'Foo',
+        nonce: 'nonce'
+      };
+      var view = new PaymentMethodView({
+        model: fakeModel,
+        strings: strings,
+        paymentMethod: paymentMethod
+      });
+
+      view._selectDelete();
+
+      expect(fakeModel.confirmPaymentMethodDeletion).to.be.calledOnce;
+      expect(fakeModel.confirmPaymentMethodDeletion).to.be.calledWith(paymentMethod);
     });
   });
 });

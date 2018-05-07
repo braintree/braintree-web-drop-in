@@ -69,10 +69,7 @@ PaymentMethodView.prototype._initialize = function () {
 
   this.element.innerHTML = html;
   this.checkMark = this.element.querySelector('.braintree-method__check-container');
-  addSelectionEventHandler(this.element.querySelector('.braintree-method__delete-container'), function () {
-    // TODO: open confirmation dialog
-    console.log(this.paymentMethod);
-  }.bind(this));
+  addSelectionEventHandler(this.element.querySelector('.braintree-method__delete-container'), this._selectDelete.bind(this));
 };
 
 PaymentMethodView.prototype.setActive = function (isActive) {
@@ -101,6 +98,10 @@ PaymentMethodView.prototype._choosePaymentMethod = function () {
     return;
   }
   this.model.changeActivePaymentMethod(this.paymentMethod);
+};
+
+PaymentMethodView.prototype._selectDelete = function () {
+  this.model.confirmPaymentMethodDeletion(this.paymentMethod);
 };
 
 module.exports = PaymentMethodView;
