@@ -853,6 +853,10 @@ $loader-scale-duration: 300ms;
   display: none;
 }
 
+.braintree-show-methods .braintree-done-edit {
+  display: block;
+}
+
 .braintree-methods--edit {
   .braintree-method__delete-container {
     display: block;
@@ -879,6 +883,10 @@ $loader-scale-duration: 300ms;
 }
 
 .braintree-delete-confirmation {
+  display: none;
+}
+
+.braintree-done-edit {
   display: none;
 }
 
