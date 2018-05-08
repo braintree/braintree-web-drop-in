@@ -33,6 +33,7 @@ function DropinModel(options) {
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
   this._options = options;
+  this._vaultManager = options.vaultManager;
 
   EventEmitter.call(this);
 }
@@ -206,6 +207,26 @@ DropinModel.prototype.reportError = function (error) {
 
 DropinModel.prototype.clearError = function () {
   this._emit('errorCleared');
+};
+
+DropinModel.prototype.deleteVaultedPaymentMethod = function () {
+  var self = this;
+
+  this._emit('startVaultedPaymentMethodDeletion');
+
+  return this._vaultManager.deletePaymentMethod(this._paymentMethodWaitingToBeDeleted.nonce).catch(function (error) {
+    self.reportError(error);
+  }).then(function () {
+    delete self._paymentMethodWaitingToBeDeleted;
+    // TODO reset payment method lookup
+    self._emit('finishVaultedPaymentMethodDeletion');
+  });
+};
+
+DropinModel.prototype.cancelDeleteVaultedPaymentMethod = function () {
+  this._emit('cancelVaultedPaymentMethodDeletion');
+
+  delete this._paymentMethodWaitingToBeDeleted;
 };
 
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {

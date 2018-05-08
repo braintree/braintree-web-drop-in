@@ -13,11 +13,15 @@ var isHTTPS = require('../../src/lib/is-https');
 var fake = require('../helpers/fake');
 var throwIfResolves = require('../helpers/throw-if-resolves');
 
-describe('DropinModel', function () {
+describe.only('DropinModel', function () {
   beforeEach(function () {
     this.configuration = fake.configuration();
 
+    this.vaultManager = {
+      deletePaymentMethod: this.sandbox.stub().resolves()
+    };
     this.modelOptions = {
+      vaultManager: this.vaultManager,
       client: {
         getConfiguration: function () {
           return this.configuration;
@@ -891,6 +895,91 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('confirmPaymentMethodDeletion', paymentMethod);
+    });
+  });
+
+  describe('deleteVaultedPaymentMethod', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.model._paymentMethodWaitingToBeDeleted = {
+        nonce: 'a-nonce'
+      };
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a startVaultedPaymentMethodDeletion event', function () {
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model._emit).to.be.calledWith('startVaultedPaymentMethodDeletion');
+      }.bind(this));
+    });
+
+    it('removes stored payment method variable', function () {
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model._paymentMethodWaitingToBeDeleted).to.not.exist;
+      }.bind(this));
+    });
+
+    it('uses vault manager to delete payment method', function () {
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.vaultManager.deletePaymentMethod).to.be.calledOnce;
+        expect(this.vaultManager.deletePaymentMethod).to.be.calledWith('a-nonce');
+      }.bind(this));
+    });
+
+    it('emits finishVaultedPaymentMethodDeletion event when deletion is succesful', function () {
+      this.vaultManager.deletePaymentMethod.resolves();
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model._emit).to.be.calledWith('finishVaultedPaymentMethodDeletion');
+      }.bind(this));
+    });
+
+    it('emits finishVaultedPaymentMethodDeletion event when deletion is unsuccesful', function () {
+      var error = new Error('aaaaaaah!');
+
+      this.vaultManager.deletePaymentMethod.rejects(error);
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model._emit).to.be.calledWith('finishVaultedPaymentMethodDeletion');
+      }.bind(this));
+    });
+
+    it('calls reportError when deletion is unsuccesful', function () {
+      var error = new Error('aaaaaaah!');
+
+      this.vaultManager.deletePaymentMethod.rejects(error);
+
+      this.sandbox.stub(this.model, 'reportError');
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model.reportError).to.be.calledOnce;
+        expect(this.model.reportError).to.be.calledWith(error);
+      }.bind(this));
+    });
+  });
+
+  describe('cancelDeleteVaultedPaymentMethod', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.model._paymentMethodWaitingToBeDeleted = {
+        nonce: 'a-nonce'
+      };
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a cancelVaultedPaymentMethodDeletion event', function () {
+      this.model.cancelDeleteVaultedPaymentMethod();
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('cancelVaultedPaymentMethodDeletion');
+    });
+
+    it('removes stored payment method variable', function () {
+      this.model.cancelDeleteVaultedPaymentMethod();
+
+      expect(this.model._paymentMethodWaitingToBeDeleted).to.not.exist;
     });
   });
 });
