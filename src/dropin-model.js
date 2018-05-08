@@ -103,6 +103,7 @@ DropinModel.prototype.disableEditMode = function () {
 };
 
 DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {
+  this._paymentMethodWaitingToBeDeleted = paymentMethod;
   this._emit('confirmPaymentMethodDeletion', paymentMethod);
 };
 

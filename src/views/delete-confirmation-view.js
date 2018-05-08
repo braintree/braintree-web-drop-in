@@ -19,8 +19,12 @@ DeleteConfirmationView.prototype._initialize = function () {
   this._noButton = this.getElementById('delete-confirmation__no');
   this._messageBox = this.getElementById('delete-confirmation__message');
 
-  addSelectionEventHandler(this._yesButton, this._selectYes.bind(this));
-  addSelectionEventHandler(this._noButton, this._selectNo.bind(this));
+  addSelectionEventHandler(this._yesButton, function () {
+    this.model.deleteVaultedPaymentMethod();
+  }.bind(this));
+  addSelectionEventHandler(this._noButton, function () {
+    this.model.cancelDeleteVaultedPaymentMethod();
+  }.bind(this));
 };
 
 DeleteConfirmationView.prototype.applyPaymentMethod = function (paymentMethod) {
@@ -47,12 +51,6 @@ DeleteConfirmationView.prototype.applyPaymentMethod = function (paymentMethod) {
     messageText = this.strings.genericDeleteConfirmationMessage;
   }
   this._messageBox.innerText = messageText;
-};
-
-DeleteConfirmationView.prototype._selectYes = function () {
-};
-
-DeleteConfirmationView.prototype._selectNo = function () {
 };
 
 module.exports = DeleteConfirmationView;

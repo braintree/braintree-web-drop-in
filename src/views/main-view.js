@@ -84,7 +84,6 @@ MainView.prototype._initialize = function () {
   this.deleteConfirmationView = new DeleteConfirmationView({
     element: this.getElementById('delete-confirmation'),
     model: this.model,
-    client: this.client,
     strings: this.strings
   });
   this.addView(this.deleteConfirmationView);

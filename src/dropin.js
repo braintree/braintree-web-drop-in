@@ -312,6 +312,7 @@ Dropin.prototype._initialize = function (callback) {
   self._getVaultedPaymentMethods().then(function (paymentMethods) {
     self._model = new DropinModel({
       client: self._client,
+      vaultManager: self._vaultManager,
       componentID: self._componentID,
       merchantConfiguration: self._merchantConfiguration,
       paymentMethods: paymentMethods

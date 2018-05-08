@@ -11,6 +11,17 @@ describe('DeleteConfirmationView', function () {
   beforeEach(function () {
     this.element = document.createElement('div');
     this.element.innerHTML = mainHTML;
+
+    this.model = {
+      deleteVaultedPaymentMethod: this.sandbox.stub(),
+      cancelDeleteVaultedPaymentMethod: this.sandbox.stub()
+    };
+
+    this.view = new DeleteConfirmationView({
+      element: this.element.querySelector('[data-braintree-id="delete-confirmation"]'),
+      model: this.model,
+      strings: strings
+    });
   });
 
   describe('Constructor', function () {
@@ -27,23 +38,25 @@ describe('DeleteConfirmationView', function () {
 
       expect(DeleteConfirmationView.prototype._initialize).to.have.been.calledOnce;
     });
+
+    it('sets up a button click for the yes button', function () {
+      var yesButton = this.element.querySelector('[data-braintree-id="delete-confirmation__yes"]');
+
+      yesButton.click();
+
+      expect(this.model.deleteVaultedPaymentMethod).to.be.calledOnce;
+    });
+
+    it('sets up a button click for the no button', function () {
+      var noButton = this.element.querySelector('[data-braintree-id="delete-confirmation__no"]');
+
+      noButton.click();
+
+      expect(this.model.cancelDeleteVaultedPaymentMethod).to.be.calledOnce;
+    });
   });
 
   describe('applyPaymentMethod', function () {
-    beforeEach(function () {
-      var model = {
-      };
-      var client = {
-      };
-
-      this.view = new DeleteConfirmationView({
-        element: this.element.querySelector('[data-braintree-id="delete-confirmation"]'),
-        model: model,
-        client: client,
-        strings: strings
-      });
-    });
-
     it('applies credit card payment method delete confirmation message', function () {
       var paymentMethod = {
         nonce: 'a-nonce',
