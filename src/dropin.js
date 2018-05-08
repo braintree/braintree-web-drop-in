@@ -20,6 +20,7 @@ var Promise = require('./lib/promise');
 var sanitizeHtml = require('./lib/sanitize-html');
 var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
+var vaultManager = require('braintree-web/vault-manager');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
@@ -656,21 +657,25 @@ Dropin.prototype._injectStylesheet = function () {
 };
 
 Dropin.prototype._getVaultedPaymentMethods = function () {
+  var self = this;
+
   if (isGuestCheckout(this._client)) {
     return Promise.resolve([]);
   }
 
-  return this._client.request({
-    endpoint: 'payment_methods',
-    method: 'get',
-    data: {
-      defaultFirst: 1
-    }
+  return vaultManager.create({
+    client: this._client
+  }).then(function (vaultManagerInstance) {
+    self._vaultManager = vaultManagerInstance;
+
+    return self._vaultManager.fetchPaymentMethods({
+      defaultFirst: true
+    });
   }).then(function (paymentMethodsPayload) {
-    var paymentMethods = paymentMethodsPayload.paymentMethods.map(function (paymentMethod) {
+    var paymentMethods = paymentMethodsPayload.map(function (paymentMethod) {
       paymentMethod.vaulted = true;
-      return paymentMethod;
-    }).map(formatPaymentMethodPayload);
+      return formatPaymentMethodPayload(paymentMethod);
+    });
 
     return Promise.resolve(paymentMethods);
   }).catch(function () {

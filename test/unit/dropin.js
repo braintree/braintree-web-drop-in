@@ -10,6 +10,7 @@ var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
 var threeDSecure = require('braintree-web/three-d-secure');
 var ThreeDSecure = require('../../src/lib/three-d-secure');
+var vaultManager = require('braintree-web/vault-manager');
 var DataCollector = require('../../src/lib/data-collector');
 var Promise = require('../../src/lib/promise');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
@@ -34,6 +35,10 @@ describe('Dropin', function () {
       getConfiguration: fake.configuration,
       getVersion: function () { return braintreeWebVersion; }
     };
+    this.vaultManager = {
+      fetchPaymentMethods: this.sandbox.stub().resolves([])
+    };
+    this.sandbox.stub(vaultManager, 'create').resolves(this.vaultManager);
 
     this.container = document.createElement('div');
     this.container.id = 'foo';
@@ -346,7 +351,6 @@ describe('Dropin', function () {
 
     it('requests payment methods if a customerId is provided', function (done) {
       var instance;
-      var paymentMethodsPayload = {paymentMethods: []};
 
       this.client.getConfiguration = function () {
         return {
@@ -355,21 +359,24 @@ describe('Dropin', function () {
           gatewayConfiguration: fake.configuration().gatewayConfiguration
         };
       };
-      this.client.request.resolves(paymentMethodsPayload);
 
-      this.sandbox.stub(analytics, 'sendEvent');
+      this.vaultManager.fetchPaymentMethods.resolves([]);
 
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(this.client.request).to.have.been.calledOnce;
-        expect(this.client.request).to.have.been.calledWith(this.sandbox.match({
-          endpoint: 'payment_methods',
-          method: 'get',
-          data: {
-            defaultFirst: 1
-          }
-        }));
+        try {
+          expect(vaultManager.create).to.be.calledOnce;
+          expect(vaultManager.create).to.be.calledWith({
+            client: this.client
+          });
+          expect(this.vaultManager.fetchPaymentMethods).to.have.been.calledOnce;
+          expect(this.vaultManager.fetchPaymentMethods).to.have.been.calledWith(this.sandbox.match({
+            defaultFirst: true
+          }));
+        } catch (e) {
+          done(e);
+        }
 
         done();
       }.bind(this));
@@ -378,10 +385,9 @@ describe('Dropin', function () {
     it('does not request payment methods if a customerId is not provided', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
-      this.sandbox.stub(analytics, 'sendEvent');
-
       instance._initialize(function () {
-        expect(this.client.request).to.not.have.been.calledWith(this.sandbox.match({endpoint: 'payment_methods'}));
+        expect(vaultManager.create).to.not.be.called;
+        expect(this.vaultManager.fetchPaymentMethods).to.not.have.been.called;
 
         done();
       }.bind(this));
@@ -419,7 +425,6 @@ describe('Dropin', function () {
         type: 'CreditCard',
         garbage: 'garbage'
       };
-      var paymentMethodsPayload = {paymentMethods: [fakePaymentMethod]};
 
       this.client.getConfiguration = function () {
         return {
@@ -428,9 +433,7 @@ describe('Dropin', function () {
           gatewayConfiguration: fake.configuration().gatewayConfiguration
         };
       };
-      this.client.request.resolves(paymentMethodsPayload);
-
-      this.sandbox.stub(analytics, 'sendEvent');
+      this.vaultManager.fetchPaymentMethods.resolves([fakePaymentMethod]);
 
       instance = new Dropin(this.dropinOptions);
 
