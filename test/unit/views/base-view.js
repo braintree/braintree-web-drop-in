@@ -94,6 +94,14 @@ describe('BaseView', function () {
       expect(classlist.add).to.be.calledOnce;
       expect(classlist.add).to.be.calledWith(element, 'braintree-sheet--loading');
     });
+
+    it('ignores adding class if no element is provided', function () {
+      var view = new BaseView();
+
+      view.preventUserAction();
+
+      expect(classlist.add).to.not.be.called;
+    });
   });
 
   describe('allowUserAction', function () {
@@ -111,6 +119,14 @@ describe('BaseView', function () {
 
       expect(classlist.remove).to.be.calledOnce;
       expect(classlist.remove).to.be.calledWith(element, 'braintree-sheet--loading');
+    });
+
+    it('ignores adding class if no element is provided', function () {
+      var view = new BaseView();
+
+      view.allowUserAction();
+
+      expect(classlist.remove).to.not.be.called;
     });
   });
 });

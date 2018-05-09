@@ -33,11 +33,15 @@ BaseView.prototype.teardown = function () {
 };
 
 BaseView.prototype.preventUserAction = function () {
-  classlist.add(this.element, 'braintree-sheet--loading');
+  if (this.element) {
+    classlist.add(this.element, 'braintree-sheet--loading');
+  }
 };
 
 BaseView.prototype.allowUserAction = function () {
-  classlist.remove(this.element, 'braintree-sheet--loading');
+  if (this.element) {
+    classlist.remove(this.element, 'braintree-sheet--loading');
+  }
 };
 
 module.exports = BaseView;
