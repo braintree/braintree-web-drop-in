@@ -6,7 +6,6 @@ var constants = require('./constants');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
-var isGuestCheckout = require('./lib/is-guest-checkout');
 var assets = require('./lib/assets');
 var fs = require('fs');
 var MainView = require('./views/main-view');
@@ -20,7 +19,6 @@ var Promise = require('./lib/promise');
 var sanitizeHtml = require('./lib/sanitize-html');
 var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
-var vaultManager = require('braintree-web/vault-manager');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
@@ -309,17 +307,13 @@ Dropin.prototype._initialize = function (callback) {
   self._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(self._dropinWrapper);
 
-  self._getVaultedPaymentMethods().then(function (paymentMethods) {
-    self._model = new DropinModel({
-      client: self._client,
-      vaultManager: self._vaultManager,
-      componentID: self._componentID,
-      merchantConfiguration: self._merchantConfiguration,
-      paymentMethods: paymentMethods
-    });
+  self._model = new DropinModel({
+    client: self._client,
+    componentID: self._componentID,
+    merchantConfiguration: self._merchantConfiguration
+  });
 
-    return self._model.initialize();
-  }).then(function () {
+  self._model.initialize().then(function () {
     self._model.on('cancelInitialization', function (err) {
       self._dropinWrapper.innerHTML = '';
       analytics.sendEvent(self._client, 'load-error');
@@ -654,33 +648,6 @@ Dropin.prototype._injectStylesheet = function () {
   assets.loadStylesheet({
     href: stylesheetUrl,
     id: constants.STYLESHEET_ID
-  });
-};
-
-Dropin.prototype._getVaultedPaymentMethods = function () {
-  var self = this;
-
-  if (isGuestCheckout(this._client)) {
-    return Promise.resolve([]);
-  }
-
-  return vaultManager.create({
-    client: this._client
-  }).then(function (vaultManagerInstance) {
-    self._vaultManager = vaultManagerInstance;
-
-    return self._vaultManager.fetchPaymentMethods({
-      defaultFirst: true
-    });
-  }).then(function (paymentMethodsPayload) {
-    var paymentMethods = paymentMethodsPayload.map(function (paymentMethod) {
-      paymentMethod.vaulted = true;
-      return formatPaymentMethodPayload(paymentMethod);
-    });
-
-    return Promise.resolve(paymentMethods);
-  }).catch(function () {
-    return Promise.resolve([]);
   });
 };
 

@@ -4,7 +4,6 @@
 var BaseView = require('../../../../src/views/base-view');
 var ApplePayView = require('../../../../src/views/payment-sheet-views/apple-pay-view');
 var btApplePay = require('braintree-web/apple-pay');
-var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
 var isHTTPS = require('../../../../src/lib/is-https');
 var fake = require('../../../helpers/fake');
@@ -14,13 +13,10 @@ var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'u
 
 describe('ApplePayView', function () {
   beforeEach(function () {
-    this.model = new DropinModel(fake.modelOptions());
+    this.model = fake.model();
 
     return this.model.initialize().then(function () {
-      this.fakeClient = {
-        getConfiguration: this.sandbox.stub().returns(fake.configuration()),
-        getVersion: function () {}
-      };
+      this.fakeClient = fake.client();
 
       this.div = document.createElement('div');
 

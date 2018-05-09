@@ -53,8 +53,10 @@ DropinModel.prototype.initialize = function () {
     return getSupportedPaymentOptions(self._options);
   }).then(function (paymentOptions) {
     self.supportedPaymentOptions = paymentOptions;
-    // TODO get vaulted payment methods
-    self._paymentMethods = self._getSupportedPaymentMethods(self._options.paymentMethods);
+
+    return self.getVaultedPaymentMethods();
+  }).then(function (paymentMethods) {
+    self._paymentMethods = paymentMethods;
     self._paymentMethodIsRequestable = self._paymentMethods.length > 0;
   });
 };
@@ -242,18 +244,18 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
   var self = this;
 
   if (self.isGuestCheckout) {
-    self._paymentMethods = [];
-
-    return Promise.resolve();
+    return Promise.resolve([]);
   }
 
   return self._vaultManager.fetchPaymentMethods({
     defaultFirst: true
   }).then(function (paymentMethods) {
-    self._paymentMethods = self._getSupportedPaymentMethods(paymentMethods).map(function (paymentMethod) {
+    return self._getSupportedPaymentMethods(paymentMethods).map(function (paymentMethod) {
       paymentMethod.vaulted = true;
       return paymentMethod;
     });
+  }).catch(function () {
+    return Promise.resovle([]);
   });
 };
 

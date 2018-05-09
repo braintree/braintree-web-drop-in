@@ -3,6 +3,8 @@
 var clientToken, clientTokenWithCustomerID, fakeBTInstances;
 var tokenizationKey = 'development_testing_merchant_id';
 var braintreeVersion = require('braintree-web').VERSION;
+var DropinModel = require('../../src/dropin-model');
+var sinon = require('sinon');
 
 function configuration() {
   return {
@@ -89,20 +91,42 @@ fakeBTInstances = {
   }
 };
 
+function client(conf) {
+  conf = conf || configuration();
+
+  return {
+    _request: sinon.stub().resolves(),
+    request: sinon.stub().resolves(),
+    getConfiguration: sinon.stub().returns(conf),
+    getVersion: function () { return braintreeVersion; }
+  };
+}
+
+function model(options) {
+  var modelInstance;
+
+  options = options || modelOptions();
+
+  modelInstance = new DropinModel(options);
+
+  sinon.stub(modelInstance, 'getVaultedPaymentMethods').resolves([]);
+
+  return modelInstance;
+}
+
 function modelOptions() {
   return {
-    client: {
-      getConfiguration: configuration
-    },
+    client: client(),
     componentID: 'foo123',
     merchantConfiguration: {
       authorization: tokenizationKey
-    },
-    paymentMethods: []
+    }
   };
 }
 
 module.exports = {
+  client: client,
+  model: model,
   clientToken: clientToken,
   clientTokenWithCustomerID: clientTokenWithCustomerID,
   configuration: configuration,

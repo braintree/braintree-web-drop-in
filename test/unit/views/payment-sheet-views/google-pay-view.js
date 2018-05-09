@@ -4,7 +4,6 @@
 var BaseView = require('../../../../src/views/base-view');
 var GooglePayView = require('../../../../src/views/payment-sheet-views/google-pay-view');
 var btGooglePay = require('braintree-web/google-payment');
-var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
 var analytics = require('../../../../src/lib/analytics');
 var assets = require('../../../../src/lib/assets');
@@ -16,11 +15,8 @@ var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'u
 
 describe('GooglePayView', function () {
   beforeEach(function () {
-    this.model = new DropinModel(fake.modelOptions());
-    this.fakeClient = {
-      getConfiguration: this.sandbox.stub().returns(fake.configuration()),
-      getVersion: function () {}
-    };
+    this.model = fake.model();
+    this.fakeClient = fake.client();
 
     this.div = document.createElement('div');
 

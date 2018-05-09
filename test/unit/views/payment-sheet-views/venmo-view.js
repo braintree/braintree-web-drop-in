@@ -4,7 +4,6 @@
 var BaseView = require('../../../../src/views/base-view');
 var VenmoView = require('../../../../src/views/payment-sheet-views/venmo-view');
 var btVenmo = require('braintree-web/venmo');
-var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
@@ -13,12 +12,9 @@ var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'u
 
 describe('VenmoView', function () {
   beforeEach(function () {
-    this.fakeClient = {
-      getConfiguration: this.sandbox.stub().returns(fake.configuration()),
-      getVersion: function () {}
-    };
+    this.fakeClient = fake.client();
 
-    this.model = new DropinModel(fake.modelOptions());
+    this.model = fake.model();
     this.sandbox.stub(this.model, 'reportAppSwitchPayload');
     this.sandbox.stub(this.model, 'reportAppSwitchError');
 

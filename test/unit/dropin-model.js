@@ -14,7 +14,7 @@ var isHTTPS = require('../../src/lib/is-https');
 var fake = require('../helpers/fake');
 var throwIfResolves = require('../helpers/throw-if-resolves');
 
-describe.only('DropinModel', function () {
+describe('DropinModel', function () {
   beforeEach(function () {
     this.configuration = fake.configuration();
 
@@ -24,11 +24,7 @@ describe.only('DropinModel', function () {
     };
     this.sandbox.stub(vaultManager, 'create').resolves(this.vaultManager);
     this.modelOptions = {
-      client: {
-        getConfiguration: function () {
-          return this.configuration;
-        }.bind(this)
-      },
+      client: fake.client(this.configuration),
       componentID: 'foo123',
       merchantConfiguration: {
         authorization: fake.clientToken,
@@ -119,14 +115,13 @@ describe.only('DropinModel', function () {
     });
 
     it('sets existing payment methods as _paymentMethods', function () {
-      var model;
+      var model = new DropinModel(this.modelOptions);
 
-      this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
-
-      model = new DropinModel(this.modelOptions);
+      model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([{type: 'CreditCard', details: {lastTwo: '11'}}]);
 
       return model.initialize().then(function () {
-        expect(model._paymentMethods).to.deep.equal([{type: 'CreditCard', details: {lastTwo: '11'}}]);
+        expect(model._paymentMethods).to.deep.equal([{type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}]);
       });
     });
 
@@ -138,108 +133,61 @@ describe.only('DropinModel', function () {
       });
     });
 
-    it('ignores invalid payment methods', function () {
-      var model;
-
-      this.modelOptions.paymentMethods = [
-        {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-        {type: 'InvalidMethod', details: {}},
-        {type: 'AlsoInvalidMethod', details: {}}
-      ];
-
-      this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
-      model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-        ]);
-      });
-    });
-
     it('ignores valid, but disabled payment methods', function () {
-      var model;
+      var model = new DropinModel(this.modelOptions);
 
-      this.modelOptions.paymentMethods = [
+      model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-      ];
-
+      ]);
       PayPalView.isEnabled.resolves(false);
       PayPalCreditView.isEnabled.resolves(false);
 
-      model = new DropinModel(this.modelOptions);
-
       return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}}
+          {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}
         ]);
       });
     });
 
     it('ignores payment methods that have errored when calling isEnabled', function () {
-      var model;
+      var model = new DropinModel(this.modelOptions);
 
+      model.isGuestCheckout = false;
       this.sandbox.stub(console, 'error');
-      this.modelOptions.paymentMethods = [
+      this.vaultManager.fetchPaymentMethods.resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-      ];
+      ]);
 
       PayPalView.isEnabled.rejects(new Error('fail'));
       PayPalCreditView.isEnabled.resolves(false);
 
-      model = new DropinModel(this.modelOptions);
-
       return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}}
+          {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}
         ]);
       });
     });
 
     it('calls console.error with error if isEnabled errors', function () {
+      var model = new DropinModel(this.modelOptions);
       var error = new Error('fail');
-      var model;
 
       this.sandbox.stub(console, 'error');
-      this.modelOptions.paymentMethods = [
+      this.vaultManager.fetchPaymentMethods.resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-      ];
+      ]);
 
       PayPalView.isEnabled.rejects(error);
       PayPalCreditView.isEnabled.resolves(false);
-
-      model = new DropinModel(this.modelOptions);
 
       return model.initialize().then(function () {
         expect(console.error).to.be.calledTwice; // eslint-disable-line no-console
         expect(console.error).to.be.calledWith('paypal view errored when checking if it was supported.'); // eslint-disable-line no-console
         expect(console.error).to.be.calledWith(error); // eslint-disable-line no-console
-      });
-    });
-
-    it('ignores payment vaulted payment methods that cannot be used client side', function () {
-      var model;
-
-      this.modelOptions.paymentMethods = [
-        {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-        {type: 'ApplePayCard', details: {}},
-        {type: 'AndroidPayCard', details: {}},
-        {type: 'VenmoAccount', details: {}}
-      ];
-
-      model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-        ]);
       });
     });
 
@@ -711,11 +659,11 @@ describe.only('DropinModel', function () {
       });
     });
 
-    it('returns true initially if payment methods are passed in', function () {
-      var model;
+    it('returns true initially if customer has saved payment methods', function () {
+      var model = new DropinModel(this.modelOptions);
 
-      this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
-      model = new DropinModel(this.modelOptions);
+      model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([{type: 'CreditCard', details: {lastTwo: '11'}}]);
 
       return model.initialize().then(function () {
         expect(model.isPaymentMethodRequestable()).to.equal(true);
@@ -1004,23 +952,28 @@ describe.only('DropinModel', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
 
-      return this.model.initialize();
-    });
+      this.sandbox.stub(ApplePayView, 'isEnabled').resolves(true);
+      this.sandbox.stub(CardView, 'isEnabled').resolves(true);
+      this.sandbox.stub(GooglePayView, 'isEnabled').resolves(true);
+      this.sandbox.stub(PayPalView, 'isEnabled').resolves(true);
+      this.sandbox.stub(PayPalCreditView, 'isEnabled').resolves(true);
+      this.sandbox.stub(VenmoView, 'isEnabled').resolves(true);
 
-    it('sets saved payment methods to empty array when in guest checkout', function () {
-      this.model.isGuestCheckout = true;
-      this.model._paymentMethods = [{nonce: 'a-nonce'}];
-
-      return this.model.getVaultedPaymentMethods().then(function () {
-        expect(this.model.getPaymentMethods()).to.deep.equal([]);
+      return this.model.initialize().then(function () {
+        this.model.isGuestCheckout = false;
       }.bind(this));
     });
 
-    it('sets saved payment methods to fetched payment methods from vault manager when not in guest checkout', function () {
+    it('resolves with payment methods as empty array when in guest checkout', function () {
+      this.model.isGuestCheckout = true;
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(paymentMethods).to.deep.equal([]);
+      });
+    });
+
+    it('resolves with payment methods from vault manager when not in guest checkout', function () {
       this.model.isGuestCheckout = false;
-      this.model._paymentMethods = [{
-        nonce: 'an-old-nonce'
-      }];
       this.vaultManager.fetchPaymentMethods.resolves([{
         nonce: '1-nonce',
         type: 'CreditCard'
@@ -1029,11 +982,11 @@ describe.only('DropinModel', function () {
         type: 'PayPalAccount'
       }]);
 
-      return this.model.getVaultedPaymentMethods().then(function () {
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
         expect(this.vaultManager.fetchPaymentMethods).to.be.calledWith({
           defaultFirst: true
         });
-        expect(this.model.getPaymentMethods()).to.deep.equal([{
+        expect(paymentMethods).to.deep.equal([{
           nonce: '1-nonce',
           type: 'CreditCard',
           vaulted: true
@@ -1045,11 +998,8 @@ describe.only('DropinModel', function () {
       }.bind(this));
     });
 
-    it('only saves supported payment method types', function () {
+    it('only resolves supported payment method types', function () {
       this.model.isGuestCheckout = false;
-      this.model._paymentMethods = [{
-        nonce: 'an-old-nonce'
-      }];
       this.vaultManager.fetchPaymentMethods.resolves([{
         nonce: '1-nonce',
         type: 'CreditCard'
@@ -1058,20 +1008,17 @@ describe.only('DropinModel', function () {
         type: 'FooPay'
       }]);
 
-      return this.model.getVaultedPaymentMethods().then(function () {
-        expect(this.model.getPaymentMethods()).to.deep.equal([{
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(paymentMethods).to.deep.equal([{
           nonce: '1-nonce',
           type: 'CreditCard',
           vaulted: true
         }]);
-      }.bind(this));
+      });
     });
 
     it('includes vaulted property on payment method objects', function () {
       this.model.isGuestCheckout = false;
-      this.model._paymentMethods = [{
-        nonce: 'an-old-nonce'
-      }];
       this.vaultManager.fetchPaymentMethods.resolves([{
         nonce: '1-nonce',
         type: 'CreditCard'
@@ -1083,24 +1030,48 @@ describe.only('DropinModel', function () {
         type: 'CreditCard'
       }]);
 
-      return this.model.getVaultedPaymentMethods().then(function () {
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
         expect(this.vaultManager.fetchPaymentMethods).to.be.calledWith({
           defaultFirst: true
         });
-        expect(this.model.getPaymentMethods()).to.deep.equal([{
-          nonce: '1-nonce',
-          type: 'CreditCard',
-          vaulted: true
-        }, {
-          nonce: '2-nonce',
-          type: 'PayPalAccount',
-          vaulted: true
-        }, {
-          nonce: '3-nonce',
-          type: 'CreditCard',
-          vaulted: true
-        }]);
+        expect(paymentMethods[0].vaulted).to.equal(true);
+        expect(paymentMethods[1].vaulted).to.equal(true);
+        expect(paymentMethods[2].vaulted).to.equal(true);
       }.bind(this));
+    });
+
+    it('ignores invalid payment methods', function () {
+      this.vaultManager.fetchPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'InvalidMethod', details: {}},
+        {type: 'AlsoInvalidMethod', details: {}}
+      ]);
+      this.model.merchantConfiguration.paypal = {flow: 'vault'};
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}, vaulted: true}
+        ]);
+      });
+    });
+
+    it('ignores vaulted payment methods that cannot be used client side', function () {
+      this.vaultManager.fetchPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'ApplePayCard', details: {}},
+        {type: 'AndroidPayCard', details: {}},
+        {type: 'VenmoAccount', details: {}}
+      ]);
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}, vaulted: true}
+        ]);
+      });
     });
   });
 });
