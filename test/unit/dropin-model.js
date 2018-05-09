@@ -1,5 +1,6 @@
 'use strict';
 
+var vaultManager = require('braintree-web/vault-manager');
 var analytics = require('../../src/lib/analytics');
 var DropinModel = require('../../src/dropin-model');
 var ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
@@ -18,10 +19,11 @@ describe.only('DropinModel', function () {
     this.configuration = fake.configuration();
 
     this.vaultManager = {
+      fetchPaymentMethods: this.sandbox.stub().resolves([]),
       deletePaymentMethod: this.sandbox.stub().resolves()
     };
+    this.sandbox.stub(vaultManager, 'create').resolves(this.vaultManager);
     this.modelOptions = {
-      vaultManager: this.vaultManager,
       client: {
         getConfiguration: function () {
           return this.configuration;
@@ -29,7 +31,9 @@ describe.only('DropinModel', function () {
       },
       componentID: 'foo123',
       merchantConfiguration: {
-        authorization: fake.clientToken
+        authorization: fake.clientToken,
+        paypal: {},
+        venmo: {}
       },
       paymentMethods: []
     };
@@ -101,6 +105,17 @@ describe.only('DropinModel', function () {
       this.sandbox.stub(PayPalView, 'isEnabled').resolves(true);
       this.sandbox.stub(PayPalCreditView, 'isEnabled').resolves(true);
       this.sandbox.stub(VenmoView, 'isEnabled').resolves(true);
+    });
+
+    it('creates a vault manager', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      return model.initialize().then(function () {
+        expect(vaultManager.create).to.be.calledOnce;
+        expect(vaultManager.create).to.be.calledWith({
+          client: this.modelOptions.client
+        });
+      }.bind(this));
     });
 
     it('sets existing payment methods as _paymentMethods', function () {
@@ -906,6 +921,8 @@ describe.only('DropinModel', function () {
         nonce: 'a-nonce'
       };
       this.sandbox.stub(this.model, '_emit');
+
+      return this.model.initialize();
     });
 
     it('emits a startVaultedPaymentMethodDeletion event', function () {
@@ -980,6 +997,110 @@ describe.only('DropinModel', function () {
       this.model.cancelDeleteVaultedPaymentMethod();
 
       expect(this.model._paymentMethodWaitingToBeDeleted).to.not.exist;
+    });
+  });
+
+  describe('getVaultedPaymentMethods', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      return this.model.initialize();
+    });
+
+    it('sets saved payment methods to empty array when in guest checkout', function () {
+      this.model.isGuestCheckout = true;
+      this.model._paymentMethods = [{nonce: 'a-nonce'}];
+
+      return this.model.getVaultedPaymentMethods().then(function () {
+        expect(this.model.getPaymentMethods()).to.deep.equal([]);
+      }.bind(this));
+    });
+
+    it('sets saved payment methods to fetched payment methods from vault manager when not in guest checkout', function () {
+      this.model.isGuestCheckout = false;
+      this.model._paymentMethods = [{
+        nonce: 'an-old-nonce'
+      }];
+      this.vaultManager.fetchPaymentMethods.resolves([{
+        nonce: '1-nonce',
+        type: 'CreditCard'
+      }, {
+        nonce: '2-nonce',
+        type: 'PayPalAccount'
+      }]);
+
+      return this.model.getVaultedPaymentMethods().then(function () {
+        expect(this.vaultManager.fetchPaymentMethods).to.be.calledWith({
+          defaultFirst: true
+        });
+        expect(this.model.getPaymentMethods()).to.deep.equal([{
+          nonce: '1-nonce',
+          type: 'CreditCard',
+          vaulted: true
+        }, {
+          nonce: '2-nonce',
+          type: 'PayPalAccount',
+          vaulted: true
+        }]);
+      }.bind(this));
+    });
+
+    it('only saves supported payment method types', function () {
+      this.model.isGuestCheckout = false;
+      this.model._paymentMethods = [{
+        nonce: 'an-old-nonce'
+      }];
+      this.vaultManager.fetchPaymentMethods.resolves([{
+        nonce: '1-nonce',
+        type: 'CreditCard'
+      }, {
+        nonce: '2-nonce',
+        type: 'FooPay'
+      }]);
+
+      return this.model.getVaultedPaymentMethods().then(function () {
+        expect(this.model.getPaymentMethods()).to.deep.equal([{
+          nonce: '1-nonce',
+          type: 'CreditCard',
+          vaulted: true
+        }]);
+      }.bind(this));
+    });
+
+    it('includes vaulted property on payment method objects', function () {
+      this.model.isGuestCheckout = false;
+      this.model._paymentMethods = [{
+        nonce: 'an-old-nonce'
+      }];
+      this.vaultManager.fetchPaymentMethods.resolves([{
+        nonce: '1-nonce',
+        type: 'CreditCard'
+      }, {
+        nonce: '2-nonce',
+        type: 'PayPalAccount'
+      }, {
+        nonce: '3-nonce',
+        type: 'CreditCard'
+      }]);
+
+      return this.model.getVaultedPaymentMethods().then(function () {
+        expect(this.vaultManager.fetchPaymentMethods).to.be.calledWith({
+          defaultFirst: true
+        });
+        expect(this.model.getPaymentMethods()).to.deep.equal([{
+          nonce: '1-nonce',
+          type: 'CreditCard',
+          vaulted: true
+        }, {
+          nonce: '2-nonce',
+          type: 'PayPalAccount',
+          vaulted: true
+        }, {
+          nonce: '3-nonce',
+          type: 'CreditCard',
+          vaulted: true
+        }]);
+      }.bind(this));
     });
   });
 });

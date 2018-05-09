@@ -8,6 +8,7 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var Promise = require('./lib/promise');
 var paymentSheetViews = require('./views/payment-sheet-views');
+var vaultManager = require('braintree-web/vault-manager');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
   paymentMethodTypes.applePay,
@@ -33,7 +34,6 @@ function DropinModel(options) {
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
   this._options = options;
-  this._vaultManager = options.vaultManager;
 
   EventEmitter.call(this);
 }
@@ -43,11 +43,20 @@ DropinModel.prototype = Object.create(EventEmitter.prototype, {
 });
 
 DropinModel.prototype.initialize = function () {
-  return getSupportedPaymentOptions(this._options).then(function (paymentOptions) {
-    this.supportedPaymentOptions = paymentOptions;
-    this._paymentMethods = this._getSupportedPaymentMethods(this._options.paymentMethods);
-    this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
-  }.bind(this));
+  var self = this;
+
+  return vaultManager.create({
+    client: self._options.client
+  }).then(function (vaultManagerInstance) {
+    self._vaultManager = vaultManagerInstance;
+
+    return getSupportedPaymentOptions(self._options);
+  }).then(function (paymentOptions) {
+    self.supportedPaymentOptions = paymentOptions;
+    // TODO get vaulted payment methods
+    self._paymentMethods = self._getSupportedPaymentMethods(self._options.paymentMethods);
+    self._paymentMethodIsRequestable = self._paymentMethods.length > 0;
+  });
 };
 
 DropinModel.prototype.isPaymentMethodRequestable = function () {
@@ -227,6 +236,25 @@ DropinModel.prototype.cancelDeleteVaultedPaymentMethod = function () {
   this._emit('cancelVaultedPaymentMethodDeletion');
 
   delete this._paymentMethodWaitingToBeDeleted;
+};
+
+DropinModel.prototype.getVaultedPaymentMethods = function () {
+  var self = this;
+
+  if (self.isGuestCheckout) {
+    self._paymentMethods = [];
+
+    return Promise.resolve();
+  }
+
+  return self._vaultManager.fetchPaymentMethods({
+    defaultFirst: true
+  }).then(function (paymentMethods) {
+    self._paymentMethods = self._getSupportedPaymentMethods(paymentMethods).map(function (paymentMethod) {
+      paymentMethod.vaulted = true;
+      return paymentMethod;
+    });
+  });
 };
 
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
