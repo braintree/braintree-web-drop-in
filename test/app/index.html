@@ -127,9 +127,12 @@
       landingPageType: 'login' // hard code this so we get a consistent experience for e2e tests
     },
     googlePay: {
-      totalPriceStatus: 'FINAL',
-      totalPrice: '10.00',
-      currencyCode: 'USD'
+      // merchantId: 'merchant-id', // prod id goes here
+      transactionInfo: {
+        currencyCode: 'USD',
+        totalPriceStatus: 'FINAL',
+        totalPrice: '19.99'
+      }
     }
   };
   var dropinInstance;
