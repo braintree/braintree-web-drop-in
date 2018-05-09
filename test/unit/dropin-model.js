@@ -860,4 +860,34 @@ describe('DropinModel', function () {
       });
     });
   });
+
+  describe('preventUserAction', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a preventUserAction event', function () {
+      this.model.preventUserAction('card');
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('preventUserAction');
+    });
+  });
+
+  describe('allowUserAction', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a allowUserAction event', function () {
+      this.model.allowUserAction('card');
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('allowUserAction');
+    });
+  });
 });

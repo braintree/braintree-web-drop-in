@@ -36,12 +36,16 @@ BaseView.prototype.preventUserAction = function () {
   if (this.element) {
     classlist.add(this.element, 'braintree-sheet--loading');
   }
+
+  this.model.preventUserAction();
 };
 
 BaseView.prototype.allowUserAction = function () {
   if (this.element) {
     classlist.remove(this.element, 'braintree-sheet--loading');
   }
+
+  this.model.allowUserAction();
 };
 
 module.exports = BaseView;

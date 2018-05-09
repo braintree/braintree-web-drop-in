@@ -195,6 +195,14 @@ DropinModel.prototype.clearError = function () {
   this._emit('errorCleared');
 };
 
+DropinModel.prototype.preventUserAction = function () {
+  this._emit('preventUserAction');
+};
+
+DropinModel.prototype.allowUserAction = function () {
+  this._emit('allowUserAction');
+};
+
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
   var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
     var paymentMethodType = paymentMethodTypes[key];

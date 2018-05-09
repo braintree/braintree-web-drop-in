@@ -81,52 +81,84 @@ describe('BaseView', function () {
   describe('preventUserAction', function () {
     beforeEach(function () {
       this.sandbox.stub(classlist, 'add');
+      this.element = global.document.createElement('div');
+      this.model = {
+        preventUserAction: this.sandbox.stub()
+      };
     });
 
     it('adds a loading class to view element', function () {
-      var element = global.document.createElement('div');
       var view = new BaseView({
-        element: element
+        element: this.element,
+        model: this.model
       });
 
       view.preventUserAction();
 
       expect(classlist.add).to.be.calledOnce;
-      expect(classlist.add).to.be.calledWith(element, 'braintree-sheet--loading');
+      expect(classlist.add).to.be.calledWith(this.element, 'braintree-sheet--loading');
     });
 
     it('ignores adding class if no element is provided', function () {
-      var view = new BaseView();
+      var view = new BaseView({
+        model: this.model
+      });
 
       view.preventUserAction();
 
       expect(classlist.add).to.not.be.called;
+    });
+
+    it('calls preventUserAction on model', function () {
+      var view = new BaseView({
+        model: this.model
+      });
+
+      view.preventUserAction();
+
+      expect(this.model.preventUserAction).to.be.calledOnce;
     });
   });
 
   describe('allowUserAction', function () {
     beforeEach(function () {
       this.sandbox.stub(classlist, 'remove');
+      this.element = global.document.createElement('div');
+      this.model = {
+        allowUserAction: this.sandbox.stub()
+      };
     });
 
     it('adds a loading class to view element', function () {
-      var element = global.document.createElement('div');
       var view = new BaseView({
-        element: element
+        element: this.element,
+        model: this.model
       });
 
       view.allowUserAction();
 
       expect(classlist.remove).to.be.calledOnce;
-      expect(classlist.remove).to.be.calledWith(element, 'braintree-sheet--loading');
+      expect(classlist.remove).to.be.calledWith(this.element, 'braintree-sheet--loading');
     });
 
     it('ignores adding class if no element is provided', function () {
-      var view = new BaseView();
+      var view = new BaseView({
+        model: this.model
+      });
 
       view.allowUserAction();
 
       expect(classlist.remove).to.not.be.called;
+    });
+
+    it('calls allowUserAction on model', function () {
+      var view = new BaseView({
+        model: this.model
+      });
+
+      view.allowUserAction();
+
+      expect(this.model.allowUserAction).to.be.calledOnce;
     });
   });
 });
