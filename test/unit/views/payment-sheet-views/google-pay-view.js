@@ -430,7 +430,7 @@ describe('GooglePayView', function () {
         expect(assets.loadScript).to.be.calledOnce;
         expect(assets.loadScript).to.be.calledWith({
           id: 'braintree-dropin-google-payment-script',
-          src: 'https://payments.developers.google.com/js/apis/pay.js'
+          src: 'https://pay.google.com/gp/p/js/pay.js'
         });
       });
     });
@@ -455,7 +455,7 @@ describe('GooglePayView', function () {
         expect(assets.loadScript).to.be.calledOnce;
         expect(assets.loadScript).to.be.calledWith({
           id: 'braintree-dropin-google-payment-script',
-          src: 'https://payments.developers.google.com/js/apis/pay.js'
+          src: 'https://pay.google.com/gp/p/js/pay.js'
         });
       });
     });
