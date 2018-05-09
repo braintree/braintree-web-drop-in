@@ -1,6 +1,7 @@
 'use strict';
 
 var assign = require('../lib/assign').assign;
+var classlist = require('../lib/classlist');
 var DropinError = require('../lib/dropin-error');
 var errors = require('../constants').errors;
 var Promise = require('../lib/promise');
@@ -29,6 +30,14 @@ BaseView.prototype.onSelection = function () {};
 
 BaseView.prototype.teardown = function () {
   return Promise.resolve();
+};
+
+BaseView.prototype.preventUserAction = function () {
+  classlist.add(this.element, 'braintree-sheet--loading');
+};
+
+BaseView.prototype.allowUserAction = function () {
+  classlist.remove(this.element, 'braintree-sheet--loading');
 };
 
 module.exports = BaseView;

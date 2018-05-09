@@ -2,6 +2,7 @@
 
 var BaseView = require('../../../src/views/base-view');
 var constants = require('../../../src/constants');
+var classlist = require('../../../src/lib/classlist');
 var Promise = require('../../../src/lib/promise');
 
 describe('BaseView', function () {
@@ -74,6 +75,42 @@ describe('BaseView', function () {
       var view = new BaseView();
 
       expect(view.onSelection).to.be.a('function');
+    });
+  });
+
+  describe('preventUserAction', function () {
+    beforeEach(function () {
+      this.sandbox.stub(classlist, 'add');
+    });
+
+    it('adds a loading class to view element', function () {
+      var element = global.document.createElement('div');
+      var view = new BaseView({
+        element: element
+      });
+
+      view.preventUserAction();
+
+      expect(classlist.add).to.be.calledOnce;
+      expect(classlist.add).to.be.calledWith(element, 'braintree-sheet--loading');
+    });
+  });
+
+  describe('allowUserAction', function () {
+    beforeEach(function () {
+      this.sandbox.stub(classlist, 'remove');
+    });
+
+    it('adds a loading class to view element', function () {
+      var element = global.document.createElement('div');
+      var view = new BaseView({
+        element: element
+      });
+
+      view.allowUserAction();
+
+      expect(classlist.remove).to.be.calledOnce;
+      expect(classlist.remove).to.be.calledWith(element, 'braintree-sheet--loading');
     });
   });
 });

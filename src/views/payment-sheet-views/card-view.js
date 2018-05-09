@@ -354,7 +354,7 @@ CardView.prototype.tokenize = function () {
 
   if (!this._validateForm(true)) {
     self.model.reportError('hostedFieldsFieldsInvalidError');
-    classlist.remove(self.element, 'braintree-sheet--loading');
+    self.allowUserAction();
 
     return Promise.reject(new DropinError(constants.errors.NO_PAYMENT_METHOD_ERROR));
   }
@@ -397,7 +397,7 @@ CardView.prototype.tokenize = function () {
       transitionHelper.onTransitionEnd(self.element, 'max-height', transitionCallback);
 
       setTimeout(function () {
-        classlist.remove(self.element, 'braintree-sheet--loading');
+        self.allowUserAction();
       }, constants.CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
 
       classlist.add(self.element, 'braintree-sheet--tokenized');
@@ -409,7 +409,7 @@ CardView.prototype.tokenize = function () {
     // then reportError will automatically print that translation.
     // See https://github.com/braintree/braintree-web-drop-in/blob/6ecba73f2f16e8b7ae2119702ac162a1a985908e/src/views/main-view.js#L255-L256
     self.model.reportError(err);
-    classlist.remove(self.element, 'braintree-sheet--loading');
+    self.allowUserAction();
     return Promise.reject(new DropinError({
       message: constants.errors.NO_PAYMENT_METHOD_ERROR,
       braintreeWebError: err
@@ -570,7 +570,7 @@ CardView.prototype._onValidityChangeEvent = function (event) {
 };
 
 CardView.prototype.requestPaymentMethod = function () {
-  classlist.add(this.element, 'braintree-sheet--loading');
+  this.preventUserAction();
   return this.tokenize();
 };
 

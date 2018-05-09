@@ -1753,6 +1753,8 @@ describe('CardView', function () {
           hostedFieldsInstance: self.fakeHostedFieldsInstance,
           fieldErrors: {},
           model: self.model,
+          preventUserAction: BaseView.prototype.preventUserAction,
+          allowUserAction: BaseView.prototype.allowUserAction,
           _validateForm: CardView.prototype._validateForm,
           _validateExtraInput: CardView.prototype._validateExtraInput,
           _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
