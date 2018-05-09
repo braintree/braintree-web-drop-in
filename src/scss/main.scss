@@ -25,6 +25,21 @@ $loader-scale-duration: 300ms;
 [data-braintree-id='wrapper'] {
   // dropin.js has display = 'none' to prevent flicker before CSS has loaded
   display: block !important;
+  position: relative;
+}
+
+.braintree-dropin__disabled {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  cursor: not-allowed;
+  z-index: 99999;
+
+  &.braintree-hidden {
+    display: none;
+  }
 }
 
 .braintree-dropin * {

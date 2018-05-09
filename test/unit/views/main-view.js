@@ -529,6 +529,8 @@ describe('MainView', function () {
           },
           setPrimaryView: this.sandbox.stub(),
           showSheetError: this.sandbox.stub(),
+          allowUserAction: this.sandbox.stub(),
+          preventUserAction: this.sandbox.stub(),
           toggleAdditionalOptions: function () {},
           showLoadingIndicator: function () {},
           strings: strings
@@ -1014,6 +1016,36 @@ describe('MainView', function () {
       };
 
       expect(MainView.prototype.getOptionsElements.call(context)).to.equal(elements);
+    });
+  });
+
+  describe('preventUserAction', function () {
+    it('displays disable wrapper', function () {
+      var wrapper = {};
+      var context = {
+        disableWrapper: wrapper
+      };
+
+      this.sandbox.stub(classlist, 'remove');
+
+      MainView.prototype.preventUserAction.call(context);
+
+      expect(classlist.remove).to.be.calledWith(wrapper, 'braintree-hidden');
+    });
+  });
+
+  describe('allowUserAction', function () {
+    it('hides disable wrapper', function () {
+      var wrapper = {};
+      var context = {
+        disableWrapper: wrapper
+      };
+
+      this.sandbox.stub(classlist, 'add');
+
+      MainView.prototype.allowUserAction.call(context);
+
+      expect(classlist.add).to.be.calledWith(wrapper, 'braintree-hidden');
     });
   });
 });
