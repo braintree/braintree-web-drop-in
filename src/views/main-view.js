@@ -29,9 +29,8 @@ MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
   var paymentOptionsView;
-  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
-  var paymentMethods = this.model.getPaymentMethods();
-  var preselectVaultedPaymentMethod = this.model.merchantConfiguration.preselectVaultedPaymentMethod !== false;
+
+  this._hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
 
   this._views = {};
 
@@ -133,7 +132,7 @@ MainView.prototype._initialize = function () {
   this.model.on('cancelVaultedPaymentMethodDeletion', this.cancelVaultedPaymentMethodDeletion.bind(this));
   this.model.on('finishVaultedPaymentMethodDeletion', this.finishVaultedPaymentMethodDeletion.bind(this));
 
-  if (hasMultiplePaymentOptions) {
+  if (this._hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
       client: this.client,
       element: this.getElementById(PaymentOptionsView.ID),
@@ -145,17 +144,7 @@ MainView.prototype._initialize = function () {
     this.addView(paymentOptionsView);
   }
 
-  if (paymentMethods.length > 0) {
-    if (preselectVaultedPaymentMethod) {
-      this.model.changeActivePaymentMethod(paymentMethods[0]);
-    } else {
-      this.setPrimaryView(this.paymentMethodsViews.ID);
-    }
-  } else if (hasMultiplePaymentOptions) {
-    this.setPrimaryView(paymentOptionsView.ID);
-  } else {
-    this.setPrimaryView(this.paymentSheetViewIDs[0]);
-  }
+  this._sendToDefaultView();
 };
 
 MainView.prototype.addView = function (view) {
@@ -230,12 +219,11 @@ MainView.prototype.hideLoadingIndicator = function () {
 
 MainView.prototype.toggleAdditionalOptions = function () {
   var sheetViewID;
-  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var isPaymentSheetView = this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1;
 
   this.hideToggle();
 
-  if (!hasMultiplePaymentOptions) {
+  if (!this._hasMultiplePaymentOptions) {
     sheetViewID = this.paymentSheetViewIDs[0];
 
     classlist.add(this.element, prefixShowClass(sheetViewID));
@@ -335,6 +323,22 @@ MainView.prototype.startVaultedPaymentMethodDeletion = function () {
 MainView.prototype.finishVaultedPaymentMethodDeletion = function () {
 };
 
+MainView.prototype._sendToDefaultView = function () {
+  var paymentMethods = this.model.getPaymentMethods();
+  var preselectVaultedPaymentMethod = this.model.merchantConfiguration.preselectVaultedPaymentMethod !== false;
+
+  if (paymentMethods.length > 0) {
+    if (preselectVaultedPaymentMethod) {
+      this.model.changeActivePaymentMethod(paymentMethods[0]);
+    } else {
+      this.setPrimaryView(this.paymentMethodsViews.ID);
+    }
+  } else if (this._hasMultiplePaymentOptions) {
+    this.setPrimaryView(PaymentOptionsView.ID);
+  } else {
+    this.setPrimaryView(this.paymentSheetViewIDs[0]);
+  }
+};
 function snakeCaseToCamelCase(s) {
   return s.toLowerCase().replace(/(\_\w)/g, function (m) {
     return m[1].toUpperCase();
