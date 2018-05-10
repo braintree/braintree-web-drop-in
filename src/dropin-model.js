@@ -49,6 +49,14 @@ DropinModel.prototype.initialize = function () {
     client: self._options.client
   }).then(function (vaultManagerInstance) {
     self._vaultManager = vaultManagerInstance;
+    // TODO remove this when vault manager actuall has a delete method
+    if (!self._vaultManager.deletePaymentMethod) {
+      self._vaultManager.deletePaymentMethod = function () {
+        return new Promise(function (resolve) {
+          setTimeout(resolve, 1500);
+        });
+      };
+    }
 
     return getSupportedPaymentOptions(self._options);
   }).then(function (paymentOptions) {
@@ -234,6 +242,8 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
   return this._vaultManager.deletePaymentMethod(this._paymentMethodWaitingToBeDeleted.nonce).catch(function (error) {
     self.reportError(error);
   }).then(function () {
+    self.disableEditMode();
+    self.removePaymentMethod(self._paymentMethodWaitingToBeDeleted);
     delete self._paymentMethodWaitingToBeDeleted;
     // TODO reset payment method lookup
     self._emit('finishVaultedPaymentMethodDeletion');

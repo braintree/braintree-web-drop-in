@@ -11,7 +11,6 @@ var DeleteConfirmationView = require('./delete-confirmation-view');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var Promise = require('../lib/promise');
 var supportsFlexbox = require('../lib/supports-flexbox');
-var transitionHelper = require('../lib/transition-helper');
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 var DEVELOPER_MISCONFIGURATION_MESSAGE = require('../constants').errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
@@ -130,6 +129,7 @@ MainView.prototype._initialize = function () {
 
   this.model.on('confirmPaymentMethodDeletion', this.openConfirmPaymentMethodDeletionDialog.bind(this));
   this.model.on('cancelVaultedPaymentMethodDeletion', this.cancelVaultedPaymentMethodDeletion.bind(this));
+  this.model.on('startVaultedPaymentMethodDeletion', this.startVaultedPaymentMethodDeletion.bind(this));
   this.model.on('finishVaultedPaymentMethodDeletion', this.finishVaultedPaymentMethodDeletion.bind(this));
 
   if (this._hasMultiplePaymentOptions) {
@@ -212,9 +212,10 @@ MainView.prototype.requestPaymentMethod = function () {
 
 MainView.prototype.hideLoadingIndicator = function () {
   classlist.add(this.dropinContainer, 'braintree-loaded');
-  transitionHelper.onTransitionEnd(this.loadingIndicator, 'transform', function () {
-    this.loadingContainer.parentNode.removeChild(this.loadingContainer);
-  }.bind(this));
+};
+
+MainView.prototype.showLoadingIndicator = function () {
+  classlist.remove(this.dropinContainer, 'braintree-loaded');
 };
 
 MainView.prototype.toggleAdditionalOptions = function () {
@@ -318,9 +319,13 @@ MainView.prototype.cancelVaultedPaymentMethodDeletion = function () {
 };
 
 MainView.prototype.startVaultedPaymentMethodDeletion = function () {
+  this.element.className = '';
+  this.showLoadingIndicator();
 };
 
 MainView.prototype.finishVaultedPaymentMethodDeletion = function () {
+  this.hideLoadingIndicator();
+  this._sendToDefaultView();
 };
 
 MainView.prototype._sendToDefaultView = function () {

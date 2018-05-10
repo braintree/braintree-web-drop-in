@@ -18,7 +18,6 @@ var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en_US');
-var transitionHelper = require('../../../src/lib/transition-helper');
 
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
@@ -571,6 +570,7 @@ describe('MainView', function () {
           finishVaultedPaymentMethodDeletion: this.sandbox.stub(),
           hideSheetError: this.sandbox.stub(),
           hideLoadingIndicator: function () {},
+          _sendToDefaultView: this.sandbox.stub(),
           model: model,
           client: fake.client(),
           setPrimaryView: this.sandbox.stub(),
@@ -602,26 +602,32 @@ describe('MainView', function () {
   });
 
   describe('hideLoadingIndicator', function () {
-    it('hides the loading indicator', function () {
+    it('sets the loaded class on dropin container', function () {
       var dropinContainer = document.createElement('div');
-      var upperContainer = document.createElement('div');
-      var loadingContainer = document.createElement('div');
-      var loadingIndicator = document.createElement('div');
       var context = {
-        dropinContainer: dropinContainer,
-        loadingContainer: loadingContainer,
-        loadingIndicator: loadingIndicator
+        dropinContainer: dropinContainer
       };
-
-      this.sandbox.stub(upperContainer, 'removeChild');
-      upperContainer.appendChild(loadingContainer);
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
       MainView.prototype.hideLoadingIndicator.call(context);
 
-      expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
-      expect(context.dropinContainer.classList.contains('braintree-loaded')).to.be.true;
-      expect(upperContainer.removeChild).to.have.been.called;
+      expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(true);
+    });
+  });
+
+  describe('showLoadingIndicator', function () {
+    it('shows the loading indicator', function () {
+      var dropinContainer = document.createElement('div');
+      var context = {
+        dropinContainer: dropinContainer
+      };
+
+      MainView.prototype.hideLoadingIndicator.call(context);
+
+      expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(true);
+
+      MainView.prototype.showLoadingIndicator.call(context);
+
+      expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(false);
     });
   });
 
@@ -1211,6 +1217,80 @@ describe('MainView', function () {
 
       expect(this.mainView.setPrimaryView).to.be.calledOnce;
       expect(this.mainView.setPrimaryView).to.be.calledWith('methods');
+    });
+  });
+
+  describe('startVaultedPaymentMethodDeletion', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+      }.bind(this));
+    });
+
+    it('calls showLoadingIndicator', function () {
+      this.sandbox.stub(this.mainView, 'showLoadingIndicator');
+      this.mainView.startVaultedPaymentMethodDeletion();
+      expect(this.mainView.showLoadingIndicator).to.be.calledOnce;
+    });
+
+    it('removes classes from dropin wrapper', function () {
+      this.mainView.element.className = 'braintree-show-methods';
+
+      this.mainView.startVaultedPaymentMethodDeletion();
+
+      expect(this.mainView.element.className).to.equal('');
+    });
+  });
+
+  describe('finishVaultedPaymentMethodDeletion', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+      }.bind(this));
+    });
+
+    it('calls hideLoadingIndicator', function () {
+      this.sandbox.stub(this.mainView, 'hideLoadingIndicator');
+      this.mainView.finishVaultedPaymentMethodDeletion();
+      expect(this.mainView.hideLoadingIndicator).to.be.calledOnce;
+    });
+
+    it('sends customer back to their initial view', function () {
+      this.sandbox.stub(this.mainView, '_sendToDefaultView');
+
+      this.mainView.finishVaultedPaymentMethodDeletion();
+
+      expect(this.mainView._sendToDefaultView).to.be.calledOnce;
     });
   });
 });
