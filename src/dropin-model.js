@@ -243,9 +243,11 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
     self.reportError(error);
   }).then(function () {
     self.disableEditMode();
-    self.removePaymentMethod(self._paymentMethodWaitingToBeDeleted);
     delete self._paymentMethodWaitingToBeDeleted;
-    // TODO reset payment method lookup
+
+    return self.getVaultedPaymentMethods();
+  }).then(function (paymentMethods) {
+    self._paymentMethods = paymentMethods;
     self._emit('finishVaultedPaymentMethodDeletion');
   });
 };

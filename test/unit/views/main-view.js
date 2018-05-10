@@ -1279,9 +1279,19 @@ describe('MainView', function () {
       }.bind(this));
     });
 
+    it('refreshes payment methods view', function () {
+      this.sandbox.stub(this.mainView.paymentMethodsViews, 'refreshPaymentMethods');
+
+      this.mainView.finishVaultedPaymentMethodDeletion();
+
+      expect(this.mainView.paymentMethodsViews.refreshPaymentMethods).to.be.calledOnce;
+    });
+
     it('calls hideLoadingIndicator', function () {
       this.sandbox.stub(this.mainView, 'hideLoadingIndicator');
+
       this.mainView.finishVaultedPaymentMethodDeletion();
+
       expect(this.mainView.hideLoadingIndicator).to.be.calledOnce;
     });
 

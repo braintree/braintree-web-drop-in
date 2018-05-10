@@ -940,6 +940,17 @@ describe('DropinModel', function () {
         expect(this.model.reportError).to.be.calledWith(error);
       }.bind(this));
     });
+
+    it('refetches payment methods', function () {
+      var paymentMethods = [{type: 'CreditCard', nonce: 'a-nonce'}];
+
+      this.sandbox.stub(this.model, 'getVaultedPaymentMethods').resolves(paymentMethods);
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model.getVaultedPaymentMethods).to.be.calledOnce;
+        expect(this.model.getPaymentMethods()).to.deep.equal(paymentMethods);
+      }.bind(this));
+    });
   });
 
   describe('cancelDeleteVaultedPaymentMethod', function () {

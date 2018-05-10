@@ -324,6 +324,7 @@ MainView.prototype.startVaultedPaymentMethodDeletion = function () {
 };
 
 MainView.prototype.finishVaultedPaymentMethodDeletion = function () {
+  this.paymentMethodsViews.refreshPaymentMethods();
   this.hideLoadingIndicator();
   this._sendToDefaultView();
 };

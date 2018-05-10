@@ -453,8 +453,7 @@ describe('PaymentMethodsView', function () {
 
       model.getVaultedPaymentMethods.resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-        {type: 'UnsupportedPaymentMethod'}
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
       ]);
 
       return model.initialize().then(function () {
@@ -498,8 +497,7 @@ describe('PaymentMethodsView', function () {
 
       model.getVaultedPaymentMethods.resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-        {type: 'UnsupportedPaymentMethod'}
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
       ]);
 
       return model.initialize().then(function () {
@@ -521,6 +519,62 @@ describe('PaymentMethodsView', function () {
         expect(paymentMethodsViews.views[0].disableEditMode).to.be.calledOnce;
         expect(paymentMethodsViews.views[1].disableEditMode).to.be.calledOnce;
       }.bind(this));
+    });
+  });
+
+  describe('refreshPaymentMethods', function () {
+    beforeEach(function () {
+      var modelOptions = fake.modelOptions();
+      var element = document.createElement('div');
+
+      element.innerHTML = mainHTML;
+
+      modelOptions.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
+      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      this.model = fake.model(modelOptions);
+
+      this.model.getVaultedPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'VenmoAccount', details: {email: 'wow@example.com'}}
+      ]);
+
+      return this.model.initialize().then(function () {
+        this.paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: this.model,
+          merchantConfiguration: {
+            paypal: modelOptions.merchantConfiguration.paypal,
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+        this.sandbox.stub(this.model, 'getPaymentMethods').returns([
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'VenmoAccount', details: {email: 'wow@example.com'}}
+        ]);
+      }.bind(this));
+    });
+
+    it('removes all payment method views from container', function () {
+      this.sandbox.stub(this.paymentMethodsViews.container, 'removeChild');
+
+      this.paymentMethodsViews.refreshPaymentMethods();
+
+      expect(this.paymentMethodsViews.container.removeChild).to.be.calledThrice;
+    });
+
+    it('calls addPaymentMethod for each payment method on the model', function () {
+      this.sandbox.stub(this.paymentMethodsViews, '_addPaymentMethod');
+
+      this.paymentMethodsViews.refreshPaymentMethods();
+
+      expect(this.paymentMethodsViews._addPaymentMethod).to.be.calledTwice;
     });
   });
 });

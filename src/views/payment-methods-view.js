@@ -27,9 +27,6 @@ PaymentMethodsView.prototype.constructor = PaymentMethodsView;
 PaymentMethodsView.ID = PaymentMethodsView.prototype.ID = 'methods';
 
 PaymentMethodsView.prototype._initialize = function () {
-  var i;
-  var paymentMethods = this.model.getPaymentMethods();
-
   this.views = [];
   this.container = this.getElementById('methods-container');
   this._headingLabel = this.getElementById('methods-label');
@@ -40,9 +37,7 @@ PaymentMethodsView.prototype._initialize = function () {
   this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
 
-  for (i = paymentMethods.length - 1; i >= 0; i--) {
-    this._addPaymentMethod(paymentMethods[i]);
-  }
+  this.refreshPaymentMethods();
 
   addSelectionEventHandler(this._editButton, function () {
     this.model.enableEditMode();
@@ -150,6 +145,21 @@ PaymentMethodsView.prototype.requestPaymentMethod = function () {
     return Promise.reject(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
   }
   return Promise.resolve(this.activeMethodView.paymentMethod);
+};
+
+PaymentMethodsView.prototype.refreshPaymentMethods = function () {
+  var i;
+  var paymentMethods = this.model.getPaymentMethods();
+
+  this.views.forEach(function (view) {
+    this.container.removeChild(view.element);
+  }.bind(this));
+
+  this.views = [];
+
+  for (i = paymentMethods.length - 1; i >= 0; i--) {
+    this._addPaymentMethod(paymentMethods[i]);
+  }
 };
 
 module.exports = PaymentMethodsView;
