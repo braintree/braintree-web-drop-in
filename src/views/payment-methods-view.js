@@ -72,6 +72,7 @@ PaymentMethodsView.prototype.enableEditMode = function () {
   classlist.add(this.container, 'braintree-methods--edit');
 
   classlist.add(this._editButton, 'braintree-hidden');
+  classlist.add(this._headingLabel, 'braintree-hidden');
   classlist.remove(this._doneEdittingButton, 'braintree-hidden');
 
   this.views.forEach(function (view) {
@@ -83,6 +84,7 @@ PaymentMethodsView.prototype.disableEditMode = function () {
   classlist.remove(this.container, 'braintree-methods--edit');
 
   classlist.remove(this._editButton, 'braintree-hidden');
+  classlist.remove(this._headingLabel, 'braintree-hidden');
   classlist.add(this._doneEdittingButton, 'braintree-hidden');
 
   this.views.forEach(function (view) {
