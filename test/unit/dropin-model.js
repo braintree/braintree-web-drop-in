@@ -964,6 +964,18 @@ describe('DropinModel', function () {
       }.bind(this));
     });
 
+    it('resolves with payment methods as empty array when vault manager errors', function () {
+      this.model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.rejects(new Error('error'));
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(this.vaultManager.fetchPaymentMethods).to.be.calledWith({
+          defaultFirst: true
+        });
+        expect(paymentMethods).to.deep.equal([]);
+      }.bind(this));
+    });
+
     it('resolves with payment methods as empty array when in guest checkout', function () {
       this.model.isGuestCheckout = true;
 

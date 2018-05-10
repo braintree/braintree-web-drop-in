@@ -255,7 +255,7 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
       return paymentMethod;
     });
   }).catch(function () {
-    return Promise.resovle([]);
+    return Promise.resolve([]);
   });
 };
 
