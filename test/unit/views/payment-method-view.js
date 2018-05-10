@@ -1,6 +1,7 @@
 'use strict';
 
 var BaseView = require('../../../src/views/base-view');
+var fake = require('../../helpers/fake');
 var fs = require('fs');
 var PaymentMethodView = require('../../../src/views/payment-method-view');
 var strings = require('../../../src/translations/en_US');
@@ -205,10 +206,9 @@ describe('PaymentMethodView', function () {
 
   describe('edit mode', function () {
     it('does not call model.changeActivePaymentMethod in click handler when in edit mode', function () {
+      var model = fake.model();
       var view = new PaymentMethodView({
-        model: {
-          changeActivePaymentMethod: this.sandbox.stub()
-        },
+        model: model,
         strings: strings,
         paymentMethod: {
           type: 'Foo',
@@ -216,18 +216,14 @@ describe('PaymentMethodView', function () {
         }
       });
 
-      view._choosePaymentMethod();
+      this.sandbox.stub(model, 'changeActivePaymentMethod');
+      this.sandbox.stub(model, 'isInEditMode').returns(true);
 
-      expect(view.model.changeActivePaymentMethod).to.be.calledOnce;
-
-      view.model.changeActivePaymentMethod.resetHistory();
-
-      view.enableEditMode();
       view._choosePaymentMethod();
 
       expect(view.model.changeActivePaymentMethod).to.not.be.called;
 
-      view.disableEditMode();
+      model.isInEditMode.returns(false);
       view._choosePaymentMethod();
 
       expect(view.model.changeActivePaymentMethod).to.be.calledOnce;

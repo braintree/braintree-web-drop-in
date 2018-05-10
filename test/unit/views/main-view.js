@@ -566,6 +566,9 @@ describe('MainView', function () {
           enableEditMode: this.sandbox.stub(),
           disableEditMode: this.sandbox.stub(),
           openConfirmPaymentMethodDeletionDialog: this.sandbox.stub(),
+          cancelVaultedPaymentMethodDeletion: this.sandbox.stub(),
+          startVaultedPaymentMethodDeletion: this.sandbox.stub(),
+          finishVaultedPaymentMethodDeletion: this.sandbox.stub(),
           hideSheetError: this.sandbox.stub(),
           hideLoadingIndicator: function () {},
           model: model,
@@ -1127,7 +1130,7 @@ describe('MainView', function () {
       expect(this.mainView.paymentMethodsViews.disableEditMode).to.be.calledOnce;
     });
 
-    it('hides the toggle button', function () {
+    it('shows the toggle button', function () {
       this.sandbox.stub(this.mainView, 'showToggle');
 
       this.mainView.disableEditMode();
@@ -1136,7 +1139,7 @@ describe('MainView', function () {
     });
   });
 
-  describe('confirmPaymentMethodDeletion', function () {
+  describe('openConfirmPaymentMethodDeletionDialog', function () {
     beforeEach(function () {
       var element = document.createElement('div');
       var model = fake.model();
@@ -1177,6 +1180,37 @@ describe('MainView', function () {
 
       expect(this.mainView.setPrimaryView).to.be.calledOnce;
       expect(this.mainView.setPrimaryView).to.be.calledWith('delete-confirmation');
+    });
+  });
+
+  describe('cancelVaultedPaymentMethodDeletion', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+        this.sandbox.stub(this.mainView, 'setPrimaryView');
+      }.bind(this));
+    });
+
+    it('sets primary view to methods view', function () {
+      this.mainView.cancelVaultedPaymentMethodDeletion();
+
+      expect(this.mainView.setPrimaryView).to.be.calledOnce;
+      expect(this.mainView.setPrimaryView).to.be.calledWith('methods');
     });
   });
 });

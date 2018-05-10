@@ -80,7 +80,6 @@ PaymentMethodView.prototype.setActive = function (isActive) {
 };
 
 PaymentMethodView.prototype.enableEditMode = function () {
-  this._isInEditMode = true;
   classlist.add(this.checkMark, 'braintree-hidden');
   if (this.paymentMethod.hasSubscription) {
     classlist.add(this.element, 'braintree-method--disabled');
@@ -88,13 +87,12 @@ PaymentMethodView.prototype.enableEditMode = function () {
 };
 
 PaymentMethodView.prototype.disableEditMode = function () {
-  this._isInEditMode = false;
   classlist.remove(this.checkMark, 'braintree-hidden');
   classlist.remove(this.element, 'braintree-method--disabled');
 };
 
 PaymentMethodView.prototype._choosePaymentMethod = function () {
-  if (this._isInEditMode) {
+  if (this.model.isInEditMode()) {
     return;
   }
   this.model.changeActivePaymentMethod(this.paymentMethod);

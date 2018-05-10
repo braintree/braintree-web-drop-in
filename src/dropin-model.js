@@ -107,11 +107,17 @@ DropinModel.prototype.selectPaymentOption = function (paymentViewID) {
 };
 
 DropinModel.prototype.enableEditMode = function () {
+  this._isInEditMode = true;
   this._emit('enableEditMode');
 };
 
 DropinModel.prototype.disableEditMode = function () {
+  this._isInEditMode = false;
   this._emit('disableEditMode');
+};
+
+DropinModel.prototype.isInEditMode = function () {
+  return Boolean(this._isInEditMode);
 };
 
 DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {

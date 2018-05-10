@@ -69,7 +69,6 @@ PaymentMethodsView.prototype._getPaymentMethodString = function () {
 };
 
 PaymentMethodsView.prototype.enableEditMode = function () {
-  classlist.remove(this.container, 'braintree-methods--active');
   classlist.add(this.container, 'braintree-methods--edit');
 
   classlist.add(this._editButton, 'braintree-hidden');
@@ -81,7 +80,6 @@ PaymentMethodsView.prototype.enableEditMode = function () {
 };
 
 PaymentMethodsView.prototype.disableEditMode = function () {
-  classlist.add(this.container, 'braintree-methods--active');
   classlist.remove(this.container, 'braintree-methods--edit');
 
   classlist.remove(this._editButton, 'braintree-hidden');

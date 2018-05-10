@@ -130,6 +130,8 @@ MainView.prototype._initialize = function () {
   this.model.on('disableEditMode', this.disableEditMode.bind(this));
 
   this.model.on('confirmPaymentMethodDeletion', this.openConfirmPaymentMethodDeletionDialog.bind(this));
+  this.model.on('cancelVaultedPaymentMethodDeletion', this.cancelVaultedPaymentMethodDeletion.bind(this));
+  this.model.on('finishVaultedPaymentMethodDeletion', this.finishVaultedPaymentMethodDeletion.bind(this));
 
   if (hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
@@ -251,6 +253,9 @@ MainView.prototype.toggleAdditionalOptions = function () {
 };
 
 MainView.prototype.showToggle = function () {
+  if (this.model.isInEditMode()) {
+    return;
+  }
   classlist.remove(this.toggle, 'braintree-hidden');
   classlist.add(this.lowerContainer, 'braintree-hidden');
 };
@@ -318,6 +323,16 @@ MainView.prototype.disableEditMode = function () {
 MainView.prototype.openConfirmPaymentMethodDeletionDialog = function (paymentMethod) {
   this.deleteConfirmationView.applyPaymentMethod(paymentMethod);
   this.setPrimaryView(this.deleteConfirmationView.ID);
+};
+
+MainView.prototype.cancelVaultedPaymentMethodDeletion = function () {
+  this.setPrimaryView(this.paymentMethodsViews.ID);
+};
+
+MainView.prototype.startVaultedPaymentMethodDeletion = function () {
+};
+
+MainView.prototype.finishVaultedPaymentMethodDeletion = function () {
 };
 
 function snakeCaseToCamelCase(s) {

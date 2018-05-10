@@ -842,11 +842,29 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.be.calledWith('enableEditMode');
     });
 
+    it('model.enableEditMode sets isInEditMode to true', function () {
+      expect(this.model.isInEditMode()).to.equal(false);
+
+      this.model.enableEditMode();
+
+      expect(this.model.isInEditMode()).to.equal(true);
+    });
+
     it('model.disableEditMode emits a disableEditMode event', function () {
       this.model.disableEditMode();
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('disableEditMode');
+    });
+
+    it('model.disableEditMode sets isInEditMode to false', function () {
+      this.model.enableEditMode();
+
+      expect(this.model.isInEditMode()).to.equal(true);
+
+      this.model.disableEditMode();
+
+      expect(this.model.isInEditMode()).to.equal(false);
     });
 
     it('model.confirmPaymentMethodDeletion emits a confirmPaymentMethodDeletion event', function () {

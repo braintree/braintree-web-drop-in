@@ -815,7 +815,7 @@ $loader-scale-duration: 300ms;
   }
 }
 
-.braintree-methods--active .braintree-method--active {
+.braintree-methods--active:not(.braintree-methods--edit) .braintree-method--active {
   border-radius: 5px;
   opacity: 1;
   width: 100%;
