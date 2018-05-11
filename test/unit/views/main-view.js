@@ -806,6 +806,7 @@ describe('MainView', function () {
           modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
 
           this.mainViewOptions.model = new DropinModel(modelOptions);
+
           return this.mainViewOptions.model.initialize().then(function () {
             this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
             this.mainView = new MainView(this.mainViewOptions);

@@ -201,6 +201,7 @@ MainView.prototype.requestPaymentMethod = function () {
     return payload;
   }.bind(this)).catch(function (err) {
     analytics.sendEvent(this.client, 'request-payment-method.error');
+
     return Promise.reject(err);
   }.bind(this));
 };

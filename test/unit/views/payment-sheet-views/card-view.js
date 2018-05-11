@@ -46,6 +46,7 @@ describe('CardView', function () {
       this.sandbox.stub(hostedFields, 'create').resolves(this.hostedFieldsInstance);
 
       this.model = new DropinModel(fake.modelOptions());
+
       return this.model.initialize();
     });
 
@@ -646,6 +647,7 @@ describe('CardView', function () {
       this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
 
       this.model = new DropinModel(fake.modelOptions());
+
       return this.model.initialize();
     });
 
