@@ -55,6 +55,7 @@ GooglePayView.prototype.tokenize = function () {
 
   return self.paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
     rawPaymentData = paymentData;
+
     return self.googlePayInstance.parseResponse(paymentData);
   }).then(function (tokenizePayload) {
     tokenizePayload.rawPaymentData = rawPaymentData;
@@ -67,6 +68,7 @@ GooglePayView.prototype.tokenize = function () {
       reportedError = 'developerError';
     } else if (err.statusCode === 'CANCELED') {
       analytics.sendEvent(self.client, 'googlepay.loadPaymentData.canceled');
+
       return;
     } else if (err.statusCode) {
       analytics.sendEvent(self.client, 'googlepay.loadPaymentData.failed');

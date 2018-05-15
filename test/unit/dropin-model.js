@@ -354,6 +354,7 @@ describe('DropinModel', function () {
   describe('addPaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
+
       return this.model.initialize();
     });
 
@@ -388,6 +389,7 @@ describe('DropinModel', function () {
   describe('removePaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
+
       return this.model.initialize();
     });
 

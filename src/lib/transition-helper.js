@@ -17,6 +17,7 @@ function isHidden(element) {
 function onTransitionEnd(element, propertyName, callback) {
   if (browserDetection.isIe9() || isHidden(element)) {
     callback();
+
     return;
   }
 

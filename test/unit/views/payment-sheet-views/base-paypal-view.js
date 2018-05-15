@@ -145,6 +145,7 @@ describe('BasePayPalView', function () {
         color: 'orange',
         shape: 'rect'
       };
+
       return this.view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
           style: {
@@ -164,6 +165,7 @@ describe('BasePayPalView', function () {
         shape: 'rect'
       };
       this.view._isPayPalCredit = true;
+
       return this.view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
           style: {
@@ -182,6 +184,7 @@ describe('BasePayPalView', function () {
         label: 'buynow'
       };
       this.view._isPayPalCredit = true;
+
       return this.view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
           style: {
@@ -193,6 +196,7 @@ describe('BasePayPalView', function () {
 
     it('can set user action to commit for the PayPal button', function () {
       this.view.model.merchantConfiguration.paypal.commit = true;
+
       return this.view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
           commit: true
@@ -202,6 +206,7 @@ describe('BasePayPalView', function () {
 
     it('can set user action to continue for the PayPal button', function () {
       this.view.model.merchantConfiguration.paypal.commit = false;
+
       return this.view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
           commit: false
@@ -211,6 +216,7 @@ describe('BasePayPalView', function () {
 
     it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function () {
       this.configuration.gatewayConfiguration.environment = 'production';
+
       return this.view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
           env: 'production'
@@ -220,6 +226,7 @@ describe('BasePayPalView', function () {
 
     it('sets paypal-checkout.js environment to sandbox when gatewayConfiguration is not production', function () {
       this.configuration.gatewayConfiguration.environment = 'development';
+
       return this.view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
           env: 'sandbox'
@@ -536,6 +543,7 @@ describe('BasePayPalView', function () {
       var model = this.model;
 
       this.paypal.Button.render.resolves();
+
       return this.view.initialize().then(function () {
         var onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
         var err = new Error('Some error');
@@ -630,6 +638,7 @@ describe('BasePayPalView', function () {
         };
 
         this.view._isPayPalCredit = true;
+
         return this.view.initialize().then(function () {
           expect(this.view.paypalConfiguration).to.deep.equal({
             flow: 'checkout',
@@ -649,6 +658,7 @@ describe('BasePayPalView', function () {
         };
 
         this.view._isPayPalCredit = true;
+
         return this.view.initialize().then(function () {
           expect(this.view.paypalConfiguration).to.deep.equal({
             flow: 'checkout',
@@ -661,6 +671,7 @@ describe('BasePayPalView', function () {
 
       it('uses the PayPal Credit button selector', function () {
         this.view._isPayPalCredit = true;
+
         return this.view.initialize().then(function () {
           expect(this.paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-credit-button"]');
         }.bind(this));

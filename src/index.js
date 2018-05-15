@@ -505,6 +505,7 @@ function create(options) {
       })._initialize(function (err, instance) {
         if (err) {
           reject(err);
+
           return;
         }
 
