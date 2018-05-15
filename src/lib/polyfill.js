@@ -1,4 +1,5 @@
 'use strict';
+/* eslint-disable no-mixed-operators */
 
 var atobNormalized = typeof global.atob === 'function' ? global.atob : atob;
 

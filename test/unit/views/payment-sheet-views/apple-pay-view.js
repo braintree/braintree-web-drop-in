@@ -150,6 +150,7 @@ describe('ApplePayView', function () {
 
     it('allows the Apple Pay button style to be customized', function () {
       this.view.model.merchantConfiguration.applePay.buttonStyle = 'white';
+
       return this.view.initialize().then(function () {
         var button = document.querySelector('[data-braintree-id="apple-pay-button"]');
 

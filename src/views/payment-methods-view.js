@@ -115,6 +115,7 @@ PaymentMethodsView.prototype.requestPaymentMethod = function () {
   if (!this.activeMethodView) {
     return Promise.reject(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
   }
+
   return Promise.resolve(this.activeMethodView.paymentMethod);
 };
 

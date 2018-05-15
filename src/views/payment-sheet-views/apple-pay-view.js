@@ -83,6 +83,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
   };
 
   session.begin();
+
   return false;
 };
 

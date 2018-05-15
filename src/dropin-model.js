@@ -261,6 +261,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
   }).catch(function (error) {
     console.error(SheetView.ID + ' view errored when checking if it was supported.'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
+
     return Promise.resolve(false);
   });
 }
