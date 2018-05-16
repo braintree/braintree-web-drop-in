@@ -3,7 +3,6 @@
 var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btVenmo = require('braintree-web/venmo');
-var classlist = require('../../lib/classlist');
 var DropinError = require('../../lib/dropin-error');
 var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
@@ -43,7 +42,7 @@ VenmoView.prototype.initialize = function () {
     button.addEventListener('click', function (event) {
       event.preventDefault();
 
-      classlist.add(self.element, 'braintree-sheet--loading');
+      self.preventUserAction();
 
       return self.venmoInstance.tokenize().then(function (payload) {
         self.model.addPaymentMethod(payload);
@@ -54,7 +53,7 @@ VenmoView.prototype.initialize = function () {
 
         self.model.reportError(tokenizeErr);
       }).then(function () {
-        classlist.remove(self.element, 'braintree-sheet--loading');
+        self.allowUserAction();
       });
     });
 

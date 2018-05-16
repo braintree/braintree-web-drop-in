@@ -6,7 +6,6 @@ var btGooglePay = require('braintree-web/google-payment');
 var DropinError = require('../../lib/dropin-error');
 var constants = require('../../constants');
 var assets = require('../../lib/assets');
-var classlist = require('../../lib/classlist');
 var Promise = require('../../lib/promise');
 var analytics = require('../../lib/analytics');
 
@@ -34,10 +33,10 @@ GooglePayView.prototype.initialize = function () {
     buttonDiv.addEventListener('click', function (event) {
       event.preventDefault();
 
-      classlist.add(self.element, 'braintree-sheet--loading');
+      self.preventUserAction();
 
       self.tokenize().then(function () {
-        classlist.remove(self.element, 'braintree-sheet--loading');
+        self.allowUserAction();
       });
     });
     self.model.asyncDependencyReady();

@@ -12,6 +12,7 @@ unreleased
 - Report error for duplicate payment method error
 - Fix issue where Drop-in would throw an error if another Google script was included on the merchant page
 - Fix issue where Drop-in would throw an error if a non-checkout.js PayPal script was included in the merchant page
+- Update Google Pay script to enable it in Desktop Chrome, Firefox, Safari, and others (See [Google's documentation](https://developers.google.com/pay/api/web/guides/test-and-deploy/overview#browser-test))
 
 1.10.0
 ------
