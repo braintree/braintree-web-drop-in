@@ -3,6 +3,7 @@ node_modules/
 npm-debug.log
 
 .DS_Store
+.idea
 
 .env
 sauce_connect.ready
