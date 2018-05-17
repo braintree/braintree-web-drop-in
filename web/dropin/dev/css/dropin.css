@@ -2,7 +2,19 @@
    General
    ========================================================================= */
 [data-braintree-id='wrapper'] {
-  display: block !important; }
+  display: block !important;
+  position: relative; }
+
+.braintree-dropin__disabled {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  cursor: not-allowed;
+  z-index: 99999; }
+  .braintree-dropin__disabled.braintree-hidden {
+    display: none; }
 
 .braintree-dropin * {
   -webkit-box-sizing: border-box;
