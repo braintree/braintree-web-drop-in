@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix issue where sass compliation would prevent styling of ApplePay button
+
 1.11.0
 ------
 - Use generic error with console log when a payment method fails to set up
