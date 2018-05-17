@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.11.0
+------
 - Use generic error with console log when a payment method fails to set up
 - Fix issue where Mastercard was displayed as MasterCard
 - Allow card form to not be cleared after succesful tokenization with `card.clearFieldsAfterTokenization`
