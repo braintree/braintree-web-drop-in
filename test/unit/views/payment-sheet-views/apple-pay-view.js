@@ -144,7 +144,7 @@ describe('ApplePayView', function () {
       return this.view.initialize().then(function () {
         var button = document.querySelector('[data-braintree-id="apple-pay-button"]');
 
-        expect(button.classList.contains('apple-pay-button-black')).to.be.true;
+        expect(button.style['-apple-pay-button-style']).to.equal('black');
       });
     });
 
@@ -154,7 +154,7 @@ describe('ApplePayView', function () {
       return this.view.initialize().then(function () {
         var button = document.querySelector('[data-braintree-id="apple-pay-button"]');
 
-        expect(button.classList.contains('apple-pay-button-white')).to.be.true;
+        expect(button.style['-apple-pay-button-style']).to.equal('white');
       });
     });
 
