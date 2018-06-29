@@ -28,8 +28,8 @@ module.exports = {
   paypalTokenizationRequestActiveError: 'O autorizare de plată PayPal e deja în desfășurare.',
   applePayTokenizationError: 'O eroare de rețea a apărut cât timp procesam plata Apple. Mai încearcă o dată.',
   applePayActiveCardError: 'Adaugă un card acceptat în wallet-ul Apple Pay.',
-  venmoCanceledError: 'Ceva nu a funcționat. Asigură-te că ai cea mai recentă versiune a aplicatiei Venmo instalată pe dispozitivul tău și că browser-ul tău acceptă trecerea la Venmo.',
-  venmoAppFailedError: 'Aplicatia Venmo nu a putut fi găsita pe dispozitivul tău.',
+  venmoCanceledError: 'Ceva nu a funcționat. Asigură-te că ai cea mai recentă versiune a aplicației Venmo instalată pe dispozitivul tău și că browser-ul tău acceptă trecerea la Venmo.',
+  venmoAppFailedError: 'Aplicația Venmo nu a putut fi găsita pe dispozitivul tău.',
   unsupportedCardTypeError: 'Acest tip de card nu este acceptat. Te rugăm să încerci un alt card.',
   // Card form
   cardholderNameLabel: 'Numele Deținătorului',
