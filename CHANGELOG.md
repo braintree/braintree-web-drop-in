@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Fix issue where sass compliation would prevent styling of ApplePay button
+- Fix slight HTML error for the expiration date field
 
 1.11.0
 ------
