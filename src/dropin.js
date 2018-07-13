@@ -256,10 +256,12 @@ Dropin.prototype._initialize = function (callback) {
   if (!container) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.container is required.'));
+
     return;
   } else if (self._merchantConfiguration.container && self._merchantConfiguration.selector) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('Must only have one options.selector or options.container.'));
+
     return;
   }
 
@@ -270,12 +272,14 @@ Dropin.prototype._initialize = function (callback) {
   if (!container || container.nodeType !== 1) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference a valid DOM node.'));
+
     return;
   }
 
   if (container.innerHTML.trim()) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference an empty DOM node.'));
+
     return;
   }
 
@@ -623,6 +627,7 @@ Dropin.prototype.requestPaymentMethod = function () {
     if (this._dataCollector) {
       payload.deviceData = this._dataCollector.getDeviceData();
     }
+
     return payload;
   }.bind(this)).then(function (payload) {
     return formatPaymentMethodPayload(payload);

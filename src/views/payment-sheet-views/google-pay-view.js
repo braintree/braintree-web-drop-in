@@ -6,7 +6,6 @@ var btGooglePay = require('braintree-web/google-payment');
 var DropinError = require('../../lib/dropin-error');
 var constants = require('../../constants');
 var assets = require('../../lib/assets');
-var classlist = require('../../lib/classlist');
 var Promise = require('../../lib/promise');
 var analytics = require('../../lib/analytics');
 
@@ -34,10 +33,10 @@ GooglePayView.prototype.initialize = function () {
     buttonDiv.addEventListener('click', function (event) {
       event.preventDefault();
 
-      classlist.add(self.element, 'braintree-sheet--loading');
+      self.preventUserAction();
 
       self.tokenize().then(function () {
-        classlist.remove(self.element, 'braintree-sheet--loading');
+        self.allowUserAction();
       });
     });
     self.model.asyncDependencyReady();
@@ -56,6 +55,7 @@ GooglePayView.prototype.tokenize = function () {
 
   return self.paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
     rawPaymentData = paymentData;
+
     return self.googlePayInstance.parseResponse(paymentData);
   }).then(function (tokenizePayload) {
     tokenizePayload.rawPaymentData = rawPaymentData;
@@ -68,6 +68,7 @@ GooglePayView.prototype.tokenize = function () {
       reportedError = 'developerError';
     } else if (err.statusCode === 'CANCELED') {
       analytics.sendEvent(self.client, 'googlepay.loadPaymentData.canceled');
+
       return;
     } else if (err.statusCode) {
       analytics.sendEvent(self.client, 'googlepay.loadPaymentData.failed');

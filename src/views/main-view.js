@@ -37,6 +37,7 @@ MainView.prototype._initialize = function () {
   this.sheetErrorText = this.getElementById('sheet-error-text');
 
   this.toggle = this.getElementById('toggle');
+  this.disableWrapper = this.getElementById('disable-wrapper');
   this.lowerContainer = this.getElementById('lower-container');
 
   this.loadingContainer = this.getElementById('loading-container');
@@ -49,6 +50,8 @@ MainView.prototype._initialize = function () {
 
   this.model.on('errorOccurred', this.showSheetError.bind(this));
   this.model.on('errorCleared', this.hideSheetError.bind(this));
+  this.model.on('preventUserAction', this.preventUserAction.bind(this));
+  this.model.on('allowUserAction', this.allowUserAction.bind(this));
 
   this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (ids, sheetViewKey) {
     var PaymentSheetView, paymentSheetView;
@@ -206,6 +209,7 @@ MainView.prototype.requestPaymentMethod = function () {
     return payload;
   }.bind(this)).catch(function (err) {
     analytics.sendEvent(this.client, 'request-payment-method.error');
+
     return Promise.reject(err);
   }.bind(this));
 };
@@ -278,6 +282,14 @@ MainView.prototype.hideSheetError = function () {
 
 MainView.prototype.getOptionsElements = function () {
   return this._views.options.elements;
+};
+
+MainView.prototype.preventUserAction = function () {
+  classlist.remove(this.disableWrapper, 'braintree-hidden');
+};
+
+MainView.prototype.allowUserAction = function () {
+  classlist.add(this.disableWrapper, 'braintree-hidden');
 };
 
 MainView.prototype.teardown = function () {

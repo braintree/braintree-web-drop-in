@@ -234,6 +234,14 @@ DropinModel.prototype.clearError = function () {
   this._emit('errorCleared');
 };
 
+DropinModel.prototype.preventUserAction = function () {
+  this._emit('preventUserAction');
+};
+
+DropinModel.prototype.allowUserAction = function () {
+  this._emit('allowUserAction');
+};
+
 DropinModel.prototype.deleteVaultedPaymentMethod = function () {
   var self = this;
 
@@ -270,6 +278,7 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
   }).then(function (paymentMethods) {
     return self._getSupportedPaymentMethods(paymentMethods).map(function (paymentMethod) {
       paymentMethod.vaulted = true;
+
       return paymentMethod;
     });
   }).catch(function () {
@@ -343,6 +352,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
   }).catch(function (error) {
     console.error(SheetView.ID + ' view errored when checking if it was supported.'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
+
     return Promise.resolve(false);
   });
 }

@@ -87,6 +87,7 @@ describe('PaymentMethodsView', function () {
       model = fake.model(modelOptions);
 
       model.getVaultedPaymentMethods.resolves([paypalAccount, creditCard]);
+
       return model.initialize().then(function () {
         paymentMethodsViews = new PaymentMethodsView({
           element: this.element,

@@ -321,6 +321,7 @@ describe('DropinModel', function () {
   describe('addPaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
+
       return this.model.initialize();
     });
 
@@ -355,6 +356,7 @@ describe('DropinModel', function () {
   describe('removePaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
+
       return this.model.initialize();
     });
 
@@ -825,6 +827,36 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.be.calledWith('paymentOptionSelected', {
         paymentOption: 'card'
       });
+    });
+  });
+
+  describe('preventUserAction', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a preventUserAction event', function () {
+      this.model.preventUserAction('card');
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('preventUserAction');
+    });
+  });
+
+  describe('allowUserAction', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a allowUserAction event', function () {
+      this.model.allowUserAction('card');
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('allowUserAction');
     });
   });
 

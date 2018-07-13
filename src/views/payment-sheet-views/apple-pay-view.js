@@ -41,7 +41,7 @@ ApplePayView.prototype.initialize = function () {
     });
 
     buttonDiv.onclick = self._showPaymentSheet.bind(self);
-    buttonDiv.classList.add('apple-pay-button-' + (self.model.merchantConfiguration.applePay.buttonStyle || 'black'));
+    buttonDiv.style['-apple-pay-button-style'] = self.model.merchantConfiguration.applePay.buttonStyle || 'black';
 
     self.model.asyncDependencyReady();
   }).catch(function (err) {
@@ -83,6 +83,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
   };
 
   session.begin();
+
   return false;
 };
 
