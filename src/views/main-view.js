@@ -41,7 +41,6 @@ MainView.prototype._initialize = function () {
   this.lowerContainer = this.getElementById('lower-container');
 
   this.loadingContainer = this.getElementById('loading-container');
-  this.loadingIndicator = this.getElementById('loading-indicator');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
 
   this.supportsFlexbox = supportsFlexbox();
@@ -216,10 +215,12 @@ MainView.prototype.requestPaymentMethod = function () {
 
 MainView.prototype.hideLoadingIndicator = function () {
   classlist.add(this.dropinContainer, 'braintree-loaded');
+  classlist.add(this.loadingContainer, 'braintree-hidden');
 };
 
 MainView.prototype.showLoadingIndicator = function () {
   classlist.remove(this.dropinContainer, 'braintree-loaded');
+  classlist.remove(this.loadingContainer, 'braintree-hidden');
 };
 
 MainView.prototype.toggleAdditionalOptions = function () {
