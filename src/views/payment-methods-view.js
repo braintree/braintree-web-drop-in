@@ -33,6 +33,10 @@ PaymentMethodsView.prototype._initialize = function () {
   this._editButton = this.getElementById('methods-edit');
   this._doneEdittingButton = this.getElementById('done-edit');
 
+  if (this.model.merchantConfiguration.vaultManager) {
+    classlist.remove(this._editButton, 'braintree-hidden');
+  }
+
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
