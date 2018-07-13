@@ -244,12 +244,18 @@ DropinModel.prototype.allowUserAction = function () {
 
 DropinModel.prototype.deleteVaultedPaymentMethod = function () {
   var self = this;
+  var promise = Promise.resolve();
+  var error;
 
   this._emit('startVaultedPaymentMethodDeletion');
 
-  return this._vaultManager.deletePaymentMethod(this._paymentMethodWaitingToBeDeleted.nonce).catch(function (error) {
-    self.reportError(error);
-  }).then(function () {
+  if (!self.isGuestCheckout) {
+    promise = this._vaultManager.deletePaymentMethod(this._paymentMethodWaitingToBeDeleted.nonce).catch(function (err) {
+      error = err;
+    });
+  }
+
+  return promise.then(function () {
     self.disableEditMode();
     delete self._paymentMethodWaitingToBeDeleted;
 
@@ -257,6 +263,10 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
   }).then(function (paymentMethods) {
     self._paymentMethods = paymentMethods;
     self._emit('finishVaultedPaymentMethodDeletion');
+
+    if (error) {
+      self.reportError(error);
+    }
   });
 };
 

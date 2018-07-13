@@ -606,7 +606,9 @@ describe('MainView', function () {
   describe('hideLoadingIndicator', function () {
     it('sets the loaded class on dropin container', function () {
       var dropinContainer = document.createElement('div');
+      var loadingContainer = document.createElement('div');
       var context = {
+        loadingContainer: loadingContainer,
         dropinContainer: dropinContainer
       };
 
@@ -619,7 +621,9 @@ describe('MainView', function () {
   describe('showLoadingIndicator', function () {
     it('shows the loading indicator', function () {
       var dropinContainer = document.createElement('div');
+      var loadingContainer = document.createElement('div');
       var context = {
+        loadingContainer: loadingContainer,
         dropinContainer: dropinContainer
       };
 

@@ -33,22 +33,23 @@ PaymentMethodsView.prototype._initialize = function () {
   this._editButton = this.getElementById('methods-edit');
   this._doneEdittingButton = this.getElementById('done-edit');
 
-  if (this.model.merchantConfiguration.vaultManager) {
-    classlist.remove(this._editButton, 'braintree-hidden');
-  }
-
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
-  this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
 
   this.refreshPaymentMethods();
 
-  addSelectionEventHandler(this._editButton, function () {
-    this.model.enableEditMode();
-  }.bind(this));
-  addSelectionEventHandler(this._doneEdittingButton, function () {
-    this.model.disableEditMode();
-  }.bind(this));
+  if (this.model.merchantConfiguration.vaultManager) {
+    this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
+
+    addSelectionEventHandler(this._editButton, function () {
+      this.model.enableEditMode();
+    }.bind(this));
+    addSelectionEventHandler(this._doneEdittingButton, function () {
+      this.model.disableEditMode();
+    }.bind(this));
+
+    classlist.remove(this._editButton, 'braintree-hidden');
+  }
 };
 
 PaymentMethodsView.prototype.removeActivePaymentMethod = function () {

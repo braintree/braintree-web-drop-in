@@ -918,6 +918,7 @@ describe('DropinModel', function () {
       this.model._paymentMethodWaitingToBeDeleted = {
         nonce: 'a-nonce'
       };
+      this.model.isGuestCheckout = false;
       this.sandbox.stub(this.model, '_emit');
 
       return this.model.initialize();
@@ -939,6 +940,14 @@ describe('DropinModel', function () {
       return this.model.deleteVaultedPaymentMethod().then(function () {
         expect(this.vaultManager.deletePaymentMethod).to.be.calledOnce;
         expect(this.vaultManager.deletePaymentMethod).to.be.calledWith('a-nonce');
+      }.bind(this));
+    });
+
+    it('does not vault manager to delete payment method if in guest checkout mode', function () {
+      this.model.isGuestCheckout = true;
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.vaultManager.deletePaymentMethod).to.not.be.called;
       }.bind(this));
     });
 
