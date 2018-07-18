@@ -39,7 +39,7 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@SUBTITLE/g, '');
       break;
     case paymentMethodTypes.card:
-      endingInText = this.strings.endingIn.replace('{{lastTwoCardDigits}}', this.paymentMethod.details.lastTwo);
+      endingInText = this.strings.endingIn.replace('{{lastFourCardDigits}}', this.paymentMethod.details.lastFour);
       html = html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType])
         .replace(/@CLASSNAME/g, ' braintree-icon--bordered')
         .replace(/@TITLE/g, endingInText)

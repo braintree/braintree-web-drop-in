@@ -28,13 +28,14 @@ DeleteConfirmationView.prototype._initialize = function () {
 };
 
 DeleteConfirmationView.prototype.applyPaymentMethod = function (paymentMethod) {
-  var identifier;
+  var identifier, secondaryIdentifier;
   var messageText = this.strings[paymentMethod.type + 'DeleteConfirmationMessage'];
 
   if (messageText) {
     switch (paymentMethod.type) {
       case paymentMethodTypes.card:
         identifier = paymentMethod.details.lastFour;
+        secondaryIdentifier = paymentMethod.details.cardType;
         break;
       case paymentMethodTypes.paypal:
         identifier = paymentMethod.details.email;
@@ -47,6 +48,9 @@ DeleteConfirmationView.prototype.applyPaymentMethod = function (paymentMethod) {
     }
 
     messageText = messageText.replace('{{identifier}}', identifier);
+    if (secondaryIdentifier) {
+      messageText = messageText.replace('{{secondaryIdentifier}}', secondaryIdentifier);
+    }
   } else {
     messageText = this.strings.genericDeleteConfirmationMessage;
   }
