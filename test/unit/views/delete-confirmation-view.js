@@ -62,6 +62,7 @@ describe('DeleteConfirmationView', function () {
         nonce: 'a-nonce',
         type: 'CreditCard',
         details: {
+          cardType: 'Visa',
           lastFour: '1234',
           description: 'A card ending in 1234'
         }
@@ -69,7 +70,7 @@ describe('DeleteConfirmationView', function () {
 
       this.view.applyPaymentMethod(paymentMethod);
 
-      expect(this.view._messageBox.innerText).to.equal('Are you sure you want to delete card ending in 1234?');
+      expect(this.view._messageBox.innerText).to.equal('Delete Visa card ending in 1234?');
     });
 
     it('applies PayPal payment method delete confirmation message', function () {
@@ -83,7 +84,7 @@ describe('DeleteConfirmationView', function () {
 
       this.view.applyPaymentMethod(paymentMethod);
 
-      expect(this.view._messageBox.innerText).to.equal('Are you sure you want to delete PayPal account with email foo@bar.com?');
+      expect(this.view._messageBox.innerText).to.equal('Delete PayPal account foo@bar.com?');
     });
 
     it('applies Venmo payment method delete confirmation message', function () {

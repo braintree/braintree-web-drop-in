@@ -46,7 +46,7 @@ describe('PaymentMethodView', function () {
         type: 'CreditCard',
         details: {
           cardType: 'Visa',
-          lastTwo: '11'
+          lastFour: '1111'
         }
       };
 
@@ -59,7 +59,7 @@ describe('PaymentMethodView', function () {
       labelElement = this.context.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).to.equal('#icon-visa');
-      expect(labelElement.textContent).to.contain('Ending in ••11');
+      expect(labelElement.textContent).to.contain('Ending in 1111');
       expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('Visa');
       expect(iconContainer.classList.contains('braintree-icon--bordered')).to.be.true;
     });
