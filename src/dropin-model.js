@@ -1,5 +1,6 @@
 'use strict';
 
+var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('./lib/event-emitter');
 var constants = require('./constants');
@@ -115,6 +116,7 @@ DropinModel.prototype.selectPaymentOption = function (paymentViewID) {
 };
 
 DropinModel.prototype.enableEditMode = function () {
+  analytics.sendEvent(this._options.client, 'manager.appeared');
   this._isInEditMode = true;
   this._emit('enableEditMode');
 };
@@ -265,7 +267,10 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
     self._emit('finishVaultedPaymentMethodDeletion');
 
     if (error) {
+      analytics.sendEvent(self._options.client, 'manager.delete.failed');
       self.reportError(error);
+    } else {
+      analytics.sendEvent(self._options.client, 'manager.delete.succeeded');
     }
   });
 };
