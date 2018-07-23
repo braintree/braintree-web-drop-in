@@ -259,19 +259,19 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
 
   return promise.then(function () {
     self.disableEditMode();
+
     delete self._paymentMethodWaitingToBeDeleted;
 
     return self.getVaultedPaymentMethods();
   }).then(function (paymentMethods) {
-    self._paymentMethods = paymentMethods;
-    self._emit('finishVaultedPaymentMethodDeletion');
-
     if (error) {
       analytics.sendEvent(self._options.client, 'manager.delete.failed');
       self.reportError(error);
     } else {
       analytics.sendEvent(self._options.client, 'manager.delete.succeeded');
     }
+    self._paymentMethods = paymentMethods;
+    self._emit('finishVaultedPaymentMethodDeletion', error);
   });
 };
 
