@@ -50,14 +50,6 @@ DropinModel.prototype.initialize = function () {
     client: self._options.client
   }).then(function (vaultManagerInstance) {
     self._vaultManager = vaultManagerInstance;
-    // TODO remove this when vault manager actuall has a delete method
-    if (!self._vaultManager.deletePaymentMethod) {
-      self._vaultManager.deletePaymentMethod = function () {
-        return new Promise(function (resolve) {
-          setTimeout(resolve, 1500);
-        });
-      };
-    }
 
     return getSupportedPaymentOptions(self._options);
   }).then(function (paymentOptions) {
