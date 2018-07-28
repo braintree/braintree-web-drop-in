@@ -423,9 +423,25 @@ $loader-scale-duration: 300ms;
   }
 }
 
-.braintree-sheet--has-error .braintree-sheet {
-  border: 2px solid $error-color;
-  border-radius: $radius-default $radius-default 0 0;
+.braintree-sheet--has-error {
+  .braintree-sheet {
+    border: 2px solid $error-color;
+    border-radius: $radius-default $radius-default 0 0;
+  }
+
+  .braintree-methods--edit .braintree-method {
+    border-left: 2px solid $error-color;
+    border-right: 2px solid $error-color;
+
+    &:first-child {
+      border-top: 2px solid $error-color;
+    }
+
+    &:last-child {
+      border-bottom: 2px solid $error-color;
+    }
+  }
+
 }
 
 .braintree-sheet__container {
@@ -442,35 +458,30 @@ $loader-scale-duration: 300ms;
 }
 
 .braintree-sheet--has-error .braintree-sheet__error {
+  color: $error-color;
   align-items: center;
-  background-color: $error-color;
-  border-color: $error-color;
-  border-radius: 0 0 $radius-default $radius-default;
-  border-style: solid;
-  border-width: 0 0 1px 0;
+  justify-content: center;
   display: flex;
   padding: 6px;
   position: relative;
+  margin-top: 4px;
 
   .braintree-sheet__error-icon {
     height: 24px;
-    left: 13px;
     margin-top: -12px;
-    position: absolute;
-    top: 50%;
+    margin-right: 4px;
+    position: relative;
+    top: 4px;
     width: 24px;
 
     use {
-      fill: white;
+      fill: $error-color;
     }
   }
 
   .braintree-sheet__error-text {
-    color: white;
+    color: $error-color;
     font-size: 14px;
-    font-weight: bold;
-    margin: 0 auto;
-    padding: 0 42px; // Prevent text from overlapping with icon
     text-align: center;
   }
 }
@@ -904,7 +915,7 @@ $loader-scale-duration: 300ms;
 
 .braintree-methods {
   display: none;
-  margin: 0 auto 13px auto;
+  margin: 0 auto 6px auto;
 }
 
 .braintree-delete-confirmation {

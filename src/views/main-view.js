@@ -273,12 +273,12 @@ MainView.prototype.showSheetError = function (error) {
     errorMessage = genericErrorMessage;
   }
 
-  classlist.add(this.sheetContainer, 'braintree-sheet--has-error');
+  classlist.add(this.dropinContainer, 'braintree-sheet--has-error');
   this.sheetErrorText.innerHTML = errorMessage;
 };
 
 MainView.prototype.hideSheetError = function () {
-  classlist.remove(this.sheetContainer, 'braintree-sheet--has-error');
+  classlist.remove(this.dropinContainer, 'braintree-sheet--has-error');
 };
 
 MainView.prototype.getOptionsElements = function () {
@@ -318,6 +318,7 @@ MainView.prototype.enableEditMode = function () {
 };
 
 MainView.prototype.disableEditMode = function () {
+  this.hideSheetError();
   this.paymentMethodsViews.disableEditMode();
   this.showToggle();
 };
