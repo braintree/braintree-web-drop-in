@@ -7,6 +7,7 @@ module.exports = {
   otherWaysToPay: 'Other ways to pay',
   edit: 'Edit',
   doneEditting: 'Done',
+  editPaymentMethods: 'Edit payment methods',
   CreditCardDeleteConfirmationMessage: 'Delete {{secondaryIdentifier}} card ending in {{identifier}}?',
   PayPalAccountDeleteConfirmationMessage: 'Delete PayPal account {{identifier}}?',
   VenmoAccountDeleteConfirmationMessage: 'Are you sure you want to delete Venmo account with username {{identifier}}?',
