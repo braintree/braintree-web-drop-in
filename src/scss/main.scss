@@ -885,10 +885,6 @@ $loader-scale-duration: 300ms;
   }
 }
 
-.braintree-show-methods .braintree-done-edit {
-  display: block;
-}
-
 .braintree-methods--edit {
   .braintree-method__delete-container {
     display: block;
@@ -953,10 +949,6 @@ $loader-scale-duration: 300ms;
       border-bottom-left-radius: 4px;
     }
   }
-}
-
-.braintree-done-edit {
-  display: none;
 }
 
 .braintree-methods-initial {

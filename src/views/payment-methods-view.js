@@ -31,7 +31,6 @@ PaymentMethodsView.prototype._initialize = function () {
   this.container = this.getElementById('methods-container');
   this._headingLabel = this.getElementById('methods-label');
   this._editButton = this.getElementById('methods-edit');
-  this._doneEdittingButton = this.getElementById('done-edit');
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
@@ -42,10 +41,11 @@ PaymentMethodsView.prototype._initialize = function () {
     this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
 
     addSelectionEventHandler(this._editButton, function () {
-      this.model.enableEditMode();
-    }.bind(this));
-    addSelectionEventHandler(this._doneEdittingButton, function () {
-      this.model.disableEditMode();
+      if (this.model.isInEditMode()) {
+        this.model.disableEditMode();
+      } else {
+        this.model.enableEditMode();
+      }
     }.bind(this));
 
     classlist.remove(this._editButton, 'braintree-hidden');
@@ -71,9 +71,8 @@ PaymentMethodsView.prototype._getPaymentMethodString = function () {
 PaymentMethodsView.prototype.enableEditMode = function () {
   classlist.add(this.container, 'braintree-methods--edit');
 
-  classlist.add(this._editButton, 'braintree-hidden');
+  this._editButton.innerText = this.strings.doneEditting;
   classlist.add(this._headingLabel, 'braintree-hidden');
-  classlist.remove(this._doneEdittingButton, 'braintree-hidden');
 
   this.views.forEach(function (view) {
     view.enableEditMode();
@@ -83,9 +82,8 @@ PaymentMethodsView.prototype.enableEditMode = function () {
 PaymentMethodsView.prototype.disableEditMode = function () {
   classlist.remove(this.container, 'braintree-methods--edit');
 
-  classlist.remove(this._editButton, 'braintree-hidden');
+  this._editButton.innerText = this.strings.edit;
   classlist.remove(this._headingLabel, 'braintree-hidden');
-  classlist.add(this._doneEdittingButton, 'braintree-hidden');
 
   this.views.forEach(function (view) {
     view.disableEditMode();
