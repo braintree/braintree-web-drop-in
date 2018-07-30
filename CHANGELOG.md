@@ -5,6 +5,7 @@ unreleased
 ----------
 - Fix issue where sass compliation would prevent styling of ApplePay button
 - Fix slight HTML error for the expiration date field
+- Add feature where payment methods can be deleted from Drop-in
 
 1.11.0
 ------
