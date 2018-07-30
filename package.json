@@ -12,6 +12,7 @@
     "test:integration": ". ./.env && bundle exec rake sauce:spec test_files=spec",
     "test:integration:paypal-only": "RUN_PAYPAL_ONLY=true npm run test:integration",
     "test:integration:paypal-skipped": "SKIP_PAYPAL=true npm run test:integration",
+    "test:integration:kill": "ps -ef | awk '/rspec/ {print $2}' | xargs kill",
     "test:publishing": "mocha test/publishing",
     "deploy:gh-pages": "./scripts/deploy-gh-pages"
   },
