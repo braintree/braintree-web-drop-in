@@ -30,8 +30,6 @@ describe "Drop-in#requestPaymentMethod" do
     end
 
     it "tokenizes PayPal", :paypal do
-      skip_ie_less_than_11
-
       visit_dropin_url
 
       click_option("paypal")
@@ -47,8 +45,6 @@ describe "Drop-in#requestPaymentMethod" do
     end
 
     it "tokenizes PayPal Credit", :paypal do
-      skip_ie_less_than_11
-
       visit_dropin_url
 
       click_option("paypalCredit")
@@ -89,8 +85,6 @@ describe "Drop-in#requestPaymentMethod" do
     end
 
     it "tokenizes PayPal", :paypal do
-      skip_ie_less_than_11
-
       visit_dropin_url("/promise.html")
 
       click_option("paypal")

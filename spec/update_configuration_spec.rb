@@ -8,8 +8,6 @@ describe "Drop-in#updateConfiguration" do
   include PayPal
 
   it "updates PayPal configuration", :paypal do
-    skip_ie_less_than_11
-
     skip "This test fails repeatedly in multiple browsers. Something about opening 2 popups results in Saucelabs having trouble."
 
     visit_dropin_url("?showUpdatePayPalMenu=true")
@@ -35,8 +33,6 @@ describe "Drop-in#updateConfiguration" do
   end
 
   it "updates PayPal Credit configuration", :paypal do
-    skip_ie_less_than_11
-
     skip "This test fails repeatedly in multiple browsers. Something about opening 2 popups results in Saucelabs having trouble."
 
     visit_dropin_url("?showUpdatePayPalMenu=true")
@@ -62,8 +58,6 @@ describe "Drop-in#updateConfiguration" do
   end
 
   it "removes authorized PayPal account when configuration is updated", :paypal do
-    skip_ie_less_than_11
-
     visit_dropin_url("?showUpdatePayPalMenu=true")
 
     find("#paypal-config-checkout").click()

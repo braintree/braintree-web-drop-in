@@ -1,11 +1,10 @@
 module SkipBrowser
-  def skip_ie_less_than_11
+  def browser_skip(browser_name, reason)
     browser = page.driver.browser
-    browser_name = browser.browser.to_s
-    browser_version = browser.capabilities.version.to_i
+    detected_browser_name = browser.browser.to_s
 
-    if (browser_name == "internet_explorer" and browser_version < 11)
-      skip("Not supported in Internet Explorer 9 or 10")
+    if (detected_browser_name == browser_name)
+      skip(reason)
     end
   end
 end

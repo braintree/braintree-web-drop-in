@@ -25,8 +25,6 @@ describe "Drop-in#clearSelectedPaymentMethod" do
   end
 
   it "clears active payment method card", :paypal do
-    skip_ie_less_than_11
-
     visit_dropin_url
 
     click_option("paypal")

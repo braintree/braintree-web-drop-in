@@ -2,7 +2,6 @@ require_relative "helpers/drop_in_helper"
 require_relative "helpers/paypal_helper"
 
 describe "Drop-in Script Tag Integration" do
-  include SkipBrowser
   include DropIn
   include PayPal
 
@@ -21,8 +20,6 @@ describe "Drop-in Script Tag Integration" do
   end
 
   it "tokenizes PayPal", :paypal do
-    skip_ie_less_than_11
-
     visit_dropin_url("/script-tag-integration.html", false)
 
     click_option("paypal")
