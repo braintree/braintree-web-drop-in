@@ -1140,6 +1140,16 @@ describe('MainView', function () {
 
       expect(this.mainView.hideToggle).to.be.calledOnce;
     });
+
+    it('sets payment method requestable to false', function () {
+      this.sandbox.stub(this.mainView.model, 'setPaymentMethodRequestable');
+
+      this.mainView.enableEditMode();
+
+      expect(this.mainView.model.setPaymentMethodRequestable).to.be.calledWith({
+        isRequestable: false
+      });
+    });
   });
 
   describe('disableEditMode', function () {
@@ -1178,6 +1188,35 @@ describe('MainView', function () {
       this.mainView.disableEditMode();
 
       expect(this.mainView.showToggle).to.be.calledOnce;
+    });
+
+    it('sets payment method requestable to true when a payment method is available', function () {
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
+
+      this.mainView.primaryView.getPaymentMethod.returns(fakePaymentMethod);
+      this.sandbox.stub(this.mainView.model, 'setPaymentMethodRequestable');
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.model.setPaymentMethodRequestable).to.be.calledWith({
+        isRequestable: true,
+        type: 'TYPE',
+        selectedPaymentMethod: fakePaymentMethod
+      });
+    });
+
+    it('sets payment method requestable to false when no payment methods are available', function () {
+      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns(false);
+      this.sandbox.stub(this.mainView.model, 'setPaymentMethodRequestable');
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.model.setPaymentMethodRequestable).to.be.calledWithMatch({
+        isRequestable: false
+      });
     });
   });
 

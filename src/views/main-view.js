@@ -315,12 +315,26 @@ MainView.prototype.enableEditMode = function () {
   this.setPrimaryView(this.paymentMethodsViews.ID);
   this.paymentMethodsViews.enableEditMode();
   this.hideToggle();
+
+  this.model.setPaymentMethodRequestable({
+    isRequestable: false
+  });
 };
 
 MainView.prototype.disableEditMode = function () {
+  var paymentMethod;
+
   this.hideSheetError();
   this.paymentMethodsViews.disableEditMode();
   this.showToggle();
+
+  paymentMethod = this.primaryView.getPaymentMethod();
+
+  this.model.setPaymentMethodRequestable({
+    isRequestable: Boolean(paymentMethod),
+    type: paymentMethod && paymentMethod.type,
+    selectedPaymentMethod: paymentMethod
+  });
 };
 
 MainView.prototype.openConfirmPaymentMethodDeletionDialog = function (paymentMethod) {
