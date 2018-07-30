@@ -1,6 +1,8 @@
 'use strict';
 /* eslint-disable no-new */
 
+var analytics = require('../../../../src/lib/analytics');
+var browserDetection = require('../../../../src/lib/browser-detection');
 var BaseView = require('../../../../src/views/base-view');
 var DropinModel = require('../../../../src/dropin-model');
 var DropinError = require('../../../../src/lib/dropin-error');
@@ -21,6 +23,7 @@ describe('BasePayPalView', function () {
       },
       setup: this.sandbox.stub()
     };
+    this.sandbox.stub(analytics, 'sendEvent');
 
     global.paypal = this.paypal;
 
@@ -802,6 +805,22 @@ describe('BasePayPalView', function () {
 
     it('resolves false if merchant does not have PayPal enabled on the gateway', function () {
       this.configuration.gatewayConfiguration.paypalEnabled = false;
+
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves false if browser is IE9', function () {
+      this.sandbox.stub(browserDetection, 'isIe9').returns(true);
+
+      return BasePayPalView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves false if browser is IE10', function () {
+      this.sandbox.stub(browserDetection, 'isIe10').returns(true);
 
       return BasePayPalView.isEnabled(this.options).then(function (result) {
         expect(result).to.equal(false);
