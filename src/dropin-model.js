@@ -250,8 +250,6 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
   }
 
   return promise.then(function () {
-    self.disableEditMode();
-
     delete self._paymentMethodWaitingToBeDeleted;
 
     return self.getVaultedPaymentMethods();
@@ -260,6 +258,7 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
       analytics.sendEvent(self._options.client, 'manager.delete.failed');
       self.reportError(error);
     } else {
+      self.disableEditMode();
       analytics.sendEvent(self._options.client, 'manager.delete.succeeded');
     }
     self._paymentMethods = paymentMethods;

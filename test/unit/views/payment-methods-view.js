@@ -2,8 +2,10 @@
 
 var BaseView = require('../../../src/views/base-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
+var DropinError = require('../../../src/lib/dropin-error');
 var classlist = require('../../../src/lib/classlist');
 var fake = require('../../helpers/fake');
+var throwIfResolves = require('../../helpers/throw-if-resolves');
 var fs = require('fs');
 var strings = require('../../../src/translations/en_US');
 
@@ -431,6 +433,58 @@ describe('PaymentMethodsView', function () {
         return paymentMethodsViews.requestPaymentMethod();
       }).then(function (payload) {
         expect(payload).to.equal(fakeActiveMethodView.paymentMethod);
+      });
+    });
+
+    it('rejects if there is no activeMethodView', function () {
+      var paymentMethodsViews;
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      return model.initialize().then(function () {
+        element.innerHTML = mainHTML;
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        return paymentMethodsViews.requestPaymentMethod();
+      }).then(throwIfResolves).catch(function (err) {
+        expect(err).to.be.an.instanceof(DropinError);
+        expect(err.message).to.equal('No payment method is available.');
+      });
+    });
+
+    it('rejects if model is in edit mode', function () {
+      var paymentMethodsViews;
+      var fakeActiveMethodView = {
+        paymentMethod: {foo: 'bar'}
+      };
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      return model.initialize().then(function () {
+        element.innerHTML = mainHTML;
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        paymentMethodsViews.activeMethodView = fakeActiveMethodView;
+        this.sandbox.stub(model, 'isInEditMode').returns(true);
+
+        return paymentMethodsViews.requestPaymentMethod();
+      }.bind(this)).then(throwIfResolves).catch(function (err) {
+        expect(err).to.be.an.instanceof(DropinError);
+        expect(err.message).to.equal('No payment method is available.');
       });
     });
   });

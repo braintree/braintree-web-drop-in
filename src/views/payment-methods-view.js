@@ -62,8 +62,14 @@ PaymentMethodsView.prototype.removeActivePaymentMethod = function () {
 };
 
 PaymentMethodsView.prototype._getPaymentMethodString = function () {
-  var stringKey = PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING[this.activeMethodView.paymentMethod.type];
-  var paymentMethodTypeString = this.strings[stringKey];
+  var stringKey, paymentMethodTypeString;
+
+  if (!this.activeMethodView) {
+    return '';
+  }
+
+  stringKey = PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING[this.activeMethodView.paymentMethod.type];
+  paymentMethodTypeString = this.strings[stringKey];
 
   return this.strings.payingWith.replace('{{paymentSource}}', paymentMethodTypeString);
 };
@@ -144,7 +150,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
 };
 
 PaymentMethodsView.prototype.requestPaymentMethod = function () {
-  if (!this.activeMethodView) {
+  if (!this.activeMethodView || this.model.isInEditMode()) {
     return Promise.reject(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
   }
 

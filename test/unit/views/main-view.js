@@ -492,16 +492,16 @@ describe('MainView', function () {
   describe('showSheetError', function () {
     beforeEach(function () {
       this.context = {
-        sheetContainer: document.createElement('div'),
+        dropinContainer: document.createElement('div'),
         sheetErrorText: document.createElement('div'),
         strings: strings
       };
     });
 
-    it('applies the braintree-sheet--has-error class to sheet container', function () {
+    it('applies the braintree-sheet--has-error class to dropin container', function () {
       MainView.prototype.showSheetError.call(this.context, {});
 
-      expect(this.context.sheetContainer.classList.contains('braintree-sheet--has-error')).to.be.true;
+      expect(this.context.dropinContainer.classList.contains('braintree-sheet--has-error')).to.be.true;
     });
 
     it('sets the error text to the expected message for the error code', function () {
@@ -537,16 +537,16 @@ describe('MainView', function () {
   describe('hideSheetError', function () {
     beforeEach(function () {
       this.context = {
-        sheetContainer: document.createElement('div')
+        dropinContainer: document.createElement('div')
       };
     });
 
-    it('removes the braintree-sheet--has-error class from sheet container', function () {
-      classlist.add(this.context.sheetContainer, 'braintree-sheet--has-error');
+    it('removes the braintree-sheet--has-error class from dropin container', function () {
+      classlist.add(this.context.dropinContainer, 'braintree-sheet--has-error');
 
       MainView.prototype.hideSheetError.call(this.context);
 
-      expect(this.context.sheetContainer.classList.contains('braintree-sheet--has-error')).to.be.false;
+      expect(this.context.dropinContainer.classList.contains('braintree-sheet--has-error')).to.be.false;
     });
   });
 
