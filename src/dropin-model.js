@@ -254,11 +254,7 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
 
     return self.getVaultedPaymentMethods();
   }).then(function (paymentMethods) {
-    if (error) {
-      self.reportError(error);
-    } else {
-      self.disableEditMode();
-    }
+    self.disableEditMode();
     self._paymentMethods = paymentMethods;
     self._emit('finishVaultedPaymentMethodDeletion', error);
   });

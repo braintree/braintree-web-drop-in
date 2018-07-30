@@ -969,19 +969,6 @@ describe('DropinModel', function () {
       }.bind(this));
     });
 
-    it('calls reportError when deletion is unsuccesful', function () {
-      var error = new Error('aaaaaaah!');
-
-      this.vaultManager.deletePaymentMethod.rejects(error);
-
-      this.sandbox.stub(this.model, 'reportError');
-
-      return this.model.deleteVaultedPaymentMethod().then(function () {
-        expect(this.model.reportError).to.be.calledOnce;
-        expect(this.model.reportError).to.be.calledWith(error);
-      }.bind(this));
-    });
-
     it('refetches payment methods', function () {
       var paymentMethods = [{type: 'CreditCard', nonce: 'a-nonce'}];
 

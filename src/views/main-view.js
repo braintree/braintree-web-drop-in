@@ -354,9 +354,10 @@ MainView.prototype.startVaultedPaymentMethodDeletion = function () {
 MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
   this.paymentMethodsViews.refreshPaymentMethods();
   this.hideLoadingIndicator();
-  if (error) {
-    this.enableEditMode();
-    this.model.reportError('vaultManagerPaymentMethodDeletionError');
+
+  if (error && this.model.getPaymentMethods().length > 0) {
+    this.model.enableEditMode();
+    this.showSheetError('vaultManagerPaymentMethodDeletionError');
   } else {
     this._sendToDefaultView();
   }

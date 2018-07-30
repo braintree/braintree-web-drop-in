@@ -1377,5 +1377,46 @@ describe('MainView', function () {
 
       expect(this.mainView._sendToDefaultView).to.be.calledOnce;
     });
+
+    it('re-enables edit mode when it errors', function () {
+      var err = new Error('some error');
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
+
+      this.sandbox.stub(this.mainView.model, 'enableEditMode');
+      this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([fakePaymentMethod]);
+
+      this.mainView.finishVaultedPaymentMethodDeletion(err);
+
+      expect(this.mainView.model.enableEditMode).to.be.calledOnce;
+    });
+
+    it('shows sheet error when it errors', function () {
+      var err = new Error('some error');
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
+
+      this.sandbox.stub(this.mainView, 'showSheetError');
+      this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([fakePaymentMethod]);
+
+      this.mainView.finishVaultedPaymentMethodDeletion(err);
+
+      expect(this.mainView.showSheetError).to.be.calledOnce;
+    });
+
+    it('sends customer back to their initial view if erros but there are no saved payment methods', function () {
+      var err = new Error('some error');
+
+      this.sandbox.stub(this.mainView, '_sendToDefaultView');
+      this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([]);
+
+      this.mainView.finishVaultedPaymentMethodDeletion(err);
+
+      expect(this.mainView._sendToDefaultView).to.be.calledOnce;
+    });
   });
 });
