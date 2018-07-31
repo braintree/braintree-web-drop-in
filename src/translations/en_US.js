@@ -14,7 +14,6 @@ module.exports = {
   genericDeleteConfirmationMessage: 'Are you sure you want to delete this payment method?',
   deleteCancelButton: 'Cancel',
   deleteConfirmationButton: 'Delete',
-  hasSubscription: 'This payment method is associated with a recurring charge and cannot be deleted.',
   paymentMethodCouldNotBeRemoved: 'Something went wrong. Payment method could not be removed.',
   cardVerification: 'Card Verification',
   // Errors
