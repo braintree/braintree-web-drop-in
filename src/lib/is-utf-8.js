@@ -3,5 +3,5 @@
 module.exports = function (win) {
   win = win || global;
 
-  return win.document.characterSet.toLowerCase() === 'utf-8';
+  return Boolean(win.document.characterSet && win.document.characterSet.toLowerCase() === 'utf-8');
 };
