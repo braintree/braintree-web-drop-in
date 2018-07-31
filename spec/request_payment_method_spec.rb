@@ -21,7 +21,7 @@ describe "Drop-in#requestPaymentMethod" do
       expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with")
 
       # Drop-in Details
-      expect(page).to have_content("Ending in ••11")
+      expect(page).to have_content("Ending in 1111")
 
       # Nonce Details
       expect(page).to have_content("CreditCard")
@@ -76,7 +76,7 @@ describe "Drop-in#requestPaymentMethod" do
       expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with")
 
       # Drop-in Details
-      expect(page).to have_content("Ending in ••11")
+      expect(page).to have_content("Ending in 1111")
 
       # Nonce Details
       expect(page).to have_content("CreditCard")
