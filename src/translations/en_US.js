@@ -6,7 +6,7 @@ module.exports = {
   chooseAWayToPay: 'Choose a way to pay',
   otherWaysToPay: 'Other ways to pay',
   edit: 'Edit',
-  doneEditting: 'Done',
+  doneEditing: 'Done',
   editPaymentMethods: 'Edit payment methods',
   CreditCardDeleteConfirmationMessage: 'Delete {{secondaryIdentifier}} card ending in {{identifier}}?',
   PayPalAccountDeleteConfirmationMessage: 'Delete PayPal account {{identifier}}?',
