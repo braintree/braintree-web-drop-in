@@ -26,7 +26,7 @@ describe "Drop-in Script Tag Integration" do
 
     open_popup_and_complete_login
 
-    expect(find(".braintree-heading")).to have_content("Paying with")
+    expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with")
 
     submit_pay
 
@@ -49,7 +49,7 @@ describe "Drop-in Script Tag Integration" do
     visit_dropin_url("/script-tag-integration.html", false)
 
     # Accepts an array for payment option priority
-    find(".braintree-heading")
+    find("[data-braintree-id='choose-a-way-to-pay']")
     payment_options = all(:css, ".braintree-option__label")
 
     expect(payment_options[0]).to have_content("PayPal")

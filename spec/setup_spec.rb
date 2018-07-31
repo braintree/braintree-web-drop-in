@@ -44,7 +44,7 @@ describe "Drop-in#create" do
   it "uses default priority of card, paypal, paypalCredit" do
     visit_dropin_url
 
-    find(".braintree-heading")
+    find("[data-braintree-id='choose-a-way-to-pay']")
     payment_options = all(:css, ".braintree-option__label")
 
     expect(payment_options[0]).to have_content("Card")
@@ -56,7 +56,7 @@ describe "Drop-in#create" do
     options = '["paypal","card","paypalCredit"]'
     visit_dropin_url("?paymentOptionPriority=#{options}")
 
-    find(".braintree-heading")
+    find("[data-braintree-id='choose-a-way-to-pay']")
     payment_options = all(:css, ".braintree-option__label")
 
     expect(payment_options[0]).to have_content("PayPal")
