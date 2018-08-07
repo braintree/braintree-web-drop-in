@@ -9,7 +9,6 @@ var fs = require('fs');
 var hostedFields = require('braintree-web/hosted-fields');
 var strings = require('../../../../src/translations/en_US');
 var transitionHelper = require('../../../../src/lib/transition-helper');
-var braintreeWebVersion = require('../../../../package.json').dependencies['braintree-web'];
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
@@ -26,10 +25,7 @@ describe('CardView', function () {
     document.body.appendChild(this.div);
     this.element = document.body.querySelector('.braintree-sheet.braintree-card');
 
-    this.client = {
-      getConfiguration: this.sandbox.stub().returns(fake.configuration()),
-      getVersion: function () { return braintreeWebVersion; }
-    };
+    this.client = fake.client();
   });
 
   describe('Constructor', function () {
@@ -45,22 +41,20 @@ describe('CardView', function () {
       };
       this.sandbox.stub(hostedFields, 'create').resolves(this.hostedFieldsInstance);
 
-      this.model = new DropinModel(fake.modelOptions());
+      this.model = fake.model();
 
       return this.model.initialize();
     });
 
     it('has cvv if supplied in challenges', function () {
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: ['cvv'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: ['cvv'],
+          creditCards: {
+            supportedCardTypes: []
           }
-        };
-      };
+        }
+      });
 
       this.view = new CardView({
         element: this.element,
@@ -76,16 +70,14 @@ describe('CardView', function () {
     });
 
     it('does not have cvv if supplied in challenges, but hosted fields overrides sets cvv to null', function () {
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: ['cvv'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: ['cvv'],
+          creditCards: {
+            supportedCardTypes: []
           }
-        };
-      };
+        }
+      });
 
       this.model.merchantConfiguration.card = {
         overrides: {
@@ -123,16 +115,14 @@ describe('CardView', function () {
     });
 
     it('has postal code if supplied in challenges', function () {
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: ['postal_code'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: ['postal_code'],
+          creditCards: {
+            supportedCardTypes: []
           }
-        };
-      };
+        }
+      });
 
       this.view = new CardView({
         element: this.element,
@@ -148,16 +138,14 @@ describe('CardView', function () {
     });
 
     it('does not have postal code if supplied in challenges, but hosted fields overrides sets postal code to null', function () {
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: ['postal_code'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: ['postal_code'],
+          creditCards: {
+            supportedCardTypes: []
           }
-        };
-      };
+        }
+      });
 
       this.model.merchantConfiguration.card = {
         overrides: {
@@ -283,16 +271,14 @@ describe('CardView', function () {
     });
 
     it('creates Hosted Fields with cvv if included in challenges', function () {
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: ['cvv'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: ['cvv'],
+          creditCards: {
+            supportedCardTypes: []
           }
-        };
-      };
+        }
+      });
 
       this.view = new CardView({
         element: this.element,
@@ -311,16 +297,14 @@ describe('CardView', function () {
     });
 
     it('creates Hosted Fields with postal code if included in challenges', function () {
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: ['postal_code'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: ['postal_code'],
+          creditCards: {
+            supportedCardTypes: []
           }
-        };
-      };
+        }
+      });
 
       this.view = new CardView({
         element: this.element,
@@ -405,16 +389,14 @@ describe('CardView', function () {
     it('does not show UnionPay icon even if it is supported', function () {
       var unionPayCardIcon;
 
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: [],
-            creditCards: {
-              supportedCardTypes: ['UnionPay']
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: ['UnionPay']
           }
-        };
-      };
+        }
+      });
 
       this.view = new CardView({
         element: this.element,
@@ -434,16 +416,14 @@ describe('CardView', function () {
     it('sets field placeholders', function () {
       var hostedFieldsConfiguredFields;
 
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: ['cvv', 'postal_code'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: ['cvv', 'postal_code'],
+          creditCards: {
+            supportedCardTypes: []
           }
-        };
-      };
+        }
+      });
 
       this.view = new CardView({
         element: this.element,
@@ -466,16 +446,14 @@ describe('CardView', function () {
     it('allows overriding field options for hosted fields', function () {
       var hostedFieldsConfiguredFields;
 
-      this.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            challenges: ['cvv', 'postal_code'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+      this.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          challenges: ['cvv', 'postal_code'],
+          creditCards: {
+            supportedCardTypes: []
           }
-        };
-      };
+        }
+      });
       this.model.merchantConfiguration.card = {
         overrides: {
           fields: {
@@ -646,7 +624,7 @@ describe('CardView', function () {
     beforeEach(function () {
       this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
 
-      this.model = new DropinModel(fake.modelOptions());
+      this.model = fake.model();
 
       return this.model.initialize();
     });
@@ -688,7 +666,7 @@ describe('CardView', function () {
   describe('Hosted Fields events', function () {
     beforeEach(function () {
       var self = this;
-      var model = new DropinModel(fake.modelOptions());
+      var model = fake.model();
 
       return model.initialize().then(function () {
         self.context = {
@@ -701,18 +679,14 @@ describe('CardView', function () {
           hideFieldError: CardView.prototype.hideFieldError,
           showFieldError: CardView.prototype.showFieldError,
           model: model,
-          client: {
-            getConfiguration: function () {
-              return {
-                gatewayConfiguration: {
-                  challenges: ['cvv'],
-                  creditCards: {
-                    supportedCardTypes: []
-                  }
-                }
-              };
+          client: fake.client({
+            gatewayConfiguration: {
+              challenges: ['cvv'],
+              creditCards: {
+                supportedCardTypes: []
+              }
             }
-          },
+          }),
           strings: strings,
           tokenize: CardView.prototype.tokenize,
           _hideUnsupportedCardIcons: function () {},
@@ -836,16 +810,14 @@ describe('CardView', function () {
         var numberFieldError = this.element.querySelector('[data-braintree-id="number-field-error"]');
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        this.context.client.getConfiguration = function () {
-          return {
-            gatewayConfiguration: {
-              challenges: ['cvv'],
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
+        this.context.client.getConfiguration.returns({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
             }
-          };
-        };
+          }
+        });
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
@@ -880,22 +852,20 @@ describe('CardView', function () {
         document.body.appendChild(fakeHostedField);
         fakeHostedField.focus();
 
-        this.context.client.getConfiguration = function () {
-          return {
-            authorization: fake.clientToken,
-            authorizationType: 'CLIENT_TOKEN',
-            gatewayConfiguration: {
-              challenges: ['cvv'],
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
+        this.context.client.getConfiguration.returns({
+          authorization: fake.clientToken,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
             }
-          };
-        };
+          }
+        });
 
         modelOptions.client.getConfiguration = this.context.client.getConfiguration;
 
-        this.context.model = new DropinModel(modelOptions);
+        this.context.model = fake.model(modelOptions);
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
@@ -932,22 +902,20 @@ describe('CardView', function () {
         document.body.appendChild(fakeHostedField);
         fakeElement.focus();
 
-        this.context.client.getConfiguration = function () {
-          return {
-            authorization: fake.clientToken,
-            authorizationType: 'CLIENT_TOKEN',
-            gatewayConfiguration: {
-              challenges: ['cvv'],
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
+        this.context.client.getConfiguration.returns({
+          authorization: fake.clientToken,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
             }
-          };
-        };
+          }
+        });
 
         modelOptions.client.getConfiguration = this.context.client.getConfiguration;
 
-        this.context.model = new DropinModel(modelOptions);
+        this.context.model = fake.model(modelOptions);
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
@@ -985,22 +953,20 @@ describe('CardView', function () {
         document.body.appendChild(fakeElement);
         fakeElement.focus();
 
-        this.context.client.getConfiguration = function () {
-          return {
-            authorization: fake.clientToken,
-            authorizationType: 'CLIENT_TOKEN',
-            gatewayConfiguration: {
-              challenges: ['cvv'],
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
+        this.context.client.getConfiguration.returns({
+          authorization: fake.clientToken,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
             }
-          };
-        };
+          }
+        });
 
         modelOptions.client.getConfiguration = this.context.client.getConfiguration;
 
-        this.context.model = new DropinModel(modelOptions);
+        this.context.model = fake.model(modelOptions);
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
@@ -1031,22 +997,20 @@ describe('CardView', function () {
         document.body.appendChild(fakeElement);
         fakeElement.focus();
 
-        this.context.client.getConfiguration = function () {
-          return {
-            authorization: fake.clientToken,
-            authorizationType: 'CLIENT_TOKEN',
-            gatewayConfiguration: {
-              challenges: ['cvv'],
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
+        this.context.client.getConfiguration.returns({
+          authorization: fake.clientToken,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
             }
-          };
-        };
+          }
+        });
 
         modelOptions.client.getConfiguration = this.context.client.getConfiguration;
 
-        this.context.model = new DropinModel(modelOptions);
+        this.context.model = fake.model(modelOptions);
 
         classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
@@ -1329,16 +1293,14 @@ describe('CardView', function () {
           setAttribute: this.sandbox.spy()
         };
 
-        this.context.client.getConfiguration = function () {
-          return {
-            gatewayConfiguration: {
-              challenges: [],
-              creditCards: {
-                supportedCardTypes: []
-              }
+        this.context.client.getConfiguration.returns({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: []
             }
-          };
-        };
+          }
+        });
 
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
@@ -1512,16 +1474,14 @@ describe('CardView', function () {
           removeAttribute: this.sandbox.stub()
         };
 
-        this.context.client.getConfiguration = function () {
-          return {
-            gatewayConfiguration: {
-              challenges: ['cvv'],
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
+        this.context.client.getConfiguration.returns({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
             }
-          };
-        };
+          }
+        });
 
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
@@ -1552,16 +1512,14 @@ describe('CardView', function () {
           removeAttribute: this.sandbox.stub()
         };
 
-        this.context.client.getConfiguration = function () {
-          return {
-            gatewayConfiguration: {
-              challenges: ['cvv'],
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
+        this.context.client.getConfiguration.returns({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
             }
-          };
-        };
+          }
+        });
 
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
@@ -1592,16 +1550,14 @@ describe('CardView', function () {
           removeAttribute: this.sandbox.stub()
         };
 
-        this.context.client.getConfiguration = function () {
-          return {
-            gatewayConfiguration: {
-              challenges: ['cvv'],
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
+        this.context.client.getConfiguration.returns({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
             }
-          };
-        };
+          }
+        });
 
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
@@ -1746,7 +1702,7 @@ describe('CardView', function () {
         setMessage: self.sandbox.stub(),
         tokenize: self.sandbox.stub().resolves({})
       };
-      self.model = new DropinModel(fake.modelOptions());
+      self.model = fake.model();
 
       return self.model.initialize().then(function () {
         self.context = {
@@ -1761,9 +1717,7 @@ describe('CardView', function () {
           _validateExtraInput: CardView.prototype._validateExtraInput,
           _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
           _setupCardholderName: self.sandbox.stub(),
-          client: {
-            getConfiguration: fake.configuration
-          },
+          client: fake.client(),
           merchantConfiguration: {
             authorization: fake.configuration().authorization,
             card: {}
@@ -1989,15 +1943,13 @@ describe('CardView', function () {
 
       this.sandbox.stub(this.context.model, 'reportError');
 
-      this.context.client.getConfiguration = function () {
-        return {
-          gatewayConfiguration: {
-            creditCards: {
-              supportedCardTypes: ['Foo Pay']
-            }
+      this.context.client.getConfiguration.returns({
+        gatewayConfiguration: {
+          creditCards: {
+            supportedCardTypes: ['Foo Pay']
           }
-        };
-      };
+        }
+      });
 
       return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
         expect(numberFieldError.classList.contains('braintree-hidden')).to.be.false;

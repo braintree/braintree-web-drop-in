@@ -1,6 +1,7 @@
 'use strict';
 
 var BaseView = require('../../../src/views/base-view');
+var fake = require('../../helpers/fake');
 var fs = require('fs');
 var PaymentMethodView = require('../../../src/views/payment-method-view');
 var strings = require('../../../src/translations/en_US');
@@ -33,7 +34,9 @@ describe('PaymentMethodView', function () {
   describe('_initialize', function () {
     beforeEach(function () {
       this.context = {
-        strings: strings
+        strings: strings,
+        _selectDelete: this.sandbox.stub(),
+        _choosePaymentMethod: this.sandbox.stub()
       };
     });
 
@@ -43,7 +46,7 @@ describe('PaymentMethodView', function () {
         type: 'CreditCard',
         details: {
           cardType: 'Visa',
-          lastTwo: '11'
+          lastFour: '1111'
         }
       };
 
@@ -56,7 +59,7 @@ describe('PaymentMethodView', function () {
       labelElement = this.context.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).to.equal('#icon-visa');
-      expect(labelElement.textContent).to.contain('Ending in ••11');
+      expect(labelElement.textContent).to.contain('Ending in 1111');
       expect(labelElement.querySelector('.braintree-method__label--small').textContent).to.equal('Visa');
       expect(iconContainer.classList.contains('braintree-icon--bordered')).to.be.true;
     });
@@ -198,6 +201,52 @@ describe('PaymentMethodView', function () {
       this.sandbox.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
+    });
+  });
+
+  describe('edit mode', function () {
+    it('does not call model.changeActivePaymentMethod in click handler when in edit mode', function () {
+      var model = fake.model();
+      var view = new PaymentMethodView({
+        model: model,
+        strings: strings,
+        paymentMethod: {
+          type: 'Foo',
+          nonce: 'nonce'
+        }
+      });
+
+      this.sandbox.stub(model, 'changeActivePaymentMethod');
+      this.sandbox.stub(model, 'isInEditMode').returns(true);
+
+      view._choosePaymentMethod();
+
+      expect(view.model.changeActivePaymentMethod).to.not.be.called;
+
+      model.isInEditMode.returns(false);
+      view._choosePaymentMethod();
+
+      expect(view.model.changeActivePaymentMethod).to.be.calledOnce;
+    });
+
+    it('calls model.confirmPaymentMethodDeletion when delete icon is clicked', function () {
+      var fakeModel = {
+        confirmPaymentMethodDeletion: this.sandbox.stub()
+      };
+      var paymentMethod = {
+        type: 'Foo',
+        nonce: 'nonce'
+      };
+      var view = new PaymentMethodView({
+        model: fakeModel,
+        strings: strings,
+        paymentMethod: paymentMethod
+      });
+
+      view._selectDelete();
+
+      expect(fakeModel.confirmPaymentMethodDeletion).to.be.calledOnce;
+      expect(fakeModel.confirmPaymentMethodDeletion).to.be.calledWith(paymentMethod);
     });
   });
 });

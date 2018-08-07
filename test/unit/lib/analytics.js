@@ -8,10 +8,7 @@ var fake = require('../../helpers/fake');
 
 describe('analytics.sendEvent', function () {
   beforeEach(function () {
-    this.client = {
-      _request: this.sandbox.stub(),
-      getConfiguration: fake.configuration
-    };
+    this.client = fake.client();
   });
 
   it('correctly sends an analytics event with a callback', function () {
@@ -72,10 +69,7 @@ describe('analytics.sendEvent', function () {
     var fakeConfiguration = fake.configuration();
 
     fakeConfiguration.authorization = fake.tokenizationKey;
-    client = {
-      _request: this.sandbox.stub(),
-      getConfiguration: function () { return fakeConfiguration; }
-    };
+    client = fake.client(fakeConfiguration);
 
     analytics.sendEvent(client, 'test.event.kind');
 
@@ -93,10 +87,7 @@ describe('analytics.sendEvent', function () {
     fakeConfiguration.authorization = fake.clientToken;
     fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
     fingerprint = JSON.parse(atob(fakeConfiguration.authorization)).authorizationFingerprint;
-    client = {
-      _request: this.sandbox.stub(),
-      getConfiguration: function () { return fakeConfiguration; }
-    };
+    client = fake.client(fakeConfiguration);
 
     analytics.sendEvent(client, 'test.event.kind');
 

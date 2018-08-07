@@ -1,5 +1,6 @@
 'use strict';
 
+var vaultManager = require('braintree-web/vault-manager');
 var analytics = require('../../src/lib/analytics');
 var DropinModel = require('../../src/dropin-model');
 var ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
@@ -17,15 +18,18 @@ describe('DropinModel', function () {
   beforeEach(function () {
     this.configuration = fake.configuration();
 
+    this.vaultManager = {
+      fetchPaymentMethods: this.sandbox.stub().resolves([]),
+      deletePaymentMethod: this.sandbox.stub().resolves()
+    };
+    this.sandbox.stub(vaultManager, 'create').resolves(this.vaultManager);
     this.modelOptions = {
-      client: {
-        getConfiguration: function () {
-          return this.configuration;
-        }.bind(this)
-      },
+      client: fake.client(this.configuration),
       componentID: 'foo123',
       merchantConfiguration: {
-        authorization: fake.clientToken
+        authorization: fake.clientToken,
+        paypal: {},
+        venmo: {}
       },
       paymentMethods: []
     };
@@ -99,15 +103,25 @@ describe('DropinModel', function () {
       this.sandbox.stub(VenmoView, 'isEnabled').resolves(true);
     });
 
-    it('sets existing payment methods as _paymentMethods', function () {
-      var model;
-
-      this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
-
-      model = new DropinModel(this.modelOptions);
+    it('creates a vault manager', function () {
+      var model = new DropinModel(this.modelOptions);
 
       return model.initialize().then(function () {
-        expect(model._paymentMethods).to.deep.equal([{type: 'CreditCard', details: {lastTwo: '11'}}]);
+        expect(vaultManager.create).to.be.calledOnce;
+        expect(vaultManager.create).to.be.calledWith({
+          client: this.modelOptions.client
+        });
+      }.bind(this));
+    });
+
+    it('sets existing payment methods as _paymentMethods', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([{type: 'CreditCard', details: {lastTwo: '11'}}]);
+
+      return model.initialize().then(function () {
+        expect(model._paymentMethods).to.deep.equal([{type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}]);
       });
     });
 
@@ -119,108 +133,61 @@ describe('DropinModel', function () {
       });
     });
 
-    it('ignores invalid payment methods', function () {
-      var model;
-
-      this.modelOptions.paymentMethods = [
-        {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-        {type: 'InvalidMethod', details: {}},
-        {type: 'AlsoInvalidMethod', details: {}}
-      ];
-
-      this.modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
-      model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-        ]);
-      });
-    });
-
     it('ignores valid, but disabled payment methods', function () {
-      var model;
+      var model = new DropinModel(this.modelOptions);
 
-      this.modelOptions.paymentMethods = [
+      model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-      ];
-
+      ]);
       PayPalView.isEnabled.resolves(false);
       PayPalCreditView.isEnabled.resolves(false);
 
-      model = new DropinModel(this.modelOptions);
-
       return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}}
+          {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}
         ]);
       });
     });
 
     it('ignores payment methods that have errored when calling isEnabled', function () {
-      var model;
+      var model = new DropinModel(this.modelOptions);
 
+      model.isGuestCheckout = false;
       this.sandbox.stub(console, 'error');
-      this.modelOptions.paymentMethods = [
+      this.vaultManager.fetchPaymentMethods.resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-      ];
+      ]);
 
       PayPalView.isEnabled.rejects(new Error('fail'));
       PayPalCreditView.isEnabled.resolves(false);
 
-      model = new DropinModel(this.modelOptions);
-
       return model.initialize().then(function () {
         expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}}
+          {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}
         ]);
       });
     });
 
     it('calls console.error with error if isEnabled errors', function () {
+      var model = new DropinModel(this.modelOptions);
       var error = new Error('fail');
-      var model;
 
       this.sandbox.stub(console, 'error');
-      this.modelOptions.paymentMethods = [
+      this.vaultManager.fetchPaymentMethods.resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-      ];
+      ]);
 
       PayPalView.isEnabled.rejects(error);
       PayPalCreditView.isEnabled.resolves(false);
-
-      model = new DropinModel(this.modelOptions);
 
       return model.initialize().then(function () {
         expect(console.error).to.be.calledTwice; // eslint-disable-line no-console
         expect(console.error).to.be.calledWith('paypal view errored when checking if it was supported.'); // eslint-disable-line no-console
         expect(console.error).to.be.calledWith(error); // eslint-disable-line no-console
-      });
-    });
-
-    it('ignores payment vaulted payment methods that cannot be used client side', function () {
-      var model;
-
-      this.modelOptions.paymentMethods = [
-        {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-        {type: 'ApplePayCard', details: {}},
-        {type: 'AndroidPayCard', details: {}},
-        {type: 'VenmoAccount', details: {}}
-      ];
-
-      model = new DropinModel(this.modelOptions);
-
-      return model.initialize().then(function () {
-        expect(model._paymentMethods).to.deep.equal([
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
-        ]);
       });
     });
 
@@ -694,11 +661,11 @@ describe('DropinModel', function () {
       });
     });
 
-    it('returns true initially if payment methods are passed in', function () {
-      var model;
+    it('returns true initially if customer has saved payment methods', function () {
+      var model = new DropinModel(this.modelOptions);
 
-      this.modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
-      model = new DropinModel(this.modelOptions);
+      model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([{type: 'CreditCard', details: {lastTwo: '11'}}]);
 
       return model.initialize().then(function () {
         expect(model.isPaymentMethodRequestable()).to.equal(true);
@@ -890,6 +857,290 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('allowUserAction');
+    });
+  });
+
+  describe('Edit mode', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('model.enableEditMode emits an enableEditMode event', function () {
+      this.model.enableEditMode();
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('enableEditMode');
+    });
+
+    it('model.enableEditMode sets isInEditMode to true', function () {
+      expect(this.model.isInEditMode()).to.equal(false);
+
+      this.model.enableEditMode();
+
+      expect(this.model.isInEditMode()).to.equal(true);
+    });
+
+    it('model.disableEditMode emits a disableEditMode event', function () {
+      this.model.disableEditMode();
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('disableEditMode');
+    });
+
+    it('model.disableEditMode sets isInEditMode to false', function () {
+      this.model.enableEditMode();
+
+      expect(this.model.isInEditMode()).to.equal(true);
+
+      this.model.disableEditMode();
+
+      expect(this.model.isInEditMode()).to.equal(false);
+    });
+
+    it('model.confirmPaymentMethodDeletion emits a confirmPaymentMethodDeletion event', function () {
+      var paymentMethod = {
+        nonce: '123-fake-nonce'
+      };
+
+      this.model.confirmPaymentMethodDeletion(paymentMethod);
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('confirmPaymentMethodDeletion', paymentMethod);
+    });
+  });
+
+  describe('deleteVaultedPaymentMethod', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.model._paymentMethodWaitingToBeDeleted = {
+        nonce: 'a-nonce'
+      };
+      this.model.isGuestCheckout = false;
+      this.sandbox.stub(this.model, '_emit');
+
+      return this.model.initialize();
+    });
+
+    it('emits a startVaultedPaymentMethodDeletion event', function () {
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model._emit).to.be.calledWith('startVaultedPaymentMethodDeletion');
+      }.bind(this));
+    });
+
+    it('removes stored payment method variable', function () {
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model._paymentMethodWaitingToBeDeleted).to.not.exist;
+      }.bind(this));
+    });
+
+    it('uses vault manager to delete payment method', function () {
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.vaultManager.deletePaymentMethod).to.be.calledOnce;
+        expect(this.vaultManager.deletePaymentMethod).to.be.calledWith('a-nonce');
+      }.bind(this));
+    });
+
+    it('does not vault manager to delete payment method if in guest checkout mode', function () {
+      this.model.isGuestCheckout = true;
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.vaultManager.deletePaymentMethod).to.not.be.called;
+      }.bind(this));
+    });
+
+    it('emits finishVaultedPaymentMethodDeletion event when deletion is succesful', function () {
+      this.vaultManager.deletePaymentMethod.resolves();
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model._emit).to.be.calledWith('finishVaultedPaymentMethodDeletion');
+      }.bind(this));
+    });
+
+    it('emits finishVaultedPaymentMethodDeletion event when deletion is unsuccesful', function () {
+      var error = new Error('aaaaaaah!');
+
+      this.vaultManager.deletePaymentMethod.rejects(error);
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model._emit).to.be.calledWith('finishVaultedPaymentMethodDeletion');
+      }.bind(this));
+    });
+
+    it('refetches payment methods', function () {
+      var paymentMethods = [{type: 'CreditCard', nonce: 'a-nonce'}];
+
+      this.sandbox.stub(this.model, 'getVaultedPaymentMethods').resolves(paymentMethods);
+
+      return this.model.deleteVaultedPaymentMethod().then(function () {
+        expect(this.model.getVaultedPaymentMethods).to.be.calledOnce;
+        expect(this.model.getPaymentMethods()).to.deep.equal(paymentMethods);
+      }.bind(this));
+    });
+  });
+
+  describe('cancelDeleteVaultedPaymentMethod', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.model._paymentMethodWaitingToBeDeleted = {
+        nonce: 'a-nonce'
+      };
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('emits a cancelVaultedPaymentMethodDeletion event', function () {
+      this.model.cancelDeleteVaultedPaymentMethod();
+
+      expect(this.model._emit).to.be.calledOnce;
+      expect(this.model._emit).to.be.calledWith('cancelVaultedPaymentMethodDeletion');
+    });
+
+    it('removes stored payment method variable', function () {
+      this.model.cancelDeleteVaultedPaymentMethod();
+
+      expect(this.model._paymentMethodWaitingToBeDeleted).to.not.exist;
+    });
+  });
+
+  describe('getVaultedPaymentMethods', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+
+      this.sandbox.stub(ApplePayView, 'isEnabled').resolves(true);
+      this.sandbox.stub(CardView, 'isEnabled').resolves(true);
+      this.sandbox.stub(GooglePayView, 'isEnabled').resolves(true);
+      this.sandbox.stub(PayPalView, 'isEnabled').resolves(true);
+      this.sandbox.stub(PayPalCreditView, 'isEnabled').resolves(true);
+      this.sandbox.stub(VenmoView, 'isEnabled').resolves(true);
+
+      return this.model.initialize().then(function () {
+        this.model.isGuestCheckout = false;
+      }.bind(this));
+    });
+
+    it('resolves with payment methods as empty array when vault manager errors', function () {
+      this.model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.rejects(new Error('error'));
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(this.vaultManager.fetchPaymentMethods).to.be.calledWith({
+          defaultFirst: true
+        });
+        expect(paymentMethods).to.deep.equal([]);
+      }.bind(this));
+    });
+
+    it('resolves with payment methods as empty array when in guest checkout', function () {
+      this.model.isGuestCheckout = true;
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(paymentMethods).to.deep.equal([]);
+      });
+    });
+
+    it('resolves with payment methods from vault manager when not in guest checkout', function () {
+      this.model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([{
+        nonce: '1-nonce',
+        type: 'CreditCard'
+      }, {
+        nonce: '2-nonce',
+        type: 'PayPalAccount'
+      }]);
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(this.vaultManager.fetchPaymentMethods).to.be.calledWith({
+          defaultFirst: true
+        });
+        expect(paymentMethods).to.deep.equal([{
+          nonce: '1-nonce',
+          type: 'CreditCard',
+          vaulted: true
+        }, {
+          nonce: '2-nonce',
+          type: 'PayPalAccount',
+          vaulted: true
+        }]);
+      }.bind(this));
+    });
+
+    it('only resolves supported payment method types', function () {
+      this.model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([{
+        nonce: '1-nonce',
+        type: 'CreditCard'
+      }, {
+        nonce: '2-nonce',
+        type: 'FooPay'
+      }]);
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(paymentMethods).to.deep.equal([{
+          nonce: '1-nonce',
+          type: 'CreditCard',
+          vaulted: true
+        }]);
+      });
+    });
+
+    it('includes vaulted property on payment method objects', function () {
+      this.model.isGuestCheckout = false;
+      this.vaultManager.fetchPaymentMethods.resolves([{
+        nonce: '1-nonce',
+        type: 'CreditCard'
+      }, {
+        nonce: '2-nonce',
+        type: 'PayPalAccount'
+      }, {
+        nonce: '3-nonce',
+        type: 'CreditCard'
+      }]);
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(this.vaultManager.fetchPaymentMethods).to.be.calledWith({
+          defaultFirst: true
+        });
+        expect(paymentMethods[0].vaulted).to.equal(true);
+        expect(paymentMethods[1].vaulted).to.equal(true);
+        expect(paymentMethods[2].vaulted).to.equal(true);
+      }.bind(this));
+    });
+
+    it('ignores invalid payment methods', function () {
+      this.vaultManager.fetchPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'InvalidMethod', details: {}},
+        {type: 'AlsoInvalidMethod', details: {}}
+      ]);
+      this.model.merchantConfiguration.paypal = {flow: 'vault'};
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}, vaulted: true}
+        ]);
+      });
+    });
+
+    it('ignores vaulted payment methods that cannot be used client side', function () {
+      this.vaultManager.fetchPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'ApplePayCard', details: {}},
+        {type: 'AndroidPayCard', details: {}},
+        {type: 'VenmoAccount', details: {}}
+      ]);
+
+      return this.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        expect(paymentMethods).to.deep.equal([
+          {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true},
+          {type: 'PayPalAccount', details: {email: 'wow@example.com'}, vaulted: true}
+        ]);
+      });
     });
   });
 });

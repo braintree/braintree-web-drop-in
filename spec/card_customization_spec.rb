@@ -117,7 +117,7 @@ describe "Drop-in card.cardholderName" do
 
       submit_pay
 
-      expect(find(".braintree-heading")).to have_content("Paying with")
+      expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with")
 
       find("[data-braintree-id='toggle']").click
 
@@ -138,7 +138,7 @@ describe "Drop-in card.cardholderName" do
 
       submit_pay
 
-      expect(find(".braintree-heading")).to have_content("Paying with")
+      expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with")
 
       old_nonce = JSON.parse(find("#results").text)["nonce"]
 
@@ -150,7 +150,7 @@ describe "Drop-in card.cardholderName" do
 
       submit_pay
 
-      expect(find(".braintree-heading")).to have_content("Paying with")
+      expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with")
 
       new_nonce = JSON.parse(find("#results").text)["nonce"]
 

@@ -7,7 +7,6 @@ var constants = require('./constants');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('./lib/event-emitter');
-var isGuestCheckout = require('./lib/is-guest-checkout');
 var assets = require('./lib/assets');
 var fs = require('fs');
 var MainView = require('./views/main-view');
@@ -313,16 +312,13 @@ Dropin.prototype._initialize = function (callback) {
   self._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(self._dropinWrapper);
 
-  self._getVaultedPaymentMethods().then(function (paymentMethods) {
-    self._model = new DropinModel({
-      client: self._client,
-      componentID: self._componentID,
-      merchantConfiguration: self._merchantConfiguration,
-      paymentMethods: paymentMethods
-    });
+  self._model = new DropinModel({
+    client: self._client,
+    componentID: self._componentID,
+    merchantConfiguration: self._merchantConfiguration
+  });
 
-    return self._model.initialize();
-  }).then(function () {
+  self._model.initialize().then(function () {
     self._model.on('cancelInitialization', function (err) {
       self._dropinWrapper.innerHTML = '';
       analytics.sendEvent(self._client, 'load-error');
@@ -658,30 +654,6 @@ Dropin.prototype._injectStylesheet = function () {
   assets.loadStylesheet({
     href: stylesheetUrl,
     id: constants.STYLESHEET_ID
-  });
-};
-
-Dropin.prototype._getVaultedPaymentMethods = function () {
-  if (isGuestCheckout(this._client)) {
-    return Promise.resolve([]);
-  }
-
-  return this._client.request({
-    endpoint: 'payment_methods',
-    method: 'get',
-    data: {
-      defaultFirst: 1
-    }
-  }).then(function (paymentMethodsPayload) {
-    var paymentMethods = paymentMethodsPayload.paymentMethods.map(function (paymentMethod) {
-      paymentMethod.vaulted = true;
-
-      return paymentMethod;
-    }).map(formatPaymentMethodPayload);
-
-    return Promise.resolve(paymentMethods);
-  }).catch(function () {
-    return Promise.resolve([]);
   });
 };
 

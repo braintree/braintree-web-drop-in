@@ -10,7 +10,6 @@ var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var Promise = require('../../../src/lib/promise');
 var analytics = require('../../../src/lib/analytics');
 var classlist = require('../../../src/lib/classlist');
-var DropinModel = require('../../../src/dropin-model');
 var fake = require('../../helpers/fake');
 var fs = require('fs');
 var hostedFields = require('braintree-web/hosted-fields');
@@ -19,18 +18,13 @@ var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 var PayPalCheckout = require('braintree-web/paypal-checkout');
 var sheetViews = require('../../../src/views/payment-sheet-views');
 var strings = require('../../../src/translations/en_US');
-var transitionHelper = require('../../../src/lib/transition-helper');
-var braintreeWebVersion = require('../../../package.json').dependencies['braintree-web'];
 
 var templateHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 
 describe('MainView', function () {
   beforeEach(function () {
-    this.client = {
-      getConfiguration: fake.configuration,
-      getVersion: function () { return braintreeWebVersion; }
-    };
+    this.client = fake.client();
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(BasePayPalView.prototype, 'initialize');
   });
@@ -73,7 +67,7 @@ describe('MainView', function () {
 
     it('creates a CardView if it is the only payment option', function () {
       var mainView;
-      var model = new DropinModel(fake.modelOptions());
+      var model = fake.model();
 
       return model.initialize().then(function () {
         model.supportedPaymentOptions = ['card'];
@@ -92,7 +86,7 @@ describe('MainView', function () {
       var modelOptions = fake.modelOptions();
 
       modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
 
       return model.initialize().then(function () {
         model.supportedPaymentOptions = ['card', 'paypal'];
@@ -107,24 +101,72 @@ describe('MainView', function () {
       }.bind(this));
     });
 
+    it('listens for enableEditMode', function () {
+      var mainView;
+      var model = fake.model();
+
+      return model.initialize().then(function () {
+        this.sandbox.stub(model, 'on');
+        model.supportedPaymentOptions = ['card'];
+
+        this.mainViewOptions.model = model;
+
+        mainView = new MainView(this.mainViewOptions);
+
+        expect(mainView.model.on).to.be.calledWith('enableEditMode', this.sandbox.match.func);
+      }.bind(this));
+    });
+
+    it('listens for disableEditMode', function () {
+      var mainView;
+      var model = fake.model();
+
+      return model.initialize().then(function () {
+        this.sandbox.stub(model, 'on');
+        model.supportedPaymentOptions = ['card'];
+
+        this.mainViewOptions.model = model;
+
+        mainView = new MainView(this.mainViewOptions);
+
+        expect(mainView.model.on).to.be.calledWith('disableEditMode', this.sandbox.match.func);
+      }.bind(this));
+    });
+
+    it('listens for confirmPaymentMethodDeletion', function () {
+      var mainView;
+      var model = fake.model();
+
+      return model.initialize().then(function () {
+        this.sandbox.stub(model, 'on');
+        model.supportedPaymentOptions = ['card'];
+
+        this.mainViewOptions.model = model;
+
+        mainView = new MainView(this.mainViewOptions);
+
+        expect(mainView.model.on).to.be.calledWith('confirmPaymentMethodDeletion', this.sandbox.match.func);
+      }.bind(this));
+    });
+
     context('with vaulted payment methods', function () {
       beforeEach(function () {
-        var modelOptions = fake.modelOptions();
         var element = document.createElement('div');
 
         element.innerHTML = templateHTML;
 
-        modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}, {type: 'PayPalAccount'}];
-        this.model = new DropinModel(modelOptions);
+        this.model = fake.model();
+
+        this.model.getVaultedPaymentMethods.resolves([
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'PayPalAccount', details: {email: 'me@example.com'}}
+        ]);
 
         return this.model.initialize().then(function () {
           this.model.supportedPaymentOptions = ['card', 'paypal'];
 
           this.mainViewOptions = {
-            client: {
-              getConfiguration: fake.configuration,
-              getVersion: function () { return braintreeWebVersion; }
-            },
+            client: fake.client(),
             element: element,
             merchantConfiguration: {
               authorization: fake.tokenizationKey
@@ -173,7 +215,7 @@ describe('MainView', function () {
 
         element.innerHTML = templateHTML;
 
-        this.model = new DropinModel(fake.modelOptions());
+        this.model = fake.model();
 
         return this.model.initialize().then(function () {
           this.mainViewOptions = {
@@ -234,7 +276,7 @@ describe('MainView', function () {
 
   describe('setPrimaryView', function () {
     beforeEach(function () {
-      var model = new DropinModel(fake.modelOptions());
+      var model = fake.model();
       var wrapper = document.createElement('div');
 
       wrapper.innerHTML = templateHTML;
@@ -350,7 +392,7 @@ describe('MainView', function () {
 
               modelOptions.paymentMethods = [];
               modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-              model = new DropinModel(modelOptions);
+              model = fake.model(modelOptions);
 
               return model.initialize().then(function () {
                 model.supportedPaymentOptions = [sheetViewKey];
@@ -450,16 +492,16 @@ describe('MainView', function () {
   describe('showSheetError', function () {
     beforeEach(function () {
       this.context = {
-        sheetContainer: document.createElement('div'),
+        dropinContainer: document.createElement('div'),
         sheetErrorText: document.createElement('div'),
         strings: strings
       };
     });
 
-    it('applies the braintree-sheet--has-error class to sheet container', function () {
+    it('applies the braintree-sheet--has-error class to dropin container', function () {
       MainView.prototype.showSheetError.call(this.context, {});
 
-      expect(this.context.sheetContainer.classList.contains('braintree-sheet--has-error')).to.be.true;
+      expect(this.context.dropinContainer.classList.contains('braintree-sheet--has-error')).to.be.true;
     });
 
     it('sets the error text to the expected message for the error code', function () {
@@ -495,23 +537,23 @@ describe('MainView', function () {
   describe('hideSheetError', function () {
     beforeEach(function () {
       this.context = {
-        sheetContainer: document.createElement('div')
+        dropinContainer: document.createElement('div')
       };
     });
 
-    it('removes the braintree-sheet--has-error class from sheet container', function () {
-      classlist.add(this.context.sheetContainer, 'braintree-sheet--has-error');
+    it('removes the braintree-sheet--has-error class from dropin container', function () {
+      classlist.add(this.context.dropinContainer, 'braintree-sheet--has-error');
 
       MainView.prototype.hideSheetError.call(this.context);
 
-      expect(this.context.sheetContainer.classList.contains('braintree-sheet--has-error')).to.be.false;
+      expect(this.context.dropinContainer.classList.contains('braintree-sheet--has-error')).to.be.false;
     });
   });
 
   describe('dropinErrorState events', function () {
     beforeEach(function () {
       var element = document.createElement('div');
-      var model = new DropinModel(fake.modelOptions());
+      var model = fake.model();
 
       element.innerHTML = templateHTML;
 
@@ -520,13 +562,17 @@ describe('MainView', function () {
           addView: this.sandbox.stub(),
           element: element,
           getElementById: BaseView.prototype.getElementById,
+          enableEditMode: this.sandbox.stub(),
+          disableEditMode: this.sandbox.stub(),
+          openConfirmPaymentMethodDeletionDialog: this.sandbox.stub(),
+          cancelVaultedPaymentMethodDeletion: this.sandbox.stub(),
+          startVaultedPaymentMethodDeletion: this.sandbox.stub(),
+          finishVaultedPaymentMethodDeletion: this.sandbox.stub(),
           hideSheetError: this.sandbox.stub(),
           hideLoadingIndicator: function () {},
+          _sendToDefaultView: this.sandbox.stub(),
           model: model,
-          client: {
-            getConfiguration: fake.configuration,
-            getVersion: function () { return braintreeWebVersion; }
-          },
+          client: fake.client(),
           setPrimaryView: this.sandbox.stub(),
           showSheetError: this.sandbox.stub(),
           allowUserAction: this.sandbox.stub(),
@@ -558,26 +604,36 @@ describe('MainView', function () {
   });
 
   describe('hideLoadingIndicator', function () {
-    it('hides the loading indicator', function () {
+    it('sets the loaded class on dropin container', function () {
       var dropinContainer = document.createElement('div');
-      var upperContainer = document.createElement('div');
       var loadingContainer = document.createElement('div');
-      var loadingIndicator = document.createElement('div');
       var context = {
-        dropinContainer: dropinContainer,
         loadingContainer: loadingContainer,
-        loadingIndicator: loadingIndicator
+        dropinContainer: dropinContainer
       };
-
-      this.sandbox.stub(upperContainer, 'removeChild');
-      upperContainer.appendChild(loadingContainer);
-      this.sandbox.stub(transitionHelper, 'onTransitionEnd').yields();
 
       MainView.prototype.hideLoadingIndicator.call(context);
 
-      expect(context.dropinContainer.classList.contains('braintree-hidden')).to.be.false;
-      expect(context.dropinContainer.classList.contains('braintree-loaded')).to.be.true;
-      expect(upperContainer.removeChild).to.have.been.called;
+      expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(true);
+    });
+  });
+
+  describe('showLoadingIndicator', function () {
+    it('shows the loading indicator', function () {
+      var dropinContainer = document.createElement('div');
+      var loadingContainer = document.createElement('div');
+      var context = {
+        loadingContainer: loadingContainer,
+        dropinContainer: dropinContainer
+      };
+
+      MainView.prototype.hideLoadingIndicator.call(context);
+
+      expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(true);
+
+      MainView.prototype.showLoadingIndicator.call(context);
+
+      expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(false);
     });
   });
 
@@ -585,7 +641,7 @@ describe('MainView', function () {
     beforeEach(function () {
       this.element = document.createElement('div');
       this.element.innerHTML = templateHTML;
-      this.model = new DropinModel(fake.modelOptions());
+      this.model = fake.model();
 
       return this.model.initialize().then(function () {
         this.mainViewOptions = {
@@ -724,7 +780,7 @@ describe('MainView', function () {
 
   describe('additional options toggle', function () {
     beforeEach(function () {
-      var model = new DropinModel(fake.modelOptions());
+      var model = fake.model();
 
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
@@ -803,11 +859,8 @@ describe('MainView', function () {
 
       describe('and there are payment methods available', function () {
         beforeEach(function () {
-          var modelOptions = fake.modelOptions();
-
-          modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}];
-
-          this.mainViewOptions.model = new DropinModel(modelOptions);
+          this.mainViewOptions.model = fake.model();
+          this.mainViewOptions.model.getVaultedPaymentMethods.resolves([{type: 'CreditCard', details: {lastTwo: '11'}}]);
 
           return this.mainViewOptions.model.initialize().then(function () {
             this.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
@@ -840,7 +893,7 @@ describe('MainView', function () {
 
   describe('requestPaymentMethod', function () {
     beforeEach(function () {
-      var model = new DropinModel(fake.modelOptions());
+      var model = fake.model();
 
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
@@ -913,7 +966,7 @@ describe('MainView', function () {
 
     describe('with vaulted payment methods', function () {
       beforeEach(function () {
-        var model = new DropinModel(fake.modelOptions());
+        var model = fake.model();
 
         this.wrapper = document.createElement('div');
         this.wrapper.innerHTML = templateHTML;
@@ -1047,6 +1100,323 @@ describe('MainView', function () {
       MainView.prototype.allowUserAction.call(context);
 
       expect(classlist.add).to.be.calledWith(wrapper, 'braintree-hidden');
+    });
+  });
+
+  describe('enableEditMode', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+      }.bind(this));
+    });
+
+    it('enables edit mode on the payment methods view', function () {
+      this.sandbox.stub(this.mainView.paymentMethodsViews, 'enableEditMode');
+
+      this.mainView.enableEditMode();
+
+      expect(this.mainView.paymentMethodsViews.enableEditMode).to.be.calledOnce;
+    });
+
+    it('hides the toggle button', function () {
+      this.sandbox.stub(this.mainView, 'hideToggle');
+
+      this.mainView.enableEditMode();
+
+      expect(this.mainView.hideToggle).to.be.calledOnce;
+    });
+
+    it('sets payment method requestable to false', function () {
+      this.sandbox.stub(this.mainView.model, 'setPaymentMethodRequestable');
+
+      this.mainView.enableEditMode();
+
+      expect(this.mainView.model.setPaymentMethodRequestable).to.be.calledWith({
+        isRequestable: false
+      });
+    });
+  });
+
+  describe('disableEditMode', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+      }.bind(this));
+    });
+
+    it('disables edit mode on the payment methods view', function () {
+      this.sandbox.stub(this.mainView.paymentMethodsViews, 'disableEditMode');
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.paymentMethodsViews.disableEditMode).to.be.calledOnce;
+    });
+
+    it('shows the toggle button', function () {
+      this.sandbox.stub(this.mainView, 'showToggle');
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.showToggle).to.be.calledOnce;
+    });
+
+    it('sets payment method requestable to true when a payment method is available', function () {
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
+
+      this.mainView.primaryView.getPaymentMethod.returns(fakePaymentMethod);
+      this.sandbox.stub(this.mainView.model, 'setPaymentMethodRequestable');
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.model.setPaymentMethodRequestable).to.be.calledWith({
+        isRequestable: true,
+        type: 'TYPE',
+        selectedPaymentMethod: fakePaymentMethod
+      });
+    });
+
+    it('sets payment method requestable to false when no payment methods are available', function () {
+      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns(false);
+      this.sandbox.stub(this.mainView.model, 'setPaymentMethodRequestable');
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.model.setPaymentMethodRequestable).to.be.calledWithMatch({
+        isRequestable: false
+      });
+    });
+  });
+
+  describe('openConfirmPaymentMethodDeletionDialog', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+
+        this.sandbox.stub(this.mainView.deleteConfirmationView, 'applyPaymentMethod');
+        this.sandbox.stub(this.mainView, 'setPrimaryView');
+      }.bind(this));
+    });
+
+    it('updates delete confirmation view with payment method', function () {
+      var paymentMethod = {nonce: 'a-nonce'};
+
+      this.mainView.openConfirmPaymentMethodDeletionDialog(paymentMethod);
+
+      expect(this.mainView.deleteConfirmationView.applyPaymentMethod).to.be.calledOnce;
+      expect(this.mainView.deleteConfirmationView.applyPaymentMethod).to.be.calledWith(paymentMethod);
+    });
+
+    it('sets primary view to delete confirmation view', function () {
+      var paymentMethod = {nonce: 'a-nonce'};
+
+      this.mainView.openConfirmPaymentMethodDeletionDialog(paymentMethod);
+
+      expect(this.mainView.setPrimaryView).to.be.calledOnce;
+      expect(this.mainView.setPrimaryView).to.be.calledWith('delete-confirmation');
+    });
+  });
+
+  describe('cancelVaultedPaymentMethodDeletion', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+        this.sandbox.stub(this.mainView, 'setPrimaryView');
+      }.bind(this));
+    });
+
+    it('sets primary view to methods view', function () {
+      this.mainView.cancelVaultedPaymentMethodDeletion();
+
+      expect(this.mainView.setPrimaryView).to.be.calledOnce;
+      expect(this.mainView.setPrimaryView).to.be.calledWith('methods');
+    });
+  });
+
+  describe('startVaultedPaymentMethodDeletion', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+      }.bind(this));
+    });
+
+    it('calls showLoadingIndicator', function () {
+      this.sandbox.stub(this.mainView, 'showLoadingIndicator');
+      this.mainView.startVaultedPaymentMethodDeletion();
+      expect(this.mainView.showLoadingIndicator).to.be.calledOnce;
+    });
+
+    it('removes classes from dropin wrapper', function () {
+      this.mainView.element.className = 'braintree-show-methods';
+
+      this.mainView.startVaultedPaymentMethodDeletion();
+
+      expect(this.mainView.element.className).to.equal('');
+    });
+  });
+
+  describe('finishVaultedPaymentMethodDeletion', function () {
+    beforeEach(function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        model.supportedPaymentOptions = ['card'];
+        this.mainViewOptions = {
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        };
+        this.mainView = new MainView(this.mainViewOptions);
+      }.bind(this));
+    });
+
+    it('refreshes payment methods view', function () {
+      this.sandbox.stub(this.mainView.paymentMethodsViews, 'refreshPaymentMethods');
+
+      this.mainView.finishVaultedPaymentMethodDeletion();
+
+      expect(this.mainView.paymentMethodsViews.refreshPaymentMethods).to.be.calledOnce;
+    });
+
+    it('calls hideLoadingIndicator', function () {
+      this.sandbox.stub(this.mainView, 'hideLoadingIndicator');
+
+      this.mainView.finishVaultedPaymentMethodDeletion();
+
+      expect(this.mainView.hideLoadingIndicator).to.be.calledOnce;
+    });
+
+    it('sends customer back to their initial view', function () {
+      this.sandbox.stub(this.mainView, '_sendToDefaultView');
+
+      this.mainView.finishVaultedPaymentMethodDeletion();
+
+      expect(this.mainView._sendToDefaultView).to.be.calledOnce;
+    });
+
+    it('re-enables edit mode when it errors', function () {
+      var err = new Error('some error');
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
+
+      this.sandbox.stub(this.mainView.model, 'enableEditMode');
+      this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([fakePaymentMethod]);
+
+      this.mainView.finishVaultedPaymentMethodDeletion(err);
+
+      expect(this.mainView.model.enableEditMode).to.be.calledOnce;
+    });
+
+    it('shows sheet error when it errors', function () {
+      var err = new Error('some error');
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
+
+      this.sandbox.stub(this.mainView, 'showSheetError');
+      this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([fakePaymentMethod]);
+
+      this.mainView.finishVaultedPaymentMethodDeletion(err);
+
+      expect(this.mainView.showSheetError).to.be.calledOnce;
+    });
+
+    it('sends customer back to their initial view if erros but there are no saved payment methods', function () {
+      var err = new Error('some error');
+
+      this.sandbox.stub(this.mainView, '_sendToDefaultView');
+      this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([]);
+
+      this.mainView.finishVaultedPaymentMethodDeletion(err);
+
+      expect(this.mainView._sendToDefaultView).to.be.calledOnce;
     });
   });
 });

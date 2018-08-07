@@ -69,11 +69,7 @@ describe('dropin.create', function () {
   });
 
   it('returns a Dropin instance if client.create returns successfully', function (done) {
-    var fakeClient = {
-      getConfiguration: fake.configuration,
-      request: function () {},
-      _request: function () {}
-    };
+    var fakeClient = fake.client();
 
     this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
@@ -93,11 +89,7 @@ describe('dropin.create', function () {
   });
 
   it('returns an error to callback if Drop-in initialization fails', function (done) {
-    var fakeClient = {
-      getConfiguration: fake.configuration,
-      request: function () {},
-      _request: function () {}
-    };
+    var fakeClient = fake.client();
     var dropinError = new DropinError('Dropin Error');
 
     this.sandbox.stub(Dropin.prototype, '_initialize').yields(dropinError);
@@ -116,11 +108,7 @@ describe('dropin.create', function () {
   });
 
   it('sets the correct analytics metadata', function (done) {
-    var fakeClient = {
-      getConfiguration: fake.configuration,
-      request: function () {},
-      _request: function () {}
-    };
+    var fakeClient = fake.client();
 
     this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
@@ -143,11 +131,7 @@ describe('dropin.create', function () {
   });
 
   it('sends web.dropin.started.tokenization-key event when using a tokenization key', function (done) {
-    var fakeClient = {
-      getConfiguration: fake.configuration,
-      request: function () {},
-      _request: function () {}
-    };
+    var fakeClient = fake.client();
 
     this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);
@@ -172,11 +156,8 @@ describe('dropin.create', function () {
     fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
     fakeConfiguration.authorization = fake.clientToken;
 
-    fakeClient = {
-      getConfiguration: function () { return fakeConfiguration; },
-      request: function () {},
-      _request: function () {}
-    };
+    fakeClient = fake.client();
+    fakeClient.getConfiguration.returns(fakeConfiguration);
 
     this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
       callback(null, this);

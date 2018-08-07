@@ -27,7 +27,7 @@ describe('BasePayPalView', function () {
 
     global.paypal = this.paypal;
 
-    this.model = new DropinModel(fake.modelOptions());
+    this.model = fake.model();
 
     this.div = document.createElement('div');
     this.div.innerHTML = mainHTML;
@@ -39,10 +39,7 @@ describe('BasePayPalView', function () {
     this.sandbox.stub(this.model, 'reportError');
 
     this.configuration = fake.configuration();
-    this.fakeClient = {
-      getConfiguration: this.sandbox.stub().returns(this.configuration),
-      request: this.sandbox.spy()
-    };
+    this.fakeClient = fake.client(this.configuration);
     this.paypalViewOptions = {
       strings: {},
       element: this.element,

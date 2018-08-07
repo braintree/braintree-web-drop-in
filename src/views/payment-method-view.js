@@ -27,9 +27,9 @@ PaymentMethodView.prototype._initialize = function () {
   this.element.className = 'braintree-method';
   this.element.setAttribute('tabindex', '0');
 
-  addSelectionEventHandler(this.element, function () {
-    this.model.changeActivePaymentMethod(this.paymentMethod);
-  }.bind(this));
+  addSelectionEventHandler(this.element, this._choosePaymentMethod.bind(this));
+
+  html = html.replace(/@DISABLE_MESSAGE/g, this.strings.hasSubscription);
 
   switch (this.paymentMethod.type) {
     case paymentMethodTypes.applePay:
@@ -39,7 +39,7 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@SUBTITLE/g, '');
       break;
     case paymentMethodTypes.card:
-      endingInText = this.strings.endingIn.replace('{{lastTwoCardDigits}}', this.paymentMethod.details.lastTwo);
+      endingInText = this.strings.endingIn.replace('{{lastFourCardDigits}}', this.paymentMethod.details.lastFour);
       html = html.replace(/@ICON/g, 'icon-' + paymentMethodCardTypes[this.paymentMethod.details.cardType])
         .replace(/@CLASSNAME/g, ' braintree-icon--bordered')
         .replace(/@TITLE/g, endingInText)
@@ -68,6 +68,8 @@ PaymentMethodView.prototype._initialize = function () {
   }
 
   this.element.innerHTML = html;
+  this.checkMark = this.element.querySelector('.braintree-method__check-container');
+  addSelectionEventHandler(this.element.querySelector('.braintree-method__delete-container'), this._selectDelete.bind(this));
 };
 
 PaymentMethodView.prototype.setActive = function (isActive) {
@@ -75,6 +77,29 @@ PaymentMethodView.prototype.setActive = function (isActive) {
   setTimeout(function () {
     classlist.toggle(this.element, 'braintree-method--active', isActive);
   }.bind(this), 0);
+};
+
+PaymentMethodView.prototype.enableEditMode = function () {
+  classlist.add(this.checkMark, 'braintree-hidden');
+  if (this.paymentMethod.hasSubscription) {
+    classlist.add(this.element, 'braintree-method--disabled');
+  }
+};
+
+PaymentMethodView.prototype.disableEditMode = function () {
+  classlist.remove(this.checkMark, 'braintree-hidden');
+  classlist.remove(this.element, 'braintree-method--disabled');
+};
+
+PaymentMethodView.prototype._choosePaymentMethod = function () {
+  if (this.model.isInEditMode()) {
+    return;
+  }
+  this.model.changeActivePaymentMethod(this.paymentMethod);
+};
+
+PaymentMethodView.prototype._selectDelete = function () {
+  this.model.confirmPaymentMethodDeletion(this.paymentMethod);
 };
 
 module.exports = PaymentMethodView;

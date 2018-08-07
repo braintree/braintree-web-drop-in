@@ -18,10 +18,10 @@ describe "Drop-in#requestPaymentMethod" do
 
       submit_pay
 
-      expect(find(".braintree-heading")).to have_content("Paying with")
+      expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with")
 
       # Drop-in Details
-      expect(page).to have_content("Ending in ••11")
+      expect(page).to have_content("Ending in 1111")
 
       # Nonce Details
       expect(page).to have_content("CreditCard")
@@ -38,7 +38,7 @@ describe "Drop-in#requestPaymentMethod" do
 
       submit_pay
 
-      expect(find(".braintree-heading")).to have_content("Paying with PayPal")
+      expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with PayPal")
 
       expect(page).to have_content("PayPalAccount")
       expect(page).to have_content(ENV["PAYPAL_USERNAME"])
@@ -55,7 +55,7 @@ describe "Drop-in#requestPaymentMethod" do
 
       submit_pay
 
-      expect(find(".braintree-heading")).to have_content("Paying with PayPal")
+      expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with PayPal")
 
       expect(page).to have_content("PayPalAccount")
       expect(page).to have_content(ENV["PAYPAL_USERNAME"])
@@ -73,10 +73,10 @@ describe "Drop-in#requestPaymentMethod" do
 
       submit_pay
 
-      expect(find(".braintree-heading")).to have_content("Paying with")
+      expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with")
 
       # Drop-in Details
-      expect(page).to have_content("Ending in ••11")
+      expect(page).to have_content("Ending in 1111")
 
       # Nonce Details
       expect(page).to have_content("CreditCard")
@@ -93,7 +93,7 @@ describe "Drop-in#requestPaymentMethod" do
 
       submit_pay
 
-      expect(find(".braintree-heading")).to have_content("Paying with PayPal")
+      expect(find("[data-braintree-id='methods-label']")).to have_content("Paying with PayPal")
 
       expect(page).to have_content("PayPalAccount")
       expect(page).to have_content(ENV["PAYPAL_USERNAME"])

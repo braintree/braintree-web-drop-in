@@ -2,15 +2,21 @@
 
 var BaseView = require('../../../src/views/base-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
-var DropinModel = require('../../../src/dropin-model');
+var DropinError = require('../../../src/lib/dropin-error');
 var classlist = require('../../../src/lib/classlist');
 var fake = require('../../helpers/fake');
+var throwIfResolves = require('../../helpers/throw-if-resolves');
 var fs = require('fs');
 var strings = require('../../../src/translations/en_US');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
 describe('PaymentMethodsView', function () {
+  beforeEach(function () {
+    this.element = document.createElement('div');
+    this.element.innerHTML = mainHTML;
+  });
+
   describe('Constructor', function () {
     beforeEach(function () {
       this.sandbox.stub(PaymentMethodsView.prototype, '_initialize');
@@ -28,26 +34,22 @@ describe('PaymentMethodsView', function () {
   });
 
   describe('_initialize', function () {
-    beforeEach(function () {
-      this.element = document.createElement('div');
-      this.element.innerHTML = mainHTML;
-    });
-
     it('adds supported vaulted payment methods', function () {
       var model, paymentMethodsViews;
       var modelOptions = fake.modelOptions();
 
-      modelOptions.client.getConfiguration = function () {
-        return {
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        };
-      };
-      modelOptions.paymentMethods = [{type: 'CreditCard', details: {lastTwo: '11'}}, {type: 'PayPalAccount', details: {email: 'wow@example.com'}}, {type: 'UnsupportedPaymentMethod'}];
+      modelOptions.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
       modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
+      model.getVaultedPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
 
       return model.initialize().then(function () {
         paymentMethodsViews = new PaymentMethodsView({
@@ -77,17 +79,16 @@ describe('PaymentMethodsView', function () {
       };
       var modelOptions = fake.modelOptions();
 
-      modelOptions.client.getConfiguration = function () {
-        return {
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        };
-      };
-      modelOptions.paymentMethods = [paypalAccount, creditCard];
+      modelOptions.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
       modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
+
+      model.getVaultedPaymentMethods.resolves([paypalAccount, creditCard]);
 
       return model.initialize().then(function () {
         paymentMethodsViews = new PaymentMethodsView({
@@ -107,15 +108,13 @@ describe('PaymentMethodsView', function () {
       var model, methodsContainer, paymentMethodsViews;
       var modelOptions = fake.modelOptions();
 
-      modelOptions.client.getConfiguration = function () {
-        return {
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        };
-      };
+      modelOptions.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
 
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
 
       return model.initialize().then(function () {
         methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
@@ -141,8 +140,9 @@ describe('PaymentMethodsView', function () {
       this.sandbox.useFakeTimers();
 
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-      modelOptions.paymentMethods = [{foo: 'bar'}, fakePaymentMethod];
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
+
+      model.getVaultedPaymentMethods.resolves([{foo: 'bar'}, fakePaymentMethod]);
 
       return model.initialize().then(function () {
         model.changeActivePaymentMethod({foo: 'bar'});
@@ -174,8 +174,9 @@ describe('PaymentMethodsView', function () {
       var modelOptions = fake.modelOptions();
 
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-      modelOptions.paymentMethods = [fakePayPal, fakeCard];
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
+
+      model.getVaultedPaymentMethods.resolves([fakePayPal, fakeCard]);
 
       return model.initialize().then(function () {
         model.isGuestCheckout = false;
@@ -218,17 +219,16 @@ describe('PaymentMethodsView', function () {
       var methodsContainer = this.element.querySelector('[data-braintree-id="methods-container"]');
       var modelOptions = fake.modelOptions();
 
-      modelOptions.client.getConfiguration = function () {
-        return {
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        };
-      };
+      modelOptions.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
 
       modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-      modelOptions.paymentMethods = [this.fakePaymentMethod];
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
+
+      model.getVaultedPaymentMethods.resolves([this.fakePaymentMethod]);
 
       return model.initialize().then(function () {
         paymentMethodsViews = new PaymentMethodsView({
@@ -253,8 +253,9 @@ describe('PaymentMethodsView', function () {
       var modelOptions = fake.modelOptions();
 
       modelOptions.merchantConfiguration.authorization = fake.clientToken;
-      modelOptions.paymentMethods = [this.fakePaymentMethod];
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
+
+      model.getVaultedPaymentMethods.resolves([this.fakePaymentMethod]);
 
       return model.initialize().then(function () {
         paymentMethodsViews = new PaymentMethodsView({
@@ -279,7 +280,7 @@ describe('PaymentMethodsView', function () {
       var modelOptions = fake.modelOptions();
 
       modelOptions.merchantConfiguration.authorization = fake.clientToken;
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
 
       return model.initialize().then(function () {
         paymentMethodsViews = new PaymentMethodsView({
@@ -305,7 +306,7 @@ describe('PaymentMethodsView', function () {
       var modelOptions = fake.modelOptions();
 
       modelOptions.merchantConfiguration.authorization = fake.clientToken;
-      model = new DropinModel(modelOptions);
+      model = fake.model(modelOptions);
 
       return model.initialize().then(function () {
         this.paymentMethodsViews = new PaymentMethodsView({
@@ -358,11 +359,11 @@ describe('PaymentMethodsView', function () {
         details: {lastTwo: '11'}
       };
 
-      this.model = new DropinModel(fake.modelOptions());
+      this.model = fake.model();
 
       return this.model.initialize().then(function () {
         this.paymentMethodsViews = new PaymentMethodsView({
-          element: document.createElement('div'),
+          element: div,
           model: this.model,
           merchantConfiguration: {
             authorization: fake.clientTokenWithCustomerID
@@ -414,7 +415,7 @@ describe('PaymentMethodsView', function () {
         paymentMethod: {foo: 'bar'}
       };
       var element = document.createElement('div');
-      var model = new DropinModel(fake.modelOptions());
+      var model = fake.model();
 
       return model.initialize().then(function () {
         element.innerHTML = mainHTML;
@@ -433,6 +434,202 @@ describe('PaymentMethodsView', function () {
       }).then(function (payload) {
         expect(payload).to.equal(fakeActiveMethodView.paymentMethod);
       });
+    });
+
+    it('rejects if there is no activeMethodView', function () {
+      var paymentMethodsViews;
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      return model.initialize().then(function () {
+        element.innerHTML = mainHTML;
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        return paymentMethodsViews.requestPaymentMethod();
+      }).then(throwIfResolves).catch(function (err) {
+        expect(err).to.be.an.instanceof(DropinError);
+        expect(err.message).to.equal('No payment method is available.');
+      });
+    });
+
+    it('rejects if model is in edit mode', function () {
+      var paymentMethodsViews;
+      var fakeActiveMethodView = {
+        paymentMethod: {foo: 'bar'}
+      };
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      return model.initialize().then(function () {
+        element.innerHTML = mainHTML;
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        paymentMethodsViews.activeMethodView = fakeActiveMethodView;
+        this.sandbox.stub(model, 'isInEditMode').returns(true);
+
+        return paymentMethodsViews.requestPaymentMethod();
+      }.bind(this)).then(throwIfResolves).catch(function (err) {
+        expect(err).to.be.an.instanceof(DropinError);
+        expect(err.message).to.equal('No payment method is available.');
+      });
+    });
+  });
+
+  describe('enableEditMode', function () {
+    it('calls enableEditMode on each payment method view', function () {
+      var model, paymentMethodsViews;
+      var modelOptions = fake.modelOptions();
+      var element = document.createElement('div');
+
+      element.innerHTML = mainHTML;
+
+      modelOptions.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
+      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      model = fake.model(modelOptions);
+
+      model.getVaultedPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+
+      return model.initialize().then(function () {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            paypal: modelOptions.merchantConfiguration.paypal,
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        this.sandbox.stub(paymentMethodsViews.views[0], 'enableEditMode');
+        this.sandbox.stub(paymentMethodsViews.views[1], 'enableEditMode');
+
+        paymentMethodsViews.enableEditMode();
+
+        expect(paymentMethodsViews.views[0].enableEditMode).to.be.calledOnce;
+        expect(paymentMethodsViews.views[1].enableEditMode).to.be.calledOnce;
+      }.bind(this));
+    });
+  });
+
+  describe('disableEditMode', function () {
+    it('calls disableEditMode on each payment method view', function () {
+      var model, paymentMethodsViews;
+      var modelOptions = fake.modelOptions();
+      var element = document.createElement('div');
+
+      element.innerHTML = mainHTML;
+
+      modelOptions.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
+      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      model = fake.model(modelOptions);
+
+      model.getVaultedPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+
+      return model.initialize().then(function () {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            paypal: modelOptions.merchantConfiguration.paypal,
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+
+        this.sandbox.stub(paymentMethodsViews.views[0], 'disableEditMode');
+        this.sandbox.stub(paymentMethodsViews.views[1], 'disableEditMode');
+
+        paymentMethodsViews.disableEditMode();
+
+        expect(paymentMethodsViews.views[0].disableEditMode).to.be.calledOnce;
+        expect(paymentMethodsViews.views[1].disableEditMode).to.be.calledOnce;
+      }.bind(this));
+    });
+  });
+
+  describe('refreshPaymentMethods', function () {
+    beforeEach(function () {
+      var modelOptions = fake.modelOptions();
+      var element = document.createElement('div');
+
+      element.innerHTML = mainHTML;
+
+      modelOptions.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
+      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+
+      this.model = fake.model(modelOptions);
+
+      this.model.getVaultedPaymentMethods.resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'VenmoAccount', details: {email: 'wow@example.com'}}
+      ]);
+
+      return this.model.initialize().then(function () {
+        this.paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: this.model,
+          merchantConfiguration: {
+            paypal: modelOptions.merchantConfiguration.paypal,
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
+        });
+        this.sandbox.stub(this.model, 'getPaymentMethods').returns([
+          {type: 'CreditCard', details: {lastTwo: '11'}},
+          {type: 'VenmoAccount', details: {email: 'wow@example.com'}}
+        ]);
+      }.bind(this));
+    });
+
+    it('removes all payment method views from container', function () {
+      this.sandbox.stub(this.paymentMethodsViews.container, 'removeChild');
+
+      this.paymentMethodsViews.refreshPaymentMethods();
+
+      expect(this.paymentMethodsViews.container.removeChild).to.be.calledThrice;
+    });
+
+    it('calls addPaymentMethod for each payment method on the model', function () {
+      this.sandbox.stub(this.paymentMethodsViews, '_addPaymentMethod');
+
+      this.paymentMethodsViews.refreshPaymentMethods();
+
+      expect(this.paymentMethodsViews._addPaymentMethod).to.be.calledTwice;
     });
   });
 });

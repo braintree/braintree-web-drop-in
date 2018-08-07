@@ -1,5 +1,6 @@
 'use strict';
 
+var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('./lib/event-emitter');
 var constants = require('./constants');
@@ -8,6 +9,7 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var Promise = require('./lib/promise');
 var paymentSheetViews = require('./views/payment-sheet-views');
+var vaultManager = require('braintree-web/vault-manager');
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
   paymentMethodTypes.applePay,
@@ -42,11 +44,22 @@ DropinModel.prototype = Object.create(EventEmitter.prototype, {
 });
 
 DropinModel.prototype.initialize = function () {
-  return getSupportedPaymentOptions(this._options).then(function (paymentOptions) {
-    this.supportedPaymentOptions = paymentOptions;
-    this._paymentMethods = this._getSupportedPaymentMethods(this._options.paymentMethods);
-    this._paymentMethodIsRequestable = this._paymentMethods.length > 0;
-  }.bind(this));
+  var self = this;
+
+  return vaultManager.create({
+    client: self._options.client
+  }).then(function (vaultManagerInstance) {
+    self._vaultManager = vaultManagerInstance;
+
+    return getSupportedPaymentOptions(self._options);
+  }).then(function (paymentOptions) {
+    self.supportedPaymentOptions = paymentOptions;
+
+    return self.getVaultedPaymentMethods();
+  }).then(function (paymentMethods) {
+    self._paymentMethods = paymentMethods;
+    self._paymentMethodIsRequestable = self._paymentMethods.length > 0;
+  });
 };
 
 DropinModel.prototype.isPaymentMethodRequestable = function () {
@@ -92,6 +105,26 @@ DropinModel.prototype.selectPaymentOption = function (paymentViewID) {
   this._emit('paymentOptionSelected', {
     paymentOption: paymentViewID
   });
+};
+
+DropinModel.prototype.enableEditMode = function () {
+  analytics.sendEvent(this._options.client, 'manager.appeared');
+  this._isInEditMode = true;
+  this._emit('enableEditMode');
+};
+
+DropinModel.prototype.disableEditMode = function () {
+  this._isInEditMode = false;
+  this._emit('disableEditMode');
+};
+
+DropinModel.prototype.isInEditMode = function () {
+  return Boolean(this._isInEditMode);
+};
+
+DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {
+  this._paymentMethodWaitingToBeDeleted = paymentMethod;
+  this._emit('confirmPaymentMethodDeletion', paymentMethod);
 };
 
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
@@ -201,6 +234,56 @@ DropinModel.prototype.preventUserAction = function () {
 
 DropinModel.prototype.allowUserAction = function () {
   this._emit('allowUserAction');
+};
+
+DropinModel.prototype.deleteVaultedPaymentMethod = function () {
+  var self = this;
+  var promise = Promise.resolve();
+  var error;
+
+  this._emit('startVaultedPaymentMethodDeletion');
+
+  if (!self.isGuestCheckout) {
+    promise = this._vaultManager.deletePaymentMethod(this._paymentMethodWaitingToBeDeleted.nonce).catch(function (err) {
+      error = err;
+    });
+  }
+
+  return promise.then(function () {
+    delete self._paymentMethodWaitingToBeDeleted;
+
+    return self.getVaultedPaymentMethods();
+  }).then(function (paymentMethods) {
+    self.disableEditMode();
+    self._paymentMethods = paymentMethods;
+    self._emit('finishVaultedPaymentMethodDeletion', error);
+  });
+};
+
+DropinModel.prototype.cancelDeleteVaultedPaymentMethod = function () {
+  this._emit('cancelVaultedPaymentMethodDeletion');
+
+  delete this._paymentMethodWaitingToBeDeleted;
+};
+
+DropinModel.prototype.getVaultedPaymentMethods = function () {
+  var self = this;
+
+  if (self.isGuestCheckout) {
+    return Promise.resolve([]);
+  }
+
+  return self._vaultManager.fetchPaymentMethods({
+    defaultFirst: true
+  }).then(function (paymentMethods) {
+    return self._getSupportedPaymentMethods(paymentMethods).map(function (paymentMethod) {
+      paymentMethod.vaulted = true;
+
+      return paymentMethod;
+    });
+  }).catch(function () {
+    return Promise.resolve([]);
+  });
 };
 
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {

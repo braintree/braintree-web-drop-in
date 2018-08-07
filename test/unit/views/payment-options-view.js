@@ -3,7 +3,6 @@
 var BaseView = require('../../../src/views/base-view');
 var CardView = require('../../../src/views/payment-sheet-views/card-view');
 var PaymentOptionsView = require('../../../src/views/payment-options-view');
-var DropinModel = require('../../../src/dropin-model');
 var strings = require('../../../src/translations/en_US');
 var fake = require('../../helpers/fake');
 var fs = require('fs');
@@ -53,11 +52,7 @@ var paymentOptionAttributes = {
 
 describe('PaymentOptionsView', function () {
   beforeEach(function () {
-    this.client = {
-      getConfiguration: fake.configuration,
-      request: function () {},
-      _request: function () {}
-    };
+    this.client = fake.client();
   });
 
   describe('Constructor', function () {
@@ -189,7 +184,7 @@ describe('PaymentOptionsView', function () {
 });
 
 function modelThatSupports(supportedPaymentOptions) {
-  var result = new DropinModel(fake.modelOptions());
+  var result = fake.model();
 
   result.supportedPaymentOptions = supportedPaymentOptions;
 

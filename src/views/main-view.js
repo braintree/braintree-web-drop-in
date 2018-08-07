@@ -7,10 +7,10 @@ var classlist = require('../lib/classlist');
 var sheetViews = require('./payment-sheet-views');
 var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
+var DeleteConfirmationView = require('./delete-confirmation-view');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var Promise = require('../lib/promise');
 var supportsFlexbox = require('../lib/supports-flexbox');
-var transitionHelper = require('../lib/transition-helper');
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 var DEVELOPER_MISCONFIGURATION_MESSAGE = require('../constants').errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
@@ -28,9 +28,8 @@ MainView.prototype.constructor = MainView;
 
 MainView.prototype._initialize = function () {
   var paymentOptionsView;
-  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
-  var paymentMethods = this.model.getPaymentMethods();
-  var preselectVaultedPaymentMethod = this.model.merchantConfiguration.preselectVaultedPaymentMethod !== false;
+
+  this._hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
 
   this._views = {};
 
@@ -42,7 +41,6 @@ MainView.prototype._initialize = function () {
   this.lowerContainer = this.getElementById('lower-container');
 
   this.loadingContainer = this.getElementById('loading-container');
-  this.loadingIndicator = this.getElementById('loading-indicator');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
 
   this.supportsFlexbox = supportsFlexbox();
@@ -83,6 +81,13 @@ MainView.prototype._initialize = function () {
   });
   this.addView(this.paymentMethodsViews);
 
+  this.deleteConfirmationView = new DeleteConfirmationView({
+    element: this.getElementById('delete-confirmation'),
+    model: this.model,
+    strings: this.strings
+  });
+  this.addView(this.deleteConfirmationView);
+
   addSelectionEventHandler(this.toggle, this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
@@ -120,7 +125,16 @@ MainView.prototype._initialize = function () {
     }
   }.bind(this));
 
-  if (hasMultiplePaymentOptions) {
+  this.model.on('enableEditMode', this.enableEditMode.bind(this));
+
+  this.model.on('disableEditMode', this.disableEditMode.bind(this));
+
+  this.model.on('confirmPaymentMethodDeletion', this.openConfirmPaymentMethodDeletionDialog.bind(this));
+  this.model.on('cancelVaultedPaymentMethodDeletion', this.cancelVaultedPaymentMethodDeletion.bind(this));
+  this.model.on('startVaultedPaymentMethodDeletion', this.startVaultedPaymentMethodDeletion.bind(this));
+  this.model.on('finishVaultedPaymentMethodDeletion', this.finishVaultedPaymentMethodDeletion.bind(this));
+
+  if (this._hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
       client: this.client,
       element: this.getElementById(PaymentOptionsView.ID),
@@ -132,17 +146,7 @@ MainView.prototype._initialize = function () {
     this.addView(paymentOptionsView);
   }
 
-  if (paymentMethods.length > 0) {
-    if (preselectVaultedPaymentMethod) {
-      this.model.changeActivePaymentMethod(paymentMethods[0]);
-    } else {
-      this.setPrimaryView(this.paymentMethodsViews.ID);
-    }
-  } else if (hasMultiplePaymentOptions) {
-    this.setPrimaryView(paymentOptionsView.ID);
-  } else {
-    this.setPrimaryView(this.paymentSheetViewIDs[0]);
-  }
+  this._sendToDefaultView();
 };
 
 MainView.prototype.addView = function (view) {
@@ -211,19 +215,21 @@ MainView.prototype.requestPaymentMethod = function () {
 
 MainView.prototype.hideLoadingIndicator = function () {
   classlist.add(this.dropinContainer, 'braintree-loaded');
-  transitionHelper.onTransitionEnd(this.loadingIndicator, 'transform', function () {
-    this.loadingContainer.parentNode.removeChild(this.loadingContainer);
-  }.bind(this));
+  classlist.add(this.loadingContainer, 'braintree-hidden');
+};
+
+MainView.prototype.showLoadingIndicator = function () {
+  classlist.remove(this.dropinContainer, 'braintree-loaded');
+  classlist.remove(this.loadingContainer, 'braintree-hidden');
 };
 
 MainView.prototype.toggleAdditionalOptions = function () {
   var sheetViewID;
-  var hasMultiplePaymentOptions = this.model.supportedPaymentOptions.length > 1;
   var isPaymentSheetView = this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1;
 
   this.hideToggle();
 
-  if (!hasMultiplePaymentOptions) {
+  if (!this._hasMultiplePaymentOptions) {
     sheetViewID = this.paymentSheetViewIDs[0];
 
     classlist.add(this.element, prefixShowClass(sheetViewID));
@@ -241,6 +247,9 @@ MainView.prototype.toggleAdditionalOptions = function () {
 };
 
 MainView.prototype.showToggle = function () {
+  if (this.model.isInEditMode()) {
+    return;
+  }
   classlist.remove(this.toggle, 'braintree-hidden');
   classlist.add(this.lowerContainer, 'braintree-hidden');
 };
@@ -264,12 +273,12 @@ MainView.prototype.showSheetError = function (error) {
     errorMessage = genericErrorMessage;
   }
 
-  classlist.add(this.sheetContainer, 'braintree-sheet--has-error');
+  classlist.add(this.dropinContainer, 'braintree-sheet--has-error');
   this.sheetErrorText.innerHTML = errorMessage;
 };
 
 MainView.prototype.hideSheetError = function () {
-  classlist.remove(this.sheetContainer, 'braintree-sheet--has-error');
+  classlist.remove(this.dropinContainer, 'braintree-sheet--has-error');
 };
 
 MainView.prototype.getOptionsElements = function () {
@@ -302,6 +311,74 @@ MainView.prototype.teardown = function () {
   });
 };
 
+MainView.prototype.enableEditMode = function () {
+  this.setPrimaryView(this.paymentMethodsViews.ID);
+  this.paymentMethodsViews.enableEditMode();
+  this.hideToggle();
+
+  this.model.setPaymentMethodRequestable({
+    isRequestable: false
+  });
+};
+
+MainView.prototype.disableEditMode = function () {
+  var paymentMethod;
+
+  this.hideSheetError();
+  this.paymentMethodsViews.disableEditMode();
+  this.showToggle();
+
+  paymentMethod = this.primaryView.getPaymentMethod();
+
+  this.model.setPaymentMethodRequestable({
+    isRequestable: Boolean(paymentMethod),
+    type: paymentMethod && paymentMethod.type,
+    selectedPaymentMethod: paymentMethod
+  });
+};
+
+MainView.prototype.openConfirmPaymentMethodDeletionDialog = function (paymentMethod) {
+  this.deleteConfirmationView.applyPaymentMethod(paymentMethod);
+  this.setPrimaryView(this.deleteConfirmationView.ID);
+};
+
+MainView.prototype.cancelVaultedPaymentMethodDeletion = function () {
+  this.setPrimaryView(this.paymentMethodsViews.ID);
+};
+
+MainView.prototype.startVaultedPaymentMethodDeletion = function () {
+  this.element.className = '';
+  this.showLoadingIndicator();
+};
+
+MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
+  this.paymentMethodsViews.refreshPaymentMethods();
+  this.hideLoadingIndicator();
+
+  if (error && this.model.getPaymentMethods().length > 0) {
+    this.model.enableEditMode();
+    this.showSheetError('vaultManagerPaymentMethodDeletionError');
+  } else {
+    this._sendToDefaultView();
+  }
+};
+
+MainView.prototype._sendToDefaultView = function () {
+  var paymentMethods = this.model.getPaymentMethods();
+  var preselectVaultedPaymentMethod = this.model.merchantConfiguration.preselectVaultedPaymentMethod !== false;
+
+  if (paymentMethods.length > 0) {
+    if (preselectVaultedPaymentMethod) {
+      this.model.changeActivePaymentMethod(paymentMethods[0]);
+    } else {
+      this.setPrimaryView(this.paymentMethodsViews.ID);
+    }
+  } else if (this._hasMultiplePaymentOptions) {
+    this.setPrimaryView(PaymentOptionsView.ID);
+  } else {
+    this.setPrimaryView(this.paymentSheetViewIDs[0]);
+  }
+};
 function snakeCaseToCamelCase(s) {
   return s.toLowerCase().replace(/(\_\w)/g, function (m) {
     return m[1].toUpperCase();

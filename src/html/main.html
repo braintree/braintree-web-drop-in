@@ -1,5 +1,6 @@
 <div class="braintree-dropin">
   <div data-braintree-id="methods-label" class="braintree-heading">&nbsp;</div>
+  <div data-braintree-id="methods-edit" class="braintree-hidden braintree-heading">{{edit}}</div>
   <div data-braintree-id="choose-a-way-to-pay" class="braintree-heading">{{chooseAWayToPay}}</div>
   <div class="braintree-placeholder">&nbsp;</div>
 
@@ -9,6 +10,14 @@
         <svg width="14" height="16" class="braintree-loader__lock">
           <use xlink:href="#iconLockLoader"></use>
         </svg>
+      </div>
+    </div>
+
+    <div data-braintree-id="delete-confirmation" class="braintree-delete-confirmation braintree-sheet">
+      <div data-braintree-id="delete-confirmation__message"></div>
+      <div class="braintree-delete-confirmation__button-container">
+        <div role="button" data-braintree-id="delete-confirmation__no" class="braintree-delete-confirmation__button">{{deleteCancelButton}}</div>
+        <div role="button" data-braintree-id="delete-confirmation__yes" class="braintree-delete-confirmation__button">{{deleteConfirmationButton}}</div>
       </div>
     </div>
 
@@ -230,7 +239,7 @@
     <div data-braintree-id="other-ways-to-pay" class="braintree-heading">{{otherWaysToPay}}</div>
   </div>
 
-  <div data-braintree-id="toggle" class="braintree-toggle braintree-hidden" tabindex="0">
+  <div data-braintree-id="toggle" class="braintree-large-button braintree-toggle braintree-hidden" tabindex="0">
     <span>{{chooseAnotherWayToPay}}</span>
   </div>
 </div>

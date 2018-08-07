@@ -10,11 +10,11 @@ var hostedFields = require('braintree-web/hosted-fields');
 var paypalCheckout = require('braintree-web/paypal-checkout');
 var threeDSecure = require('braintree-web/three-d-secure');
 var ThreeDSecure = require('../../src/lib/three-d-secure');
+var vaultManager = require('braintree-web/vault-manager');
 var DataCollector = require('../../src/lib/data-collector');
 var Promise = require('../../src/lib/promise');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
 var constants = require('../../src/constants');
-var braintreeWebVersion = require('../../package.json').dependencies['braintree-web'];
 
 function delay(amount) {
   amount = amount || 100;
@@ -28,12 +28,11 @@ function delay(amount) {
 
 describe('Dropin', function () {
   beforeEach(function () {
-    this.client = {
-      request: this.sandbox.stub(),
-      _request: this.sandbox.stub(),
-      getConfiguration: fake.configuration,
-      getVersion: function () { return braintreeWebVersion; }
+    this.client = fake.client();
+    this.vaultManager = {
+      fetchPaymentMethods: this.sandbox.stub().resolves([])
     };
+    this.sandbox.stub(vaultManager, 'create').resolves(this.vaultManager);
 
     this.container = document.createElement('div');
     this.container.id = 'foo';
@@ -346,42 +345,30 @@ describe('Dropin', function () {
 
     it('requests payment methods if a customerId is provided', function (done) {
       var instance;
-      var paymentMethodsPayload = {paymentMethods: []};
 
-      this.client.getConfiguration = function () {
-        return {
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        };
-      };
-      this.client.request.resolves(paymentMethodsPayload);
+      this.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
 
-      this.sandbox.stub(analytics, 'sendEvent');
+      this.vaultManager.fetchPaymentMethods.resolves([]);
 
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
-        expect(this.client.request).to.have.been.calledOnce;
-        expect(this.client.request).to.have.been.calledWith(this.sandbox.match({
-          endpoint: 'payment_methods',
-          method: 'get',
-          data: {
-            defaultFirst: 1
-          }
-        }));
-
-        done();
-      }.bind(this));
-    });
-
-    it('does not request payment methods if a customerId is not provided', function (done) {
-      var instance = new Dropin(this.dropinOptions);
-
-      this.sandbox.stub(analytics, 'sendEvent');
-
-      instance._initialize(function () {
-        expect(this.client.request).to.not.have.been.calledWith(this.sandbox.match({endpoint: 'payment_methods'}));
+        try {
+          expect(vaultManager.create).to.be.calledOnce;
+          expect(vaultManager.create).to.be.calledWith({
+            client: this.client
+          });
+          expect(this.vaultManager.fetchPaymentMethods).to.have.been.calledOnce;
+          expect(this.vaultManager.fetchPaymentMethods).to.have.been.calledWith(this.sandbox.match({
+            defaultFirst: true
+          }));
+        } catch (e) {
+          done(e);
+        }
 
         done();
       }.bind(this));
@@ -390,13 +377,11 @@ describe('Dropin', function () {
     it('does not fail if there is an error getting existing payment methods', function (done) {
       var instance;
 
-      this.client.getConfiguration = function () {
-        return {
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        };
-      };
+      this.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
       this.client.request.rejects(new Error('This failed'));
 
       this.sandbox.stub(analytics, 'sendEvent');
@@ -411,52 +396,15 @@ describe('Dropin', function () {
       });
     });
 
-    it('formats existing payment method payload', function (done) {
-      var instance;
-      var fakePaymentMethod = {
-        nonce: 'nonce',
-        details: {lastTwo: '11'},
-        type: 'CreditCard',
-        garbage: 'garbage'
-      };
-      var paymentMethodsPayload = {paymentMethods: [fakePaymentMethod]};
-
-      this.client.getConfiguration = function () {
-        return {
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        };
-      };
-      this.client.request.resolves(paymentMethodsPayload);
-
-      this.sandbox.stub(analytics, 'sendEvent');
-
-      instance = new Dropin(this.dropinOptions);
-
-      instance._initialize(function () {
-        var existingPaymentMethod = instance._model.getPaymentMethods()[0];
-
-        expect(existingPaymentMethod.nonce).to.equal('nonce');
-        expect(existingPaymentMethod.details).to.deep.equal({lastTwo: '11'});
-        expect(existingPaymentMethod.type).to.equal('CreditCard');
-        expect(existingPaymentMethod.vaulted).to.equal(true);
-        expect(existingPaymentMethod.garbage).to.not.exist;
-        done();
-      });
-    });
-
     it('creates a MainView a customerId exists', function (done) {
       var instance;
       var paymentMethodsPayload = {paymentMethods: []};
 
-      this.client.getConfiguration = function () {
-        return {
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        };
-      };
+      this.client.getConfiguration.returns({
+        authorization: fake.clientTokenWithCustomerID,
+        authorizationType: 'CLIENT_TOKEN',
+        gatewayConfiguration: fake.configuration().gatewayConfiguration
+      });
       this.client.request.resolves(paymentMethodsPayload);
 
       this.sandbox.stub(analytics, 'sendEvent');
@@ -735,7 +683,7 @@ describe('Dropin', function () {
 
   describe('_setUpDataCollector', function () {
     beforeEach(function () {
-      this.model = new DropinModel({
+      this.model = fake.model({
         componentID: 'foo',
         client: this.client,
         merchantConfiguration: {
@@ -812,7 +760,7 @@ describe('Dropin', function () {
 
   describe('_setUpThreeDSecure', function () {
     beforeEach(function () {
-      this.model = new DropinModel({
+      this.model = fake.model({
         componentID: 'foo',
         client: this.client,
         merchantConfiguration: {
