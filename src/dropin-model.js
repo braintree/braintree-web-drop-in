@@ -83,6 +83,16 @@ DropinModel.prototype.removePaymentMethod = function (paymentMethod) {
   this._emit('removePaymentMethod', paymentMethod);
 };
 
+DropinModel.prototype.refreshPaymentMethods = function () {
+  var self = this;
+
+  return self.getVaultedPaymentMethods().then(function (paymentMethods) {
+    self._paymentMethods = paymentMethods;
+
+    self._emit('refreshPaymentMethods');
+  });
+};
+
 DropinModel.prototype.changeActivePaymentMethod = function (paymentMethod) {
   this._activePaymentMethod = paymentMethod;
   this._emit('changeActivePaymentMethod', paymentMethod);
@@ -252,10 +262,9 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
   return promise.then(function () {
     delete self._paymentMethodWaitingToBeDeleted;
 
-    return self.getVaultedPaymentMethods();
-  }).then(function (paymentMethods) {
+    return self.refreshPaymentMethods();
+  }).then(function () {
     self.disableEditMode();
-    self._paymentMethods = paymentMethods;
     self._emit('finishVaultedPaymentMethodDeletion', error);
   });
 };
