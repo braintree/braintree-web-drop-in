@@ -421,10 +421,20 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
  */
 Dropin.prototype.clearSelectedPaymentMethod = function () {
   this._removeUnvaultedPaymentMethods();
-
-  this._navigateToInitialView();
-
   this._model.removeActivePaymentMethod();
+
+  if (this._model.getPaymentMethods().length === 0) {
+    this._navigateToInitialView();
+
+    return;
+  }
+
+  this._mainView.showLoadingIndicator();
+
+  this._model.refreshPaymentMethods().then(function () {
+    this._navigateToInitialView();
+    this._mainView.hideLoadingIndicator();
+  }.bind(this));
 };
 
 Dropin.prototype._setUpDataCollector = function () {

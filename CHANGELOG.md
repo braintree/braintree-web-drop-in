@@ -7,6 +7,7 @@ unreleased
 - Fix slight HTML error for the expiration date field
 - Fix issue where Drop-in could not load in IE9 and 10
 - Add feature where payment methods can be deleted from Drop-in
+- Fix issue where consumed payment methods could not be cleared in 3ds flow (closes #408)
 
 1.11.0
 ------
