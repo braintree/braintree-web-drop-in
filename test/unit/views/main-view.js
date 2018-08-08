@@ -1354,20 +1354,28 @@ describe('MainView', function () {
       }.bind(this));
     });
 
-    it('calls hideLoadingIndicator', function () {
+    it('refreshes payment methods view', function () {
+      this.sandbox.stub(this.mainView.paymentMethodsViews, 'refreshPaymentMethods');
+
+      return this.mainView.finishVaultedPaymentMethodDeletion().then(function () {
+        expect(this.mainView.paymentMethodsViews.refreshPaymentMethods).to.be.calledOnce;
+      }.bind(this));
+    });
+
+    it('calls hideLoadingIndicator after half a second', function () {
       this.sandbox.stub(this.mainView, 'hideLoadingIndicator');
 
-      this.mainView.finishVaultedPaymentMethodDeletion();
-
-      expect(this.mainView.hideLoadingIndicator).to.be.calledOnce;
+      return this.mainView.finishVaultedPaymentMethodDeletion().then(function () {
+        expect(this.mainView.hideLoadingIndicator).to.be.calledOnce;
+      }.bind(this));
     });
 
     it('sends customer back to their initial view', function () {
       this.sandbox.stub(this.mainView, '_sendToDefaultView');
 
-      this.mainView.finishVaultedPaymentMethodDeletion();
-
-      expect(this.mainView._sendToDefaultView).to.be.calledOnce;
+      return this.mainView.finishVaultedPaymentMethodDeletion().then(function () {
+        expect(this.mainView._sendToDefaultView).to.be.calledOnce;
+      }.bind(this));
     });
 
     it('re-enables edit mode when it errors', function () {
@@ -1380,9 +1388,9 @@ describe('MainView', function () {
       this.sandbox.stub(this.mainView.model, 'enableEditMode');
       this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([fakePaymentMethod]);
 
-      this.mainView.finishVaultedPaymentMethodDeletion(err);
-
-      expect(this.mainView.model.enableEditMode).to.be.calledOnce;
+      return this.mainView.finishVaultedPaymentMethodDeletion(err).then(function () {
+        expect(this.mainView.model.enableEditMode).to.be.calledOnce;
+      }.bind(this));
     });
 
     it('shows sheet error when it errors', function () {
@@ -1395,9 +1403,9 @@ describe('MainView', function () {
       this.sandbox.stub(this.mainView, 'showSheetError');
       this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([fakePaymentMethod]);
 
-      this.mainView.finishVaultedPaymentMethodDeletion(err);
-
-      expect(this.mainView.showSheetError).to.be.calledOnce;
+      return this.mainView.finishVaultedPaymentMethodDeletion(err).then(function () {
+        expect(this.mainView.showSheetError).to.be.calledOnce;
+      }.bind(this));
     });
 
     it('sends customer back to their initial view if erros but there are no saved payment methods', function () {
@@ -1406,9 +1414,9 @@ describe('MainView', function () {
       this.sandbox.stub(this.mainView, '_sendToDefaultView');
       this.sandbox.stub(this.mainView.model, 'getPaymentMethods').returns([]);
 
-      this.mainView.finishVaultedPaymentMethodDeletion(err);
-
-      expect(this.mainView._sendToDefaultView).to.be.calledOnce;
+      return this.mainView.finishVaultedPaymentMethodDeletion(err).then(function () {
+        expect(this.mainView._sendToDefaultView).to.be.calledOnce;
+      }.bind(this));
     });
   });
 });
