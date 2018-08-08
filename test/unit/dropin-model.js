@@ -415,6 +415,36 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('refreshPaymentMethods', function () {
+    beforeEach(function () {
+      this.model = new DropinModel(this.modelOptions);
+      this.fakeMethod = {type: 'CreditCard', nonce: 'a-nonce'};
+      this.sandbox.stub(this.model, 'getVaultedPaymentMethods').resolves([this.fakeMethod]);
+      this.sandbox.stub(this.model, '_emit');
+    });
+
+    it('calls out to get vaulted payment methods', function () {
+      return this.model.refreshPaymentMethods().then(function () {
+        expect(this.model.getVaultedPaymentMethods).to.be.calledOnce;
+      }.bind(this));
+    });
+
+    it('replaces payment methods on model', function () {
+      this.model._paymentMethods = [{type: 'foo'}];
+
+      return this.model.refreshPaymentMethods().then(function () {
+        expect(this.model.getPaymentMethods()).to.deep.equal([this.fakeMethod]);
+      }.bind(this));
+    });
+
+    it('remits refresh event', function () {
+      return this.model.refreshPaymentMethods().then(function () {
+        expect(this.model._emit).to.be.calledOnce;
+        expect(this.model._emit).to.be.calledWith('refreshPaymentMethods');
+      }.bind(this));
+    });
+  });
+
   describe('changeActivePaymentMethod', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);

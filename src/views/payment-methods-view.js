@@ -34,6 +34,7 @@ PaymentMethodsView.prototype._initialize = function () {
 
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
+  this.model.on('refreshPaymentMethods', this.refreshPaymentMethods.bind(this));
 
   this.refreshPaymentMethods();
 

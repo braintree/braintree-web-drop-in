@@ -1636,7 +1636,7 @@ describe('Dropin', function () {
   });
 
   describe('clearSelectedPaymentMethod', function () {
-    it('removes saved payment methods if they are not vaulted', function () {
+    it('refreshes saved payment methods', function () {
       var instance = new Dropin(this.dropinOptions);
       var getViewStub = this.sandbox.stub();
       var fakeMethodsView = {
@@ -1647,6 +1647,8 @@ describe('Dropin', function () {
 
       instance._mainView = {
         getView: getViewStub,
+        showLoadingIndicator: this.sandbox.stub(),
+        hideLoadingIndicator: this.sandbox.stub(),
         primaryView: {
           ID: 'view'
         }
@@ -1659,6 +1661,7 @@ describe('Dropin', function () {
           {nonce: '4', type: 'PayPalAccount'},
           {nonce: '5', type: 'PayPalAccount', vaulted: true}
         ]),
+        refreshPaymentMethods: this.sandbox.stub().resolves(),
         removeActivePaymentMethod: this.sandbox.stub(),
         removePaymentMethod: this.sandbox.stub()
       };
@@ -1667,9 +1670,7 @@ describe('Dropin', function () {
 
       instance.clearSelectedPaymentMethod();
 
-      expect(instance._model.removePaymentMethod).to.be.calledTwice;
-      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '3', type: 'CreditCard'});
-      expect(instance._model.removePaymentMethod).to.be.calledWith({nonce: '4', type: 'PayPalAccount'});
+      expect(instance._model.refreshPaymentMethods).to.be.calledOnce;
     });
 
     it('does not call removePaymentMethod if no non-vaulted paypal accounts are avaialble', function () {
@@ -1683,11 +1684,14 @@ describe('Dropin', function () {
 
       instance._mainView = {
         getView: getViewStub,
+        showLoadingIndicator: this.sandbox.stub(),
+        hideLoadingIndicator: this.sandbox.stub(),
         primaryView: {
           ID: 'view'
         }
       };
       instance._model = {
+        refreshPaymentMethods: this.sandbox.stub().resolves(),
         getPaymentMethods: this.sandbox.stub().returns([
           {nonce: '1', type: 'PayPalAccount', vaulted: true},
           {nonce: '2', type: 'CreditCard', vaulted: true},
@@ -1715,12 +1719,15 @@ describe('Dropin', function () {
 
       instance._mainView = {
         getView: getViewStub,
+        showLoadingIndicator: this.sandbox.stub(),
+        hideLoadingIndicator: this.sandbox.stub(),
         primaryView: {
           ID: 'methods'
         },
         setPrimaryView: this.sandbox.stub()
       };
       instance._model = {
+        refreshPaymentMethods: this.sandbox.stub().resolves(),
         getPaymentMethods: this.sandbox.stub().returns([]),
         removeActivePaymentMethod: this.sandbox.stub(),
         supportedPaymentOptions: ['paypal', 'card'],
@@ -1746,12 +1753,15 @@ describe('Dropin', function () {
 
       instance._mainView = {
         getView: getViewStub,
+        showLoadingIndicator: this.sandbox.stub(),
+        hideLoadingIndicator: this.sandbox.stub(),
         primaryView: {
           ID: 'methods'
         },
         setPrimaryView: this.sandbox.stub()
       };
       instance._model = {
+        refreshPaymentMethods: this.sandbox.stub().resolves(),
         getPaymentMethods: this.sandbox.stub().returns([]),
         removeActivePaymentMethod: this.sandbox.stub(),
         supportedPaymentOptions: ['paypal'],
@@ -1777,12 +1787,15 @@ describe('Dropin', function () {
 
       instance._mainView = {
         getView: getViewStub,
+        showLoadingIndicator: this.sandbox.stub(),
+        hideLoadingIndicator: this.sandbox.stub(),
         primaryView: {
           ID: 'any-id-but-methods'
         },
         setPrimaryView: this.sandbox.stub()
       };
       instance._model = {
+        refreshPaymentMethods: this.sandbox.stub().resolves(),
         getPaymentMethods: this.sandbox.stub().returns([]),
         removeActivePaymentMethod: this.sandbox.stub(),
         removePaymentMethod: this.sandbox.stub()
@@ -1806,12 +1819,15 @@ describe('Dropin', function () {
 
       instance._mainView = {
         getView: getViewStub,
+        showLoadingIndicator: this.sandbox.stub(),
+        hideLoadingIndicator: this.sandbox.stub(),
         primaryView: {
           ID: 'methods'
         },
         setPrimaryView: this.sandbox.stub()
       };
       instance._model = {
+        refreshPaymentMethods: this.sandbox.stub().resolves(),
         getPaymentMethods: this.sandbox.stub().returns([
           {nonce: '1', type: 'CreditCard'}
         ]),
@@ -1836,6 +1852,8 @@ describe('Dropin', function () {
       };
 
       instance._mainView = {
+        showLoadingIndicator: this.sandbox.stub(),
+        hideLoadingIndicator: this.sandbox.stub(),
         getView: getViewStub,
         primaryView: {
           ID: 'methods'
@@ -1843,6 +1861,7 @@ describe('Dropin', function () {
         setPrimaryView: this.sandbox.stub()
       };
       instance._model = {
+        refreshPaymentMethods: this.sandbox.stub().resolves(),
         getPaymentMethods: this.sandbox.stub().returns([
           {nonce: '1', type: 'CreditCard'}
         ]),
