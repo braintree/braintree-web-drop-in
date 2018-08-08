@@ -77,7 +77,7 @@ PaymentMethodsView.prototype._getPaymentMethodString = function () {
 PaymentMethodsView.prototype.enableEditMode = function () {
   classlist.add(this.container, 'braintree-methods--edit');
 
-  this._editButton.innerHTML = this.strings.doneEditing;
+  this._editButton.innerHTML = this.strings.deleteCancelButton;
   this._headingLabel.innerHTML = this.strings.editPaymentMethods;
 
   this.views.forEach(function (view) {

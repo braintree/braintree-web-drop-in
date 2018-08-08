@@ -352,8 +352,9 @@ MainView.prototype.startVaultedPaymentMethodDeletion = function () {
 };
 
 MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
+  var self = this;
+
   this.paymentMethodsViews.refreshPaymentMethods();
-  this.hideLoadingIndicator();
 
   if (error && this.model.getPaymentMethods().length > 0) {
     this.model.enableEditMode();
@@ -361,6 +362,14 @@ MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
   } else {
     this._sendToDefaultView();
   }
+
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      // allow all the views to reset before hiding the loading indicator
+      self.hideLoadingIndicator();
+      resolve();
+    }, 500);
+  });
 };
 
 MainView.prototype._sendToDefaultView = function () {
