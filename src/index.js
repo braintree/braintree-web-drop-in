@@ -451,6 +451,27 @@ var VERSION = process.env.npm_package_version;
  * }, callback);
  *
  * @example
+ * <caption>Mask Card Inputs</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container',
+ *   card: {
+ *     overrides: {
+ *       fields: {
+ *         number: {
+ *           maskInput: {
+ *             showLastFour: true
+ *           }
+ *         },
+ *         cvv: {
+ *           maskInput: true
+ *         }
+ *       }
+ *     }
+ *   }
+ * }, callback);
+ *
+ * @example
  * <caption>Including a cardholder name field</caption>
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
