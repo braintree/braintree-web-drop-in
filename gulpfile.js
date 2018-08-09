@@ -125,6 +125,7 @@ gulp.task('build:npm:package.json', function (done) {
 
   delete pkg.browserify;
   pkg.main = 'index.js';
+  pkg.browser = './dist/browser/dropin.js';
 
   mkdirp.sync(NPM_PATH);
 
@@ -141,11 +142,23 @@ gulp.task('build:npm:src', function () {
   .pipe(gulp.dest(NPM_PATH));
 });
 
+gulp.task('build:npm:browser', function () {
+  var browserPath = NPM_PATH + '/dist/browser/';
+
+  mkdirp.sync(browserPath);
+
+  return gulp.src([
+    'dist/web/dropin/' + VERSION + '/js/dropin.js'
+  ])
+  .pipe(gulp.dest(browserPath));
+});
+
 gulp.task('build:npm', [
   'build:npm:css',
   'build:npm:statics',
   'build:npm:package.json',
-  'build:npm:src'
+  'build:npm:src',
+  'build:npm:browser'
 ]);
 
 gulp.task('clean', function () {
@@ -157,7 +170,8 @@ gulp.task('build', function (done) {
 
   runSequence(
   'clean',
-  ['build:js', 'build:css', 'build:gh-pages', 'build:npm'],
+  ['build:js', 'build:css', 'build:gh-pages'],
+  'build:npm',
   'build:link-latest',
   done);
 });

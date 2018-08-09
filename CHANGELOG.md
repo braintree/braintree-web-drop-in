@@ -3,6 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
+- Update braintree-web to v3.36.0
+- Provide browserified version of Drop-in on npm at `dist/browser/dropin.js`
 - Fix issue where sass compliation would prevent styling of ApplePay button
 - Fix slight HTML error for the expiration date field
 - Fix issue where Drop-in could not load in IE9 and 10
