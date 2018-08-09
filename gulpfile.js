@@ -124,6 +124,7 @@ gulp.task('build:npm:package.json', function (done) {
   var pkg = Object.assign({}, require('./package.json'));
 
   delete pkg.browserify;
+  delete pkg.private;
   pkg.main = 'index.js';
   pkg.browser = './dist/browser/dropin.js';
 
