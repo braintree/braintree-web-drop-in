@@ -109,7 +109,6 @@ gulp.task('build:link-latest', function (done) {
 
 gulp.task('build:npm:statics', function () {
   return gulp.src([
-    './.gitignore',
     './CHANGELOG.md',
     './LICENSE',
     './README.md'
