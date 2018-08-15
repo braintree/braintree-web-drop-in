@@ -1142,14 +1142,29 @@ describe('Dropin', function () {
   describe('updateConfiguration', function () {
     it('does not update if a non-editiable prop is used', function () {
       var instance = new Dropin(this.dropinOptions);
+      var fakePayPalView = {
+        updateConfiguration: this.sandbox.stub()
+      };
 
       instance._mainView = {
-        getView: this.sandbox.stub()
+        getView: this.sandbox.stub().returns(fakePayPalView)
       };
 
       instance.updateConfiguration('card', 'foo', 'bar');
 
       expect(instance._mainView.getView).to.not.be.called;
+    });
+
+    it('does not update if view is not set up', function () {
+      var instance = new Dropin(this.dropinOptions);
+
+      instance._mainView = {
+        getView: this.sandbox.stub().returns(null)
+      };
+
+      expect(function () {
+        instance.updateConfiguration('paypal', 'foo', 'bar');
+      }).to.not.throw();
     });
 
     it('updates if view is paypal', function () {
