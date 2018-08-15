@@ -383,6 +383,10 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
     return;
   }
 
+  if (this._mainView.getView(property) === undefined) {
+    return;
+  }
+
   this._mainView.getView(property).updateConfiguration(key, value);
 
   if (UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED.indexOf(property) === -1) {
