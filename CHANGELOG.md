@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Provide browserified version of Drop-in on npm at `dist/browser/dropin.js`
+- Added Greek translation at `src/translations/el_GR.js`
 
 1.12.0
 ------
