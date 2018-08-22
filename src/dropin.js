@@ -371,6 +371,8 @@ Dropin.prototype._initialize = function (callback) {
  * dropinInstance.updateConfiguration('paypal', 'amount', '10.00');
  */
 Dropin.prototype.updateConfiguration = function (property, key, value) {
+  var view = this._mainView.getView(property);
+
   if (UPDATABLE_CONFIGURATION_OPTIONS.indexOf(property) === -1) {
     return;
   }
@@ -382,8 +384,6 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
 
     return;
   }
-
-  var view = this._mainView.getView(property);
 
   if (!view) {
     return;
