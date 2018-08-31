@@ -658,7 +658,7 @@ $loader-scale-duration: 300ms;
           border-color: $black-40;
         }
 
-        input {
+        input.braintree-form__raw-input {
           border:none;
           background-image:none;
           background-color:transparent;
