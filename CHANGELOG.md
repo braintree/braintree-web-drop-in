@@ -5,7 +5,7 @@ unreleased
 ----------
 - Provide browserified version of Drop-in on npm at `dist/browser/dropin.js`
 - Fix issue where Drop-in would throw an error when updating not presented payment method
-- Fix issue the keyboard could get stuck when entering card details (#419)
+- Fix issue where the keyboard could get stuck when entering card details on iOS (#419)
 
 1.12.0
 ------
