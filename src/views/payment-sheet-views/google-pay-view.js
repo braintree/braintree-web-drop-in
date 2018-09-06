@@ -28,17 +28,21 @@ GooglePayView.prototype.initialize = function () {
     self.googlePayInstance = googlePayInstance;
     self.paymentsClient = createPaymentsClient(self.client);
   }).then(function () {
-    var buttonDiv = self.getElementById('google-pay-button');
+    var buttonContainer = self.getElementById('google-pay-button');
 
-    buttonDiv.addEventListener('click', function (event) {
-      event.preventDefault();
+    buttonContainer.appendChild(self.paymentsClient.createButton({
+      buttonType: 'short',
+      onClick: function (event) {
+        event.preventDefault();
 
-      self.preventUserAction();
+        self.preventUserAction();
 
-      self.tokenize().then(function () {
-        self.allowUserAction();
-      });
-    });
+        self.tokenize().then(function () {
+          self.allowUserAction();
+        });
+      }
+    }));
+
     self.model.asyncDependencyReady();
   }).catch(function (err) {
     self.model.asyncDependencyFailed({

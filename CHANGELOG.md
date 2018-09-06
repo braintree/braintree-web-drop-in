@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Change Google Pay button to black style to better match [Google's brand guidelines](https://developers.google.com/pay/api/web/guides/brand-guidelines)
+
 1.13.0
 ------
 - Provide browserified version of Drop-in on npm at `dist/browser/dropin.js`
