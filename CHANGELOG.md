@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Change Google Pay button to black style to better match [Google's brand guidelines](https://developers.google.com/pay/api/web/guides/brand-guidelines)
+- Allow passing in [button options](https://developers.google.com/pay/api/web/reference/object#ButtonOptions) to Google Pay configuration
 
 1.13.0
 ------

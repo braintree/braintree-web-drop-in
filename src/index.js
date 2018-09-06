@@ -157,6 +157,7 @@ var VERSION = process.env.npm_package_version;
  *
  * @param {string} merchantId The ID provided by Google for processing transactions in production. Not necessary for testing in sandbox.
  * @param {external:GooglePayTransactionInfo} transactionInfo The transaction details necessary for processing the payment.
+ * @param {external:GooglePayButtonOptions} [button] The button options for configuring the look of the Google Pay button. The `onClick` property cannot be overwritten.
  */
 
 /**
@@ -169,6 +170,12 @@ var VERSION = process.env.npm_package_version;
  * @typedef {object} GooglePayTransactionInfo A [Google Pay TransactionInfo object](https://developers.google.com/pay/api/web/object-reference#TransactionInfo).
  * @external GooglePayTransactionInfo
  * @see {@link https://developers.google.com/pay/api/web/object-reference#TransactionInfo TransactionInfo}
+ */
+
+/**
+ * @typedef {object} GooglePayButtonOptions A [Google Pay ButtonOptions object](https://developers.google.com/pay/api/web/reference/object#ButtonOptions).
+ * @external GooglePayButtonOptions
+ * @see {@link https://developers.google.com/pay/api/web/reference/object#ButtonOptions ButtonOptions}
  */
 
 /** @typedef {object|boolean} venmoCreateOptions The configuration options for Venmo. If `true` is passed instead of a configuration object, the default settings listed will be used.

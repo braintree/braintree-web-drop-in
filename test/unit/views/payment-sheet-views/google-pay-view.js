@@ -193,6 +193,46 @@ describe('GooglePayView', function () {
         expect(this.view.tokenize).to.be.calledOnce;
       }.bind(this));
     });
+
+    it('can initialize buttons with custom settings', function () {
+      this.model.merchantConfiguration.googlePay.button = {
+        buttonType: 'long',
+        buttonColor: 'white'
+      };
+
+      return this.view.initialize().then(function () {
+        expect(this.FakePaymentClient.prototype.createButton).to.be.calledOnce;
+        expect(this.FakePaymentClient.prototype.createButton).to.be.calledWith({
+          buttonType: 'long',
+          buttonColor: 'white',
+          onClick: this.sandbox.match.func
+        });
+      }.bind(this));
+    });
+
+    it('cannot override onClick function for button', function () {
+      this.model.merchantConfiguration.googlePay.button = {
+        onClick: function () {
+          throw new Error('Should never call this error');
+        }
+      };
+      this.sandbox.stub(this.view, 'tokenize').resolves();
+
+      return this.view.initialize().then(function () {
+        var handler = this.FakePaymentClient.prototype.createButton.getCall(0).args[0].onClick;
+
+        expect(this.FakePaymentClient.prototype.createButton).to.be.calledOnce;
+        expect(this.FakePaymentClient.prototype.createButton).to.be.calledWith({
+          buttonType: 'short',
+          onClick: this.sandbox.match.func
+        });
+
+        expect(function () {
+          handler({preventDefault: this.sandbox.stub()});
+          expect(this.view.tokenize).to.be.calledOnce;
+        }.bind(this)).to.not.throw();
+      }.bind(this));
+    });
   });
 
   describe('tokenize', function () {

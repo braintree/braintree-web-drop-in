@@ -19,8 +19,23 @@ GooglePayView.ID = GooglePayView.prototype.ID = constants.paymentOptionIDs.googl
 
 GooglePayView.prototype.initialize = function () {
   var self = this;
+  var buttonOptions;
 
   self.googlePayConfiguration = assign({}, self.model.merchantConfiguration.googlePay);
+
+  buttonOptions = assign({
+    buttonType: 'short'
+  }, self.googlePayConfiguration.button, {
+    onClick: function (event) {
+      event.preventDefault();
+
+      self.preventUserAction();
+
+      self.tokenize().then(function () {
+        self.allowUserAction();
+      });
+    }
+  });
 
   self.model.asyncDependencyStarting();
 
@@ -30,18 +45,7 @@ GooglePayView.prototype.initialize = function () {
   }).then(function () {
     var buttonContainer = self.getElementById('google-pay-button');
 
-    buttonContainer.appendChild(self.paymentsClient.createButton({
-      buttonType: 'short',
-      onClick: function (event) {
-        event.preventDefault();
-
-        self.preventUserAction();
-
-        self.tokenize().then(function () {
-          self.allowUserAction();
-        });
-      }
-    }));
+    buttonContainer.appendChild(self.paymentsClient.createButton(buttonOptions));
 
     self.model.asyncDependencyReady();
   }).catch(function (err) {
