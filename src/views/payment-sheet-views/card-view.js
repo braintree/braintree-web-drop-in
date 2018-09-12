@@ -394,13 +394,13 @@ CardView.prototype.tokenize = function () {
           resolve(payload);
           classlist.remove(self.element, 'braintree-sheet--tokenized');
         }, 0);
-        self._isTokenizing = false;
       };
 
       transitionHelper.onTransitionEnd(self.element, 'max-height', transitionCallback);
 
       setTimeout(function () {
         self.allowUserAction();
+        self._isTokenizing = false;
       }, constants.CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
 
       classlist.add(self.element, 'braintree-sheet--tokenized');
