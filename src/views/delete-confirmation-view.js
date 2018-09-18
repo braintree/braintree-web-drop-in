@@ -36,6 +36,7 @@ DeleteConfirmationView.prototype.applyPaymentMethod = function (paymentMethod) {
       case paymentMethodTypes.card:
         identifier = paymentMethod.details.lastFour;
         secondaryIdentifier = paymentMethod.details.cardType;
+        secondaryIdentifier = this.strings[secondaryIdentifier] || secondaryIdentifier;
         break;
       case paymentMethodTypes.paypal:
         identifier = paymentMethod.details.email;
