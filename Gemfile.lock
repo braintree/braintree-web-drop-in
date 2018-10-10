@@ -55,7 +55,7 @@ GEM
     rspec-retry (0.4.5)
       rspec-core
     rspec-support (3.4.1)
-    rubyzip (1.2.1)
+    rubyzip (1.2.2)
     sauce (3.5.11)
       childprocess (>= 0.1.6)
       cmdparse (>= 2.0.2)
