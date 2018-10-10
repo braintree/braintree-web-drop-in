@@ -7,6 +7,7 @@ unreleased
 - Allow passing in [button options](https://developers.google.com/pay/api/web/reference/object#ButtonOptions) to Google Pay configuration
 - Fix issue where Drop-in would emit `noPaymentMethodRequestable` and `paymentMethodRequestable` right after tokenization
 - Fix issue where Mastercard was styled as MasterCard in vault manager view
+- Update braintree-web to v3.38.1
 
 1.13.0
 ------
