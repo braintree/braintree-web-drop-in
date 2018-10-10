@@ -8,6 +8,7 @@ unreleased
 - Fix issue where Drop-in would emit `noPaymentMethodRequestable` and `paymentMethodRequestable` right after tokenization
 - Fix issue where Mastercard was styled as MasterCard in vault manager view
 - Update braintree-web to v3.38.1
+- Fix issue where PayPal email addresses may overflow the container
 
 1.13.0
 ------
