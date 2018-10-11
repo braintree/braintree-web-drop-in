@@ -3,8 +3,19 @@ CHANGELOG
 
 unreleased
 ----------
+- Change Google Pay button to black style to better match [Google's brand guidelines](https://developers.google.com/pay/api/web/guides/brand-guidelines)
+- Allow passing in [button options](https://developers.google.com/pay/api/web/reference/object#ButtonOptions) to Google Pay configuration
+- Fix issue where Drop-in would emit `noPaymentMethodRequestable` and `paymentMethodRequestable` right after tokenization
+- Fix issue where Mastercard was styled as MasterCard in vault manager view
+- Update braintree-web to v3.38.1
+- Fix issue where PayPal email addresses may overflow the container
+
+1.13.0
+------
 - Provide browserified version of Drop-in on npm at `dist/browser/dropin.js`
 - Fix issue where Drop-in would throw an error when updating not presented payment method
+- Fix issue where the keyboard could get stuck when entering card details on iOS (#419)
+- Update braintree-web to v3.37.0
 
 1.12.0
 ------

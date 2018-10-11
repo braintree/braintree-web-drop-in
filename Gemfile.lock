@@ -14,7 +14,7 @@ GEM
     domain_name (0.5.25)
       unf (>= 0.0.5, < 1.0.0)
     dotenv (2.1.0)
-    ffi (1.9.10)
+    ffi (1.9.25)
     highline (1.7.8)
     http-cookie (1.0.2)
       domain_name (~> 0.5)
@@ -55,7 +55,7 @@ GEM
     rspec-retry (0.4.5)
       rspec-core
     rspec-support (3.4.1)
-    rubyzip (1.2.1)
+    rubyzip (1.2.2)
     sauce (3.5.11)
       childprocess (>= 0.1.6)
       cmdparse (>= 2.0.2)
@@ -100,4 +100,4 @@ DEPENDENCIES
   selenium-webdriver
 
 BUNDLED WITH
-   1.16.1
+   1.16.2

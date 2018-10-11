@@ -2219,7 +2219,7 @@ describe('CardView', function () {
         setTimeout(function () {
           expect(this.context._isTokenizing).to.equal(false);
           done();
-        }.bind(this), 100);
+        }.bind(this), 300);
       }.bind(this));
     });
 

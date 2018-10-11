@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "main": "src/index.js",
   "private": true,
   "scripts": {
@@ -63,7 +63,7 @@
     "vinyl-source-stream": "2.0.0"
   },
   "dependencies": {
-    "braintree-web": "3.36.0",
+    "braintree-web": "3.38.1",
     "@braintree/asset-loader": "0.1.0",
     "@braintree/browser-detection": "1.7.0",
     "@braintree/class-list": "0.1.0",

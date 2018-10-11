@@ -19,18 +19,14 @@ GooglePayView.ID = GooglePayView.prototype.ID = constants.paymentOptionIDs.googl
 
 GooglePayView.prototype.initialize = function () {
   var self = this;
+  var buttonOptions;
 
   self.googlePayConfiguration = assign({}, self.model.merchantConfiguration.googlePay);
 
-  self.model.asyncDependencyStarting();
-
-  return btGooglePay.create({client: self.client}).then(function (googlePayInstance) {
-    self.googlePayInstance = googlePayInstance;
-    self.paymentsClient = createPaymentsClient(self.client);
-  }).then(function () {
-    var buttonDiv = self.getElementById('google-pay-button');
-
-    buttonDiv.addEventListener('click', function (event) {
+  buttonOptions = assign({
+    buttonType: 'short'
+  }, self.googlePayConfiguration.button, {
+    onClick: function (event) {
       event.preventDefault();
 
       self.preventUserAction();
@@ -38,7 +34,19 @@ GooglePayView.prototype.initialize = function () {
       self.tokenize().then(function () {
         self.allowUserAction();
       });
-    });
+    }
+  });
+
+  self.model.asyncDependencyStarting();
+
+  return btGooglePay.create({client: self.client}).then(function (googlePayInstance) {
+    self.googlePayInstance = googlePayInstance;
+    self.paymentsClient = createPaymentsClient(self.client);
+  }).then(function () {
+    var buttonContainer = self.getElementById('google-pay-button');
+
+    buttonContainer.appendChild(self.paymentsClient.createButton(buttonOptions));
+
     self.model.asyncDependencyReady();
   }).catch(function (err) {
     self.model.asyncDependencyFailed({
