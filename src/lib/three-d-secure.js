@@ -1,7 +1,7 @@
 'use strict';
 
 var fs = require('fs');
-var classlist = require('./classlist');
+var classList = require('@braintree/class-list');
 var threeDSecure = require('braintree-web/three-d-secure');
 var Promise = require('./promise');
 
@@ -36,7 +36,7 @@ ThreeDSecure.prototype.verify = function (nonce) {
         var modalBody = self._modal.querySelector('.braintree-three-d-secure__modal-body');
 
         iframe.onload = function () {
-          classlist.add(modalBody, 'braintree-three-d-secure__frame-active');
+          classList.add(modalBody, 'braintree-three-d-secure__frame-active');
         };
 
         modalBody.appendChild(iframe);
@@ -96,8 +96,8 @@ ThreeDSecure.prototype.teardown = function () {
 ThreeDSecure.prototype._cleanupModal = function () {
   var iframe = this._modal.querySelector('iframe');
 
-  classlist.remove(this._modal.querySelector('.braintree-three-d-secure__modal'), 'braintree-three-d-secure__frame_visible');
-  classlist.remove(this._modal.querySelector('.braintree-three-d-secure__backdrop'), 'braintree-three-d-secure__frame_visible');
+  classList.remove(this._modal.querySelector('.braintree-three-d-secure__modal'), 'braintree-three-d-secure__frame_visible');
+  classList.remove(this._modal.querySelector('.braintree-three-d-secure__backdrop'), 'braintree-three-d-secure__frame_visible');
 
   if (iframe && iframe.parentNode) {
     iframe.parentNode.removeChild(iframe);
@@ -134,9 +134,9 @@ ThreeDSecure.prototype._waitForThreeDSecure = function () {
 
 ThreeDSecure.prototype._revealModal = function () {
   document.body.appendChild(this._modal);
-  classlist.add(this._modal.querySelector('.braintree-three-d-secure__backdrop'), 'braintree-three-d-secure__frame_visible');
+  classList.add(this._modal.querySelector('.braintree-three-d-secure__backdrop'), 'braintree-three-d-secure__frame_visible');
   setTimeout(function () {
-    classlist.add(this._modal.querySelector('.braintree-three-d-secure__modal'), 'braintree-three-d-secure__frame_visible');
+    classList.add(this._modal.querySelector('.braintree-three-d-secure__modal'), 'braintree-three-d-secure__frame_visible');
   }.bind(this), 10);
 };
 

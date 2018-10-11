@@ -3,7 +3,7 @@
 var BaseView = require('../../../src/views/base-view');
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var DropinError = require('../../../src/lib/dropin-error');
-var classlist = require('../../../src/lib/classlist');
+var classList = require('@braintree/class-list');
 var fake = require('../../helpers/fake');
 var throwIfResolves = require('../../helpers/throw-if-resolves');
 var fs = require('fs');
@@ -322,7 +322,7 @@ describe('PaymentMethodsView', function () {
         };
 
         this.paymentMethodsViews.activeMethodView = this.activeMethodView;
-        this.sandbox.stub(classlist, 'add');
+        this.sandbox.stub(classList, 'add');
       }.bind(this));
     });
 
@@ -342,8 +342,8 @@ describe('PaymentMethodsView', function () {
     it('applies class to heading label to hide it when no payment methods are selected', function () {
       this.paymentMethodsViews.removeActivePaymentMethod();
 
-      expect(classlist.add).to.be.calledOnce;
-      expect(classlist.add).to.be.calledWith(this.sandbox.match.any, 'braintree-no-payment-method-selected');
+      expect(classList.add).to.be.calledOnce;
+      expect(classList.add).to.be.calledWith(this.sandbox.match.any, 'braintree-no-payment-method-selected');
     });
   });
 

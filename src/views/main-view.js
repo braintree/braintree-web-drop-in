@@ -3,7 +3,7 @@
 var analytics = require('../lib/analytics');
 var analyticsKinds = require('../constants').analyticsKinds;
 var BaseView = require('./base-view');
-var classlist = require('../lib/classlist');
+var classList = require('@braintree/class-list');
 var sheetViews = require('./payment-sheet-views');
 var PaymentMethodsView = require('./payment-methods-view');
 var PaymentOptionsView = require('./payment-options-view');
@@ -100,13 +100,13 @@ MainView.prototype._initialize = function () {
     var activePaymentView = this.getView(id);
 
     if (id === PaymentMethodsView.ID) {
-      classlist.add(this.paymentMethodsViews.container, 'braintree-methods--active');
-      classlist.remove(this.sheetContainer, 'braintree-sheet--active');
+      classList.add(this.paymentMethodsViews.container, 'braintree-methods--active');
+      classList.remove(this.sheetContainer, 'braintree-sheet--active');
     } else {
       setTimeout(function () {
-        classlist.add(this.sheetContainer, 'braintree-sheet--active');
+        classList.add(this.sheetContainer, 'braintree-sheet--active');
       }.bind(this), 0);
-      classlist.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
+      classList.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
       if (!this.getView(id).getPaymentMethod()) {
         this.model.setPaymentMethodRequestable({
           isRequestable: false
@@ -163,7 +163,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
   setTimeout(function () {
     this.element.className = prefixShowClass(id);
     if (secondaryViewId) {
-      classlist.add(this.element, prefixShowClass(secondaryViewId));
+      classList.add(this.element, prefixShowClass(secondaryViewId));
     }
   }.bind(this), 0);
 
@@ -214,13 +214,13 @@ MainView.prototype.requestPaymentMethod = function () {
 };
 
 MainView.prototype.hideLoadingIndicator = function () {
-  classlist.add(this.dropinContainer, 'braintree-loaded');
-  classlist.add(this.loadingContainer, 'braintree-hidden');
+  classList.add(this.dropinContainer, 'braintree-loaded');
+  classList.add(this.loadingContainer, 'braintree-hidden');
 };
 
 MainView.prototype.showLoadingIndicator = function () {
-  classlist.remove(this.dropinContainer, 'braintree-loaded');
-  classlist.remove(this.loadingContainer, 'braintree-hidden');
+  classList.remove(this.dropinContainer, 'braintree-loaded');
+  classList.remove(this.loadingContainer, 'braintree-hidden');
 };
 
 MainView.prototype.toggleAdditionalOptions = function () {
@@ -232,7 +232,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
   if (!this._hasMultiplePaymentOptions) {
     sheetViewID = this.paymentSheetViewIDs[0];
 
-    classlist.add(this.element, prefixShowClass(sheetViewID));
+    classList.add(this.element, prefixShowClass(sheetViewID));
     this.model.changeActivePaymentView(sheetViewID);
   } else if (isPaymentSheetView) {
     if (this.model.getPaymentMethods().length === 0) {
@@ -242,7 +242,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
       this.hideToggle();
     }
   } else {
-    classlist.add(this.element, prefixShowClass(PaymentOptionsView.ID));
+    classList.add(this.element, prefixShowClass(PaymentOptionsView.ID));
   }
 };
 
@@ -250,13 +250,13 @@ MainView.prototype.showToggle = function () {
   if (this.model.isInEditMode()) {
     return;
   }
-  classlist.remove(this.toggle, 'braintree-hidden');
-  classlist.add(this.lowerContainer, 'braintree-hidden');
+  classList.remove(this.toggle, 'braintree-hidden');
+  classList.add(this.lowerContainer, 'braintree-hidden');
 };
 
 MainView.prototype.hideToggle = function () {
-  classlist.add(this.toggle, 'braintree-hidden');
-  classlist.remove(this.lowerContainer, 'braintree-hidden');
+  classList.add(this.toggle, 'braintree-hidden');
+  classList.remove(this.lowerContainer, 'braintree-hidden');
 };
 
 MainView.prototype.showSheetError = function (error) {
@@ -273,12 +273,12 @@ MainView.prototype.showSheetError = function (error) {
     errorMessage = genericErrorMessage;
   }
 
-  classlist.add(this.dropinContainer, 'braintree-sheet--has-error');
+  classList.add(this.dropinContainer, 'braintree-sheet--has-error');
   this.sheetErrorText.innerHTML = errorMessage;
 };
 
 MainView.prototype.hideSheetError = function () {
-  classlist.remove(this.dropinContainer, 'braintree-sheet--has-error');
+  classList.remove(this.dropinContainer, 'braintree-sheet--has-error');
 };
 
 MainView.prototype.getOptionsElements = function () {
@@ -286,11 +286,11 @@ MainView.prototype.getOptionsElements = function () {
 };
 
 MainView.prototype.preventUserAction = function () {
-  classlist.remove(this.disableWrapper, 'braintree-hidden');
+  classList.remove(this.disableWrapper, 'braintree-hidden');
 };
 
 MainView.prototype.allowUserAction = function () {
-  classlist.add(this.disableWrapper, 'braintree-hidden');
+  classList.add(this.disableWrapper, 'braintree-hidden');
 };
 
 MainView.prototype.teardown = function () {

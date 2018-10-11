@@ -193,7 +193,6 @@ If you need to collect form details, such as with a credit card or us bank accou
 ```javascript
 var BaseView = require('../base-view');
 var btFooPay = require('braintree-web/foo-pay');
-var classlist = require('../../lib/classlist');
 var DropinError = require('../../lib/dropin-error');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
