@@ -64,8 +64,9 @@
   },
   "dependencies": {
     "braintree-web": "3.36.0",
+    "@braintree/asset-loader": "0.0.1",
     "@braintree/browser-detection": "1.7.0",
-    "promise-polyfill": "8.0.0",
+    "promise-polyfill": "8.1.0",
     "@braintree/wrap-promise": "1.1.1"
   },
   "browserify": {

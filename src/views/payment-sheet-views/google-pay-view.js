@@ -5,7 +5,7 @@ var BaseView = require('../base-view');
 var btGooglePay = require('braintree-web/google-payment');
 var DropinError = require('../../lib/dropin-error');
 var constants = require('../../constants');
-var assets = require('../../lib/assets');
+var assets = require('@braintree/asset-loader');
 var Promise = require('../../lib/promise');
 var analytics = require('../../lib/analytics');
 
