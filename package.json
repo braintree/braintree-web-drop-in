@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "braintree-web": "3.38.1",
-    "@braintree/asset-loader": "0.1.0",
+    "@braintree/asset-loader": "0.2.0",
     "@braintree/browser-detection": "1.7.0",
     "@braintree/class-list": "0.1.0",
     "promise-polyfill": "8.1.0",
