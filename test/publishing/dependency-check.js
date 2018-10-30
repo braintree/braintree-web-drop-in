@@ -39,7 +39,7 @@ describe('Shared dependency', function () {
             } else {
               done();
             }
-          })
+          });
         });
       });
     });
