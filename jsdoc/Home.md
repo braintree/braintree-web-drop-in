@@ -134,16 +134,16 @@ Drop-in and the Braintree JS SDK have the same [browser support](http://braintre
 
 You will need to add the following directives to your policy:
 
-|             | Sandbox                                                                                                                   | Production                                                                                                            |
-|-------------|---------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| script-src  | js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>c.paypal.com<br/>pay.google.com     | js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>c.paypal.com<br/>pay.google.com |
-| style-src   | 'unsafe-inline'<br/>assets.braintreegateway.com                                                                           | 'unsafe-inline'<br/>assets.braintreegateway.com                                                                       |
-| img-src     | assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:                                                             | assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:                                                         |
-| child-src   | assets.braintreegateway.com<br/>c.paypal.com                                                                              | assets.braintreegateway.com<br/>c.paypal.com                                                                          |
-| frame-src   | assets.braintreegateway.com<br/>c.paypal.com<br/>*.cardinalcommerce.com                                                   | assets.braintreegateway.com<br/>c.paypal.com<br/>*.cardinalcommerce.com                                               |
-| connect-src | api.sandbox.braintreegateway.com<br/>client-analytics.sandbox.braintreegateway.com<br/>*.braintree-api.com                | api.braintreegateway.com<br/>client-analytics.braintreegateway.com<br/>*.braintree-api.com                            |
+|             | Sandbox                                                                                                                     | Production                                                                                                            |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| script-src  | js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>*.paypal.com<br/>pay.google.com       | js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>*.paypal.com<br/>pay.google.com |
+| style-src   | 'unsafe-inline'<br/>assets.braintreegateway.com                                                                             | 'unsafe-inline'<br/>assets.braintreegateway.com                                                                       |
+| img-src     | assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:                                                               | assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:                                                         |
+| child-src   | assets.braintreegateway.com<br/>*.paypal.com                                                                                | assets.braintreegateway.com<br/>*.paypal.com                                                                          |
+| frame-src   | assets.braintreegateway.com<br/>*.paypal.com<br/>*.cardinalcommerce.com                                                     | assets.braintreegateway.com<br/>*.paypal.com<br/>*.cardinalcommerce.com                                               |
+| connect-src | api.sandbox.braintreegateway.com<br/>client-analytics.sandbox.braintreegateway.com<br/>*.braintree-api.com<br/>*.paypal.com | api.braintreegateway.com<br/>client-analytics.braintreegateway.com<br/>*.braintree-api.com<br/>*.paypal.com           |
 
-Including `www.paypalobjects.com` and `c.paypal.com` in `script-src`, `img-src`, `child-src` and `frame-src` are only required if you are using [PayPal](module-braintree-web-drop-in.html#~paypalCreateOptions).
+Including `www.paypalobjects.com` and `*.paypal.com` in `script-src`, `img-src`, `child-src`, `frame-src`, and `connect-src` are only required if you are using [PayPal](module-braintree-web-drop-in.html#~paypalCreateOptions).
 
 Including `pay.google.com` in `script-src` is only required if you are using [Google Pay](module-braintree-web-drop-in.html#~googlePayCreateOptions).
 
