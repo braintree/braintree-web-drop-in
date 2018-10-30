@@ -14,6 +14,7 @@
   * [Events](#events)
   * [Styling](#styling)
 * [Browser support](#browser-support)
+* [Content Security Policy](#content-security-policy)
 * [Additional resources](#additional-resources)
 
 <span class="rule"></span>
@@ -125,6 +126,28 @@ If you are using npm to manage your assets and would prefer to use a local versi
 ## Browser support
 
 Drop-in and the Braintree JS SDK have the same [browser support](http://braintree.github.io/braintree-web/current/#browser-support).
+
+<a id="content-security-policy"></a>
+## Using `braintree-web-drop-in` with a Content Security Policy
+
+[Content Security Policy](http://www.html5rocks.com/en/tutorials/security/content-security-policy/) is a feature of web browsers that mitigates cross-site scripting and other attacks. By limiting the origins of resources that may be loaded on your page, you can maintain tighter control over any potentially malicious code. We recommend considering the implementation of a CSP when available.
+
+You will need to add the following directives to your policy:
+
+|             | Sandbox                                                                                                                     | Production                                                                                                            |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| script-src  | js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>*.paypal.com<br/>pay.google.com       | js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>*.paypal.com<br/>pay.google.com |
+| style-src   | 'unsafe-inline'<br/>assets.braintreegateway.com                                                                             | 'unsafe-inline'<br/>assets.braintreegateway.com                                                                       |
+| img-src     | assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:                                                               | assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:                                                         |
+| child-src   | assets.braintreegateway.com<br/>*.paypal.com                                                                                | assets.braintreegateway.com<br/>*.paypal.com                                                                          |
+| frame-src   | assets.braintreegateway.com<br/>*.paypal.com<br/>*.cardinalcommerce.com                                                     | assets.braintreegateway.com<br/>*.paypal.com<br/>*.cardinalcommerce.com                                               |
+| connect-src | api.sandbox.braintreegateway.com<br/>client-analytics.sandbox.braintreegateway.com<br/>*.braintree-api.com<br/>*.paypal.com | api.braintreegateway.com<br/>client-analytics.braintreegateway.com<br/>*.braintree-api.com<br/>*.paypal.com           |
+
+Including `www.paypalobjects.com` and `*.paypal.com` in `script-src`, `img-src`, `child-src`, `frame-src`, and `connect-src` are only required if you are using [PayPal](module-braintree-web-drop-in.html#~paypalCreateOptions).
+
+Including `pay.google.com` in `script-src` is only required if you are using [Google Pay](module-braintree-web-drop-in.html#~googlePayCreateOptions).
+
+Including `*.cardinalcommerce.com` in `frame-src` is only required if you are using [3D Secure](module-braintree-web-drop-in.html#~threeDSecureOptions).
 
 <a id="additional-resources"></a>
 ## Additional resources
