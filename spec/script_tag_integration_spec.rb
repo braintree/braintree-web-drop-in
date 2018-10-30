@@ -2,6 +2,7 @@ require_relative "helpers/drop_in_helper"
 require_relative "helpers/paypal_helper"
 
 describe "Drop-in Script Tag Integration" do
+  include SkipBrowser
   include DropIn
   include PayPal
 
@@ -46,6 +47,8 @@ describe "Drop-in Script Tag Integration" do
   end
 
   it "accepts data attributes as create options" do
+    browser_skip("firefox", "Firefox can't run `have_content` on the options for some reason")
+
     visit_dropin_url("/script-tag-integration.html", false)
 
     # Accepts an array for payment option priority
