@@ -63,7 +63,7 @@
     "vinyl-source-stream": "2.0.0"
   },
   "dependencies": {
-    "braintree-web": "3.38.1",
+    "braintree-web": "3.39.0",
     "@braintree/asset-loader": "0.2.0",
     "@braintree/browser-detection": "1.7.0",
     "@braintree/class-list": "0.1.0",
