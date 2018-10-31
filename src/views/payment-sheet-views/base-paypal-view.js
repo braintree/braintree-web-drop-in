@@ -7,7 +7,7 @@ var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
 var constants = require('../../constants');
-var assets = require('../../lib/assets');
+var assets = require('@braintree/asset-loader');
 var translations = require('../../translations').fiveCharacterLocales;
 var Promise = require('../../lib/promise');
 

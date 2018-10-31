@@ -1,7 +1,7 @@
 'use strict';
 
 var fake = require('../../helpers/fake');
-var assets = require('../../../src/lib/assets');
+var assets = require('@braintree/asset-loader');
 var Promise = require('../../../src/lib/promise');
 var DataCollector = require('../../../src/lib/data-collector');
 

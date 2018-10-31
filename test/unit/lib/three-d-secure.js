@@ -2,7 +2,7 @@
 
 var fake = require('../../helpers/fake');
 var threeDSecure = require('braintree-web/three-d-secure');
-var classlist = require('../../../src/lib/classlist');
+var classList = require('@braintree/class-list');
 var Promise = require('../../../src/lib/promise');
 var ThreeDSecure = require('../../../src/lib/three-d-secure');
 
@@ -12,8 +12,8 @@ describe('ThreeDSecure', function () {
     this.sandbox.stub(this.threeDSecureInstance, 'verifyCard');
     this.sandbox.stub(this.threeDSecureInstance, 'cancelVerifyCard');
 
-    this.sandbox.stub(classlist, 'add');
-    this.sandbox.stub(classlist, 'remove');
+    this.sandbox.stub(classList, 'add');
+    this.sandbox.stub(classList, 'remove');
   });
 
   describe('initialize', function () {

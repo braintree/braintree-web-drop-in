@@ -1,5 +1,6 @@
 'use strict';
 var execSync = require('child_process').execSync;
+var fs = require('fs');
 
 var dependencies = require('../../package.json').dependencies;
 var dependencyNames = Object.keys(dependencies);
@@ -29,12 +30,16 @@ describe('Shared dependency', function () {
       sharedDependencyNames.forEach(function (sharedDepName) {
         var sharedDepVersion = depPkg.dependencies[sharedDepName];
 
-        it('uses ' + sharedDepName + '@' + sharedDepVersion, function () {
-          var dependencyVersion = dependencies[sharedDepName];
+        it('uses ' + sharedDepName + '@' + sharedDepVersion, function (done) {
+          var nestedNodeModulePath = './node_modules/' + depPkg.name + '/node_modules/';
 
-          if (sharedDepVersion !== dependencyVersion) {
-            throw new Error(depPkg.name + ' should be using ' + sharedDepName + '@' + dependencyVersion + ' but was ' + sharedDepVersion);
-          }
+          fs.exists(nestedNodeModulePath + sharedDepName, function (exists) {
+            if (exists) {
+              done(new Error('Found ' + sharedDepName + ' with a different version in ' + depPkg.name));
+            } else {
+              done();
+            }
+          });
         });
       });
     });

@@ -9,7 +9,7 @@ var GooglePayView = require('../../../src/views/payment-sheet-views/google-pay-v
 var PaymentMethodsView = require('../../../src/views/payment-methods-view');
 var Promise = require('../../../src/lib/promise');
 var analytics = require('../../../src/lib/analytics');
-var classlist = require('../../../src/lib/classlist');
+var classList = require('@braintree/class-list');
 var fake = require('../../helpers/fake');
 var fs = require('fs');
 var hostedFields = require('braintree-web/hosted-fields');
@@ -542,7 +542,7 @@ describe('MainView', function () {
     });
 
     it('removes the braintree-sheet--has-error class from dropin container', function () {
-      classlist.add(this.context.dropinContainer, 'braintree-sheet--has-error');
+      classList.add(this.context.dropinContainer, 'braintree-sheet--has-error');
 
       MainView.prototype.hideSheetError.call(this.context);
 
@@ -713,8 +713,8 @@ describe('MainView', function () {
 
       describe('when the PaymentMethodsView is active', function () {
         beforeEach(function () {
-          classlist.remove(this.paymentMethodsContainer, 'braintree-methods--active');
-          classlist.add(this.sheetElement, 'braintree-sheet--active');
+          classList.remove(this.paymentMethodsContainer, 'braintree-methods--active');
+          classList.add(this.sheetElement, 'braintree-sheet--active');
           this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
         });
 
@@ -739,8 +739,8 @@ describe('MainView', function () {
         beforeEach(function () {
           this.sandbox.useFakeTimers();
 
-          classlist.add(this.paymentMethodsContainer, 'braintree-methods--active');
-          classlist.remove(this.sheetElement, 'braintree-sheet--active');
+          classList.add(this.paymentMethodsContainer, 'braintree-methods--active');
+          classList.remove(this.sheetElement, 'braintree-sheet--active');
         });
 
         [CardView, PayPalView].forEach(function (PaymentSheetView) {
@@ -1080,11 +1080,11 @@ describe('MainView', function () {
         disableWrapper: wrapper
       };
 
-      this.sandbox.stub(classlist, 'remove');
+      this.sandbox.stub(classList, 'remove');
 
       MainView.prototype.preventUserAction.call(context);
 
-      expect(classlist.remove).to.be.calledWith(wrapper, 'braintree-hidden');
+      expect(classList.remove).to.be.calledWith(wrapper, 'braintree-hidden');
     });
   });
 
@@ -1095,11 +1095,11 @@ describe('MainView', function () {
         disableWrapper: wrapper
       };
 
-      this.sandbox.stub(classlist, 'add');
+      this.sandbox.stub(classList, 'add');
 
       MainView.prototype.allowUserAction.call(context);
 
-      expect(classlist.add).to.be.calledWith(wrapper, 'braintree-hidden');
+      expect(classList.add).to.be.calledWith(wrapper, 'braintree-hidden');
     });
   });
 

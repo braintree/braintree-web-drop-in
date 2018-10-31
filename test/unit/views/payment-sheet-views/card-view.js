@@ -2,7 +2,7 @@
 
 var BaseView = require('../../../../src/views/base-view');
 var CardView = require('../../../../src/views/payment-sheet-views/card-view');
-var classlist = require('../../../../src/lib/classlist');
+var classList = require('@braintree/class-list');
 var DropinModel = require('../../../../src/dropin-model');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
@@ -754,7 +754,7 @@ describe('CardView', function () {
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
-        classlist.remove(numberFieldGroup, 'braintree-form__field-group--is-focused');
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--is-focused');
 
         return CardView.prototype.initialize.call(this.context).then(function () {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.true;
@@ -782,7 +782,7 @@ describe('CardView', function () {
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
-        classlist.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+        classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
 
         return CardView.prototype.initialize.call(this.context).then(function () {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).to.be.false;
@@ -819,7 +819,7 @@ describe('CardView', function () {
           }
         });
 
-        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
         return CardView.prototype.initialize.call(this.context).then(function () {
@@ -867,7 +867,7 @@ describe('CardView', function () {
 
         this.context.model = fake.model(modelOptions);
 
-        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
         return CardView.prototype.initialize.call(this.context).then(function () {
@@ -917,7 +917,7 @@ describe('CardView', function () {
 
         this.context.model = fake.model(modelOptions);
 
-        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
         CardView.prototype.initialize.call(this.context).then(function () {
@@ -968,7 +968,7 @@ describe('CardView', function () {
 
         this.context.model = fake.model(modelOptions);
 
-        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
         return CardView.prototype.initialize.call(this.context).then(function () {
@@ -1012,7 +1012,7 @@ describe('CardView', function () {
 
         this.context.model = fake.model(modelOptions);
 
-        classlist.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
         return CardView.prototype.initialize.call(this.context).then(function () {
@@ -1055,7 +1055,7 @@ describe('CardView', function () {
           setAttribute: function () {}
         };
 
-        classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+        classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
 
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
@@ -1075,7 +1075,7 @@ describe('CardView', function () {
           setAttribute: function () {}
         };
 
-        classlist.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+        classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
 
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
@@ -1386,7 +1386,7 @@ describe('CardView', function () {
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        classlist.add(numberFieldGroup, 'braintree-form__field-group--has-error');
+        classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
         return CardView.prototype.initialize.call(this.context).then(function () {
@@ -1670,7 +1670,7 @@ describe('CardView', function () {
         };
         var numberFieldGroup = this.element.querySelector('[data-braintree-id="number-field-group"]');
 
-        classlist.add(numberFieldGroup, 'braintree-form__field-group--has-error');
+        classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
         this.sandbox.stub(hostedFields, 'create').resolves(hostedFieldsInstance);
 
         return CardView.prototype.initialize.call(this.context).then(function () {
@@ -2046,7 +2046,7 @@ describe('CardView', function () {
       };
 
       this.context.getElementById = this.sandbox.stub().returns(fieldGroup);
-      this.sandbox.stub(classlist, 'add');
+      this.sandbox.stub(classList, 'add');
 
       CardView.prototype.showFieldError.call(this.context, 'foo');
 
@@ -2094,7 +2094,7 @@ describe('CardView', function () {
       };
 
       this.context.getElementById = this.sandbox.stub().returns(fieldGroup);
-      this.sandbox.stub(classlist, 'remove');
+      this.sandbox.stub(classList, 'remove');
 
       CardView.prototype.hideFieldError.call(this.context, 'foo');
 
@@ -2234,23 +2234,23 @@ describe('CardView', function () {
     it('removes braintree-sheet--loading class after successful tokenization', function (done) {
       var stubPayload = {};
 
-      this.sandbox.stub(classlist, 'remove');
+      this.sandbox.stub(classList, 'remove');
       this.context.hostedFieldsInstance.tokenize.resolves(stubPayload);
 
       CardView.prototype.tokenize.call(this.context).then(function () {
         setTimeout(function () {
-          expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+          expect(classList.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
           done();
         }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
       }.bind(this));
     });
 
     it('removes braintree-sheet--loading class after tokenization fails', function () {
-      this.sandbox.stub(classlist, 'remove');
+      this.sandbox.stub(classList, 'remove');
       this.context.hostedFieldsInstance.tokenize.rejects(new Error('foo'));
 
       return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
-        expect(classlist.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
+        expect(classList.remove).to.have.been.calledWith(this.context.element, 'braintree-sheet--loading');
       }.bind(this));
     });
 
@@ -2289,7 +2289,7 @@ describe('CardView', function () {
         getElementById: this.sandbox.stub().returns({})
       };
 
-      this.sandbox.stub(classlist, 'add');
+      this.sandbox.stub(classList, 'add');
     });
 
     describe('showFieldError', function () {

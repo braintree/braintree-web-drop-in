@@ -9,6 +9,8 @@ unreleased
 - Fix issue where Mastercard was styled as MasterCard in vault manager view
 - Update braintree-web to v3.38.1
 - Fix issue where PayPal email addresses may overflow the container
+- Use @braintree/asset-loader@v0.1.0 for asset loading
+- Use @braintree/class-list@v0.1.0 for manipulating classes
 
 1.13.0
 ------

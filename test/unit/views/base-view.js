@@ -2,7 +2,7 @@
 
 var BaseView = require('../../../src/views/base-view');
 var constants = require('../../../src/constants');
-var classlist = require('../../../src/lib/classlist');
+var classList = require('@braintree/class-list');
 var Promise = require('../../../src/lib/promise');
 
 describe('BaseView', function () {
@@ -80,7 +80,7 @@ describe('BaseView', function () {
 
   describe('preventUserAction', function () {
     beforeEach(function () {
-      this.sandbox.stub(classlist, 'add');
+      this.sandbox.stub(classList, 'add');
       this.element = global.document.createElement('div');
       this.model = {
         preventUserAction: this.sandbox.stub()
@@ -95,8 +95,8 @@ describe('BaseView', function () {
 
       view.preventUserAction();
 
-      expect(classlist.add).to.be.calledOnce;
-      expect(classlist.add).to.be.calledWith(this.element, 'braintree-sheet--loading');
+      expect(classList.add).to.be.calledOnce;
+      expect(classList.add).to.be.calledWith(this.element, 'braintree-sheet--loading');
     });
 
     it('ignores adding class if no element is provided', function () {
@@ -106,7 +106,7 @@ describe('BaseView', function () {
 
       view.preventUserAction();
 
-      expect(classlist.add).to.not.be.called;
+      expect(classList.add).to.not.be.called;
     });
 
     it('calls preventUserAction on model', function () {
@@ -122,7 +122,7 @@ describe('BaseView', function () {
 
   describe('allowUserAction', function () {
     beforeEach(function () {
-      this.sandbox.stub(classlist, 'remove');
+      this.sandbox.stub(classList, 'remove');
       this.element = global.document.createElement('div');
       this.model = {
         allowUserAction: this.sandbox.stub()
@@ -137,8 +137,8 @@ describe('BaseView', function () {
 
       view.allowUserAction();
 
-      expect(classlist.remove).to.be.calledOnce;
-      expect(classlist.remove).to.be.calledWith(this.element, 'braintree-sheet--loading');
+      expect(classList.remove).to.be.calledOnce;
+      expect(classList.remove).to.be.calledWith(this.element, 'braintree-sheet--loading');
     });
 
     it('ignores adding class if no element is provided', function () {
@@ -148,7 +148,7 @@ describe('BaseView', function () {
 
       view.allowUserAction();
 
-      expect(classlist.remove).to.not.be.called;
+      expect(classList.remove).to.not.be.called;
     });
 
     it('calls allowUserAction on model', function () {
