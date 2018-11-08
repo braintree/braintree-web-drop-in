@@ -21,7 +21,10 @@ describe('BasePayPalView', function () {
       Button: {
         render: this.sandbox.stub().resolves()
       },
-      setup: this.sandbox.stub()
+      setup: this.sandbox.stub(),
+      FUNDING: {
+        CREDIT: 'credit'
+      }
     };
     this.sandbox.stub(analytics, 'sendEvent');
 
@@ -191,6 +194,30 @@ describe('BasePayPalView', function () {
             label: 'credit'
           }
         });
+      }.bind(this));
+    });
+
+    it('dissallows credit option for PayPal', function () {
+      this.view.model.merchantConfiguration.paypal = this.view.model.merchantConfiguration.paypal;
+      this.view._isPayPalCredit = false;
+
+      return this.view.initialize().then(function () {
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          funding: {
+            disallowed: ['credit']
+          }
+        });
+      }.bind(this));
+    });
+
+    it('does not include funding param for PayPal credit', function () {
+      this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
+      this.view._isPayPalCredit = true;
+
+      return this.view.initialize().then(function () {
+        var renderOptions = this.paypal.Button.render.args[0][0];
+
+        expect(renderOptions.funding).to.not.exist;
       }.bind(this));
     });
 
