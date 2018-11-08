@@ -76,6 +76,10 @@ BasePayPalView.prototype.initialize = function () {
     if (isCredit) {
       buttonSelector = '[data-braintree-id="paypal-credit-button"]';
       checkoutJSConfiguration.style.label = 'credit';
+    } else {
+      checkoutJSConfiguration.funding = {
+        disallowed: [global.paypal.FUNDING.CREDIT]
+      };
     }
 
     return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
