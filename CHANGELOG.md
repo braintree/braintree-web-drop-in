@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.14.1
+------
 - Explicitly opt out of additional PayPal credit button in normal PayPal view
 
 1.14.0
