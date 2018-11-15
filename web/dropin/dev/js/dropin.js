@@ -9672,7 +9672,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var VERSION = "1.14.0";
+var VERSION = "1.14.1";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -10530,7 +10530,7 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = "1.14.0";
+var VERSION = "1.14.1";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -14418,6 +14418,10 @@ BasePayPalView.prototype.initialize = function () {
     if (isCredit) {
       buttonSelector = '[data-braintree-id="paypal-credit-button"]';
       checkoutJSConfiguration.style.label = 'credit';
+    } else {
+      checkoutJSConfiguration.funding = {
+        disallowed: [global.paypal.FUNDING.CREDIT]
+      };
     }
 
     return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
