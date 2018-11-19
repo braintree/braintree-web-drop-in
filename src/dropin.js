@@ -68,10 +68,17 @@ var VERSION = process.env.npm_package_version;
  * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
  * @property {string} details.cardHolderName The name of the card holder.
  * @property {string} details.dpanLastTwo Last two digits of card number.
+ * @property {external:ApplePayPayment} details.rawPaymentData The raw response back from the Apple Pay flow, which includes billing/shipping address, phone and email if passed in as required parameters.
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `ApplePayCard` when the method requested is an Apple Pay provided card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} ApplePayPayment An [Apple Pay Payment object](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypayment).
+ * @external ApplePayPayment
+ * @see {@link https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypayment ApplePayPayment}
  */
 
 /**
@@ -88,7 +95,7 @@ var VERSION = process.env.npm_package_version;
  * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
  * @property {string} details.lastFour The last 4 digits of the card.
  * @property {string} details.lastTwo The last 2 digits of the card.
- * @param {external:GooglePayPaymentData} details.rawPaymentData The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.
+ * @property {external:GooglePayPaymentData} details.rawPaymentData The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.
  * @property {string} type The payment method type, always `AndroidPayCard` when the method requested is a Google Pay Card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
@@ -761,6 +768,10 @@ function formatPaymentMethodPayload(paymentMethod) {
 
   if (paymentMethod.type === constants.paymentMethodTypes.googlePay) {
     formattedPaymentMethod.details.rawPaymentData = paymentMethod.rawPaymentData;
+  }
+
+  if (paymentMethod.type === constants.paymentMethodTypes.applePay) {
+    formattedPaymentMethod.details.rawPaymentData = paymentMethod.payment;
   }
 
   if (typeof paymentMethod.liabilityShiftPossible === 'boolean') {
