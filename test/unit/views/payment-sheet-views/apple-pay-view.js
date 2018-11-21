@@ -270,8 +270,8 @@ describe('ApplePayView', function () {
             this.view.model.addPaymentMethod = function (payload) {
               expect(payload.nonce).to.equal('fake-nonce');
               expect(payload.type).to.equal('ApplePayCard');
-              expect(payload.payment.shippingContact).not.to.exist;
-              expect(payload.payment.billingContact).not.to.exist;
+              expect(payload.rawPaymentData.shippingContact).not.to.exist;
+              expect(payload.rawPaymentData.billingContact).not.to.exist;
               done();
             };
 
@@ -290,8 +290,8 @@ describe('ApplePayView', function () {
               type: 'ApplePayCard'
             });
             this.view.model.addPaymentMethod = function (payload) {
-              expect(payload.payment.shippingContact).to.equal(fakeShippingContact);
-              expect(payload.payment.billingContact).to.equal(fakeBillingContact);
+              expect(payload.rawPaymentData.shippingContact).to.equal(fakeShippingContact);
+              expect(payload.rawPaymentData.billingContact).to.equal(fakeBillingContact);
               done();
             };
 

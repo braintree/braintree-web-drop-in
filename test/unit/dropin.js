@@ -1002,7 +1002,7 @@ describe('Dropin', function () {
         details: {
           foo: 'bar'
         },
-        payment: rawPaymentData,
+        rawPaymentData: rawPaymentData,
         type: 'ApplePayCard',
         binData: {
           bin: 'data'

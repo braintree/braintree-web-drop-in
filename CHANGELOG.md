@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Add `rawPaymentData` to Apple Pay payment method payload
+
 1.14.1
 ------
 - Explicitly opt out of additional PayPal credit button in normal PayPal view

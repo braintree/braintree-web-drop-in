@@ -74,7 +74,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
       token: event.payment.token
     }).then(function (payload) {
       session.completePayment(global.ApplePaySession.STATUS_SUCCESS);
-      payload.payment = event.payment;
+      payload.rawPaymentData = event.payment;
       self.model.addPaymentMethod(payload);
     }).catch(function (tokenizeErr) {
       self.model.reportError(tokenizeErr);

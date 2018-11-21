@@ -38,7 +38,11 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
+var HAS_RAW_PAYMENT_DATA = {};
 var VERSION = process.env.npm_package_version;
+
+HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
+HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -766,12 +770,8 @@ function formatPaymentMethodPayload(paymentMethod) {
     formattedPaymentMethod.description = paymentMethod.description;
   }
 
-  if (paymentMethod.type === constants.paymentMethodTypes.googlePay) {
+  if (paymentMethod.type in HAS_RAW_PAYMENT_DATA) {
     formattedPaymentMethod.details.rawPaymentData = paymentMethod.rawPaymentData;
-  }
-
-  if (paymentMethod.type === constants.paymentMethodTypes.applePay) {
-    formattedPaymentMethod.details.rawPaymentData = paymentMethod.payment;
   }
 
   if (typeof paymentMethod.liabilityShiftPossible === 'boolean') {
