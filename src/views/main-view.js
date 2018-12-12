@@ -265,7 +265,7 @@ MainView.prototype.showSheetError = function (error) {
 
   if (this.strings.hasOwnProperty(error)) {
     errorMessage = this.strings[error];
-  } else if (error && error.code) {
+  } else if (error && typeof error.code === 'string') {
     errorMessage = this.strings[snakeCaseToCamelCase(error.code) + 'Error'] || genericErrorMessage;
   } else if (error === 'developerError') {
     errorMessage = DEVELOPER_MISCONFIGURATION_MESSAGE;
