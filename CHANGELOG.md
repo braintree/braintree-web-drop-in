@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Add `rawPaymentData` to Apple Pay payment method payload
+- Fix error with `toLowerCase` on error reporting
 
 1.14.1
 ------
