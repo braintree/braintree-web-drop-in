@@ -5,7 +5,7 @@ unreleased
 ----------
 - Add `rawPaymentData` to Apple Pay payment method payload
 - Fix error with `toLowerCase` on error reporting
-- Update braintree-web to v3.41.0
+- Update braintree-web to v3.42.0
 - Update @braintree/asset-loader to v0.2.1
 
 1.14.1
