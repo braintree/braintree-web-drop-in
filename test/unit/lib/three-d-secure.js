@@ -230,14 +230,23 @@ describe('ThreeDSecure', function () {
   });
 
   describe('teardown', function () {
-    it('calls teardown on 3ds instance', function () {
-      var tds = new ThreeDSecure({}, {}, 'Card Verification');
+    beforeEach(function () {
+      this.tds = new ThreeDSecure({}, {}, 'Card Verification');
 
-      tds._instance = this.threeDSecureInstance;
+      this.tds._instance = this.threeDSecureInstance;
       this.sandbox.stub(this.threeDSecureInstance, 'teardown').resolves();
+      this.sandbox.stub(this.tds, '_cleanupModal').resolves();
+    });
 
-      return tds.teardown().then(function () {
+    it('calls teardown on 3ds instance', function () {
+      return this.tds.teardown().then(function () {
         expect(this.threeDSecureInstance.teardown).to.be.calledOnce;
+      }.bind(this));
+    });
+
+    it('cleanus up modal', function () {
+      return this.tds.teardown().then(function () {
+        expect(this.tds._cleanupModal).to.be.calledOnce;
       }.bind(this));
     });
   });

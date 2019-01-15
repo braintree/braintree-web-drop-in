@@ -90,11 +90,15 @@ ThreeDSecure.prototype.updateConfiguration = function (key, value) {
 };
 
 ThreeDSecure.prototype.teardown = function () {
-  return this._instance.teardown();
+  return Promise.all([
+    this._cleanupModal(),
+    this._instance.teardown()
+  ]);
 };
 
 ThreeDSecure.prototype._cleanupModal = function () {
   var iframe = this._modal.querySelector('iframe');
+  var self = this;
 
   classList.remove(this._modal.querySelector('.braintree-three-d-secure__modal'), 'braintree-three-d-secure__frame_visible');
   classList.remove(this._modal.querySelector('.braintree-three-d-secure__backdrop'), 'braintree-three-d-secure__frame_visible');
@@ -102,11 +106,16 @@ ThreeDSecure.prototype._cleanupModal = function () {
   if (iframe && iframe.parentNode) {
     iframe.parentNode.removeChild(iframe);
   }
-  setTimeout(function () {
-    if (this._modal.parentNode) {
-      this._modal.parentNode.removeChild(this._modal);
-    }
-  }.bind(this), 300);
+
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      if (self._modal.parentNode) {
+        self._modal.parentNode.removeChild(self._modal);
+      }
+
+      resolve();
+    }, 300);
+  });
 };
 
 ThreeDSecure.prototype._setupModal = function (cardVerificationString) {
