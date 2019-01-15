@@ -102,6 +102,10 @@ BasePayPalView.prototype.initialize = function () {
   }
 };
 
+BasePayPalView.prototype.requestPaymentMethod = function () {
+  this.model.reportError('paypalButtonMustBeUsed');
+};
+
 BasePayPalView.prototype.updateConfiguration = function (key, value) {
   if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
     this.paypalConfiguration[key] = value;

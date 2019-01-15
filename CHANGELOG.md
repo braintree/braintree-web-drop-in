@@ -7,6 +7,7 @@ unreleased
 - Fix error with `toLowerCase` on error reporting
 - Update braintree-web to v3.42.0
 - Update @braintree/asset-loader to v0.2.1
+- Provide error message when payment method is requested on PayPal button view (#433)
 
 1.14.1
 ------
