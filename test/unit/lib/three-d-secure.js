@@ -244,7 +244,7 @@ describe('ThreeDSecure', function () {
       }.bind(this));
     });
 
-    it('cleanus up modal', function () {
+    it('cleans up modal', function () {
       return this.tds.teardown().then(function () {
         expect(this.tds._cleanupModal).to.be.calledOnce;
       }.bind(this));
