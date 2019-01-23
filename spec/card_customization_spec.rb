@@ -84,7 +84,7 @@ describe "Drop-in card.cardholderName" do
 
       iframe = find("iframe[id='braintree-hosted-field-cvv']")
 
-      within_frame(iframe) do
+      page.within_frame(iframe) do
         expect(find("input").native.attribute("placeholder")).to eq("my placeholder")
       end
     end
@@ -95,11 +95,11 @@ describe "Drop-in card.cardholderName" do
 
       click_option("card")
 
-      within_frame(find("iframe[id='braintree-hosted-field-cvv']")) do
+      page.within_frame(find("iframe[id='braintree-hosted-field-cvv']")) do
         expect(find("input").native.css_value("font-size")).to eq("20px")
       end
 
-      within_frame(find("iframe[id='braintree-hosted-field-number']")) do
+      page.within_frame(find("iframe[id='braintree-hosted-field-number']")) do
         expect(find("input").native.css_value("font-size")).to eq("10px")
       end
     end
