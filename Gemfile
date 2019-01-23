@@ -4,7 +4,7 @@ gem "rake"
 
 group :development do
   gem "dotenv"
-  gem "capybara"
+  gem "capybara", "2.7.1"
   gem "sauce"
   gem "sauce-connect"
   gem "selenium-webdriver"
