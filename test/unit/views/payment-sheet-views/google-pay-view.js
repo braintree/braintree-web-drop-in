@@ -118,10 +118,34 @@ describe('GooglePayView', function () {
       }.bind(this));
     });
 
-    it('creates a GooglePay component', function () {
+    it('creates a GooglePayment component', function () {
       return this.view.initialize().then(function () {
         expect(btGooglePay.create).to.be.calledWith(this.sandbox.match({
           client: this.view.client
+        }));
+        expect(this.view.googlePayInstance).to.equal(this.fakeGooglePayInstance);
+      }.bind(this));
+    });
+
+    it('can configure GooglePayment component with googleApiVersion', function () {
+      this.model.merchantConfiguration.googlePay.googlePayVersion = 2;
+
+      return this.view.initialize().then(function () {
+        expect(btGooglePay.create).to.be.calledWith(this.sandbox.match({
+          client: this.view.client,
+          googlePayVersion: 2
+        }));
+        expect(this.view.googlePayInstance).to.equal(this.fakeGooglePayInstance);
+      }.bind(this));
+    });
+
+    it('can configure GooglePayment component with googleMerchantId', function () {
+      this.model.merchantConfiguration.googlePay.merchantId = 'foobar';
+
+      return this.view.initialize().then(function () {
+        expect(btGooglePay.create).to.be.calledWith(this.sandbox.match({
+          client: this.view.client,
+          googleMerchantId: 'foobar'
         }));
         expect(this.view.googlePayInstance).to.equal(this.fakeGooglePayInstance);
       }.bind(this));
@@ -248,7 +272,6 @@ describe('GooglePayView', function () {
       return this.view.tokenize().then(function () {
         expect(this.fakeGooglePayInstance.createPaymentDataRequest).to.be.calledOnce;
         expect(this.fakeGooglePayInstance.createPaymentDataRequest).to.be.calledWith({
-          merchantId: 'merchant-id',
           transactionInfo: {
             currencyCode: 'USD',
             totalPriceStatus: 'FINAL',
