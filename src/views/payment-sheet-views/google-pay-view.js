@@ -39,7 +39,11 @@ GooglePayView.prototype.initialize = function () {
 
   self.model.asyncDependencyStarting();
 
-  return btGooglePay.create({client: self.client}).then(function (googlePayInstance) {
+  return btGooglePay.create({
+    client: self.client,
+    googlePayVersion: self.googlePayConfiguration.googlePayVersion,
+    googleMerchantId: self.googlePayConfiguration.merchantId
+  }).then(function (googlePayInstance) {
     self.googlePayInstance = googlePayInstance;
     self.paymentsClient = createPaymentsClient(self.client);
   }).then(function () {

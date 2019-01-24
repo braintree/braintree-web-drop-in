@@ -156,6 +156,7 @@ var VERSION = process.env.npm_package_version;
 /** @typedef {object} googlePayCreateOptions The configuration options for Google Pay. Additional options from the few listed here are available, many have default values applied based on the settings found in the Braintree Gateway. For more information, see [Google's Documentation](https://developers.google.com/pay/api/web/object-reference#request-objects).
  *
  * @param {string} merchantId The ID provided by Google for processing transactions in production. Not necessary for testing in sandbox.
+ * @param {string} [googlePayVersion=1] The version of the Google Pay API to use. Defaults to 1, but 2 can be passed in.
  * @param {external:GooglePayTransactionInfo} transactionInfo The transaction details necessary for processing the payment.
  * @param {external:GooglePayButtonOptions} [button] The button options for configuring the look of the Google Pay button. The `onClick` property cannot be overwritten.
  */
