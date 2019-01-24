@@ -272,7 +272,6 @@ describe('GooglePayView', function () {
       return this.view.tokenize().then(function () {
         expect(this.fakeGooglePayInstance.createPaymentDataRequest).to.be.calledOnce;
         expect(this.fakeGooglePayInstance.createPaymentDataRequest).to.be.calledWith({
-          merchantId: 'merchant-id',
           transactionInfo: {
             currencyCode: 'USD',
             totalPriceStatus: 'FINAL',
