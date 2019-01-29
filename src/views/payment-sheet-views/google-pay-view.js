@@ -19,9 +19,14 @@ GooglePayView.ID = GooglePayView.prototype.ID = constants.paymentOptionIDs.googl
 
 GooglePayView.prototype.initialize = function () {
   var self = this;
-  var buttonOptions;
+  var buttonOptions, googlePayVersion, merchantId;
 
   self.googlePayConfiguration = assign({}, self.model.merchantConfiguration.googlePay);
+  googlePayVersion = self.googlePayConfiguration.googlePayVersion;
+  merchantId = self.googlePayConfiguration.merchantId;
+
+  delete self.googlePayConfiguration.googlePayVersion;
+  delete self.googlePayConfiguration.merchantId;
 
   buttonOptions = assign({
     buttonType: 'short'
@@ -39,7 +44,11 @@ GooglePayView.prototype.initialize = function () {
 
   self.model.asyncDependencyStarting();
 
-  return btGooglePay.create({client: self.client}).then(function (googlePayInstance) {
+  return btGooglePay.create({
+    client: self.client,
+    googlePayVersion: googlePayVersion,
+    googleMerchantId: merchantId
+  }).then(function (googlePayInstance) {
     self.googlePayInstance = googlePayInstance;
     self.paymentsClient = createPaymentsClient(self.client);
   }).then(function () {

@@ -15,10 +15,10 @@ module PayPal
     rescue Capybara::WindowError
       paypal_outer_frame = find(".paypal-checkout-sandbox iframe")
 
-      within_frame paypal_outer_frame do
+      page.within_frame paypal_outer_frame do
         inner_frame = find("body iframe")
 
-        within_frame inner_frame do
+        page.within_frame inner_frame do
           block.call if block
 
           sleep 2
@@ -63,7 +63,7 @@ module PayPal
   end
 
   def login_to_paypal_with_iframe_login(login_iframe)
-    within_frame login_iframe do
+    page.within_frame login_iframe do
       fill_in("email", :with => ENV["PAYPAL_USERNAME"])
       fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
 
