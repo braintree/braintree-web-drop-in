@@ -31,6 +31,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "정보를 확인하고 다시 시도해 주세요.",
   "hostedFieldsTokenizationNetworkErrorError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "신용카드 인증에 실패했습니다. 정보를 확인하고 다시 시도해 주세요.",
+  "paypalButtonMustBeUsed": "결제를 계속하려면 PayPal 버튼을 사용하세요.",
   "paypalAccountTokenizationFailedError": "PayPal 계정을 추가하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalFlowFailedError": "PayPal 계정을 연결하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalTokenizationRequestActiveError": "PayPal 결제 승인이 이미 진행 중입니다.",

@@ -31,6 +31,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Vérifiez vos informations et réessayez.",
   "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Réessayez.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Échec de vérification de la carte bancaire. Vérifiez vos informations et réessayez.",
+  "paypalButtonMustBeUsed": "Utilisez le bouton PayPal pour poursuivre votre paiement.",
   "paypalAccountTokenizationFailedError": "Une erreur est survenue lors de l'ajout du compte PayPal. Réessayez.",
   "paypalFlowFailedError": "Une erreur est survenue lors de la connexion à PayPal. Réessayez.",
   "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",

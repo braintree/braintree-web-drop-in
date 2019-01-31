@@ -31,6 +31,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Sprawdź swoje informacje i spróbuj ponownie.",
   "hostedFieldsTokenizationNetworkErrorError": "Błąd sieci. Spróbuj ponownie.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Weryfikacja karty kredytowej nie powiodła się. Sprawdź swoje informacje i spróbuj ponownie.",
+  "paypalButtonMustBeUsed": "Użyj przycisku PayPal, aby kontynuować płatność.",
   "paypalAccountTokenizationFailedError": "Coś poszło nie tak podczas dodawania konta PayPal. Spróbuj ponownie.",
   "paypalFlowFailedError": "Coś poszło nie tak podczas łączenia z systemem PayPal. Spróbuj ponownie.",
   "paypalTokenizationRequestActiveError": "Autoryzacja płatności PayPal jest już w trakcie realizacji.",
