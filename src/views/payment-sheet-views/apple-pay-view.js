@@ -22,6 +22,9 @@ ApplePayView.prototype.initialize = function () {
   var self = this;
 
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
+  self.applePaySessionVersion = self.applePayConfiguration.applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;
+
+  delete self.applePayConfiguration.applePaySessionVersion;
 
   self.model.asyncDependencyStarting();
 
@@ -57,7 +60,7 @@ ApplePayView.prototype.initialize = function () {
 ApplePayView.prototype._showPaymentSheet = function () {
   var self = this;
   var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
-  var session = new global.ApplePaySession(2, request);
+  var session = new global.ApplePaySession(self.applePaySessionVersion, request);
 
   session.onvalidatemerchant = function (event) {
     self.applePayInstance.performValidation({

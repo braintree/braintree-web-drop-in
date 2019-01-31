@@ -101,6 +101,20 @@ describe('ApplePayView', function () {
       }.bind(this));
     });
 
+    it('defaults Apple Pay session to 2', function () {
+      return this.view.initialize().then(function () {
+        expect(this.view.applePaySessionVersion).to.equal(2);
+      }.bind(this));
+    });
+
+    it('can set Apple Pay session', function () {
+      this.model.merchantConfiguration.applePay.applePaySessionVersion = 5;
+
+      return this.view.initialize().then(function () {
+        expect(this.view.applePaySessionVersion).to.equal(5);
+      }.bind(this));
+    });
+
     it('calls asyncDependencyFailed when Apple Pay component creation fails', function () {
       var fakeError = new DropinError('A_FAKE_ERROR');
 
@@ -183,6 +197,16 @@ describe('ApplePayView', function () {
 
         expect(this.view.applePayInstance.createPaymentRequest).to.be.calledWith(this.fakePaymentRequest);
         expect(global.ApplePaySession).to.be.calledWith(2, this.fakePaymentRequest);
+      });
+
+      it('can set which version of ApplePaySession to use', function () {
+        this.view.applePaySessionVersion = 3;
+        this.view.applePayInstance.createPaymentRequest = this.sandbox.stub().returns(this.fakePaymentRequest);
+
+        this.buttonClickHandler();
+
+        expect(this.view.applePayInstance.createPaymentRequest).to.be.calledWith(this.fakePaymentRequest);
+        expect(global.ApplePaySession).to.be.calledWith(3, this.fakePaymentRequest);
       });
 
       it('begins the ApplePaySession', function () {
