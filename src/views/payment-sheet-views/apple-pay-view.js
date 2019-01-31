@@ -8,6 +8,8 @@ var isHTTPS = require('../../lib/is-https');
 var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
+var DEFAULT_APPLE_PAY_SESSION_VERSION = 2;
+
 function ApplePayView() {
   BaseView.apply(this, arguments);
 }
@@ -94,7 +96,10 @@ ApplePayView.prototype.updateConfiguration = function (key, value) {
 ApplePayView.isEnabled = function (options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
   var applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
+  var applePaySessionVersion = options.merchantConfiguration.applePay && options.merchantConfiguration.applePay.applePaySessionVersion;
   var applePayBrowserSupported;
+
+  applePaySessionVersion = applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;
 
   if (!applePayEnabled) {
     return Promise.resolve(false);
@@ -103,6 +108,10 @@ ApplePayView.isEnabled = function (options) {
   applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS();
 
   if (!applePayBrowserSupported) {
+    return Promise.resolve(false);
+  }
+
+  if (!global.ApplePaySession.supportsVersion(applePaySessionVersion)) {
     return Promise.resolve(false);
   }
 

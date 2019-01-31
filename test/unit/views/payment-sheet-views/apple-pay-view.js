@@ -28,6 +28,7 @@ describe('ApplePayView', function () {
 
       global.ApplePaySession = this.sandbox.stub().returns(this.fakeApplePaySession);
       global.ApplePaySession.canMakePayments = this.sandbox.stub().returns(true);
+      global.ApplePaySession.supportsVersion = this.sandbox.stub().returns(true);
       global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(true);
       global.ApplePaySession.STATUS_FAILURE = 'failure';
       global.ApplePaySession.STATUS_SUCCESS = 'success';
@@ -379,6 +380,30 @@ describe('ApplePayView', function () {
 
       return ApplePayView.isEnabled(this.options).then(function (result) {
         expect(result).to.equal(false);
+      });
+    });
+
+    it('resolves with false when device does not support the version of the apple pay session', function () {
+      global.ApplePaySession.supportsVersion.returns(false);
+
+      return ApplePayView.isEnabled(this.options).then(function (result) {
+        expect(result).to.equal(false);
+      });
+    });
+
+    it('defaults ApplePaySession version to 2', function () {
+      return ApplePayView.isEnabled(this.options).then(function () {
+        expect(global.ApplePaySession.supportsVersion).to.be.calledOnce;
+        expect(global.ApplePaySession.supportsVersion).to.be.calledWith(2);
+      });
+    });
+
+    it('can set ApplePaySession version', function () {
+      this.options.merchantConfiguration.applePay.applePaySessionVersion = 3;
+
+      return ApplePayView.isEnabled(this.options).then(function () {
+        expect(global.ApplePaySession.supportsVersion).to.be.calledOnce;
+        expect(global.ApplePaySession.supportsVersion).to.be.calledWith(3);
       });
     });
 
