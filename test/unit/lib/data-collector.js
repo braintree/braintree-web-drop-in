@@ -88,6 +88,19 @@ describe('DataCollector', function () {
         expect(dc._instance).to.equal(this.dataCollectorInstance);
       }.bind(this));
     });
+
+    it('resolves even if data collector setup fails', function () {
+      var dc = new DataCollector(this.config);
+      var err = new Error('fail');
+
+      this.sandbox.stub(dc, 'log');
+      global.braintree.dataCollector.create.rejects(err);
+
+      return dc.initialize().then(function () {
+        expect(dc._instance).to.not.exist;
+        expect(dc.log).to.be.calledWith(err);
+      });
+    });
   });
 
   describe('getDeviceData', function () {

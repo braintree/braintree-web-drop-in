@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Stop halting Drop-in setup when Data Collector fails to load
+
 1.15.0
 ------
 - Add `rawPaymentData` to Apple Pay payment method payload
