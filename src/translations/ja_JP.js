@@ -31,6 +31,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "情報を確認してもう一度お試しください。",
   "hostedFieldsTokenizationNetworkErrorError": "ネットワークエラーです。もう一度お試しください。",
   "hostedFieldsTokenizationCvvVerificationFailedError": "クレジットカードの認証に失敗しました。情報を確認してもう一度お試しください。",
+  "paypalButtonMustBeUsed": "お客さまの支払いを続行するには、PayPalボタンを使用します。",
   "paypalAccountTokenizationFailedError": "PayPalアカウントの追加で問題が発生しました。もう一度お試しください。",
   "paypalFlowFailedError": "PayPalへの接続に問題が発生しました。もう一度お試しください。",
   "paypalTokenizationRequestActiveError": "PayPal支払いの承認はすでに処理中です。",

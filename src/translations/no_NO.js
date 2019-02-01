@@ -31,6 +31,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Kontroller informasjonen og prøv på nytt.",
   "hostedFieldsTokenizationNetworkErrorError": "Nettverksfeil. Prøv på nytt.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Bekreftelsen av betalingskortet mislyktes. Kontroller informasjonen og prøv på nytt.",
+  "paypalButtonMustBeUsed": "Bruk PayPal-knappen for å fortsette med betalingen.",
   "paypalAccountTokenizationFailedError": "Noe gikk galt da PayPal-kontoen ble lagt til. Prøv på nytt.",
   "paypalFlowFailedError": "Det oppsto et problem med tilkoblingen til PayPal. Prøv på nytt.",
   "paypalTokenizationRequestActiveError": "Godkjenning av PayPal-betalingen pågår allerede",

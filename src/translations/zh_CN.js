@@ -31,6 +31,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
   "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",
   "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡验证失败。请检查您的信息，然后重试。",
+  "paypalButtonMustBeUsed": "使用PayPal按钮继续进行付款。",
   "paypalAccountTokenizationFailedError": "添加PayPal账户时出错。请重试。",
   "paypalFlowFailedError": "连接到PayPal时出错。请重试。",
   "paypalTokenizationRequestActiveError": "PayPal付款授权已在进行中。",

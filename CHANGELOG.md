@@ -9,6 +9,7 @@ CHANGELOG
 - Update @braintree/asset-loader to v0.2.1
 - Fix issue where 3ds modal may not get cleaned up during teardown (#463)
 - Allow easy Google Pay version 2 configuration
+- Provide error message when payment method is requested on PayPal button view (#433)
 
 1.14.1
 ------

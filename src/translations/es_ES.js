@@ -31,6 +31,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Comprueba la información e inténtalo de nuevo.",
   "hostedFieldsTokenizationNetworkErrorError": "Error de red. Inténtalo de nuevo.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Error de verificación de la tarjeta de crédito. Comprueba la información e inténtalo de nuevo.",
+  "paypalButtonMustBeUsed": "Utiliza el botón de PayPal para continuar con el pago.",
   "paypalAccountTokenizationFailedError": "Se ha producido un error al vincular la cuenta PayPal. Inténtalo de nuevo.",
   "paypalFlowFailedError": "Se ha producido un error al conectarse a PayPal. Inténtalo de nuevo.",
   "paypalTokenizationRequestActiveError": "Ya hay una autorización de pago de PayPal en curso.",
