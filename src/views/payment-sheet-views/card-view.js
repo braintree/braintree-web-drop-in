@@ -59,7 +59,7 @@ CardView.prototype.initialize = function () {
     // TODO: Don't hardcode enabled and required boolean values. Option from merchant options.
     {
       fieldName: 'addressLine1',
-      enabled: false,
+      enabled: true,
       required: false,
       validations: [
         {
@@ -379,6 +379,10 @@ CardView.prototype.tokenize = function () {
 
   if (this.hasCardholderName) {
     tokenizeOptions.cardholderName = this.cardholderNameInput.value;
+  }
+
+  tokenizeOptions.billingAddress = {
+	  streetAddress: this.addressLine1Input.value
   }
 
   self._isTokenizing = true;
