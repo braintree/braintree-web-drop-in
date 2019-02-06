@@ -24,6 +24,7 @@ CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 CardView.prototype.initialize = function () {
   var cvvFieldGroup, postalCodeFieldGroup;
   var cardholderNameField = this.getElementById('cardholder-name-field-group');
+  var addressLine1Field = this.getElementById('address-line1-field-group');
   var cardIcons = this.getElementById('card-view-icons');
   var hfOptions = this._generateHostedFieldsOptions();
 
@@ -33,6 +34,7 @@ CardView.prototype.initialize = function () {
   this.hasCVV = hfOptions.fields.cvv;
   this.hasCardholderName = Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName);
   this.cardholderNameInput = cardholderNameField.querySelector('input');
+  this.addressLine1Input = addressLine1Field.querySelector('input');
   this.cardNumberIcon = this.getElementById('card-number-icon');
   this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
   this.cvvIcon = this.getElementById('cvv-icon');
@@ -51,6 +53,20 @@ CardView.prototype.initialize = function () {
             return value.length < 256;
           },
           error: this.strings.fieldTooLongForCardholderName
+        }
+      ]
+    },
+    // TODO: Don't hardcode enabled and required boolean values. Option from merchant options.
+    {
+      fieldName: 'addressLine1',
+      enabled: false,
+      required: false,
+      validations: [
+        {
+          isValid: function (value) {
+            return value.length < 256;
+          },
+          error: "Address entry error."
         }
       ]
     }

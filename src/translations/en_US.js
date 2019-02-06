@@ -43,6 +43,7 @@ module.exports = {
   venmoAppFailedError: 'The Venmo app could not be found on your device.',
   unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
   // Card form
+  addressLine1: 'Address Line 1',
   cardholderNameLabel: 'Cardholder Name',
   cardNumberLabel: 'Card Number',
   cvvLabel: 'CVV',
@@ -51,6 +52,7 @@ module.exports = {
   expirationDateLabel: 'Expiration Date',
   expirationDateLabelSubheading: '(MM/YY)',
   cardholderNamePlaceholder: 'Cardholder Name',
+  addressLine1Placeholder: 'Address Line 1',
   expirationDatePlaceholder: 'MM/YY',
   postalCodeLabel: 'Postal Code',
   payWithCard: 'Pay with card',
