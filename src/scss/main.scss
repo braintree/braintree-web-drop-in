@@ -710,37 +710,6 @@ $loader-scale-duration: 300ms;
   width: 98%;
   z-index: 0;
 
-  &.braintree-method--disabled {
-    .braintree-method__delete-container {
-      @include disabled;
-
-      .braintree-method__disabled-description {
-        position: absolute;
-        background: rgba(0, 0, 0, .7);
-        left: 6px;
-        z-index: 999999;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        top: 24px;
-      }
-
-      &:hover .braintree-method__disabled-description {
-        display: block;
-      }
-    }
-
-    .braintree-method__icon.braintree-method__delete {
-       background: darken(#EAEAEA, 20%);
-     }
-  }
-
-  .braintree-method__disabled-description {
-    text-align: center;
-    font-size: 12px;
-    display: none;
-  }
-
   &:hover .braintree-method__label {
     font-weight: 500;
   }

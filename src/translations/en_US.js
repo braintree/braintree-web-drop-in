@@ -58,7 +58,6 @@ module.exports = {
   endingIn: 'Ending in {{lastFourCardDigits}}',
   Card: 'Card',
   PayPal: 'PayPal',
-  hasSubscription: 'Payment methods associated with subscriptions may not be deleted.',
   'PayPal Credit': 'PayPal Credit',
   'Apple Pay': 'Apple Pay',
   'Google Pay': 'Google Pay',

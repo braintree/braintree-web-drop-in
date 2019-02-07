@@ -29,8 +29,6 @@ PaymentMethodView.prototype._initialize = function () {
 
   addSelectionEventHandler(this.element, this._choosePaymentMethod.bind(this));
 
-  html = html.replace(/@DISABLE_MESSAGE/g, this.strings.hasSubscription);
-
   switch (this.paymentMethod.type) {
     case paymentMethodTypes.applePay:
       html = html.replace(/@ICON/g, 'logoApplePay')
@@ -99,9 +97,6 @@ PaymentMethodView.prototype._choosePaymentMethod = function () {
 };
 
 PaymentMethodView.prototype._selectDelete = function () {
-  if (this.paymentMethod.hasSubscription) {
-    return;
-  }
   this.model.confirmPaymentMethodDeletion(this.paymentMethod);
 };
 
