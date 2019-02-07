@@ -59,7 +59,7 @@ module.exports = {
   "PayPal": "PayPal",
   "PayPal Credit": "PayPal Credit",
   "Google Pay": "Google Pay",
-  "American Express": "美國運通",
+  "American Express": "American Express",
   "Discover": "Discover",
   "Diners Club": "Diners Club",
   "MasterCard": "Mastercard",
