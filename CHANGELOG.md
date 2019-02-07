@@ -3,6 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
+- Allow `ApplePaySession` version to be set
+- Fix issue where vaulted payment methods have a UI error when deleting them (#474)
 - Stop halting Drop-in setup when Data Collector fails to load
 
 1.15.0
@@ -13,6 +15,7 @@ unreleased
 - Update @braintree/asset-loader to v0.2.1
 - Fix issue where 3ds modal may not get cleaned up during teardown (#463)
 - Allow easy Google Pay version 2 configuration
+- Provide error message when payment method is requested on PayPal button view (#433)
 
 1.14.1
 ------

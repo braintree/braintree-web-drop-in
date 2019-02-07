@@ -263,8 +263,20 @@ gulp.task('jsdoc:link-current', function (done) {
   fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
 });
 
-gulp.task('build:demoapp', function () {
-  return gulp.src([config.src.demoApp]).pipe(gulp.dest(GH_PAGES_PATH));
+gulp.task('build:demoapp:apple-domain-association', function () {
+  var wellknown = GH_PAGES_PATH + '/.well-known/';
+
+  mkdirp.sync(wellknown);
+
+  return gulp.src([
+    './test/app/.well-known/*'
+  ]).pipe(gulp.dest(wellknown));
+});
+
+gulp.task('build:demoapp', ['build:demoapp:apple-domain-association'], function () {
+  return gulp.src([
+    config.src.demoApp
+  ]).pipe(gulp.dest(GH_PAGES_PATH));
 });
 
 gulp.task('gh-pages', ['build'], function () {

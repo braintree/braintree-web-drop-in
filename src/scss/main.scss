@@ -710,36 +710,6 @@ $loader-scale-duration: 300ms;
   width: 98%;
   z-index: 0;
 
-  &.braintree-method--disabled {
-    .braintree-method__delete-container {
-      position: relative;
-      background: darken(#EAEAEA, 20%);
-      @include disabled;
-
-      .braintree-method__disabled-description {
-        position: absolute;
-        background: rgba(0, 0, 0, .7);
-        right: -5px;
-        z-index: 999999;
-        color: white;
-        padding: 5px;
-        border-radius: 5px;
-        top: 1px;
-        width: 250px;
-      }
-
-      &:hover .braintree-method__disabled-description {
-        display: block;
-      }
-    }
-  }
-
-  .braintree-method__disabled-description {
-    text-align: right;
-    font-size: 12px;
-    display: none;
-  }
-
   &:hover .braintree-method__label {
     font-weight: 500;
   }
