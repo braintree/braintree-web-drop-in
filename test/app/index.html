@@ -190,6 +190,12 @@
       config = Object.assign({}, defaultCreateObject, config);
     }
 
+    if (config.dataCollector === true) {
+      config.dataCollector = {
+        paypal: true
+      }
+    }
+
     if (config.threeDSecure === true) {
       config.threeDSecure = {
         amount: '10.00'

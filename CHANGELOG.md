@@ -5,6 +5,7 @@ unreleased
 ----------
 - Allow `ApplePaySession` version to be set
 - Fix issue where vaulted payment methods have a UI error when deleting them (#474)
+- Stop halting Drop-in setup when Data Collector fails to load
 
 1.15.0
 ------

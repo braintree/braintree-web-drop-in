@@ -1,6 +1,7 @@
 'use strict';
 
 var constants = require('../constants');
+var analytics = require('./analytics');
 var assets = require('@braintree/asset-loader');
 var Promise = require('./promise');
 
@@ -28,14 +29,31 @@ DataCollector.prototype.initialize = function () {
     return global.braintree.dataCollector.create(self._config);
   }).then(function (instance) {
     self._instance = instance;
+  }).catch(function (err) {
+    analytics.sendEvent(self._config.client, 'data-collector.setup-failed');
+    // log the Data Collector setup error
+    // but do not prevent Drop-in from loading
+    self.log(err);
   });
 };
 
+DataCollector.prototype.log = function (message) {
+  console.log(message);
+};
+
 DataCollector.prototype.getDeviceData = function () {
+  if (!this._instance) {
+    return '';
+  }
+
   return this._instance.deviceData;
 };
 
 DataCollector.prototype.teardown = function () {
+  if (!this._instance) {
+    return Promise.resolve();
+  }
+
   return this._instance.teardown();
 };
 
