@@ -3,10 +3,12 @@
 var fake = require('../../helpers/fake');
 var assets = require('@braintree/asset-loader');
 var Promise = require('../../../src/lib/promise');
+var analytics = require('../../../src/lib/analytics');
 var DataCollector = require('../../../src/lib/data-collector');
 
 describe('DataCollector', function () {
   beforeEach(function () {
+    this.sandbox.stub(analytics, 'sendEvent');
     this.dataCollectorInstance = fake.dataCollectorInstance;
     this.sandbox.stub(this.dataCollectorInstance, 'teardown').resolves();
   });
@@ -99,7 +101,8 @@ describe('DataCollector', function () {
       return dc.initialize().then(function () {
         expect(dc._instance).to.not.exist;
         expect(dc.log).to.be.calledWith(err);
-      });
+        expect(analytics.sendEvent).to.be.calledWith(this.config.client, 'data-collector.setup-failed');
+      }.bind(this));
     });
   });
 
