@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Allow `ApplePaySession` version to be set
+
 1.15.0
 ------
 - Add `rawPaymentData` to Apple Pay payment method payload
