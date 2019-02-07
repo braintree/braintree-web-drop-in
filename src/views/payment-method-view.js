@@ -99,6 +99,9 @@ PaymentMethodView.prototype._choosePaymentMethod = function () {
 };
 
 PaymentMethodView.prototype._selectDelete = function () {
+  if (this.paymentMethod.hasSubscription) {
+    return;
+  }
   this.model.confirmPaymentMethodDeletion(this.paymentMethod);
 };
 
