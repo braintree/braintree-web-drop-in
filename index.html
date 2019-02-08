@@ -126,6 +126,15 @@
       currency: 'USD',
       landingPageType: 'login' // hard code this so we get a consistent experience for e2e tests
     },
+    applePay: {
+      displayName: 'Braintree Test',
+      paymentRequest: {
+        total: {
+          label: 'Braintree Test Store',
+          amount: '19.99'
+        }
+      }
+    },
     googlePay: {
       // merchantId: 'merchant-id', // prod id goes here
       googlePayVersion: 2,
@@ -179,6 +188,12 @@
 
     if (config.mergeWithDefault !== false) {
       config = Object.assign({}, defaultCreateObject, config);
+    }
+
+    if (config.dataCollector === true) {
+      config.dataCollector = {
+        paypal: true
+      }
     }
 
     if (config.threeDSecure === true) {

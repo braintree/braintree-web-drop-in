@@ -617,26 +617,6 @@
   transition: opacity 300ms, width 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 300ms, border-radius 300ms;
   width: 98%;
   z-index: 0; }
-  .braintree-method.braintree-method--disabled .braintree-method__delete-container {
-    position: relative;
-    background: #b7b7b7;
-    cursor: not-allowed; }
-    .braintree-method.braintree-method--disabled .braintree-method__delete-container .braintree-method__disabled-description {
-      position: absolute;
-      background: rgba(0, 0, 0, 0.7);
-      right: -5px;
-      z-index: 999999;
-      color: white;
-      padding: 5px;
-      border-radius: 5px;
-      top: 1px;
-      width: 250px; }
-    .braintree-method.braintree-method--disabled .braintree-method__delete-container:hover .braintree-method__disabled-description {
-      display: block; }
-  .braintree-method .braintree-method__disabled-description {
-    text-align: right;
-    font-size: 12px;
-    display: none; }
   .braintree-method:hover .braintree-method__label {
     font-weight: 500; }
   .braintree-method:first-child {

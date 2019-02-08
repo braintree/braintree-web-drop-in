@@ -10098,7 +10098,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.googlePay
 ];
 var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = "1.15.0";
+var VERSION = "1.16.0";
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -10966,7 +10966,7 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = "1.15.0";
+var VERSION = "1.16.0";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -10974,7 +10974,7 @@ var VERSION = "1.15.0";
  * @param {boolean|object} [cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
  * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
  * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
- * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions).
+ * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developers.braintreepayments.com/guides/drop-in/customization/javascript/v3#customize-your-ui).
  * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a succesful tokenization.
  */
 
@@ -11004,6 +11004,7 @@ var VERSION = "1.15.0";
  *
  * @param {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
  * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {number} [applePaySessionVersion=2] The [version of the `ApplePaySession`](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history) to use. It's recomended to use the lowest version that contains all the features you need for your checkout to maximize compatiblity.
  * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
  */
 
@@ -11645,6 +11646,7 @@ module.exports = createFromScriptTag;
 'use strict';
 
 var constants = require('../constants');
+var analytics = require('./analytics');
 var assets = require('@braintree/asset-loader');
 var Promise = require('./promise');
 
@@ -11672,21 +11674,38 @@ DataCollector.prototype.initialize = function () {
     return global.braintree.dataCollector.create(self._config);
   }).then(function (instance) {
     self._instance = instance;
+  }).catch(function (err) {
+    analytics.sendEvent(self._config.client, 'data-collector.setup-failed');
+    // log the Data Collector setup error
+    // but do not prevent Drop-in from loading
+    self.log(err);
   });
 };
 
+DataCollector.prototype.log = function (message) {
+  console.log(message);
+};
+
 DataCollector.prototype.getDeviceData = function () {
+  if (!this._instance) {
+    return '';
+  }
+
   return this._instance.deviceData;
 };
 
 DataCollector.prototype.teardown = function () {
+  if (!this._instance) {
+    return Promise.resolve();
+  }
+
   return this._instance.teardown();
 };
 
 module.exports = DataCollector;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../constants":125,"./promise":143,"@braintree/asset-loader":1}],135:[function(require,module,exports){
+},{"../constants":125,"./analytics":130,"./promise":143,"@braintree/asset-loader":1}],135:[function(require,module,exports){
 'use strict';
 
 function isBraintreeWebError(err) {
@@ -12109,6 +12128,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Tjek oplysningerne, og prøv igen.",
   "hostedFieldsTokenizationNetworkErrorError": "Netværksfejl. Prøv igen.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Betalingskortet blev ikke bekræftet. Kontrollér oplysningerne, og prøv igen.",
+  "paypalButtonMustBeUsed": "Bruge PayPal-knappen for at fortsætte med din betaling.",
   "paypalAccountTokenizationFailedError": "PayPal-kontoen blev ikke tilføjet. Prøv igen.",
   "paypalFlowFailedError": "Der kunne ikke oprettes forbindelse til PayPal. Prøv igen.",
   "paypalTokenizationRequestActiveError": "PayPal-betalingen er i gang med at blive autoriseret.",
@@ -12134,7 +12154,7 @@ module.exports = {
   "Venmo": "Venmo",
   "Card": "Kort",
   "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
+  "PayPal Credit": "PayPal-kredit",
   "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
@@ -12180,6 +12200,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
   "hostedFieldsTokenizationNetworkErrorError": "Netzwerkfehler. Versuchen Sie es erneut.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Überprüfung der Karte fehlgeschlagen. Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+  "paypalButtonMustBeUsed": "Verwenden Sie den PayPal-Button, um mit der Zahlung fortfahren.",
   "paypalAccountTokenizationFailedError": "Beim Hinzufügen des PayPal-Kontos ist ein Problem aufgetreten. Versuchen Sie es erneut.",
   "paypalFlowFailedError": "Beim Verbinden mit PayPal ist ein Problem aufgetreten. Versuchen Sie es erneut.",
   "paypalTokenizationRequestActiveError": "Die PayPal-Zahlung wird bereits autorisiert.",
@@ -12251,11 +12272,12 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Check your entries and try again.",
   "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Check your entries and try again.",
+  "paypalButtonMustBeUsed": "Use the PayPal button to continue with your payment.",
   "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
   "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
   "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
   "venmoCanceledError": "We're sorry, something seems to have gone wrong. Please ensure you have the most recent version of the Venmo app installed on your device and your browser supports switching to Venmo.",
-  "vaultManagerPaymentMethodDeletionError": "Unable to delete payment method, try again.",
+  "vaultManagerPaymentMethodDeletionError": "We're sorry. We couldn't delete that payment method. Please try again.",
   "venmoAppFailedError": "The Venmo app wasn't found on your device.",
   "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
   "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
@@ -12322,6 +12344,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Please check your information and try again.",
   "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Please check your information and try again.",
+  "paypalButtonMustBeUsed": "Use the PayPal button to continue with your payment.",
   "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
   "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
   "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
@@ -12394,6 +12417,7 @@ module.exports = {
   hostedFieldsTokenizationCvvVerificationFailedError: 'Credit card verification failed. Please check your information and try again.',
   hostedFieldsTokenizationNetworkErrorError: 'Network error. Please try again.',
   hostedFieldsFieldsInvalidError: 'Please check your information and try again.',
+  paypalButtonMustBeUsed: 'Use the PayPal button to continue with your payment.',
   paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
   paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
@@ -12467,6 +12491,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Comprueba la información e inténtalo de nuevo.",
   "hostedFieldsTokenizationNetworkErrorError": "Error de red. Inténtalo de nuevo.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Error de verificación de la tarjeta de crédito. Comprueba la información e inténtalo de nuevo.",
+  "paypalButtonMustBeUsed": "Utiliza el botón de PayPal para continuar con el pago.",
   "paypalAccountTokenizationFailedError": "Se ha producido un error al vincular la cuenta PayPal. Inténtalo de nuevo.",
   "paypalFlowFailedError": "Se ha producido un error al conectarse a PayPal. Inténtalo de nuevo.",
   "paypalTokenizationRequestActiveError": "Ya hay una autorización de pago de PayPal en curso.",
@@ -12538,6 +12563,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Vérifiez vos informations, puis réessayez.",
   "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Veuillez réessayer.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "La vérification de la carte de crédit a échoué. Vérifiez vos informations, puis réessayez.",
+  "paypalButtonMustBeUsed": "Utilisez le bouton PayPal pour poursuivre votre paiement.",
   "paypalAccountTokenizationFailedError": "Une erreur s'est produite lors de l'enregistrement du compte PayPal. Veuillez réessayer.",
   "paypalFlowFailedError": "Une erreur s'est produite au cours de la connexion à PayPal. Veuillez réessayer.",
   "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
@@ -12609,6 +12635,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Vérifiez vos informations et réessayez.",
   "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Réessayez.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Échec de vérification de la carte bancaire. Vérifiez vos informations et réessayez.",
+  "paypalButtonMustBeUsed": "Utilisez le bouton PayPal pour poursuivre votre paiement.",
   "paypalAccountTokenizationFailedError": "Une erreur est survenue lors de l'ajout du compte PayPal. Réessayez.",
   "paypalFlowFailedError": "Une erreur est survenue lors de la connexion à PayPal. Réessayez.",
   "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
@@ -12659,8 +12686,8 @@ module.exports = {
   "editPaymentMethods": "Edit metode pembayaran",
   "CreditCardDeleteConfirmationMessage": "Hapus kartu {{secondaryIdentifier}} yang berakhiran {{identifier}}?",
   "PayPalAccountDeleteConfirmationMessage": "Hapus {{identifier}} rekening PayPal?",
-  "VenmoAccountDeleteConfirmationMessage": "Apakah Anda yakin akan menghapus rekening Venmo dengan nama pengguna {{identifier}}?",
-  "genericDeleteConfirmationMessage": "Apakah Anda yakin akan menghapus metode pembayaran ini?",
+  "VenmoAccountDeleteConfirmationMessage": "Yakin akan menghapus rekening Venmo dengan nama pengguna {{identifier}}?",
+  "genericDeleteConfirmationMessage": "Yakin akan menghapus metode pembayaran ini?",
   "deleteCancelButton": "Batalkan",
   "deleteConfirmationButton": "Hapus",
   "cardVerification": "Verifikasi Kartu",
@@ -12674,12 +12701,13 @@ module.exports = {
   "fieldInvalidForExpirationDate": "Tanggal akhir berlaku ini tidak valid.",
   "fieldInvalidForNumber": "Nomor kartu ini tidak valid.",
   "fieldInvalidForPostalCode": "Kode pos ini tidak valid.",
-  "genericError": "Terjadi kesalahan pada sistem kami.",
+  "genericError": "Ada yang salah pada sistem kami.",
   "hostedFieldsTokenizationFailOnDuplicateError": "Kartu kredit ini sudah dimasukkan sebagai metode pembayaran tersimpan.",
   "hostedFieldsFailedTokenizationError": "Periksa informasi Anda dan coba lagi.",
   "hostedFieldsFieldsInvalidError": "Periksa informasi Anda dan coba lagi.",
   "hostedFieldsTokenizationNetworkErrorError": "Masalah jaringan. Coba lagi.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Verifikasi kartu kredit gagal. Periksa informasi Anda dan coba lagi.",
+  "paypalButtonMustBeUsed": "Gunakan tombol PayPal untuk melanjutkan pembayaran Anda.",
   "paypalAccountTokenizationFailedError": "Terjadi kesalahan saat menambahkan rekening PayPal. Coba lagi.",
   "paypalFlowFailedError": "Terjadi kesalahan saat menyambung ke PayPal. Coba lagi.",
   "paypalTokenizationRequestActiveError": "Otorisasi pembayaran PayPal sedang diproses.",
@@ -12810,6 +12838,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Controlla e riprova.",
   "hostedFieldsTokenizationNetworkErrorError": "Errore di rete. Riprova.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "La verifica della carta di credito non è andata a buon fine. Controlla i dati e riprova.",
+  "paypalButtonMustBeUsed": "Usa il pulsante PayPal per procedere al pagamento.",
   "paypalAccountTokenizationFailedError": "Si è verificato un errore nel collegamento del conto PayPal. Riprova.",
   "paypalFlowFailedError": "Si è verificato un errore di connessione a PayPal. Riprova.",
   "paypalTokenizationRequestActiveError": "L'autorizzazione di pagamento PayPal è già in corso.",
@@ -12881,6 +12910,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "情報を確認してもう一度お試しください。",
   "hostedFieldsTokenizationNetworkErrorError": "ネットワークエラーです。もう一度お試しください。",
   "hostedFieldsTokenizationCvvVerificationFailedError": "クレジットカードの認証に失敗しました。情報を確認してもう一度お試しください。",
+  "paypalButtonMustBeUsed": "お客さまの支払いを続行するには、PayPalボタンを使用します。",
   "paypalAccountTokenizationFailedError": "PayPalアカウントの追加で問題が発生しました。もう一度お試しください。",
   "paypalFlowFailedError": "PayPalへの接続に問題が発生しました。もう一度お試しください。",
   "paypalTokenizationRequestActiveError": "PayPal支払いの承認はすでに処理中です。",
@@ -12952,6 +12982,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "정보를 확인하고 다시 시도해 주세요.",
   "hostedFieldsTokenizationNetworkErrorError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "신용카드 인증에 실패했습니다. 정보를 확인하고 다시 시도해 주세요.",
+  "paypalButtonMustBeUsed": "결제를 계속하려면 PayPal 버튼을 사용하세요.",
   "paypalAccountTokenizationFailedError": "PayPal 계정을 추가하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalFlowFailedError": "PayPal 계정을 연결하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalTokenizationRequestActiveError": "PayPal 결제 승인이 이미 진행 중입니다.",
@@ -13023,6 +13054,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Controleer uw gegevens en probeer het opnieuw.",
   "hostedFieldsTokenizationNetworkErrorError": "Netwerkfout. Probeer het opnieuw.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "De controle van de creditcard is mislukt. Controleer uw gegevens en probeer het opnieuw.",
+  "paypalButtonMustBeUsed": "Gebruik de PayPal-knop om door te gaan met uw betaling.",
   "paypalAccountTokenizationFailedError": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
   "paypalFlowFailedError": "Er is iets misgegaan bij de verbinding met PayPal. Probeer het opnieuw.",
   "paypalTokenizationRequestActiveError": "De autorisatie van de PayPal-betaling is al in behandeling.",
@@ -13094,6 +13126,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Kontroller informasjonen og prøv på nytt.",
   "hostedFieldsTokenizationNetworkErrorError": "Nettverksfeil. Prøv på nytt.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Bekreftelsen av betalingskortet mislyktes. Kontroller informasjonen og prøv på nytt.",
+  "paypalButtonMustBeUsed": "Bruk PayPal-knappen for å fortsette med betalingen.",
   "paypalAccountTokenizationFailedError": "Noe gikk galt da PayPal-kontoen ble lagt til. Prøv på nytt.",
   "paypalFlowFailedError": "Det oppsto et problem med tilkoblingen til PayPal. Prøv på nytt.",
   "paypalTokenizationRequestActiveError": "Godkjenning av PayPal-betalingen pågår allerede",
@@ -13165,6 +13198,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Sprawdź swoje informacje i spróbuj ponownie.",
   "hostedFieldsTokenizationNetworkErrorError": "Błąd sieci. Spróbuj ponownie.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Weryfikacja karty kredytowej nie powiodła się. Sprawdź swoje informacje i spróbuj ponownie.",
+  "paypalButtonMustBeUsed": "Użyj przycisku PayPal, aby kontynuować płatność.",
   "paypalAccountTokenizationFailedError": "Coś poszło nie tak podczas dodawania konta PayPal. Spróbuj ponownie.",
   "paypalFlowFailedError": "Coś poszło nie tak podczas łączenia z systemem PayPal. Spróbuj ponownie.",
   "paypalTokenizationRequestActiveError": "Autoryzacja płatności PayPal jest już w trakcie realizacji.",
@@ -13236,6 +13270,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Verifique as informações e tente novamente.",
   "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Falha ao verificar o cartão de crédito. Verifique as informações e tente novamente.",
+  "paypalButtonMustBeUsed": "Use o botão do PayPal para prosseguir com o seu pagamento.",
   "paypalAccountTokenizationFailedError": "Ocorreu um erro ao adicionar a conta do PayPal. Tente novamente.",
   "paypalFlowFailedError": "Ocorreu um erro de conexão com o PayPal. Tente novamente.",
   "paypalTokenizationRequestActiveError": "A autorização de pagamento do PayPal já está em andamento.",
@@ -13261,7 +13296,7 @@ module.exports = {
   "Venmo": "Venmo",
   "Card": "Cartão",
   "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
+  "PayPal Credit": "Crédito do PayPal",
   "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
@@ -13301,12 +13336,13 @@ module.exports = {
   "fieldInvalidForExpirationDate": "Esta data de validade não é correta.",
   "fieldInvalidForNumber": "Este número de cartão não é válido.",
   "fieldInvalidForPostalCode": "Este código postal não é válido.",
-  "genericError": "Tudo indica que ocorreu um problema.",
+  "genericError": "Tudo indica que houve um problema.",
   "hostedFieldsTokenizationFailOnDuplicateError": "Este cartão de crédito já está registado como um meio de pagamento guardado.",
   "hostedFieldsFailedTokenizationError": "Verifique os dados e tente novamente.",
   "hostedFieldsFieldsInvalidError": "Verifique os dados e tente novamente.",
   "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "A verificação do cartão de crédito falhou. Verifique os dados e tente novamente.",
+  "paypalButtonMustBeUsed": "Use o botão PayPal para continuar com o seu pagamento.",
   "paypalAccountTokenizationFailedError": "Ocorreu um erro ao associar a conta PayPal. Tente novamente.",
   "paypalFlowFailedError": "Ocorreu um erro na ligação com PayPal. Tente novamente.",
   "paypalTokenizationRequestActiveError": "Já há uma autorização de pagamento PayPal em curso.",
@@ -13378,6 +13414,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Проверьте правильность ввода данных и повторите попытку.",
   "hostedFieldsTokenizationNetworkErrorError": "Ошибка сети. Повторите попытку.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Проверка банковской карты не выполнена. Проверьте правильность ввода данных и повторите попытку.",
+  "paypalButtonMustBeUsed": "Используйте кнопку PayPal, чтобы продолжить совершение оплаты.",
   "paypalAccountTokenizationFailedError": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
   "paypalFlowFailedError": "Что-то пошло не так — не удалось подключиться к системе PayPal. Повторите попытку.",
   "paypalTokenizationRequestActiveError": "Выполняется авторизация платежа PayPal.",
@@ -13403,7 +13440,7 @@ module.exports = {
   "Venmo": "Venmo",
   "Card": "Карта",
   "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
+  "PayPal Credit": "Кредит PayPal",
   "Google Pay": "Google Pay",
   "American Express": "American Express",
   "Discover": "Discover",
@@ -13449,6 +13486,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "Kontrollera uppgifterna och försök igen.",
   "hostedFieldsTokenizationNetworkErrorError": "Nätverksfel. Försök igen.",
   "hostedFieldsTokenizationCvvVerificationFailedError": "Verifieringen av betalkort misslyckades. Kontrollera uppgifterna och försök igen.",
+  "paypalButtonMustBeUsed": "Använd PayPal-knappen för att fortsätta med din betalning.",
   "paypalAccountTokenizationFailedError": "Ett fel uppstod när PayPal-kontot skulle läggas till. Försök igen.",
   "paypalFlowFailedError": "Ett fel uppstod när anslutningen till PayPal skulle upprättas. Försök igen.",
   "paypalTokenizationRequestActiveError": "Betalningsgodkännandet för PayPal behandlas redan.",
@@ -13520,6 +13558,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองใหม่อีกครั้ง",
   "hostedFieldsTokenizationNetworkErrorError": "ข้อผิดพลาดด้านเครือข่าย โปรดลองอีกครั้ง",
   "hostedFieldsTokenizationCvvVerificationFailedError": "การตรวจสอบยืนยันบัตรเครดิตล้มเหลว โปรดตรวจสอบข้อมูลของคุณ แล้วลองใหม่อีกครั้ง",
+  "paypalButtonMustBeUsed": "ใช้ปุ่ม PayPal เพื่อดำเนินการชำระเงินต่อ",
   "paypalAccountTokenizationFailedError": "เกิดข้อผิดพลาดในการเพิ่มบัญชี PayPal โปรดลองอีกครั้ง",
   "paypalFlowFailedError": "เกิดข้อผิดพลาดในการเชื่อมต่อกับ PayPal โปรดลองอีกครั้ง",
   "paypalTokenizationRequestActiveError": "การอนุญาตการชำระเงินของ PayPal อยู่ในระหว่างดำเนินการ",
@@ -13591,6 +13630,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
   "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",
   "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡验证失败。请检查您的信息，然后重试。",
+  "paypalButtonMustBeUsed": "使用PayPal按钮继续进行付款。",
   "paypalAccountTokenizationFailedError": "添加PayPal账户时出错。请重试。",
   "paypalFlowFailedError": "连接到PayPal时出错。请重试。",
   "paypalTokenizationRequestActiveError": "PayPal付款授权已在进行中。",
@@ -13662,6 +13702,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "請檢查你的資料並再試一次。",
   "hostedFieldsTokenizationNetworkErrorError": "網絡錯誤。再試一次。",
   "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡認證失敗。請檢查你的資料並再試一次。",
+  "paypalButtonMustBeUsed": "使用 PayPal 按鈕以繼續付款。",
   "paypalAccountTokenizationFailedError": "加入 PayPal 帳戶時發生錯誤。再試一次。",
   "paypalFlowFailedError": "連接 PayPal 時發生錯誤。再試一次。",
   "paypalTokenizationRequestActiveError": "PayPal 付款授權已在處理中。",
@@ -13733,6 +13774,7 @@ module.exports = {
   "hostedFieldsFieldsInvalidError": "請檢查你的資料並重試。",
   "hostedFieldsTokenizationNetworkErrorError": "網路錯誤。請重試。",
   "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡認證失敗。請檢查你的資料並重試。",
+  "paypalButtonMustBeUsed": "使用 PayPal 按鈕以繼續付款。",
   "paypalAccountTokenizationFailedError": "新增 PayPal 帳戶時，系統發生錯誤。請重試。",
   "paypalFlowFailedError": "連結至 PayPal 時，系統發生錯誤。請重試。",
   "paypalTokenizationRequestActiveError": "PayPal 支付款項的授權已在處理中。",
@@ -13758,11 +13800,11 @@ module.exports = {
   "Venmo": "Venmo",
   "Card": "信用卡或扣帳卡",
   "PayPal": "PayPal",
-  "PayPal Credit": "PayPal 信貸",
+  "PayPal Credit": "PayPal Credit",
   "Google Pay": "Google Pay",
-  "American Express": "美國運通 (American Express)",
+  "American Express": "美國運通",
   "Discover": "Discover",
-  "Diners Club": "大來國際 (Diners Club)",
+  "Diners Club": "Diners Club",
   "MasterCard": "Mastercard",
   "Visa": "Visa",
   "JCB": "JCB",
@@ -14298,7 +14340,7 @@ var constants = require('../constants');
 
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
-var paymentMethodHTML = "<div class=\"braintre-method__icon-container braintree-method__delete-container\">\n  <div class=\"braintree-method__icon braintree-method__delete\">\n    <svg width=\"48\" height=\"29\">\n      <use xlink:href=\"#iconX\"></use>\n    </svg>\n  </div>\n  <div class=\"braintree-method__disabled-description\">@DISABLE_MESSAGE</div>\n</div>\n\n<div class=\"braintree-method__logo\">\n  <svg width=\"40\" height=\"24\" class=\"@CLASSNAME\">\n    <use xlink:href=\"#@ICON\"></use>\n  </svg>\n</div>\n\n<div class=\"braintree-method__label\">@TITLE<br><div class=\"braintree-method__label--small\">@SUBTITLE</div></div>\n\n<div class=\"braintre-method__icon-container braintree-method__check-container\">\n  <div class=\"braintree-method__icon braintree-method__check\">\n    <svg height=\"100%\" width=\"100%\">\n      <use xlink:href=\"#iconCheck\"></use>\n    </svg>\n  </div>\n</div>\n";
+var paymentMethodHTML = "<div class=\"braintre-method__icon-container braintree-method__delete-container\">\n  <div class=\"braintree-method__icon braintree-method__delete\">\n    <svg width=\"48\" height=\"29\">\n      <use xlink:href=\"#iconX\"></use>\n    </svg>\n  </div>\n</div>\n\n<div class=\"braintree-method__logo\">\n  <svg width=\"40\" height=\"24\" class=\"@CLASSNAME\">\n    <use xlink:href=\"#@ICON\"></use>\n  </svg>\n</div>\n\n<div class=\"braintree-method__label\">@TITLE<br><div class=\"braintree-method__label--small\">@SUBTITLE</div></div>\n\n<div class=\"braintre-method__icon-container braintree-method__check-container\">\n  <div class=\"braintree-method__icon braintree-method__check\">\n    <svg height=\"100%\" width=\"100%\">\n      <use xlink:href=\"#iconCheck\"></use>\n    </svg>\n  </div>\n</div>\n";
 
 function PaymentMethodView() {
   BaseView.apply(this, arguments);
@@ -14320,8 +14362,6 @@ PaymentMethodView.prototype._initialize = function () {
   this.element.setAttribute('tabindex', '0');
 
   addSelectionEventHandler(this.element, this._choosePaymentMethod.bind(this));
-
-  html = html.replace(/@DISABLE_MESSAGE/g, this.strings.hasSubscription);
 
   switch (this.paymentMethod.type) {
     case paymentMethodTypes.applePay:
@@ -14680,6 +14720,8 @@ var isHTTPS = require('../../lib/is-https');
 var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
+var DEFAULT_APPLE_PAY_SESSION_VERSION = 2;
+
 function ApplePayView() {
   BaseView.apply(this, arguments);
 }
@@ -14692,6 +14734,9 @@ ApplePayView.prototype.initialize = function () {
   var self = this;
 
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
+  self.applePaySessionVersion = self.applePayConfiguration.applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;
+
+  delete self.applePayConfiguration.applePaySessionVersion;
 
   self.model.asyncDependencyStarting();
 
@@ -14727,7 +14772,7 @@ ApplePayView.prototype.initialize = function () {
 ApplePayView.prototype._showPaymentSheet = function () {
   var self = this;
   var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
-  var session = new global.ApplePaySession(2, request);
+  var session = new global.ApplePaySession(self.applePaySessionVersion, request);
 
   session.onvalidatemerchant = function (event) {
     self.applePayInstance.performValidation({
@@ -14766,7 +14811,10 @@ ApplePayView.prototype.updateConfiguration = function (key, value) {
 ApplePayView.isEnabled = function (options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
   var applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
+  var applePaySessionVersion = options.merchantConfiguration.applePay && options.merchantConfiguration.applePay.applePaySessionVersion;
   var applePayBrowserSupported;
+
+  applePaySessionVersion = applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;
 
   if (!applePayEnabled) {
     return Promise.resolve(false);
@@ -14775,6 +14823,10 @@ ApplePayView.isEnabled = function (options) {
   applePayBrowserSupported = global.ApplePaySession && isHTTPS.isHTTPS();
 
   if (!applePayBrowserSupported) {
+    return Promise.resolve(false);
+  }
+
+  if (!global.ApplePaySession.supportsVersion(applePaySessionVersion)) {
     return Promise.resolve(false);
   }
 
@@ -14888,6 +14940,10 @@ BasePayPalView.prototype.initialize = function () {
       clearTimeout(asyncDependencyTimeoutHandler);
     }
   }
+};
+
+BasePayPalView.prototype.requestPaymentMethod = function () {
+  this.model.reportError('paypalButtonMustBeUsed');
 };
 
 BasePayPalView.prototype.updateConfiguration = function (key, value) {
