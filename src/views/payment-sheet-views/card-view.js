@@ -203,7 +203,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
   if (!overrides) { return options; }
 
   if (overrides.fields) {
-    if (overrides.fields.cvv && overrides.fields.cvv.placeholder !== undefined) {
+    if (overrides.fields.cvv && typeof overrides.fields.cvv.placeholder !== 'undefined') {
       this._hasCustomCVVPlaceholder = true;
     }
 
