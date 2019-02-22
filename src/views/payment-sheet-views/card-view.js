@@ -27,6 +27,7 @@ CardView.prototype.initialize = function () {
   var cardIcons = this.getElementById('card-view-icons');
 
   this.merchantConfiguration = this.model.merchantConfiguration.card || {};
+  this.merchantConfiguration.vault = this.merchantConfiguration.vault || {};
   hfOptions = this._generateHostedFieldsOptions();
 
   cardIcons.innerHTML = cardIconHTML;
@@ -77,7 +78,7 @@ CardView.prototype.initialize = function () {
     }
   }.bind(this));
 
-  if (!this.model.isGuestCheckout && this.merchantConfiguration.showSaveCardToggle === true) {
+  if (!this.model.isGuestCheckout && this.merchantConfiguration.vault.showSaveCardToggle === true) {
     classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
   }
 
