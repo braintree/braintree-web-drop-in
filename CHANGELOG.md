@@ -4,6 +4,7 @@ CHANGELOG
 Unreleased
 ----------
 - Fix issue where falsey values were not allowed as CVV placeholders
+- Fix issue where requestable event fires when cancelling payment method deletion (#477)
 
 1.16.0
 ------
