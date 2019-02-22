@@ -22,17 +22,20 @@ CardView.prototype.constructor = CardView;
 CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
 CardView.prototype.initialize = function () {
-  var cvvFieldGroup, postalCodeFieldGroup;
+  var cvvFieldGroup, postalCodeFieldGroup, hfOptions;
   var cardholderNameField = this.getElementById('cardholder-name-field-group');
   var cardIcons = this.getElementById('card-view-icons');
-  var hfOptions = this._generateHostedFieldsOptions();
+
+  this.merchantConfiguration = this.model.merchantConfiguration.card || {};
+  hfOptions = this._generateHostedFieldsOptions();
 
   cardIcons.innerHTML = cardIconHTML;
   this._hideUnsupportedCardIcons();
 
   this.hasCVV = hfOptions.fields.cvv;
-  this.hasCardholderName = Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName);
+  this.hasCardholderName = Boolean(this.merchantConfiguration.cardholderName);
   this.cardholderNameInput = cardholderNameField.querySelector('input');
+  this.saveCardInput = this.getElementById('save-card-input');
   this.cardNumberIcon = this.getElementById('card-number-icon');
   this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
   this.cvvIcon = this.getElementById('cvv-icon');
@@ -43,7 +46,7 @@ CardView.prototype.initialize = function () {
     {
       fieldName: 'cardholderName',
       enabled: this.hasCardholderName,
-      required: this.hasCardholderName && this.model.merchantConfiguration.card.cardholderName.required,
+      required: this.hasCardholderName && this.merchantConfiguration.cardholderName.required,
       requiredError: this.strings.fieldEmptyForCardholderName,
       validations: [
         {
@@ -73,6 +76,10 @@ CardView.prototype.initialize = function () {
       this._removeExtraInput(extraInput);
     }
   }.bind(this));
+
+  if (!this.model.isGuestCheckout && this.merchantConfiguration.showSaveCardToggle === true) {
+    classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
+  }
 
   this.model.asyncDependencyStarting();
 
@@ -145,7 +152,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
   var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
   var hasCVVChallenge = challenges.indexOf('cvv') !== -1;
   var hasPostalCodeChallenge = challenges.indexOf('postal_code') !== -1;
-  var overrides = this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.overrides;
+  var overrides = this.merchantConfiguration.overrides;
   var options = {
     client: this.client,
     fields: {
@@ -349,7 +356,7 @@ CardView.prototype.tokenize = function () {
   var self = this;
   var state = self.hostedFieldsInstance.getState();
   var tokenizeOptions = {
-    vault: !self.model.isGuestCheckout
+    vault: this._shouldVault()
   };
 
   this.model.clearError();
@@ -368,8 +375,7 @@ CardView.prototype.tokenize = function () {
   self._isTokenizing = true;
 
   return self.hostedFieldsInstance.tokenize(tokenizeOptions).then(function (payload) {
-    var retainCardFields = self.model.merchantConfiguration.card &&
-      self.model.merchantConfiguration.card.clearFieldsAfterTokenization === false;
+    var retainCardFields = self.merchantConfiguration.clearFieldsAfterTokenization === false;
 
     if (!retainCardFields) {
       Object.keys(state.fields).forEach(function (field) {
@@ -381,7 +387,7 @@ CardView.prototype.tokenize = function () {
       }
     }
 
-    if (!self.model.isGuestCheckout) {
+    if (self._shouldVault()) {
       payload.vaulted = true;
     }
 
@@ -476,6 +482,10 @@ CardView.prototype.hideFieldError = function (field) {
 
 CardView.prototype.teardown = function () {
   return this.hostedFieldsInstance.teardown();
+};
+
+CardView.prototype._shouldVault = function () {
+  return !this.model.isGuestCheckout && this.saveCardInput.checked;
 };
 
 CardView.prototype._generateFieldSelector = function (field) {

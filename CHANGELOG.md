@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Add ability to opt out of client side vaulting (cards)
+
 1.16.0
 ------
 - Allow `ApplePaySession` version to be set
