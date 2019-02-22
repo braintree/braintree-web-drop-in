@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+Unreleased
+----------
+- Fix issue where falsey values were not allowed as CVV placeholders
+
 1.16.0
 ------
 - Allow `ApplePaySession` version to be set
