@@ -216,6 +216,80 @@ describe('CardView', function () {
       }.bind(this));
     });
 
+    it('removes hidden class from save card input if configured', function () {
+      this.model.merchantConfiguration.card = {
+        vault: {
+          showSaveCardToggle: true
+        }
+      };
+      this.model.isGuestCheckout = false;
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="save-card-field-group"]').className).to.not.include('braintree-hidden');
+      }.bind(this));
+    });
+
+    it('does not remove hidden class from save card input if not configured', function () {
+      this.model.merchantConfiguration.card = {};
+      this.model.isGuestCheckout = false;
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="save-card-field-group"]').className).to.include('braintree-hidden');
+      }.bind(this));
+    });
+
+    it('sets checked value for save card input', function () {
+      this.model.merchantConfiguration.card = {
+        vault: {
+          defaultValueForVaulting: false
+        }
+      };
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        expect(this.view.saveCardInput.checked).to.equal(false);
+      }.bind(this));
+    });
+
+    it('defaults checked value for save card input to true', function () {
+      this.model.merchantConfiguration.card = {};
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        expect(this.view.saveCardInput.checked).to.equal(true);
+      }.bind(this));
+    });
+
     it('starts async dependency', function () {
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
 

@@ -124,6 +124,7 @@ var VERSION = process.env.npm_package_version;
  * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a succesful tokenization.
  * @param {object} [vault] Configuration for vaulting credit cards. Only applies  when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id).
  * @param {boolean} [vault.showSaveCardToggle=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
+ * @param {boolean} [vault.defaultValueForVaulting=true] Whether or not to have the save card input pre-checked. When set to `false` with `showSaveCardToggle` set to `false`, then cards will not be vaulted upon tokenization.
  */
 
 /**

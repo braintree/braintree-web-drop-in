@@ -82,6 +82,10 @@ CardView.prototype.initialize = function () {
     classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
   }
 
+  if (this.merchantConfiguration.vault.defaultValueForVaulting === false) {
+    this.saveCardInput.checked = false;
+  }
+
   this.model.asyncDependencyStarting();
 
   return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
