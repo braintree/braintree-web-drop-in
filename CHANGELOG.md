@@ -1,8 +1,9 @@
 CHANGELOG
 =========
 
-unreleased
+Unreleased
 ----------
+- Fix issue where falsey values were not allowed as CVV placeholders
 - Add ability to opt out of client side vaulting (cards)
 
 1.16.0

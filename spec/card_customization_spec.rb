@@ -89,6 +89,20 @@ describe "Drop-in card.cardholderName" do
       end
     end
 
+    it "can override field configurations with falsey values" do
+      options = '{"overrides":{"fields":{"cvv":{"placeholder":""}}}}'
+      visit_dropin_url("?card=#{options}")
+
+      click_option("card")
+      hosted_field_send_input("number", "4111111111111111")
+
+      iframe = find("iframe[id='braintree-hosted-field-cvv']")
+
+      page.within_frame(iframe) do
+        expect(find("input").native.attribute("placeholder")).to eq("")
+      end
+    end
+
     it "can override style configurations" do
       options = '{"overrides":{"styles":{"input":{"font-size":"20px"},".number":{"font-size":"10px"}}}}'
       visit_dropin_url("?card=#{options}")
