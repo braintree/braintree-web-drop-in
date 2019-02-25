@@ -14,6 +14,7 @@ var vaultManager = require('braintree-web/vault-manager');
 var DataCollector = require('../../src/lib/data-collector');
 var Promise = require('../../src/lib/promise');
 var CardView = require('../../src/views/payment-sheet-views/card-view');
+var MainView = require('../../src/views/main-view');
 var constants = require('../../src/constants');
 
 function delay(amount) {
@@ -396,7 +397,7 @@ describe('Dropin', function () {
       });
     });
 
-    it('creates a MainView a customerId exists', function (done) {
+    it('creates a MainView when a customerId exists', function (done) {
       var instance;
       var paymentMethodsPayload = {paymentMethods: []};
 
@@ -418,11 +419,35 @@ describe('Dropin', function () {
       });
     });
 
-    it('creates a MainView a customerId does not exist', function (done) {
+    it('creates a MainView when a customerId does not exist', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
         expect(instance._mainView).to.exist;
+        done();
+      });
+    });
+
+    it('expands payment options when configured', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'shouldExpandPaymentOptions').returns(true);
+      this.sandbox.stub(MainView.prototype, 'expandPaymentOptions');
+
+      instance._initialize(function () {
+        expect(instance._mainView.expandPaymentOptions).to.be.calledOnce;
+        done();
+      });
+    });
+
+    it('does not expand payment options when not configured', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'shouldExpandPaymentOptions').returns(false);
+      this.sandbox.stub(MainView.prototype, 'expandPaymentOptions');
+
+      instance._initialize(function () {
+        expect(instance._mainView.expandPaymentOptions).to.not.be.called;
         done();
       });
     });

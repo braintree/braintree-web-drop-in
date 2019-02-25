@@ -675,14 +675,43 @@ describe('MainView', function () {
     });
 
     describe('for changeActivePaymentMethod', function () {
+      beforeEach(function () {
+        this.sandbox.stub(this.mainView, 'setPrimaryView');
+      });
+
       it('sets the PaymentMethodsView as the primary view', function (done) {
         this.mainView.paymentMethodsViews.activeMethodView = {setActive: function () {}};
-        this.sandbox.stub(this.mainView, 'setPrimaryView');
 
         this.model._emit('changeActivePaymentMethod', {});
 
         setTimeout(function () {
           expect(this.mainView.setPrimaryView).to.be.called;
+          done();
+        }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+      });
+
+      it('calls expandPaymentOptions when configured to do so', function (done) {
+        this.mainView.paymentMethodsViews.activeMethodView = {setActive: function () {}};
+        this.sandbox.stub(this.model, 'shouldExpandPaymentOptions').returns(true);
+        this.sandbox.stub(this.mainView, 'expandPaymentOptions');
+
+        this.model._emit('changeActivePaymentMethod', {});
+
+        setTimeout(function () {
+          expect(this.mainView.expandPaymentOptions).to.be.calledOnce;
+          done();
+        }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+      });
+
+      it('does not call expandPaymentOptions when not configured to do so', function (done) {
+        this.mainView.paymentMethodsViews.activeMethodView = {setActive: function () {}};
+        this.sandbox.stub(this.model, 'shouldExpandPaymentOptions').returns(false);
+        this.sandbox.stub(this.mainView, 'expandPaymentOptions');
+
+        this.model._emit('changeActivePaymentMethod', {});
+
+        setTimeout(function () {
+          expect(this.mainView.expandPaymentOptions).to.not.be.called;
           done();
         }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
       });
@@ -1011,6 +1040,36 @@ describe('MainView', function () {
     });
   });
 
+  describe('extendPaymentOptions', function () {
+    it('sets view to payment methods and payment options', function () {
+      var element = document.createElement('div');
+      var model = fake.model();
+
+      element.innerHTML = templateHTML;
+
+      return model.initialize().then(function () {
+        var mainView = new MainView({
+          client: this.client,
+          element: element,
+          merchantConfiguration: {
+            authorization: fake.tokenizationKey
+          },
+          model: model,
+          strings: strings
+        });
+
+        this.sandbox.stub(mainView, 'setPrimaryView');
+        this.sandbox.stub(mainView, 'hideToggle');
+
+        mainView.expandPaymentOptions();
+
+        expect(mainView.setPrimaryView).to.be.calledOnce;
+        expect(mainView.setPrimaryView).to.be.calledWith('methods', 'options');
+        expect(mainView.hideToggle).to.be.calledOnce;
+      }.bind(this));
+    });
+  });
+
   describe('teardown', function () {
     beforeEach(function () {
       this.context = {
@@ -1217,6 +1276,24 @@ describe('MainView', function () {
       expect(this.mainView.model.setPaymentMethodRequestable).to.be.calledWithMatch({
         isRequestable: false
       });
+    });
+
+    it('expands payment options if configured', function () {
+      this.sandbox.stub(this.mainView, 'expandPaymentOptions');
+      this.sandbox.stub(this.mainView.model, 'shouldExpandPaymentOptions').returns(true);
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.expandPaymentOptions).to.be.calledOnce;
+    });
+
+    it('does not expand payment options if not configured', function () {
+      this.sandbox.stub(this.mainView, 'expandPaymentOptions');
+      this.sandbox.stub(this.mainView.model, 'shouldExpandPaymentOptions').returns(false);
+
+      this.mainView.disableEditMode();
+
+      expect(this.mainView.expandPaymentOptions).to.not.be.called;
     });
   });
 

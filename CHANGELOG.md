@@ -4,6 +4,7 @@ CHANGELOG
 Unreleased
 ----------
 - Fix issue where falsey values were not allowed as CVV placeholders
+- Add ability to auto expand "Other Ways to Pay" Section
 
 1.16.0
 ------

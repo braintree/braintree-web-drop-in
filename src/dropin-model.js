@@ -137,6 +137,10 @@ DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {
   this._emit('confirmPaymentMethodDeletion', paymentMethod);
 };
 
+DropinModel.prototype.shouldExpandPaymentOptions = function () {
+  return Boolean(this.merchantConfiguration.expandOtherWaysToPay && this.getPaymentMethods().length > 0);
+};
+
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
   var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
   var typeHasNotChanged = options.type === this._paymentMethodRequestableType;

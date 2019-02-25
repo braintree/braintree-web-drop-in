@@ -93,6 +93,9 @@ MainView.prototype._initialize = function () {
   this.model.on('changeActivePaymentMethod', function () {
     setTimeout(function () {
       this.setPrimaryView(PaymentMethodsView.ID);
+      if (this.model.shouldExpandPaymentOptions()) {
+        this.expandPaymentOptions();
+      }
     }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
   }.bind(this));
 
@@ -178,6 +181,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
     }
   } else if (id === PaymentMethodsView.ID) {
     this.showToggle();
+
     // Move options below the upper-container
     this.getElementById('lower-container').appendChild(this.getElementById('options'));
   } else if (id === PaymentOptionsView.ID) {
@@ -238,18 +242,23 @@ MainView.prototype.toggleAdditionalOptions = function () {
     if (this.model.getPaymentMethods().length === 0) {
       this.setPrimaryView(PaymentOptionsView.ID);
     } else {
-      this.setPrimaryView(PaymentMethodsView.ID, PaymentOptionsView.ID);
-      this.hideToggle();
+      this.expandPaymentOptions();
     }
   } else {
     classList.add(this.element, prefixShowClass(PaymentOptionsView.ID));
   }
 };
 
+MainView.prototype.expandPaymentOptions = function () {
+  this.setPrimaryView(PaymentMethodsView.ID, PaymentOptionsView.ID);
+  this.hideToggle();
+};
+
 MainView.prototype.showToggle = function () {
   if (this.model.isInEditMode()) {
     return;
   }
+
   classList.remove(this.toggle, 'braintree-hidden');
   classList.add(this.lowerContainer, 'braintree-hidden');
 };
@@ -329,6 +338,10 @@ MainView.prototype.disableEditMode = function () {
   this.showToggle();
 
   paymentMethod = this.primaryView.getPaymentMethod();
+
+  if (this.model.shouldExpandPaymentOptions()) {
+    this.expandPaymentOptions();
+  }
 
   this.model.setPaymentMethodRequestable({
     isRequestable: Boolean(paymentMethod),
