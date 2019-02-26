@@ -2197,7 +2197,7 @@ describe('CardView', function () {
       });
     });
 
-    it('odes not include `vaulted: true` in tokenization payload if save card input is not checked', function () {
+    it('does not include `vaulted: true` in tokenization payload if save card input is not checked', function () {
       this.context.model.isGuestCheckout = false;
       this.context.saveCardInput.checked = false;
 
