@@ -641,7 +641,13 @@ $loader-scale-duration: 300ms;
 
       &.braintree-form__checkbox {
         float: left;
-        margin-top: -7px;
+
+        input {
+          margin: -5px 5px 0 0;
+          padding: 0;
+          line-height: 0;
+          box-sizing: border-box;
+        }
       }
     }
 
