@@ -25,6 +25,10 @@ CardView.prototype.initialize = function () {
   var cvvFieldGroup, postalCodeFieldGroup;
   var cardholderNameField = this.getElementById('cardholder-name-field-group');
   var addressLine1Field = this.getElementById('address-line1-field-group');
+  var addressLine2Field = this.getElementById('address-line2-field-group');
+  var localityField = this.getElementById('locality-field-group');
+  var regionField = this.getElementById('region-field-group');
+  var countryCodeField = this.getElementById('country-code-field-group');
   var cardIcons = this.getElementById('card-view-icons');
   var hfOptions = this._generateHostedFieldsOptions();
 
@@ -33,8 +37,13 @@ CardView.prototype.initialize = function () {
 
   this.hasCVV = hfOptions.fields.cvv;
   this.hasCardholderName = Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.cardholderName);
+  this.billingAddressRequired = Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.billingAddressRequired);
   this.cardholderNameInput = cardholderNameField.querySelector('input');
   this.addressLine1Input = addressLine1Field.querySelector('input');
+  this.addressLine2Input = addressLine2Field.querySelector('input');
+  this.localityInput = localityField.querySelector('input');
+  this.regionInput = regionField.querySelector('input');
+  this.countryCodeInput = countryCodeField.querySelector('input');
   this.cardNumberIcon = this.getElementById('card-number-icon');
   this.cardNumberIconSvg = this.getElementById('card-number-icon-svg');
   this.cvvIcon = this.getElementById('cvv-icon');
@@ -56,17 +65,68 @@ CardView.prototype.initialize = function () {
         }
       ]
     },
-    // TODO: Don't hardcode enabled and required boolean values. Option from merchant options.
     {
       fieldName: 'addressLine1',
-      enabled: true,
-      required: false,
+      enabled: this.billingAddressRequired,
+      required: this.billingAddressRequired,
       validations: [
         {
           isValid: function (value) {
             return value.length < 256;
           },
-          error: "Address entry error."
+          error: "Address line 1 entry error."
+        }
+      ]
+    },
+    {
+      fieldName: 'addressLine2',
+      enabled: this.billingAddressRequired,
+      required: this.billingAddressRequired,
+      validations: [
+        {
+          isValid: function (value) {
+            return value.length < 256;
+          },
+          error: "Address line 2 entry error."
+        }
+      ]
+    },
+    {
+      fieldName: 'locality',
+      enabled: this.billingAddressRequired,
+      required: this.billingAddressRequired,
+      validations: [
+        {
+          isValid: function (value) {
+            return value.length < 256;
+          },
+          error: "Locality entry error."
+        }
+      ]
+    },
+    {
+      fieldName: 'region',
+      enabled: this.billingAddressRequired,
+      required: this.billingAddressRequired,
+      validations: [
+        {
+          isValid: function (value) {
+            return value.length < 256;
+          },
+          error: "Region entry error."
+        }
+      ]
+    },
+    {
+      fieldName: 'countryCode',
+      enabled: this.billingAddressRequired,
+      required: this.billingAddressRequired,
+      validations: [
+        {
+          isValid: function (value) {
+            return value.length < 256;
+          },
+          error: "Country code entry error."
         }
       ]
     }
@@ -77,7 +137,7 @@ CardView.prototype.initialize = function () {
     cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
   }
 
-  if (!hfOptions.fields.postalCode) {
+  if (!hfOptions.fields.postalCode && !this.billingAddressRequired) {
     postalCodeFieldGroup = this.getElementById('postal-code-field-group');
     postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
   }
