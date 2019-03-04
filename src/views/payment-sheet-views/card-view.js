@@ -222,6 +222,9 @@ CardView.prototype._generateHostedFieldsOptions = function () {
   var hasCVVChallenge = challenges.indexOf('cvv') !== -1;
   var hasPostalCodeChallenge = challenges.indexOf('postal_code') !== -1;
   var overrides = this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.overrides;
+  // TODO: Ask blade why 'this.billingAddressRequired' is undefined.
+  var billingAddressRequired = Boolean(this.model.merchantConfiguration.card && this.model.merchantConfiguration.card.billingAddressRequired);
+
   var options = {
     client: this.client,
     fields: {
@@ -272,7 +275,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     delete options.fields.cvv;
   }
 
-  if (!hasPostalCodeChallenge) {
+  if (!hasPostalCodeChallenge && !billingAddressRequired) {
     delete options.fields.postalCode;
   }
 
