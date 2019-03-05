@@ -69,6 +69,7 @@ CardView.prototype.initialize = function () {
       fieldName: 'addressLine1',
       enabled: this.billingAddressRequired,
       required: this.billingAddressRequired,
+      requiredError: this.strings.fieldEmptyForStreetAddress,
       validations: [
         {
           isValid: function (value) {
@@ -82,6 +83,7 @@ CardView.prototype.initialize = function () {
       fieldName: 'addressLine2',
       enabled: this.billingAddressRequired,
       required: this.billingAddressRequired,
+      requiredError: this.strings.fieldEmptyForExtendedAddress,
       validations: [
         {
           isValid: function (value) {
@@ -95,6 +97,7 @@ CardView.prototype.initialize = function () {
       fieldName: 'locality',
       enabled: this.billingAddressRequired,
       required: this.billingAddressRequired,
+      requiredError: this.strings.fieldEmptyForLocality,
       validations: [
         {
           isValid: function (value) {
@@ -108,6 +111,7 @@ CardView.prototype.initialize = function () {
       fieldName: 'region',
       enabled: this.billingAddressRequired,
       required: this.billingAddressRequired,
+      requiredError: this.strings.fieldEmptyForRegion,
       validations: [
         {
           isValid: function (value) {
@@ -121,6 +125,7 @@ CardView.prototype.initialize = function () {
       fieldName: 'countryCode',
       enabled: this.billingAddressRequired,
       required: this.billingAddressRequired,
+      requiredError: this.strings.fieldEmptyForCountryCode,
       validations: [
         {
           isValid: function (value) {
@@ -444,11 +449,20 @@ CardView.prototype.tokenize = function () {
     tokenizeOptions.cardholderName = this.cardholderNameInput.value;
   }
 
-  tokenizeOptions.billingAddress = {
-	  streetAddress: this.addressLine1Input.value
+  if (this.billingAddressRequired) {
+    tokenizeOptions.billingAddress = {
+      streetAddress: this.addressLine1Input.value,
+      extendedAddress: this.addressLine2Input.value,
+      locality: this.localityInput.value,
+      region: this.regionInput.value,
+      // TODO: obtain 'postalCode' input value
+      countryCodeAlpha2: this.countryCodeInput.value
+    }
   }
 
   self._isTokenizing = true;
+
+  console.log("Tokenize Options: ", tokenizeOptions);
 
   return self.hostedFieldsInstance.tokenize(tokenizeOptions).then(function (payload) {
     var retainCardFields = self.model.merchantConfiguration.card &&

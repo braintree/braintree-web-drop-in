@@ -365,7 +365,7 @@ $loader-scale-duration: 300ms;
   border-radius: $radius-default;
   display: none;
   margin: 0 auto;
-  max-height: 500px;
+  max-height: 1000px;
   transition: transform 300ms, opacity 300ms, max-height 300ms ease;
   width: 100%;
 }
