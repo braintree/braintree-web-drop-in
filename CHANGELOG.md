@@ -5,6 +5,7 @@ Unreleased
 ----------
 - Fix issue where falsey values were not allowed as CVV placeholders
 - Add ability to opt out of card view by passing `false` as the card option
+- Update braintree-web to v3.43.0
 
 1.16.0
 ------
