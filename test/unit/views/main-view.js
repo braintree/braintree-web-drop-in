@@ -475,6 +475,26 @@ describe('MainView', function () {
       });
     });
 
+    it('does not call setPaymentMethodRequestable when in edit mode', function () {
+      var fakePaymentMethod = {
+        type: 'TYPE',
+        nonce: 'some-nonce'
+      };
+      var mainView = new MainView(this.mainViewOptions);
+
+      this.sandbox.stub(BaseView.prototype, 'getPaymentMethod').returns(fakePaymentMethod);
+      this.sandbox.stub(mainView.model, 'setPaymentMethodRequestable');
+      this.sandbox.stub(mainView.model, 'isInEditMode').returns(true);
+
+      mainView.setPrimaryView(PaymentOptionsView.ID);
+
+      expect(mainView.model.setPaymentMethodRequestable).to.be.calledWith({
+        isRequestable: false,
+        type: 'TYPE',
+        selectedPaymentMethod: fakePaymentMethod
+      });
+    });
+
     it('calls setPaymentMethodRequestable when there is no payment method requestable', function () {
       var mainView = new MainView(this.mainViewOptions);
 
