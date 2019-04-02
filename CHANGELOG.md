@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-Unreleased
+1.17.0
 ----------
 - Fix issue where falsey values were not allowed as CVV placeholders
 - Add ability to opt out of card view by passing `false` as the card option
