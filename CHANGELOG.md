@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.17.1
+------
 - Update braintree-web to v3.44.1
   - Fixes issue with mobile tabbing in the card form
 
