@@ -855,7 +855,7 @@ var basicComponentVerification = require('../lib/basic-component-verification');
 var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var errors = require('./errors');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -1611,7 +1611,7 @@ module.exports = {
 
 var BraintreeError = require('../lib/braintree-error');
 var Client = require('./client');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var sharedErrors = require('../lib/errors');
@@ -3106,7 +3106,7 @@ var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 
 /**
  * @static
@@ -3346,6 +3346,7 @@ module.exports = function getStylesFromClass(cssClass) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../shared/constants":62}],58:[function(require,module,exports){
+(function (global){
 'use strict';
 
 var assign = require('../../lib/assign').assign;
@@ -3656,6 +3657,54 @@ function performBlurFixForIos(container) {
   }
 }
 
+function isVisibleEnough(node) {
+  var boundingBox = node.getBoundingClientRect();
+  var verticalMidpoint = Math.floor(boundingBox.height / 2);
+  var horizontalMidpoint = Math.floor(boundingBox.width / 2);
+
+  return (
+    boundingBox.top < (global.innerHeight - verticalMidpoint || document.documentElement.clientHeight - verticalMidpoint) &&
+    boundingBox.right > horizontalMidpoint &&
+    boundingBox.bottom > verticalMidpoint &&
+    boundingBox.left < (global.innerWidth - horizontalMidpoint || document.documentElement.clientWidth - horizontalMidpoint)
+  );
+}
+
+function fieldsDOMOrder(configFields) {
+  var fieldPosition = [];
+  var fields = configFields;
+  var sortedFieldNames = [];
+  var validFieldsInUse = Object.keys(fields).filter(function (key) {
+    return allowedFields.hasOwnProperty(key);
+  });
+
+  validFieldsInUse.forEach(function (key) {
+    fieldPosition.push([key, fields[key].container]);
+  });
+
+  fieldPosition.sort(function (a, b) {
+    var element1 = a[1];
+    var element2 = b[1];
+    var position = element1.compareDocumentPosition(element2);
+
+    if (element1 === element2) { return 0; }
+
+    if (position & Node.DOCUMENT_POSITION_FOLLOWING || position & Node.DOCUMENT_POSITION_CONTAINED_BY) {
+      return -1;
+    } else if (position & Node.DOCUMENT_POSITION_PRECEDING || position & Node.DOCUMENT_POSITION_CONTAINS) {
+      return 1;
+    }
+
+    return 0;
+  });
+
+  fieldPosition.forEach(function (value) {
+    sortedFieldNames.push(value[0]);
+  });
+
+  return sortedFieldNames;
+}
+
 /**
  * @class HostedFields
  * @param {object} options The Hosted Fields {@link module:braintree-web/hosted-fields.create create} options.
@@ -3824,6 +3873,8 @@ function HostedFields(options) {
     }, 0);
   }.bind(this));
 
+  busOptions.orderedFields = fieldsDOMOrder(this._state.fields);
+
   if (busOptions.styles) {
     Object.keys(busOptions.styles).forEach(function (selector) {
       var className = busOptions.styles[selector];
@@ -3865,6 +3916,21 @@ function HostedFields(options) {
     events.INPUT_EVENT,
     createInputEventHandler(fields).bind(this)
   );
+
+  this._bus.on(events.TRIGGER_INPUT_FOCUS, function (fieldName) {
+    var container = fields[fieldName].containerElement;
+
+    // Inputs outside of the viewport don't always scroll into view on
+    // focus in iOS Safari. 5ms timeout gives the browser a chance to
+    // do the right thing and prevents stuttering.
+    if (browserDetection.isIos()) {
+      setTimeout(function () {
+        if (!isVisibleEnough(container)) {
+          container.scrollIntoView();
+        }
+      }, 5);
+    }
+  });
 
   this._destructor.registerFunctionForTeardown(function () {
     var j, node, parent;
@@ -4473,6 +4539,7 @@ HostedFields.prototype.getState = function () {
 
 module.exports = wrapPromise.wrapPrototype(HostedFields);
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../../lib/analytics":67,"../../lib/assign":69,"../../lib/braintree-error":72,"../../lib/bus":75,"../../lib/constants":76,"../../lib/convert-methods-to-error":77,"../../lib/create-assets-url":79,"../../lib/create-deferred-client":81,"../../lib/destructor":83,"../../lib/errors":85,"../../lib/event-emitter":86,"../../lib/methods":93,"../../lib/promise":95,"../../lib/vendor/uuid":99,"../shared/browser-detection":61,"../shared/constants":62,"../shared/errors":63,"../shared/find-parent-tags":64,"../shared/get-card-types":65,"./attribute-validation-error":55,"./compose-url":56,"./get-styles-from-class":57,"./inject-frame":59,"@braintree/class-list":18,"@braintree/iframer":19,"@braintree/wrap-promise":26}],59:[function(require,module,exports){
 'use strict';
 
@@ -4501,7 +4568,7 @@ var supportsInputFormatting = require('restricted-input/supports-input-formattin
 var wrapPromise = require('@braintree/wrap-promise');
 var BraintreeError = require('../lib/braintree-error');
 var Promise = require('../lib/promise');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -4811,7 +4878,7 @@ module.exports = {
 
 var enumerate = require('../../lib/enumerate');
 var errors = require('./errors');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 
 var constants = {
   VERSION: VERSION,
@@ -5212,7 +5279,7 @@ module.exports = {
 var BraintreeError = require('./braintree-error');
 var Promise = require('./promise');
 var sharedErrors = require('./errors');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 
 function basicComponentVerification(options) {
   var client, authorization, name;
@@ -5560,7 +5627,7 @@ module.exports = BraintreeBus;
 },{"../braintree-error":72,"./check-origin":73,"./events":74,"framebus":125}],76:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 var PLATFORM = 'web';
 
 var CLIENT_API_URLS = {
@@ -5705,7 +5772,7 @@ var Promise = require('./promise');
 var assets = require('./assets');
 var sharedErrors = require('./errors');
 
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 
 function createDeferredClient(options) {
   var promise = Promise.resolve();
@@ -5921,7 +5988,7 @@ module.exports = function (array, key, value) {
 },{}],88:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 var assign = require('./assign').assign;
 
 function generateTokenizationParameters(configuration, overrides) {
@@ -6362,7 +6429,7 @@ module.exports = {
 var basicComponentVerification = require('../lib/basic-component-verification');
 var wrapPromise = require('@braintree/wrap-promise');
 var PayPalCheckout = require('./paypal-checkout');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 
 /**
  * @static
@@ -7033,7 +7100,7 @@ var uuid = require('../../lib/vendor/uuid');
 var deferred = require('../../lib/deferred');
 var errors = require('../shared/errors');
 var events = require('../shared/events');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 var iFramer = require('@braintree/iframer');
 var Promise = require('../../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
@@ -7413,7 +7480,7 @@ var createAssetsUrl = require('../lib/create-assets-url');
 var BraintreeError = require('../lib/braintree-error');
 var analytics = require('../lib/analytics');
 var errors = require('./shared/errors');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -7606,7 +7673,7 @@ var basicComponentVerification = require('../lib/basic-component-verification');
 var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var VaultManager = require('./vault-manager');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 var wrapPromise = require('@braintree/wrap-promise');
 
 /**
@@ -7847,7 +7914,7 @@ var BraintreeError = require('../lib/braintree-error');
 var Venmo = require('./venmo');
 var Promise = require('../lib/promise');
 var supportsVenmo = require('./shared/supports-venmo');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 
 /**
  * @static
@@ -8064,7 +8131,7 @@ var convertMethodsToError = require('../lib/convert-methods-to-error');
 var wrapPromise = require('@braintree/wrap-promise');
 var BraintreeError = require('../lib/braintree-error');
 var Promise = require('../lib/promise');
-var VERSION = "3.44.0";
+var VERSION = "3.44.1";
 
 /**
  * Venmo tokenize payload.
@@ -8643,7 +8710,7 @@ var cardTypes = {
       6292
     ],
     gaps: [4, 8, 12],
-    lengths: [16, 17, 18, 19],
+    lengths: [14, 15, 16, 17, 18, 19],
     code: {
       name: 'CVN',
       size: 3
@@ -10221,7 +10288,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.googlePay
 ];
 var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = "1.17.0";
+var VERSION = "1.17.1";
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -11089,7 +11156,7 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = "1.17.0";
+var VERSION = "1.17.1";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
