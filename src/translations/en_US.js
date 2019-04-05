@@ -53,7 +53,7 @@ module.exports = {
   cardholderNamePlaceholder: 'Cardholder Name',
   expirationDatePlaceholder: 'MM/YY',
   postalCodeLabel: 'Postal Code',
-  saveCardLabel: 'Save credit card',
+  saveCardLabel: 'Save card',
   payWithCard: 'Pay with card',
   // Payment Method descriptions
   endingIn: 'Ending in {{lastFourCardDigits}}',
