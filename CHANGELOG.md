@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+Unreleased
+------
+- Update braintree-web to v3.44.2
+- Google Pay
+  - Fix issue where tokenization details for Google Payments could accidentally be dropped
+- PayPal
+  - Fix bug where merchant account id was not being applied in vault flows
+
 1.17.1
 ------
 - Update braintree-web to v3.44.1
