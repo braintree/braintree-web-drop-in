@@ -855,7 +855,7 @@ var basicComponentVerification = require('../lib/basic-component-verification');
 var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var errors = require('./errors');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -1611,7 +1611,7 @@ module.exports = {
 
 var BraintreeError = require('../lib/braintree-error');
 var Client = require('./client');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var sharedErrors = require('../lib/errors');
@@ -2849,8 +2849,6 @@ var methods = require('../lib/methods');
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var DEFAULT_CARD_NETWORKS = ['AMEX', 'DISCOVER', 'MASTERCARD', 'VISA'];
-
 /**
  * @typedef {object} GooglePayment~tokenizePayload
  * @property {string} nonce The payment method nonce.
@@ -2899,29 +2897,16 @@ GooglePayment.prototype._createV1PaymentDataRequest = function (defaultConfig, p
 };
 
 GooglePayment.prototype._createV2PaymentDataRequest = function (defaultConfig, paymentDataRequest) {
-  var newCardPaymentMethod, defaultConfigCardPaymentMethod, parameters;
-  var defaultConfigPaymentMethods = defaultConfig.allowedPaymentMethods;
-
-  // For the CARD allowed payment method, ensure allowedCardNetworks is set.
   if (paymentDataRequest.allowedPaymentMethods) {
-    newCardPaymentMethod = find(paymentDataRequest.allowedPaymentMethods, 'type', 'CARD');
-    defaultConfigCardPaymentMethod = find(defaultConfigPaymentMethods, 'type', 'CARD');
+    paymentDataRequest.allowedPaymentMethods.forEach(function (paymentMethod) {
+      var defaultPaymentMethod = find(defaultConfig.allowedPaymentMethods, 'type', paymentMethod.type);
 
-    if (newCardPaymentMethod) {
-      newCardPaymentMethod.parameters = assign({}, newCardPaymentMethod.parameters);
-      parameters = newCardPaymentMethod.parameters;
-      if (!parameters.allowedCardNetworks || (parameters.allowedCardNetworks && parameters.allowedCardNetworks.length === 0)) {
-        if (defaultConfigCardPaymentMethod &&
-          defaultConfigCardPaymentMethod.parameters &&
-          defaultConfigCardPaymentMethod.parameters.allowedCardNetworks
-        ) {
-          parameters.allowedCardNetworks = defaultConfigCardPaymentMethod.parameters.allowedCardNetworks;
-        } else {
-          parameters.allowedCardNetworks = DEFAULT_CARD_NETWORKS;
-        }
+      if (defaultPaymentMethod) {
+        applyDefaultsToPaymentMethodConfiguration(paymentMethod, defaultPaymentMethod);
       }
-    }
+    });
   }
+
   paymentDataRequest = assign({}, defaultConfig, paymentDataRequest);
 
   return paymentDataRequest;
@@ -3089,6 +3074,20 @@ GooglePayment.prototype.teardown = function () {
   return Promise.resolve();
 };
 
+function applyDefaultsToPaymentMethodConfiguration(merchantSubmittedPaymentMethod, defaultPaymentMethod) {
+  Object.keys(defaultPaymentMethod).forEach(function (parameter) {
+    if (typeof defaultPaymentMethod[parameter] === 'object') {
+      merchantSubmittedPaymentMethod[parameter] = assign(
+        {},
+        defaultPaymentMethod[parameter],
+        merchantSubmittedPaymentMethod[parameter]
+      );
+    } else {
+      merchantSubmittedPaymentMethod[parameter] = merchantSubmittedPaymentMethod[parameter] || defaultPaymentMethod[parameter];
+    }
+  });
+}
+
 module.exports = wrapPromise.wrapPrototype(GooglePayment);
 
 },{"../lib/analytics":67,"../lib/assign":69,"../lib/braintree-error":72,"../lib/convert-methods-to-error":77,"../lib/find":87,"../lib/generate-google-pay-configuration":88,"../lib/methods":93,"../lib/promise":95,"./errors":52,"@braintree/wrap-promise":26}],54:[function(require,module,exports){
@@ -3106,7 +3105,7 @@ var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 
 /**
  * @static
@@ -4568,7 +4567,7 @@ var supportsInputFormatting = require('restricted-input/supports-input-formattin
 var wrapPromise = require('@braintree/wrap-promise');
 var BraintreeError = require('../lib/braintree-error');
 var Promise = require('../lib/promise');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -4878,7 +4877,7 @@ module.exports = {
 
 var enumerate = require('../../lib/enumerate');
 var errors = require('./errors');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 
 var constants = {
   VERSION: VERSION,
@@ -5279,7 +5278,7 @@ module.exports = {
 var BraintreeError = require('./braintree-error');
 var Promise = require('./promise');
 var sharedErrors = require('./errors');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 
 function basicComponentVerification(options) {
   var client, authorization, name;
@@ -5627,7 +5626,7 @@ module.exports = BraintreeBus;
 },{"../braintree-error":72,"./check-origin":73,"./events":74,"framebus":125}],76:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 var PLATFORM = 'web';
 
 var CLIENT_API_URLS = {
@@ -5772,7 +5771,7 @@ var Promise = require('./promise');
 var assets = require('./assets');
 var sharedErrors = require('./errors');
 
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 
 function createDeferredClient(options) {
   var promise = Promise.resolve();
@@ -5988,7 +5987,7 @@ module.exports = function (array, key, value) {
 },{}],88:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 var assign = require('./assign').assign;
 
 function generateTokenizationParameters(configuration, overrides) {
@@ -6429,7 +6428,7 @@ module.exports = {
 var basicComponentVerification = require('../lib/basic-component-verification');
 var wrapPromise = require('@braintree/wrap-promise');
 var PayPalCheckout = require('./paypal-checkout');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 
 /**
  * @static
@@ -7021,9 +7020,10 @@ PayPalCheckout.prototype._formatTokenizeData = function (options, params) {
     if (options.intent) {
       data.paypalAccount.intent = options.intent;
     }
-    if (this._merchantAccountId) {
-      data.merchantAccountId = this._merchantAccountId;
-    }
+  }
+
+  if (this._merchantAccountId) {
+    data.merchantAccountId = this._merchantAccountId;
   }
 
   return data;
@@ -7100,7 +7100,7 @@ var uuid = require('../../lib/vendor/uuid');
 var deferred = require('../../lib/deferred');
 var errors = require('../shared/errors');
 var events = require('../shared/events');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 var iFramer = require('@braintree/iframer');
 var Promise = require('../../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
@@ -7480,7 +7480,7 @@ var createAssetsUrl = require('../lib/create-assets-url');
 var BraintreeError = require('../lib/braintree-error');
 var analytics = require('../lib/analytics');
 var errors = require('./shared/errors');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -7673,7 +7673,7 @@ var basicComponentVerification = require('../lib/basic-component-verification');
 var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var VaultManager = require('./vault-manager');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 var wrapPromise = require('@braintree/wrap-promise');
 
 /**
@@ -7914,7 +7914,7 @@ var BraintreeError = require('../lib/braintree-error');
 var Venmo = require('./venmo');
 var Promise = require('../lib/promise');
 var supportsVenmo = require('./shared/supports-venmo');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 
 /**
  * @static
@@ -8131,7 +8131,7 @@ var convertMethodsToError = require('../lib/convert-methods-to-error');
 var wrapPromise = require('@braintree/wrap-promise');
 var BraintreeError = require('../lib/braintree-error');
 var Promise = require('../lib/promise');
-var VERSION = "3.44.1";
+var VERSION = "3.44.2";
 
 /**
  * Venmo tokenize payload.
@@ -10288,7 +10288,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.googlePay
 ];
 var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = "1.17.1";
+var VERSION = "1.17.2";
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -11156,7 +11156,7 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = "1.17.1";
+var VERSION = "1.17.2";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
