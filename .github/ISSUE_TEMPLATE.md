@@ -8,4 +8,4 @@
 
 <!-- To help us quickly reproduce your issue, include as many details as possible, such as logs, steps to reproduce, and so on.  If the issue reports a new feature, follow the [user story](https://en.wikipedia.org/wiki/User_story) format to clearly describe the use case. -->
 
-<!-- NOTE: Please do not open an issue for translation requests. We can only support the languages for which PayPal provides us translations. -->
+<!-- NOTE: Please do not open an issue for translation requests. We support the same languages that are supported by PayPal, and use PayPal provided translations. -->
