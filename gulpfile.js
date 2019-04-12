@@ -68,11 +68,7 @@ var config = {
   }
 };
 
-function setNPMVersion() {
-  process.env.npm_package_version = VERSION;
-
-  return Promise.resolve();
-}
+gulp.task('build:js', ['build:js:unmin', 'build:js:min']);
 
 gulp.task('build:js:unmin', function () {
   return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
@@ -93,8 +89,6 @@ gulp.task('build:js:min', function () {
     .pipe(rename(config.src.js.min))
     .pipe(gulp.dest(config.dist.js));
 });
-
-gulp.task('build:js', gulp.series('build:js:unmin', 'build:js:min'));
 
 gulp.task('build:css', function () {
   var sassOptions = {};
@@ -121,9 +115,9 @@ gulp.task('build:npm:statics', function () {
   ]).pipe(gulp.dest(NPM_PATH));
 });
 
-gulp.task('build:npm:css', gulp.series('build:css', function () {
+gulp.task('build:npm:css', ['build:css'], function () {
   return gulp.src([config.dist.css + '/dropin.css']).pipe(gulp.dest(NPM_PATH));
-}));
+});
 
 gulp.task('build:npm:package.json', function (done) {
   var pkg = Object.assign({}, require('./package.json'));
@@ -159,71 +153,28 @@ gulp.task('build:npm:browser', function () {
   .pipe(gulp.dest(browserPath));
 });
 
-gulp.task('build:npm', gulp.parallel(
+gulp.task('build:npm', [
   'build:npm:css',
   'build:npm:statics',
   'build:npm:package.json',
   'build:npm:src',
   'build:npm:browser'
-));
+]);
 
 gulp.task('clean', function () {
   return del(['./dist']);
 });
 
-gulp.task('jsdoc:generate', function (done) {
-  jsdoc({
-    configure: 'jsdoc/conf.json',
-    destination: config.dist.jsdoc + VERSION,
-    recurse: true,
-    readme: config.jsdoc.readme,
-    template: 'node_modules/jsdoc-template'
-  }, done);
-});
+gulp.task('build', function (done) {
+  process.env.npm_package_version = VERSION;
 
-gulp.task('jsdoc:statics', function () {
-  return gulp.src(['jsdoc/index.html']).pipe(gulp.dest(config.dist.jsdoc));
-});
-
-gulp.task('jsdoc:link-current', function (done) {
-  var link = config.dist.jsdoc + 'current';
-
-  if (fs.existsSync(link)) {
-    del.sync(link);
-  }
-
-  fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
-});
-
-gulp.task('build:demoapp:apple-domain-association', function () {
-  var wellknown = GH_PAGES_PATH + '/.well-known/';
-
-  mkdirp.sync(wellknown);
-
-  return gulp.src([
-    './test/app/.well-known/*'
-  ]).pipe(gulp.dest(wellknown));
-});
-
-gulp.task('build:demoapp', gulp.series('build:demoapp:apple-domain-association', function () {
-  return gulp.src([
-    config.src.demoApp
-  ]).pipe(gulp.dest(GH_PAGES_PATH));
-}));
-
-gulp.task('build:gh-pages', gulp.series(
-  'build:demoapp',
-  'jsdoc:generate',
-  gulp.parallel('jsdoc:statics', 'jsdoc:link-current')
-));
-
-gulp.task('build', gulp.series(
-  setNPMVersion,
+  runSequence(
   'clean',
-  gulp.parallel('build:js', 'build:css', 'build:gh-pages'),
+  ['build:js', 'build:css', 'build:gh-pages'],
   'build:npm',
   'build:link-latest',
-));
+  done);
+});
 
 function _replaceVersionInFile(filename) {
   var updatedFile = fs.readFileSync(filename, 'utf-8').replace(/@VERSION/g, VERSION);
@@ -278,28 +229,78 @@ function jsdoc(options, done) {
   });
 }
 
-gulp.task('gh-pages', gulp.series('build', function () {
+gulp.task('build:gh-pages', ['build:demoapp'], function (done) {
+  runSequence(
+    'jsdoc:generate',
+    [
+      'jsdoc:statics',
+      'jsdoc:link-current',
+    ],
+    done);
+});
+
+gulp.task('jsdoc:generate', function (done) {
+  jsdoc({
+    configure: 'jsdoc/conf.json',
+    destination: config.dist.jsdoc + VERSION,
+    recurse: true,
+    readme: config.jsdoc.readme,
+    template: 'node_modules/jsdoc-template'
+  }, done);
+});
+
+gulp.task('jsdoc:statics', function () {
+  return gulp.src(['jsdoc/index.html']).pipe(gulp.dest(config.dist.jsdoc));
+});
+
+gulp.task('jsdoc:link-current', function (done) {
+  var link = config.dist.jsdoc + 'current';
+
+  if (fs.existsSync(link)) {
+    del.sync(link);
+  }
+
+  fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
+});
+
+gulp.task('build:demoapp:apple-domain-association', function () {
+  var wellknown = GH_PAGES_PATH + '/.well-known/';
+
+  mkdirp.sync(wellknown);
+
+  return gulp.src([
+    './test/app/.well-known/*'
+  ]).pipe(gulp.dest(wellknown));
+});
+
+gulp.task('build:demoapp', ['build:demoapp:apple-domain-association'], function () {
+  return gulp.src([
+    config.src.demoApp
+  ]).pipe(gulp.dest(GH_PAGES_PATH));
+});
+
+gulp.task('gh-pages', ['build'], function () {
   connect()
     .use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
     .use(serveStatic(path.join(__dirname, config.server.assetsPath)))
     .listen(config.server.port, function () {
       gutil.log(gutil.colors.magenta('Demo app and JSDocs'), 'started on port', gutil.colors.yellow(config.server.port));
     });
+});
 
-  return Promise.resolve();
-}));
-
-gulp.task('watch', gulp.series(setNPMVersion, function () {
-  gulp.watch([config.src.js.watch, config.src.html.watch]).on('change', gulp.series('build:js'));
-  gulp.watch([config.src.css.watch]).on('change', gulp.series('build:css'));
-  gulp.watch([config.src.js.watch, config.jsdoc.watch]).on('change', gulp.series('build:gh-pages'));
-  gulp.watch([config.src.demoApp]).on('change', gulp.series('build:demoapp'));
-}));
-
-gulp.task('development', gulp.series(
+gulp.task('development', [
   'build',
   'watch',
   'gh-pages'
-));
+]);
 
-gulp.task('watch:integration', gulp.series('watch'));
+gulp.task('watch', function () {
+  process.env.npm_package_version = VERSION;
+
+  gulp.watch([config.src.js.watch, config.src.html.watch], ['build:js']);
+  gulp.watch([config.src.css.watch], ['build:css']);
+  gulp.watch([config.src.js.watch, config.jsdoc.watch], ['build:gh-pages']);
+  gulp.watch([config.src.demoApp], ['build:demoapp']);
+});
+
+gulp.task('watch:integration', ['watch']);

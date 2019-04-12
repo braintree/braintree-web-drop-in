@@ -32,7 +32,7 @@
     "eslint": "^5.16.0",
     "eslint-config-braintree": "2.0.0",
     "finalhandler": "1.1.1",
-    "gulp": "^4.0.0",
+    "gulp": "3.9.1",
     "gulp-autoprefixer": "^6.0.0",
     "gulp-brfs": "0.1.0",
     "gulp-clean-css": "^4.0.0",
