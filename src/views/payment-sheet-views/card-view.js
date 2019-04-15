@@ -78,11 +78,11 @@ CardView.prototype.initialize = function () {
     }
   }.bind(this));
 
-  if (!this.model.isGuestCheckout && this.merchantConfiguration.vault.showSaveCardToggle === true) {
+  if (!this.model.isGuestCheckout && this.merchantConfiguration.vault.allowVaultCardOverride === true) {
     classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
   }
 
-  if (this.merchantConfiguration.vault.defaultValueForVaulting === false) {
+  if (this.merchantConfiguration.vault.vaultCard === false) {
     this.saveCardInput.checked = false;
   }
 

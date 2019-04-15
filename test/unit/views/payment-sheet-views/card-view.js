@@ -219,7 +219,7 @@ describe('CardView', function () {
     it('removes hidden class from save card input if configured', function () {
       this.model.merchantConfiguration.card = {
         vault: {
-          showSaveCardToggle: true
+          allowVaultCardOverride: true
         }
       };
       this.model.isGuestCheckout = false;
@@ -257,7 +257,7 @@ describe('CardView', function () {
     it('sets checked value for save card input', function () {
       this.model.merchantConfiguration.card = {
         vault: {
-          defaultValueForVaulting: false
+          vaultCard: false
         }
       };
 
