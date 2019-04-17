@@ -51,6 +51,7 @@ module.exports = {
   "expirationDateLabelSubheading": "(MM/AA)",
   "expirationDatePlaceholder": "MM/AA",
   "postalCodeLabel": "Código postal",
+  "saveCardLabel": "Guardar tarjeta",
   "payWithCard": "Pagar con tarjeta",
   "endingIn": "Terminada en {{lastFourCardDigits}}",
   "Apple Pay": "Apple Pay",

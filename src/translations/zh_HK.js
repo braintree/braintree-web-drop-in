@@ -51,6 +51,7 @@ module.exports = {
   "expirationDateLabelSubheading": "(MM/YY)",
   "expirationDatePlaceholder": "月 / 年",
   "postalCodeLabel": "郵遞區號",
+  "saveCardLabel": "儲存信用卡",
   "payWithCard": "使用信用卡付款",
   "endingIn": "末碼為 {{lastFourCardDigits}}",
   "Apple Pay": "Apple Pay",
