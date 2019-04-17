@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+------
+- Add ability to opt out of client side vaulting (cards)
+
 1.17.2
 ------
 - Update braintree-web to v3.44.2

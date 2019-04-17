@@ -51,6 +51,7 @@ module.exports = {
   "expirationDateLabelSubheading": "(MM/YY)",
   "expirationDatePlaceholder": "MM/YY",
   "postalCodeLabel": "郵便番号",
+  "saveCardLabel": "カードを保存",
   "payWithCard": "カードで支払う",
   "endingIn": "末尾が{{lastFourCardDigits}}",
   "Apple Pay": "Apple Pay",
