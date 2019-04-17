@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+------
+- Update wrap-promise to v2.0.0
+  - Errors thrown in developer provided callbacks will now log in the console
+
 1.17.2
 ------
 - Update braintree-web to v3.44.2
