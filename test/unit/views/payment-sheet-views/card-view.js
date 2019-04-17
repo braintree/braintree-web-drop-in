@@ -665,7 +665,8 @@ describe('CardView', function () {
   describe('isEnabled', function () {
     beforeEach(function () {
       this.fakeOptions = {
-        client: this.client
+        client: this.client,
+        merchantConfiguration: {}
       };
     });
 
@@ -678,6 +679,19 @@ describe('CardView', function () {
 
       return CardView.isEnabled(this.fakeOptions).then(function (result) {
         expect(result).to.equal(true);
+      });
+    });
+
+    it('resovles with false when merchant configuration sets card to false', function () {
+      var configuration = fake.configuration();
+
+      configuration.gatewayConfiguration.creditCards.supportedCardTypes = ['visa'];
+
+      this.client.getConfiguration.returns(configuration);
+      this.fakeOptions.merchantConfiguration.card = false;
+
+      return CardView.isEnabled(this.fakeOptions).then(function (result) {
+        expect(result).to.equal(false);
       });
     });
 

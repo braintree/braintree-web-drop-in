@@ -1,10 +1,27 @@
 CHANGELOG
 =========
 
-Unreleased
-----------
-- Fix issue where falsey values were not allowed as CVV placeholders
+unreleased
+------
 - Add ability to opt out of client side vaulting (cards)
+
+1.17.2
+------
+- Update braintree-web to v3.44.2
+  - Google Pay: Fix issue where tokenization details for Google Payments could accidentally be dropped
+  - PayPal: Fix bug where merchant account id was not being applied in vault flows
+
+1.17.1
+------
+- Update braintree-web to v3.44.1
+  - Fixes issue with mobile tabbing in the card form
+
+1.17.0
+------
+- Fix issue where falsey values were not allowed as CVV placeholders
+- Add ability to opt out of card view by passing `false` as the card option
+- Update braintree-web to v3.44.0
+- Fix issue where requestable event fires when cancelling payment method deletion (#477)
 
 1.16.0
 ------
