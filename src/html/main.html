@@ -179,7 +179,7 @@
               </label>
               <div data-braintree-id="expiration-date-field-error" class="braintree-form__field-error"></div>
             </div>
-            
+
 
             <div data-braintree-id="cvv-field-group" class="braintree-form__field-group">
               <label>
@@ -222,8 +222,18 @@
               <div data-braintree-id="postal-code-field-error" class="braintree-form__field-error"></div>
             </div>
           </div>
+
+          <div data-braintree-id="save-card-field-group" class="braintree-form__field-group braintree-hidden">
+            <label>
+              <div class="braintree-form__field braintree-form__checkbox">
+                <input type="checkbox" data-braintree-id="save-card-input" checked />
+              </div>
+              <div class="braintree-form__label">{{saveCardLabel}}</div>
+            </label>
+          </div>
         </div>
       </div>
+
       <div data-braintree-id="sheet-error" class="braintree-sheet__error">
         <div class="braintree-form__icon braintree-sheet__error-icon">
           <svg width="24" height="24">

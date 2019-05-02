@@ -216,6 +216,80 @@ describe('CardView', function () {
       }.bind(this));
     });
 
+    it('removes hidden class from save card input if configured', function () {
+      this.model.merchantConfiguration.card = {
+        vault: {
+          allowVaultCardOverride: true
+        }
+      };
+      this.model.isGuestCheckout = false;
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="save-card-field-group"]').className).to.not.include('braintree-hidden');
+      }.bind(this));
+    });
+
+    it('does not remove hidden class from save card input if not configured', function () {
+      this.model.merchantConfiguration.card = {};
+      this.model.isGuestCheckout = false;
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        expect(this.element.querySelector('[data-braintree-id="save-card-field-group"]').className).to.include('braintree-hidden');
+      }.bind(this));
+    });
+
+    it('sets checked value for save card input', function () {
+      this.model.merchantConfiguration.card = {
+        vault: {
+          vaultCard: false
+        }
+      };
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        expect(this.view.saveCardInput.checked).to.equal(false);
+      }.bind(this));
+    });
+
+    it('defaults checked value for save card input to true', function () {
+      this.model.merchantConfiguration.card = {};
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        expect(this.view.saveCardInput.checked).to.equal(true);
+      }.bind(this));
+    });
+
     it('starts async dependency', function () {
       this.sandbox.spy(DropinModel.prototype, 'asyncDependencyStarting');
 
@@ -701,6 +775,10 @@ describe('CardView', function () {
               }
             }
           }),
+          _shouldVault: CardView.prototype._shouldVault,
+          saveCardInput: {
+            checked: true
+          },
           strings: strings,
           tokenize: CardView.prototype.tokenize,
           _hideUnsupportedCardIcons: function () {},
@@ -1721,6 +1799,10 @@ describe('CardView', function () {
       return self.model.initialize().then(function () {
         self.context = {
           element: self.element,
+          _shouldVault: CardView.prototype._shouldVault,
+          saveCardInput: {
+            checked: true
+          },
           getElementById: BaseView.prototype.getElementById,
           hostedFieldsInstance: self.fakeHostedFieldsInstance,
           fieldErrors: {},
@@ -2129,6 +2211,15 @@ describe('CardView', function () {
       });
     });
 
+    it('does not include `vaulted: true` in tokenization payload if save card input is not checked', function () {
+      this.context.model.isGuestCheckout = false;
+      this.context.saveCardInput.checked = false;
+
+      return CardView.prototype.tokenize.call(this.context).then(function (payload) {
+        expect(payload.vaulted).to.not.exist;
+      });
+    });
+
     it('does not include `vaulted: true` in tokenization payload if guest checkout', function () {
       this.context.model.isGuestCheckout = true;
 
@@ -2169,6 +2260,15 @@ describe('CardView', function () {
       }.bind(this));
     });
 
+    it('does not vault on tokenization if save card input is not checked', function () {
+      this.context.model.isGuestCheckout = false;
+      this.context.saveCardInput.checked = false;
+
+      return CardView.prototype.tokenize.call(this.context).then(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.have.been.calledWith({vault: false});
+      }.bind(this));
+    });
+
     it('does not vault on tokenization if using guest checkout', function () {
       this.context.model.isGuestCheckout = true;
 
@@ -2201,7 +2301,7 @@ describe('CardView', function () {
     });
 
     it('does not clear fields after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false', function () {
-      this.model.merchantConfiguration.card = {
+      this.context.merchantConfiguration = {
         clearFieldsAfterTokenization: false
       };
       this.context.hostedFieldsInstance.tokenize.resolves({nonce: 'foo'});
@@ -2212,7 +2312,7 @@ describe('CardView', function () {
     });
 
     it('does not clear cardholder name field after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false', function () {
-      this.model.merchantConfiguration.card = {
+      this.context.merchantConfiguration = {
         clearFieldsAfterTokenization: false
       };
       this.context.hasCardholderName = true;

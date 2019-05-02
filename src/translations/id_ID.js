@@ -51,6 +51,7 @@ module.exports = {
   "expirationDateLabelSubheading": "(BB/TT)",
   "expirationDatePlaceholder": "BB/TT",
   "postalCodeLabel": "Kode Pos",
+  "saveCardLabel": "Simpan kartu",
   "payWithCard": "Bayar dengan kartu",
   "endingIn": "Berakhiran {{lastTwoCardDigits}}",
   "Apple Pay": "Apple Pay",
