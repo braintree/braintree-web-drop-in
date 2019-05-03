@@ -541,6 +541,14 @@
           color: black; }
           .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field .braintree-form__hosted-field input.braintree-form__raw-input:focus {
             outline: none; }
+      .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field.braintree-form__checkbox {
+        float: left; }
+        .braintree-sheet__content--form .braintree-form__field-group .braintree-form__field.braintree-form__checkbox input {
+          margin: -5px 5px 0 0;
+          padding: 0;
+          line-height: 0;
+          -webkit-box-sizing: border-box;
+                  box-sizing: border-box; }
     .braintree-sheet__content--form .braintree-form__field-group.braintree-form__field-group--has-error .braintree-form__field-secondary-icon,
     .braintree-sheet__content--form .braintree-form__field-group.braintree-form__field-group--has-error.braintree-form__field-group--card-type-known .braintree-form__field-secondary-icon,
     .braintree-sheet__content--form .braintree-form__field-group.braintree-form__field-group--has-error.braintree-form__field-group--is-focused .braintree-form__field-secondary-icon,
