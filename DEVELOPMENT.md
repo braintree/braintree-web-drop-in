@@ -125,9 +125,9 @@ The [src/html/main.html](https://github.com/braintree/braintree-web-drop-in/blob
 </div>
 ```
 
-We will also need to update [src/scss/main.scss](https://github.com/braintree/braintree-web-drop-in/blob/master/src/scss/main.scss) to make the payment sheet view visible when selected. Add `.braintree-show-{payment-method-name} .braintree-{payment-method-name}` to the list of classes in the "Dropin Visibility States" section.
+We will also need to update [src/less/main.less](https://github.com/braintree/braintree-web-drop-in/blob/master/src/less/main.less) to make the payment sheet view visible when selected. Add `.braintree-show-{payment-method-name} .braintree-{payment-method-name}` to the list of classes in the "Dropin Visibility States" section.
 
-```css
+```less
 // ...
 .braintree-show-applePay .braintree-applePay,
 .braintree-show-fooPay .braintree-fooPay {
@@ -140,7 +140,7 @@ We will also need to update [src/scss/main.scss](https://github.com/braintree/br
 
 You will also need to add your payment method to the `.braintree-show-{payment-method-name} [data-braintree-id='other-ways-to-pay']` section.
 
-```css
+```less
 // ...
 .braintree-show-paypal [data-braintree-id='other-ways-to-pay'],
 .braintree-show-applePay [data-braintree-id='other-ways-to-pay'],

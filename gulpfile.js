@@ -13,7 +13,7 @@ var path = require('path');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var runSequence = require('run-sequence');
-var sass = require('gulp-sass');
+var less = require('gulp-less');
 var size = require('gulp-size');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
@@ -42,8 +42,8 @@ var config = {
       min: 'dropin.min.js'
     },
     css: {
-      main: './src/scss/main.scss',
-      watch: 'src/scss/**/*.scss',
+      main: './src/less/main.less',
+      watch: 'src/less/**/*.less',
       output: 'dropin.css',
       min: 'dropin.min.css'
     },
@@ -91,10 +91,11 @@ gulp.task('build:js:min', function () {
 });
 
 gulp.task('build:css', function () {
-  var sassOptions = {};
+  var lessOptions = {};
 
   return gulp.src(config.src.css.main)
-    .pipe(sass(sassOptions).on('error', sass.logError))
+    .pipe(less(lessOptions))
+    // TODO re-introduce error handling on Gulp 4 upgrade
     .pipe(autoprefixer())
     .pipe(rename(config.src.css.output))
     .pipe(gulp.dest(config.dist.css))
