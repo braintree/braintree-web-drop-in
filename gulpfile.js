@@ -94,8 +94,10 @@ gulp.task('build:css', function () {
   var lessOptions = {};
 
   return gulp.src(config.src.css.main)
-    .pipe(less(lessOptions))
-    // TODO re-introduce error handling on Gulp 4 upgrade
+    .pipe(less(lessOptions)).on('error', function(error) {
+      process.stderr.write(new gutil.PluginError('less', error.messageFormatted).toString());
+      this.emit('end');
+    })
     .pipe(autoprefixer())
     .pipe(rename(config.src.css.output))
     .pipe(gulp.dest(config.dist.css))
