@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+Unreleased
+------
+- Replace css preprocessor, from [Sass](https://sass-lang.com) to [Less](http://lesscss.org)
+
 1.18.0
 ------
 - Add ability to opt out of client side vaulting (cards)
