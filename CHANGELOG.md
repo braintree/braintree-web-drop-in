@@ -3,7 +3,7 @@ CHANGELOG
 
 Unreleased
 ------
-- Replace css preprocessor, from sass to less
+- Replace css preprocessor, from [Sass](https://sass-lang.com) to [Less](http://lesscss.org)
 
 1.18.0
 ------
