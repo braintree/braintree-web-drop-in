@@ -146,6 +146,7 @@ function npmPackage(done) {
 function npmSrc() {
   return src('src/**/*.js')
     .pipe(replace('@DOT_MIN', ''))
+    .pipe(replace('__VERSION__', VERSION))
     .pipe(brfs())
     .pipe(dest(NPM_PATH));
 }
