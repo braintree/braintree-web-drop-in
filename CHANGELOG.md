@@ -8,6 +8,8 @@ Unreleased
 
 1.18.0
 ------
+- Update wrap-promise to v2.0.0
+  - Errors thrown in developer provided callbacks will now log in the console
 - Add ability to opt out of client side vaulting (cards)
 - Update Google Pay mark to adhere with [brand guidelines](https://developers.google.com/pay/api/web/guides/brand-guidelines#logo-mark)
 
