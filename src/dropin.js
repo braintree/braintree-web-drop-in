@@ -341,6 +341,8 @@ Dropin.prototype._initialize = function (callback) {
         analytics.sendEvent(self._client, 'appeared');
         self._disableErroredPaymentMethods();
 
+        self._vaultedCardAppearAnalyticEvent();
+
         self._handleAppSwitch();
 
         callback(null, self);
@@ -563,6 +565,17 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
     errorMessageDiv.innerHTML = constants.errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
     console.error(error); // eslint-disable-line no-console
   }.bind(this));
+};
+
+Dropin.prototype._vaultedCardAppearAnalyticEvent = function () {
+  var i;
+
+  for (i = 0; i < this._model._paymentMethods.length; i++) {
+    if (this._model._paymentMethods[i].type === 'CreditCard') {
+      analytics.sendEvent(this._client, 'vaulted-card.appear');
+      break;
+    }
+  }
 };
 
 Dropin.prototype._handleAppSwitch = function () {

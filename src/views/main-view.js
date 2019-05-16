@@ -102,6 +102,7 @@ MainView.prototype._initialize = function () {
     if (id === PaymentMethodsView.ID) {
       classList.add(this.paymentMethodsViews.container, 'braintree-methods--active');
       classList.remove(this.sheetContainer, 'braintree-sheet--active');
+      this.vaultedCardSelectAnalyticEvent();
     } else {
       setTimeout(function () {
         classList.add(this.sheetContainer, 'braintree-sheet--active');
@@ -147,6 +148,14 @@ MainView.prototype._initialize = function () {
   }
 
   this._sendToDefaultView();
+};
+
+MainView.prototype.vaultedCardSelectAnalyticEvent = function () {
+  if (this.shouldSendSelectEvent === false) {
+    this.shouldSendSelectEvent = true;
+  } else {
+    analytics.sendEvent(this.client, 'vaulted-card.select');
+  }
 };
 
 MainView.prototype.addView = function (view) {
@@ -204,6 +213,7 @@ MainView.prototype.requestPaymentMethod = function () {
 
   return activePaymentView.requestPaymentMethod().then(function (payload) {
     analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
+    this.shouldSendSelectEvent = false;
 
     return payload;
   }.bind(this)).catch(function (err) {
@@ -312,6 +322,7 @@ MainView.prototype.teardown = function () {
 };
 
 MainView.prototype.enableEditMode = function () {
+  this.shouldSendSelectEvent = false;
   this.setPrimaryView(this.paymentMethodsViews.ID);
   this.paymentMethodsViews.enableEditMode();
   this.hideToggle();
@@ -378,6 +389,9 @@ MainView.prototype._sendToDefaultView = function () {
 
   if (paymentMethods.length > 0) {
     if (preselectVaultedPaymentMethod) {
+      analytics.sendEvent(this.client, 'vaulted-card.preselect');
+      this.shouldSendSelectEvent = false;
+
       this.model.changeActivePaymentMethod(paymentMethods[0]);
     } else {
       this.setPrimaryView(this.paymentMethodsViews.ID);
