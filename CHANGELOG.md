@@ -1,7 +1,12 @@
 CHANGELOG
 =========
 
-unreleased
+Unreleased
+------
+- Replace css preprocessor, from [Sass](https://sass-lang.com) to [Less](http://lesscss.org)
+- Adjust delete confirmation box css to be consistent, all relative to own parent.
+
+1.18.0
 ------
 - Update wrap-promise to v2.0.0
   - Errors thrown in developer provided callbacks will now log in the console
