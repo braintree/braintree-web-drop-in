@@ -1,14 +1,12 @@
 language: node_js
 before_install:
-# See https://github.com/travis-ci/travis-ci/issues/5092#issuecomment-171777646
-# Dirty hack for https://github.com/travis-ci/travis-ci/issues/5092
-- |
-  PATH=`echo $PATH | sed "s/\.\/node_modules\/\.bin//g"`; export PATH=$PATH:./node_modules/.bin; touch .env; if [ $IS_INTEGRATION_TEST ]; then rvm install ruby-2.3.0 && rvm use ruby-2.3.0 && bundle install; else echo "Not an integration test. Skipping Ruby setup"; fi
+  touch .env;
+  if [ $IS_INTEGRATION_TEST ]; then rvm install ruby-2.4.3 --binary && rvm use ruby-2.4.3 && bundle install; else echo "Not an integration test. Skipping Ruby setup"; fi
 script: npm run $TEST
 addons:
   sauce_connect: true
   hosts:
-    - braintree-web-dropin.example
+    - braintree-web-dropin.bt.local
 notifications:
   email: false
   slack:
@@ -21,8 +19,8 @@ env:
   matrix:
   - TEST="test"
   - TEST="test:publishing"
-  - TEST="test:integration:paypal-only" PLATFORM="desktop" IS_INTEGRATION_TEST=true
-  - TEST="test:integration:paypal-skipped" PLATFORM="desktop" IS_INTEGRATION_TEST=true
+  - TEST="test:integration:paypal-only" HOSTNAME="braintree-web-dropin.bt.local" IS_INTEGRATION_TEST=true
+  - TEST="test:integration:paypal-skipped" HOSTNAME="braintree-web-dropin.bt.local" IS_INTEGRATION_TEST=true
   # iOS tests on Travis are flaky. Run these manually before merging something in
   # - TEST="test:integration" PLATFORM="ios" IS_INTEGRATION_TEST=true
   global:
