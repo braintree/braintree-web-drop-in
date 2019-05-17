@@ -3,16 +3,16 @@
 /* globals __dirname */
 
 var browserify = require('browserify');
-var envify = require('gulp-envify');
-var brfs = require('gulp-brfs');
+var brfs = require('./gulp/brfs');
+var c = require('ansi-colors');
 var cleanCSS = require('gulp-clean-css');
 var del = require('del');
 var fs = require('fs');
 var gulp = require('gulp');
+var log = require('fancy-log');
 var path = require('path');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
-var runSequence = require('run-sequence');
 var less = require('gulp-less');
 var size = require('gulp-size');
 var source = require('vinyl-source-stream');
@@ -21,16 +21,21 @@ var uglify = require('gulp-uglify');
 var spawn = require('child_process').spawn;
 var connect = require('connect');
 var serveStatic = require('serve-static');
-var finalhandler = require('finalhandler');
-var gutil = require('gulp-util');
 var mkdirp = require('mkdirp');
 var autoprefixer = require('gulp-autoprefixer');
 
-var VERSION = require('./package.json').version;
+var VERSION = require('./package.json').version.toString();
 
 var DIST_PATH = 'dist/web/dropin/' + VERSION;
 var GH_PAGES_PATH = 'dist/gh-pages';
 var NPM_PATH = 'dist/npm';
+
+var series = gulp.series;
+var parallel = gulp.parallel;
+var src = gulp.src;
+var dest = gulp.dest;
+var watch = gulp.watch;
+var task = gulp.task;
 
 var config = {
   namespace: 'braintree',
@@ -68,18 +73,16 @@ var config = {
   }
 };
 
-gulp.task('build:js', ['build:js:unmin', 'build:js:min']);
-
-gulp.task('build:js:unmin', function () {
+function jsNotMin() {
   return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
     .bundle()
     .pipe(source(config.src.js.output))
     .pipe(replace('@DOT_MIN', ''))
     .pipe(streamify(size()))
-    .pipe(gulp.dest(config.dist.js))
-});
+    .pipe(dest(config.dist.js));
+}
 
-gulp.task('build:js:min', function () {
+function jsMin() {
   return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
     .bundle()
     .pipe(source(config.src.js.output))
@@ -87,42 +90,47 @@ gulp.task('build:js:min', function () {
     .pipe(streamify(uglify()))
     .pipe(streamify(size()))
     .pipe(rename(config.src.js.min))
-    .pipe(gulp.dest(config.dist.js));
-});
+    .pipe(dest(config.dist.js));
+}
 
-gulp.task('build:css', function () {
+jsNotMin.displayName = 'build:js:notmin';
+jsMin.displayName = 'build:js:min';
+
+function buildCss() {
   var lessOptions = {};
 
-  return gulp.src(config.src.css.main)
-    .pipe(less(lessOptions)).on('error', function(error) {
-      process.stderr.write(new gutil.PluginError('less', error.messageFormatted).toString());
-      this.emit('end');
-    })
+  return src(config.src.css.main)
+    .pipe(less(lessOptions))
     .pipe(autoprefixer())
     .pipe(rename(config.src.css.output))
-    .pipe(gulp.dest(config.dist.css))
+    .pipe(dest(config.dist.css))
     .pipe(cleanCSS())
     .pipe(rename(config.src.css.min))
-    .pipe(gulp.dest(config.dist.css));
-});
+    .pipe(dest(config.dist.css));
+}
 
-gulp.task('build:link-latest', function (done) {
+buildCss.displayName = 'build:css';
+
+function linkLatest(done) {
   fs.symlink(VERSION, 'dist/web/dropin/dev', done);
-});
+}
 
-gulp.task('build:npm:statics', function () {
-  return gulp.src([
+linkLatest.displayName = 'build:link-latest';
+
+function npmStats() {
+  return src([
     './CHANGELOG.md',
     './LICENSE',
     './README.md'
-  ]).pipe(gulp.dest(NPM_PATH));
-});
+  ]).pipe(dest(NPM_PATH));
+}
 
-gulp.task('build:npm:css', ['build:css'], function () {
-  return gulp.src([config.dist.css + '/dropin.css']).pipe(gulp.dest(NPM_PATH));
-});
+function npmCss() {
+  return src(path.join(config.dist.css, 'dropin.css'))
+    .pipe(dest(NPM_PATH));
+}
 
-gulp.task('build:npm:package.json', function (done) {
+function npmPackage(done) {
   var pkg = Object.assign({}, require('./package.json'));
 
   delete pkg.browserify;
@@ -132,52 +140,49 @@ gulp.task('build:npm:package.json', function (done) {
 
   mkdirp.sync(NPM_PATH);
 
-  fs.writeFile(NPM_PATH + '/' + 'package.json', JSON.stringify(pkg, null, 2), done);
-});
+  fs.writeFile(path.join(NPM_PATH, 'package.json'), JSON.stringify(pkg, null, 2), done);
+}
 
-gulp.task('build:npm:src', function () {
-  return gulp.src([
-    'src/**/*.js'
-  ])
-  .pipe(replace('@DOT_MIN', ''))
-  .pipe(envify(process.env))
-  .pipe(brfs())
-  .pipe(gulp.dest(NPM_PATH));
-});
+function npmSrc() {
+  return src('src/**/*.js')
+    .pipe(replace('@DOT_MIN', ''))
+    .pipe(replace('__VERSION__', VERSION))
+    .pipe(brfs())
+    .pipe(dest(NPM_PATH));
+}
 
-gulp.task('build:npm:browser', function () {
+function npmBrowser() {
   var browserPath = NPM_PATH + '/dist/browser/';
 
   mkdirp.sync(browserPath);
 
-  return gulp.src([
-    'dist/web/dropin/' + VERSION + '/js/dropin.js'
-  ])
-  .pipe(gulp.dest(browserPath));
-});
+  return src(path.join(
+    'dist/web/dropin', VERSION, 'js/dropin.js'
+  ))
+    .pipe(dest(browserPath));
+}
 
-gulp.task('build:npm', [
-  'build:npm:css',
-  'build:npm:statics',
-  'build:npm:package.json',
-  'build:npm:src',
-  'build:npm:browser'
-]);
+npmStats.displayName = 'build:npm:statics';
+npmCss.displayName = 'build:npm:css';
+npmPackage.displayName = 'build:npm:package.json';
+npmSrc.displayName = 'build:npm:src';
+npmBrowser.displayName = 'build:npm:browser';
 
-gulp.task('clean', function () {
+function clean() {
   return del(['./dist']);
-});
+}
 
-gulp.task('build', function (done) {
-  process.env.npm_package_version = VERSION;
-
-  runSequence(
-  'clean',
-  ['build:js', 'build:css', 'build:gh-pages'],
-  'build:npm',
-  'build:link-latest',
-  done);
-});
+function build() {
+  return series(
+    clean,
+    parallel(
+      jsNotMin, jsMin, buildCss,
+      ghPagesBuild()
+    ),
+    parallel(npmCss, npmStats, npmPackage, npmSrc, npmBrowser),
+    linkLatest
+  );
+}
 
 function _replaceVersionInFile(filename) {
   var updatedFile = fs.readFileSync(filename, 'utf-8').replace(/@VERSION/g, VERSION);
@@ -223,7 +228,7 @@ function jsdoc(options, done) {
     stdio: ['ignore', 1, 2]
   }).on('exit', function (code) {
     if (code === 0) {
-      _replaceVersionInFile(`dist/gh-pages/docs/${VERSION}/index.html`);
+      _replaceVersionInFile(path.join('dist/gh-pages/docs', VERSION, 'index.html'));
 
       done();
     } else {
@@ -232,17 +237,11 @@ function jsdoc(options, done) {
   });
 }
 
-gulp.task('build:gh-pages', ['build:demoapp'], function (done) {
-  runSequence(
-    'jsdoc:generate',
-    [
-      'jsdoc:statics',
-      'jsdoc:link-current',
-    ],
-    done);
-});
+function ghPagesBuild() {
+  return series(demoAppApple, demoApp, generateJsdoc, parallel(jsdocStatistics, linkJsdoc));
+}
 
-gulp.task('jsdoc:generate', function (done) {
+function generateJsdoc(done) {
   jsdoc({
     configure: 'jsdoc/conf.json',
     destination: config.dist.jsdoc + VERSION,
@@ -250,13 +249,13 @@ gulp.task('jsdoc:generate', function (done) {
     readme: config.jsdoc.readme,
     template: 'node_modules/jsdoc-template'
   }, done);
-});
+}
 
-gulp.task('jsdoc:statics', function () {
-  return gulp.src(['jsdoc/index.html']).pipe(gulp.dest(config.dist.jsdoc));
-});
+function jsdocStatistics() {
+  return src('jsdoc/index.html').pipe(dest(config.dist.jsdoc));
+}
 
-gulp.task('jsdoc:link-current', function (done) {
+function linkJsdoc(done) {
   var link = config.dist.jsdoc + 'current';
 
   if (fs.existsSync(link)) {
@@ -264,46 +263,52 @@ gulp.task('jsdoc:link-current', function (done) {
   }
 
   fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
-});
+}
 
-gulp.task('build:demoapp:apple-domain-association', function () {
+generateJsdoc.displayName = 'jsdoc:generate';
+jsdocStatistics.displayName = 'jsdoc:statics';
+linkJsdoc.displayName = 'jsdoc:link-current';
+
+function demoAppApple() {
   var wellknown = GH_PAGES_PATH + '/.well-known/';
 
   mkdirp.sync(wellknown);
 
-  return gulp.src([
+  return src([
     './test/app/.well-known/*'
-  ]).pipe(gulp.dest(wellknown));
-});
+  ]).pipe(dest(wellknown));
+}
 
-gulp.task('build:demoapp', ['build:demoapp:apple-domain-association'], function () {
-  return gulp.src([
+function demoApp() {
+  return src([
     config.src.demoApp
-  ]).pipe(gulp.dest(GH_PAGES_PATH));
-});
+  ]).pipe(dest(GH_PAGES_PATH));
+}
 
-gulp.task('gh-pages', ['build'], function () {
+demoAppApple.displayName = 'build:demoapp:apple-domain-association';
+demoApp.displayName = 'build:demoapp';
+
+function ghPagesServer() {
   connect()
     .use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
     .use(serveStatic(path.join(__dirname, config.server.assetsPath)))
     .listen(config.server.port, function () {
-      gutil.log(gutil.colors.magenta('Demo app and JSDocs'), 'started on port', gutil.colors.yellow(config.server.port));
+      log(c.magenta('Demo app and JSDocs'), 'started at', c.yellow('http://localhost:' + config.server.port));
     });
-});
+}
 
-gulp.task('development', [
-  'build',
-  'watch',
-  'gh-pages'
-]);
+ghPagesServer.displayName = 'gh-pages';
 
-gulp.task('watch', function () {
-  process.env.npm_package_version = VERSION;
+function triggerWatchers() {
+  watch([config.src.js.watch, config.src.html.watch], parallel(jsNotMin, jsMin));
+  watch([config.src.css.watch], task(buildCss));
+  watch([config.src.js.watch, config.jsdoc.watch], task(ghPagesServer));
+  watch([config.src.demoApp], task(demoApp));
+}
 
-  gulp.watch([config.src.js.watch, config.src.html.watch], ['build:js']);
-  gulp.watch([config.src.css.watch], ['build:css']);
-  gulp.watch([config.src.js.watch, config.jsdoc.watch], ['build:gh-pages']);
-  gulp.watch([config.src.demoApp], ['build:demoapp']);
-});
+triggerWatchers.displayName = 'watch';
 
-gulp.task('watch:integration', ['watch']);
+exports.build = build();
+exports.ghPages = ghPagesBuild();
+exports.ghPages.displayName = 'build:gh-pages';
+exports.development = parallel(build(), triggerWatchers, ghPagesServer);
