@@ -33,19 +33,21 @@ module PayPal
     paypal_popup = open_popup
 
     within_window paypal_popup do
-      login_to_paypal
-
-      sleep 1
-
-      block.call if block
-
-      sleep 2
-
-      click_button("confirmButtonTop", wait: 30)
+      expect(page).to have_text("Pay with PayPal", wait: 30)
+      login_iframe = first("#injectedUnifiedLogin iframe")
+      # login_to_paypal
+      #
+      # sleep 1
+      #
+      # block.call if block
+      #
+      # sleep 2
+      #
+      # click_button("confirmButtonTop", wait: 30)
     end
 
     # can take sandbox a while to close
-    sleep 4
+    # sleep 4
   end
 
   def login_to_paypal

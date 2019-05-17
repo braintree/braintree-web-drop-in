@@ -6,7 +6,7 @@ script: npm run $TEST
 addons:
   sauce_connect: true
   hosts:
-    - braintree-web-dropin.bt.local
+    - braintree-web-dropin.example
 notifications:
   email: false
   slack:
@@ -19,8 +19,7 @@ env:
   matrix:
   - TEST="test"
   - TEST="test:publishing"
-  - TEST="test:integration:paypal-only" HOSTNAME="braintree-web-dropin.bt.local" IS_INTEGRATION_TEST=true
-  - TEST="test:integration:paypal-skipped" HOSTNAME="braintree-web-dropin.bt.local" IS_INTEGRATION_TEST=true
+  - TEST="test:integration" IS_INTEGRATION_TEST=true
   # iOS tests on Travis are flaky. Run these manually before merging something in
   # - TEST="test:integration" PLATFORM="ios" IS_INTEGRATION_TEST=true
   global:

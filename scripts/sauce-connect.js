@@ -1,14 +1,14 @@
 var dotenv = require('dotenv');
 var sauceConnectLauncher = require('sauce-connect-launcher');
 
-var config = dotenv.config();
+dotenv.config();
 
 sauceConnectLauncher({
-  username: config.SAUCE_USERNAME,
-  accessKey: config.SAUCE_ACCESS_KEY
+  username: process.env.SAUCE_USERNAME,
+  accessKey: process.env.SAUCE_ACCESS_KEY
 }, function (err, sauceConnectProcess) {
   if (err) {
-    console.error(err.message);
+    console.error(err);
     process.exit(1);
   }
   console.log("Sauce Connect ready");

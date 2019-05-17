@@ -18,10 +18,14 @@ RSpec.configure do |config|
   config.include Capybara::DSL
   config.include Capybara::RSpecMatchers
 
-  config.verbose_retry = true
-  config.around(:each) do |c|
-    c.run_with_retry(retry: 2)
-  end
+  # config.verbose_retry = true
+  # config.around(:each) do |c|
+  #   c.run_with_retry(retry: 2)
+  # end
+  #
+  # config.around(:each, :paypal) do |c|
+  #   c.run_with_retry(retry: 4, retry_wait: 4)
+  # end
 
   if ParallelTests.first_process?
     config.after(:suite) do
@@ -119,7 +123,7 @@ RSpec.configure do |config|
     elsif ENV['SAUCE_START_TIME']
       ENV['SAUCE_START_TIME']
     else
-      "Restricted Input: Local-#{Time.now.to_i}"
+      "Braintree Web Drop-in: Local-#{Time.now.to_i}"
     end
   end
 end

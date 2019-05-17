@@ -3,11 +3,11 @@
 require 'rspec/core/rake_task'
 
 #
-# For use in building a unique Build Name for running tests in parallel on Sauce Labs from a local machine
+# For use in building a unique Build Name for running tests on Sauce Labs from a local machine
 #
-ENV['SAUCE_START_TIME'] = "Restricted Input: Local-#{Time.now.to_i}"
+ENV['SAUCE_START_TIME'] = "Braintree Web Drop-in: Local-#{Time.now.to_i}"
 
-PORT = ENV['PORT'] || 3099
+PORT = ENV['PORT'] || 4567
 SAUCE_CONNECT_PORT = 4445
 
 @build_success = true
@@ -46,7 +46,7 @@ PLATFORMS.each do |platform_key, browser_name|
   task platform_key do
     ENV['PLATFORM'] = platform_key
     begin
-      @result = system 'rspec spec/restricted_input_spec.rb'
+      @result = system 'rspec spec/request_payment_method_spec.rb'
     ensure
       @build_success &= @result
     end
