@@ -1,4 +1,4 @@
-# Braintree Web Drop-in Reference <span>v@VERSION</span>
+# Braintree Web Drop-in Reference <span>v{@pkg version}</span>
 
 <span class="rule"></span>
 
@@ -34,7 +34,7 @@ If you have any feedback or questions, create a [GitHub issue](https://github.co
 The Drop-in source is available from our CDN, that you can include in your project with a script tag:
 
 ```html
-<script src="https://js.braintreegateway.com/web/dropin/@VERSION/js/dropin.min.js"></script>
+<script src="https://js.braintreegateway.com/web/dropin/{@pkg version}/js/dropin.min.js"></script>
 
 <script>
 braintree.dropin.create({ /* options */ }, callback);

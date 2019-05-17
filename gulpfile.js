@@ -24,7 +24,8 @@ var serveStatic = require('serve-static');
 var mkdirp = require('mkdirp');
 var autoprefixer = require('gulp-autoprefixer');
 
-var VERSION = require('./package.json').version.toString();
+var VERSION = require('./package.json').version;
+var BT_WEB_VERSION = require('./package.json').dependencies['braintree-web'];
 
 var DIST_PATH = 'dist/web/dropin/' + VERSION;
 var GH_PAGES_PATH = 'dist/gh-pages';
@@ -180,15 +181,19 @@ function build() {
       ghPagesBuild()
     ),
     parallel(npmCss, npmStats, npmPackage, npmSrc, npmBrowser),
+    cleanUpVersions,
     linkLatest
   );
 }
 
-function _replaceVersionInFile(filename) {
-  var updatedFile = fs.readFileSync(filename, 'utf-8').replace(/@VERSION/g, VERSION);
-
-  fs.writeFileSync(filename, updatedFile, 'utf-8');
+function cleanUpVersions() {
+  return src('dist/**/*.{js,html}')
+    .pipe(replace('{@pkg version}', VERSION))
+    .pipe(replace('{@pkg bt-web-version}', BT_WEB_VERSION))
+    .pipe(dest('dist'));
 }
+
+cleanUpVersions.displayName = 'build:update-versions';
 
 function jsdoc(options, done) {
   var args = ['jsdoc', 'src'];
@@ -228,8 +233,6 @@ function jsdoc(options, done) {
     stdio: ['ignore', 1, 2]
   }).on('exit', function (code) {
     if (code === 0) {
-      _replaceVersionInFile(path.join('dist/gh-pages/docs', VERSION, 'index.html'));
-
       done();
     } else {
       done(code);
@@ -238,7 +241,7 @@ function jsdoc(options, done) {
 }
 
 function ghPagesBuild() {
-  return series(demoAppApple, demoApp, generateJsdoc, parallel(jsdocStatistics, linkJsdoc));
+  return series(demoAppApple, demoApp, generateJsdoc, parallel(jsdocStatics, linkJsdoc));
 }
 
 function generateJsdoc(done) {
@@ -251,7 +254,7 @@ function generateJsdoc(done) {
   }, done);
 }
 
-function jsdocStatistics() {
+function jsdocStatics() {
   return src('jsdoc/index.html').pipe(dest(config.dist.jsdoc));
 }
 
@@ -262,11 +265,11 @@ function linkJsdoc(done) {
     del.sync(link);
   }
 
-  fs.symlink(VERSION, config.dist.jsdoc + 'current', done);
+  fs.symlink(VERSION, link + 'current', done);
 }
 
 generateJsdoc.displayName = 'jsdoc:generate';
-jsdocStatistics.displayName = 'jsdoc:statics';
+jsdocStatics.displayName = 'jsdoc:statics';
 linkJsdoc.displayName = 'jsdoc:link-current';
 
 function demoAppApple() {
