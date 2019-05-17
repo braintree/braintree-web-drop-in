@@ -196,42 +196,25 @@ function cleanUpVersions() {
 cleanUpVersions.displayName = 'build:update-versions';
 
 function jsdoc(options, done) {
-  var args = ['jsdoc', 'src'];
+  var args = ['jsdoc'];
   var command = 'bash';
   var commandOption = '-c';
   var platform = process.platform;
+  var configPath = path.join(GH_PAGES_PATH, 'config.json');
+
+  fs.writeFileSync(configPath, JSON.stringify(options), 'utf-8');
 
   if (platform !== 'darwin' && platform.indexOf('win') >= 0) {
     command = 'cmd';
     commandOption = '/c';
   }
 
-  options = options || {};
-
-  if (options.access) args.splice(1, 0, '-a', options.access);
-  if (options.configure) args.splice(1, 0, '-c', options.configure);
-  if (options.debug === true) args.splice(1, 0, '--debug');
-  if (options.destination) args.splice(1, 0, '-d', options.destination);
-  if (options.encoding) args.splice(1, 0, '-e', options.encoding);
-  if (options.help === true) args.splice(1, 0, '-h');
-  if (options.match) args.splice(1, 0, '--match', options.match);
-  if (options.nocolor === true) args.splice(1, 0, '--nocolor');
-  if (options.private === true) args.splice(1, 0, '-p');
-  if (options.package) args.splice(1, 0, '-P', options.package);
-  if (options.pedantic === true) args.splice(1, 0, '--pedantic');
-  if (options.query) args.splice(1, 0, '-q', options.query);
-  if (options.recurse === true) args.splice(1, 0, '-r');
-  if (options.readme) args.splice(1, 0, '-R', options.readme);
-  if (options.template) args.splice(1, 0, '-t', options.template);
-  if (options.test === true) args.splice(1, 0, '-T');
-  if (options.tutorials) args.splice(1, 0, '-u', options.tutorials);
-  if (options.version === true) args.splice(1, 0, '-v');
-  if (options.verbose === true) args.splice(1, 0, '--verbose');
-  if (options.explain === true) args.splice(1, 0, '-X');
+  args.push('-c', configPath, 'src');
 
   spawn(command, [commandOption, args.join(' ')], {
     stdio: ['ignore', 1, 2]
   }).on('exit', function (code) {
+    fs.unlinkSync(configPath);
     if (code === 0) {
       done();
     } else {
@@ -246,11 +229,16 @@ function ghPagesBuild() {
 
 function generateJsdoc(done) {
   jsdoc({
-    configure: 'jsdoc/conf.json',
-    destination: config.dist.jsdoc + VERSION,
-    recurse: true,
-    readme: config.jsdoc.readme,
-    template: 'node_modules/jsdoc-template'
+    opts: {
+      destination: config.dist.jsdoc + VERSION,
+      recurse: true,
+      readme: config.jsdoc.readme,
+      template: 'node_modules/jsdoc-template'
+    },
+    templates: {
+      referenceTitle: 'Braintree Drop-in Reference'
+    },
+    plugins: ['./jsdoc/version-interpolator-plugin', 'plugins/markdown']
   }, done);
 }
 
