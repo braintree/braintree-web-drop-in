@@ -510,6 +510,35 @@ describe('Dropin', function () {
       });
     });
 
+    it('sends web.vaulted-card.appear event when vaulted cards are available', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+      this.sandbox.stub(analytics, 'sendEvent');
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'vaulted-card.appear');
+        done();
+      });
+    });
+
+    it('does not send web.vaulted-card.appear event when no vaulted cards', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+      this.sandbox.stub(analytics, 'sendEvent');
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-card.appear');
+        done();
+      });
+    });
+
     it('loads strings by default', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
