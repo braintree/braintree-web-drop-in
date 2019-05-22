@@ -764,34 +764,34 @@ describe('MainView', function () {
         });
 
         it('adds braintree-methods--active to the payment methods view element', function () {
-          this.mainView._onChangeActivePaymentMethodView(PaymentMethodsView.ID);
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.paymentMethodsContainer.className).to.contain('braintree-methods--active');
         });
 
         it('removes braintree-sheet--active from the payment sheet element', function () {
-          this.mainView._onChangeActivePaymentMethodView(PaymentMethodsView.ID);
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.sheetElement.className).to.not.contain('braintree-sheet--active');
         });
 
         it('does not call model.setPaymentMethodRequestable', function () {
-          this.mainView._onChangeActivePaymentMethodView(PaymentMethodsView.ID);
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.model.setPaymentMethodRequestable).to.not.be.called;
         });
 
         it('calls onSelection', function () {
-          this.mainView._onChangeActivePaymentMethodView(PaymentMethodsView.ID);
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.mainView._views.methods.onSelection).to.be.calledOnce;
         });
 
         it('sends select analytic event sent when shouldSendSelectEvent is true', function () {
           this.mainView.shouldSendSelectEvent = true;
-          this.mainView._onChangeActivePaymentMethodView(PaymentMethodsView.ID);
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(analytics.sendEvent).to.be.calledWith(this.client, 'vaulted-card.select');
         });
 
         it('does not send select analytic event when shouldSendSelectEvent is false', function () {
           this.mainView.shouldSendSelectEvent = false;
-          this.mainView._onChangeActivePaymentMethodView(PaymentMethodsView.ID);
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(analytics.sendEvent).to.not.be.calledWith(this.client, 'vaulted-card.select');
         });
       });
