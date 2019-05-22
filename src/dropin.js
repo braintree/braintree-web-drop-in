@@ -565,14 +565,23 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
   }.bind(this));
 };
 
-Dropin.prototype._vaultedCardAppearAnalyticEvent = function () {
-  var i;
+Dropin.prototype._sendVaultedPaymentMethodAppearAnalyticsEvents = function () {
+  var i, type;
+  var typesThatSentAnEvent = {};
+  var paymentMethods = this._model._paymentMethods;
 
-  for (i = 0; i < this._model._paymentMethods.length; i++) {
-    if (this._model._paymentMethods[i].type === 'CreditCard') {
-      analytics.sendEvent(this._client, 'vaulted-card.appear');
-      break;
+  for (i = 0; i < paymentMethods.length; i++) {
+    type = paymentMethods[i].type;
+
+    if (type in typesThatSentAnEvent) {
+      // prevents us from sending the analytic multiple times
+      // for the same payment method type
+      continue;
     }
+
+    typesThatSentAnEvent[type] = true;
+
+    analytics.sendEvent(this._client, 'vaulted-' + constants.analyticsKinds[type] + '.appear');
   }
 };
 
@@ -583,7 +592,7 @@ Dropin.prototype._handleAppSwitch = function () {
   } else if (this._model.appSwitchPayload) {
     this._model.addPaymentMethod(this._model.appSwitchPayload);
   } else {
-    this._vaultedCardAppearAnalyticEvent();
+    this._sendVaultedPaymentMethodAppearAnalyticsEvents();
   }
 };
 

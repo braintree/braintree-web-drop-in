@@ -493,19 +493,93 @@ describe('Dropin', function () {
       });
     });
 
-    it('sends web.vaulted-card.appear event when vaulted cards are available', function (done) {
+    it('sends vaulted payment method appeared events for each vaulted payment method', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
       this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
         {type: 'CreditCard', details: {lastTwo: '11'}},
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
       ]);
-      this.sandbox.stub(analytics, 'sendEvent');
 
       instance._initialize(function () {
         expect(analytics.sendEvent).to.be.calledWith(instance._client, 'vaulted-card.appear');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'vaulted-paypal.appear');
         done();
       });
+    });
+
+    it('sends a single analytic event even when multiple vaulted payment methods of the same kind are available', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'CreditCard', details: {lastTwo: '22'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'PayPalAccount', details: {email: 'woah@example.com'}}
+      ]);
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent.withArgs(instance._client, 'vaulted-card.appear')).to.be.calledOnce;
+        expect(analytics.sendEvent.withArgs(instance._client, 'vaulted-paypal.appear')).to.be.calledOnce;
+        done();
+      });
+    });
+
+    it('does not send payment method analytic event when app switch payload present', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-card.appear');
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-paypal.appear');
+
+        done();
+      });
+
+      delay().then(function () {
+        instance._model.dependencySuccessCount = 1;
+        instance._model.appSwitchPayload = {
+          nonce: 'a-nonce'
+        };
+        this.sandbox.stub(instance._mainView, 'setPrimaryView');
+
+        instance._model._emit('asyncDependenciesReady');
+      }.bind(this));
+    });
+
+    it('does not send payment method analytic event when app switch error present', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-card.appear');
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-paypal.appear');
+
+        done();
+      });
+
+      delay().then(function () {
+        instance._model.dependencySuccessCount = 1;
+        instance._model.appSwitchError = {
+          ID: 'view',
+          error: new Error('error')
+        };
+        this.sandbox.stub(instance._mainView, 'setPrimaryView');
+
+        instance._model._emit('asyncDependenciesReady');
+      }.bind(this));
     });
 
     it('does not send web.vaulted-card.appear event when no vaulted cards', function (done) {
