@@ -96,27 +96,7 @@ MainView.prototype._initialize = function () {
     }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
   }.bind(this));
 
-  this.model.on('changeActivePaymentView', function (id) {
-    var activePaymentView = this.getView(id);
-
-    if (id === PaymentMethodsView.ID) {
-      classList.add(this.paymentMethodsViews.container, 'braintree-methods--active');
-      classList.remove(this.sheetContainer, 'braintree-sheet--active');
-      this.vaultedCardSelectAnalyticEvent();
-    } else {
-      setTimeout(function () {
-        classList.add(this.sheetContainer, 'braintree-sheet--active');
-      }.bind(this), 0);
-      classList.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
-      if (!this.getView(id).getPaymentMethod()) {
-        this.model.setPaymentMethodRequestable({
-          isRequestable: false
-        });
-      }
-    }
-
-    activePaymentView.onSelection();
-  }.bind(this));
+  this.model.on('changeActivePaymentView', this._onChangeActivePaymentMethodView.bind(this));
 
   this.model.on('removeActivePaymentMethod', function () {
     var activePaymentView = this.getView(this.model.getActivePaymentView());
@@ -148,6 +128,28 @@ MainView.prototype._initialize = function () {
   }
 
   this._sendToDefaultView();
+};
+
+MainView.prototype._onChangeActivePaymentMethodView = function (id) {
+  var activePaymentView = this.getView(id);
+
+  if (id === PaymentMethodsView.ID) {
+    classList.add(this.paymentMethodsViews.container, 'braintree-methods--active');
+    classList.remove(this.sheetContainer, 'braintree-sheet--active');
+    this.vaultedCardSelectAnalyticEvent();
+  } else {
+    setTimeout(function () {
+      classList.add(this.sheetContainer, 'braintree-sheet--active');
+    }.bind(this), 0);
+    classList.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
+    if (!this.getView(id).getPaymentMethod()) {
+      this.model.setPaymentMethodRequestable({
+        isRequestable: false
+      });
+    }
+  }
+
+  activePaymentView.onSelection();
 };
 
 MainView.prototype.vaultedCardSelectAnalyticEvent = function () {
@@ -388,9 +390,9 @@ MainView.prototype._sendToDefaultView = function () {
   var preselectVaultedPaymentMethod = this.model.merchantConfiguration.preselectVaultedPaymentMethod !== false;
 
   if (paymentMethods.length > 0) {
+    this.shouldSendSelectEvent = false;
     if (preselectVaultedPaymentMethod) {
       analytics.sendEvent(this.client, 'vaulted-card.preselect');
-      this.shouldSendSelectEvent = false;
 
       this.model.changeActivePaymentMethod(paymentMethods[0]);
     } else {
