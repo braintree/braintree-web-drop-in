@@ -101,6 +101,7 @@ PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
   var paymentMethodView = new PaymentMethodView({
     model: this.model,
     paymentMethod: paymentMethod,
+    client: this.client,
     strings: this.strings
   });
 
