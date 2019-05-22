@@ -341,8 +341,6 @@ Dropin.prototype._initialize = function (callback) {
         analytics.sendEvent(self._client, 'appeared');
         self._disableErroredPaymentMethods();
 
-        self._vaultedCardAppearAnalyticEvent();
-
         self._handleAppSwitch();
 
         callback(null, self);
@@ -584,6 +582,8 @@ Dropin.prototype._handleAppSwitch = function () {
     this._model.reportError(this._model.appSwitchError.error);
   } else if (this._model.appSwitchPayload) {
     this._model.addPaymentMethod(this._model.appSwitchPayload);
+  } else {
+    this._vaultedCardAppearAnalyticEvent();
   }
 };
 
