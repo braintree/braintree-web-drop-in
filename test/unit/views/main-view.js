@@ -209,15 +209,14 @@ describe('MainView', function () {
       });
 
       it('sends preselect analytic event when a vaulted card is preselected', function () {
-        new MainView(this.mainViewOptions); // eslint-disable-line no-new
         this.model.merchantConfiguration.preselectVaultedPaymentMethod = true;
+        new MainView(this.mainViewOptions); // eslint-disable-line no-new
 
         expect(analytics.sendEvent).to.be.calledWith(this.client, 'vaulted-card.preselect');
       });
 
       it('does not send preselect analytic event when a vaulted card is not preselected', function () {
         this.model.merchantConfiguration.preselectVaultedPaymentMethod = false;
-        this.sandbox.spy(this.model, 'changeActivePaymentMethod');
 
         new MainView(this.mainViewOptions); // eslint-disable-line no-new
 
@@ -792,7 +791,7 @@ describe('MainView', function () {
         it('does not send select analytic event when shouldSendSelectEvent is false', function () {
           this.mainView.shouldSendSelectEvent = false;
           this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
-          expect(analytics.sendEvent).to.not.be.calledWith(this.client, 'vaulted-card.select');
+          expect(analytics.sendEvent).to.not.be.calledWith(this.sandbox.match.any, 'vaulted-card.select');
         });
       });
 
