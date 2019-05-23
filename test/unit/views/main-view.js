@@ -781,18 +781,6 @@ describe('MainView', function () {
           this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.mainView._views.methods.onSelection).to.be.calledOnce;
         });
-
-        it('sends select analytic event sent when shouldSendSelectEvent is true', function () {
-          this.mainView.shouldSendSelectEvent = true;
-          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
-          expect(analytics.sendEvent).to.be.calledWith(this.client, 'vaulted-card.select');
-        });
-
-        it('does not send select analytic event when shouldSendSelectEvent is false', function () {
-          this.mainView.shouldSendSelectEvent = false;
-          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
-          expect(analytics.sendEvent).to.not.be.calledWith(this.sandbox.match.any, 'vaulted-card.select');
-        });
       });
 
       describe('when a payment sheet is active', function () {
