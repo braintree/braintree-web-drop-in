@@ -63,12 +63,12 @@
     "vinyl-source-stream": "2.0.0"
   },
   "dependencies": {
-    "braintree-web": "3.44.2",
+    "braintree-web": "3.45.0",
     "@braintree/asset-loader": "0.2.1",
     "@braintree/browser-detection": "1.7.0",
     "@braintree/class-list": "0.1.0",
     "promise-polyfill": "8.1.0",
-    "@braintree/wrap-promise": "1.1.1"
+    "@braintree/wrap-promise": "2.0.0"
   },
   "browserify": {
     "transform": [
