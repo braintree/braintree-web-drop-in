@@ -13,7 +13,7 @@ module DropIn
   def get_hostname
     return `hostname`.chomp if !IS_TRAVIS
 
-    return "braintree-web-dropin.example"
+    return "braintree-web-dropin.bt.local"
   end
 
   def click_option(option_type)
@@ -21,8 +21,13 @@ module DropIn
   end
 
   def hosted_field_send_input(key, value)
-    find("iframe[id='braintree-hosted-field-#{key}']").click
-    find("iframe[id='braintree-hosted-field-#{key}']").send_keys(value)
+    field = find("iframe[id='braintree-hosted-field-#{key}']")
+
+    field.click
+
+    page.within_frame field do
+      find(".#{key}").send_keys(value)
+    end
   end
 
   def submit_pay

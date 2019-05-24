@@ -328,22 +328,52 @@ npm test
 
 ## Integration tests
 
-Create a `.env` with [SauceLabs](https://saucelabs.com/) and [PayPal Sandbox](https://developer.paypal.com/docs/classic/lifecycle/sb_about-accounts/#creating-sandbox-test-accounts) credentials:
+Copy the `env.example` file to `.env` and filling in the env variables with [SauceLabs](https://saucelabs.com/) and [PayPal Sandbox](https://developer.paypal.com/docs/classic/lifecycle/sb_about-accounts/#creating-sandbox-test-accounts) credentials:
 
 ```
-export SAUCE_USERNAME=<SAUCE_USERNAME here>
-export SAUCE_ACCESS_KEY=<SAUCE_ACCESS_KEY here>
-export PAYPAL_USERNAME=<PayPal sandbox username here>
-export PAYPAL_PASSWORD=<PayPal sandbox password>
+SAUCE_USERNAME=<SAUCE_USERNAME here>
+SAUCE_ACCESS_KEY=<SAUCE_ACCESS_KEY here>
+PAYPAL_USERNAME=<PayPal sandbox username here>
+PAYPAL_PASSWORD=<PayPal sandbox password>
 ```
 
 To start the tests, run:
 
-```
+```bash
 npm run test:integration
 ```
 
-This will run the tests from `spec` in the browsers specified in [`spec/sauce_helper.rb`](./spec/sauce_helper.rb).
+This will run the tests from `spec` in the browsers specified in [`spec/spec_helper.rb`](./spec/spec_helper.rb).
+
+To run only the PayPal tests, run:
+
+```bash
+npm run test:integration:paypal-only
+```
+
+To run all tests but the PayPal tests, run:
+
+```bash
+npm run test:integration:paypal-skipped
+```
+
+By default, each test will retry once if it fails. PayPal tests will retry up to 4 times. You can ignore the retry behavior by passing `DISABLE_RETRIES=true` before running the test command.
+
+```bash
+DISABLE_RETRIES=true npm run test:integration
+```
+
+You can mark a test with an `:only` tag:
+
+```ruby
+it "asserts something", :only do
+```
+
+And then run the test command to run only that test:
+
+```bash
+npm run test:integration
+```
 
 ## Translations
 
