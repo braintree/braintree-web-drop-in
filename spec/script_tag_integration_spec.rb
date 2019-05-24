@@ -1,3 +1,4 @@
+require_relative "helpers/skip_browser_helper"
 require_relative "helpers/drop_in_helper"
 require_relative "helpers/paypal_helper"
 
@@ -16,7 +17,7 @@ describe "Drop-in Script Tag Integration" do
 
     submit_pay
 
-    expect(page).to have_content("Braintree Drop-in Script Tag Result Page")
+    expect(page).to have_current_path("/script-tag-result.html", :ignore_query => true)
     expect(page).to have_content("payment_method_nonce:")
   end
 
@@ -31,7 +32,7 @@ describe "Drop-in Script Tag Integration" do
 
     submit_pay
 
-    expect(page).to have_content("Braintree Drop-in Script Tag Result Page")
+    expect(page).to have_current_path("/script-tag-result.html", :ignore_query => true)
     expect(page).to have_content("payment_method_nonce:")
   end
 
@@ -43,7 +44,7 @@ describe "Drop-in Script Tag Integration" do
 
     submit_pay
 
-    expect(page).to_not have_content("Braintree Drop-in Script Tag Result Page")
+    expect(page).to_not have_current_path("/script-tag-result.html", :ignore_query => true)
   end
 
   it "accepts data attributes as create options" do

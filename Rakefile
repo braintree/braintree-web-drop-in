@@ -13,12 +13,12 @@ SAUCE_CONNECT_PORT = 4445
 @build_success = true
 
 PLATFORMS = {
-  "windows_ie9" => "Windows 7 IE9",
-  "windows_ie10" => "Windows 8.1 IE10",
   "windows_ie11" => "Windows 10 IE11",
   "windows_10_chrome" => "Windows 10 Chrome",
   "windows_10_ff" => "Windows 10 Firefox",
-  "mac_mojave_safari" => "Mac OS 10.14 Safari"
+  # PayPal window doesn't complete flow on this VM
+  # the login window appears again after login
+  # "mac_mojave_safari" => "Mac OS 10.14 Safari",
 }
 
 $pids = []
@@ -45,8 +45,16 @@ PLATFORMS.each do |platform_key, browser_name|
   desc "Run tests using #{browser_name}"
   task platform_key do
     ENV['PLATFORM'] = platform_key
+    command = "rspec spec/"
+
+    if ENV["RUN_PAYPAL_ONLY"]
+      command += " --tag paypal"
+    elsif ENV["SKIP_PAYPAL"]
+      command += " --tag ~paypal"
+    end
+
     begin
-      @result = system 'rspec spec/request_payment_method_spec.rb'
+      @result = system command
     ensure
       @build_success &= @result
     end

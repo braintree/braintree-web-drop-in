@@ -4,7 +4,6 @@ before_install:
   if [ $IS_INTEGRATION_TEST ]; then rvm install ruby-2.4.3 --binary && rvm use ruby-2.4.3 && bundle install; else echo "Not an integration test. Skipping Ruby setup"; fi
 script: npm run $TEST
 addons:
-  sauce_connect: true
   hosts:
     - braintree-web-dropin.example
 notifications:
@@ -19,7 +18,8 @@ env:
   matrix:
   - TEST="test"
   - TEST="test:publishing"
-  - TEST="test:integration" IS_INTEGRATION_TEST=true
+  - TEST="test:integration:paypal-only" IS_INTEGRATION_TEST=true
+  - TEST="test:integration:paypal-skipped" IS_INTEGRATION_TEST=true
   # iOS tests on Travis are flaky. Run these manually before merging something in
   # - TEST="test:integration" PLATFORM="ios" IS_INTEGRATION_TEST=true
   global:

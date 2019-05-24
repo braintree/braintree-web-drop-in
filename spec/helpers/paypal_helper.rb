@@ -33,29 +33,24 @@ module PayPal
     paypal_popup = open_popup
 
     within_window paypal_popup do
-      expect(page).to have_text("Pay with PayPal", wait: 30)
-      login_iframe = first("#injectedUnifiedLogin iframe")
-      # login_to_paypal
-      #
-      # sleep 1
-      #
-      # block.call if block
-      #
-      # sleep 2
-      #
-      # click_button("confirmButtonTop", wait: 30)
+      login_to_paypal
+
+      sleep 1
+
+      block.call if block
+
+      sleep 2
+
+      click_button("confirmButtonTop", wait: 30)
     end
 
     # can take sandbox a while to close
-    # sleep 4
+    sleep 4
   end
 
   def login_to_paypal
-    expect(page).to have_text("Pay with PayPal", wait: 30)
-    login_iframe = first("#injectedUnifiedLogin iframe")
-
-    if !login_iframe.nil?
-      login_to_paypal_with_iframe_login(login_iframe)
+    if page.has_css?("#injectedUnifiedLogin iframe")
+      login_to_paypal_with_iframe_login
     else
       login_to_paypal_without_iframe_login
     end
@@ -64,7 +59,9 @@ module PayPal
     expect(page).to have_selector('#confirmButtonTop')
   end
 
-  def login_to_paypal_with_iframe_login(login_iframe)
+  def login_to_paypal_with_iframe_login
+    login_iframe = first("#injectedUnifiedLogin iframe")
+
     page.within_frame login_iframe do
       fill_in("email", :with => ENV["PAYPAL_USERNAME"])
       fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
@@ -76,11 +73,7 @@ module PayPal
   end
 
   def login_to_paypal_without_iframe_login
-    split_login = first('#splitEmail')
-
     fill_in("email", :with => ENV["PAYPAL_USERNAME"])
-
-    click_button("btnNext") unless split_login.nil?
 
     fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
     click_button("btnLogin")

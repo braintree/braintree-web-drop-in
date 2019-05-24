@@ -18,14 +18,17 @@ RSpec.configure do |config|
   config.include Capybara::DSL
   config.include Capybara::RSpecMatchers
 
-  # config.verbose_retry = true
-  # config.around(:each) do |c|
-  #   c.run_with_retry(retry: 2)
-  # end
-  #
-  # config.around(:each, :paypal) do |c|
-  #   c.run_with_retry(retry: 4, retry_wait: 4)
-  # end
+  # turn off retries by passing DISABLE_RETRIES=true before running test command
+  unless ENV["DISABLE_RETRIES"]
+    config.verbose_retry = true
+    config.around(:each) do |c|
+      c.run_with_retry(retry: 2)
+    end
+
+    config.around(:each, :paypal) do |c|
+      c.run_with_retry(retry: 4, retry_wait: 4)
+    end
+  end
 
   if ParallelTests.first_process?
     config.after(:suite) do
@@ -55,7 +58,7 @@ RSpec.configure do |config|
     Capybara.current_session.quit
   end
 
-	def chrome(name)
+  def chrome(name)
     # This is for running Chrome with w3c which is not yet the default
     {
       platform_name: 'Windows 10',
@@ -66,18 +69,6 @@ RSpec.configure do |config|
 
   def platform(name)
     case ENV['PLATFORM']
-    when 'windows_ie9'
-      {
-        platform: 'Windows 7',
-        browser_name: 'ie',
-        browser_version: '9.0'
-      }.merge(sauce_w3c(name))
-    when 'windows_ie10'
-      {
-        platform: 'Windows 8.1',
-        browser_name: 'ie',
-        browser_version: '10.0'
-      }.merge(sauce_w3c(name))
     when 'windows_ie11'
       {
         platform: 'Windows 10',
