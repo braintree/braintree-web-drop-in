@@ -13,7 +13,7 @@ module DropIn
   def get_hostname
     return `hostname`.chomp if !IS_TRAVIS
 
-    return "braintree-web-dropin.example"
+    return "braintree-web-dropin.bt.local"
   end
 
   def click_option(option_type)

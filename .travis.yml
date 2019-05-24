@@ -5,7 +5,7 @@ before_install:
 script: npm run $TEST
 addons:
   hosts:
-    - braintree-web-dropin.example
+    - braintree-web-dropin.bt.local
 notifications:
   email: false
   slack:
