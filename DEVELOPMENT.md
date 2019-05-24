@@ -363,6 +363,18 @@ By default, each test will retry once if it fails. PayPal tests will retry up to
 DISABLE_RETRIES=true npm run test:integration
 ```
 
+You can mark a test with an `:only` tag:
+
+```ruby
+it "asserts something", :only do
+```
+
+And then run the test command to run only that test:
+
+```bash
+npm run test:integration
+```
+
 ## Translations
 
 If you need to update a key for a translation that you have already updated in `en_US`, run the following with the existing key and then the new key as arguments:

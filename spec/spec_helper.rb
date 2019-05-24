@@ -30,6 +30,8 @@ RSpec.configure do |config|
     end
   end
 
+  config.filter_run_when_matching :only
+
   if ParallelTests.first_process?
     config.after(:suite) do
       ParallelTests.wait_for_other_processes_to_finish
