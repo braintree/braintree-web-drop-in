@@ -582,7 +582,7 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
-    it('does not send web.vaulted-card.appear event when no vaulted cards', function (done) {
+    it('does not send web.vaulted-card.appear analytic event when no vaulted cards appear', function (done) {
       var instance = new Dropin(this.dropinOptions);
 
       this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
