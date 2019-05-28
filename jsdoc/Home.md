@@ -152,5 +152,5 @@ Including `*.cardinalcommerce.com` in `frame-src` is only required if you are us
 <a id="additional-resources"></a>
 ## Additional resources
 
-<li>[Braintree Drop-in Payment UI guide](https://developers.braintreepayments.com/guides/drop-in/javascript/v3)</li>
-<li>[`braintree-web-drop-in` GitHub repo](https://github.com/braintree/braintree-web-drop-in)</li>
+- [Braintree Drop-in Payment UI guide](https://developers.braintreepayments.com/guides/drop-in/javascript/v3)
+- [`braintree-web-drop-in` GitHub repo](https://github.com/braintree/braintree-web-drop-in)
