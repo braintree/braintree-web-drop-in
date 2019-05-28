@@ -253,7 +253,7 @@ function linkJsdoc(done) {
     del.sync(link);
   }
 
-  fs.symlink(VERSION, link + 'current', done);
+  fs.symlink(VERSION, link, done);
 }
 
 generateJsdoc.displayName = 'jsdoc:generate';
