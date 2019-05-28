@@ -251,7 +251,7 @@ describe('PaymentMethodView', function () {
       expect(analytics.sendEvent.withArgs(this.client, 'vaulted-paypal.select')).to.be.calledOnce;
     });
 
-    it.only('does not send an analytic event when no payment is selected', function () {
+    it('does not send an analytic event when no payment is selected', function () {
       var view = new PaymentMethodView({
         client: this.client,
         model: this.model,
