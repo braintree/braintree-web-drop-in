@@ -293,7 +293,7 @@ ghPagesServer.displayName = 'gh-pages';
 function triggerWatchers() {
   watch([config.src.js.watch, config.src.html.watch], parallel(jsNotMin, jsMin));
   watch([config.src.css.watch], task(buildCss));
-  watch([config.src.js.watch, config.jsdoc.watch], task(ghPagesServer));
+  watch([config.src.js.watch, config.jsdoc.watch], ghPagesBuild());
   watch([config.src.demoApp], task(demoApp));
 }
 
