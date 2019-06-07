@@ -75,7 +75,10 @@ module PayPal
   def login_to_paypal_without_iframe_login
     fill_in("email", :with => ENV["PAYPAL_USERNAME"])
 
+    click_button("btnNext") if page.has_css?('#splitEmail')
+
     fill_in("password", :with => ENV["PAYPAL_PASSWORD"])
+
     click_button("btnLogin")
   end
 end
