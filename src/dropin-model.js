@@ -2,7 +2,7 @@
 
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
-var EventEmitter = require('./lib/event-emitter');
+var EventEmitter = require('@braintree/event-emitter');
 var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
@@ -39,9 +39,7 @@ function DropinModel(options) {
   EventEmitter.call(this);
 }
 
-DropinModel.prototype = Object.create(EventEmitter.prototype, {
-  constructor: DropinModel
-});
+EventEmitter.createChild(DropinModel);
 
 DropinModel.prototype.initialize = function () {
   var self = this;

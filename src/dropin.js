@@ -6,7 +6,7 @@ var classList = require('@braintree/class-list');
 var constants = require('./constants');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
-var EventEmitter = require('./lib/event-emitter');
+var EventEmitter = require('@braintree/event-emitter');
 var assets = require('@braintree/asset-loader');
 var fs = require('fs');
 var MainView = require('./views/main-view');
@@ -254,9 +254,7 @@ function Dropin(options) {
   EventEmitter.call(this);
 }
 
-Dropin.prototype = Object.create(EventEmitter.prototype, {
-  constructor: Dropin
-});
+EventEmitter.createChild(Dropin);
 
 Dropin.prototype._initialize = function (callback) {
   var localizedStrings, localizedHTML;
