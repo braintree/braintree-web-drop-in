@@ -2,7 +2,7 @@
 
 var Dropin = require('../../src/dropin/');
 var DropinModel = require('../../src/dropin-model');
-var EventEmitter = require('../../src/lib/event-emitter');
+var EventEmitter = require('@braintree/event-emitter');
 var assets = require('@braintree/asset-loader');
 var analytics = require('../../src/lib/analytics');
 var fake = require('../helpers/fake');
