@@ -40,7 +40,7 @@ A demo app for the latest release of `braintree-web-drop-in` and JSDocs are publ
 
 To run the app and docs locally, follow the build instructions and then run `npm run development`.
 
-This will serve `dist/gh-pages` at port 4567 and watch for changes in `src`.
+This will serve `dist/gh-pages` at <https://localhost:4567> and watch for changes in `src`. On first visit, you will need to accept the certificate and reload. (Browsers word this a bit differently, but typically will warn that the site is not private and offer a button or link to continue anyway.)
 
 ## CSS
 
