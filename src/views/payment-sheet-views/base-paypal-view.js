@@ -138,6 +138,7 @@ BasePayPalView.isEnabled = function (options) {
   paypalScriptLoadInProgressPromise = assets.loadScript({
     src: constants.CHECKOUT_JS_SOURCE,
     id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+    crossorigin: 'anonymous',
     dataAttributes: {
       'log-level': options.merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
     }
