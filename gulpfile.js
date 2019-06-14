@@ -20,6 +20,7 @@ var streamify = require('gulp-streamify');
 var uglify = require('gulp-uglify');
 var spawn = require('child_process').spawn;
 var connect = require('connect');
+var https = require('https');
 var serveStatic = require('serve-static');
 var mkdirp = require('mkdirp');
 var autoprefixer = require('gulp-autoprefixer');
@@ -280,11 +281,19 @@ demoAppApple.displayName = 'build:demoapp:apple-domain-association';
 demoApp.displayName = 'build:demoapp';
 
 function ghPagesServer() {
-  connect()
-    .use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
-    .use(serveStatic(path.join(__dirname, config.server.assetsPath)))
+  var app = connect();
+
+  app.use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
+    .use(serveStatic(path.join(__dirname, config.server.assetsPath)));
+
+  https.createServer(
+    {
+      key: fs.readFileSync(path.join(process.env.PWD, '.ssl', 'localhost.key')),
+      cert: fs.readFileSync(path.join(process.env.PWD, '.ssl', 'localhost.cert'))
+    },
+    app)
     .listen(config.server.port, function () {
-      log(c.magenta('Demo app and JSDocs'), 'started at', c.yellow('http://localhost:' + config.server.port));
+      log(c.magenta('Demo app and JSDocs'), 'started at', c.yellow('https://localhost:' + config.server.port));
     });
 }
 
