@@ -46,6 +46,7 @@ describe('Dropin', function () {
       }
     };
 
+    this.sandbox.stub(analytics, 'sendEvent');
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(hostedFields, 'create').resolves(fake.hostedFieldsInstance);
     this.sandbox.stub(paypalCheckout, 'create').resolves(fake.paypalInstance);
@@ -92,8 +93,6 @@ describe('Dropin', function () {
 
       delete this.dropinOptions.merchantConfiguration.container;
 
-      this.sandbox.stub(analytics, 'sendEvent');
-
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function (err) {
@@ -107,8 +106,6 @@ describe('Dropin', function () {
       var instance;
 
       this.dropinOptions.merchantConfiguration.selector = {value: '#bar'};
-
-      this.sandbox.stub(analytics, 'sendEvent');
 
       instance = new Dropin(this.dropinOptions);
 
@@ -127,7 +124,6 @@ describe('Dropin', function () {
       hostedFields.create.rejects(hostedFieldsError);
       paypalCheckout.create.rejects(paypalError);
 
-      this.sandbox.stub(analytics, 'sendEvent');
       this.dropinOptions.merchantConfiguration.paypal = {flow: 'vault'};
 
       instance = new Dropin(this.dropinOptions);
@@ -195,8 +191,6 @@ describe('Dropin', function () {
 
       this.dropinOptions.merchantConfiguration.container = '#garbage';
 
-      this.sandbox.stub(analytics, 'sendEvent');
-
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function (err) {
@@ -212,8 +206,6 @@ describe('Dropin', function () {
       var div = document.createElement('div');
 
       this.container.appendChild(div);
-
-      this.sandbox.stub(analytics, 'sendEvent');
 
       instance = new Dropin(this.dropinOptions);
 
@@ -233,8 +225,6 @@ describe('Dropin', function () {
 
       this.dropinOptions.merchantConfiguration.container = this.container;
 
-      this.sandbox.stub(analytics, 'sendEvent');
-
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function (err) {
@@ -250,8 +240,6 @@ describe('Dropin', function () {
       var fakeDiv = {appendChild: 'fake'};
 
       this.dropinOptions.merchantConfiguration.container = fakeDiv;
-
-      this.sandbox.stub(analytics, 'sendEvent');
 
       instance = new Dropin(this.dropinOptions);
 
@@ -384,8 +372,6 @@ describe('Dropin', function () {
       });
       this.client.request.rejects(new Error('This failed'));
 
-      this.sandbox.stub(analytics, 'sendEvent');
-
       instance = new Dropin(this.dropinOptions);
 
       instance._initialize(function () {
@@ -406,8 +392,6 @@ describe('Dropin', function () {
         gatewayConfiguration: fake.configuration().gatewayConfiguration
       });
       this.client.request.resolves(paymentMethodsPayload);
-
-      this.sandbox.stub(analytics, 'sendEvent');
 
       instance = new Dropin(this.dropinOptions);
 
@@ -496,7 +480,6 @@ describe('Dropin', function () {
 
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
       this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
-      this.sandbox.stub(analytics, 'sendEvent');
 
       instance._initialize(function () {
         expect(analytics.sendEvent).to.be.calledOnce;
@@ -507,6 +490,108 @@ describe('Dropin', function () {
       delay().then(function () {
         instance._model.dependencySuccessCount = 2;
         instance._model._emit('asyncDependenciesReady');
+      });
+    });
+
+    it('sends vaulted payment method appeared events for each vaulted payment method', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'vaulted-card.appear');
+        expect(analytics.sendEvent).to.be.calledWith(instance._client, 'vaulted-paypal.appear');
+        done();
+      });
+    });
+
+    it('sends a single analytic event even when multiple vaulted payment methods of the same kind are available', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'CreditCard', details: {lastTwo: '22'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
+        {type: 'PayPalAccount', details: {email: 'woah@example.com'}}
+      ]);
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent.withArgs(instance._client, 'vaulted-card.appear')).to.be.calledOnce;
+        expect(analytics.sendEvent.withArgs(instance._client, 'vaulted-paypal.appear')).to.be.calledOnce;
+        done();
+      });
+    });
+
+    it('does not send payment method analytic event when app switch payload present', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-card.appear');
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-paypal.appear');
+
+        done();
+      });
+
+      delay().then(function () {
+        instance._model.dependencySuccessCount = 1;
+        instance._model.appSwitchPayload = {
+          nonce: 'a-nonce'
+        };
+        this.sandbox.stub(instance._mainView, 'setPrimaryView');
+
+        instance._model._emit('asyncDependenciesReady');
+      }.bind(this));
+    });
+
+    it('does not send payment method analytic event when app switch error present', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'CreditCard', details: {lastTwo: '11'}},
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
+      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyReady');
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-card.appear');
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-paypal.appear');
+
+        done();
+      });
+
+      delay().then(function () {
+        instance._model.dependencySuccessCount = 1;
+        instance._model.appSwitchError = {
+          ID: 'view',
+          error: new Error('error')
+        };
+        this.sandbox.stub(instance._mainView, 'setPrimaryView');
+
+        instance._model._emit('asyncDependenciesReady');
+      }.bind(this));
+    });
+
+    it('does not send web.vaulted-card.appear analytic event when no vaulted cards appear', function (done) {
+      var instance = new Dropin(this.dropinOptions);
+
+      this.sandbox.stub(DropinModel.prototype, 'getVaultedPaymentMethods').resolves([
+        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+      ]);
+
+      instance._initialize(function () {
+        expect(analytics.sendEvent).to.not.be.calledWith(instance._client, 'vaulted-card.appear');
+        done();
       });
     });
 

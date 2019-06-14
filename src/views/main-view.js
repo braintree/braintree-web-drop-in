@@ -77,6 +77,7 @@ MainView.prototype._initialize = function () {
   this.paymentMethodsViews = new PaymentMethodsView({
     element: this.element,
     model: this.model,
+    client: this.client,
     strings: this.strings
   });
   this.addView(this.paymentMethodsViews);
@@ -96,26 +97,7 @@ MainView.prototype._initialize = function () {
     }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
   }.bind(this));
 
-  this.model.on('changeActivePaymentView', function (id) {
-    var activePaymentView = this.getView(id);
-
-    if (id === PaymentMethodsView.ID) {
-      classList.add(this.paymentMethodsViews.container, 'braintree-methods--active');
-      classList.remove(this.sheetContainer, 'braintree-sheet--active');
-    } else {
-      setTimeout(function () {
-        classList.add(this.sheetContainer, 'braintree-sheet--active');
-      }.bind(this), 0);
-      classList.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
-      if (!this.getView(id).getPaymentMethod()) {
-        this.model.setPaymentMethodRequestable({
-          isRequestable: false
-        });
-      }
-    }
-
-    activePaymentView.onSelection();
-  }.bind(this));
+  this.model.on('changeActivePaymentView', this._onChangeActivePaymentMethodView.bind(this));
 
   this.model.on('removeActivePaymentMethod', function () {
     var activePaymentView = this.getView(this.model.getActivePaymentView());
@@ -147,6 +129,27 @@ MainView.prototype._initialize = function () {
   }
 
   this._sendToDefaultView();
+};
+
+MainView.prototype._onChangeActivePaymentMethodView = function (id) {
+  var activePaymentView = this.getView(id);
+
+  if (id === PaymentMethodsView.ID) {
+    classList.add(this.paymentMethodsViews.container, 'braintree-methods--active');
+    classList.remove(this.sheetContainer, 'braintree-sheet--active');
+  } else {
+    setTimeout(function () {
+      classList.add(this.sheetContainer, 'braintree-sheet--active');
+    }.bind(this), 0);
+    classList.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
+    if (!this.getView(id).getPaymentMethod()) {
+      this.model.setPaymentMethodRequestable({
+        isRequestable: false
+      });
+    }
+  }
+
+  activePaymentView.onSelection();
 };
 
 MainView.prototype.addView = function (view) {
@@ -378,6 +381,8 @@ MainView.prototype._sendToDefaultView = function () {
 
   if (paymentMethods.length > 0) {
     if (preselectVaultedPaymentMethod) {
+      analytics.sendEvent(this.client, 'vaulted-card.preselect');
+
       this.model.changeActivePaymentMethod(paymentMethods[0]);
     } else {
       this.setPrimaryView(this.paymentMethodsViews.ID);

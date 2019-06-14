@@ -1,5 +1,6 @@
 'use strict';
 
+var analytics = require('../../../src/lib/analytics');
 var BaseView = require('../../../src/views/base-view');
 var fake = require('../../helpers/fake');
 var fs = require('fs');
@@ -201,6 +202,85 @@ describe('PaymentMethodView', function () {
       this.sandbox.clock.tick(1001);
 
       expect(this.context.element.classList.contains('braintree-method--active')).to.be.false;
+    });
+  });
+
+  describe('selecting payment methods', function () {
+    beforeEach(function () {
+      this.client = fake.client();
+      this.model = fake.model();
+      this.sandbox.stub(analytics, 'sendEvent');
+    });
+
+    it('sends an analytic event when a vaulted card is selected', function () {
+      var view = new PaymentMethodView({
+        client: this.client,
+        model: this.model,
+        strings: strings,
+        paymentMethod: {
+          type: 'CreditCard',
+          nonce: 'nonce',
+          vaulted: true,
+          details: {
+            lastFour: 1111
+          }
+        }
+      });
+
+      view._choosePaymentMethod();
+
+      expect(analytics.sendEvent.withArgs(this.client, 'vaulted-card.select')).to.be.calledOnce;
+    });
+
+    it('sends an analytic event when a vaulted paypal payment method is selected', function () {
+      var view = new PaymentMethodView({
+        client: this.client,
+        model: this.model,
+        strings: strings,
+        paymentMethod: {
+          type: 'PayPalAccount',
+          vaulted: true,
+          details: {
+            email: 'test@example.com'
+          }
+        }
+      });
+
+      view._choosePaymentMethod();
+
+      expect(analytics.sendEvent.withArgs(this.client, 'vaulted-paypal.select')).to.be.calledOnce;
+    });
+
+    it('does not send an analytic event when no payment is selected', function () {
+      var view = new PaymentMethodView({
+        client: this.client,
+        model: this.model,
+        strings: strings,
+        paymentMethod: {}
+      });
+
+      view._choosePaymentMethod();
+
+      expect(analytics.sendEvent.withArgs(this.client, 'vaulted-card.select')).to.not.be.called;
+    });
+
+    it('does not send an analytic event when a non-vaulted PayPal payment method is selected', function () {
+      var view = new PaymentMethodView({
+        client: this.client,
+        model: this.model,
+        strings: strings,
+        paymentMethod: {
+          type: 'PayPalAccount',
+          vaulted: false,
+          details: {
+            email: 'test@example.com'
+          }
+        }
+      });
+
+      view._choosePaymentMethod();
+
+      expect(analytics.sendEvent.withArgs(this.client, 'vaulted-paypal.select')).to.not.be.called;
     });
   });
 

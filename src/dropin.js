@@ -563,12 +563,34 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
   }.bind(this));
 };
 
+Dropin.prototype._sendVaultedPaymentMethodAppearAnalyticsEvents = function () {
+  var i, type;
+  var typesThatSentAnEvent = {};
+  var paymentMethods = this._model._paymentMethods;
+
+  for (i = 0; i < paymentMethods.length; i++) {
+    type = paymentMethods[i].type;
+
+    if (type in typesThatSentAnEvent) {
+      // prevents us from sending the analytic multiple times
+      // for the same payment method type
+      continue;
+    }
+
+    typesThatSentAnEvent[type] = true;
+
+    analytics.sendEvent(this._client, 'vaulted-' + constants.analyticsKinds[type] + '.appear');
+  }
+};
+
 Dropin.prototype._handleAppSwitch = function () {
   if (this._model.appSwitchError) {
     this._mainView.setPrimaryView(this._model.appSwitchError.id);
     this._model.reportError(this._model.appSwitchError.error);
   } else if (this._model.appSwitchPayload) {
     this._model.addPaymentMethod(this._model.appSwitchPayload);
+  } else {
+    this._sendVaultedPaymentMethodAppearAnalyticsEvents();
   }
 };
 

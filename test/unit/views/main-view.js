@@ -27,6 +27,7 @@ describe('MainView', function () {
     this.client = fake.client();
     this.sandbox.stub(CardView.prototype, 'getPaymentMethod');
     this.sandbox.stub(BasePayPalView.prototype, 'initialize');
+    this.sandbox.stub(analytics, 'sendEvent');
   });
 
   describe('Constructor', function () {
@@ -162,11 +163,19 @@ describe('MainView', function () {
           {type: 'PayPalAccount', details: {email: 'me@example.com'}}
         ]);
 
+        this.dropinOptions = {
+          client: this.client,
+          merchantConfiguration: {
+            container: '#foo',
+            authorization: fake.tokenizationKey
+          }
+        };
+
         return this.model.initialize().then(function () {
           this.model.supportedPaymentOptions = ['card', 'paypal'];
 
           this.mainViewOptions = {
-            client: fake.client(),
+            client: this.client,
             element: element,
             merchantConfiguration: {
               authorization: fake.tokenizationKey
@@ -197,6 +206,21 @@ describe('MainView', function () {
         expect(this.model.changeActivePaymentMethod).to.not.have.been.called;
         expect(MainView.prototype.setPrimaryView).to.be.calledOnce;
         expect(MainView.prototype.setPrimaryView).to.be.calledWith('methods');
+      });
+
+      it('sends preselect analytic event when a vaulted card is preselected', function () {
+        this.model.merchantConfiguration.preselectVaultedPaymentMethod = true;
+        new MainView(this.mainViewOptions); // eslint-disable-line no-new
+
+        expect(analytics.sendEvent).to.be.calledWith(this.client, 'vaulted-card.preselect');
+      });
+
+      it('does not send preselect analytic event when a vaulted card is not preselected', function () {
+        this.model.merchantConfiguration.preselectVaultedPaymentMethod = false;
+
+        new MainView(this.mainViewOptions); // eslint-disable-line no-new
+
+        expect(analytics.sendEvent).to.not.be.calledWith(this.client, 'vaulted-card.preselect');
       });
 
       it('sets the PaymentMethodsView as the primary view', function (done) {
@@ -591,6 +615,7 @@ describe('MainView', function () {
           hideSheetError: this.sandbox.stub(),
           hideLoadingIndicator: function () {},
           _sendToDefaultView: this.sandbox.stub(),
+          _onChangeActivePaymentMethodView: this.sandbox.stub(),
           model: model,
           client: fake.client(),
           setPrimaryView: this.sandbox.stub(),
@@ -735,22 +760,25 @@ describe('MainView', function () {
         beforeEach(function () {
           classList.remove(this.paymentMethodsContainer, 'braintree-methods--active');
           classList.add(this.sheetElement, 'braintree-sheet--active');
-          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
         });
 
         it('adds braintree-methods--active to the payment methods view element', function () {
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.paymentMethodsContainer.className).to.contain('braintree-methods--active');
         });
 
         it('removes braintree-sheet--active from the payment sheet element', function () {
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.sheetElement.className).to.not.contain('braintree-sheet--active');
         });
 
         it('does not call model.setPaymentMethodRequestable', function () {
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.model.setPaymentMethodRequestable).to.not.be.called;
         });
 
         it('calls onSelection', function () {
+          this.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
           expect(this.mainView._views.methods.onSelection).to.be.calledOnce;
         });
       });
@@ -917,8 +945,6 @@ describe('MainView', function () {
 
       this.wrapper = document.createElement('div');
       this.wrapper.innerHTML = templateHTML;
-
-      this.sandbox.stub(analytics, 'sendEvent');
 
       return model.initialize().then(function () {
         this.mainView = new MainView({
