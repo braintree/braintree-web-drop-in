@@ -5,8 +5,9 @@ Unreleased
 ------
 - Replace css preprocessor, from [Sass](https://sass-lang.com) to [Less](http://lesscss.org)
 - Upgrade to gulp 4
-- Adjust delete confirmation box css to be consistent, all relative to own parent.
-- Improved build to properly interpolate current versions in not only docs but also built code
+- Adjust delete confirmation box css to be consistent, all relative to own parent
+- Improve build to properly interpolate current versions in not only docs but also built code
+- Use SSL on localhost so gateway will return a configuration object
 
 1.18.0
 ------
