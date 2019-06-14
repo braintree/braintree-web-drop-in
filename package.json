@@ -44,6 +44,7 @@
     "gulp-size": "3.0.0",
     "gulp-streamify": "1.0.2",
     "gulp-uglify": "^3.0.2",
+    "hint": "^5.0.2",
     "is-uuid": "1.0.2",
     "jsdoc": "^3.6.2",
     "jsdoc-template": "braintree/jsdoc-template#3.2.0",
@@ -62,7 +63,8 @@
     "through2": "^3.0.1",
     "vinyl": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
-    "watchify": "^3.11.1"
+    "watchify": "^3.11.1",
+    "webhint-configuration-braintree-sdk": "github:braintree/webhint-configuration-braintree-sdk#semver:0.0.2"
   },
   "dependencies": {
     "@braintree/asset-loader": "0.2.1",
