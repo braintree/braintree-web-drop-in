@@ -282,19 +282,25 @@ demoApp.displayName = 'build:demoapp';
 
 function ghPagesServer() {
   var app = connect();
+  var protocol = 'http';
 
   app.use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
     .use(serveStatic(path.join(__dirname, config.server.assetsPath)));
 
-  https.createServer(
-    {
-      key: fs.readFileSync(path.join(process.env.PWD, '.ssl', 'localhost.key')),
-      cert: fs.readFileSync(path.join(process.env.PWD, '.ssl', 'localhost.cert'))
-    },
-    app)
-    .listen(config.server.port, function () {
-      log(c.magenta('Demo app and JSDocs'), 'started at', c.yellow('https://localhost:' + config.server.port));
-    });
+  if (process.env.NODE_ENV === 'development') {
+    protocol = 'https';
+
+    app = https.createServer(
+      {
+        key: fs.readFileSync(path.join(process.env.PWD, '.ssl', 'localhost.key')),
+        cert: fs.readFileSync(path.join(process.env.PWD, '.ssl', 'localhost.cert'))
+      },
+      app);
+  }
+
+  app.listen(config.server.port, function () {
+    log(c.magenta('Demo app and JSDocs'), 'started at', c.yellow(protocol + '://localhost:' + config.server.port));
+  });
 }
 
 ghPagesServer.displayName = 'gh-pages';
