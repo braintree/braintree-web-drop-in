@@ -938,4 +938,17 @@ describe('BasePayPalView', function () {
       });
     });
   });
+
+  describe('requestPaymentMethod', function () {
+    it('always rejects', function () {
+      var view = new BasePayPalView(this.paypalViewOptions);
+
+      return view.requestPaymentMethod().then(function () {
+        throw new Error('should not resolve');
+      }).catch(function (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal('No payment method is available.');
+      });
+    });
+  });
 });
