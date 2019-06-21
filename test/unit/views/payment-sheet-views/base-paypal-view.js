@@ -938,4 +938,14 @@ describe('BasePayPalView', function () {
       });
     });
   });
+
+  describe('requestPaymentMethod', function () {
+    it('always rejects', function () {
+      var view = new BasePayPalView(this.paypalViewOptions);
+
+      return view.requestPaymentMethod().then(
+        function () { expect(true).to.equal(false); },
+        function () { expect(true).to.equal(true); });
+    });
+  });
 });

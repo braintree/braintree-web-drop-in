@@ -104,6 +104,8 @@ BasePayPalView.prototype.initialize = function () {
 
 BasePayPalView.prototype.requestPaymentMethod = function () {
   this.model.reportError('paypalButtonMustBeUsed');
+
+  return Promise.reject(new DropinError(constants.errors.NO_PAYMENT_METHOD_ERROR));
 };
 
 BasePayPalView.prototype.updateConfiguration = function (key, value) {
