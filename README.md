@@ -23,7 +23,7 @@ This is a full example of a Drop-in integration that only accepts credit cards.
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>Checkout</title>
   </head>
   <body>
