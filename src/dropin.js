@@ -656,7 +656,7 @@ Dropin.prototype._handleAppSwitch = function () {
  *      form.submit();
  *    } else {
  *      // Decide if you will force the user to enter a different payment method
- *      // if liablity was not shifted
+ *      // if liability was not shifted
  *      dropinInstance.clearSelectedPaymentMethod();
  *    }
  *  });
