@@ -64,7 +64,7 @@
     "vinyl": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^3.11.1",
-    "webhint-configuration-braintree-sdk": "github:braintree/webhint-configuration-braintree-sdk#semver:0.0.2"
+    "webhint-configuration-braintree-sdk": "github:braintree/webhint-configuration-braintree-sdk#semver:0.0.4"
   },
   "dependencies": {
     "@braintree/asset-loader": "0.2.1",
