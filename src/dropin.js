@@ -341,6 +341,8 @@ Dropin.prototype._initialize = function (callback) {
 
         self._handleAppSwitch();
 
+        self._model.confirmDropinReady();
+
         callback(null, self);
       } else {
         self._model.cancelInitialization(new DropinError('All payment options failed to load.'));

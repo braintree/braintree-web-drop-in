@@ -93,6 +93,18 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('confirmDropinReady', function () {
+    it('sets _setupComplete to true', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      expect(model._setupComplete).to.equal(false);
+
+      model.confirmDropinReady();
+
+      expect(model._setupComplete).to.equal(true);
+    });
+  });
+
   describe('initialize', function () {
     beforeEach(function () {
       this.sandbox.stub(ApplePayView, 'isEnabled').resolves(true);
@@ -707,6 +719,7 @@ describe('DropinModel', function () {
     beforeEach(function () {
       this.model = new DropinModel(this.modelOptions);
 
+      this.model.confirmDropinReady();
       this.sandbox.stub(this.model, '_emit');
     });
 
@@ -731,6 +744,16 @@ describe('DropinModel', function () {
         type: 'card',
         paymentMethodIsSelected: false
       });
+    });
+
+    it('does not emit paymentMethodRequestable event if drop-in is not ready', function () {
+      this.model._setupComplete = false;
+      this.model.setPaymentMethodRequestable({
+        isRequestable: true,
+        type: 'card'
+      });
+
+      expect(this.model._emit).to.not.be.called;
     });
 
     it('sets isPaymentMethodRequestable to false when isRequestable is false', function () {
