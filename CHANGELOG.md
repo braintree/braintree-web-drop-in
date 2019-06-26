@@ -7,6 +7,7 @@ Unreleased
 - Upgrade to gulp 4
 - Adjust delete confirmation box css to be consistent, all relative to own parent.
 - Improved build to properly interpolate current versions in not only docs but also built code
+- Update braintree-web to v3.46.0
 
 1.18.0
 ------
