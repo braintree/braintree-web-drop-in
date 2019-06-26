@@ -53,6 +53,7 @@ describe('DataCollector', function () {
       return dc.initialize().then(function () {
         expect(assets.loadScript).to.be.calledOnce;
         expect(assets.loadScript).to.be.calledWith({
+          crossorigin: 'anonymous',
           src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
           id: 'braintree-dropin-data-collector-script'
         });
@@ -67,6 +68,7 @@ describe('DataCollector', function () {
       return dc.initialize().then(function () {
         expect(assets.loadScript).to.be.calledOnce;
         expect(assets.loadScript).to.be.calledWith({
+          crossorigin: 'anonymous',
           src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
           id: 'braintree-dropin-data-collector-script'
         });
