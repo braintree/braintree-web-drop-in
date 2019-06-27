@@ -146,7 +146,9 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
 
   if (!this._setupComplete) {
     // don't emit event until after Drop-in is fully set up
-    // fixes issues with lazy loading of imports where this event
+    // fixes issues with lazy loading of imports where event
+    // should not be emitted
+    // https://github.com/braintree/braintree-web-drop-in/issues/511
     return false;
   }
 
