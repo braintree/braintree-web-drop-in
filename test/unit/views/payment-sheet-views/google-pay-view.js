@@ -489,6 +489,7 @@ describe('GooglePayView', function () {
       return GooglePayView.isEnabled(this.fakeOptions).then(function () {
         expect(assets.loadScript).to.be.calledOnce;
         expect(assets.loadScript).to.be.calledWith({
+          crossorigin: 'anonymous',
           id: 'braintree-dropin-google-payment-script',
           src: 'https://pay.google.com/gp/p/js/pay.js'
         });
@@ -514,6 +515,7 @@ describe('GooglePayView', function () {
       return GooglePayView.isEnabled(this.fakeOptions).then(function () {
         expect(assets.loadScript).to.be.calledOnce;
         expect(assets.loadScript).to.be.calledWith({
+          crossorigin: 'anonymous',
           id: 'braintree-dropin-google-payment-script',
           src: 'https://pay.google.com/gp/p/js/pay.js'
         });
