@@ -38,7 +38,7 @@ DataCollector.prototype.initialize = function () {
 };
 
 DataCollector.prototype.log = function (message) {
-  console.log(message);
+  console.log(message); // eslint-disable-line no-console
 };
 
 DataCollector.prototype.getDeviceData = function () {
