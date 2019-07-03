@@ -24,7 +24,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "ansi-colors": "^4.0.1",
+    "ansi-colors": "^4.1.0",
     "brfs": "^2.0.2",
     "browserify": "^16.2.3",
     "browserify-versionify": "^1.0.6",
@@ -67,7 +67,7 @@
     "webhint-configuration-braintree-sdk": "github:braintree/webhint-configuration-braintree-sdk#semver:0.0.4"
   },
   "dependencies": {
-    "@braintree/asset-loader": "0.2.1",
+    "@braintree/asset-loader": "0.3.0",
     "@braintree/browser-detection": "1.7.0",
     "@braintree/class-list": "0.1.0",
     "@braintree/event-emitter": "0.2.0",
