@@ -869,7 +869,6 @@ describe('BasePayPalView', function () {
       return BasePayPalView.isEnabled(this.options).then(function () {
         expect(assets.loadScript).to.be.calledOnce;
         expect(assets.loadScript).to.be.calledWith({
-          crossorigin: 'anonymous',
           src: 'https://www.paypalobjects.com/api/checkout.min.js',
           id: 'braintree-dropin-paypal-checkout-script',
           dataAttributes: {
@@ -887,7 +886,6 @@ describe('BasePayPalView', function () {
       return BasePayPalView.isEnabled(this.options).then(function () {
         expect(assets.loadScript).to.be.calledOnce;
         expect(assets.loadScript).to.be.calledWith({
-          crossorigin: 'anonymous',
           src: 'https://www.paypalobjects.com/api/checkout.min.js',
           id: 'braintree-dropin-paypal-checkout-script',
           dataAttributes: {
