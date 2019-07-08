@@ -67,7 +67,7 @@
     "webhint-configuration-braintree-sdk": "github:braintree/webhint-configuration-braintree-sdk#semver:0.0.4"
   },
   "dependencies": {
-    "@braintree/asset-loader": "0.3.1",
+    "@braintree/asset-loader": "0.2.1",
     "@braintree/browser-detection": "1.7.0",
     "@braintree/class-list": "0.1.0",
     "@braintree/event-emitter": "0.2.0",
