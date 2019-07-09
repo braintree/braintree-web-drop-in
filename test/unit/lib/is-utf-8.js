@@ -13,10 +13,10 @@ describe('isUtf8', function () {
     expect(isUtf8(win)).to.be.true;
   });
 
-  it('returns true when characterSet is UTF-8', function () {
+  it('returns true when characterSet is utf-8', function () {
     var win = {
       document: {
-        characterSet: 'UTF-8'
+        characterSet: 'utf-8'
       }
     };
 
