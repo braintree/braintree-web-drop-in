@@ -32,7 +32,7 @@
  * <!DOCTYPE html>
  * <html lang="en">
  *   <head>
- *     <meta charset="UTF-8">
+ *     <meta charset="utf-8">
  *     <title>Checkout</title>
  *   </head>
  *   <body>
@@ -50,7 +50,7 @@
  * <!DOCTYPE html>
  * <html lang="en">
  *   <head>
- *     <meta charset="UTF-8">
+ *     <meta charset="utf-8">
  *     <title>Checkout</title>
  *   </head>
  *   <body>
@@ -121,7 +121,7 @@ var VERSION = '__VERSION__';
  * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
  * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
  * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developers.braintreepayments.com/guides/drop-in/customization/javascript/v3#customize-your-ui).
- * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a succesful tokenization.
+ * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a successful tokenization.
  * @param {object} [vault] Configuration for vaulting credit cards. Only applies when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id).
  * @param {boolean} [vault.allowVaultCardOverride=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
  * @param {boolean} [vault.vaultCard=true] Whether or not to vault the card upon tokenization. When set to `false` with `allowVaultCardOverride` set to `false`, then cards will not be vaulted.
@@ -152,8 +152,8 @@ var VERSION = '__VERSION__';
 /** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
  *
  * @param {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
- * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 128 characters. The system may display this name to the user.
- * @param {number} [applePaySessionVersion=2] The [version of the `ApplePaySession`](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history) to use. It's recomended to use the lowest version that contains all the features you need for your checkout to maximize compatiblity.
+ * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a utf-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {number} [applePaySessionVersion=2] The [version of the `ApplePaySession`](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history) to use. It's recommended to use the lowest version that contains all the features you need for your checkout to maximize compatibility.
  * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
  */
 
@@ -253,7 +253,7 @@ var VERSION = '__VERSION__';
  *
  * @param {object} [options.threeDSecure] The configuration options for 3D Secure. See [`threeDSecureOptions`](#~threeDSecureOptions) for all `threeDSecure` options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
- * @param {boolean} [options.vaultManager=false] Whether or not to allow a customer to delete saved payment methods when used with a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id). *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recomended for merchants using Braintree's recurring billing system. This feature is not supported in Internet Explorer 9.
+ * @param {boolean} [options.vaultManager=false] Whether or not to allow a customer to delete saved payment methods when used with a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id). *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system. This feature is not supported in Internet Explorer 9.
  *
  * @param {boolean} [options.preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
  *
@@ -264,7 +264,7 @@ var VERSION = '__VERSION__';
  * <!DOCTYPE html>
  * <html lang="en">
  *   <head>
- *     <meta charset="UTF-8">
+ *     <meta charset="utf-8">
  *     <title>Checkout</title>
  *   </head>
  *   <body>
@@ -303,7 +303,7 @@ var VERSION = '__VERSION__';
  * <!DOCTYPE html>
  * <html lang="en">
  *   <head>
- *     <meta charset="UTF-8">
+ *     <meta charset="utf-8">
  *     <title>Checkout</title>
  *   </head>
  *   <body>
@@ -378,7 +378,7 @@ var VERSION = '__VERSION__';
  * <!DOCTYPE html>
  * <html lang="en">
  *   <head>
- *     <meta charset="UTF-8">
+ *     <meta charset="utf-8">
  *     <title>Checkout</title>
  *   </head>
  *   <body>

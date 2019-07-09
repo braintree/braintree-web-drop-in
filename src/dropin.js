@@ -54,8 +54,8 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
- * @property {?boolean} liablityShifted If 3D Secure is configured, whether or not liability did shift.
- * @property {?boolean} liablityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
+ * @property {?boolean} liabilityShifted If 3D Secure is configured, whether or not liability did shift.
+ * @property {?boolean} liabilityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
  */
 
 /**
@@ -213,7 +213,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {string} type The type of payment method that is requestable. Either `CreditCard` or `PayPalAccount`.
  * @property {boolean} paymentMethodIsSelected A property to determine if a payment method is currently selected when the payment method becomes requestable.
  *
- * This will be `true` any time a payment method is visably selected in the Drop-in UI, such as when PayPal authentication completes or a stored payment method is selected.
+ * This will be `true` any time a payment method is visibly selected in the Drop-in UI, such as when PayPal authentication completes or a stored payment method is selected.
  *
  * This will be `false` when {@link Dropin#requestPaymentMethod|`requestPaymentMethod`} can be called, but a payment method is not currently selected. For instance, when a card form has been filled in with valid values, but has not been submitted to be converted into a payment method nonce.
  */
@@ -370,7 +370,7 @@ Dropin.prototype._initialize = function (callback) {
 };
 
 /**
- * Modify your configuration intially set in {@link module:braintree-web-drop-in|`dropin.create`}.
+ * Modify your configuration initially set in {@link module:braintree-web-drop-in|`dropin.create`}.
  *
  * If `updateConfiguration` is called after a user completes the PayPal authorization flow, any PayPal accounts not stored in the Vault record will be removed.
  * @public
@@ -656,7 +656,7 @@ Dropin.prototype._handleAppSwitch = function () {
  *      form.submit();
  *    } else {
  *      // Decide if you will force the user to enter a different payment method
- *      // if liablity was not shifted
+ *      // if liability was not shifted
  *      dropinInstance.clearSelectedPaymentMethod();
  *    }
  *  });
