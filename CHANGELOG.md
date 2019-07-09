@@ -6,6 +6,7 @@ Unreleased
 - Update asset-loader to v0.3.1
 - Update event-emitter to v0.2.0
 - Update promise-polyfill to v8.1.3
+- Update braintree-web to v3.47.0
 - Replace css preprocessor, from [Sass](https://sass-lang.com) to [Less](http://lesscss.org)
 - Upgrade to gulp 4
 - Adjust delete confirmation box css to be consistent, all relative to own parent.
