@@ -34,6 +34,7 @@ Unreleased
 - Add ability to opt out of card view by passing `false` as the card option
 - Update braintree-web to v3.44.0
 - Fix issue where requestable event fires when cancelling payment method deletion (#477)
+- Add ability to auto expand "Other Ways to Pay" Section
 
 1.16.0
 ------

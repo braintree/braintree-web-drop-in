@@ -416,6 +416,47 @@ describe('DropinModel', function () {
     });
   });
 
+  describe('shouldExpandPaymentOptions', function () {
+    it('returns true when merchant configuration for expanding ways to pay is set and there are multiple payment methods and more than 1 payment option', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      model.merchantConfiguration.expandOtherWaysToPay = true;
+      model.supportedPaymentOptions = ['card', 'paypal'];
+      model._paymentMethods = ['these are my payment methods'];
+
+      expect(model.shouldExpandPaymentOptions()).to.equal(true);
+    });
+
+    it('returns false when merchant configuration for expanding ways to pay is set but there are no payment methods', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      model.merchantConfiguration.expandOtherWaysToPay = true;
+      model.supportedPaymentOptions = ['card', 'paypal'];
+      model._paymentMethods = [];
+
+      expect(model.shouldExpandPaymentOptions()).to.equal(false);
+    });
+
+    it('returns false when merchant configuration for expanding ways to pay is not set', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      delete model.merchantConfiguration.expandOtherWaysToPay;
+      model._paymentMethods = ['some payment method'];
+      model.supportedPaymentOptions = ['card', 'paypal'];
+
+      expect(model.shouldExpandPaymentOptions()).to.equal(false);
+    });
+
+    it('returns false when only 1 available payment option', function () {
+      var model = new DropinModel(this.modelOptions);
+
+      model._paymentMethods = ['some payment method'];
+      model.supportedPaymentOptions = ['card'];
+
+      expect(model.shouldExpandPaymentOptions()).to.equal(false);
+    });
+  });
+
   describe('getPaymentMethods', function () {
     it('returns a copy of the _paymentMethods array', function () {
       var model = new DropinModel(this.modelOptions);
