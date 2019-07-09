@@ -202,6 +202,24 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  */
 
 /**
+ * @name Dropin#off
+ * @function
+ * @param {string} event The name of the event to which you are unsubscribing.
+ * @param {function} handler A callback to unsubscribe from the event.
+ * @description Unsubscribes a handler function to a named event.
+ * @returns {void}
+ * @example
+ * <caption>Subscribe and then unsubscribe from event</caption>
+ * var callback = function (event) {
+ *   // do something
+ * };
+ * dropinInstance.on('paymentMethodRequestable', callback);
+ *
+ * // later on
+ * dropinInstance.off('paymentMethodRequestable', callback);
+ */
+
+/**
  * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMethodRequestable`}.
  * @event Dropin#paymentMethodRequestable
  * @type {Dropin~paymentMethodRequestablePayload}
