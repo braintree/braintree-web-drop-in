@@ -55,7 +55,9 @@ describe('ThreeDSecure', function () {
     });
 
     it('calls verifyCard', function () {
-      return this.tds.verify('old-nonce').then(function (payload) {
+      return this.tds.verify({
+        nonce: 'old-nonce'
+      }).then(function (payload) {
         expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
         expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
           nonce: 'old-nonce',
@@ -74,7 +76,9 @@ describe('ThreeDSecure', function () {
         message: 'A message'
       });
 
-      return this.tds.verify('old-nonce').then(function () {
+      return this.tds.verify({
+        nonce: 'old-nonce'
+      }).then(function () {
         throw new Error('should not get here');
       }).catch(function (err) {
         expect(err.message).to.equal('A message');

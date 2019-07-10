@@ -687,7 +687,7 @@ Dropin.prototype.requestPaymentMethod = function () {
     if (self._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
       self._mainView.showLoadingIndicator();
 
-      return self._threeDSecure.verify(payload.nonce).then(function (newPayload) {
+      return self._threeDSecure.verify(payload).then(function (newPayload) {
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;

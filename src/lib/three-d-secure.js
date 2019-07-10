@@ -18,11 +18,11 @@ ThreeDSecure.prototype.initialize = function () {
   });
 };
 
-ThreeDSecure.prototype.verify = function (nonce) {
+ThreeDSecure.prototype.verify = function (payload) {
   var self = this;
 
   return this._instance.verifyCard({
-    nonce: nonce,
+    nonce: payload.nonce,
     amount: self._config.amount,
     onLookupComplete: function (data, next) {
       next();

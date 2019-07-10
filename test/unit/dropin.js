@@ -1182,7 +1182,7 @@ describe('Dropin', function () {
 
         instance.requestPaymentMethod(function () {
           expect(instance._threeDSecure.verify).to.be.calledOnce;
-          expect(instance._threeDSecure.verify).to.be.calledWith('cool-nonce');
+          expect(instance._threeDSecure.verify).to.be.calledWith(fakePayload);
 
           done();
         });
