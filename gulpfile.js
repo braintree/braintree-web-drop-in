@@ -22,7 +22,6 @@ var spawn = require('child_process').spawn;
 var connect = require('connect');
 var serveStatic = require('serve-static');
 var mkdirp = require('mkdirp');
-var autoprefixer = require('gulp-autoprefixer');
 
 var VERSION = require('./package.json').version;
 var BT_WEB_VERSION = require('./package.json').dependencies['braintree-web'];
@@ -49,7 +48,7 @@ var config = {
     },
     css: {
       main: './src/less/main.less',
-      watch: 'src/less/**/*.less',
+      watch: 'src/less/*.less',
       output: 'dropin.css',
       min: 'dropin.min.css'
     },
@@ -102,7 +101,6 @@ function buildCss() {
 
   return src(config.src.css.main)
     .pipe(less(lessOptions))
-    .pipe(autoprefixer())
     .pipe(rename(config.src.css.output))
     .pipe(dest(config.dist.css))
     .pipe(cleanCSS())
@@ -292,9 +290,9 @@ ghPagesServer.displayName = 'gh-pages';
 
 function triggerWatchers() {
   watch([config.src.js.watch, config.src.html.watch], parallel(jsNotMin, jsMin));
-  watch([config.src.css.watch], task(buildCss));
+  watch([config.src.css.watch], buildCss);
   watch([config.src.js.watch, config.jsdoc.watch], ghPagesBuild());
-  watch([config.src.demoApp], task(demoApp));
+  watch([config.src.demoApp], demoApp);
 }
 
 triggerWatchers.displayName = 'watch';
