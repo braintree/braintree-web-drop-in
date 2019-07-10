@@ -22,7 +22,6 @@ var spawn = require('child_process').spawn;
 var connect = require('connect');
 var serveStatic = require('serve-static');
 var mkdirp = require('mkdirp');
-var autoprefixer = require('gulp-autoprefixer');
 
 var VERSION = require('./package.json').version;
 var BT_WEB_VERSION = require('./package.json').dependencies['braintree-web'];
@@ -102,7 +101,6 @@ function buildCss() {
 
   return src(config.src.css.main)
     .pipe(less(lessOptions))
-    .pipe(autoprefixer())
     .pipe(rename(config.src.css.output))
     .pipe(dest(config.dist.css))
     .pipe(cleanCSS())

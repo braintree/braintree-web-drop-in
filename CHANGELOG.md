@@ -14,6 +14,7 @@ Unreleased
 - Update braintree-web to v3.46.0
 - Prevent Drop-in from firing requestable events prematurely (#511)
 - Add `off` method for unsubscribing from events without tearing down
+- Clean up extraneous css rules
 
 1.18.0
 ------
