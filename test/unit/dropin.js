@@ -1189,6 +1189,42 @@ describe('Dropin', function () {
       }.bind(this));
     });
 
+    it('can pass additional 3ds info from merchant', function (done) {
+      var instance;
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+      var threeDSInfo = {
+        email: 'foo@example.com',
+        billingAddress: {}
+      };
+
+      this.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+        instance._threeDSecure = {
+          verify: this.sandbox.stub().resolves({
+            nonce: 'new-nonce',
+            liabilityShifted: true,
+            liabilityShiftPossible: true
+          })
+        };
+
+        instance.requestPaymentMethod({
+          threeDSecure: threeDSInfo
+        }, function () {
+          expect(instance._threeDSecure.verify).to.be.calledOnce;
+          expect(instance._threeDSecure.verify).to.be.calledWith(fakePayload, threeDSInfo);
+
+          done();
+        });
+      }.bind(this));
+    });
+
     it('replaces payload nonce with new 3ds nonce', function (done) {
       var instance;
       var fakePayload = {
