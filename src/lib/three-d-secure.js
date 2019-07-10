@@ -1,5 +1,6 @@
 'use strict';
 
+var assign = require('./assign').assign;
 var threeDSecure = require('braintree-web/three-d-secure');
 
 function ThreeDSecure(client, merchantConfiguration) {
@@ -18,17 +19,21 @@ ThreeDSecure.prototype.initialize = function () {
   });
 };
 
-ThreeDSecure.prototype.verify = function (payload) {
-  var self = this;
-
-  return this._instance.verifyCard({
+ThreeDSecure.prototype.verify = function (payload, merchantProvidedData) {
+  var verifyOptions = assign({
+    amount: this._config.amount
+  }, merchantProvidedData, {
     nonce: payload.nonce,
     bin: payload.details.bin,
-    amount: self._config.amount,
+    // TODO in the future, we will allow
+    // merchants to pass in a custom
+    // onLookupComplete hook
     onLookupComplete: function (data, next) {
       next();
     }
   });
+
+  return this._instance.verifyCard(verifyOptions);
 };
 
 ThreeDSecure.prototype.updateConfiguration = function (key, value) {

@@ -90,6 +90,83 @@ describe('ThreeDSecure', function () {
         expect(err.message).to.equal('A message');
       });
     });
+
+    it('can pass additional data along', function () {
+      var billingAddress = {
+        foo: 'bar'
+      };
+
+      return this.tds.verify({
+        nonce: 'old-nonce',
+        details: {
+          bin: '123456'
+        }
+      }, {
+        email: 'foo@example.com',
+        billingAddress: billingAddress
+      }).then(function (payload) {
+        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
+        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+          nonce: 'old-nonce',
+          bin: '123456',
+          amount: '10.00',
+          onLookupComplete: this.sandbox.match.func,
+          billingAddress: billingAddress,
+          email: 'foo@example.com'
+        });
+
+        expect(payload.nonce).to.equal('a-nonce');
+        expect(payload.liabilityShifted).to.equal(true);
+        expect(payload.liablityShiftPossible).to.equal(true);
+      }.bind(this));
+    });
+
+    it('additional config cannot override nonce or bin', function () {
+      return this.tds.verify({
+        nonce: 'old-nonce',
+        details: {
+          bin: '123456'
+        }
+      }, {
+        nonce: 'bad-nonce',
+        bin: 'bad-bin'
+      }).then(function (payload) {
+        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
+        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+          nonce: 'old-nonce',
+          bin: '123456',
+          amount: '10.00',
+          onLookupComplete: this.sandbox.match.func
+        });
+
+        expect(payload.nonce).to.equal('a-nonce');
+        expect(payload.liabilityShifted).to.equal(true);
+        expect(payload.liablityShiftPossible).to.equal(true);
+      }.bind(this));
+    });
+
+    it('additional config can override amount', function () {
+      return this.tds.verify({
+        nonce: 'old-nonce',
+        details: {
+          bin: '123456'
+        }
+      }, {
+        amount: '3.00'
+      }).then(function (payload) {
+        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
+        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+          nonce: 'old-nonce',
+          bin: '123456',
+          amount: '3.00',
+          onLookupComplete: this.sandbox.match.func
+        });
+
+        expect(payload.nonce).to.equal('a-nonce');
+        expect(payload.liabilityShifted).to.equal(true);
+        expect(payload.liablityShiftPossible).to.equal(true);
+      }.bind(this));
+    });
   });
 
   describe('teardown', function () {
