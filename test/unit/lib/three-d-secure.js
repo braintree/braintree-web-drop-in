@@ -4,6 +4,7 @@ var fake = require('../../helpers/fake');
 var threeDSecure = require('braintree-web/three-d-secure');
 var classList = require('@braintree/class-list');
 var ThreeDSecure = require('../../../src/lib/three-d-secure');
+var throwIfResolves = require('../../helpers/throw-if-resolves');
 
 describe('ThreeDSecure', function () {
   beforeEach(function () {
@@ -78,9 +79,7 @@ describe('ThreeDSecure', function () {
 
       return this.tds.verify({
         nonce: 'old-nonce'
-      }).then(function () {
-        throw new Error('should not get here');
-      }).catch(function (err) {
+      }).then(throwIfResolves).catch(function (err) {
         expect(err.message).to.equal('A message');
       });
     });
