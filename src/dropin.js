@@ -681,25 +681,35 @@ Dropin.prototype._handleAppSwitch = function () {
  * });
  */
 Dropin.prototype.requestPaymentMethod = function () {
+  var self = this;
+
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (this._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
-      return this._threeDSecure.verify(payload.nonce).then(function (newPayload) {
+    if (self._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
+      self._mainView.showLoadingIndicator();
+
+      return self._threeDSecure.verify(payload.nonce).then(function (newPayload) {
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
 
+        self._mainView.hideLoadingIndicator();
+
         return payload;
+      }).catch(function (err) {
+        self._mainView.hideLoadingIndicator();
+
+        return Promise.reject(err);
       });
     }
 
     return payload;
-  }.bind(this)).then(function (payload) {
-    if (this._dataCollector) {
-      payload.deviceData = this._dataCollector.getDeviceData();
+  }).then(function (payload) {
+    if (self._dataCollector) {
+      payload.deviceData = self._dataCollector.getDeviceData();
     }
 
     return payload;
-  }.bind(this)).then(function (payload) {
+  }).then(function (payload) {
     return formatPaymentMethodPayload(payload);
   });
 };

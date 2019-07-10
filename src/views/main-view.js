@@ -217,11 +217,21 @@ MainView.prototype.requestPaymentMethod = function () {
 };
 
 MainView.prototype.hideLoadingIndicator = function () {
+  // remove the style override setup by showLoadingIndicator
+  // (see comment there)
+  this.toggle.style.display = null;
+
   classList.add(this.dropinContainer, 'braintree-loaded');
   classList.add(this.loadingContainer, 'braintree-hidden');
 };
 
 MainView.prototype.showLoadingIndicator = function () {
+  // need to set style manually here, because many time
+  // async class styles are being set in the background
+  // and this ensures that the toggle button doesn't
+  // appear unexpectedly
+  this.toggle.style.display = 'none';
+
   classList.remove(this.dropinContainer, 'braintree-loaded');
   classList.remove(this.loadingContainer, 'braintree-hidden');
 };

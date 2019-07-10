@@ -652,7 +652,9 @@ describe('MainView', function () {
     it('sets the loaded class on dropin container', function () {
       var dropinContainer = document.createElement('div');
       var loadingContainer = document.createElement('div');
+      var toggleContainer = document.createElement('div');
       var context = {
+        toggle: toggleContainer,
         loadingContainer: loadingContainer,
         dropinContainer: dropinContainer
       };
@@ -661,13 +663,32 @@ describe('MainView', function () {
 
       expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(true);
     });
+
+    it('removes display attribute from toggle style object', function () {
+      var dropinContainer = document.createElement('div');
+      var loadingContainer = document.createElement('div');
+      var toggleContainer = document.createElement('div');
+      var context = {
+        toggle: toggleContainer,
+        loadingContainer: loadingContainer,
+        dropinContainer: dropinContainer
+      };
+
+      MainView.prototype.showLoadingIndicator.call(context);
+
+      MainView.prototype.hideLoadingIndicator.call(context);
+
+      expect(toggleContainer.style.display).to.equal('');
+    });
   });
 
   describe('showLoadingIndicator', function () {
     it('shows the loading indicator', function () {
       var dropinContainer = document.createElement('div');
       var loadingContainer = document.createElement('div');
+      var toggleContainer = document.createElement('div');
       var context = {
+        toggle: toggleContainer,
         loadingContainer: loadingContainer,
         dropinContainer: dropinContainer
       };
@@ -679,6 +700,21 @@ describe('MainView', function () {
       MainView.prototype.showLoadingIndicator.call(context);
 
       expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(false);
+    });
+
+    it('forces the toggle input to be hidden', function () {
+      var dropinContainer = document.createElement('div');
+      var loadingContainer = document.createElement('div');
+      var toggleContainer = document.createElement('div');
+      var context = {
+        toggle: toggleContainer,
+        loadingContainer: loadingContainer,
+        dropinContainer: dropinContainer
+      };
+
+      MainView.prototype.showLoadingIndicator.call(context);
+
+      expect(toggleContainer.style.display).to.equal('none');
     });
   });
 
