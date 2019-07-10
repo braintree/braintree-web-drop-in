@@ -57,11 +57,15 @@ describe('ThreeDSecure', function () {
 
     it('calls verifyCard', function () {
       return this.tds.verify({
-        nonce: 'old-nonce'
+        nonce: 'old-nonce',
+        details: {
+          bin: '123456'
+        }
       }).then(function (payload) {
         expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
         expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
           nonce: 'old-nonce',
+          bin: '123456',
           amount: '10.00',
           onLookupComplete: this.sandbox.match.func
         });
@@ -78,7 +82,10 @@ describe('ThreeDSecure', function () {
       });
 
       return this.tds.verify({
-        nonce: 'old-nonce'
+        nonce: 'old-nonce',
+        details: {
+          bin: '123456'
+        }
       }).then(throwIfResolves).catch(function (err) {
         expect(err.message).to.equal('A message');
       });

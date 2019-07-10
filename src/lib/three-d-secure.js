@@ -23,6 +23,7 @@ ThreeDSecure.prototype.verify = function (payload) {
 
   return this._instance.verifyCard({
     nonce: payload.nonce,
+    bin: payload.details.bin,
     amount: self._config.amount,
     onLookupComplete: function (data, next) {
       next();
