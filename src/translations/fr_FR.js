@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "Êtes-vous sûr de vouloir supprimer cette source d'approvisionnement ?",
   "deleteCancelButton": "Annuler",
   "deleteConfirmationButton": "Supprimer",
-  "cardVerification": "Vérification de la carte",
   "fieldEmptyForCvv": "Entrez un cryptogramme visuel.",
   "fieldEmptyForExpirationDate": "Entrez une date d'expiration.",
   "fieldEmptyForCardholderName": "Entrez un nom du titulaire de la carte.",

@@ -497,7 +497,7 @@ Dropin.prototype._setUpThreeDSecure = function () {
 
   this._model.asyncDependencyStarting();
 
-  this._threeDSecure = new ThreeDSecure(this._client, config, this._strings.cardVerification);
+  this._threeDSecure = new ThreeDSecure(this._client, config);
 
   this._threeDSecure.initialize().then(function () {
     self._model.asyncDependencyReady();

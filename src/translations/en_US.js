@@ -14,7 +14,6 @@ module.exports = {
   genericDeleteConfirmationMessage: 'Are you sure you want to delete this payment method?',
   deleteCancelButton: 'Cancel',
   deleteConfirmationButton: 'Delete',
-  cardVerification: 'Card Verification',
   // Errors
   fieldEmptyForCvv: 'Please fill out a CVV.',
   fieldEmptyForExpirationDate: 'Please fill out an expiration date.',

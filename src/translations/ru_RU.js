@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "Вы действительно хотите удалить этот способ оплаты?",
   "deleteCancelButton": "Отмена",
   "deleteConfirmationButton": "Удалить",
-  "cardVerification": "Проверка карты",
   "fieldEmptyForCvv": "Укажите код безопасности.",
   "fieldEmptyForExpirationDate": "Укажите дату окончания срока действия.",
   "fieldEmptyForCardholderName": "Введите имя и фамилию владельца карты.",

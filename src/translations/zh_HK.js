@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "確定要刪除此付款方式嗎？",
   "deleteCancelButton": "取消",
   "deleteConfirmationButton": "刪除",
-  "cardVerification": "信用卡認證",
   "fieldEmptyForCvv": "請填寫信用卡認證碼。",
   "fieldEmptyForExpirationDate": "請填寫到期日。",
   "fieldEmptyForCardholderName": "請填寫持卡人的名字。",

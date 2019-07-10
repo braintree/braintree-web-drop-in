@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "Tem certeza de que pretende eliminar este meio de pagamento?",
   "deleteCancelButton": "Cancelar",
   "deleteConfirmationButton": "Eliminar",
-  "cardVerification": "Verificação de cartão",
   "fieldEmptyForCvv": "Introduza o código CVV.",
   "fieldEmptyForExpirationDate": "Introduza a data de validade.",
   "fieldEmptyForCardholderName": "Introduza um nome do titular do cartão.",

@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "Er du sikker på at du vil slette denne betalingsmetoden?",
   "deleteCancelButton": "Avbryt",
   "deleteConfirmationButton": "Slett",
-  "cardVerification": "Kortbekreftelse",
   "fieldEmptyForCvv": "Oppgi en kortsikkerhetskode (CVV).",
   "fieldEmptyForExpirationDate": "Oppgi en utløpsdato.",
   "fieldEmptyForCardholderName": "Oppgi et navn for kortinnehaveren.",

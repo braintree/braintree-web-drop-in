@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "Yakin akan menghapus metode pembayaran ini?",
   "deleteCancelButton": "Batalkan",
   "deleteConfirmationButton": "Hapus",
-  "cardVerification": "Verifikasi Kartu",
   "fieldEmptyForCvv": "Masukkan CVV.",
   "fieldEmptyForExpirationDate": "Masukkan tanggal akhir berlaku.",
   "fieldEmptyForCardholderName": "Masukkan nama pemegang kartu.",

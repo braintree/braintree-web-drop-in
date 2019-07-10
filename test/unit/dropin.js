@@ -805,9 +805,6 @@ describe('Dropin', function () {
       Dropin.prototype._setUpDataCollector.call({
         _client: this.client,
         _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        },
         _merchantConfiguration: {
           threeDSecure: {
             foo: 'bar'
@@ -833,10 +830,7 @@ describe('Dropin', function () {
             foo: 'bar'
           }
         },
-        _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        }
+        _model: this.model
       }, noop);
 
       expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
@@ -861,9 +855,6 @@ describe('Dropin', function () {
       Dropin.prototype._setUpThreeDSecure.call({
         _client: this.client,
         _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        },
         _merchantConfiguration: {
           threeDSecure: {
             foo: 'bar'
@@ -884,9 +875,6 @@ describe('Dropin', function () {
       Dropin.prototype._setUpThreeDSecure.call({
         _client: this.client,
         _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        },
         _merchantConfiguration: {
           threeDSecure: {
             foo: 'bar'
@@ -912,10 +900,7 @@ describe('Dropin', function () {
             foo: 'bar'
           }
         },
-        _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        }
+        _model: this.model
       }, noop);
 
       expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
