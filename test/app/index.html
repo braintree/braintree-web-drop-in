@@ -147,6 +147,7 @@
     vaultManager: true
   };
   var dropinInstance;
+  var requestPaymentMethodOptions = {};
   var form = document.querySelector('#checkout-form');
   var results = document.querySelector('#results');
   var error = document.querySelector('#error');
@@ -200,6 +201,20 @@
       config.threeDSecure = {
         amount: '10.00'
       }
+      requestPaymentMethodOptions.threeDSecure = {
+        email: 'foo@example.com',
+        mobilePhoneNumber: '5551231234',
+        billingAddress: {
+          givenName: 'FirstName',
+          surname: 'LastName',
+          phoneNumber: '5551231234',
+          streetAddress: '123 Street',
+          locality: 'Oakland',
+          region: 'CA',
+          postalCode: '12345',
+          countryCodeAlpha2: 'US'
+        }
+      };
     }
 
     return config;
@@ -281,7 +296,7 @@
   form.addEventListener('submit', function (event) {
     event.preventDefault();
 
-    dropinInstance.requestPaymentMethod(function (err, payload) {
+    dropinInstance.requestPaymentMethod(requestPaymentMethodOptions, function (err, payload) {
       if (err) {
         clearButton.className = 'hidden';
         error.textContent = err.message;
