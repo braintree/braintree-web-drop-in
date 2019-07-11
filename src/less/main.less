@@ -783,6 +783,20 @@
 
 .braintree-methods--edit .braintree-method {
   cursor: auto;
+
+  &.braintree-method--disabled {
+    opacity: 0.8;
+    background: lighten(@border-color, 20%);
+    cursor: not-allowed;
+
+    &:hover .braintree-method__label {
+      font-weight: inherit;
+    }
+
+    .braintree-method__delete-container {
+      display: none;
+    }
+  }
 }
 
 .braintree-methods--active:not(.braintree-methods--edit) .braintree-method--active {

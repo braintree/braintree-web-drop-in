@@ -1,6 +1,7 @@
 'use strict';
 
 var analytics = require('../../../src/lib/analytics');
+var classList = require('@braintree/class-list');
 var BaseView = require('../../../src/views/base-view');
 var fake = require('../../helpers/fake');
 var fs = require('fs');
@@ -285,6 +286,92 @@ describe('PaymentMethodView', function () {
   });
 
   describe('edit mode', function () {
+    it('applies disabled class if payment method has a subscription and the merchant configuration for preventing deleting payment methods with subscriptions is enabeld', function () {
+      var model = fake.model();
+      var view = new PaymentMethodView({
+        model: model,
+        strings: strings,
+        paymentMethod: {
+          hasSubscription: true,
+          type: 'Foo',
+          nonce: 'nonce'
+        }
+      });
+
+      model.merchantConfiguration.vaultManager = {
+        preventDeletingPaymentMethodsWithSubscriptions: true
+      };
+      this.sandbox.stub(classList, 'add');
+
+      view.enableEditMode();
+
+      expect(classList.add).to.be.calledTwice;
+      expect(classList.add).to.be.calledWith(view.element, 'braintree-method--disabled');
+    });
+
+    it('does not apply disabled class if payment method has a subscription and the merchant configuration for preventing deleting payment methods with subscriptions is not enabled', function () {
+      var model = fake.model();
+      var view = new PaymentMethodView({
+        model: model,
+        strings: strings,
+        paymentMethod: {
+          hasSubscription: true,
+          type: 'Foo',
+          nonce: 'nonce'
+        }
+      });
+
+      model.merchantConfiguration.vaultManager = true;
+      this.sandbox.stub(classList, 'add');
+
+      view.enableEditMode();
+
+      expect(classList.add).to.be.calledOnce;
+      expect(classList.add).to.not.be.calledWith(this.sandbox.match.any, 'braintree-method--disabled');
+    });
+
+    it('does not apply disabled class if payment method does not have a subscription and the merchant configuration for preventing deleting payment methods with subscriptions is not enabled', function () {
+      var model = fake.model();
+      var view = new PaymentMethodView({
+        model: model,
+        strings: strings,
+        paymentMethod: {
+          type: 'Foo',
+          nonce: 'nonce'
+        }
+      });
+
+      model.merchantConfiguration.vaultManager = true;
+      this.sandbox.stub(classList, 'add');
+
+      view.enableEditMode();
+
+      expect(classList.add).to.be.calledOnce;
+      expect(classList.add).to.not.be.calledWith(this.sandbox.match.any, 'braintree-method--disabled');
+    });
+
+    it('does not apply disabled class if payment method does not have a subscription and the merchant configuration for preventing deleting payment methods with subscriptions is enabled', function () {
+      var model = fake.model();
+      var view = new PaymentMethodView({
+        model: model,
+        strings: strings,
+        paymentMethod: {
+          type: 'Foo',
+          nonce: 'nonce'
+        }
+      });
+
+      model.merchantConfiguration.vaultManager = {
+        preventDeletingPaymentMethodsWithSubscriptions: true
+      };
+      this.sandbox.stub(classList, 'add');
+
+      view.enableEditMode();
+
+      expect(classList.add).to.be.calledOnce;
+      expect(classList.add).to.not.be.calledWith(this.sandbox.match.any, 'braintree-method--disabled');
+    });
+
     it('does not call model.changeActivePaymentMethod in click handler when in edit mode', function () {
       var model = fake.model();
       var view = new PaymentMethodView({

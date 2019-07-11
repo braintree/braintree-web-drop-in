@@ -17,6 +17,9 @@ Unreleased
 - Clean up extraneous css rules
 - Add 3DS 2 support
 
+_Beta Features_
+- Add ability to prevednt deleting a payment method with an associated subscription
+
 1.18.0
 ------
 - Update wrap-promise to v2.0.0
