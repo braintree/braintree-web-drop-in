@@ -652,7 +652,9 @@ describe('MainView', function () {
     it('sets the loaded class on dropin container', function () {
       var dropinContainer = document.createElement('div');
       var loadingContainer = document.createElement('div');
+      var toggleContainer = document.createElement('div');
       var context = {
+        toggle: toggleContainer,
         loadingContainer: loadingContainer,
         dropinContainer: dropinContainer
       };
@@ -660,6 +662,7 @@ describe('MainView', function () {
       MainView.prototype.hideLoadingIndicator.call(context);
 
       expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(true);
+      expect(dropinContainer.classList.contains('braintree-loading')).to.equal(false);
     });
   });
 
@@ -667,17 +670,21 @@ describe('MainView', function () {
     it('shows the loading indicator', function () {
       var dropinContainer = document.createElement('div');
       var loadingContainer = document.createElement('div');
+      var toggleContainer = document.createElement('div');
       var context = {
+        toggle: toggleContainer,
         loadingContainer: loadingContainer,
         dropinContainer: dropinContainer
       };
 
       MainView.prototype.hideLoadingIndicator.call(context);
 
+      expect(dropinContainer.classList.contains('braintree-loading')).to.equal(false);
       expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(true);
 
       MainView.prototype.showLoadingIndicator.call(context);
 
+      expect(dropinContainer.classList.contains('braintree-loading')).to.equal(true);
       expect(dropinContainer.classList.contains('braintree-loaded')).to.equal(false);
     });
   });

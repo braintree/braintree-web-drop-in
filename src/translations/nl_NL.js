@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "Weet u zeker dat u deze betaalmethode wilt verwijderen?",
   "deleteCancelButton": "Annuleren",
   "deleteConfirmationButton": "Verwijderen",
-  "cardVerification": "Kaartcontrole",
   "fieldEmptyForCvv": "Vul een CSC in.",
   "fieldEmptyForExpirationDate": "Vul een vervaldatum in.",
   "fieldEmptyForCardholderName": "Vul een naam voor de kaarthouder in.",

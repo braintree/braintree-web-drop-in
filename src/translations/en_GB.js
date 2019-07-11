@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "Are you sure you want to delete this funding source?",
   "deleteCancelButton": "Cancel",
   "deleteConfirmationButton": "Delete",
-  "cardVerification": "Card verification",
   "fieldEmptyForCvv": "Please fill in a CSC.",
   "fieldEmptyForExpirationDate": "Please fill in an expiry date.",
   "fieldEmptyForCardholderName": "Please fill in a cardholder name.",

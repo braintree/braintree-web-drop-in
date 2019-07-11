@@ -217,11 +217,13 @@ MainView.prototype.requestPaymentMethod = function () {
 };
 
 MainView.prototype.hideLoadingIndicator = function () {
+  classList.remove(this.dropinContainer, 'braintree-loading');
   classList.add(this.dropinContainer, 'braintree-loaded');
   classList.add(this.loadingContainer, 'braintree-hidden');
 };
 
 MainView.prototype.showLoadingIndicator = function () {
+  classList.add(this.dropinContainer, 'braintree-loading');
   classList.remove(this.dropinContainer, 'braintree-loaded');
   classList.remove(this.loadingContainer, 'braintree-hidden');
 };

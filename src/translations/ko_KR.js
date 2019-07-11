@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "이 결제수단을 삭제하시겠어요?",
   "deleteCancelButton": "취소",
   "deleteConfirmationButton": "삭제",
-  "cardVerification": "카드 인증",
   "fieldEmptyForCvv": "CVV를 입력하세요.",
   "fieldEmptyForExpirationDate": "만료일을 입력하세요.",
   "fieldEmptyForCardholderName": "카드 소유자 이름을 입력하세요.",

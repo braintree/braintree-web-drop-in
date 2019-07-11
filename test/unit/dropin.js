@@ -805,9 +805,6 @@ describe('Dropin', function () {
       Dropin.prototype._setUpDataCollector.call({
         _client: this.client,
         _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        },
         _merchantConfiguration: {
           threeDSecure: {
             foo: 'bar'
@@ -833,10 +830,7 @@ describe('Dropin', function () {
             foo: 'bar'
           }
         },
-        _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        }
+        _model: this.model
       }, noop);
 
       expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
@@ -861,9 +855,6 @@ describe('Dropin', function () {
       Dropin.prototype._setUpThreeDSecure.call({
         _client: this.client,
         _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        },
         _merchantConfiguration: {
           threeDSecure: {
             foo: 'bar'
@@ -884,9 +875,6 @@ describe('Dropin', function () {
       Dropin.prototype._setUpThreeDSecure.call({
         _client: this.client,
         _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        },
         _merchantConfiguration: {
           threeDSecure: {
             foo: 'bar'
@@ -912,10 +900,7 @@ describe('Dropin', function () {
             foo: 'bar'
           }
         },
-        _model: this.model,
-        _strings: {
-          cardVerification: 'Card Verification'
-        }
+        _model: this.model
       }, noop);
 
       expect(DropinModel.prototype.asyncDependencyStarting).to.be.calledOnce;
@@ -1197,7 +1182,43 @@ describe('Dropin', function () {
 
         instance.requestPaymentMethod(function () {
           expect(instance._threeDSecure.verify).to.be.calledOnce;
-          expect(instance._threeDSecure.verify).to.be.calledWith('cool-nonce');
+          expect(instance._threeDSecure.verify).to.be.calledWith(fakePayload);
+
+          done();
+        });
+      }.bind(this));
+    });
+
+    it('can pass additional 3ds info from merchant', function (done) {
+      var instance;
+      var fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+      var threeDSInfo = {
+        email: 'foo@example.com',
+        billingAddress: {}
+      };
+
+      this.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      instance = new Dropin(this.dropinOptions);
+
+      instance._initialize(function () {
+        this.sandbox.stub(instance._mainView, 'requestPaymentMethod').resolves(fakePayload);
+        instance._threeDSecure = {
+          verify: this.sandbox.stub().resolves({
+            nonce: 'new-nonce',
+            liabilityShifted: true,
+            liabilityShiftPossible: true
+          })
+        };
+
+        instance.requestPaymentMethod({
+          threeDSecure: threeDSInfo
+        }, function () {
+          expect(instance._threeDSecure.verify).to.be.calledOnce;
+          expect(instance._threeDSecure.verify).to.be.calledWith(fakePayload, threeDSInfo);
 
           done();
         });

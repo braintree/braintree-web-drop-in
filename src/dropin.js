@@ -497,7 +497,7 @@ Dropin.prototype._setUpThreeDSecure = function () {
 
   this._model.asyncDependencyStarting();
 
-  this._threeDSecure = new ThreeDSecure(this._client, config, this._strings.cardVerification);
+  this._threeDSecure = new ThreeDSecure(this._client, config);
 
   this._threeDSecure.initialize().then(function () {
     self._model.asyncDependencyReady();
@@ -619,7 +619,12 @@ Dropin.prototype._handleAppSwitch = function () {
  *
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
- * @param {callback} [callback] The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload}, a {@link Dropin~googlePayPaymentMethodPayload|googlePayPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
+ * @param {object} [options] All options for requesting a payment method.
+ * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/{@pkg bt-web-version}/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. The recommended fields for achieving a 3DS v2 verification are:
+ * * `email`
+ * * `mobilePhoneNumber`
+ * * `billingAddress`
+ * @param {callback} [callback] May be used as the only parameter in requestPaymentMethod if no `options` are provided. The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload}, a {@link Dropin~googlePayPaymentMethodPayload|googlePayPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example <caption>Requesting a payment method</caption>
  * var form = document.querySelector('#my-form');
@@ -680,26 +685,38 @@ Dropin.prototype._handleAppSwitch = function () {
  *  });
  * });
  */
-Dropin.prototype.requestPaymentMethod = function () {
+Dropin.prototype.requestPaymentMethod = function (options) {
+  var self = this;
+
+  options = options || {};
+
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (this._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
-      return this._threeDSecure.verify(payload.nonce).then(function (newPayload) {
+    if (self._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
+      self._mainView.showLoadingIndicator();
+
+      return self._threeDSecure.verify(payload, options.threeDSecure).then(function (newPayload) {
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
 
+        self._mainView.hideLoadingIndicator();
+
         return payload;
+      }).catch(function (err) {
+        self._mainView.hideLoadingIndicator();
+
+        return Promise.reject(err);
       });
     }
 
     return payload;
-  }.bind(this)).then(function (payload) {
-    if (this._dataCollector) {
-      payload.deviceData = this._dataCollector.getDeviceData();
+  }).then(function (payload) {
+    if (self._dataCollector) {
+      payload.deviceData = self._dataCollector.getDeviceData();
     }
 
     return payload;
-  }.bind(this)).then(function (payload) {
+  }).then(function (payload) {
     return formatPaymentMethodPayload(payload);
   });
 };

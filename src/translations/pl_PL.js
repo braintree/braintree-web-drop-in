@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "Czy na pewno chcesz usunąć to źródło finansowania płatności?",
   "deleteCancelButton": "Anuluj",
   "deleteConfirmationButton": "Usuń",
-  "cardVerification": "Weryfikacja karty",
   "fieldEmptyForCvv": "Podaj kod bezpieczeństwa.",
   "fieldEmptyForExpirationDate": "Podaj datę ważności.",
   "fieldEmptyForCardholderName": "Podaj imię i nazwisko posiadacza karty.",

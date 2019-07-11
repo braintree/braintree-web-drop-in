@@ -14,7 +14,6 @@ module.exports = {
   "genericDeleteConfirmationMessage": "คุณมั่นใจว่าต้องการลบวิธีการชำระเงินนี้หรือไม่",
   "deleteCancelButton": "ยกเลิก",
   "deleteConfirmationButton": "ลบ",
-  "cardVerification": "การตรวจสอบยืนยันบัตร",
   "fieldEmptyForCvv": "โปรดกรอก CVV (รหัสการตรวจสอบยืนยันบัตร)",
   "fieldEmptyForExpirationDate": "โปรดกรอกวันที่หมดอายุ",
   "fieldEmptyForCardholderName": "โปรดกรอกชื่อเจ้าของบัตร",
