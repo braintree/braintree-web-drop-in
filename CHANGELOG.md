@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-Unreleased
+1.19.0
 ------
 - Update asset-loader to v0.3.1
 - Update event-emitter to v0.2.0
