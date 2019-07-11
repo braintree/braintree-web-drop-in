@@ -18,7 +18,7 @@ Unreleased
 - Add 3DS 2 support
 
 _Beta Features_
-- Add ability to prevednt deleting a payment method with an associated subscription
+- Add ability to prevent deleting a payment method with an associated subscription
 
 1.18.0
 ------
