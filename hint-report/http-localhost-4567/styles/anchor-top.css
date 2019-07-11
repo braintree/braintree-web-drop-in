@@ -1,0 +1,40 @@
+a.anchor-top {
+    position: fixed;
+    right: 2.4rem;
+    bottom: 2.4rem;
+
+    width: 5rem;
+    height: 6rem;
+
+    padding: 3.3rem 1.2rem 1rem 1.2rem;
+
+    font-size: 1.3rem;
+    background: hsla(266, 100%, 32%, .7);
+    color: #fff;
+    text-transform: uppercase;
+
+    border-radius: .4rem;
+}
+
+a.anchor-top:hover, a.anchor-top:focus {
+    background: hsla(266, 100%, 32%, .8);
+    text-decoration: none;
+}
+
+a.anchor-top:focus {
+    outline: 1px dashed #4700a3;
+}
+
+a.anchor-top:active {
+    background: hsla(266, 100%, 32%, 1);
+}
+
+a.anchor-top::before {
+    content: url('..//images/back-to-top.svg');
+    display: inline-block;
+    position: absolute;
+    width: 2.5rem;
+    top: 1.4rem;
+    left: 0;
+    padding: 0 1.25rem;
+}

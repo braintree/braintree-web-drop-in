@@ -1,0 +1,98 @@
+/*
+ * LAYOUTS
+ * =============================================
+ * @Dependencies: base.css, structure.css
+ */
+
+.container::after,
+.layout::after,
+.module::after {
+    display: block;
+    clear: both;
+    content: "";
+}
+
+.layout {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.module {
+    margin-top: 2.4rem;
+    width: 100%;
+}
+
+.module:first-child {
+    margin-top: 0;
+}
+
+@media (min-width: 33.75em) {
+
+    .layout {
+        margin-right: -1.2rem;
+        margin-left: -1.2rem;
+    }
+
+    .module {
+        float: left;
+        padding-right: 1.2rem;
+        padding-left: 1.2rem;
+    }
+
+}
+
+@media (min-width: 48em) {
+
+    .layout {
+        margin-left: -1.6rem;
+        margin-right: -1.6rem;
+    }
+
+    .module {
+        padding-right: 1.6rem;
+        padding-left: 1.6rem;
+    }
+
+}
+
+/* Primary + Secondary */
+
+@media (min-width: 48em) {
+
+    .module--primary,
+    .module--secondary {
+        float: left;
+        width: 50%;
+        margin-top: 0;
+    }
+
+    .layout--basic--alt .module--secondary,
+    .layout--basic--offset--alt .module--secondary {
+        float: right;
+    }
+
+}
+
+@media (min-width: 60em) {
+
+    .layout--basic .module--primary,
+    .layout--basic--alt .module--primary {
+        width: 62.5%;
+    }
+
+    .layout--basic .module--secondary,
+    .layout--basic--alt .module--secondary {
+        width: 33.333%;
+    }
+
+    .layout--basic--offset .module--primary,
+    .layout--basic--offset--alt .module--primary {
+        width: 58.333%;
+    }
+
+    .layout--basic--offset .module--secondary,
+    .layout--basic--offset--alt .module--secondary {
+        width: 37.5%;
+    }
+
+}
