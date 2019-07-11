@@ -11,7 +11,6 @@ CHANGELOG
 - Upgrade to gulp 4
 - Adjust delete confirmation box css to be consistent, all relative to own parent.
 - Improved build to properly interpolate current versions in not only docs but also built code
-- Update braintree-web to v3.46.0
 - Prevent Drop-in from firing requestable events prematurely (#511)
 - Add `off` method for unsubscribing from events without tearing down
 - Clean up extraneous css rules
