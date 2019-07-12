@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Update braintree-web to v3.48.0
+
 1.19.0
 ------
 - Update asset-loader to v0.3.1
