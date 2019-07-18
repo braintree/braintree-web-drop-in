@@ -286,7 +286,7 @@ function ghPagesServer() {
     });
 }
 
-ghPagesServer.displayName = 'gh-pages';
+ghPagesServer.displayName = 'server';
 
 function triggerWatchers() {
   watch([config.src.js.watch, config.src.html.watch], parallel(jsNotMin, jsMin));
@@ -298,6 +298,7 @@ function triggerWatchers() {
 triggerWatchers.displayName = 'watch';
 
 exports.build = build();
+exports.server = ghPagesServer;
 exports.ghPages = ghPagesBuild();
 exports.ghPages.displayName = 'build:gh-pages';
 exports.development = parallel(build(), triggerWatchers, ghPagesServer);
