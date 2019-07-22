@@ -17,6 +17,7 @@ notifications:
 env:
   matrix:
   - TEST="test"
+  - TEST="test:hint"
   - TEST="test:publishing"
   - TEST="test:integration:paypal-only" IS_INTEGRATION_TEST=true
   - TEST="test:integration:paypal-skipped" IS_INTEGRATION_TEST=true
