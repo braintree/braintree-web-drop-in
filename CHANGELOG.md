@@ -5,6 +5,7 @@ unreleased
 ----------
 - Update braintree-web to v3.51.0
 - Update browser-detection to v1.8.0
+- Fix issue where 3D Secure iframe may not be scrollable on devices with small screens
 
 1.19.0
 ------
