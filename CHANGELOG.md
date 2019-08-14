@@ -3,7 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
-- Update braintree-web to v3.50.0
+- Update braintree-web to v3.51.0
+- Update browser-detection to v1.8.0
 
 1.19.0
 ------
