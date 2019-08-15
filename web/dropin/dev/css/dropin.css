@@ -894,3 +894,16 @@
   right: 0;
   position: absolute;
 }
+#Cardinal-Modal {
+  top: 10px !important;
+  bottom: 10px !important;
+  left: 10px !important;
+  right: 10px !important;
+  transform: none !important;
+  overflow: scroll !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+#Cardinal-Modal iframe {
+  height: 100% !important;
+  width: 100% !important;
+}
