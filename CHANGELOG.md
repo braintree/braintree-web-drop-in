@@ -1,9 +1,15 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.20.0
+------
 - Update braintree-web to v3.51.0
+  - Add `threeDSecureInfo` to the 3D Secure response
+  - Add `expirationMonth` and `expirationYear` to card tokenization payload
+  - Fix issue where chrome books could not input correctly with a soft keyboard on card form
+  - Fix issue where Google Pay would error in Edge
+  - Fix issue where an error may be thrown when cancelling the 3D Secure flow
+  - Fix issue where Drop-in would throw an error when creating a 3ds component without a Cardinal Authentication JWT
 - Update browser-detection to v1.8.0
 - Fix issue where 3D Secure iframe may not be scrollable on devices with small screens
 
