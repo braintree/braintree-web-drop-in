@@ -3,7 +3,7 @@ CHANGELOG
 
 1.20.0
 ------
-- Update braintree-web to v3.51.0
+- Update braintree-web to v3.50.1
   - Add `threeDSecureInfo` to the 3D Secure response
   - Add `expirationMonth` and `expirationYear` to card tokenization payload
   - Fix issue where chrome books could not input correctly with a soft keyboard on card form
