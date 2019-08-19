@@ -510,10 +510,23 @@ var VERSION = '__VERSION__';
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
  *   container: '#dropin-container',
- *   threeDSecure: {
- *     amount: '10.00'
- *   }
- * }, callback);
+ *   threeDSecure: true
+ * }, function (err, dropinInstance) {
+ *   // setup payment button
+ *   btn.addEventListener('click', function (e) {
+ *     e.preventDefault();
+ *
+ *     dropinInstance.requestPaymentMethod(|
+ *       threeDSecure: {
+ *         amount: '100.00',
+ *        // additional 3ds params
+ *       }
+ *     }, function (err, payload) {
+ *       // inspect payload.liablityShifted
+ *       // send payload.nonce to server
+ *     });
+ *   });
+ * });
  *
  * @example
  * <caption>Enabled Vault Manager</caption>
