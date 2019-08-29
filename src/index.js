@@ -519,7 +519,18 @@ var VERSION = '__VERSION__';
  *     dropinInstance.requestPaymentMethod(|
  *       threeDSecure: {
  *         amount: '100.00',
- *        // additional 3ds params
+ *         billingAddress: {
+ *           givenName: 'Jill', // ASCII-printable characters required, else will throw a validation error
+ *           surname: 'Doe', // ASCII-printable characters required, else will throw a validation error
+ *           phoneNumber: '8101234567',
+ *           streetAddress: '555 Smith St.',
+ *           extendedAddress: '#5',
+ *           locality: 'Oakland',
+ *           region: 'CA',
+ *           postalCode: '12345',
+ *           countryCodeAlpha2: 'US'
+ *         },
+ *         // additional 3ds params
  *       }
  *     }, function (err, payload) {
  *       // inspect payload.liablityShifted
