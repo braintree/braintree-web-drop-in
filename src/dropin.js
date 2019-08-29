@@ -166,6 +166,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  *     submitButton.setAttribute('disabled', true);
  *   });
  * });
+ *
  * @example
  * <caption>Automatically submit nonce to server as soon as it becomes available</caption>
  * var submitButton = document.querySelector('#submit-button');
@@ -624,6 +625,8 @@ Dropin.prototype._handleAppSwitch = function () {
  * * `email`
  * * `mobilePhoneNumber`
  * * `billingAddress`
+ *
+ * For an example of verifying 3D Secure within Drop-in, [check out this codepen](https://codepen.io/braintree/pen/KjWqGx).
  * @param {callback} [callback] May be used as the only parameter in requestPaymentMethod if no `options` are provided. The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload}, a {@link Dropin~googlePayPaymentMethodPayload|googlePayPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
  * @returns {void|Promise} Returns a promise if no callback is provided.
  * @example <caption>Requesting a payment method</caption>

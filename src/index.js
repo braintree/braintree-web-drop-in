@@ -510,10 +510,34 @@ var VERSION = '__VERSION__';
  * braintree.dropin.create({
  *   authorization: 'CLIENT_AUTHORIZATION',
  *   container: '#dropin-container',
- *   threeDSecure: {
- *     amount: '10.00'
- *   }
- * }, callback);
+ *   threeDSecure: true
+ * }, function (err, dropinInstance) {
+ *   // setup payment button
+ *   btn.addEventListener('click', function (e) {
+ *     e.preventDefault();
+ *
+ *     dropinInstance.requestPaymentMethod(|
+ *       threeDSecure: {
+ *         amount: '100.00',
+ *         billingAddress: {
+ *           givenName: 'Jill', // ASCII-printable characters required, else will throw a validation error
+ *           surname: 'Doe', // ASCII-printable characters required, else will throw a validation error
+ *           phoneNumber: '8101234567',
+ *           streetAddress: '555 Smith St.',
+ *           extendedAddress: '#5',
+ *           locality: 'Oakland',
+ *           region: 'CA',
+ *           postalCode: '12345',
+ *           countryCodeAlpha2: 'US'
+ *         },
+ *         // additional 3ds params
+ *       }
+ *     }, function (err, payload) {
+ *       // inspect payload.liablityShifted
+ *       // send payload.nonce to server
+ *     });
+ *   });
+ * });
  *
  * @example
  * <caption>Enabled Vault Manager</caption>
