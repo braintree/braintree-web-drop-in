@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+---------
+- Update braintree-web to v3.51.0
+  - Update songbird.js script urls for 3D Secure
+
 1.20.0
 ------
 - Update braintree-web to v3.50.1
