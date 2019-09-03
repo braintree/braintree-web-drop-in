@@ -25,6 +25,7 @@ module.exports = function (config) {
       noParse: []
     },
     files: [
+      '../node_modules/es6-shim/es6-shim.js',
       '**/*.js'
     ],
     exclude: [
