@@ -114,6 +114,21 @@
     // use your own client token or tokenization key
     authorization: 'sandbox_f252zhq7_hh4cpc39zq4rgjcg',
     container: '#dropin-container',
+    card: {
+      overrides: {
+        fields: {
+          number: {
+            prefill: '4000000000001091'
+          },
+          expirationDate: {
+            prefill: '12/21'
+          },
+          cvv: {
+            prefill: '123'
+          }
+        }
+      }
+    },
     paypal: {
       flow: 'checkout',
       amount: '10.00', // be sure to validate this amount on your server

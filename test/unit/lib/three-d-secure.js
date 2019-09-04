@@ -6,7 +6,7 @@ var classList = require('@braintree/class-list');
 var ThreeDSecure = require('../../../src/lib/three-d-secure');
 var throwIfResolves = require('../../helpers/throw-if-resolves');
 
-describe('ThreeDSecure', function () {
+describe.only('ThreeDSecure', function () {
   beforeEach(function () {
     this.threeDSecureInstance = fake.threeDSecureInstance;
     this.sandbox.stub(this.threeDSecureInstance, 'verifyCard');
@@ -67,6 +67,9 @@ describe('ThreeDSecure', function () {
           nonce: 'old-nonce',
           bin: '123456',
           amount: '10.00',
+          additionalInformation: {
+            acsWindowSize: '03'
+          },
           onLookupComplete: this.sandbox.match.func
         });
 
@@ -103,13 +106,20 @@ describe('ThreeDSecure', function () {
         }
       }, {
         email: 'foo@example.com',
-        billingAddress: billingAddress
+        billingAddress: billingAddress,
+        additionalInformation: {
+          shippingMethod: '01'
+        }
       }).then(function (payload) {
         expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
         expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
           nonce: 'old-nonce',
           bin: '123456',
           amount: '10.00',
+          additionalInformation: {
+            shippingMethod: '01',
+            acsWindowSize: '03'
+          },
           onLookupComplete: this.sandbox.match.func,
           billingAddress: billingAddress,
           email: 'foo@example.com'
@@ -136,6 +146,9 @@ describe('ThreeDSecure', function () {
           nonce: 'old-nonce',
           bin: '123456',
           amount: '10.00',
+          additionalInformation: {
+            acsWindowSize: '03'
+          },
           onLookupComplete: this.sandbox.match.func
         });
 
@@ -159,6 +172,37 @@ describe('ThreeDSecure', function () {
           nonce: 'old-nonce',
           bin: '123456',
           amount: '3.00',
+          additionalInformation: {
+            acsWindowSize: '03'
+          },
+          onLookupComplete: this.sandbox.match.func
+        });
+
+        expect(payload.nonce).to.equal('a-nonce');
+        expect(payload.liabilityShifted).to.equal(true);
+        expect(payload.liablityShiftPossible).to.equal(true);
+      }.bind(this));
+    });
+
+    it('additional config can override acsWindowSize', function () {
+      return this.tds.verify({
+        nonce: 'old-nonce',
+        details: {
+          bin: '123456'
+        }
+      }, {
+        additionalInformation: {
+          acsWindowSize: '01'
+        }
+      }).then(function (payload) {
+        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
+        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+          nonce: 'old-nonce',
+          bin: '123456',
+          amount: '10.00',
+          additionalInformation: {
+            acsWindowSize: '01'
+          },
           onLookupComplete: this.sandbox.match.func
         });
 

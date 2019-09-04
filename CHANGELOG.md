@@ -5,6 +5,7 @@ unreleased
 ---------
 - Update braintree-web to v3.51.0
   - Update songbird.js script urls for 3D Secure
+- Default ACS Window Size to `03` (see `acsWindowSize` in https://braintree.github.io/braintree-web/current/ThreeDSecure.html#verifyCard)
 
 1.20.0
 ------
