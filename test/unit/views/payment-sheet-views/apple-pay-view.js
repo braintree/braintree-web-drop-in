@@ -4,7 +4,6 @@
 var BaseView = require('../../../../src/views/base-view');
 var ApplePayView = require('../../../../src/views/payment-sheet-views/apple-pay-view');
 var btApplePay = require('braintree-web/apple-pay');
-var DropinError = require('../../../../src/lib/dropin-error');
 var isHTTPS = require('../../../../src/lib/is-https');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
@@ -116,17 +115,20 @@ describe('ApplePayView', function () {
     });
 
     it('calls asyncDependencyFailed when Apple Pay component creation fails', function () {
-      var fakeError = new DropinError('A_FAKE_ERROR');
+      var fakeError = new Error('A_FAKE_ERROR');
 
       this.sandbox.stub(this.view.model, 'asyncDependencyFailed');
       btApplePay.create.rejects(fakeError);
 
       return this.view.initialize().then(function () {
+        var error = this.view.model.asyncDependencyFailed.args[0][0].error;
+
         expect(this.view.model.asyncDependencyFailed).to.be.calledOnce;
         expect(this.view.model.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
-          error: fakeError,
           view: 'applePay'
         }));
+
+        expect(error.message).to.equal(fakeError.message);
       }.bind(this));
     });
 
