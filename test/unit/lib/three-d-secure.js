@@ -6,7 +6,7 @@ var classList = require('@braintree/class-list');
 var ThreeDSecure = require('../../../src/lib/three-d-secure');
 var throwIfResolves = require('../../helpers/throw-if-resolves');
 
-describe.only('ThreeDSecure', function () {
+describe('ThreeDSecure', function () {
   beforeEach(function () {
     this.threeDSecureInstance = fake.threeDSecureInstance;
     this.sandbox.stub(this.threeDSecureInstance, 'verifyCard');
