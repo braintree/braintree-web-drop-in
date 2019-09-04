@@ -4,7 +4,6 @@
 var BaseView = require('../../../../src/views/base-view');
 var GooglePayView = require('../../../../src/views/payment-sheet-views/google-pay-view');
 var btGooglePay = require('braintree-web/google-payment');
-var DropinError = require('../../../../src/lib/dropin-error');
 var analytics = require('../../../../src/lib/analytics');
 var assets = require('@braintree/asset-loader');
 var Promise = require('../../../../src/lib/promise');
@@ -186,17 +185,20 @@ describe('GooglePayView', function () {
     });
 
     it('calls asyncDependencyFailed when Google Pay component creation fails', function () {
-      var fakeError = new DropinError('A_FAKE_ERROR');
+      var fakeError = new Error('A_FAKE_ERROR');
 
       this.sandbox.stub(this.view.model, 'asyncDependencyFailed');
       btGooglePay.create.rejects(fakeError);
 
       return this.view.initialize().then(function () {
+        var error = this.view.model.asyncDependencyFailed.args[0][0].error;
+
         expect(this.view.model.asyncDependencyFailed).to.be.calledOnce;
         expect(this.view.model.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
-          error: fakeError,
           view: 'googlePay'
         }));
+
+        expect(error.message).to.equal(fakeError.message);
       }.bind(this));
     });
 

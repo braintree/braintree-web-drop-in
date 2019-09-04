@@ -4,7 +4,6 @@
 var BaseView = require('../../../../src/views/base-view');
 var VenmoView = require('../../../../src/views/payment-sheet-views/venmo-view');
 var btVenmo = require('braintree-web/venmo');
-var DropinError = require('../../../../src/lib/dropin-error');
 var fake = require('../../../helpers/fake');
 var fs = require('fs');
 
@@ -142,17 +141,20 @@ describe('VenmoView', function () {
     });
 
     it('calls asyncDependencyFailed when Venmo component creation fails', function () {
-      var fakeError = new DropinError('A_FAKE_ERROR');
+      var fakeError = new Error('A_FAKE_ERROR');
 
       this.sandbox.stub(this.view.model, 'asyncDependencyFailed');
       btVenmo.create.rejects(fakeError);
 
       return this.view.initialize().then(function () {
+        var error = this.view.model.asyncDependencyFailed.args[0][0].error;
+
         expect(this.view.model.asyncDependencyFailed).to.be.calledOnce;
         expect(this.view.model.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
-          error: fakeError,
           view: 'venmo'
         }));
+
+        expect(error.message).to.equal(fakeError.message);
       }.bind(this));
     });
 
