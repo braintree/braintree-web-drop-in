@@ -260,7 +260,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
 };
 
 CardView.prototype._validateForm = function (showFieldErrors) {
-  var cardType, cardTypeSupported, state;
+  var card, cardType, cardTypeSupported, state;
   var isValid = true;
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
@@ -295,8 +295,9 @@ CardView.prototype._validateForm = function (showFieldErrors) {
   }.bind(this));
 
   if (state.fields.number.isValid) {
-    cardType = constants.configurationCardTypes[state.cards[0].type];
-    cardTypeSupported = supportedCardTypes.indexOf(cardType) !== -1;
+    card = state.cards[0];
+    cardType = card && constants.configurationCardTypes[card.type];
+    cardTypeSupported = cardType && supportedCardTypes.indexOf(cardType) !== -1;
 
     if (!cardTypeSupported) {
       isValid = false;

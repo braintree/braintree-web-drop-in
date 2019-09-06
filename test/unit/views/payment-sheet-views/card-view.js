@@ -2283,6 +2283,42 @@ describe('CardView', function () {
       }.bind(this));
     });
 
+    it('does not call hostedFieldsInstance.tokenize if form is valid, but card type is not supported', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [{type: 'foo'}],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
+    });
+
+    it('does not call hostedFieldsInstance.tokenize if form is valid, but no card is available in state', function () {
+      this.context.hostedFieldsInstance.getState.returns({
+        cards: [],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      return CardView.prototype.tokenize.call(this.context).then(throwIfResolves).catch(function () {
+        expect(this.context.hostedFieldsInstance.tokenize).to.not.be.called;
+      }.bind(this));
+    });
+
     it('vaults on tokenization if not using guest checkout', function () {
       this.context.model.isGuestCheckout = false;
 
