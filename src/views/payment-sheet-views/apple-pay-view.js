@@ -20,6 +20,7 @@ ApplePayView.ID = ApplePayView.prototype.ID = paymentOptionIDs.applePay;
 
 ApplePayView.prototype.initialize = function () {
   var self = this;
+  var isProduction = self.client.getConfiguration().gatewayConfiguration.environment === 'production';
 
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
   self.applePaySessionVersion = self.applePayConfiguration.applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;
@@ -40,7 +41,12 @@ ApplePayView.prototype.initialize = function () {
 
       global.ApplePaySession.canMakePaymentsWithActiveCard(self.applePayInstance.merchantIdentifier).then(function (canMakePayments) {
         if (!canMakePayments) {
-          self.model.reportError('applePayActiveCardError');
+          if (isProduction) {
+            self.model.reportError('applePayActiveCardError');
+          } else {
+            console.error('Could not find an active card. This may be because you\'re using a production iCloud account in a sandbox Apple Pay Session. Log in to a Sandbox iCloud account to test this flow, and add a card to your wallet. For additional assistance, visit  https://help.braintreepayments.com'); // eslint-disable-line no-console
+            self.model.reportError('developerError');
+          }
         }
       });
     });
