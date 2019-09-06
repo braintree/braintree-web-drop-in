@@ -7,6 +7,7 @@ unreleased
   - Update songbird.js script urls for 3D Secure
 - Default 3D Secure ACS Window Size to `03` (see [`acsWindowSize` option](https://braintree.github.io/braintree-web/current/ThreeDSecure.html#verifyCard))
 - Scope full screen 3D Secure modal to screen sizes with heights of 700px and smaller
+- Log developer error for Apple Pay failure when mismatching a Sandbox session with a production iCloud account (closes #522)
 
 1.20.0
 ------

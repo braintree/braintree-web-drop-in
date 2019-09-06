@@ -141,12 +141,36 @@ describe('ApplePayView', function () {
       }.bind(this));
     });
 
-    it('reports error when canMakePaymentsWithActiveCard returns false', function (done) {
+    it('reports error when canMakePaymentsWithActiveCard returns false in production mode', function (done) {
+      var configuration = fake.configuration();
+
+      configuration.gatewayConfiguration.environment = 'production';
+      this.fakeClient.getConfiguration.returns(configuration);
+
       global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(false);
 
       this.view.initialize().then(function () {
         this.view.model.reportError = function (err) {
           expect(err).to.equal('applePayActiveCardError');
+          done();
+        };
+        this.view.model.changeActivePaymentView(this.view.ID);
+      }.bind(this));
+    });
+
+    it('reports developer error when canMakePaymentsWithActiveCard returns false in sandbox mode', function (done) {
+      var configuration = fake.configuration();
+
+      configuration.gatewayConfiguration.environment = 'sandbox';
+      this.fakeClient.getConfiguration.returns(configuration);
+
+      this.sandbox.stub(console, 'error');
+      global.ApplePaySession.canMakePaymentsWithActiveCard = this.sandbox.stub().resolves(false);
+
+      this.view.initialize().then(function () {
+        this.view.model.reportError = function (err) {
+          expect(err).to.equal('developerError');
+          expect(console.error).to.be.calledWith('Could not find an active card. This may be because your Apple Pay Session was created in the Sandbox environment and your iCloud account is a production account. Log in to a Sandbox iCloud account to test this flow. If you are already logged into an iCloud Sandbox account, then add a card to your wallet.'); // eslint-disable-line no-console
           done();
         };
         this.view.model.changeActivePaymentView(this.view.ID);
