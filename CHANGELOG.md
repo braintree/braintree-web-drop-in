@@ -3,8 +3,10 @@ CHANGELOG
 
 unreleased
 ---------
-- Update braintree-web to v3.51.0
+- Update event-emitter to v0.3.0
+- Update braintree-web to v3.52.0
   - Update songbird.js script urls for 3D Secure
+  - Fix issue where bin was not being passed to underlying cardinal SDK
 - Default 3D Secure ACS Window Size to `03` (see [`acsWindowSize` option](https://braintree.github.io/braintree-web/current/ThreeDSecure.html#verifyCard))
 - Scope full screen 3D Secure modal to screen sizes with heights of 700px and smaller
 
