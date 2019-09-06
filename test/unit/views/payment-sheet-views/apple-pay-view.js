@@ -170,7 +170,7 @@ describe('ApplePayView', function () {
       this.view.initialize().then(function () {
         this.view.model.reportError = function (err) {
           expect(err).to.equal('developerError');
-          expect(console.error).to.be.calledWith('Could not find an active card. This may be because your Apple Pay Session was created in the Sandbox environment and your iCloud account is a production account. Log in to a Sandbox iCloud account to test this flow. If you are already logged into an iCloud Sandbox account, then add a card to your wallet.'); // eslint-disable-line no-console
+          expect(console.error).to.be.calledWith('Could not find an active card. This may be because you\'re using a production iCloud account in a sandbox Apple Pay Session. Log in to a Sandbox iCloud account to test this flow, and add a card to your wallet. For additional assistance, visit  https://help.braintreepayments.com'); // eslint-disable-line no-console
           done();
         };
         this.view.model.changeActivePaymentView(this.view.ID);
