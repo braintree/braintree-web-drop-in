@@ -660,6 +660,37 @@ describe('CardView', function () {
         });
       });
     });
+
+    it('allows overriding styles options with class name for hosted fields', function () {
+      var hostedFieldsConfiguredStyles;
+
+      this.model.merchantConfiguration.card = {
+        overrides: {
+          styles: {
+            input: 'class-name',
+            ':focus': 'focus-class'
+          }
+        }
+      };
+
+      this.view = new CardView({
+        element: this.element,
+        mainView: this.mainView,
+        model: this.model,
+        client: this.client,
+        strings: strings
+      });
+
+      return this.view.initialize().then(function () {
+        hostedFieldsConfiguredStyles = hostedFields.create.lastCall.args[0].styles;
+
+        expect(hostedFieldsConfiguredStyles.input).to.equal('class-name');
+        expect(hostedFieldsConfiguredStyles[':focus']).to.equal('focus-class');
+        expect(hostedFieldsConfiguredStyles['input::-ms-clear']).to.deep.equal({
+          color: 'transparent'
+        });
+      });
+    });
   });
 
   describe('isEnabled', function () {

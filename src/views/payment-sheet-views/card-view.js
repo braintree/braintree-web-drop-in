@@ -242,6 +242,11 @@ CardView.prototype._generateHostedFieldsOptions = function () {
         delete options.styles[style];
 
         return;
+      } else if (typeof overrides.styles[style] === 'string') {
+        // it's a class name, and should override the configured styles entirely
+        options.styles[style] = overrides.styles[style];
+
+        return;
       }
 
       normalizeStyles(overrides.styles[style]);
