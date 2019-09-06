@@ -3,6 +3,8 @@
 var assign = require('./assign').assign;
 var threeDSecure = require('braintree-web/three-d-secure');
 
+var DEFAULT_ACS_WINDOW_SIZE = '03';
+
 function ThreeDSecure(client, merchantConfiguration) {
   this._client = client;
   this._config = merchantConfiguration;
@@ -32,6 +34,9 @@ ThreeDSecure.prototype.verify = function (payload, merchantProvidedData) {
       next();
     }
   });
+
+  verifyOptions.additionalInformation = verifyOptions.additionalInformation || {};
+  verifyOptions.additionalInformation.acsWindowSize = verifyOptions.additionalInformation.acsWindowSize || DEFAULT_ACS_WINDOW_SIZE;
 
   return this._instance.verifyCard(verifyOptions);
 };
