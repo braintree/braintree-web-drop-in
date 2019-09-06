@@ -9,6 +9,7 @@ CHANGELOG
   - Fix issue where bin was not being passed to underlying cardinal SDK
 - Default 3D Secure ACS Window Size to `03` (see [`acsWindowSize` option](https://braintree.github.io/braintree-web/current/ThreeDSecure.html#verifyCard))
 - Scope full screen 3D Secure modal to screen sizes with heights of 700px and smaller
+- Fix issue where error could be thrown when validating card form (closes #471)
 
 1.20.0
 ------
