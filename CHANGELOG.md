@@ -4,7 +4,9 @@ CHANGELOG
 unreleased
 ----------
 - Fix issue where error could be thrown when validating card form (closes #471)
+- Fix issue where css class names could not be passed as an override style for card form (closes #535)
 - Log developer error for Apple Pay failure when mismatching a Sandbox session with a production iCloud account (closes #522)
+
 
 1.20.1
 ------
