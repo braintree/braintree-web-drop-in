@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
----------
+1.20.1
+------
 - Update event-emitter to v0.3.0
 - Update braintree-web to v3.52.0
   - Update songbird.js script urls for 3D Secure
