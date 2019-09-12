@@ -52,7 +52,7 @@ module.exports = {
   "postalCodeLabel": "PSČ",
   "saveCardLabel": "Uložit název karty",
   "payWithCard": "Platba kartou",
-  "endingIn": "Končící {{lastFourCardDigits}}",
+  "endingIn": "Karta končící {{lastFourCardDigits}}",
   "Apple Pay": "Apple Pay",
   "Venmo": "Venmo",
   "Card": "Karta",
