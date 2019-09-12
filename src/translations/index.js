@@ -4,7 +4,7 @@
 var assign = require('../lib/assign').assign;
 
 var fiveCharacterLocales = {
-  cs_CS: require('./cs_CS'),
+  cs_CZ: require('./cs_CZ'),
   da_DK: require('./da_DK'),
   de_DE: require('./de_DE'),
   en_US: require('./en_US'),
@@ -31,7 +31,7 @@ var fiveCharacterLocales = {
 };
 
 var twoCharacterLocaleAliases = {
-  cs: fiveCharacterLocales.cs_CS,
+  cs: fiveCharacterLocales.cs_CZ,
   da: fiveCharacterLocales.da_DK,
   de: fiveCharacterLocales.de_DE,
   en: fiveCharacterLocales.en_US,
