@@ -7,3 +7,8 @@ If there is an error in a specific translation, you may open an issue and we wil
 ### Checklist
 
 - [ ] Added a changelog entry
+
+### Authors
+> List GitHub usernames for everyone who contributed to this pull request.
+
+- 
