@@ -1,0 +1,9 @@
+---
+  extends: braintree/es6
+  env:
+    mocha: true
+
+  globals:
+    expect: false
+    $: false
+    browser: false
