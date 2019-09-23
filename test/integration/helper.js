@@ -12,8 +12,13 @@ global.expect = require('chai').expect;
 browser.addCommand('start', function (options = {}, waitTime = 40000) {
   let path = '';
 
-  options = Object.assign({}, options, DEFAULT_START_OPTIONS);
+  options = Object.assign({}, DEFAULT_START_OPTIONS, options);
   options = Object.keys(options).reduce((array, key) => {
+    if (options[key] === 'default') {
+      // use the default config on the test app
+      return array;
+    }
+
     array.push(`${key}=${JSON.stringify(options[key])}`);
 
     return array;
@@ -56,14 +61,54 @@ browser.addCommand('hostedFieldSendInput', function (key, value) {
   });
 });
 
+browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
+  $('.braintree-sheet__button--paypal').click();
+
+  browser.switchWindow('paypal.com');
+
+  if ($('#injectedUnifiedLogin iframe').isExisting()) {
+    const loginIframe = $("#injectedUnifiedLogin iframe")
+
+    browser.inFrame(loginIframe, () => {
+      $('#email').typeKeys(process.env.PAYPAL_USERNAME);
+      $('#password').typeKeys(process.env.PAYPAL_PASSWORD);
+
+      $('#btnLogin').click();
+    });
+  } else {
+    $('#email').typeKeys(process.env.PAYPAL_USERNAME);
+
+    if ($('#splitEmail').isExisting()) {
+      $('#btnNext').click();
+    }
+
+    $('#password').typeKeys(process.env.PAYPAL_PASSWORD);
+
+    $('#btnLogin').click();
+  }
+
+  $('#confirmButtonTop').waitForDisplayed();
+
+  if (cb) {
+    cb();
+  }
+
+  $('#confirmButtonTop').click();
+});
+
 browser.addCommand('clickOption', function (type) {
   $(`.braintree-option__${type} .braintree-option__label`).click();
 });
 
-browser.addCommand('submitPay', function () {
+browser.addCommand('submitPay', function (waitForResult = true) {
   const button = $('input[type="submit"]');
 
   button.click();
+
+  if (waitForResult) {
+    // to not resolve submitPay until result is finished
+    browser.getResult();
+  }
 });
 
 browser.addCommand('inFrame', function (iframe, cb) {
