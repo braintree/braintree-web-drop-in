@@ -3,7 +3,7 @@ CHANGELOG
 
 unreleased
 ----------
-- Update braintree-web to v3.52.1
+- Update braintree-web to v3.53.0
   - Fix issue when tabbing between fields on a software keybaord
 - Fix issue where error could be thrown when validating card form (closes #471)
 - Fix issue where css class names could not be passed as an override style for card form (closes #535)
