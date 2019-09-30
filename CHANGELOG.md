@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.20.2
+------
 - Update braintree-web to v3.53.0
   - Fix issue when tabbing between fields on an Android or iOS < 13 software keybaord
 - Fix issue where error could be thrown when validating card form (closes #471)
