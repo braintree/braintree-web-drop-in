@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.20.1",
+  "version": "1.20.2",
   "main": "src/index.js",
   "private": true,
   "scripts": {
@@ -43,7 +43,7 @@
     "del": "^5.1.0",
     "dotenv": "^8.1.0",
     "es6-shim": "^0.35.5",
-    "eslint": "^6.3.0",
+    "eslint": "^6.4.0",
     "eslint-config-braintree": "^4.0.0",
     "fancy-log": "^1.3.3",
     "gulp": "^4.0.2",
@@ -54,7 +54,7 @@
     "gulp-size": "3.0.0",
     "gulp-streamify": "1.0.2",
     "gulp-uglify": "^3.0.2",
-    "hint": "^5.2.3",
+    "hint": "^5.3.0",
     "is-uuid": "1.0.2",
     "jsdoc": "^3.6.3",
     "jsdoc-template": "braintree/jsdoc-template#3.2.0",
@@ -69,7 +69,7 @@
     "phantomjs-prebuilt": "2.1.16",
     "sauce-connect-launcher": "^1.2.7",
     "serve-static": "^1.14.1",
-    "sinon": "^7.4.2",
+    "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
     "through2": "^3.0.1",
     "vinyl": "^2.2.0",
@@ -79,11 +79,11 @@
   },
   "dependencies": {
     "@braintree/asset-loader": "0.3.1",
-    "@braintree/browser-detection": "1.8.0",
+    "@braintree/browser-detection": "1.9.0",
     "@braintree/class-list": "0.1.0",
     "@braintree/event-emitter": "0.3.0",
     "@braintree/wrap-promise": "2.0.0",
-    "braintree-web": "3.52.1",
+    "braintree-web": "3.53.0",
     "promise-polyfill": "8.1.3"
   },
   "browserify": {

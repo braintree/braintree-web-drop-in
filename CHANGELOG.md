@@ -1,10 +1,10 @@
 CHANGELOG
 =========
 
-unreleased
-----------
-- Update braintree-web to v3.52.1
-  - Fix issue when tabbing between fields on a software keybaord
+1.20.2
+------
+- Update braintree-web to v3.53.0
+  - Fix issue when tabbing between fields on an Android or iOS < 13 software keybaord
 - Fix issue where error could be thrown when validating card form (closes #471)
 - Fix issue where css class names could not be passed as an override style for card form (closes #535)
 - Log developer error for Apple Pay failure when mismatching a Sandbox session with a production iCloud account (closes #522)
