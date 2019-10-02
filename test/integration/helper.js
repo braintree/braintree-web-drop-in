@@ -6,6 +6,7 @@ const DEFAULT_START_OPTIONS = {
   googlePay: null,
   applePay: null
 };
+const PAYPAL_TIMEOUT = 60000; // 60 seconds
 
 global.expect = require('chai').expect;
 
@@ -64,10 +65,18 @@ browser.addCommand('hostedFieldSendInput', function (key, value) {
 browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
   $('.braintree-sheet__button--paypal').click();
 
-  browser.switchWindow('paypal.com');
+  browser.waitUntil(() => {
+    return browser.getWindowHandles().length > 1;
+  }, PAYPAL_TIMEOUT, 'expected multiple windows to be available.');
+
+  const handles = browser.getWindowHandles();
+  const currentHandle = browser.getWindowHandle();
+  const popupHandle = handles.find(h => h !== currentHandle);
+
+  browser.switchToWindow(popupHandle);
 
   if ($('#injectedUnifiedLogin iframe').isExisting()) {
-    const loginIframe = $("#injectedUnifiedLogin iframe")
+    const loginIframe = $('#injectedUnifiedLogin iframe');
 
     browser.inFrame(loginIframe, () => {
       $('#email').typeKeys(process.env.PAYPAL_USERNAME);
@@ -82,18 +91,46 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
       $('#btnNext').click();
     }
 
+    $('.spinner').waitForDisplayed(PAYPAL_TIMEOUT, true);
+    $('#password').waitForDisplayed();
+
     $('#password').typeKeys(process.env.PAYPAL_PASSWORD);
 
     $('#btnLogin').click();
+
+    $('.spinner').waitForDisplayed(PAYPAL_TIMEOUT, true);
+
+    // safari sometimes fails the initial login, so the
+    // login form is shown again with email already filled in
+    // using the iframe system
+    if ($('#injectedUnifiedLogin iframe').isExisting()) {
+      const loginIframe = $('#injectedUnifiedLogin iframe');
+
+      browser.inFrame(loginIframe, () => {
+        $('#password').typeKeys(process.env.PAYPAL_PASSWORD);
+
+        $('#btnLogin').click();
+      });
+    }
   }
 
   $('#confirmButtonTop').waitForDisplayed();
+  $('.spinner').waitForDisplayed(PAYPAL_TIMEOUT, true);
 
   if (cb) {
     cb();
   }
 
   $('#confirmButtonTop').click();
+
+  if (browser.name() === 'INTERNET EXPLORER') {
+    $('.spinner').waitForDisplayed(PAYPAL_TIMEOUT, true);
+    $('#confirmButtonTop').click();
+  }
+
+  browser.switchToWindow(currentHandle);
+
+  $('.paypal-checkout-sandbox-iframe').waitForDisplayed(PAYPAL_TIMEOUT, true);
 });
 
 browser.addCommand('clickOption', function (type) {
@@ -142,27 +179,6 @@ browser.addCommand('repeatKeys', function (key, numberOfTimes) {
   }
 }, true);
 
-browser.addCommand('getSelectionRange', function () {
-  return browser.execute(function (nodeId) {
-    const el = document.getElementById(nodeId);
-
-    return {
-      start: el.selectionStart,
-      end: el.selectionEnd
-    };
-  }, this.getProperty('id'));
-}, true);
-
 browser.addCommand('typeKeys', function (keys) {
-  let i;
-
-  if (browser.name() !== 'IE 11') {
-    this.addValue(keys);
-
-    return;
-  }
-
-  for (i = 0; i < keys.length; i++) {
-    this.keys(keys[i]);
-  }
+  this.addValue(keys);
 }, true);
