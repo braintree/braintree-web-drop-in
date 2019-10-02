@@ -62,7 +62,14 @@ let capabilities = [
     browser: 'IE',
     browserName: 'IE 11',
     browser_version: '11.0',
-    'browserstack.selenium_version' : '3.5.2'
+    'browserstack.selenium_version' : '3.141.5',
+    // don't update this! There's a weird bug in the
+    // 64 bit ie driver that prevents the shift key
+    // from working which means that an email can
+    // never be entered because the "@" key cannot
+    // be entered. This doesn't occur in the 32 bit
+    // version, so we pin to that
+    'browserstack.ie.arch' : 'x32'
   },
   {
     ...desktopCapabilities,
