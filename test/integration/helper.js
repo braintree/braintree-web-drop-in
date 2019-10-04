@@ -7,35 +7,48 @@ const DEFAULT_START_OPTIONS = {
   applePay: null
 };
 const PAYPAL_TIMEOUT = 60000; // 60 seconds
+const BASE_URL = `http://bs-local.com:${PORT}`;
 
 global.expect = require('chai').expect;
 
 browser.addCommand('start', function (options = {}, waitTime = 40000) {
   let path = '';
 
-  options = Object.assign({}, DEFAULT_START_OPTIONS, options);
-  options = Object.keys(options).reduce((array, key) => {
-    if (options[key] === 'default') {
-      // use the default config on the test app
+  if (typeof options === 'string') {
+    path = options;
+  } else {
+    options = Object.assign({}, DEFAULT_START_OPTIONS, options);
+    options = Object.keys(options).reduce((array, key) => {
+      if (options[key] === 'default') {
+        // use the default config on the test app
+        return array;
+      }
+
+      array.push(`${key}=${JSON.stringify(options[key])}`);
+
       return array;
+    }, []);
+
+    if (options.length > 0) {
+      path = `?${options.join('&')}`;
     }
-
-    array.push(`${key}=${JSON.stringify(options[key])}`);
-
-    return array;
-  }, []);
-
-  if (options.length > 0) {
-    path = `?${options.join('&')}`;
   }
 
-  const url = encodeURI(`http://bs-local.com:${PORT}${path}`);
+  const url = encodeURI(`${BASE_URL}${path}`);
 
   browser.url(url);
 
   browser.waitUntil(() => {
     return $('#ready').getHTML(false) === 'ready';
   }, waitTime, `Expected Drop-in to be ready after ${waitTime / 1000} seconds.`);
+});
+
+browser.addCommand('reloadSessionOnRetry', () => {
+  if (this.sessionId === browser.sessionId) {
+    browser.reloadSession();
+  } else {
+    this.sessionId = browser.sessionId;
+  }
 });
 
 browser.addCommand('getResult', function () {
@@ -63,7 +76,7 @@ browser.addCommand('hostedFieldSendInput', function (key, value) {
 });
 
 browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
-  $('.braintree-sheet__button--paypal').click();
+  $('.braintree-sheet__button--paypal iframe.zoid-visible').click();
 
   browser.waitUntil(() => {
     return browser.getWindowHandles().length > 1;
