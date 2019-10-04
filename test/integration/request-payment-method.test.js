@@ -63,7 +63,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.clickOption('paypalCredit');
       browser.openPayPalAndCompleteLogin(function () {
-        // expect($('body').getHTML()).to.include('PayPal Credit');
+        expect($('body').getHTML()).to.include('PayPal Credit');
       });
 
       browser.submitPay();
