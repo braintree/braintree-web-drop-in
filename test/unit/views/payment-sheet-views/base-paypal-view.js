@@ -878,10 +878,52 @@ describe('BasePayPalView', function () {
       });
     });
 
-    it('loads paypal script with merchant provided log level', function () {
+    it('loads paypal script with merchant provided log level for paypal', function () {
       delete global.paypal;
 
       this.options.merchantConfiguration.paypal.logLevel = 'error';
+
+      return BasePayPalView.isEnabled(this.options).then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith({
+          src: 'https://www.paypalobjects.com/api/checkout.min.js',
+          id: 'braintree-dropin-paypal-checkout-script',
+          dataAttributes: {
+            'log-level': 'error'
+          }
+        });
+      });
+    });
+
+    it('loads paypal script with merchant provided log level for paypal credit', function () {
+      delete global.paypal;
+
+      delete this.options.merchantConfiguration.paypal;
+      this.options.merchantConfiguration.paypalCredit = {
+        flow: 'vault',
+        logLevel: 'error'
+      };
+
+      return BasePayPalView.isEnabled(this.options).then(function () {
+        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).to.be.calledWith({
+          src: 'https://www.paypalobjects.com/api/checkout.min.js',
+          id: 'braintree-dropin-paypal-checkout-script',
+          dataAttributes: {
+            'log-level': 'error'
+          }
+        });
+      });
+    });
+
+    it('loads paypal script with merchant provided log level for paypal if both paypal and paypal credit options are available', function () {
+      delete global.paypal;
+
+      this.options.merchantConfiguration.paypal.logLevel = 'error';
+      this.options.merchantConfiguration.paypalCredit = {
+        flow: 'vault',
+        logLevel: 'not-error'
+      };
 
       return BasePayPalView.isEnabled(this.options).then(function () {
         expect(assets.loadScript).to.be.calledOnce;

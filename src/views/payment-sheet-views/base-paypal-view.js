@@ -116,6 +116,7 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
 
 BasePayPalView.isEnabled = function (options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+  var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
 
   if (!gatewayConfiguration.paypalEnabled) {
     return Promise.resolve(false);
@@ -139,7 +140,7 @@ BasePayPalView.isEnabled = function (options) {
     src: constants.CHECKOUT_JS_SOURCE,
     id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
     dataAttributes: {
-      'log-level': options.merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+      'log-level': merchantPayPalConfig.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
     }
   }).then(function () {
     return Promise.resolve(true);
