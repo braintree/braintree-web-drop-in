@@ -6,4 +6,5 @@
   globals:
     expect: false
     $: false
+    $$: false
     browser: false

@@ -11,7 +11,8 @@ const BASE_URL = `http://bs-local.com:${PORT}`;
 
 global.expect = require('chai').expect;
 
-browser.addCommand('start', function (options = {}, waitTime = 40000) {
+browser.addCommand('start', function (options = {}, overrides = {}) {
+  const waitTime = overrides.waitTime || 40000;
   let path = '';
 
   if (typeof options === 'string') {
@@ -37,6 +38,10 @@ browser.addCommand('start', function (options = {}, waitTime = 40000) {
   const url = encodeURI(`${BASE_URL}${path}`);
 
   browser.url(url);
+
+  if (overrides.skipReady) {
+    return;
+  }
 
   browser.waitUntil(() => {
     return $('#ready').getHTML(false) === 'ready';
