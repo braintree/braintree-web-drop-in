@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+* Fix issue where PayPal loading would fail when using only PayPal credit
+
 1.20.2
 ------
 - Update braintree-web to v3.53.0
