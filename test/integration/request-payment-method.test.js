@@ -45,7 +45,7 @@ describe('Drop-in#requestPaymentMethod', function () {
       expect(result.details.email).to.include(process.env.PAYPAL_USERNAME);
     });
 
-    it('tokenizes PayPal Credit', function () {
+    it('tokenizes PayPal Credit @paypal', function () {
       switch (browser.name()) {
         case 'SAFARI':
         case 'INTERNET EXPLORER':
@@ -99,7 +99,7 @@ describe('Drop-in#requestPaymentMethod', function () {
       expect(result.details.cardType).to.include('Visa');
     });
 
-    it('tokenizes PayPal', function () {
+    it('tokenizes PayPal @paypal', function () {
       browser.start('/promise.html');
 
       browser.clickOption('paypal');

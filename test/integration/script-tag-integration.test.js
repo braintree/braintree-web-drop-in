@@ -28,7 +28,7 @@ describe('Drop-in Script Tag Integration', function () {
     expect($('body').getHTML()).to.include('payment_method_nonce:');
   });
 
-  it('tokenizes PayPal', function () {
+  it('tokenizes PayPal @paypal', function () {
     browser.start('/script-tag-integration.html', {
       skipReady: true
     });
