@@ -118,7 +118,7 @@ if (process.env.TEST_GREP) {
   mochaOpts.grep = '@paypal';
 } else if (process.env.SKIP_PAYPAL) {
   mochaOpts.grep = '@paypal';
-  mochaOpts.invert = true;
+  mochaOpts.invert = 1;
 }
 
 exports.config = {
