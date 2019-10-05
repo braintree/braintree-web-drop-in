@@ -328,22 +328,41 @@ npm test
 
 ## Integration tests
 
-Copy the `env.example` file to `.env` and filling in the env variables with [SauceLabs](https://saucelabs.com/) and [PayPal Sandbox](https://developer.paypal.com/docs/classic/lifecycle/sb_about-accounts/#creating-sandbox-test-accounts) credentials:
+First, [sign up for a free open source Browserstack account](https://www.browserstack.com/open-source?ref=pricing) and a and [PayPal Sandbox](https://developer.paypal.com/docs/classic/lifecycle/sb_about-accounts/#creating-sandbox-test-accounts).
 
+Copy the `.env.example` file to `.env`
+
+```sh
+cp .env.example .env
 ```
-SAUCE_USERNAME=<SAUCE_USERNAME here>
-SAUCE_ACCESS_KEY=<SAUCE_ACCESS_KEY here>
+
+Fill in the `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` environmental variables with your Browserstack credentials:
+
+```sh
+BROWSERSTACK_USERNAME=username
+BROWSERSTACK_ACCESS_KEY=access_key
+```
+
+Fill in the `PAYPAL_USERNAME` and `PAYPAL_PASSWORD` environmental variables with your PayPal sandbox customer credentials:
+
+```sh
 PAYPAL_USERNAME=<PayPal sandbox username here>
 PAYPAL_PASSWORD=<PayPal sandbox password>
 ```
 
-To start the tests, run:
+To start the tests, start the app:
+
+```sh
+npm run development
+```
+
+And run the integration test command:
 
 ```bash
 npm run test:integration
 ```
 
-This will run the tests from `spec` in the browsers specified in [`spec/spec_helper.rb`](./spec/spec_helper.rb).
+This will run the tests from `test/integration` in the browsers specified in [`wdio.conf.js`](./wdio.conf.js).
 
 To run only the PayPal tests, run:
 
@@ -363,16 +382,39 @@ By default, each test will retry once if it fails. PayPal tests will retry up to
 DISABLE_RETRIES=true npm run test:integration
 ```
 
-You can mark a test with an `:only` tag:
+You can mark a test with an `.only` tag:
 
-```ruby
-it "asserts something", :only do
+```js
+it.only('asserts something', function () {
 ```
 
 And then run the test command to run only that test:
 
 ```bash
-npm run test:integration
+npx wdio wdio.conf.js --spec test/integration/path-to-test.test.js
+```
+
+To run tests in only one browser, prefix the test command with an `ONLY_BROWSERS` env variable:
+
+```sh
+# run only in chrome browser
+ONLY_BROWSERS=chrome npm run test:integration
+
+# run only in internet explorer 11 browser
+ONLY_BROWSERS=ie npm run test:integration
+
+# run only in safari browser
+ONLY_BROWSERS=safari npm run test:integration
+
+# run only in firefox browser
+ONLY_BROWSERS=firefox npm run test:integration
+```
+
+To run tests in certain browsers, prefix the test command with an `ONLY_BROWSERS` env variable, with each browser comma separated:
+
+```sh
+# run only in internet explorer 11 and chrome browsers
+ONLY_BROWSERS=ie,chrome npm run test:integration
 ```
 
 ## Translations
