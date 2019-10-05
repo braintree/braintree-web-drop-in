@@ -28,7 +28,7 @@ describe('Drop-in events', function () {
     expect($('#pay-button').isEnabled()).to.equal(true);
   });
 
-  it('enable submit button on PayPal authorization', function () {
+  it('enable submit button on PayPal authorization @paypal', function () {
     browser.start({
       paypal: 'default'
     });

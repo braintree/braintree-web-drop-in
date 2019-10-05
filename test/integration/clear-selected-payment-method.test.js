@@ -17,7 +17,7 @@ describe('Drop-in#clearSelectedPaymentMethod', function () {
     expect($('.braintree-method.braintree-method--active').isExisting()).to.equal(false);
   });
 
-  it('clears paypal when it is the active payment method', function () {
+  it('clears paypal when it is the active payment method @paypal', function () {
     browser.start({
       paypal: 'default'
     });

@@ -26,7 +26,7 @@ describe('Drop-in#requestPaymentMethod', function () {
       expect(result.details.cardType).to.include('Visa');
     });
 
-    it('tokenizes PayPal', function () {
+    it('tokenizes PayPal @paypal', function () {
       browser.start({
         paypal: 'default'
       });

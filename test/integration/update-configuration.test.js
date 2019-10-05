@@ -5,7 +5,7 @@ describe('Drop-in#updateConfiguration', function () {
     browser.reloadSessionOnRetry();
   });
 
-  it('updates PayPal configuration', function () {
+  it('updates PayPal configuration @paypal', function () {
     if (browser.name()) {
       this.skip('This test fails repeatedly in multiple browsers. Something about opening 2 popups results in the driver having trouble');
 
@@ -33,7 +33,7 @@ describe('Drop-in#updateConfiguration', function () {
     });
   });
 
-  it('updates PayPal Credit configuration', function () {
+  it('updates PayPal Credit configuration @paypal', function () {
     if (browser.name()) {
       this.skip('This test fails repeatedly in multiple browsers. Something about opening 2 popups results in the driver having trouble');
 
@@ -61,7 +61,7 @@ describe('Drop-in#updateConfiguration', function () {
     });
   });
 
-  it('removes authorized PayPal account when configuration is updated', function () {
+  it('removes authorized PayPal account when configuration is updated @paypal', function () {
     if (browser.name() === 'INTERNET EXPLORER') {
       this.skip('Fails for unknown reasons on IE');
 

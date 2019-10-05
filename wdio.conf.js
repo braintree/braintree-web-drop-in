@@ -112,6 +112,15 @@ if (!process.env.DISABLE_RETRIES) {
   mochaOpts.retries = 3;
 }
 
+if (process.env.TEST_GREP) {
+  mochaOpts.grep = process.env.TEST_GREP;
+} else if (process.env.RUN_PAYPAL_ONLY) {
+  mochaOpts.grep = '@paypal';
+} else if (process.env.SKIP_PAYPAL) {
+  mochaOpts.grep = '@paypal';
+  mochaOpts.invert = true;
+}
+
 exports.config = {
   runner: 'local',
   user: process.env.BROWSERSTACK_USERNAME,
