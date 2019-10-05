@@ -104,6 +104,14 @@ if (ONLY_BROWSERS) {
   }
 }
 
+const mochaOpts = {
+  timeout: 60000
+};
+
+if (!process.env.DISABLE_RETRIES) {
+  mochaOpts.retries = 3;
+}
+
 exports.config = {
   runner: 'local',
   user: process.env.BROWSERSTACK_USERNAME,
@@ -127,9 +135,7 @@ exports.config = {
   connectionRetryCount: 1,
   services: ['browserstack'],
   framework: 'mocha',
-  mochaOpts: {
-    timeout: 60000
-  },
+  mochaOpts,
   reporters: ['spec'],
   reportOptions: {
     outputDir: './'
