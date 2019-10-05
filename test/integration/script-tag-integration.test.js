@@ -1,8 +1,6 @@
 require('./helper');
 
 describe('Drop-in Script Tag Integration', function () {
-  this.retries(3);
-
   beforeEach(function () {
     browser.reloadSessionOnRetry();
   });

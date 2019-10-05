@@ -1,8 +1,6 @@
 require('./helper');
 
 describe('Drop-in#requestPaymentMethod', function () {
-  this.retries(3);
-
   beforeEach(function () {
     browser.reloadSessionOnRetry();
   });
