@@ -18,8 +18,6 @@ describe('Drop-in#clearSelectedPaymentMethod', function () {
   });
 
   it('clears paypal when it is the active payment method', function () {
-    this.timeout(120000);
-
     browser.start({
       paypal: 'default'
     });
