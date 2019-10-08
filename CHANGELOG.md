@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.20.3
+------
 - Update braintree-web to v3.54.0
   - Fix issue where 3D Secure billing address was not sent over if no additional information was sent
 - Fix issue where PayPal loading would fail when using only PayPal credit
