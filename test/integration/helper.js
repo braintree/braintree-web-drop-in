@@ -141,11 +141,6 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
 
   $('#confirmButtonTop').click();
 
-  if (browser.name() === 'INTERNET EXPLORER') {
-    $('.spinner').waitForDisplayed(PAYPAL_TIMEOUT, true);
-    $('#confirmButtonTop').click();
-  }
-
   browser.switchToWindow(currentHandle);
 
   $('.paypal-checkout-sandbox-iframe').waitForDisplayed(PAYPAL_TIMEOUT, true);
