@@ -153,7 +153,7 @@ browser.addCommand('waitForElementToDissapear', function (selector) {
     const el = $(selector);
 
     return el.isExisting() === false || el.isDisplayed() === false;
-  }, PAYPAL_TIMEOUT, `expected PayPal spinner to dissapear`);
+  }, PAYPAL_TIMEOUT, 'expected PayPal spinner to dissapear');
 });
 
 browser.addCommand('clickOption', function (type) {
