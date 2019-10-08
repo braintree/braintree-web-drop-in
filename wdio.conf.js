@@ -63,6 +63,8 @@ let capabilities = [
     browserName: 'IE 11',
     browser_version: '11.0',
     'browserstack.selenium_version' : '3.141.5',
+    // https://stackoverflow.com/a/42340325/7851516
+    'browserstack.bfcache': '0',
     // don't update this! There's a weird bug in the
     // 64 bit ie driver that prevents the shift key
     // from working which means that an email can
