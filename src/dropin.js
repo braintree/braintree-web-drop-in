@@ -628,7 +628,7 @@ Dropin.prototype._handleAppSwitch = function () {
  *
  * For an example of verifying 3D Secure within Drop-in, [check out this codepen](https://codepen.io/braintree/pen/KjWqGx).
  * @param {callback} [callback] May be used as the only parameter in requestPaymentMethod if no `options` are provided. The first argument will be an error if no payment method is available and will otherwise be null. The second argument will be an object containing a payment method nonce; either a {@link Dropin~cardPaymentMethodPayload|cardPaymentMethodPayload}, a {@link Dropin~paypalPaymentMethodPayload|paypalPaymentMethodPayload}, a {@link Dropin~venmoPaymentMethodPayload|venmoPaymentMethodPayload}, a {@link Dropin~googlePayPaymentMethodPayload|googlePayPaymentMethodPayload} or an {@link Dropin~applePayPaymentMethodPayload|applePayPaymentMethodPayload}. If no callback is provided, `requestPaymentMethod` will return a promise.
- * @returns {void|Promise} Returns a promise if no callback is provided.
+ * @returns {(void|Promise)} Returns a promise if no callback is provided.
  * @example <caption>Requesting a payment method</caption>
  * var form = document.querySelector('#my-form');
  * var hiddenNonceInput = document.querySelector('#my-nonce-input');
@@ -750,7 +750,7 @@ Dropin.prototype._injectStylesheet = function () {
  * Cleanly remove anything set up by {@link module:braintree-web-drop-in|dropin.create}. This may be be useful in a single-page app.
  * @public
  * @param {callback} [callback] Called on completion, containing an error if one occurred. No data is returned if teardown completes successfully. If no callback is provided, `teardown` will return a promise.
- * @returns {void|Promise} Returns a promise if no callback is provided.
+ * @returns {(void|Promise)} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
   var teardownError;
