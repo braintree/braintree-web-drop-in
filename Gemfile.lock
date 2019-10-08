@@ -56,7 +56,7 @@ GEM
     rspec-retry (0.6.1)
       rspec-core (> 3.3)
     rspec-support (3.8.0)
-    rubyzip (1.2.3)
+    rubyzip (1.3.0)
     sauce_whisk (0.2.1)
       json
       rest-client (~> 2.0)
