@@ -150,4 +150,164 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~paypalPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
- * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/3.54.0/P
+ * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/3.54.0/PayPalCheckout.html#~tokenizePayload).
+ * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~applePayPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Apple Pay provided card.
+ * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
+ * @property {string} details.cardHolderName The name of the card holder.
+ * @property {string} details.dpanLastTwo Last two digits of card number.
+ * @property {external:ApplePayPayment} details.rawPaymentData The raw response back from the Apple Pay flow, which includes billing/shipping address, phone and email if passed in as required parameters.
+ * @property {string} description A human-readable description.
+ * @property {string} type The payment method type, always `ApplePayCard` when the method requested is an Apple Pay provided card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} ApplePayPayment An [Apple Pay Payment object](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypayment).
+ * @external ApplePayPayment
+ * @see {@link https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypayment ApplePayPayment}
+ */
+
+/**
+ * @typedef {object} Dropin~venmoPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Venmo account.
+ * @property {string} details.username The Venmo username.
+ * @property {string} type The payment method type, always `VenmoAccount` when the method requested is a Venmo account.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} Dropin~googlePayPaymentMethodPayload
+ * @property {string} nonce The payment method nonce, used by your server to charge the Google Pay card.
+ * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
+ * @property {string} details.lastFour The last 4 digits of the card.
+ * @property {string} details.lastTwo The last 2 digits of the card.
+ * @property {external:GooglePayPaymentData} details.rawPaymentData The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.
+ * @property {string} type The payment method type, always `AndroidPayCard` when the method requested is a Google Pay Card.
+ * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
+ * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
+ */
+
+/**
+ * @typedef {object} GooglePayPaymentData A [Google Pay Payment Data object](https://developers.google.com/pay/api/web/object-reference#PaymentData).
+ * @external GooglePayPaymentData
+ * @see {@link https://developers.google.com/pay/api/web/object-reference#PaymentData PaymentData}
+ */
+
+/**
+ * @typedef {object} Dropin~binData Information about the card based on the bin.
+ * @property {string} commercial Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} countryOfIssuance The country of issuance.
+ * @property {string} debit Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} durbinRegulated Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} healthcare Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} issuingBank The issuing bank.
+ * @property {string} payroll Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} prepaid Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} productId The product id.
+ */
+
+/**
+ * @name Dropin#on
+ * @function
+ * @param {string} event The name of the event to which you are subscribing.
+ * @param {function} handler A callback to handle the event.
+ * @description Subscribes a handler function to a named event. `event` should be one of the following:
+ *  * [`paymentMethodRequestable`](#event:paymentMethodRequestable)
+ *  * [`noPaymentMethodRequestable`](#event:noPaymentMethodRequestable)
+ *  * [`paymentOptionSelected`](#event:paymentOptionSelected)
+ * @returns {void}
+ * @example
+ * &lt;caption>Dynamically enable or disable your submit button based on whether or not the payment method is requestable&lt;/caption>
+ * var submitButton = document.querySelector('#submit-button');
+ *
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container'
+ * }, function (err, dropinInstance) {
+ *   submitButton.addEventListener('click', function () {
+ *     dropinInstance.requestPaymentMethod(function (err, payload) {
+ *       // Send payload.nonce to your server.
+ *     });
+ *   });
+ *
+ *   if (dropinInstance.isPaymentMethodRequestable()) {
+ *     // This will be true if you generated the client token
+ *     // with a customer ID and there is a saved payment method
+ *     // available to tokenize with that customer.
+ *     submitButton.removeAttribute('disabled');
+ *   }
+ *
+ *   dropinInstance.on('paymentMethodRequestable', function (event) {
+ *     console.log(event.type); // The type of Payment Method, e.g 'CreditCard', 'PayPalAccount'.
+ *     console.log(event.paymentMethodIsSelected); // true if a customer has selected a payment method when paymentMethodRequestable fires
+ *
+ *     submitButton.removeAttribute('disabled');
+ *   });
+ *
+ *   dropinInstance.on('noPaymentMethodRequestable', function () {
+ *     submitButton.setAttribute('disabled', true);
+ *   });
+ * });
+ *
+ * @example
+ * &lt;caption>Automatically submit nonce to server as soon as it becomes available&lt;/caption>
+ * var submitButton = document.querySelector('#submit-button');
+ *
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container'
+ * }, function (err, dropinInstance) {
+ *   function sendNonceToServer() {
+ *     dropinInstance.requestPaymentMethod(function (err, payload) {
+ *       if (err) {
+ *         // handle errors
+ *       }
+ *
+ *       // send payload.nonce to your server
+ *     });
+ *   }
+ *
+ *   // allows us to still request the payment method manually, such as
+ *   // when filling out a credit card form
+ *   submitButton.addEventListener('click', sendNonceToServer);
+ *
+ *   dropinInstance.on('paymentMethodRequestable', function (event) {
+ *     // if the nonce is already available (via PayPal authentication
+ *     // or by using a stored payment method), we can request the
+ *     // nonce right away. Otherwise, we wait for the customer to
+ *     // request the nonce by pressing the submit button once they
+ *     // are finished entering their credit card details
+ *     if (event.paymentMethodIsSelected) {
+ *       sendNonceToServer();
+ *     }
+ *   });
+ * });
+ */
+
+/**
+ * @name Dropin#off
+ * @function
+ * @param {string} event The name of the event to which you are unsubscribing.
+ * @param {function} handler A callback to unsubscribe from the event.
+ * @description Unsubscribes a handler function to a named event.
+ * @returns {void}
+ * @example
+ * &lt;caption>Subscribe and then unsubscribe from event&lt;/caption>
+ * var callback = function (event) {
+ *   // do something
+ * };
+ * dropinInstance.on('paymentMethodRequestable', callback);
+ *
+ * // later on
+ * dropinInstance.off('paymentMethodRequestable', callback);
+ */
+
+/**
+ * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMe
