@@ -18,6 +18,7 @@ if (!process.env.TRAVIS_BRANCH) {
 }
 
 const defaultCapabilities = {
+  project: projectName,
   'browserstack.debug': true,
   'browserstack.local': true,
   'browserstack.networkLogs': true,
@@ -26,7 +27,6 @@ const defaultCapabilities = {
 
 const desktopCapabilities = {
   ...defaultCapabilities,
-  project: projectName,
   os: 'windows',
   os_version: '10',
   resolution: screenResolution
