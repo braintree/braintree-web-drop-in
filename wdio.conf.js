@@ -143,7 +143,7 @@ exports.config = {
   exclude: [
     './test/integration/helper.js'
   ],
-  maxInstances: 2,
+  maxInstances: 4,
   capabilities,
   sync: true,
   logLevel: 'error',
