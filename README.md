@@ -1,5 +1,7 @@
 # Braintree Web Drop-in
 
+[![BrowserStack Status](https://automate.browserstack.com/badge.svg?badge_key=eXpPWDNzYkdKZkxuQ1VaYkRqOTYwT1hBZ1ZWcFNoWGE1Mm1UYk02cGNYRT0tLTc5RXJRNFhQdnBlOXFlQlYwdjY4SFE9PQ==--e62ce6f205d984a440dca2c74289c82a30ad84a8)](https://automate.browserstack.com/public-build/eXpPWDNzYkdKZkxuQ1VaYkRqOTYwT1hBZ1ZWcFNoWGE1Mm1UYk02cGNYRT0tLTc5RXJRNFhQdnBlOXFlQlYwdjY4SFE9PQ==--e62ce6f205d984a440dca2c74289c82a30ad84a8)
+
 A pre-made payments UI for accepting cards and alternative payments in the browser built using version 3 of the [Braintree JS client SDK](https://github.com/braintree/braintree-web).
 
 If you have any feedback or questions, create an [issue](https://github.com/braintree/braintree-web-drop-in/issues) or [contact Braintree support](https://developers.braintreepayments.com/forms/contact).

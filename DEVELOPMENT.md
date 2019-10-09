@@ -328,6 +328,8 @@ npm test
 
 ## Integration tests
 
+We use [Browserstack](https://www.browserstack.com) to automate end to end testing on Google Chrome, Safari, Firefox and Internet Explorer 11.
+
 First, [sign up for a free open source Browserstack account](https://www.browserstack.com/open-source?ref=pricing) and a and [PayPal Sandbox](https://developer.paypal.com/docs/classic/lifecycle/sb_about-accounts/#creating-sandbox-test-accounts).
 
 Copy the `.env.example` file to `.env`

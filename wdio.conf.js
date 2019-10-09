@@ -9,6 +9,14 @@ const ONLY_BROWSERS = process.env.ONLY_BROWSERS;
 const localIdentifier = uuid();
 const screenResolution = '1920x1080';
 
+let projectName = 'Braintee Web Drop-in';
+
+if (!process.env.TRAVIS_BRANCH) {
+  projectName += ' - Local';
+} else if (process.env.TRAVIS_BRANCH !== 'master') {
+  projectName += ' - PR';
+}
+
 const defaultCapabilities = {
   'browserstack.debug': true,
   'browserstack.local': true,
@@ -18,6 +26,7 @@ const defaultCapabilities = {
 
 const desktopCapabilities = {
   ...defaultCapabilities,
+  project: projectName,
   os: 'windows',
   os_version: '10',
   resolution: screenResolution
