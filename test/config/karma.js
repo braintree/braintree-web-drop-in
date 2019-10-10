@@ -30,7 +30,8 @@ module.exports = function (config) {
     ],
     exclude: [
       '**/*.swp',
-      '**/publishing/*.js'
+      '**/publishing/*.js',
+      '**/integration/*.js'
     ]
   });
 };
