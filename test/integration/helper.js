@@ -120,9 +120,22 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
 
     browser.waitForElementToDissapear('.spinner');
 
+    // Sometimes PayPal shows a one touch login screen
+    // after the login process completes
+    if ($('#activate').isExisting()) {
+      // if one touch activation is prompted, opt out
+      $('#notNowLink').click();
+
+      browser.waitForElementToDissapear('.spinner');
+    }
+
     // safari sometimes fails the initial login, so the
     // login form is shown again with email already filled in
     // using the iframe system
+    browser.waitUntil(() => {
+      return $('#confirmButtonTop').isDisplayed() || $('#injectedUnifiedLogin iframe').isExisting();
+    }, PAYPAL_TIMEOUT);
+
     if ($('#injectedUnifiedLogin iframe').isExisting()) {
       const loginIframe = $('#injectedUnifiedLogin iframe');
 
@@ -132,6 +145,7 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
         $('#btnLogin').click();
       });
     }
+    // end silly safari hack
   }
 
   $('#confirmButtonTop').waitForDisplayed();
