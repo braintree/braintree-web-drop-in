@@ -132,6 +132,10 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
     // safari sometimes fails the initial login, so the
     // login form is shown again with email already filled in
     // using the iframe system
+    browser.waitUntil(() => {
+      return $('#confirmButtonTop').isDisplayed() || $('#injectedUnifiedLogin iframe').isExisting();
+    }, PAYPAL_TIMEOUT);
+
     if ($('#injectedUnifiedLogin iframe').isExisting()) {
       const loginIframe = $('#injectedUnifiedLogin iframe');
 
@@ -141,6 +145,7 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
         $('#btnLogin').click();
       });
     }
+    // end silly safari hack
   }
 
   $('#confirmButtonTop').waitForDisplayed();
