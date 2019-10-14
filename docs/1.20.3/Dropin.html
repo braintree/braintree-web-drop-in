@@ -1091,7 +1091,7 @@ braintree.dropin.create({
         
 
         <td class="description last">
-          <p>Any of the options in the <a href="https://braintree.github.io/braintree-web/3.54.0/ThreeDSecure.html#verifyCard">Braintree 3D Secure client reference</a> except for <code>nonce</code>, <code>bin</code>, and <code>onLookupComplete</code>. If <code>amount</code> is provided, it will override the value of <code>amount</code> in the <a href="module-braintree-web-drop-in.html#~threeDSecureOptions">3D Secure create options</a>. The more options provided, the more likely the customer will not need to answer a 3DS challenge. The recommended fields for achieving a 3DS v2 verification are:</p>
+          <p>Any of the options in the <a href="https://braintree.github.io/braintree-web/3.54.1/ThreeDSecure.html#verifyCard">Braintree 3D Secure client reference</a> except for <code>nonce</code>, <code>bin</code>, and <code>onLookupComplete</code>. If <code>amount</code> is provided, it will override the value of <code>amount</code> in the <a href="module-braintree-web-drop-in.html#~threeDSecureOptions">3D Secure create options</a>. The more options provided, the more likely the customer will not need to answer a 3DS challenge. The recommended fields for achieving a 3DS v2 verification are:</p>
 <ul>
 <li><code>email</code></li>
 <li><code>mobilePhoneNumber</code></li>
@@ -2546,3 +2546,1991 @@ form.addEventListener('submit', function (event) {
       
 
       <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>nonce</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The payment method nonce, used by your server to charge the card.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>details</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>Additional account details.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>cardType</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>Type of card, e.g. Visa, Mastercard.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>lastTwo</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>Last two digits of card number.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>description</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>A human-readable description.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>type</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The payment method type, always <code>CreditCard</code> when the method requested is a card.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>binData</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>Information about the card based on the bin. Documented <a href="Dropin.html#~binData">here</a>.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>deviceData</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+              &lt;nullable><br>
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>If data collector is configured, the device data property to be used when making a transaction.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>liabilityShifted</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+              &lt;nullable><br>
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>If 3D Secure is configured, whether or not liability did shift.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>liabilityShiftPossible</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+              &lt;nullable><br>
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>If 3D Secure is configured, whether or not liability shift is possible.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line47">line 47</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~googlePayPaymentMethodPayload">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~googlePayPaymentMethodPayload">
+      <span class="type-signature"></span>googlePayPaymentMethodPayload<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>nonce</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The payment method nonce, used by your server to charge the Google Pay card.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>details.cardType</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>Type of card, ex: Visa, Mastercard.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>details.lastFour</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The last 4 digits of the card.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>details.lastTwo</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The last 2 digits of the card.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>details.rawPaymentData</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      <a href="external-GooglePayPaymentData.html">external:GooglePayPaymentData</a>
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>type</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The payment method type, always <code>AndroidPayCard</code> when the method requested is a Google Pay Card.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>binData</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>Information about the card based on the bin. Documented <a href="Dropin.html#~binData">here</a>.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>deviceData</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+              &lt;nullable><br>
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>If data collector is configured, the device data property to be used when making a transaction.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line96">line 96</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~paymentMethodRequestablePayload">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~paymentMethodRequestablePayload">
+      <span class="type-signature"></span>paymentMethodRequestablePayload<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The event payload sent from <a href="Dropin.html#on"><code>on</code></a> with the <a href="Dropin.html#event:paymentMethodRequestable"><code>paymentMethodRequestable</code></a> event.</p>
+  </div>
+
+
+
+
+
+
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>type</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The type of payment method that is requestable. Either <code>CreditCard</code> or <code>PayPalAccount</code>.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>paymentMethodIsSelected</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>A property to determine if a payment method is currently selected when the payment method becomes requestable.</p>
+<p>This will be <code>true</code> any time a payment method is visibly selected in the Drop-in UI, such as when PayPal authentication completes or a stored payment method is selected.</p>
+<p>This will be <code>false</code> when <a href="Dropin.html#requestPaymentMethod"><code>requestPaymentMethod</code></a> can be called, but a payment method is not currently selected. For instance, when a card form has been filled in with valid values, but has not been submitted to be converted into a payment method nonce.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line229">line 229</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~paymentOptionSelectedPayload">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~paymentOptionSelectedPayload">
+      <span class="type-signature"></span>paymentOptionSelectedPayload<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The event payload sent from <a href="Dropin.html#on"><code>on</code></a> with the <a href="Dropin.html#event:paymentOptionSelected"><code>paymentOptionSelected</code></a> event.</p>
+  </div>
+
+
+
+
+
+
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>paymentOption</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The payment option view selected. Either <code>card</code>, <code>paypal</code>, or <code>paypalCredit</code>.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line251">line 251</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~paypalPaymentMethodPayload">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~paypalPaymentMethodPayload">
+      <span class="type-signature"></span>paypalPaymentMethodPayload<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>nonce</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The payment method nonce, used by your server to charge the PayPal account.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>details</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>Additional PayPal account details. See a full list of details in the <a href="http://braintree.github.io/braintree-web/3.54.1/PayPalCheckout.html#~tokenizePayload">PayPal client reference</a>.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>type</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The payment method type, always <code>PayPalAccount</code> when the method requested is a PayPal account.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>deviceData</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+              &lt;nullable><br>
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>If data collector is configured, the device data property to be used when making a transaction.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line61">line 61</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~venmoPaymentMethodPayload">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~venmoPaymentMethodPayload">
+      <span class="type-signature"></span>venmoPaymentMethodPayload<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>nonce</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The payment method nonce, used by your server to charge the Venmo account.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>details.username</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Venmo username.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>type</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The payment method type, always <code>VenmoAccount</code> when the method requested is a Venmo account.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>deviceData</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+              &lt;nullable><br>
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>If data collector is configured, the device data property to be used when making a transaction.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line88">line 88</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+    
+      <h3 class="subsection-title">Events</h3>
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#event:noPaymentMethodRequestable">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="event:noPaymentMethodRequestable">
+      <span class="type-signature"></span>noPaymentMethodRequestable<span class="type-signature"></span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>This event is emitted when there is no payment method available in Drop-in. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use <a href="Dropin.html#isPaymentMethodRequestable"><code>isPaymentMethodRequestable</code></a>. No payload is available in the callback for this event.</p>
+  </div>
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line240">line 240</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#event:paymentMethodRequestable">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="event:paymentMethodRequestable">
+      <span class="type-signature"></span>paymentMethodRequestable<span class="type-signature"> :<a href="Dropin.html#~paymentMethodRequestablePayload">Dropin~paymentMethodRequestablePayload</a></span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use <a href="Dropin.html#isPaymentMethodRequestable"><code>isPaymentMethodRequestable</code></a>.</p>
+  </div>
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line223">line 223</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#event:paymentOptionSelected">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="event:paymentOptionSelected">
+      <span class="type-signature"></span>paymentOptionSelected<span class="type-signature"> :<a href="Dropin.html#~paymentOptionSelectedPayload">Dropin~paymentOptionSelectedPayload</a></span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>This event is emitted when the customer selects a new payment option type (e.g. PayPal, PayPal Credit, credit card). This event is not emitted when the user changes between existing saved payment methods. Only relevant when accepting multiple payment options.</p>
+  </div>
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="dropin.js.html">dropin.js</a>, <a href="dropin.js.html#line245">line 245</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    
+  </article>
+</section>
+
+
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+  
+</body>
+</html>

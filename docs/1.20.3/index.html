@@ -180,7 +180,7 @@ dropin.create({ /* options */ }, callback);
 <p><a id="content-security-policy"></a></p>
 <h2>Using <code>braintree-web-drop-in</code> with a Content Security Policy</h2>
 <p><a href="http://www.html5rocks.com/en/tutorials/security/content-security-policy/">Content Security Policy</a> is a feature of web browsers that mitigates cross-site scripting and other attacks. By limiting the origins of resources that may be loaded on your page, you can maintain tighter control over any potentially malicious code. We recommend considering the implementation of a CSP when available.</p>
-<p>You will need to add the following directives to your policy:</p>
+<h3>Basic Directives</h3>
 <table>
 <thead>
 <tr>
@@ -192,39 +192,117 @@ dropin.create({ /* options */ }, callback);
 <tbody>
 <tr>
 <td>script-src</td>
-<td>js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>*.paypal.com<br/>songbirdstag.cardinalcommerce.com<br/>pay.google.com<br />'unsafe-inline'</td>
-<td>js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>*.paypal.com<br/>songbird.cardinalcommerce.com<br/>pay.google.com<br/>'unsafe-inline'</td>
-</tr>
-<tr>
-<td>style-src</td>
-<td>'unsafe-inline'<br/>assets.braintreegateway.com</td>
-<td>'unsafe-inline'<br/>assets.braintreegateway.com</td>
+<td>js.braintreegateway.com<br/>assets.braintreegateway.com</td>
+<td>js.braintreegateway.com<br/>assets.braintreegateway.com</td>
 </tr>
 <tr>
 <td>img-src</td>
-<td>assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:</td>
-<td>assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:</td>
+<td>assets.braintreegateway.com<br/>data:</td>
+<td>assets.braintreegateway.com<br/>data:</td>
 </tr>
 <tr>
 <td>child-src</td>
-<td>assets.braintreegateway.com<br/>*.paypal.com</td>
-<td>assets.braintreegateway.com<br/>*.paypal.com</td>
+<td>assets.braintreegateway.com</td>
+<td>assets.braintreegateway.com</td>
 </tr>
 <tr>
 <td>frame-src</td>
-<td>assets.braintreegateway.com<br/>*.paypal.com<br/>*.cardinalcommerce.com</td>
-<td>assets.braintreegateway.com<br/>*.paypal.com<br/>*.cardinalcommerce.com</td>
+<td>assets.braintreegateway.com</td>
+<td>assets.braintreegateway.com</td>
 </tr>
 <tr>
 <td>connect-src</td>
-<td>api.sandbox.braintreegateway.com<br/>client-analytics.sandbox.braintreegateway.com<br/>*.braintree-api.com<br/>*.paypal.com</td>
-<td>api.braintreegateway.com<br/>client-analytics.braintreegateway.com<br/>*.braintree-api.com<br/>*.paypal.com</td>
+<td>api.sandbox.braintreegateway.com<br/>client-analytics.sandbox.braintreegateway.com<br/>*.braintree-api.com</td>
+<td>api.braintreegateway.com<br/>client-analytics.braintreegateway.com<br/>*.braintree-api.com</td>
 </tr>
 </tbody>
 </table>
-<p>Including <code>'unsafe-inline'</code> and <code>www.paypalobjects.com</code> in <code>script-src</code> along with <code>*.paypal.com</code> in <code>script-src</code>, <code>img-src</code>, <code>child-src</code>, <code>frame-src</code>, and <code>connect-src</code> are only required if you are using <a href="module-braintree-web-drop-in.html#~paypalCreateOptions">PayPal</a>.</p>
-<p>Including <code>pay.google.com</code> in <code>script-src</code> is only required if you are using <a href="module-braintree-web-drop-in.html#~googlePayCreateOptions">Google Pay</a>.</p>
-<p>Including <code>*.cardinalcommerce.com</code> in <code>frame-src</code>and <code>script-src</code> is only required if you are using <a href="module-braintree-web-drop-in.html#~threeDSecureOptions">3D Secure</a>.</p>
+<h3>PayPal Specific Directives</h3>
+<p>If using <a href="module-braintree-web-drop-in.html#~paypalCreateOptions">PayPal</a>, include these additional directives:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sandbox</th>
+<th>Production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>script-src</td>
+<td>www.paypalobjects.com<br/>*.paypal.com<br/>'unsafe-inline'</td>
+<td>www.paypalobjects.com<br/>*.paypal.com<br/>'unsafe-inline'</td>
+</tr>
+<tr>
+<td>style-src</td>
+<td>'unsafe-inline'</td>
+<td>'unsafe-inline'</td>
+</tr>
+<tr>
+<td>img-src</td>
+<td>checkout.paypal.com</td>
+<td>checkout.paypal.com</td>
+</tr>
+<tr>
+<td>child-src</td>
+<td>*.paypal.com</td>
+<td>*.paypal.com</td>
+</tr>
+<tr>
+<td>frame-src</td>
+<td>*.paypal.com</td>
+<td>*.paypal.com</td>
+</tr>
+</tbody>
+</table>
+<h3>Google Pay Specific Directives</h3>
+<p>If using <a href="module-braintree-web-drop-in.html#~googlePayCreateOptions">Google Pay</a>, include these additional directives:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sandbox</th>
+<th>Production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>script-src</td>
+<td>pay.google.com</td>
+<td>pay.google.com</td>
+</tr>
+</tbody>
+</table>
+<h3>3D Secure Specific Directives</h3>
+<p>If using <a href="module-braintree-web-drop-in.html#~threeDSecureOptions">3D Secure</a>, include these additional directives:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sandbox</th>
+<th>Production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>script-src</td>
+<td>songbirdstag.cardinalcommerce.com</td>
+<td>songbird.cardinalcommerce.com</td>
+</tr>
+<tr>
+<td>frame-src</td>
+<td>*.cardinalcommerce.com</td>
+<td>*.cardinalcommerce.com</td>
+</tr>
+<tr>
+<td>connect-src</td>
+<td>*.cardinalcommerce.com</td>
+<td>*.cardinalcommerce.com</td>
+</tr>
+</tbody>
+</table>
+<h3>Data Collector Specific Directives</h3>
+<p>If using Kount with <a href="module-braintree-web-drop-in.html#~dataCollectorOptions">Data Collector</a>, adhere to the <a href="https://support.kount.com/s/article/How-is-Content-Security-Policy-Used">Kount CSP guide</a>.</p>
 <p><a id="additional-resources"></a></p>
 <h2>Additional resources</h2>
 <ul>
