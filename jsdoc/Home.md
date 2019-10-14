@@ -132,22 +132,49 @@ Drop-in and the Braintree JS SDK have the same [browser support](http://braintre
 
 [Content Security Policy](http://www.html5rocks.com/en/tutorials/security/content-security-policy/) is a feature of web browsers that mitigates cross-site scripting and other attacks. By limiting the origins of resources that may be loaded on your page, you can maintain tighter control over any potentially malicious code. We recommend considering the implementation of a CSP when available.
 
-You will need to add the following directives to your policy:
+### Basic Directives
 
-|             | Sandbox                                                                                                                                                                              | Production                                                                                                                                                                      | 
-|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| script-src  | js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>&#42;.paypal.com<br/>songbirdstag.cardinalcommerce.com<br/>pay.google.com<br />'unsafe-inline' | js.braintreegateway.com<br/>assets.braintreegateway.com<br/>www.paypalobjects.com<br/>&#42;.paypal.com<br/>songbird.cardinalcommerce.com<br/>pay.google.com<br/>'unsafe-inline' |
-| style-src   | 'unsafe-inline'<br/>assets.braintreegateway.com                                                                                                                                      | 'unsafe-inline'<br/>assets.braintreegateway.com                                                                                                                                 |
-| img-src     | assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:                                                                                                                        | assets.braintreegateway.com<br/>checkout.paypal.com<br/>data:                                                                                                                   |
-| child-src   | assets.braintreegateway.com<br/>&#42;.paypal.com                                                                                                                                     | assets.braintreegateway.com<br/>&#42;.paypal.com                                                                                                                                |
-| frame-src   | assets.braintreegateway.com<br/>&#42;.paypal.com<br/>&#42;.cardinalcommerce.com                                                                                                      | assets.braintreegateway.com<br/>&#42;.paypal.com<br/>&#42;.cardinalcommerce.com                                                                                                 |
-| connect-src | api.sandbox.braintreegateway.com<br/>client-analytics.sandbox.braintreegateway.com<br/>&#42;.braintree-api.com<br/>&#42;.paypal.com                                                  | api.braintreegateway.com<br/>client-analytics.braintreegateway.com<br/>&#42;.braintree-api.com<br/>&#42;.paypal.com                                                             |
+|             | Sandbox                                                                                                        | Production                                                                                     |
+|-------------|----------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| script-src  | js.braintreegateway.com<br/>assets.braintreegateway.com                                                        | js.braintreegateway.com<br/>assets.braintreegateway.com                                        |
+| img-src     | assets.braintreegateway.com<br/>data:                                                                          | assets.braintreegateway.com<br/>data:                                                          |
+| child-src   | assets.braintreegateway.com                                                                                    | assets.braintreegateway.com                                                                    |
+| frame-src   | assets.braintreegateway.com                                                                                    | assets.braintreegateway.com                                                                    |
+| connect-src | api.sandbox.braintreegateway.com<br/>client-analytics.sandbox.braintreegateway.com<br/>&#42;.braintree-api.com | api.braintreegateway.com<br/>client-analytics.braintreegateway.com<br/>&#42;.braintree-api.com |
 
-Including `'unsafe-inline'` and `www.paypalobjects.com` in `script-src` along with `*.paypal.com` in `script-src`, `img-src`, `child-src`, `frame-src`, and `connect-src` are only required if you are using [PayPal](module-braintree-web-drop-in.html#~paypalCreateOptions).
+### PayPal Specific Directives
 
-Including `pay.google.com` in `script-src` is only required if you are using [Google Pay](module-braintree-web-drop-in.html#~googlePayCreateOptions).
+If using [PayPal](module-braintree-web-drop-in.html#~paypalCreateOptions), include these additional directives:
 
-Including `*.cardinalcommerce.com` in `frame-src`and `script-src` is only required if you are using [3D Secure](module-braintree-web-drop-in.html#~threeDSecureOptions).
+|             | Sandbox                                                          | Production                                                       |
+|-------------|------------------------------------------------------------------|------------------------------------------------------------------|
+| script-src  | www.paypalobjects.com<br/>&#42;.paypal.com<br/>'unsafe-inline' | www.paypalobjects.com<br/>&#42;.paypal.com<br/>'unsafe-inline' |
+| style-src   | 'unsafe-inline'                                                  | 'unsafe-inline'                                                  |
+| img-src     | checkout.paypal.com                                              | checkout.paypal.com                                              |
+| child-src   | &#42;.paypal.com                                                 | &#42;.paypal.com                                                 |
+| frame-src   | &#42;.paypal.com                                                 | &#42;.paypal.com                                                 |
+
+### Google Pay Specific Directives
+
+If using [Google Pay](module-braintree-web-drop-in.html#~googlePayCreateOptions), include these additional directives:
+
+|             | Sandbox        | Production     |
+|-------------|----------------|----------------|
+| script-src  | pay.google.com | pay.google.com |
+
+### 3D Secure Specific Directives
+
+If using [3D Secure](module-braintree-web-drop-in.html#~threeDSecureOptions), include these additional directives:
+
+|             | Sandbox                           | Production                    |
+|-------------|-----------------------------------|-------------------------------|
+| script-src  | songbirdstag.cardinalcommerce.com | songbird.cardinalcommerce.com |
+| frame-src   | &#42;.cardinalcommerce.com        | &#42;.cardinalcommerce.com    |
+| connect-src | &#42;.cardinalcommerce.com        | &#42;.cardinalcommerce.com    |
+
+### Data Collector Specific Directives
+
+If using Kount with [Data Collector](module-braintree-web-drop-in.html#~dataCollectorOptions), adhere to the [Kount CSP guide](https://support.kount.com/s/article/How-is-Content-Security-Policy-Used).
 
 <a id="additional-resources"></a>
 ## Additional resources
