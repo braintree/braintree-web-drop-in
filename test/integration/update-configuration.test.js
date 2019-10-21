@@ -1,10 +1,6 @@
 require('./helper');
 
 describe('Drop-in#updateConfiguration', function () {
-  beforeEach(function () {
-    browser.reloadSessionOnRetry();
-  });
-
   it('updates PayPal configuration @paypal', function () {
     if (browser.name()) {
       this.skip('This test fails repeatedly in multiple browsers. Something about opening 2 popups results in the driver having trouble');

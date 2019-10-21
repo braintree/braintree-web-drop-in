@@ -1,10 +1,6 @@
 require('./helper');
 
 describe('Drop-in#requestPaymentMethod', function () {
-  beforeEach(function () {
-    browser.reloadSessionOnRetry();
-  });
-
   describe('callback api', function () {
     it('tokenizes a card', function () {
       browser.start();

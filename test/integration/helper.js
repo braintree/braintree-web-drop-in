@@ -48,14 +48,6 @@ browser.addCommand('start', function (options = {}, overrides = {}) {
   }, waitTime, `Expected Drop-in to be ready after ${waitTime / 1000} seconds.`);
 });
 
-browser.addCommand('reloadSessionOnRetry', () => {
-  if (this.sessionId === browser.sessionId) {
-    browser.reloadSession();
-  } else {
-    this.sessionId = browser.sessionId;
-  }
-});
-
 browser.addCommand('getResult', function () {
   browser.waitUntil(() => {
     return $('#results').getHTML(false).trim() !== '';

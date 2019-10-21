@@ -1,10 +1,6 @@
 require('./helper');
 
 describe('Drop-in card', function () {
-  beforeEach(function () {
-    browser.reloadSessionOnRetry();
-  });
-
   describe('cardholderName', function () {
     beforeEach(function () {
       this.options = {

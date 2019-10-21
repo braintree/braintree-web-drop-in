@@ -1,10 +1,6 @@
 require('./helper');
 
 describe('Drop-in events', function () {
-  beforeEach(function () {
-    browser.reloadSessionOnRetry();
-  });
-
   it('disable and enable submit button on credit card validity', function () {
     browser.start();
 
