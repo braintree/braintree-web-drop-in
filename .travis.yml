@@ -18,7 +18,8 @@ env:
   - TEST="test"
   - TEST="test:hint"
   - TEST="test:publishing"
-  - TEST="test:integration:paypal-only" ONLY_BROWSERS=chrome,firefox,safari IS_INTEGRATION_TEST=true
+  # safari is suuuuuper flaky with PayPal tests right now :(
+  - TEST="test:integration:paypal-only" ONLY_BROWSERS=chrome,firefox IS_INTEGRATION_TEST=true
   - TEST="test:integration:paypal-only" ONLY_BROWSERS=ie IS_INTEGRATION_TEST=true
   - TEST="test:integration:paypal-skipped" ONLY_BROWSERS=chrome,firefox,safari IS_INTEGRATION_TEST=true
   - TEST="test:integration:paypal-skipped" ONLY_BROWSERS=ie IS_INTEGRATION_TEST=true
