@@ -11,13 +11,13 @@ describe('Drop-in Script Tag Integration', function () {
     });
     browser.waitUntil(() => {
       return $('.braintree-option__card').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
-    }, 5000, 'expected Drop-in to be ready after 5 s');
+    }, 15000, 'expected Drop-in to be ready after 15 s');
 
     browser.clickOption('card');
 
-    browser.hostedFieldSendInput('number', '4111111111111111');
-    browser.hostedFieldSendInput('expirationDate', '1030');
-    browser.hostedFieldSendInput('cvv', '123');
+    browser.hostedFieldSendInput('number');
+    browser.hostedFieldSendInput('expirationDate');
+    browser.hostedFieldSendInput('cvv');
 
     browser.submitPay(false);
 
@@ -39,8 +39,8 @@ describe('Drop-in Script Tag Integration', function () {
       skipReady: true
     });
     browser.waitUntil(() => {
-      return $('.braintree-option__paypal').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
-    }, 5000, 'expected Drop-in to be ready after 5 s');
+      return $('.braintree-option__card').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
+    }, 15000, 'expected Drop-in to be ready after 15 s');
 
     browser.clickOption('paypal');
 
@@ -61,11 +61,11 @@ describe('Drop-in Script Tag Integration', function () {
     });
     browser.waitUntil(() => {
       return $('.braintree-option__card').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
-    }, 5000, 'expected Drop-in to be ready after 5 s');
+    }, 15000, 'expected Drop-in to be ready after 15 s');
 
     browser.clickOption('card');
 
-    browser.hostedFieldSendInput('number', '4111111111111111');
+    browser.hostedFieldSendInput('number');
 
     browser.submitPay(false);
 
@@ -82,7 +82,7 @@ describe('Drop-in Script Tag Integration', function () {
     });
     browser.waitUntil(() => {
       return $('.braintree-option__card').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
-    }, 5000, 'expected Drop-in to be ready after 5 s');
+    }, 15000, 'expected Drop-in to be ready after 15 s');
 
     const options = $$('[data-braintree-id="options"] .braintree-option__label');
 

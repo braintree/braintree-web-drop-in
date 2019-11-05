@@ -12,9 +12,9 @@ describe('Drop-in with Data Collector', function () {
       }
     });
 
-    browser.hostedFieldSendInput('number', '4111111111111111');
-    browser.hostedFieldSendInput('expirationDate', '1019');
-    browser.hostedFieldSendInput('cvv', '123');
+    browser.hostedFieldSendInput('number');
+    browser.hostedFieldSendInput('expirationDate');
+    browser.hostedFieldSendInput('cvv');
 
     browser.submitPay();
 

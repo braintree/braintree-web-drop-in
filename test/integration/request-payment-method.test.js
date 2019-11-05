@@ -9,9 +9,9 @@ describe('Drop-in#requestPaymentMethod', function () {
     it('tokenizes a card', function () {
       browser.start();
 
-      browser.hostedFieldSendInput('number', '4111111111111111');
-      browser.hostedFieldSendInput('expirationDate', '1030');
-      browser.hostedFieldSendInput('cvv', '123');
+      browser.hostedFieldSendInput('number');
+      browser.hostedFieldSendInput('expirationDate');
+      browser.hostedFieldSendInput('cvv');
 
       browser.submitPay();
 
@@ -82,9 +82,9 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.clickOption('card');
 
-      browser.hostedFieldSendInput('number', '4111111111111111');
-      browser.hostedFieldSendInput('expirationDate', '1030');
-      browser.hostedFieldSendInput('cvv', '123');
+      browser.hostedFieldSendInput('number');
+      browser.hostedFieldSendInput('expirationDate');
+      browser.hostedFieldSendInput('cvv');
 
       browser.submitPay();
 

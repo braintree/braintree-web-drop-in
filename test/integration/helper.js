@@ -9,6 +9,13 @@ const DEFAULT_START_OPTIONS = {
 const PAYPAL_TIMEOUT = 60000; // 60 seconds
 const BASE_URL = `http://bs-local.com:${PORT}`;
 
+const DEFAULT_HOSTED_FIELDS_VALUES = {
+  number: '4111111111111111',
+  expirationDate: '12' + ((new Date().getFullYear() % 100) + 3), // last month of current year + 3
+  cvv: '123',
+  postalCode: '12345'
+};
+
 global.expect = require('chai').expect;
 
 browser.addCommand('start', function (options = {}, overrides = {}) {
@@ -74,6 +81,10 @@ browser.addCommand('hostedFieldSendInput', function (key, value) {
   const field = $(`iframe[id="braintree-hosted-field-${key}"]`);
 
   field.click();
+
+  if (!value) {
+    value = DEFAULT_HOSTED_FIELDS_VALUES[key];
+  }
 
   browser.inFrame(field, () => {
     $(`.${key}`).typeKeys(value);

@@ -108,7 +108,9 @@ let capabilities = [
 ];
 
 if (ONLY_BROWSERS) {
-  capabilities = ONLY_BROWSERS.split(',').map(browser => capabilities.find(config => config.browser.toLowerCase() === browser.toLowerCase()))
+  capabilities = ONLY_BROWSERS.split(',')
+    .map(browser => capabilities.find(config => config.browser.toLowerCase() === browser.toLowerCase()))
+    .filter(b => b); // in case an invalid value is passed and no corresponding capability is available
 
   if (capabilities.length === 0) {
     throw new Error(`Could not find browsers ${ONLY_BROWSERS} in config`);
