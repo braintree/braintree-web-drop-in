@@ -15,9 +15,9 @@ describe('Drop-in Script Tag Integration', function () {
 
     browser.clickOption('card');
 
-    browser.hostedFieldSendInput('number', '4111111111111111');
-    browser.hostedFieldSendInput('expirationDate', '1030');
-    browser.hostedFieldSendInput('cvv', '123');
+    browser.hostedFieldSendInput('number');
+    browser.hostedFieldSendInput('expirationDate');
+    browser.hostedFieldSendInput('cvv');
 
     browser.submitPay(false);
 
@@ -65,7 +65,7 @@ describe('Drop-in Script Tag Integration', function () {
 
     browser.clickOption('card');
 
-    browser.hostedFieldSendInput('number', '4111111111111111');
+    browser.hostedFieldSendInput('number');
 
     browser.submitPay(false);
 

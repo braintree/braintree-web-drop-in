@@ -11,9 +11,9 @@ describe('Drop-in events', function () {
     expect($('#pay-button').isEnabled()).to.equal(false);
 
     // Put in valid state
-    browser.hostedFieldSendInput('number', '4111111111111111');
-    browser.hostedFieldSendInput('expirationDate', '1030');
-    browser.hostedFieldSendInput('cvv', '123');
+    browser.hostedFieldSendInput('number');
+    browser.hostedFieldSendInput('expirationDate');
+    browser.hostedFieldSendInput('cvv');
 
     expect($('#pay-button').isEnabled()).to.equal(true);
 
@@ -27,7 +27,7 @@ describe('Drop-in events', function () {
     // Put in valid state again
     browser.hostedFieldSendInput('expirationDate', 'Backspace');
     browser.hostedFieldSendInput('expirationDate', 'Backspace');
-    browser.hostedFieldSendInput('expirationDate', '30');
+    browser.hostedFieldSendInput('expirationDate', String((new Date().getFullYear() % 100) + 3));
 
     expect($('#pay-button').isEnabled()).to.equal(true);
   });

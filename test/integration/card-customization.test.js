@@ -29,9 +29,9 @@ describe('Drop-in card', function () {
     it('does not require cardholder name', function () {
       browser.start(this.options);
 
-      browser.hostedFieldSendInput('number', '4111111111111111');
-      browser.hostedFieldSendInput('expirationDate', '1019');
-      browser.hostedFieldSendInput('cvv', '123');
+      browser.hostedFieldSendInput('number');
+      browser.hostedFieldSendInput('expirationDate');
+      browser.hostedFieldSendInput('cvv');
 
       expect($('#pay-button').isEnabled()).to.equal(true);
 
@@ -50,9 +50,9 @@ describe('Drop-in card', function () {
       };
       browser.start(this.options);
 
-      browser.hostedFieldSendInput('number', '4111111111111111');
-      browser.hostedFieldSendInput('expirationDate', '1019');
-      browser.hostedFieldSendInput('cvv', '123');
+      browser.hostedFieldSendInput('number');
+      browser.hostedFieldSendInput('expirationDate');
+      browser.hostedFieldSendInput('cvv');
 
       expect($('#pay-button').isEnabled()).to.equal(false);
 
@@ -159,9 +159,9 @@ describe('Drop-in card', function () {
     it('does not persist data by default', function () {
       browser.start();
 
-      browser.hostedFieldSendInput('number', '4111111111111111');
-      browser.hostedFieldSendInput('expirationDate', '1019');
-      browser.hostedFieldSendInput('cvv', '123');
+      browser.hostedFieldSendInput('number');
+      browser.hostedFieldSendInput('expirationDate');
+      browser.hostedFieldSendInput('cvv');
 
       browser.submitPay();
 
@@ -179,9 +179,9 @@ describe('Drop-in card', function () {
         }
       });
 
-      browser.hostedFieldSendInput('number', '4111111111111111');
-      browser.hostedFieldSendInput('expirationDate', '1019');
-      browser.hostedFieldSendInput('cvv', '123');
+      browser.hostedFieldSendInput('number');
+      browser.hostedFieldSendInput('expirationDate');
+      browser.hostedFieldSendInput('cvv');
 
       browser.submitPay();
 
