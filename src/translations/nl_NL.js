@@ -42,7 +42,7 @@ module.exports = {
   "applePayActiveCardError": "Voeg een ondersteunde creditcard toe aan je Apple Pay-wallet.",
   "cardholderNameLabel": "Naam kaarthouder",
   "cardNumberLabel": "Creditcardnummer",
-  "cvvLabel": "CVV",
+  "cvvLabel": "CSC",
   "cvvThreeDigitLabelSubheading": "(3 cijfers)",
   "cvvFourDigitLabelSubheading": "(4 cijfers)",
   "cardholderNamePlaceholder": "Naam kaarthouder",
