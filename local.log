@@ -1,0 +1,22 @@
+
+You can now access your local server(s) in our remote browser.
+
+Press Ctrl-C to exit
+
+
+
+BrowserStackLocal v7.6
+
+***
+Setting the --only-automate parameter will stop local testing via command line from working with BrowserStack Live and BrowserStack Screenshots.
+To enable local testing via the command line for Live and Screenshots, rerun BrowserStackLocal without --only-automate.
+***
+
+You can now access your local server(s) in our remote browser.
+
+Press Ctrl-C to exit
+
+
+Press Ctrl-C to exit
+
+
