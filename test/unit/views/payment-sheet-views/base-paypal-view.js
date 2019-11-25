@@ -23,6 +23,9 @@ describe('BasePayPalView', function () {
       },
       setup: this.sandbox.stub(),
       FUNDING: {
+        FOO: 'foo',
+        VENMO: 'venmo',
+        PAYPAL: 'paypal',
         CREDIT: 'credit'
       }
     };
@@ -197,27 +200,36 @@ describe('BasePayPalView', function () {
       }.bind(this));
     });
 
-    it('dissallows credit option for PayPal', function () {
+    it('dissallows all non-paypal payment methods', function () {
       this.view.model.merchantConfiguration.paypal = this.view.model.merchantConfiguration.paypal;
       this.view._isPayPalCredit = false;
 
       return this.view.initialize().then(function () {
         expect(this.paypal.Button.render).to.be.calledWithMatch({
           funding: {
-            disallowed: ['credit']
+            disallowed: [
+              'foo',
+              'venmo',
+              'credit'
+            ]
           }
         });
       }.bind(this));
     });
 
-    it('does not include funding param for PayPal credit', function () {
+    it('dissallows all funcing but credit for paypal credit', function () {
       this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
       this.view._isPayPalCredit = true;
 
       return this.view.initialize().then(function () {
-        var renderOptions = this.paypal.Button.render.args[0][0];
-
-        expect(renderOptions.funding).to.not.exist;
+        expect(this.paypal.Button.render).to.be.calledWithMatch({
+          funding: {
+            disallowed: [
+              'foo',
+              'venmo'
+            ]
+          }
+        });
       }.bind(this));
     });
 
