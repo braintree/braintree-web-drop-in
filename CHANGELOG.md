@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.21.0
+------
 - Update braintree-web to v3.55.0
   - Retry failed connections to Braintree Gateway due to TCP Preconnect errors in all browsers
   - Google Pay: Add support for `isNetworkTokenized` param in `parseResponse` method
