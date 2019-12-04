@@ -9,16 +9,22 @@ const ONLY_BROWSERS = process.env.ONLY_BROWSERS;
 const localIdentifier = uuid();
 const screenResolution = '1920x1080';
 
-let projectName = 'Braintee Web Drop-in';
+const projectName = 'Braintee Web Drop-in';
+let type;
 
 if (!process.env.TRAVIS_BRANCH) {
-  projectName += ' - Local';
+  type = 'Local';
 } else if (process.env.TRAVIS_BRANCH !== 'master') {
-  projectName += ' - PR';
+  type = 'Pull Request';
+} else {
+  type = 'CI';
 }
+
+const build = `${projectName} - ${type} ${Date.now()}`;
 
 const defaultCapabilities = {
   project: projectName,
+  build,
   'browserstack.debug': true,
   'browserstack.local': true,
   'browserstack.networkLogs': true,
