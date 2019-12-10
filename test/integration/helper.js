@@ -8,6 +8,7 @@ const DEFAULT_START_OPTIONS = {
 };
 const PAYPAL_TIMEOUT = 60000; // 60 seconds
 const BASE_URL = `http://bs-local.com:${PORT}`;
+let sessionId = '';
 
 const DEFAULT_HOSTED_FIELDS_VALUES = {
   number: '4111111111111111',
@@ -56,12 +57,11 @@ browser.addCommand('start', function (options = {}, overrides = {}) {
 });
 
 browser.addCommand('reloadSessionOnRetry', () => {
-  // TODO try without reloading session
-  // if (this.sessionId === browser.sessionId) {
-  //   browser.reloadSession();
-  // } else {
-  //   this.sessionId = browser.sessionId;
-  // }
+  if (sessionId === browser.sessionId) {
+    browser.reloadSession();
+  } else {
+    sessionId = browser.sessionId;
+  }
 });
 
 browser.addCommand('getResult', function () {
