@@ -56,11 +56,12 @@ browser.addCommand('start', function (options = {}, overrides = {}) {
 });
 
 browser.addCommand('reloadSessionOnRetry', () => {
-  if (this.sessionId === browser.sessionId) {
-    browser.reloadSession();
-  } else {
-    this.sessionId = browser.sessionId;
-  }
+  // TODO try without reloading session
+  // if (this.sessionId === browser.sessionId) {
+  //   browser.reloadSession();
+  // } else {
+  //   this.sessionId = browser.sessionId;
+  // }
 });
 
 browser.addCommand('getResult', function () {
