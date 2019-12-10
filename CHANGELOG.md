@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Update braintree-web to v3.56.0
+  - Venmo: fix issue where SPA hash navigation may invalidate Venmo tokenization
+
 1.21.0
 ------
 - Update braintree-web to v3.55.0
