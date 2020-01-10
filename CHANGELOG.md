@@ -3,8 +3,9 @@ CHANGELOG
 
 unreleased
 ----------
-- Update braintree-web to v3.56.0
+- Update braintree-web to v3.57.0
   - Venmo: fix issue where SPA hash navigation may invalidate Venmo tokenization
+  - 3D Secure: fallback to a v1 flow if the v2 setup fails
 
 1.21.0
 ------
