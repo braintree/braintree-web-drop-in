@@ -388,6 +388,125 @@ EventEmitter.createChild = function (ChildObject) {
 module.exports = EventEmitter;
 
 },{}],22:[function(require,module,exports){
+(function (global){
+'use strict';
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#Methods
+var PROMISE_METHODS = [
+  'all',
+  'allSettled',
+  'race',
+  'reject',
+  'resolve'
+];
+
+function ExtendedPromise(options) {
+  var self = this;
+
+  if (typeof options === 'function') {
+    return new ExtendedPromise.Promise(options);
+  }
+
+  this._promise = new ExtendedPromise.Promise(function (resolve, reject) {
+    self._resolveFunction = resolve;
+    self._rejectFunction = reject;
+  });
+
+  options = options || {};
+  this._onResolve = options.onResolve || ExtendedPromise.defaultOnResolve;
+  this._onReject = options.onReject || ExtendedPromise.defaultOnReject;
+
+  this._resetState();
+
+  this._promise.resolve = this.resolve.bind(this);
+  this._promise.reject = this.reject.bind(this);
+
+  return this._promise;
+}
+
+PROMISE_METHODS.forEach(function (method) {
+  ExtendedPromise[method] = function () {
+    var args = Array.prototype.slice.call(arguments);
+
+    return ExtendedPromise.Promise[method].apply(ExtendedPromise.Promise, args);
+  };
+});
+
+ExtendedPromise.setPromise = function (PromiseClass) {
+  ExtendedPromise.Promise = PromiseClass;
+};
+
+// default to system level Promise, but allow it to be overwritten
+ExtendedPromise.setPromise(global.Promise);
+
+ExtendedPromise.defaultOnResolve = function (result) {
+  return ExtendedPromise.Promise.resolve(result);
+};
+
+ExtendedPromise.defaultOnReject = function (err) {
+  return ExtendedPromise.Promise.reject(err);
+};
+
+ExtendedPromise.prototype.resolve = function (arg) {
+  var self = this;
+
+  if (this._promise.isFulfilled) {
+    return this._promise;
+  }
+  this._setResolved();
+
+  ExtendedPromise.Promise.resolve().then(function () {
+    return self._onResolve(arg);
+  }).then(this._resolveFunction).catch(function (err) {
+    self._resetState();
+
+    self._promise.reject(err);
+  });
+
+  return this._promise;
+};
+
+ExtendedPromise.prototype.reject = function (arg) {
+  var self = this;
+
+  if (this._promise.isFulfilled) {
+    return this._promise;
+  }
+  this._setRejected();
+
+  ExtendedPromise.Promise.resolve().then(function () {
+    return self._onReject(arg);
+  }).then(function (result) {
+    self._setResolved();
+
+    self._resolveFunction(result);
+  }).catch(this._rejectFunction);
+
+  return this._promise;
+};
+
+ExtendedPromise.prototype._resetState = function () {
+  this._promise.isFulfilled = false;
+  this._promise.isResolved = false;
+  this._promise.isRejected = false;
+};
+
+ExtendedPromise.prototype._setResolved = function () {
+  this._promise.isFulfilled = true;
+  this._promise.isResolved = true;
+  this._promise.isRejected = false;
+};
+
+ExtendedPromise.prototype._setRejected = function () {
+  this._promise.isFulfilled = true;
+  this._promise.isResolved = false;
+  this._promise.isRejected = true;
+};
+
+module.exports = ExtendedPromise;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var setAttributes = require('./lib/set-attributes');
@@ -412,7 +531,7 @@ module.exports = function createFrame(options) {
   return iframe;
 };
 
-},{"./lib/assign":23,"./lib/default-attributes":24,"./lib/set-attributes":25}],23:[function(require,module,exports){
+},{"./lib/assign":24,"./lib/default-attributes":25,"./lib/set-attributes":26}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = function assign(target) {
@@ -429,7 +548,7 @@ module.exports = function assign(target) {
   return target;
 }
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -439,7 +558,7 @@ module.exports = {
   scrolling: 'no'
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 module.exports = function setAttributes(element, attributes) {
@@ -458,7 +577,7 @@ module.exports = function setAttributes(element, attributes) {
   }
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 function deferred(fn) {
@@ -481,7 +600,7 @@ function deferred(fn) {
 
 module.exports = deferred;
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 function once(fn) {
@@ -497,7 +616,7 @@ function once(fn) {
 
 module.exports = once;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 function promiseOrCallback(promise, callback) { // eslint-disable-line consistent-return
@@ -516,7 +635,7 @@ function promiseOrCallback(promise, callback) { // eslint-disable-line consisten
 
 module.exports = promiseOrCallback;
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 var deferred = require('./lib/deferred');
@@ -573,7 +692,7 @@ wrapPromise.wrapPrototype = function (target, options) {
 
 module.exports = wrapPromise;
 
-},{"./lib/deferred":26,"./lib/once":27,"./lib/promise-or-callback":28}],30:[function(require,module,exports){
+},{"./lib/deferred":27,"./lib/once":28,"./lib/promise-or-callback":29}],31:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -888,7 +1007,7 @@ ApplePay.prototype.teardown = function () {
 module.exports = wrapPromise.wrapPrototype(ApplePay);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lib/analytics":72,"../lib/braintree-error":77,"../lib/convert-methods-to-error":82,"../lib/methods":97,"../lib/promise":100,"./errors":31,"@braintree/wrap-promise":29}],31:[function(require,module,exports){
+},{"../lib/analytics":73,"../lib/braintree-error":78,"../lib/convert-methods-to-error":83,"../lib/methods":98,"../lib/promise":100,"./errors":32,"@braintree/wrap-promise":30}],32:[function(require,module,exports){
 'use strict';
 
 /**
@@ -947,7 +1066,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":77}],32:[function(require,module,exports){
+},{"../lib/braintree-error":78}],33:[function(require,module,exports){
 'use strict';
 
 /**
@@ -962,7 +1081,7 @@ var basicComponentVerification = require('../lib/basic-component-verification');
 var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var errors = require('./errors');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -1006,13 +1125,13 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.21.0`.
+   * @description The current version of the SDK, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"../lib/analytics":72,"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/create-assets-url":84,"../lib/create-deferred-client":86,"../lib/promise":100,"./apple-pay":30,"./errors":31,"@braintree/wrap-promise":29}],33:[function(require,module,exports){
+},{"../lib/analytics":73,"../lib/basic-component-verification":76,"../lib/braintree-error":78,"../lib/create-assets-url":85,"../lib/create-deferred-client":87,"../lib/promise":100,"./apple-pay":31,"./errors":32,"@braintree/wrap-promise":30}],34:[function(require,module,exports){
 'use strict';
 
 var isIe = require('@braintree/browser-detection/is-ie');
@@ -1023,7 +1142,7 @@ module.exports = {
   isIe9: isIe9
 };
 
-},{"@braintree/browser-detection/is-ie":10,"@braintree/browser-detection/is-ie9":13}],34:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ie":10,"@braintree/browser-detection/is-ie9":13}],35:[function(require,module,exports){
 'use strict';
 
 var BRAINTREE_VERSION = require('./constants').BRAINTREE_VERSION;
@@ -1491,14 +1610,14 @@ function getAuthorizationHeadersForGraphQL(configuration) {
 
 module.exports = Client;
 
-},{"../lib/add-metadata":71,"../lib/analytics":72,"../lib/assets":73,"../lib/assign":74,"../lib/braintree-error":77,"../lib/constants":81,"../lib/convert-methods-to-error":82,"../lib/convert-to-braintree-error":83,"../lib/create-authorization-data":85,"../lib/deferred":87,"../lib/is-verified-domain":95,"../lib/methods":97,"../lib/once":98,"../lib/promise":100,"./constants":35,"./errors":36,"./get-configuration":37,"./request":49,"./request/graphql":47,"@braintree/wrap-promise":29}],35:[function(require,module,exports){
+},{"../lib/add-metadata":72,"../lib/analytics":73,"../lib/assets":74,"../lib/assign":75,"../lib/braintree-error":78,"../lib/constants":82,"../lib/convert-methods-to-error":83,"../lib/convert-to-braintree-error":84,"../lib/create-authorization-data":86,"../lib/deferred":88,"../lib/is-verified-domain":96,"../lib/methods":98,"../lib/once":99,"../lib/promise":100,"./constants":36,"./errors":37,"./get-configuration":38,"./request":50,"./request/graphql":48,"@braintree/wrap-promise":30}],36:[function(require,module,exports){
 'use strict';
 
 module.exports = {
   BRAINTREE_VERSION: '2018-05-10'
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1585,7 +1704,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":77}],37:[function(require,module,exports){
+},{"../lib/braintree-error":78}],38:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1690,12 +1809,12 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lib/braintree-error":77,"../lib/constants":81,"../lib/is-date-string-before-or-on":93,"../lib/promise":100,"../lib/vendor/uuid":104,"./constants":35,"./errors":36,"./request":49,"./request/graphql":47,"@braintree/wrap-promise":29}],38:[function(require,module,exports){
+},{"../lib/braintree-error":78,"../lib/constants":82,"../lib/is-date-string-before-or-on":94,"../lib/promise":100,"../lib/vendor/uuid":104,"./constants":36,"./errors":37,"./request":50,"./request/graphql":48,"@braintree/wrap-promise":30}],39:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../lib/braintree-error');
 var Client = require('./client');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 var sharedErrors = require('../lib/errors');
@@ -1734,13 +1853,13 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.21.0`.
+   * @description The current version of the SDK, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"../lib/braintree-error":77,"../lib/errors":90,"../lib/promise":100,"./client":34,"@braintree/wrap-promise":29}],39:[function(require,module,exports){
+},{"../lib/braintree-error":78,"../lib/errors":91,"../lib/promise":100,"./client":35,"@braintree/wrap-promise":30}],40:[function(require,module,exports){
 'use strict';
 
 var querystring = require('../../lib/querystring');
@@ -1897,7 +2016,7 @@ module.exports = {
   request: request
 };
 
-},{"../../lib/assign":74,"../../lib/querystring":101,"./default-request":40,"./graphql/request":48,"./parse-body":52,"./prep-body":53,"./xhr":54}],40:[function(require,module,exports){
+},{"../../lib/assign":75,"../../lib/querystring":101,"./default-request":41,"./graphql/request":49,"./parse-body":53,"./prep-body":54,"./xhr":55}],41:[function(require,module,exports){
 'use strict';
 
 function DefaultRequest(options) {
@@ -1933,7 +2052,7 @@ DefaultRequest.prototype.determineStatus = function (status) {
 
 module.exports = DefaultRequest;
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1942,7 +2061,7 @@ module.exports = function getUserAgent() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 var errorResponseAdapter = require('./error');
@@ -2141,7 +2260,7 @@ function mapCardTypes(cardTypes, cardTypeTransformMap) {
 
 module.exports = configurationResponseAdapter;
 
-},{"../../../../lib/assign":74,"./error":44}],43:[function(require,module,exports){
+},{"../../../../lib/assign":75,"./error":45}],44:[function(require,module,exports){
 'use strict';
 
 var errorResponseAdapter = require('./error');
@@ -2236,7 +2355,7 @@ function adaptTokenizeCreditCardResponseBody(body) {
 
 module.exports = creditCardTokenizationResponseAdapter;
 
-},{"./error":44}],44:[function(require,module,exports){
+},{"./error":45}],45:[function(require,module,exports){
 'use strict';
 
 function errorResponseAdapter(responseBody) {
@@ -2325,7 +2444,7 @@ function getLegacyMessage(errors) {
 
 module.exports = errorResponseAdapter;
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 'use strict';
 
 var CONFIGURATION_QUERY = 'query ClientConfiguration { ' +
@@ -2415,7 +2534,7 @@ function configuration() {
 
 module.exports = configuration;
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 'use strict';
 
 var assign = require('../../../../lib/assign').assign;
@@ -2530,7 +2649,7 @@ function creditCardTokenization(body) {
 
 module.exports = creditCardTokenization;
 
-},{"../../../../lib/assign":74}],47:[function(require,module,exports){
+},{"../../../../lib/assign":75}],48:[function(require,module,exports){
 'use strict';
 
 var browserDetection = require('../../browser-detection');
@@ -2599,7 +2718,7 @@ function containsDisallowedlistedKeys(body) {
 
 module.exports = GraphQL;
 
-},{"../../browser-detection":33}],48:[function(require,module,exports){
+},{"../../browser-detection":34}],49:[function(require,module,exports){
 'use strict';
 
 var BRAINTREE_VERSION = require('../../constants').BRAINTREE_VERSION;
@@ -2748,7 +2867,7 @@ function formatBodyKeys(originalBody) {
 
 module.exports = GraphQLRequest;
 
-},{"../../../lib/assign":74,"../../constants":35,"./adapters/configuration":42,"./adapters/credit-card-tokenization":43,"./generators/configuration":45,"./generators/credit-card-tokenization":46}],49:[function(require,module,exports){
+},{"../../../lib/assign":75,"../../constants":36,"./adapters/configuration":43,"./adapters/credit-card-tokenization":44,"./generators/configuration":46,"./generators/credit-card-tokenization":47}],50:[function(require,module,exports){
 'use strict';
 
 var ajaxIsAvaliable;
@@ -2779,7 +2898,7 @@ module.exports = function (options, cb) {
   }
 };
 
-},{"../../lib/once":98,"./ajax-driver":39,"./get-user-agent":41,"./is-http":50,"./jsonp-driver":51}],50:[function(require,module,exports){
+},{"../../lib/once":99,"./ajax-driver":40,"./get-user-agent":42,"./is-http":51,"./jsonp-driver":52}],51:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2788,7 +2907,7 @@ module.exports = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2900,7 +3019,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/querystring":101,"../../lib/vendor/uuid":104}],52:[function(require,module,exports){
+},{"../../lib/querystring":101,"../../lib/vendor/uuid":104}],53:[function(require,module,exports){
 'use strict';
 
 module.exports = function (body) {
@@ -2911,7 +3030,7 @@ module.exports = function (body) {
   return body;
 };
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 module.exports = function (method, body) {
@@ -2926,7 +3045,7 @@ module.exports = function (method, body) {
   return body;
 };
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2942,7 +3061,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2977,7 +3096,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":77}],56:[function(require,module,exports){
+},{"../lib/braintree-error":78}],57:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -3262,7 +3381,7 @@ function applyDefaultsToPaymentMethodConfiguration(merchantSubmittedPaymentMetho
 
 module.exports = wrapPromise.wrapPrototype(GooglePayment);
 
-},{"../lib/analytics":72,"../lib/assign":74,"../lib/braintree-error":77,"../lib/convert-methods-to-error":82,"../lib/find":91,"../lib/generate-google-pay-configuration":92,"../lib/methods":97,"../lib/promise":100,"./errors":55,"@braintree/wrap-promise":29}],57:[function(require,module,exports){
+},{"../lib/analytics":73,"../lib/assign":75,"../lib/braintree-error":78,"../lib/convert-methods-to-error":83,"../lib/find":92,"../lib/generate-google-pay-configuration":93,"../lib/methods":98,"../lib/promise":100,"./errors":56,"@braintree/wrap-promise":30}],58:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web/google-payment
@@ -3277,7 +3396,7 @@ var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 /**
  * @static
@@ -3423,13 +3542,13 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.21.0`.
+   * @description The current version of the SDK, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/create-assets-url":84,"../lib/create-deferred-client":86,"../lib/promise":100,"./errors":55,"./google-payment":56,"@braintree/wrap-promise":29}],58:[function(require,module,exports){
+},{"../lib/basic-component-verification":76,"../lib/braintree-error":78,"../lib/create-assets-url":85,"../lib/create-deferred-client":87,"../lib/promise":100,"./errors":56,"./google-payment":57,"@braintree/wrap-promise":30}],59:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('../../lib/braintree-error');
@@ -3468,7 +3587,7 @@ function _isValid(attribute, value) {
 
 module.exports = attributeValidationError;
 
-},{"../../lib/braintree-error":77,"../shared/constants":66,"../shared/errors":67}],59:[function(require,module,exports){
+},{"../../lib/braintree-error":78,"../shared/constants":67,"../shared/errors":68}],60:[function(require,module,exports){
 'use strict';
 
 var constants = require('../shared/constants');
@@ -3482,7 +3601,7 @@ module.exports = function composeUrl(assetsUrl, componentId, isDebug) {
     componentId;
 };
 
-},{"../../lib/use-min":102,"../shared/constants":66}],60:[function(require,module,exports){
+},{"../../lib/use-min":102,"../shared/constants":67}],61:[function(require,module,exports){
 'use strict';
 
 var directions = require('../shared/constants').navigationDirections;
@@ -3605,7 +3724,7 @@ module.exports = {
   }
 };
 
-},{"../shared/browser-detection":65,"../shared/constants":66,"../shared/find-parent-tags":68,"../shared/focus-intercept":69}],61:[function(require,module,exports){
+},{"../shared/browser-detection":66,"../shared/constants":67,"../shared/find-parent-tags":69,"../shared/focus-intercept":70}],62:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -3643,7 +3762,7 @@ module.exports = function getStylesFromClass(cssClass) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../shared/constants":66}],62:[function(require,module,exports){
+},{"../shared/constants":67}],63:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4977,7 +5096,7 @@ HostedFields.prototype.getState = function () {
 module.exports = wrapPromise.wrapPrototype(HostedFields);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/analytics":72,"../../lib/assign":74,"../../lib/braintree-error":77,"../../lib/bus":80,"../../lib/constants":81,"../../lib/convert-methods-to-error":82,"../../lib/create-assets-url":84,"../../lib/create-deferred-client":86,"../../lib/destructor":88,"../../lib/errors":90,"../../lib/methods":97,"../../lib/promise":100,"../../lib/vendor/uuid":104,"../shared/browser-detection":65,"../shared/constants":66,"../shared/errors":67,"../shared/find-parent-tags":68,"../shared/focus-intercept":69,"../shared/get-card-types":70,"./attribute-validation-error":58,"./compose-url":59,"./focus-change":60,"./get-styles-from-class":61,"./inject-frame":63,"@braintree/class-list":20,"@braintree/event-emitter":21,"@braintree/iframer":22,"@braintree/wrap-promise":29}],63:[function(require,module,exports){
+},{"../../lib/analytics":73,"../../lib/assign":75,"../../lib/braintree-error":78,"../../lib/bus":81,"../../lib/constants":82,"../../lib/convert-methods-to-error":83,"../../lib/create-assets-url":85,"../../lib/create-deferred-client":87,"../../lib/destructor":89,"../../lib/errors":91,"../../lib/methods":98,"../../lib/promise":100,"../../lib/vendor/uuid":104,"../shared/browser-detection":66,"../shared/constants":67,"../shared/errors":68,"../shared/find-parent-tags":69,"../shared/focus-intercept":70,"../shared/get-card-types":71,"./attribute-validation-error":59,"./compose-url":60,"./focus-change":61,"./get-styles-from-class":62,"./inject-frame":64,"@braintree/class-list":20,"@braintree/event-emitter":21,"@braintree/iframer":23,"@braintree/wrap-promise":30}],64:[function(require,module,exports){
 'use strict';
 
 var focusIntercept = require('../shared/focus-intercept');
@@ -5002,7 +5121,7 @@ module.exports = function injectFrame(frame, container, focusHandler) {
   return [frame, clearboth];
 };
 
-},{"../shared/constants":66,"../shared/focus-intercept":69}],64:[function(require,module,exports){
+},{"../shared/constants":67,"../shared/focus-intercept":70}],65:[function(require,module,exports){
 'use strict';
 /** @module braintree-web/hosted-fields */
 
@@ -5013,7 +5132,7 @@ var supportsInputFormatting = require('restricted-input/supports-input-formattin
 var wrapPromise = require('@braintree/wrap-promise');
 var BraintreeError = require('../lib/braintree-error');
 var Promise = require('../lib/promise');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -5319,13 +5438,13 @@ module.exports = {
   supportsInputFormatting: supportsInputFormatting,
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.21.0`.
+   * @description The current version of the SDK, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/promise":100,"./external/hosted-fields":62,"./shared/errors":67,"@braintree/wrap-promise":29,"restricted-input/supports-input-formatting":141}],65:[function(require,module,exports){
+},{"../lib/basic-component-verification":76,"../lib/braintree-error":78,"../lib/promise":100,"./external/hosted-fields":63,"./shared/errors":68,"@braintree/wrap-promise":30,"restricted-input/supports-input-formatting":141}],66:[function(require,module,exports){
 'use strict';
 
 var isAndroid = require('@braintree/browser-detection/is-android');
@@ -5349,12 +5468,12 @@ module.exports = {
   hasSoftwareKeyboard: hasSoftwareKeyboard
 };
 
-},{"@braintree/browser-detection/is-android":5,"@braintree/browser-detection/is-chrome-os":6,"@braintree/browser-detection/is-edge":8,"@braintree/browser-detection/is-firefox":9,"@braintree/browser-detection/is-ie":10,"@braintree/browser-detection/is-ie10":11,"@braintree/browser-detection/is-ie9":13,"@braintree/browser-detection/is-ios":17,"@braintree/browser-detection/is-ios-webview":16}],66:[function(require,module,exports){
+},{"@braintree/browser-detection/is-android":5,"@braintree/browser-detection/is-chrome-os":6,"@braintree/browser-detection/is-edge":8,"@braintree/browser-detection/is-firefox":9,"@braintree/browser-detection/is-ie":10,"@braintree/browser-detection/is-ie10":11,"@braintree/browser-detection/is-ie9":13,"@braintree/browser-detection/is-ios":17,"@braintree/browser-detection/is-ios-webview":16}],67:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('../../lib/enumerate');
 var errors = require('./errors');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 var constants = {
   VERSION: VERSION,
@@ -5497,7 +5616,7 @@ constants.events = enumerate([
 
 module.exports = constants;
 
-},{"../../lib/enumerate":89,"./errors":67}],67:[function(require,module,exports){
+},{"../../lib/enumerate":90,"./errors":68}],68:[function(require,module,exports){
 'use strict';
 
 /**
@@ -5610,7 +5729,7 @@ module.exports = {
   }
 };
 
-},{"../../lib/braintree-error":77}],68:[function(require,module,exports){
+},{"../../lib/braintree-error":78}],69:[function(require,module,exports){
 'use strict';
 
 function findParentTags(element, tag) {
@@ -5630,7 +5749,7 @@ function findParentTags(element, tag) {
 
 module.exports = findParentTags;
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 'use strict';
 
 var browserDetection = require('./browser-detection');
@@ -5727,7 +5846,7 @@ var focusIntercept = {
 
 module.exports = focusIntercept;
 
-},{"./browser-detection":65,"./constants":66,"@braintree/class-list":20}],70:[function(require,module,exports){
+},{"./browser-detection":66,"./constants":67,"@braintree/class-list":20}],71:[function(require,module,exports){
 'use strict';
 
 var creditCardType = require('credit-card-type');
@@ -5748,7 +5867,7 @@ module.exports = function (number) {
   return results;
 };
 
-},{"credit-card-type":130}],71:[function(require,module,exports){
+},{"credit-card-type":130}],72:[function(require,module,exports){
 'use strict';
 
 var createAuthorizationData = require('./create-authorization-data');
@@ -5782,7 +5901,7 @@ function addMetadata(configuration, data) {
 
 module.exports = addMetadata;
 
-},{"./constants":81,"./create-authorization-data":85,"./json-clone":96}],72:[function(require,module,exports){
+},{"./constants":82,"./create-authorization-data":86,"./json-clone":97}],73:[function(require,module,exports){
 'use strict';
 
 var Promise = require('./promise');
@@ -5818,7 +5937,7 @@ module.exports = {
   sendEvent: sendAnalyticsEvent
 };
 
-},{"./add-metadata":71,"./constants":81,"./promise":100}],73:[function(require,module,exports){
+},{"./add-metadata":72,"./constants":82,"./promise":100}],74:[function(require,module,exports){
 'use strict';
 
 var loadScript = require('@braintree/asset-loader/load-script');
@@ -5827,7 +5946,7 @@ module.exports = {
   loadScript: loadScript
 };
 
-},{"@braintree/asset-loader/load-script":3}],74:[function(require,module,exports){
+},{"@braintree/asset-loader/load-script":3}],75:[function(require,module,exports){
 'use strict';
 
 var assignNormalized = typeof Object.assign === 'function' ? Object.assign : assignPolyfill;
@@ -5852,13 +5971,13 @@ module.exports = {
   _assign: assignPolyfill
 };
 
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
 var Promise = require('./promise');
 var sharedErrors = require('./errors');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 function basicComponentVerification(options) {
   var client, authorization, name;
@@ -5900,7 +6019,7 @@ module.exports = {
   verify: basicComponentVerification
 };
 
-},{"./braintree-error":77,"./errors":90,"./promise":100}],76:[function(require,module,exports){
+},{"./braintree-error":78,"./errors":91,"./promise":100}],77:[function(require,module,exports){
 'use strict';
 
 var once = require('./once');
@@ -5946,7 +6065,7 @@ module.exports = function (functions, cb) {
   }
 };
 
-},{"./once":98}],77:[function(require,module,exports){
+},{"./once":99}],78:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('./enumerate');
@@ -6031,7 +6150,7 @@ BraintreeError.findRootError = function (err) {
 
 module.exports = BraintreeError;
 
-},{"./enumerate":89}],78:[function(require,module,exports){
+},{"./enumerate":90}],79:[function(require,module,exports){
 'use strict';
 
 var isVerifiedDomain = require('../is-verified-domain');
@@ -6063,7 +6182,7 @@ module.exports = {
   checkOrigin: checkOrigin
 };
 
-},{"../is-verified-domain":95}],79:[function(require,module,exports){
+},{"../is-verified-domain":96}],80:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('../enumerate');
@@ -6072,7 +6191,7 @@ module.exports = enumerate([
   'CONFIGURATION_REQUEST'
 ], 'bus:');
 
-},{"../enumerate":89}],80:[function(require,module,exports){
+},{"../enumerate":90}],81:[function(require,module,exports){
 'use strict';
 
 var bus = require('framebus');
@@ -6203,10 +6322,10 @@ BraintreeBus.events = events;
 
 module.exports = BraintreeBus;
 
-},{"../braintree-error":77,"./check-origin":78,"./events":79,"framebus":137}],81:[function(require,module,exports){
+},{"../braintree-error":78,"./check-origin":79,"./events":80,"framebus":137}],82:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 var PLATFORM = 'web';
 
 var CLIENT_API_URLS = {
@@ -6241,7 +6360,7 @@ module.exports = {
   BRAINTREE_LIBRARY_VERSION: 'braintree/' + PLATFORM + '/' + VERSION
 };
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
@@ -6259,7 +6378,7 @@ module.exports = function (instance, methodNames) {
   });
 };
 
-},{"./braintree-error":77,"./errors":90}],83:[function(require,module,exports){
+},{"./braintree-error":78,"./errors":91}],84:[function(require,module,exports){
 'use strict';
 
 var BraintreeError = require('./braintree-error');
@@ -6281,7 +6400,7 @@ function convertToBraintreeError(originalErr, btErrorObject) {
 
 module.exports = convertToBraintreeError;
 
-},{"./braintree-error":77}],84:[function(require,module,exports){
+},{"./braintree-error":78}],85:[function(require,module,exports){
 'use strict';
 
 var ASSETS_URLS = require('./constants').ASSETS_URLS;
@@ -6296,7 +6415,7 @@ module.exports = {
   create: createAssetsUrl
 };
 
-},{"./constants":81}],85:[function(require,module,exports){
+},{"./constants":82}],86:[function(require,module,exports){
 'use strict';
 
 var atob = require('../lib/vendor/polyfill').atob;
@@ -6342,7 +6461,7 @@ function createAuthorizationData(authorization) {
 
 module.exports = createAuthorizationData;
 
-},{"../lib/constants":81,"../lib/vendor/polyfill":103}],86:[function(require,module,exports){
+},{"../lib/constants":82,"../lib/vendor/polyfill":103}],87:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -6351,7 +6470,7 @@ var Promise = require('./promise');
 var assets = require('./assets');
 var sharedErrors = require('./errors');
 
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 function createDeferredClient(options) {
   var promise = Promise.resolve();
@@ -6396,7 +6515,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./assets":73,"./braintree-error":77,"./errors":90,"./promise":100}],87:[function(require,module,exports){
+},{"./assets":74,"./braintree-error":78,"./errors":91,"./promise":100}],88:[function(require,module,exports){
 'use strict';
 
 module.exports = function (fn) {
@@ -6410,7 +6529,7 @@ module.exports = function (fn) {
   };
 };
 
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 'use strict';
 
 var batchExecuteFunctions = require('./batch-execute-functions');
@@ -6448,7 +6567,7 @@ Destructor.prototype.teardown = function (callback) {
 
 module.exports = Destructor;
 
-},{"./batch-execute-functions":76}],89:[function(require,module,exports){
+},{"./batch-execute-functions":77}],90:[function(require,module,exports){
 'use strict';
 
 function enumerate(values, prefix) {
@@ -6463,7 +6582,7 @@ function enumerate(values, prefix) {
 
 module.exports = enumerate;
 
-},{}],90:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6513,7 +6632,7 @@ module.exports = {
   }
 };
 
-},{"./braintree-error":77}],91:[function(require,module,exports){
+},{"./braintree-error":78}],92:[function(require,module,exports){
 'use strict';
 
 module.exports = function (array, key, value) {
@@ -6528,10 +6647,10 @@ module.exports = function (array, key, value) {
   return null;
 };
 
-},{}],92:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 'use strict';
 
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 var assign = require('./assign').assign;
 
 function generateTokenizationParameters(configuration, overrides) {
@@ -6646,7 +6765,7 @@ module.exports = function (configuration, googlePayVersion, googleMerchantId) {
   return data;
 };
 
-},{"./assign":74}],93:[function(require,module,exports){
+},{"./assign":75}],94:[function(require,module,exports){
 'use strict';
 
 function convertDateStringToDate(dateString) {
@@ -6661,7 +6780,7 @@ function isDateStringBeforeOrOn(firstDate, secondDate) {
 
 module.exports = isDateStringBeforeOrOn;
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -6676,7 +6795,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],95:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 'use strict';
 
 var parser;
@@ -6709,14 +6828,14 @@ function isVerifiedDomain(url) {
 
 module.exports = isVerifiedDomain;
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 'use strict';
 
 module.exports = function (value) {
   return JSON.parse(JSON.stringify(value));
 };
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 'use strict';
 
 module.exports = function (obj) {
@@ -6725,58 +6844,21 @@ module.exports = function (obj) {
   });
 };
 
-},{}],98:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],99:[function(require,module,exports){
-'use strict';
-
-var Promise = require('./promise');
-
-module.exports = function makePromisePlus() {
-  var resolveFunction, rejectFunction;
-
-  var promise = new Promise(function (resolve, reject) {
-    resolveFunction = resolve;
-    rejectFunction = reject;
-  });
-
-  promise.isFulfilled = false;
-  promise.isResolved = false;
-  promise.isRejected = false;
-
-  promise.resolve = function (arg) {
-    if (promise.isFulfilled) {
-      return;
-    }
-    promise.isFulfilled = true;
-    promise.isResolved = true;
-
-    resolveFunction(arg);
-  };
-
-  promise.reject = function (arg) {
-    if (promise.isFulfilled) {
-      return;
-    }
-    promise.isFulfilled = true;
-    promise.isRejected = true;
-
-    rejectFunction(arg);
-  };
-
-  return promise;
-};
-
-},{"./promise":100}],100:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],100:[function(require,module,exports){
 (function (global){
 'use strict';
 
 var Promise = global.Promise || require('promise-polyfill');
+var ExtendedPromise = require('@braintree/extended-promise');
+
+ExtendedPromise.setPromise(Promise);
 
 module.exports = Promise;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"promise-polyfill":139}],101:[function(require,module,exports){
+},{"@braintree/extended-promise":22,"promise-polyfill":139}],101:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -6993,7 +7075,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":77}],106:[function(require,module,exports){
+},{"../lib/braintree-error":78}],106:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web/paypal-checkout
@@ -7003,7 +7085,7 @@ module.exports = {
 var basicComponentVerification = require('../lib/basic-component-verification');
 var wrapPromise = require('@braintree/wrap-promise');
 var PayPalCheckout = require('./paypal-checkout');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 /**
  * @static
@@ -7058,13 +7140,13 @@ module.exports = {
   create: wrapPromise(create),
   isSupported: isSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.21.0`.
+   * @description The current version of the SDK, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"../lib/basic-component-verification":75,"./paypal-checkout":107,"@braintree/wrap-promise":29}],107:[function(require,module,exports){
+},{"../lib/basic-component-verification":76,"./paypal-checkout":107,"@braintree/wrap-promise":30}],107:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -7742,7 +7824,7 @@ PayPalCheckout.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(PayPalCheckout);
 
-},{"../lib/analytics":72,"../lib/braintree-error":77,"../lib/convert-methods-to-error":82,"../lib/convert-to-braintree-error":83,"../lib/create-assets-url":84,"../lib/create-deferred-client":86,"../lib/methods":97,"../lib/promise":100,"../paypal/shared/constants":108,"./errors":105,"@braintree/wrap-promise":29}],108:[function(require,module,exports){
+},{"../lib/analytics":73,"../lib/braintree-error":78,"../lib/convert-methods-to-error":83,"../lib/convert-to-braintree-error":84,"../lib/create-assets-url":85,"../lib/create-deferred-client":87,"../lib/methods":98,"../lib/promise":100,"../paypal/shared/constants":108,"./errors":105,"@braintree/wrap-promise":30}],108:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -7754,17 +7836,26 @@ module.exports = {
 };
 
 },{}],109:[function(require,module,exports){
+(function (global){
 'use strict';
 
 var assign = require('../../../lib/assign').assign;
 var analytics = require('../../../lib/analytics');
 var BraintreeError = require('../../../lib/braintree-error');
 var Promise = require('../../../lib/promise');
-var makePromisePlus = require('../../../lib/promise-plus');
+var ExtendedPromise = require('@braintree/extended-promise');
 var EventEmitter = require('@braintree/event-emitter');
 var errors = require('../../shared/errors');
+var iFramer = require('@braintree/iframer');
+var Bus = require('../../../lib/bus');
+var constants = require('../../shared/constants');
+var uuid = require('../../../lib/vendor/uuid');
+var events = require('../../shared/events');
+var useMin = require('../../../lib/use-min');
 
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
+var IFRAME_HEIGHT = 400;
+var IFRAME_WIDTH = 400;
 
 function BaseFramework(options) {
   EventEmitter.call(this);
@@ -7772,6 +7863,7 @@ function BaseFramework(options) {
   this._client = options.client;
   this._isDebug = this._client.getConfiguration().isDebug;
   this._assetsUrl = this._client.getConfiguration().gatewayConfiguration.assetsUrl + '/web/' + VERSION;
+  this._createOptions = options;
 }
 
 EventEmitter.createChild(BaseFramework);
@@ -7910,7 +8002,7 @@ BaseFramework.prototype.initializeChallengeWithLookupResponse = function (lookup
   // sets this in the case that initializeChallengeWithLookupResponse is
   // called as a standalone method from a server side lookup. In a normal
   // verifyCard flow, this promise will already exist
-  self._verifyCardPromisePlus = self._verifyCardPromisePlus || makePromisePlus();
+  self._verifyCardPromisePlus = self._verifyCardPromisePlus || new ExtendedPromise();
   self._handleLookupResponse(lookupResponse, options);
 
   return self._verifyCardPromisePlus.then(function (payload) {
@@ -7939,7 +8031,7 @@ BaseFramework.prototype._handleLookupResponse = function (lookupResponse, option
 
 BaseFramework.prototype._onLookupComplete = function (response) {
   this._lookupPaymentMethod = response.paymentMethod;
-  this._verifyCardPromisePlus = makePromisePlus();
+  this._verifyCardPromisePlus = new ExtendedPromise();
 
   return Promise.resolve(response);
 };
@@ -7968,6 +8060,22 @@ BaseFramework.prototype._formatLookupData = function (options) {
   return Promise.resolve(data);
 };
 
+BaseFramework.prototype._handleV1AuthResponse = function (data) {
+  var authResponse = JSON.parse(data.auth_response);
+
+  if (authResponse.success) {
+    this._verifyCardPromisePlus.resolve(this._formatAuthResponse(authResponse.paymentMethod, authResponse.threeDSecureInfo));
+  } else if (authResponse.threeDSecureInfo && authResponse.threeDSecureInfo.liabilityShiftPossible) {
+    this._verifyCardPromisePlus.resolve(this._formatAuthResponse(this._lookupPaymentMethod, authResponse.threeDSecureInfo));
+  } else {
+    this._verifyCardPromisePlus.reject(new BraintreeError({
+      type: BraintreeError.types.UNKNOWN,
+      code: 'UNKNOWN_AUTH_RESPONSE',
+      message: authResponse.error.message
+    }));
+  }
+};
+
 BaseFramework.prototype.cancelVerifyCard = function () {
   var response, threeDSecureInfo;
 
@@ -7988,16 +8096,81 @@ BaseFramework.prototype.cancelVerifyCard = function () {
   return Promise.resolve(response);
 };
 
+BaseFramework.prototype._setupV1Bus = function (options) {
+  var parentURL = global.location.href.split('#')[0];
+  var lookupResponse = options.lookupResponse;
+  var bus = new Bus({
+    channel: uuid(),
+    merchantUrl: global.location.href
+  });
+  var authenticationCompleteBaseUrl = this._assetsUrl + '/html/three-d-secure-authentication-complete-frame.html?channel=' + encodeURIComponent(bus.channel) + '&';
+
+  bus.on(Bus.events.CONFIGURATION_REQUEST, function (reply) {
+    reply({
+      acsUrl: lookupResponse.acsUrl,
+      pareq: lookupResponse.pareq,
+      termUrl: lookupResponse.termUrl + '&three_d_secure_version=' + VERSION + '&authentication_complete_base_url=' + encodeURIComponent(authenticationCompleteBaseUrl),
+      md: lookupResponse.md,
+      parentUrl: parentURL
+    });
+  });
+
+  bus.on(events.AUTHENTICATION_COMPLETE, options.handleAuthResponse);
+
+  return bus;
+};
+
+BaseFramework.prototype._setupV1Iframe = function (options) {
+  var url = this._assetsUrl + '/html/three-d-secure-bank-frame' + useMin(this._isDebug) + '.html?showLoader=' + options.showLoader;
+  var bankIframe = iFramer({
+    src: url,
+    height: IFRAME_HEIGHT,
+    width: IFRAME_WIDTH,
+    name: constants.LANDING_FRAME_NAME + '_' + this._v1Bus.channel,
+    title: '3D Secure Authorization Frame'
+  });
+
+  return bankIframe;
+};
+
+BaseFramework.prototype._setupV1Elements = function (options) {
+  this._v1Bus = this._setupV1Bus(options);
+  this._v1Iframe = this._setupV1Iframe(options);
+};
+
+BaseFramework.prototype._teardownV1Elements = function () {
+  if (this._v1Bus) {
+    this._v1Bus.teardown();
+    this._v1Bus = null;
+  }
+
+  if (this._v1Iframe && this._v1Iframe.parentNode) {
+    this._v1Iframe.parentNode.removeChild(this._v1Iframe);
+    this._v1Iframe = null;
+  }
+
+  if (this._onV1Keyup) {
+    document.removeEventListener('keyup', this._onV1Keyup);
+    this._onV1Keyup = null;
+  }
+};
+
 BaseFramework.prototype.teardown = function () {
   analytics.sendEvent(this._client, 'three-d-secure.teardown-completed');
+
+  this._teardownV1Elements();
 
   return Promise.resolve();
 };
 
 module.exports = BaseFramework;
 
-},{"../../../lib/analytics":72,"../../../lib/assign":74,"../../../lib/braintree-error":77,"../../../lib/promise":100,"../../../lib/promise-plus":99,"../../shared/errors":119,"@braintree/event-emitter":21}],110:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../../../lib/analytics":73,"../../../lib/assign":75,"../../../lib/braintree-error":78,"../../../lib/bus":81,"../../../lib/promise":100,"../../../lib/use-min":102,"../../../lib/vendor/uuid":104,"../../shared/constants":118,"../../shared/errors":119,"../../shared/events":120,"@braintree/event-emitter":21,"@braintree/extended-promise":22,"@braintree/iframer":23}],110:[function(require,module,exports){
 'use strict';
+// NEXT_MAJOR_VERSION drop support for Bootstrap framework,
+// recomend using inline frame version and putting it in
+// the merchant's own bootstrap modal
 
 var SongbirdFramework = require('./songbird');
 
@@ -8009,12 +8182,37 @@ Bootstrap3ModalFramework.prototype = Object.create(SongbirdFramework.prototype, 
   constructor: SongbirdFramework
 });
 
+Bootstrap3ModalFramework.prototype._createV1IframeModalElement = function (iframe) {
+  var modal = document.createElement('div');
+
+  modal.innerHTML = '<div class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="CCAFrameModal-label" aria-hidden="true" style="display: block;">' +
+    '<div class="modal-dialog" style="width:440px;z-index:999999;">' +
+      '<div class="modal-content">' +
+        '<div class="modal-body" data-braintree-v1-fallback-iframe-container>' +
+          '<button type="button" data-braintree-v1-fallback-close-button class="close" data-dismiss="modal" aria-hidden="true">×</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div data-braintree-v1-fallback-backdrop style="' +
+      'position: fixed;' +
+      'cursor: pointer;' +
+      'z-index: 999998;' +
+      'top: 0;' +
+      'left: 0;' +
+      'width: 100%;' +
+      'height: 100%;' +
+    '"></div>' +
+  '</div>';
+
+  modal.querySelector('[data-braintree-v1-fallback-iframe-container]').appendChild(iframe);
+
+  return modal;
+};
+
 Bootstrap3ModalFramework.prototype._createCardinalConfigurationOptions = function (setupOptions) {
   var options = SongbirdFramework.prototype._createCardinalConfigurationOptions.call(this, setupOptions);
 
-  options.payment = {
-    framework: 'bootstrap3'
-  };
+  options.payment.framework = 'bootstrap3';
 
   return options;
 };
@@ -8033,6 +8231,70 @@ function CardinalModalFramework(options) {
 CardinalModalFramework.prototype = Object.create(SongbirdFramework.prototype, {
   constructor: SongbirdFramework
 });
+
+CardinalModalFramework.prototype._createV1IframeModalElement = function (iframe) {
+  var modal = document.createElement('div');
+  var addCloseButton = Boolean(this._createOptions &&
+    this._createOptions.cardinalSDKConfig &&
+    this._createOptions.cardinalSDKConfig.payment &&
+    this._createOptions.cardinalSDKConfig.payment.displayExitButton);
+
+  modal.innerHTML = '<div style="' +
+    'position: fixed;' +
+    'z-index: 999999;' +
+    'top: 50%;' +
+    'left: 50%;' +
+    'padding: 24px 20px;' +
+    'transform: translate(-50%,-50%);' +
+    'border-radius: 2px;' +
+    'background: #fff;' +
+    'max-width: 100%;' +
+    'overflow: auto;' +
+  '">' +
+    '<div>' +
+      '<button data-braintree-v1-fallback-close-button ' +
+        'style="' +
+          'font-family: Helvetica,Arial,sans-serif;' +
+          'font-size: 25px;' +
+          'line-height: 12px;' +
+          'position: absolute;' +
+          'top: 2px;' +
+          'right: 0px;' +
+          'cursor: pointer;' +
+          'color: #999;' +
+          'border: 0;' +
+          'outline: none;' +
+          'background: none;' +
+        '" ' +
+        'onMouseOver="this.style.color=\'#000\'" ' +
+        'onMouseOut="this.style.color=\'#999\'"' +
+      '>×</button>' +
+    '</div>' +
+    // iframe container
+    '<div data-braintree-v1-fallback-iframe-container style="' +
+      'height: 400px;' +
+    '"></div>' +
+  '</div>' +
+  // modal backdrop
+  '<div data-braintree-v1-fallback-backdrop style="' +
+    'position: fixed;' +
+    'z-index: 999998;' +
+    'cursor: pointer;' +
+    'top: 0;' +
+    'left: 0;' +
+    'width: 100%;' +
+    'height: 100%;' +
+    'transition: opacity 1ms ease;' +
+    'background: rgba(0,0,0,.6);' +
+  '"></div>';
+
+  if (!addCloseButton) {
+    modal.querySelector('[data-braintree-v1-fallback-close-button]').style.display = 'none';
+  }
+  modal.querySelector('[data-braintree-v1-fallback-iframe-container]').appendChild(iframe);
+
+  return modal;
+};
 
 module.exports = CardinalModalFramework;
 
@@ -8082,11 +8344,17 @@ InlineIframeFramework.prototype.setUpEventListeners = function (reply) {
 InlineIframeFramework.prototype._createCardinalConfigurationOptions = function (setupOptions) {
   var options = SongbirdFramework.prototype._createCardinalConfigurationOptions.call(this, setupOptions);
 
-  options.payment = {
-    framework: 'inline'
-  };
+  options.payment.framework = 'inline';
 
   return options;
+};
+
+InlineIframeFramework.prototype._addV1IframeToPage = function () {
+  this._emit(InlineIframeFramework.events.AUTHENTICATION_IFRAME_AVAILABLE, {
+    element: this._v1Modal
+  }, function () {
+    // NOOP
+  });
 };
 
 InlineIframeFramework.prototype._setupFrameworkSpecificListeners = function () {
@@ -8128,24 +8396,11 @@ InlineIframeFramework.prototype._onInlineSetup = function (htmlTemplate, details
 
 module.exports = InlineIframeFramework;
 
-},{"../../../lib/braintree-error":77,"../../../lib/enumerate":89,"../../shared/errors":119,"./songbird":115}],114:[function(require,module,exports){
-(function (global){
+},{"../../../lib/braintree-error":78,"../../../lib/enumerate":90,"../../shared/errors":119,"./songbird":115}],114:[function(require,module,exports){
 'use strict';
 
 var BaseFramework = require('./base');
-var BraintreeError = require('../../../lib/braintree-error');
-var iFramer = require('@braintree/iframer');
 var deferred = require('../../../lib/deferred');
-var Bus = require('../../../lib/bus');
-var uuid = require('../../../lib/vendor/uuid');
-var constants = require('../../shared/constants');
-var useMin = require('../../../lib/use-min');
-
-var events = require('../../shared/events');
-
-var VERSION = "3.55.0";
-var IFRAME_HEIGHT = 400;
-var IFRAME_WIDTH = 400;
 
 function LegacyFramework(options) {
   BaseFramework.call(this, options);
@@ -8157,18 +8412,6 @@ LegacyFramework.prototype = Object.create(BaseFramework.prototype, {
 
 LegacyFramework.prototype.setUpEventListeners = function () {
   // noop
-};
-
-LegacyFramework.prototype.teardown = function () {
-  if (this._bus) {
-    this._bus.teardown();
-  }
-
-  if (this._bankIframe && this._bankIframe.parentNode) {
-    this._bankIframe.parentNode.removeChild(this._bankIframe);
-  }
-
-  return BaseFramework.prototype.teardown.call(this);
 };
 
 LegacyFramework.prototype.transformV1CustomerBillingAddress = function (customer) {
@@ -8187,74 +8430,27 @@ LegacyFramework.prototype.transformV1CustomerBillingAddress = function (customer
 };
 
 LegacyFramework.prototype._createIframe = function (options) {
-  var url;
-  var parentURL = global.location.href;
-  var response = options.response;
+  var self = this;
 
-  if (parentURL.indexOf('#') > -1) {
-    parentURL = parentURL.split('#')[0];
-  }
-
-  this._setupBusForIframe(parentURL, response, options);
-
-  url = this._assetsUrl + '/html/three-d-secure-bank-frame' + useMin(this._isDebug) + '.html?showLoader=' + options.showLoader;
-
-  this._bankIframe = iFramer({
-    src: url,
-    height: IFRAME_HEIGHT,
-    width: IFRAME_WIDTH,
-    name: constants.LANDING_FRAME_NAME + '_' + this._bus.channel,
-    title: '3D Secure Authorization Frame'
+  this._setupV1Elements({
+    lookupResponse: options.lookupResponse,
+    showLoader: options.showLoader,
+    handleAuthResponse: function (data) {
+      self._handleAuthResponse(data, options);
+    }
   });
 
-  return this._bankIframe;
-};
-
-LegacyFramework.prototype._setupBusForIframe = function (parentURL, response, options) {
-  var authenticationCompleteBaseUrl;
-
-  this._bus = new Bus({
-    channel: uuid(),
-    merchantUrl: global.location.href
-  });
-
-  authenticationCompleteBaseUrl = this._assetsUrl + '/html/three-d-secure-authentication-complete-frame.html?channel=' + encodeURIComponent(this._bus.channel) + '&';
-
-  this._bus.on(Bus.events.CONFIGURATION_REQUEST, function (reply) {
-    reply({
-      acsUrl: response.acsUrl,
-      pareq: response.pareq,
-      termUrl: response.termUrl + '&three_d_secure_version=' + VERSION + '&authentication_complete_base_url=' + encodeURIComponent(authenticationCompleteBaseUrl),
-      md: response.md,
-      parentUrl: parentURL
-    });
-  });
-
-  this._bus.on(events.AUTHENTICATION_COMPLETE, function (data) {
-    this._handleAuthResponse(data, options);
-  }.bind(this));
+  return this._v1Iframe;
 };
 
 LegacyFramework.prototype._handleAuthResponse = function (data, options) {
-  var authResponse = JSON.parse(data.auth_response);
-
-  this._bus.teardown();
+  this._v1Bus.teardown();
 
   options.removeFrame();
 
   // This also has to be in a setTimeout so it executes after the `removeFrame`.
   deferred(function () {
-    if (authResponse.success) {
-      this._verifyCardPromisePlus.resolve(this._formatAuthResponse(authResponse.paymentMethod, authResponse.threeDSecureInfo));
-    } else if (authResponse.threeDSecureInfo && authResponse.threeDSecureInfo.liabilityShiftPossible) {
-      this._verifyCardPromisePlus.resolve(this._formatAuthResponse(this._lookupPaymentMethod, authResponse.threeDSecureInfo));
-    } else {
-      this._verifyCardPromisePlus.reject(new BraintreeError({
-        type: BraintreeError.types.UNKNOWN,
-        code: 'UNKNOWN_AUTH_RESPONSE',
-        message: authResponse.error.message
-      }));
-    }
+    this._handleV1AuthResponse(data);
   }.bind(this))();
 };
 
@@ -8295,15 +8491,14 @@ LegacyFramework.prototype._formatLookupData = function (options) {
 LegacyFramework.prototype._presentChallenge = function (lookupResponse, options) {
   options.addFrame(null, this._createIframe({
     showLoader: options.showLoader,
-    response: lookupResponse.lookup,
+    lookupResponse: lookupResponse.lookup,
     removeFrame: options.removeFrame
   }));
 };
 
 module.exports = LegacyFramework;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../../lib/braintree-error":77,"../../../lib/bus":80,"../../../lib/deferred":87,"../../../lib/use-min":102,"../../../lib/vendor/uuid":104,"../../shared/constants":118,"../../shared/events":120,"./base":109,"@braintree/iframer":22}],115:[function(require,module,exports){
+},{"../../../lib/deferred":88,"./base":109}],115:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -8318,23 +8513,22 @@ var errors = require('../../shared/errors');
 var enumerate = require('../../../lib/enumerate');
 var constants = require('../../shared/constants');
 var Promise = require('../../../lib/promise');
-var makePromisePlus = require('../../../lib/promise-plus');
+var ExtendedPromise = require('@braintree/extended-promise');
 
 var INTEGRATION_TIMEOUT_MS = require('../../../lib/constants').INTEGRATION_TIMEOUT_MS;
 var PLATFORM = require('../../../lib/constants').PLATFORM;
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 function SongbirdFramework(options) {
   BaseFramework.call(this, options);
 
+  this._useV1Fallback = false;
   this._clientMetadata = {
     requestedThreeDSecureVersion: '2',
     sdkVersion: PLATFORM + '/' + VERSION
   };
-  this._getDfReferenceIdPromisePlus = makePromisePlus();
-  this.setupSongbird({
-    loggingEnabled: options.loggingEnabled
-  });
+  this._getDfReferenceIdPromisePlus = new ExtendedPromise();
+  this.setupSongbird(options);
   this._cardinalEvents = [];
 }
 
@@ -8378,6 +8572,12 @@ SongbirdFramework.prototype.initializeChallengeWithLookupResponse = function (lo
   }.bind(this));
 };
 
+SongbirdFramework.prototype._initiateV1Fallback = function (errorType) {
+  this._useV1Fallback = true;
+  analytics.sendEvent(this._client, 'three-d-secure.v1-fallback.' + errorType);
+  this._songbirdPromise.resolve();
+};
+
 SongbirdFramework.prototype._triggerCardinalBinProcess = function (bin) {
   var self = this;
   var issuerStartTime = Date.now();
@@ -8418,6 +8618,80 @@ SongbirdFramework.prototype.transformShippingAddress = function (additionalInfor
   return additionalInformation;
 };
 
+SongbirdFramework.prototype._createV1IframeModalElement = function (iframe) {
+  var modal = document.createElement('div');
+
+  modal.innerHTML = '<div data-braintree-v1-fallback-iframe-container="true" style="' +
+    'height: 400px;' +
+  '"></div>';
+  modal.querySelector('[data-braintree-v1-fallback-iframe-container="true"]').appendChild(iframe);
+
+  return modal;
+};
+
+SongbirdFramework.prototype._createV1IframeModal = function (iframe) {
+  var modal = this._createV1IframeModalElement(iframe);
+  var btn = modal.querySelector('[data-braintree-v1-fallback-close-button]');
+  var backdrop = modal.querySelector('[data-braintree-v1-fallback-backdrop]');
+  var self = this;
+
+  function closeHandler() {
+    modal.parentNode.removeChild(modal);
+    self.cancelVerifyCard(errors.THREEDS_CARDINAL_SDK_CANCELED);
+    document.removeEventListener('keyup', self._onV1Keyup);
+    self._onV1Keyup = null;
+  }
+
+  this._onV1Keyup = function (e) {
+    if (e.key !== 'Escape') {
+      return;
+    }
+
+    if (!modal.parentNode) {
+      // modal not on page
+      return;
+    }
+
+    closeHandler();
+  };
+
+  if (btn) {
+    btn.addEventListener('click', closeHandler);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', closeHandler);
+  }
+
+  document.addEventListener('keyup', this._onV1Keyup);
+
+  return modal;
+};
+
+SongbirdFramework.prototype._addV1IframeToPage = function () {
+  document.body.appendChild(this._v1Modal);
+};
+
+SongbirdFramework.prototype._handleAuthResponseFromV1Fallback = function (data) {
+  this._teardownV1Elements();
+  this._v1Modal.parentNode.removeChild(this._v1Modal);
+  this._handleV1AuthResponse(data);
+};
+
+SongbirdFramework.prototype._presentChallengeWithV1Fallback = function (lookupResponse) {
+  var self = this;
+
+  this._setupV1Elements({
+    lookupResponse: lookupResponse,
+    showLoader: true,
+    handleAuthResponse: function (data) {
+      self._handleAuthResponseFromV1Fallback(data);
+    }
+  });
+  this._v1Modal = this._createV1IframeModal(this._v1Iframe);
+  this._addV1IframeToPage();
+};
+
 SongbirdFramework.prototype.setupSongbird = function (setupOptions) {
   var self = this;
   var startTime = Date.now();
@@ -8428,51 +8702,64 @@ SongbirdFramework.prototype.setupSongbird = function (setupOptions) {
 
   setupOptions = setupOptions || {};
 
-  this._songbirdPromise = new Promise(function (resolve, reject) {
-    self._loadCardinalScript(reject, setupOptions).then(function () {
-      return self._configureCardinalSdk({
-        resolveSongbird: resolve,
-        setupOptions: setupOptions,
-        setupStartTime: startTime
-      });
-    }).catch(function (err) {
-      var error = convertToBraintreeError(err, {
-        type: errors.THREEDS_CARDINAL_SDK_SETUP_FAILED.type,
-        code: errors.THREEDS_CARDINAL_SDK_SETUP_FAILED.code,
-        message: errors.THREEDS_CARDINAL_SDK_SETUP_FAILED.message
-      });
+  this._songbirdPromise = new ExtendedPromise();
+  this._v2SetupFailureReason = 'reason-unknown';
 
-      self._getDfReferenceIdPromisePlus.reject(error);
+  self._loadCardinalScript(setupOptions).then(function () {
+    if (!global.Cardinal) {
+      self._v2SetupFailureReason = 'cardinal-global-unavailable';
 
-      global.clearTimeout(self._songbirdSetupTimeoutReference);
-      analytics.sendEvent(self._client, 'three-d-secure.cardinal-sdk.init.setup-failed');
-      reject(error);
+      return Promise.reject(new BraintreeError(errors.THREEDS_CARDINAL_SDK_SETUP_FAILED));
+    }
+
+    return self._configureCardinalSdk({
+      setupOptions: setupOptions,
+      setupStartTime: startTime
     });
+  }).catch(function (err) {
+    var error = convertToBraintreeError(err, {
+      type: errors.THREEDS_CARDINAL_SDK_SETUP_FAILED.type,
+      code: errors.THREEDS_CARDINAL_SDK_SETUP_FAILED.code,
+      message: errors.THREEDS_CARDINAL_SDK_SETUP_FAILED.message
+    });
+
+    self._getDfReferenceIdPromisePlus.reject(error);
+
+    global.clearTimeout(self._songbirdSetupTimeoutReference);
+    analytics.sendEvent(self._client, 'three-d-secure.cardinal-sdk.init.setup-failed');
+    self._initiateV1Fallback('cardinal-sdk-setup-failed.' + self._v2SetupFailureReason);
   });
 
   return this._songbirdPromise;
 };
 
 SongbirdFramework.prototype._configureCardinalSdk = function (config) {
-  var jwt = this._client.getConfiguration().gatewayConfiguration.threeDSecure.cardinalAuthenticationJWT;
-  var resolveSongbird = config.resolveSongbird;
-  var setupOptions = config.setupOptions;
-  var setupStartTime = config.setupStartTime;
-  var cardinalConfiguration = this._createCardinalConfigurationOptions(setupOptions);
+  var self = this;
 
-  this.setCardinalListener('payments.setupComplete', this._createPaymentsSetupCompleteCallback(resolveSongbird));
+  return Promise.resolve().then(function () {
+    var jwt = self._client.getConfiguration().gatewayConfiguration.threeDSecure.cardinalAuthenticationJWT;
+    var setupOptions = config.setupOptions;
+    var setupStartTime = config.setupStartTime;
+    var cardinalConfiguration = self._createCardinalConfigurationOptions(setupOptions);
 
-  this._setupFrameworkSpecificListeners();
+    self.setCardinalListener('payments.setupComplete', self._createPaymentsSetupCompleteCallback());
 
-  global.Cardinal.configure(cardinalConfiguration);
+    self._setupFrameworkSpecificListeners();
 
-  global.Cardinal.setup('init', {
-    jwt: jwt
+    global.Cardinal.configure(cardinalConfiguration);
+
+    global.Cardinal.setup('init', {
+      jwt: jwt
+    });
+
+    self._clientMetadata.cardinalDeviceDataCollectionTimeElapsed = Date.now() - setupStartTime;
+
+    self.setCardinalListener('payments.validated', self._createPaymentsValidatedCallback());
+  }).catch(function (err) {
+    self._v2SetupFailureReason = 'cardinal-configuration-threw-error';
+
+    return Promise.reject(err);
   });
-
-  this._clientMetadata.cardinalDeviceDataCollectionTimeElapsed = Date.now() - setupStartTime;
-
-  this.setCardinalListener('payments.validated', this._createPaymentsValidatedCallback());
 };
 
 SongbirdFramework.prototype.setCardinalListener = function (eventName, cb) {
@@ -8485,25 +8772,35 @@ SongbirdFramework.prototype._setupFrameworkSpecificListeners = function () {
 };
 
 SongbirdFramework.prototype._createCardinalConfigurationOptions = function (setupOptions) {
-  var cardinalConfiguration = {};
+  var cardinalConfiguration = setupOptions.cardinalSDKConfig || {};
+  var paymentSettings = cardinalConfiguration.payment || {};
 
-  if (setupOptions.loggingEnabled) {
+  if (!cardinalConfiguration.logging && setupOptions.loggingEnabled) {
     cardinalConfiguration.logging = {
       level: 'verbose'
     };
   }
 
+  cardinalConfiguration.payment = {};
+
+  if (paymentSettings.hasOwnProperty('displayLoading')) {
+    cardinalConfiguration.payment.displayLoading = paymentSettings.displayLoading;
+  }
+  if (paymentSettings.hasOwnProperty('displayExitButton')) {
+    cardinalConfiguration.payment.displayExitButton = paymentSettings.displayExitButton;
+  }
+
   return cardinalConfiguration;
 };
 
-SongbirdFramework.prototype._loadCardinalScript = function (rejectSongbird, setupOptions) {
+SongbirdFramework.prototype._loadCardinalScript = function (setupOptions) {
   var self = this;
   var scriptSource = constants.CARDINAL_SCRIPT_SOURCE.sandbox;
   var isProduction = this._client.getConfiguration().gatewayConfiguration.environment === 'production';
 
   this._songbirdSetupTimeoutReference = global.setTimeout(function () {
     analytics.sendEvent(self._client, 'three-d-secure.cardinal-sdk.init.setup-timeout');
-    rejectSongbird(new BraintreeError(errors.THREEDS_CARDINAL_SDK_SETUP_TIMEDOUT));
+    self._initiateV1Fallback('cardinal-sdk-setup-timeout');
   }, setupOptions.timeout || INTEGRATION_TIMEOUT_MS);
 
   if (isProduction) {
@@ -8511,11 +8808,13 @@ SongbirdFramework.prototype._loadCardinalScript = function (rejectSongbird, setu
   }
 
   return assets.loadScript({src: scriptSource}).catch(function (err) {
+    self._v2SetupFailureReason = 'songbird-js-failed-to-load';
+
     return Promise.reject(convertToBraintreeError(err, errors.THREEDS_CARDINAL_SDK_SCRIPT_LOAD_FAILED));
   });
 };
 
-SongbirdFramework.prototype._createPaymentsSetupCompleteCallback = function (resolveSongbirdSetup) {
+SongbirdFramework.prototype._createPaymentsSetupCompleteCallback = function () {
   var self = this;
 
   return function (data) {
@@ -8524,7 +8823,7 @@ SongbirdFramework.prototype._createPaymentsSetupCompleteCallback = function (res
     global.clearTimeout(self._songbirdSetupTimeoutReference);
     analytics.sendEvent(self._client, 'three-d-secure.cardinal-sdk.init.setup-completed');
 
-    resolveSongbirdSetup();
+    self._songbirdPromise.resolve();
   };
 };
 
@@ -8587,6 +8886,12 @@ SongbirdFramework.prototype._createPaymentsValidatedCallback = function () {
 
     analytics.sendEvent(self._client, 'three-d-secure.verification-flow.cardinal-sdk.action-code.' + data.ActionCode.toLowerCase());
 
+    if (!self._verifyCardPromisePlus) {
+      self._initiateV1Fallback('cardinal-sdk-setup-error.number-' + data.ErrorNumber);
+
+      return;
+    }
+
     switch (data.ActionCode) {
       // Handle these scenarios based on liability shift information in the response.
       case 'SUCCESS':
@@ -8598,6 +8903,8 @@ SongbirdFramework.prototype._createPaymentsValidatedCallback = function () {
         break;
 
       case 'ERROR':
+        analytics.sendEvent(self._client, 'three-d-secure.verification-flow.cardinal-sdk-error.' + data.ErrorNumber);
+
         switch (data.ErrorNumber) {
           case 10001: // Cardinal Docs: Timeout when sending an /Init message
           case 10002: // Cardinal Docs: Timeout when sending an /Start message
@@ -8634,11 +8941,7 @@ SongbirdFramework.prototype._createPaymentsValidatedCallback = function () {
           }
         };
 
-        if (self._verifyCardPromisePlus) {
-          self._verifyCardPromisePlus.reject(formattedError);
-        } else {
-          self._verifyCardBlockingError = formattedError;
-        }
+        self._verifyCardPromisePlus.reject(formattedError);
         break;
 
       default:
@@ -8647,10 +8950,6 @@ SongbirdFramework.prototype._createPaymentsValidatedCallback = function () {
 };
 
 SongbirdFramework.prototype._checkForVerifyCardError = function (options, privateOptions) {
-  if (this._verifyCardBlockingError) {
-    return this._verifyCardBlockingError;
-  }
-
   return BaseFramework.prototype._checkForVerifyCardError.call(this, options, privateOptions);
 };
 
@@ -8712,6 +9011,12 @@ SongbirdFramework.prototype._onLookupComplete = function (lookupResponse, option
 };
 
 SongbirdFramework.prototype._presentChallenge = function (lookupResponse) {
+  if (this._useV1Fallback) {
+    this._presentChallengeWithV1Fallback(lookupResponse.lookup);
+
+    return;
+  }
+
   // set up listener for ref id to call out to bt before calling verify callback
   global.Cardinal.continue('cca',
     {
@@ -8744,12 +9049,14 @@ SongbirdFramework.prototype._formatLookupData = function (options) {
   });
 };
 
-SongbirdFramework.prototype.cancelVerifyCard = function () {
+SongbirdFramework.prototype.cancelVerifyCard = function (verifyCardError) {
   var self = this;
 
   return BaseFramework.prototype.cancelVerifyCard.call(this).then(function (response) {
     if (self._verifyCardPromisePlus) {
-      self._verifyCardPromisePlus.reject(new BraintreeError(errors.THREEDS_VERIFY_CARD_CANCELED_BY_MERCHANT));
+      verifyCardError = verifyCardError || new BraintreeError(errors.THREEDS_VERIFY_CARD_CANCELED_BY_MERCHANT);
+
+      self._verifyCardPromisePlus.reject(verifyCardError);
     }
 
     return response;
@@ -8784,7 +9091,7 @@ function extractAddressData(source, target, prefix) {
 module.exports = SongbirdFramework;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../../lib/analytics":72,"../../../lib/assets":73,"../../../lib/assign":74,"../../../lib/braintree-error":77,"../../../lib/constants":81,"../../../lib/convert-to-braintree-error":83,"../../../lib/deferred":87,"../../../lib/enumerate":89,"../../../lib/promise":100,"../../../lib/promise-plus":99,"../../shared/constants":118,"../../shared/errors":119,"./base":109}],116:[function(require,module,exports){
+},{"../../../lib/analytics":73,"../../../lib/assets":74,"../../../lib/assign":75,"../../../lib/braintree-error":78,"../../../lib/constants":82,"../../../lib/convert-to-braintree-error":84,"../../../lib/deferred":88,"../../../lib/enumerate":90,"../../../lib/promise":100,"../../shared/constants":118,"../../shared/errors":119,"./base":109,"@braintree/extended-promise":22}],116:[function(require,module,exports){
 'use strict';
 
 var wrapPromise = require('@braintree/wrap-promise');
@@ -8812,7 +9119,7 @@ var FRAMEWORKS = require('./frameworks');
 /**
  * @deprecated
  * @typedef {object} ThreeDSecure~verifyCardCustomerObject
- * @property {string} [customer.mobilePhoneNumber] The mobile phone number used for verification. Only numbers; remove dashes, paranthesis and other characters.
+ * @property {string} [customer.mobilePhoneNumber] The mobile phone number used for verification. Only numbers; remove dashes, parenthesis and other characters.
  * @property {string} [customer.email] The email used for verification.
  * @property {string} [customer.shippingMethod] The 2-digit string indicating the shipping method chosen for the transaction.
  * @property {string} [customer.billingAddress.firstName] The first name associated with the address.
@@ -8823,7 +9130,7 @@ var FRAMEWORKS = require('./frameworks');
  * @property {string} [customer.billingAddress.region] The 2 letter code for US states, and the equivalent for other countries.
  * @property {string} [customer.billingAddress.postalCode] The zip code or equivalent for countries that have them.
  * @property {string} [customer.billingAddress.countryCodeAlpha2] The 2 character country code.
- * @property {string} [customer.billingAddress.phoneNumber] The phone number associated with the address. Only numbers; remove dashes, paranthesis and other characters.
+ * @property {string} [customer.billingAddress.phoneNumber] The phone number associated with the address. Only numbers; remove dashes, parenthesis and other characters.
  * @description **Deprecated** Optional customer information to be passed to 3DS 1.0 for verification.
  */
 
@@ -8871,7 +9178,7 @@ var FRAMEWORKS = require('./frameworks');
  * @typedef {object} ThreeDSecure~billingAddress
  * @property {string} [givenName] The first name associated with the billing address.
  * @property {string} [surname] The last name associated with the billing address.
- * @property {string} [phoneNumber] The phone number associated with the billing address. Only numbers; remove dashes, paranthesis and other characters.
+ * @property {string} [phoneNumber] The phone number associated with the billing address. Only numbers; remove dashes, parenthesis and other characters.
  * @property {string} [streetAddress] Line 1 of the billing address (eg. number, street, etc).
  * @property {string} [extendedAddress] Line 2 of the billing address (eg. suite, apt #, etc.).
  * @property {string} [line3] Line 3 of the billing address if needed (eg. suite, apt #, etc).
@@ -8905,7 +9212,7 @@ var FRAMEWORKS = require('./frameworks');
  * @property {string} [shippingMethodIndicator] The 2-digit string indicating the shipping method chosen for the transaction Possible values.
  * - `01` Ship to cardholder billing address
  * - `02` Ship to another verified address on file with merchant
- * - `03` Ship to address that is different than billing address
+ * - `03` Ship to address that is different from billing address
  * - `04` Ship to store (store address should be populated on request)
  * - `05` Digital goods
  * - `06` Travel and event tickets, not shipped
@@ -8919,11 +9226,11 @@ var FRAMEWORKS = require('./frameworks');
  * - `TRA` Travel
  * - `DSP` Cash Dispensing
  * - `REN` Car Rental
- * - `GAS` Fueld
+ * - `GAS` Fuel
  * - `LUX` Luxury Retail
  * - `ACC` Accommodation Retail
  * - `TBD` Other
- * @property {string} [deliveryTimeframe] The 2-digit number indicating the delivery timeframe. Possible values:
+ * @property {string} [deliveryTimeframe] The 2-digit number indicating the delivery time frame. Possible values:
  * - `01` Electronic delivery
  * - `02` Same day shipping
  * - `03` Overnight shipping
@@ -9105,12 +9412,12 @@ EventEmitter.createChild(ThreeDSecure);
  * @param {object} options Options for card verification.
  * @param {string} options.nonce The nonce representing the card from a tokenization payload. For example, this can be a {@link HostedFields~tokenizePayload|tokenizePayload} returned by Hosted Fields under `payload.nonce`.
  * @param {string} options.bin The numeric Bank Identification Number (bin) of the card from a tokenization payload. For example, this can be a {@link HostedFields~tokenizePayload|tokenizePayload} returned by Hosted Fields under `payload.details.bin`.
- * @param {string} options.amount The amount of the transaction in the current merchant account's currency. For example, if you are running a transaction of $123.45 US dollars, `amount` would be 123.45.
+ * @param {string} options.amount The amount of the transaction in the current merchant account's currency. This must be expressed in numbers with an optional decimal (using `.`) and precision up to the hundredths place. For example, if you're processing a transaction for 1.234,56 € then `amount` should be `1234.56`.
  * @param {boolean} [options.challengeRequested] If set to true, an authentication challenge will be forced if possible.
  * @param {boolean} [options.exemptionRequested] If set to true, an exemption to the authentication challenge will be requested.
  * @param {function} [options.onLookupComplete] *Deprecated:* Use {@link ThreeDSecure#event:lookup-complete|`threeDSecureInstance.on('lookup-complete')`} instead. Function to execute when lookup completes. The first argument, `data`, is a {@link ThreeDSecure~verificationData|verificationData} object, and the second argument, `next`, is a callback. `next` must be called to continue.
  * @param {string} [options.email] The email used for verification.
- * @param {string} [options.mobilePhoneNumber] The mobile phone number used for verification. Only numbers; remove dashes, paranthesis and other characters.
+ * @param {string} [options.mobilePhoneNumber] The mobile phone number used for verification. Only numbers; remove dashes, parenthesis and other characters.
  * @param {object} [options.billingAddress] An {@link ThreeDSecure~billingAddress|billingAddress} object for verification.
  * @param {object} [options.additionalInformation] An {@link ThreeDSecure~additionalInformation|additionalInformation} object for verification.
  * @param {object} [options.customer] **Deprecated** Customer information for use in 3DS 1.0 verifications. Can contain any subset of a {@link ThreeDSecure~verifyCardCustomerObject|verifyCardCustomerObject}. Only to be used for 3DS 1.0 integrations.
@@ -9129,7 +9436,7 @@ EventEmitter.createChild(ThreeDSecure);
  *   next();
  * });
  *
- * // call verifyCard after tokenizating a card
+ * // call verifyCard after tokenizing a card
  * threeDSecure.verifyCard({
  *   amount: '123.45',
  *   nonce: hostedFieldsTokenizationPayload.nonce,
@@ -9167,13 +9474,13 @@ EventEmitter.createChild(ThreeDSecure);
  *   }
  *
  *   if (payload.liabilityShifted) {
- *     // Liablity has shifted
+ *     // Liability has shifted
  *     submitNonceToServer(payload.nonce);
  *   } else if (payload.liabilityShiftPossible) {
- *     // Liablity may still be shifted
+ *     // Liability may still be shifted
  *     // Decide if you want to submit the nonce
  *   } else {
- *     // Liablity has not shifted and will not shift
+ *     // Liability has not shifted and will not shift
  *     // Decide if you want to submit the nonce
  *   }
  * });
@@ -9221,13 +9528,13 @@ EventEmitter.createChild(ThreeDSecure);
  *   }
  *
  *   if (payload.liabilityShifted) {
- *     // Liablity has shifted
+ *     // Liability has shifted
  *     submitNonceToServer(payload.nonce);
  *   } else if (payload.liabilityShiftPossible) {
- *     // Liablity may still be shifted
+ *     // Liability may still be shifted
  *     // Decide if you want to submit the nonce
  *   } else {
- *     // Liablity has not shifted and will not shift
+ *     // Liability has not shifted and will not shift
  *     // Decide if you want to submit the nonce
  *   }
  * });
@@ -9241,7 +9548,7 @@ EventEmitter.createChild(ThreeDSecure);
  *   next();
  * });
  *
- * // call verifyCard after tokenizating a card
+ * // call verifyCard after tokenizing a card
  * threeDSecure.verifyCard({
  *   amount: '123.45',
  *   nonce: hostedFieldsTokenizationPayload.nonce,
@@ -9298,13 +9605,13 @@ EventEmitter.createChild(ThreeDSecure);
  *   }
  *
  *   if (payload.liabilityShifted) {
- *     // Liablity has shifted
+ *     // Liability has shifted
  *     submitNonceToServer(payload.nonce);
  *   } else if (payload.liabilityShiftPossible) {
- *     // Liablity may still be shifted
+ *     // Liability may still be shifted
  *     // Decide if you want to submit the nonce
  *   } else {
- *     // Liablity has not shifted and will not shift
+ *     // Liability has not shifted and will not shift
  *     // Decide if you want to submit the nonce
  *   }
  * });
@@ -9333,13 +9640,13 @@ ThreeDSecure.prototype.verifyCard = function (options) {
  *
  * threeDSecure.initializeChallengeWithLookupResponse(lookupResponseFromServer).then(function (payload) {
  *   if (payload.liabilityShifted) {
- *     // Liablity has shifted
+ *     // Liability has shifted
  *     submitNonceToServer(payload.nonce);
  *   } else if (payload.liabilityShiftPossible) {
- *     // Liablity may still be shifted
+ *     // Liability may still be shifted
  *     // Decide if you want to submit the nonce
  *   } else {
- *     // Liablity has not shifted and will not shift
+ *     // Liability has not shifted and will not shift
  *     // Decide if you want to submit the nonce
  *   }
  * });
@@ -9489,7 +9796,7 @@ ThreeDSecure.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(ThreeDSecure);
 
-},{"../../lib/convert-methods-to-error":82,"../../lib/methods":97,"./frameworks":112,"@braintree/event-emitter":21,"@braintree/wrap-promise":29}],117:[function(require,module,exports){
+},{"../../lib/convert-methods-to-error":83,"../../lib/methods":98,"./frameworks":112,"@braintree/event-emitter":21,"@braintree/wrap-promise":30}],117:[function(require,module,exports){
 'use strict';
 /** @module braintree-web/three-d-secure */
 
@@ -9501,7 +9808,7 @@ var createAssetsUrl = require('../lib/create-assets-url');
 var BraintreeError = require('../lib/braintree-error');
 var analytics = require('../lib/analytics');
 var errors = require('./shared/errors');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 var Promise = require('../lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -9509,6 +9816,11 @@ var wrapPromise = require('@braintree/wrap-promise');
  * @static
  * @function create
  * @param {object} options Creation options:
+ * @param {object} [options.cardinalSDKConfig] A config for the underlying Cardinal SDK.
+ * @param {object} [options.cardinalSDKConfig.logging] The logging configuration for the Cardinal SDK. See [Cardinal's documentation for the logging object](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/1409568/Configurations#Configurations-Logging) for more information.
+ * @param {number} [options.cardinalSDKConfig.timeout] The time in milliseconds to wait before a request to Cardinal's API times out. See [Cardinal's documentation for root level configuration](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/1409568/Configurations#Configurations-RootLevelConfiguration) for more information.
+ * @param {number} [options.cardinalSDKConfig.maxRequestRetries] How many times a request should be re-attempted to Cardinal's API before giving up as a failure. See [Cardinal's documentation for root level configuration](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/1409568/Configurations#Configurations-RootLevelConfiguration) for more information.
+ * @param {object} [options.cardinalSDKConfig.payment] An object to describe how you want the user interactions to behave. Only a subset of the [Cardinal SDK payment configuration object](https://cardinaldocs.atlassian.net/wiki/spaces/CC/pages/1409568/Configurations#Configurations-Payment) are supported: `displayLoading` and `displayExitButton`.
  * @param {Client} [options.client] A {@link Client} instance.
  * @param {string} [options.authorization] A tokenizationKey or clientToken. Can be used in place of `options.client`.
  * @param {(number|string)} [options.version=1] The version of 3D Secure to use. Possible options:
@@ -9651,6 +9963,8 @@ function create(options) {
 
     instance = new ThreeDSecure({
       client: options.client,
+      loggingEnabled: options.loggingEnabled,
+      cardinalSDKConfig: options.cardinalSDKConfig,
       framework: framework
     });
 
@@ -9685,13 +9999,13 @@ function getFramework(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.21.0`.
+   * @description The current version of the SDK, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"../lib/analytics":72,"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/create-assets-url":84,"../lib/create-deferred-client":86,"../lib/is-https":94,"../lib/promise":100,"./external/three-d-secure":116,"./shared/errors":119,"@braintree/wrap-promise":29}],118:[function(require,module,exports){
+},{"../lib/analytics":73,"../lib/basic-component-verification":76,"../lib/braintree-error":78,"../lib/create-assets-url":85,"../lib/create-deferred-client":87,"../lib/is-https":95,"../lib/promise":100,"./external/three-d-secure":116,"./shared/errors":119,"@braintree/wrap-promise":30}],118:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -9873,7 +10187,7 @@ module.exports = {
   }
 };
 
-},{"../../lib/braintree-error":77}],120:[function(require,module,exports){
+},{"../../lib/braintree-error":78}],120:[function(require,module,exports){
 'use strict';
 
 var enumerate = require('../../lib/enumerate');
@@ -9882,7 +10196,7 @@ module.exports = enumerate([
   'AUTHENTICATION_COMPLETE'
 ], 'threedsecure:');
 
-},{"../../lib/enumerate":89}],121:[function(require,module,exports){
+},{"../../lib/enumerate":90}],121:[function(require,module,exports){
 'use strict';
 
 /**
@@ -9911,7 +10225,7 @@ module.exports = {
   }
 };
 
-},{"../lib/braintree-error":77}],122:[function(require,module,exports){
+},{"../lib/braintree-error":78}],122:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web/vault-manager
@@ -9922,7 +10236,7 @@ var basicComponentVerification = require('../lib/basic-component-verification');
 var createDeferredClient = require('../lib/create-deferred-client');
 var createAssetsUrl = require('../lib/create-assets-url');
 var VaultManager = require('./vault-manager');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 var wrapPromise = require('@braintree/wrap-promise');
 
 /**
@@ -9959,13 +10273,13 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.21.0`.
+   * @description The current version of the SDK, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"../lib/basic-component-verification":75,"../lib/create-assets-url":84,"../lib/create-deferred-client":86,"./vault-manager":123,"@braintree/wrap-promise":29}],123:[function(require,module,exports){
+},{"../lib/basic-component-verification":76,"../lib/create-assets-url":85,"../lib/create-deferred-client":87,"./vault-manager":123,"@braintree/wrap-promise":30}],123:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -10149,7 +10463,7 @@ VaultManager.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(VaultManager);
 
-},{"../lib/analytics":72,"../lib/braintree-error":77,"../lib/convert-methods-to-error":82,"../lib/methods":97,"../lib/promise":100,"./errors":121,"@braintree/wrap-promise":29}],124:[function(require,module,exports){
+},{"../lib/analytics":73,"../lib/braintree-error":78,"../lib/convert-methods-to-error":83,"../lib/methods":98,"../lib/promise":100,"./errors":121,"@braintree/wrap-promise":30}],124:[function(require,module,exports){
 'use strict';
 /** @module braintree-web/venmo */
 
@@ -10163,7 +10477,7 @@ var BraintreeError = require('../lib/braintree-error');
 var Venmo = require('./venmo');
 var Promise = require('../lib/promise');
 var supportsVenmo = require('./shared/supports-venmo');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 /**
  * @static
@@ -10251,13 +10565,13 @@ module.exports = {
   create: wrapPromise(create),
   isBrowserSupported: isBrowserSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.21.0`.
+   * @description The current version of the SDK, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"../lib/analytics":72,"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/create-assets-url":84,"../lib/create-deferred-client":86,"../lib/promise":100,"./shared/errors":127,"./shared/supports-venmo":128,"./venmo":129,"@braintree/wrap-promise":29}],125:[function(require,module,exports){
+},{"../lib/analytics":73,"../lib/basic-component-verification":76,"../lib/braintree-error":78,"../lib/create-assets-url":85,"../lib/create-deferred-client":87,"../lib/promise":100,"./shared/errors":127,"./shared/supports-venmo":128,"./venmo":129,"@braintree/wrap-promise":30}],125:[function(require,module,exports){
 'use strict';
 
 var isAndroid = require('@braintree/browser-detection/is-android');
@@ -10344,7 +10658,7 @@ module.exports = {
   }
 };
 
-},{"../../lib/braintree-error":77}],128:[function(require,module,exports){
+},{"../../lib/braintree-error":78}],128:[function(require,module,exports){
 'use strict';
 
 var browserDetection = require('./browser-detection');
@@ -10386,7 +10700,7 @@ var convertMethodsToError = require('../lib/convert-methods-to-error');
 var wrapPromise = require('@braintree/wrap-promise');
 var BraintreeError = require('../lib/braintree-error');
 var Promise = require('../lib/promise');
-var VERSION = "3.55.0";
+var VERSION = "3.57.0";
 
 /**
  * Venmo tokenize payload.
@@ -10531,18 +10845,32 @@ Venmo.prototype.tokenize = function () {
       global.open(self._url);
     }
 
-    // Subscribe to document visibility change events to detect when app switch
-    // has returned.
+    // Detect when app switch has returned with tokenization results in the
+    // URL hash.
+    self._hashChangeListener = function () {
+      self._processResults().then(resolve).catch(reject).then(function () {
+        self._tokenizationInProgress = false;
+        global.removeEventListener('hashchange', self._hashChangeListener);
+        delete self._hashChangeListener;
+        global.location.hash = self._previousHash;
+      });
+    };
+    global.addEventListener('hashchange', self._hashChangeListener);
+
+    // Check if app switch has returned but no tokenization results were found
+    // in URL hash.
     self._visibilityChangeListener = function () {
       if (!global.document.hidden) {
-        self._tokenizationInProgress = false;
-
         setTimeout(function () {
-          self._processResults().then(resolve).catch(reject).then(function () {
-            global.location.hash = self._previousHash;
-            self._removeVisibilityEventListener();
-            delete self._visibilityChangeListener;
-          });
+          // If tokenization is still in progress when this setTimeout fires,
+          // then we process results to show that the user canceled.
+          if (self._tokenizationInProgress) {
+            self._tokenizationInProgress = false;
+            self._processResults().then(resolve).catch(reject);
+          }
+
+          self._removeVisibilityEventListener();
+          delete self._visibilityChangeListener;
         }, constants.PROCESS_RESULTS_DELAY);
       }
     };
@@ -10663,7 +10991,7 @@ function documentVisibilityChangeEventName() {
 module.exports = wrapPromise.wrapPrototype(Venmo);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lib/analytics":72,"../lib/braintree-error":77,"../lib/convert-methods-to-error":82,"../lib/methods":97,"../lib/promise":100,"../lib/querystring":101,"./shared/constants":126,"./shared/errors":127,"./shared/supports-venmo":128,"@braintree/wrap-promise":29}],130:[function(require,module,exports){
+},{"../lib/analytics":73,"../lib/braintree-error":78,"../lib/convert-methods-to-error":83,"../lib/methods":98,"../lib/promise":100,"../lib/querystring":101,"./shared/constants":126,"./shared/errors":127,"./shared/supports-venmo":128,"@braintree/wrap-promise":30}],130:[function(require,module,exports){
 'use strict';
 
 var types = require('./lib/card-types');
@@ -12580,7 +12908,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.googlePay
 ];
 var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = '1.21.0';
+var VERSION = '1.22.0';
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -12588,9 +12916,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the card.
- * @property {object} details Additional account details.
- * @property {string} details.cardType Type of card, e.g. Visa, Mastercard.
- * @property {string} details.lastTwo Last two digits of card number.
+ * @property {object} details Additional account details. See a full list of details in the [Hosted Fields client reference](http://braintree.github.io/braintree-web/3.57.0/HostedFields.html#~tokenizePayload).
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
@@ -12602,7 +12928,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~paypalPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
- * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/3.55.0/PayPalCheckout.html#~tokenizePayload).
+ * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/3.57.0/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
@@ -13162,7 +13488,7 @@ Dropin.prototype._handleAppSwitch = function () {
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
  * @param {object} [options] All options for requesting a payment method.
- * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/3.55.0/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. The recommended fields for achieving a 3DS v2 verification are:
+ * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/3.57.0/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. The recommended fields for achieving a 3DS v2 verification are:
  * * `email`
  * * `mobilePhoneNumber`
  * * `billingAddress`
@@ -13393,7 +13719,7 @@ function formatPaymentMethodPayload(paymentMethod) {
 
 module.exports = wrapPrototype(Dropin);
 
-},{"./constants":143,"./dropin-model":144,"./lib/analytics":148,"./lib/assign":149,"./lib/data-collector":152,"./lib/dropin-error":153,"./lib/is-utf-8":157,"./lib/promise":160,"./lib/sanitize-html":161,"./lib/three-d-secure":163,"./lib/uuid":165,"./translations":175,"./views/main-view":192,"./views/payment-methods-view":194,"./views/payment-options-view":195,"@braintree/asset-loader":1,"@braintree/class-list":20,"@braintree/event-emitter":21,"@braintree/wrap-promise":29}],146:[function(require,module,exports){
+},{"./constants":143,"./dropin-model":144,"./lib/analytics":148,"./lib/assign":149,"./lib/data-collector":152,"./lib/dropin-error":153,"./lib/is-utf-8":157,"./lib/promise":160,"./lib/sanitize-html":161,"./lib/three-d-secure":163,"./lib/uuid":165,"./translations":175,"./views/main-view":192,"./views/payment-methods-view":194,"./views/payment-options-view":195,"@braintree/asset-loader":1,"@braintree/class-list":20,"@braintree/event-emitter":21,"@braintree/wrap-promise":30}],146:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web-drop-in
@@ -13433,7 +13759,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.21.0/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.22.0/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *       ></script>
  *       <input type="submit" value="Purchase"></input>
@@ -13451,7 +13777,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.21.0/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.22.0/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *        data-paypal.flow="checkout"
  *        data-paypal.amount="10.00"
@@ -13466,7 +13792,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Specifying a locale and payment option priority</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.21.0/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.22.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-locale="de_DE"
  *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
@@ -13481,7 +13807,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including an optional cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.21.0/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.22.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="false"
  *   ></script>
@@ -13491,7 +13817,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including a required cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.21.0/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.22.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="true"
  *   ></script>
@@ -13508,15 +13834,15 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = '1.21.0';
+var VERSION = '1.22.0';
 
 /**
- * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/3.55.0/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
+ * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/3.57.0/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
  *
  * @param {(boolean|object)} [cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
  * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
- * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/3.55.0/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/3.55.0/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
- * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/3.55.0/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developers.braintreepayments.com/guides/drop-in/customization/javascript/v3#customize-your-ui).
+ * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/3.57.0/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/3.57.0/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
+ * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/3.57.0/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developers.braintreepayments.com/guides/drop-in/customization/javascript/v3#customize-your-ui).
  * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a successful tokenization.
  * @param {object} [vault] Configuration for vaulting credit cards. Only applies when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id).
  * @param {boolean} [vault.allowVaultCardOverride=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
@@ -13536,7 +13862,7 @@ var VERSION = '1.21.0';
  * @param {string} amount The amount to verify with 3D Secure.
  */
 
-/** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.55.0/PayPalCheckout.html#createPayment).
+/** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.57.0/PayPalCheckout.html#createPayment).
  *
  * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
  * @param {(string|number)} [amount] The amount of the transaction. Required when using the Checkout flow.
@@ -13623,13 +13949,13 @@ var VERSION = '1.21.0';
  * @param {(boolean|object)} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards, pass `false` for the value.
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
  *
- * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.55.0/PayPalCheckout.html#createPayment).
+ * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.57.0/PayPalCheckout.html#createPayment).
  *
  * PayPal is not [supported in Internet Explorer versions lower than 11](https://developer.paypal.com/docs/checkout/reference/faq/#which-browsers-does-paypal-checkout-support).
  *
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live).
  *
- * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.55.0/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3).
+ * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.57.0/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3).
  *
  * PayPal Credit is not [supported in Internet Explorer versions lower than 11](https://developer.paypal.com/docs/checkout/reference/faq/#which-browsers-does-paypal-checkout-support).
  *
@@ -13667,7 +13993,7 @@ var VERSION = '1.21.0';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.21.0/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.22.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -13706,7 +14032,7 @@ var VERSION = '1.21.0';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.21.0/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.22.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -13784,7 +14110,7 @@ var VERSION = '1.21.0';
  *       <input type="hidden" id="nonce" name="payment_method_nonce"></input>
  *     </form>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.21.0/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.22.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var form = document.querySelector('#payment-form');
@@ -14002,13 +14328,13 @@ createFromScriptTag(create, typeof document !== 'undefined' && document.querySel
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of Drop-in, i.e. `1.21.0`.
+   * @description The current version of Drop-in, i.e. `1.22.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"./constants":143,"./dropin":145,"./lib/analytics":148,"./lib/create-from-script-tag":151,"./lib/dropin-error":153,"./lib/promise":160,"@braintree/wrap-promise":29,"braintree-web/client":38}],147:[function(require,module,exports){
+},{"./constants":143,"./dropin":145,"./lib/analytics":148,"./lib/create-from-script-tag":151,"./lib/dropin-error":153,"./lib/promise":160,"@braintree/wrap-promise":30,"braintree-web/client":39}],147:[function(require,module,exports){
 'use strict';
 
 function addSelectionEventHandler(element, func) {
@@ -14065,9 +14391,9 @@ module.exports = {
   sendEvent: sendAnalyticsEvent
 };
 
-},{"../constants":143,"./polyfill":159,"braintree-web/client":38}],149:[function(require,module,exports){
-arguments[4][74][0].apply(exports,arguments)
-},{"dup":74}],150:[function(require,module,exports){
+},{"../constants":143,"./polyfill":159,"braintree-web/client":39}],149:[function(require,module,exports){
+arguments[4][75][0].apply(exports,arguments)
+},{"dup":75}],150:[function(require,module,exports){
 'use strict';
 
 var isIe9 = require('@braintree/browser-detection/is-ie9');
@@ -14419,8 +14745,15 @@ module.exports = {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],160:[function(require,module,exports){
-arguments[4][100][0].apply(exports,arguments)
-},{"dup":100,"promise-polyfill":139}],161:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var Promise = global.Promise || require('promise-polyfill');
+
+module.exports = Promise;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"promise-polyfill":139}],161:[function(require,module,exports){
 'use strict';
 
 module.exports = function (string) {
@@ -17322,7 +17655,7 @@ ApplePayView.isEnabled = function (options) {
 module.exports = ApplePayView;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../constants":143,"../../lib/assign":149,"../../lib/dropin-error":153,"../../lib/is-https":156,"../../lib/promise":160,"../base-view":190,"braintree-web/apple-pay":32}],197:[function(require,module,exports){
+},{"../../constants":143,"../../lib/assign":149,"../../lib/dropin-error":153,"../../lib/is-https":156,"../../lib/promise":160,"../base-view":190,"braintree-web/apple-pay":33}],197:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -18182,7 +18515,7 @@ function generateCardNumberPlaceholder() {
 
 module.exports = CardView;
 
-},{"../../constants":143,"../../lib/assign":149,"../../lib/dropin-error":153,"../../lib/is-utf-8":157,"../../lib/promise":160,"../../lib/transition-helper":164,"../base-view":190,"@braintree/class-list":20,"braintree-web/hosted-fields":64}],199:[function(require,module,exports){
+},{"../../constants":143,"../../lib/assign":149,"../../lib/dropin-error":153,"../../lib/is-utf-8":157,"../../lib/promise":160,"../../lib/transition-helper":164,"../base-view":190,"@braintree/class-list":20,"braintree-web/hosted-fields":65}],199:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -18321,7 +18654,7 @@ function createPaymentsClient(client) {
 module.exports = GooglePayView;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../constants":143,"../../lib/analytics":148,"../../lib/assign":149,"../../lib/dropin-error":153,"../../lib/promise":160,"../base-view":190,"@braintree/asset-loader":1,"braintree-web/google-payment":57}],200:[function(require,module,exports){
+},{"../../constants":143,"../../lib/analytics":148,"../../lib/assign":149,"../../lib/dropin-error":153,"../../lib/promise":160,"../base-view":190,"@braintree/asset-loader":1,"braintree-web/google-payment":58}],200:[function(require,module,exports){
 'use strict';
 
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
