@@ -26,7 +26,9 @@ var fiveCharacterLocales = {
   th_TH: require('./th_TH'),
   zh_CN: require('./zh_CN'),
   zh_HK: require('./zh_HK'),
-  zh_TW: require('./zh_TW')
+  zh_TW: require('./zh_TW'),
+  cs_CS: require('./cs_CS'),
+  sk_SK: require('./sk_SK')
 };
 
 var twoCharacterLocaleAliases = {
@@ -46,7 +48,9 @@ var twoCharacterLocaleAliases = {
   ru: fiveCharacterLocales.ru_RU,
   sv: fiveCharacterLocales.sv_SE,
   th: fiveCharacterLocales.th_TH,
-  zh: fiveCharacterLocales.zh_CN
+  zh: fiveCharacterLocales.zh_CN,
+  cs: fiveCharacterLocales.cs_CS,
+  sk: fiveCharacterLocales.sk_SK
 };
 
 module.exports = {
