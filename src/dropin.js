@@ -219,7 +219,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  */
 
 /**
- * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMethodRequestable`}.
+ * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. Note: auto-submit behavior should not be dependent on this event. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMethodRequestable`}.
  * @event Dropin#paymentMethodRequestable
  * @type {Dropin~paymentMethodRequestablePayload}
  */
