@@ -192,7 +192,12 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  *     // or by using a stored payment method), we can request the
  *     // nonce right away. Otherwise, we wait for the customer to
  *     // request the nonce by pressing the submit button once they
- *     // are finished entering their credit card details
+ *     // are finished entering their credit card details. This is
+ *     // particularly important if your credit card form includes a
+ *     // postal code input. The `paymentMethodRequestable` event
+ *     // could fire before the customer has finished entering their
+ *     // postal code. (International postal codes can be as few as 3
+ *     // characters in length)
  *     if (event.paymentMethodIsSelected) {
  *       sendNonceToServer();
  *     }
@@ -219,7 +224,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  */
 
 /**
- * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the payment method available changes. This event is not fired if there is no payment method available on initialization. Note: auto-submit behavior should not be dependent on this event. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMethodRequestable`}.
+ * This event is emitted when the payment method available in Drop-in changes. This includes when the state of Drop-in transitions from having no payment method available to having a payment method available and when the kind of payment method available changes. This event is not fired if there is no payment method available on initialization. To check if there is a payment method requestable on initialization, use {@link Dropin#isPaymentMethodRequestable|`isPaymentMethodRequestable`}.
  * @event Dropin#paymentMethodRequestable
  * @type {Dropin~paymentMethodRequestablePayload}
  */
