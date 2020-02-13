@@ -778,7 +778,7 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.be.calledWith('noPaymentMethodRequestable');
     });
 
-    it('does not emit when isRequestable state and type state does not change', function () {
+    it('does not emit when isRequestable state and nonce does not change', function () {
       this.model._paymentMethodIsRequestable = false;
       this.model.setPaymentMethodRequestable({
         isRequestable: false
@@ -787,16 +787,19 @@ describe('DropinModel', function () {
       expect(this.model._emit).to.not.be.called;
 
       this.model._paymentMethodIsRequestable = true;
-      this.model._paymentMethodRequestableType = 'TYPE';
+      this.model._paymentMethodRequestableNonce = 'fake-nonce';
       this.model.setPaymentMethodRequestable({
         isRequestable: true,
+        selectedPaymentMethod: {
+          nonce: 'fake-nonce'
+        },
         type: 'TYPE'
       });
 
       expect(this.model._emit).to.not.be.called;
     });
 
-    it('does not emit when isRequestable state is false and type has changed', function () {
+    it('does not emit when isRequestable state is false and nonce has changed', function () {
       this.model._paymentMethodIsRequestable = false;
       this.model.setPaymentMethodRequestable({
         isRequestable: false
@@ -804,38 +807,47 @@ describe('DropinModel', function () {
 
       expect(this.model._emit).to.not.be.called;
 
-      this.model._paymentMethodRequestableType = 'TYPE';
+      this.model._paymentMethodRequestableNonce = 'old-fake-nonce';
       this.model.setPaymentMethodRequestable({
         isRequestable: false,
-        type: 'ANOTHER_TYPE'
+        type: 'TYPE',
+        selectedPaymentMethod: {
+          nonce: 'fake-nonce'
+        }
       });
 
       expect(this.model._emit).to.not.be.called;
     });
 
-    it('does emit when isRequestable state has not changed, but type state does', function () {
+    it('does emit when isRequestable state has not changed, but nonce state does', function () {
       this.model._paymentMethodIsRequestable = true;
-      this.model._paymentMethodRequestableType = 'TYPE';
+      this.model._paymentMethodRequestableNonce = 'old-fake-nonce';
       this.model.setPaymentMethodRequestable({
         isRequestable: true,
-        type: 'ANOTHER_TYPE'
+        type: 'TYPE',
+        selectedPaymentMethod: {
+          nonce: 'fake-nonce'
+        }
       });
 
       expect(this.model._emit).to.be.calledOnce;
       expect(this.model._emit).to.be.calledWith('paymentMethodRequestable', {
-        type: 'ANOTHER_TYPE',
-        paymentMethodIsSelected: false
+        type: 'TYPE',
+        paymentMethodIsSelected: true
       });
     });
 
-    it('ignores type if isRequestable is false', function () {
-      this.model._paymentMethodRequestableType = 'SOMETHING';
+    it('ignores nonce if isRequestable is false', function () {
+      this.model._paymentMethodRequestableNonce = 'SOMETHING';
       this.model.setPaymentMethodRequestable({
         isRequestable: false,
-        type: 'SOME_TYPE'
+        type: 'SOME_TYPE',
+        selectedPaymentMethod: {
+          nonce: 'fake-nonce'
+        }
       });
 
-      expect(this.model._paymentMethodRequestableType).to.not.exist;
+      expect(this.model._paymentMethodRequestableNonce).to.not.exist;
     });
 
     it('includes the paymentMethodIsSelected as true if Drop-in displays a selected payment method', function () {
