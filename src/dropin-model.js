@@ -142,7 +142,8 @@ DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {
 
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
   var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
-  var typeHasNotChanged = options.type === this._paymentMethodRequestableType;
+  var nonce = options.selectedPaymentMethod && options.selectedPaymentMethod.nonce;
+  var nonceHasNotChanged = nonce === this._paymentMethodRequestableNonce;
 
   if (!this._setupComplete) {
     // don't emit event until after Drop-in is fully set up
@@ -152,7 +153,7 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
     return false;
   }
 
-  if (requestableStateHasNotChanged && (!options.isRequestable || typeHasNotChanged)) {
+  if (requestableStateHasNotChanged && (!options.isRequestable || nonceHasNotChanged)) {
     return false;
   }
 
@@ -169,9 +170,9 @@ DropinModel.prototype.setPaymentMethodRequestable = function (options) {
   this._paymentMethodIsRequestable = options.isRequestable;
 
   if (options.isRequestable) {
-    this._paymentMethodRequestableType = options.type;
+    this._paymentMethodRequestableNonce = options.selectedPaymentMethod && options.selectedPaymentMethod.nonce;
   } else {
-    delete this._paymentMethodRequestableType;
+    delete this._paymentMethodRequestableNonce;
   }
 
   if (!shouldEmitEvent) {
