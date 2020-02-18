@@ -1,6 +1,6 @@
 # Braintree Web Drop-in
 
-[![BrowserStack Status](https://automate.browserstack.com/badge.svg?badge_key=ekVFUUJwYWFBbVhkN0w0OVV4czFtOGFSVjh2UmcwMmQzeTdBeVUzT2pSWT0tLWw1U3BydlRCWUMwRHBlWmcySG5vWWc9PQ==--ca97578d4b59174302506ff6bef971511052dc59)](https://automate.browserstack.com/public-build/ekVFUUJwYWFBbVhkN0w0OVV4czFtOGFSVjh2UmcwMmQzeTdBeVUzT2pSWT0tLWw1U3BydlRCWUMwRHBlWmcySG5vWWc9PQ==--ca97578d4b59174302506ff6bef971511052dc59)
+[![BrowserStack Status](https://automate.browserstack.com/badge.svg?badge_key=MHNCQnJqZ042SFFUek9uZTFyV2dQZEppenhsdUVBQU9SMzBLRGxPUXZyaz0tLVNpUjlqUnlPUVVPOWswN1B1WWdySXc9PQ==--7517ca3a283b3a7e80dcf5de3f4270bc47eab891)](https://automate.browserstack.com/public-build/MHNCQnJqZ042SFFUek9uZTFyV2dQZEppenhsdUVBQU9SMzBLRGxPUXZyaz0tLVNpUjlqUnlPUVVPOWswN1B1WWdySXc9PQ==--7517ca3a283b3a7e80dcf5de3f4270bc47eab891)
 
 A pre-made payments UI for accepting cards and alternative payments in the browser built using version 3 of the [Braintree JS client SDK](https://github.com/braintree/braintree-web).
 
