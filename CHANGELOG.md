@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.22.1
+------
 - Fix issue where payment requestable event would not fire when switching between vaulted payment methods (#499)
 - Update braintree-web to v3.58.0
   - Venmo: fix issue where webview based integrations would break
