@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+2.0.0 - unreleased
+-----
+* TODO: list new features here
+
+_Breaking Changes_
+* TODO: list them here
+
 1.22.1
 ------
 - Fix issue where payment requestable event would not fire when switching between vaulted payment methods (#499)
