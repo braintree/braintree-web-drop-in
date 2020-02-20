@@ -1,10 +1,8 @@
-'use strict';
 
 var clientToken, clientTokenWithCustomerID, fakeBTInstances;
 var tokenizationKey = 'development_testing_merchant_id';
 var braintreeVersion = require('braintree-web').VERSION;
 var DropinModel = require('../../src/dropin-model');
-var sinon = require('sinon');
 
 function configuration() {
   return {
@@ -48,7 +46,7 @@ function configuration() {
 
 function getState() {
   return {
-    cards: [{type: 'visa'}],
+    cards: [{ type: 'visa' }],
     fields: {
       number: {
         isValid: true
@@ -95,9 +93,9 @@ function client(conf) {
   conf = conf || configuration();
 
   return {
-    _request: sinon.stub().resolves(),
-    request: sinon.stub().resolves(),
-    getConfiguration: sinon.stub().returns(conf),
+    _request: jest.fn().mockResolvedValue(),
+    request: jest.fn().mockResolvedValue(),
+    getConfiguration: jest.fn().mockReturnValue(conf),
     getVersion: function () { return braintreeVersion; }
   };
 }
@@ -109,7 +107,7 @@ function model(options) {
 
   modelInstance = new DropinModel(options);
 
-  sinon.stub(modelInstance, 'getVaultedPaymentMethods').resolves([]);
+  jest.spyOn(modelInstance, 'getVaultedPaymentMethods').mockResolvedValue([]);
 
   return modelInstance;
 }

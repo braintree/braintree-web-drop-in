@@ -1,0 +1,16 @@
+{
+  "rootDir": "./src/",
+  "collectCoverage": true,
+  "clearMocks": true,
+  "coverageDirectory": "<rootDir>/../test/coverage",
+  "displayName": "Drop-in",
+  "restoreMocks": true,
+  "//": "In the future, tests should live in the same directory as the files they are testing",
+  "roots": [
+    "<rootDir>",
+    "<rootDir>/../test/"
+  ],
+  "testMatch": [
+    "**/unit/**/*.js"
+  ]
+}
