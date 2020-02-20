@@ -1,56 +1,55 @@
-'use strict';
 
-var assignModule = require('../../../src/lib/assign');
+const assignModule = require('../../../src/lib/assign');
 
-describe('assign', function () {
-  describe('exported function', function () {
-    test(assignModule.assign);
+describe('assign', () => {
+  describe('exported function', () => {
+    runTest(assignModule.assign);
   });
 
-  describe('polyfill', function () {
-    test(assignModule._assign);
+  describe('polyfill', () => {
+    runTest(assignModule._assign);
   });
 });
 
-function test(assign) {
-  it('does nothing to one object', function () {
-    var obj = {foo: 'bar'};
+function runTest(assign) {
+  test('does nothing to one object', () => {
+    const obj = { foo: 'bar' };
 
-    expect(assign(obj)).to.equal(obj);
+    expect(assign(obj)).toBe(obj);
   });
 
-  it('merges two objects', function () {
-    var a = {foo: 'yas', bar: 'ugh'};
-    var b = {foo: 'nope', baz: 'wow'};
+  test('merges two objects', () => {
+    const a = { foo: 'yas', bar: 'ugh' };
+    const b = { foo: 'nope', baz: 'wow' };
 
-    expect(assign(a, b)).to.deep.equal({
+    expect(assign(a, b)).toEqual({
       foo: 'nope',
       bar: 'ugh',
       baz: 'wow'
     });
   });
 
-  it('merges three objects', function () {
-    var a = {foo: 'yas', bar: 'ugh'};
-    var b = {foo: 'nope'};
-    var c = {foo: 'wow', baz: 'cool'};
+  test('merges three objects', () => {
+    const a = { foo: 'yas', bar: 'ugh' };
+    const b = { foo: 'nope' };
+    const c = { foo: 'wow', baz: 'cool' };
 
-    expect(assign(a, b, c)).to.deep.equal({
+    expect(assign(a, b, c)).toEqual({
       foo: 'wow',
       bar: 'ugh',
       baz: 'cool'
     });
   });
 
-  it('returns the first object passed', function () {
-    var a = {foo: 'yas', bar: 'ugh'};
-    var b = {foo: 'nope', baz: 'wow'};
+  test('returns the first object passed', () => {
+    const a = { foo: 'yas', bar: 'ugh' };
+    const b = { foo: 'nope', baz: 'wow' };
 
-    expect(assign(a, b)).to.equal(a);
+    expect(assign(a, b)).toBe(a);
   });
 
-  it("doesn't take inherited properties", function () {
-    var a, b;
+  test("doesn't take inherited properties", () => {
+    let a, b;
 
     function Klass() {
       this.foo = 'yas';
@@ -58,10 +57,10 @@ function test(assign) {
 
     Klass.prototype.bar = 'ugh';
 
-    a = {foo: 'nope', baz: 'wow'};
+    a = { foo: 'nope', baz: 'wow' };
     b = new Klass();
 
-    expect(assign(a, b)).to.deep.equal({
+    expect(assign(a, b)).toEqual({
       foo: 'yas',
       baz: 'wow'
     });

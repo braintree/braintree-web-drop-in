@@ -1,48 +1,54 @@
-'use strict';
+
 /* eslint-disable no-new */
 
-var BasePayPalView = require('../../../../src/views/payment-sheet-views/base-paypal-view');
-var PayPalView = require('../../../../src/views/payment-sheet-views/paypal-view');
+const BasePayPalView = require('../../../../src/views/payment-sheet-views/base-paypal-view');
+const PayPalView = require('../../../../src/views/payment-sheet-views/paypal-view');
 
-describe('PayPalView', function () {
-  beforeEach(function () {
-    this.sandbox.stub(PayPalView.prototype, 'initialize');
+describe('PayPalView', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
   });
 
-  it('inherits from BasePayPalView', function () {
-    expect(new PayPalView()).to.be.an.instanceOf(BasePayPalView);
+  beforeEach(() => {
+    jest.spyOn(PayPalView.prototype, 'initialize').mockImplementation();
   });
 
-  describe('isEnabled', function () {
-    beforeEach(function () {
-      this.options = {
+  test('inherits from BasePayPalView', () => {
+    expect(new PayPalView()).toBeInstanceOf(BasePayPalView);
+  });
+
+  describe('isEnabled', () => {
+    beforeEach(() => {
+      testContext.options = {
         merchantConfiguration: {
           paypal: {}
         }
       };
 
-      this.sandbox.stub(BasePayPalView, 'isEnabled').resolves(true);
+      jest.spyOn(BasePayPalView, 'isEnabled').mockResolvedValue(true);
     });
 
-    it('resolves false if base PayPal view resolves false', function () {
-      BasePayPalView.isEnabled.resolves(false);
+    test('resolves false if base PayPal view resolves false', () => {
+      BasePayPalView.isEnabled.mockResolvedValue(false);
 
-      return PayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(false);
+      return PayPalView.isEnabled(testContext.options).then(result => {
+        expect(result).toBe(false);
       });
     });
 
-    it('resolves false if merchant did not configure paypal', function () {
-      delete this.options.merchantConfiguration.paypal;
+    test('resolves false if merchant did not configure paypal', () => {
+      delete testContext.options.merchantConfiguration.paypal;
 
-      return PayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(false);
+      return PayPalView.isEnabled(testContext.options).then(result => {
+        expect(result).toBe(false);
       });
     });
 
-    it('resolves true if merchant enabled paypal', function () {
-      return PayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(true);
+    test('resolves true if merchant enabled paypal', () => {
+      return PayPalView.isEnabled(testContext.options).then(result => {
+        expect(result).toBe(true);
       });
     });
   });

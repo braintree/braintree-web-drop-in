@@ -1,21 +1,26 @@
-'use strict';
 
-var fake = require('../../helpers/fake');
-var assets = require('@braintree/asset-loader');
-var Promise = require('../../../src/lib/promise');
-var analytics = require('../../../src/lib/analytics');
-var DataCollector = require('../../../src/lib/data-collector');
+const fake = require('../../helpers/fake');
+const assets = require('@braintree/asset-loader');
+const Promise = require('../../../src/lib/promise');
+const analytics = require('../../../src/lib/analytics');
+const DataCollector = require('../../../src/lib/data-collector');
 
-describe('DataCollector', function () {
-  beforeEach(function () {
-    this.sandbox.stub(analytics, 'sendEvent');
-    this.dataCollectorInstance = fake.dataCollectorInstance;
-    this.sandbox.stub(this.dataCollectorInstance, 'teardown').resolves();
+describe('DataCollector', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
   });
 
-  describe('initialize', function () {
-    beforeEach(function () {
-      var createStub = this.sandbox.stub().resolves(this.dataCollectorInstance);
+  beforeEach(() => {
+    jest.spyOn(analytics, 'sendEvent').mockImplementation();
+    testContext.dataCollectorInstance = fake.dataCollectorInstance;
+    jest.spyOn(testContext.dataCollectorInstance, 'teardown').mockResolvedValue();
+  });
+
+  describe('initialize', () => {
+    beforeEach(() => {
+      const createStub = jest.fn().mockResolvedValue(testContext.dataCollectorInstance);
 
       function makeFakeBraintree() {
         return {
@@ -25,106 +30,112 @@ describe('DataCollector', function () {
         };
       }
 
-      this.config = {
+      testContext.config = {
         client: {
-          getVersion: this.sandbox.stub().returns('1.2.3')
+          getVersion: jest.fn().mockReturnValue('1.2.3')
         },
         kount: true
       };
 
       global.braintree = makeFakeBraintree();
 
-      this.sandbox.stub(assets, 'loadScript').callsFake(function () {
+      jest.spyOn(assets, 'loadScript').mockImplementation(() => {
         global.braintree = makeFakeBraintree();
 
         return Promise.resolve();
       });
     });
 
-    afterEach(function () {
+    afterEach(() => {
       delete global.braintree;
     });
 
-    it('loads datacollector script if data collector does not exist on braintree object', function () {
-      var dc = new DataCollector(this.config);
+    test(
+      'loads datacollector script if data collector does not exist on braintree object',
+      () => {
+        const dc = new DataCollector(testContext.config);
 
-      delete global.braintree.dataCollector;
+        delete global.braintree.dataCollector;
 
-      return dc.initialize().then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith({
-          src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
-          id: 'braintree-dropin-data-collector-script'
+        return dc.initialize().then(() => {
+          expect(assets.loadScript).toBeCalledTimes(1);
+          expect(assets.loadScript).toBeCalledWith({
+            src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
+            id: 'braintree-dropin-data-collector-script'
+          });
         });
-      });
-    });
+      }
+    );
 
-    it('loads datacollector script if braintree object does not exist', function () {
-      var dc = new DataCollector(this.config);
+    test(
+      'loads datacollector script if braintree object does not exist',
+      () => {
+        const dc = new DataCollector(testContext.config);
 
-      delete global.braintree;
+        delete global.braintree;
 
-      return dc.initialize().then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith({
-          src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
-          id: 'braintree-dropin-data-collector-script'
+        return dc.initialize().then(() => {
+          expect(assets.loadScript).toBeCalledTimes(1);
+          expect(assets.loadScript).toBeCalledWith({
+            src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
+            id: 'braintree-dropin-data-collector-script'
+          });
         });
+      }
+    );
+
+    test('does not load datacollector script if it already exists', () => {
+      const dc = new DataCollector(testContext.config);
+
+      return dc.initialize().then(() => {
+        expect(assets.loadScript).not.toBeCalled();
       });
     });
 
-    it('does not load datacollector script if it already exists', function () {
-      var dc = new DataCollector(this.config);
+    test('creates a data collector instance', () => {
+      const dc = new DataCollector(testContext.config);
 
-      return dc.initialize().then(function () {
-        expect(assets.loadScript).to.not.be.called;
+      expect(dc._instance).toBeFalsy();
+
+      return dc.initialize().then(() => {
+        expect(dc._instance).toBe(testContext.dataCollectorInstance);
       });
     });
 
-    it('creates a data collector instance', function () {
-      var dc = new DataCollector(this.config);
+    test('resolves even if data collector setup fails', () => {
+      const dc = new DataCollector(testContext.config);
+      const err = new Error('fail');
 
-      expect(dc._instance).to.not.exist;
+      jest.spyOn(dc, 'log').mockImplementation();
+      global.braintree.dataCollector.create.mockRejectedValue(err);
 
-      return dc.initialize().then(function () {
-        expect(dc._instance).to.equal(this.dataCollectorInstance);
-      }.bind(this));
-    });
-
-    it('resolves even if data collector setup fails', function () {
-      var dc = new DataCollector(this.config);
-      var err = new Error('fail');
-
-      this.sandbox.stub(dc, 'log');
-      global.braintree.dataCollector.create.rejects(err);
-
-      return dc.initialize().then(function () {
-        expect(dc._instance).to.not.exist;
-        expect(dc.log).to.be.calledWith(err);
-        expect(analytics.sendEvent).to.be.calledWith(this.config.client, 'data-collector.setup-failed');
-      }.bind(this));
+      return dc.initialize().then(() => {
+        expect(dc._instance).toBeFalsy();
+        expect(dc.log).toBeCalledWith(err);
+        expect(analytics.sendEvent).toBeCalledWith(testContext.config.client, 'data-collector.setup-failed');
+      });
     });
   });
 
-  describe('getDeviceData', function () {
-    it('returns device data', function () {
-      var dc = new DataCollector({});
+  describe('getDeviceData', () => {
+    test('returns device data', () => {
+      const dc = new DataCollector({});
 
-      dc._instance = this.dataCollectorInstance;
+      dc._instance = testContext.dataCollectorInstance;
 
-      expect(dc.getDeviceData()).to.equal('device-data');
+      expect(dc.getDeviceData()).toBe('device-data');
     });
   });
 
-  describe('teardown', function () {
-    it('calls teardown on data collector instance', function () {
-      var dc = new DataCollector({});
+  describe('teardown', () => {
+    test('calls teardown on data collector instance', () => {
+      const dc = new DataCollector({});
 
-      dc._instance = this.dataCollectorInstance;
+      dc._instance = testContext.dataCollectorInstance;
 
-      return dc.teardown().then(function () {
-        expect(this.dataCollectorInstance.teardown).to.be.calledOnce;
-      }.bind(this));
+      return dc.teardown().then(() => {
+        expect(testContext.dataCollectorInstance.teardown).toBeCalledTimes(1);
+      });
     });
   });
 });

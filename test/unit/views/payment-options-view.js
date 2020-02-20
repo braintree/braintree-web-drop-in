@@ -1,16 +1,15 @@
-'use strict';
 
-var BaseView = require('../../../src/views/base-view');
-var CardView = require('../../../src/views/payment-sheet-views/card-view');
-var PaymentOptionsView = require('../../../src/views/payment-options-view');
-var strings = require('../../../src/translations/en_US');
-var fake = require('../../helpers/fake');
-var fs = require('fs');
-var analytics = require('../../../src/lib/analytics');
+const BaseView = require('../../../src/views/base-view');
+const CardView = require('../../../src/views/payment-sheet-views/card-view');
+const PaymentOptionsView = require('../../../src/views/payment-options-view');
+const strings = require('../../../src/translations/en_US');
+const fake = require('../../helpers/fake');
+const fs = require('fs');
+const analytics = require('../../../src/lib/analytics');
 
-var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
+const mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
-var paymentOptionAttributes = {
+const paymentOptionAttributes = {
   applePay: {
     icon: '#logoApplePay',
     optionLabel: 'Paying with Apple Pay',
@@ -50,141 +49,157 @@ var paymentOptionAttributes = {
   }
 };
 
-describe('PaymentOptionsView', function () {
-  beforeEach(function () {
-    this.client = fake.client();
+describe('PaymentOptionsView', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
   });
 
-  describe('Constructor', function () {
-    beforeEach(function () {
-      this.sandbox.stub(PaymentOptionsView.prototype, '_initialize');
+  beforeEach(() => {
+    testContext.client = fake.client();
+  });
+
+  describe('Constructor', () => {
+    beforeEach(() => {
+      jest.spyOn(PaymentOptionsView.prototype, '_initialize').mockImplementation();
     });
 
-    it('inherits from BaseView', function () {
-      expect(new PaymentOptionsView({})).to.be.an.instanceof(BaseView);
+    test('inherits from BaseView', () => {
+      expect(new PaymentOptionsView({})).toBeInstanceOf(BaseView);
     });
 
-    it('calls _initialize', function () {
+    test('calls _initialize', () => {
       new PaymentOptionsView({}); // eslint-disable-line no-new
 
-      expect(PaymentOptionsView.prototype._initialize).to.have.been.calledOnce;
+      expect(PaymentOptionsView.prototype._initialize).toBeCalledTimes(1);
     });
   });
 
-  describe('_initialize', function () {
-    beforeEach(function () {
-      this.wrapper = document.createElement('div');
-      this.wrapper.innerHTML = mainHTML;
+  describe('_initialize', () => {
+    beforeEach(() => {
+      testContext.wrapper = document.createElement('div');
+      testContext.wrapper.innerHTML = mainHTML;
 
-      this.element = this.wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
+      testContext.element = testContext.wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
     });
 
-    Object.keys(paymentOptionAttributes).forEach(function (optionName) {
-      var option = paymentOptionAttributes[optionName];
+    afterEach(() => {
 
-      it('adds a ' + option.paymentOptionID + ' option', function () {
-        var paymentOptionsView = new PaymentOptionsView({
-          client: this.client,
-          element: this.element,
+    });
+
+    Object.keys(paymentOptionAttributes).forEach(optionName => {
+      const option = paymentOptionAttributes[optionName];
+
+      test('adds a ' + option.paymentOptionID + ' option', () => {
+        const paymentOptionsView = new PaymentOptionsView({
+          client: testContext.client,
+          element: testContext.element,
           mainView: {},
           model: modelThatSupports([option.paymentOptionID]),
           strings: strings
         });
-        var label = paymentOptionsView.container.querySelector('.braintree-option__label');
-        var icon = paymentOptionsView.container.querySelector('use');
-        var iconContainer = icon.parentElement;
-        var optionElement = paymentOptionsView.elements[option.paymentOptionID];
+        const label = paymentOptionsView.container.querySelector('.braintree-option__label');
+        const icon = paymentOptionsView.container.querySelector('use');
+        const iconContainer = icon.parentElement;
+        const optionElement = paymentOptionsView.elements[option.paymentOptionID];
 
-        expect(label.getAttribute('aria-label')).to.equal(option.optionLabel);
-        expect(label.innerHTML).to.contain(option.optionTitle);
-        expect(icon.href.baseVal).to.equal(option.icon);
-        expect(optionElement.div).to.exist;
-        expect(optionElement.clickHandler).to.be.a('function');
+        expect(label.getAttribute('aria-label')).toBe(option.optionLabel);
+        expect(label.innerHTML).toMatch(option.optionTitle);
+        expect(icon.getAttribute('xlink:href')).toBe(option.icon);
+        expect(optionElement.div).toBeDefined();
+        expect(optionElement.clickHandler).toBeInstanceOf(Function);
 
         if (option.className) {
-          expect(iconContainer.classList.contains(option.className)).to.be.true;
+          expect(iconContainer.classList.contains(option.className)).toBe(true);
         } else {
-          expect(iconContainer.classList.contains('braintree-option__logo@CLASSNAME')).to.be.false;
+          expect(iconContainer.classList.contains('braintree-option__logo@CLASSNAME')).toBe(false);
         }
       });
     });
 
-    it('sets the primary view to the payment option when clicked', function () {
-      var mainViewStub = {setPrimaryView: this.sandbox.stub()};
-      var paymentOptionsView = new PaymentOptionsView({
-        client: this.client,
-        element: this.element,
+    test('sets the primary view to the payment option when clicked', () => {
+      const mainViewStub = { setPrimaryView: jest.fn() };
+      const paymentOptionsView = new PaymentOptionsView({
+        client: testContext.client,
+        element: testContext.element,
         mainView: mainViewStub,
         model: modelThatSupports(['card']),
         strings: strings
       });
-      var option = paymentOptionsView.container.querySelector('.braintree-option');
+      const option = paymentOptionsView.container.querySelector('.braintree-option');
 
       option.click();
 
-      expect(mainViewStub.setPrimaryView).to.have.been.calledWith(CardView.ID);
+      expect(mainViewStub.setPrimaryView).toBeCalledWith(CardView.ID);
     });
 
-    it('calls model.selectPaymentOption when payment option is clicked', function () {
-      var mainViewStub = {setPrimaryView: this.sandbox.stub()};
-      var paymentOptionsView = new PaymentOptionsView({
-        client: this.client,
-        element: this.element,
-        mainView: mainViewStub,
-        model: modelThatSupports(['card']),
-        strings: strings
-      });
-      var option = paymentOptionsView.container.querySelector('.braintree-option');
+    test(
+      'calls model.selectPaymentOption when payment option is clicked',
+      () => {
+        const mainViewStub = { setPrimaryView: jest.fn() };
+        const paymentOptionsView = new PaymentOptionsView({
+          client: testContext.client,
+          element: testContext.element,
+          mainView: mainViewStub,
+          model: modelThatSupports(['card']),
+          strings: strings
+        });
+        const option = paymentOptionsView.container.querySelector('.braintree-option');
 
-      this.sandbox.stub(paymentOptionsView.model, 'selectPaymentOption');
+        jest.spyOn(paymentOptionsView.model, 'selectPaymentOption').mockImplementation();
 
-      option.click();
+        option.click();
 
-      expect(paymentOptionsView.model.selectPaymentOption).to.have.been.calledWith(CardView.ID);
-    });
+        expect(paymentOptionsView.model.selectPaymentOption).toBeCalledWith(CardView.ID);
+      }
+    );
   });
 
-  describe('sends analytics events', function () {
-    beforeEach(function () {
-      var wrapper = document.createElement('div');
+  describe('sends analytics events', () => {
+    beforeEach(() => {
+      const wrapper = document.createElement('div');
 
       wrapper.innerHTML = mainHTML;
 
-      this.element = wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
+      testContext.element = wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
 
-      this.viewConfiguration = {
-        client: this.client,
-        element: this.element,
-        mainView: {setPrimaryView: function () {}},
+      testContext.viewConfiguration = {
+        client: testContext.client,
+        element: testContext.element,
+        mainView: { setPrimaryView: function () {} },
         strings: strings
       };
     });
 
-    Object.keys(paymentOptionAttributes).forEach(function (optionName) {
-      var option = paymentOptionAttributes[optionName];
+    Object.keys(paymentOptionAttributes).forEach(optionName => {
+      const option = paymentOptionAttributes[optionName];
 
-      it('when the ' + option.paymentOptionID + ' option is selected', function () {
-        var optionElement, paymentOptionsView;
-        var model = modelThatSupports([option.paymentOptionID]);
-        var viewConfiguration = this.viewConfiguration;
-        var eventName = 'selected.' + option.paymentOptionID;
+      test(
+        'when the ' + option.paymentOptionID + ' option is selected',
+        () => {
+          let optionElement, paymentOptionsView;
+          const model = modelThatSupports([option.paymentOptionID]);
+          const viewConfiguration = testContext.viewConfiguration;
+          const eventName = 'selected.' + option.paymentOptionID;
 
-        this.sandbox.stub(analytics, 'sendEvent');
+          jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
-        viewConfiguration.model = model;
-        paymentOptionsView = new PaymentOptionsView(viewConfiguration);
-        optionElement = paymentOptionsView.container.querySelector('.braintree-option');
+          viewConfiguration.model = model;
+          paymentOptionsView = new PaymentOptionsView(viewConfiguration);
+          optionElement = paymentOptionsView.container.querySelector('.braintree-option');
 
-        optionElement.click();
+          optionElement.click();
 
-        expect(analytics.sendEvent).to.have.been.calledWith(paymentOptionsView.client, eventName);
-      });
+          expect(analytics.sendEvent).toBeCalledWith(paymentOptionsView.client, eventName);
+        }
+      );
     });
   });
 });
 
 function modelThatSupports(supportedPaymentOptions) {
-  var result = fake.model();
+  const result = fake.model();
 
   result.supportedPaymentOptions = supportedPaymentOptions;
 

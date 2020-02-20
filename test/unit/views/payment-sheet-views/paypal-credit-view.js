@@ -1,48 +1,54 @@
-'use strict';
+
 /* eslint-disable no-new */
 
-var BasePayPalView = require('../../../../src/views/payment-sheet-views/base-paypal-view');
-var PayPalCreditView = require('../../../../src/views/payment-sheet-views/paypal-credit-view');
+const BasePayPalView = require('../../../../src/views/payment-sheet-views/base-paypal-view');
+const PayPalCreditView = require('../../../../src/views/payment-sheet-views/paypal-credit-view');
 
-describe('PayPalCreditView', function () {
-  beforeEach(function () {
-    this.sandbox.stub(PayPalCreditView.prototype, 'initialize');
+describe('PayPalCreditView', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
   });
 
-  it('inherits from BasePayPalView', function () {
-    expect(new PayPalCreditView()).to.be.an.instanceOf(BasePayPalView);
+  beforeEach(() => {
+    jest.spyOn(PayPalCreditView.prototype, 'initialize').mockImplementation();
   });
 
-  describe('isEnabled', function () {
-    beforeEach(function () {
-      this.options = {
+  test('inherits from BasePayPalView', () => {
+    expect(new PayPalCreditView()).toBeInstanceOf(BasePayPalView);
+  });
+
+  describe('isEnabled', () => {
+    beforeEach(() => {
+      testContext.options = {
         merchantConfiguration: {
           paypalCredit: {}
         }
       };
 
-      this.sandbox.stub(BasePayPalView, 'isEnabled').resolves(true);
+      jest.spyOn(BasePayPalView, 'isEnabled').mockResolvedValue(true);
     });
 
-    it('resolves false if base PayPal view resolves false', function () {
-      BasePayPalView.isEnabled.resolves(false);
+    test('resolves false if base PayPal view resolves false', () => {
+      BasePayPalView.isEnabled.mockResolvedValue(false);
 
-      return PayPalCreditView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(false);
+      return PayPalCreditView.isEnabled(testContext.options).then(result => {
+        expect(result).toBe(false);
       });
     });
 
-    it('resolves false if merchant did not configure paypalCredit', function () {
-      delete this.options.merchantConfiguration.paypalCredit;
+    test('resolves false if merchant did not configure paypalCredit', () => {
+      delete testContext.options.merchantConfiguration.paypalCredit;
 
-      return PayPalCreditView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(false);
+      return PayPalCreditView.isEnabled(testContext.options).then(result => {
+        expect(result).toBe(false);
       });
     });
 
-    it('resolves true if merchant enabled paypalCredit', function () {
-      return PayPalCreditView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(true);
+    test('resolves true if merchant enabled paypalCredit', () => {
+      return PayPalCreditView.isEnabled(testContext.options).then(result => {
+        expect(result).toBe(true);
       });
     });
   });

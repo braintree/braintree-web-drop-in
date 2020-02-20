@@ -21,7 +21,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist;
+      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
       expect(result.description).to.include('ending in 11');
       expect(result.details.cardType).to.include('Visa');
     });
@@ -40,7 +40,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist;
+      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
       expect(result.type).to.equal('PayPalAccount');
       expect(result.details.email).to.include(process.env.PAYPAL_USERNAME);
     });
@@ -70,7 +70,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist;
+      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
       expect(result.type).to.equal('PayPalAccount');
       expect(result.details.email).to.include(process.env.PAYPAL_USERNAME);
     });
@@ -94,7 +94,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist;
+      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
       expect(result.description).to.include('ending in 11');
       expect(result.details.cardType).to.include('Visa');
     });
@@ -111,7 +111,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist;
+      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
       expect(result.type).to.equal('PayPalAccount');
       expect(result.details.email).to.include(process.env.PAYPAL_USERNAME);
     });

@@ -10,6 +10,7 @@ var PaymentOptionsView = require('./payment-options-view');
 var DeleteConfirmationView = require('./delete-confirmation-view');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var Promise = require('../lib/promise');
+var wait = require('../lib/wait');
 var supportsFlexbox = require('../lib/supports-flexbox');
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
@@ -92,9 +93,9 @@ MainView.prototype._initialize = function () {
   addSelectionEventHandler(this.toggle, this.toggleAdditionalOptions.bind(this));
 
   this.model.on('changeActivePaymentMethod', function () {
-    setTimeout(function () {
+    wait.delay(CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT).then(function () {
       this.setPrimaryView(PaymentMethodsView.ID);
-    }.bind(this), CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+    }.bind(this));
   }.bind(this));
 
   this.model.on('changeActivePaymentView', this._onChangeActivePaymentMethodView.bind(this));
@@ -138,9 +139,9 @@ MainView.prototype._onChangeActivePaymentMethodView = function (id) {
     classList.add(this.paymentMethodsViews.container, 'braintree-methods--active');
     classList.remove(this.sheetContainer, 'braintree-sheet--active');
   } else {
-    setTimeout(function () {
+    wait.delay(0).then(function () {
       classList.add(this.sheetContainer, 'braintree-sheet--active');
-    }.bind(this), 0);
+    }.bind(this));
     classList.remove(this.paymentMethodsViews.container, 'braintree-methods--active');
     if (!this.getView(id).getPaymentMethod()) {
       this.model.setPaymentMethodRequestable({
@@ -163,12 +164,12 @@ MainView.prototype.getView = function (id) {
 MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
   var paymentMethod;
 
-  setTimeout(function () {
+  wait.delay(0).then(function () {
     this.element.className = prefixShowClass(id);
     if (secondaryViewId) {
       classList.add(this.element, prefixShowClass(secondaryViewId));
     }
-  }.bind(this), 0);
+  }.bind(this));
 
   this.primaryView = this.getView(id);
   this.model.changeActivePaymentView(id);
@@ -369,11 +370,11 @@ MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
   }
 
   return new Promise(function (resolve) {
-    setTimeout(function () {
+    wait.delay(500).then(function () {
       // allow all the views to reset before hiding the loading indicator
       self.hideLoadingIndicator();
       resolve();
-    }, 500);
+    });
   });
 };
 

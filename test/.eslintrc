@@ -1,12 +1,29 @@
----
-  env:
-    mocha: true
-
-  globals:
-    expect: false
-    sinon: true
-    fake: false
-
-  rules:
-    no-invalid-this: 0
-    no-unused-expressions: 0
+{
+  "extends": "braintree/es6",
+  "env": {
+    "es6": true,
+    "jest": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "globals":{
+    "global": true,
+    "jest": true,
+    "$": true,
+    "$$": true,
+    "browser": true
+  },
+  "rules": {
+    "no-invalid-this": 0,
+    "object-curly-spacing": [
+      "error",
+      "always",
+      {
+        "arraysInObjects": false,
+        "objectsInObjects": false
+      }
+    ]
+  }
+}
