@@ -1,20 +1,20 @@
 'use strict';
 
-var dropin = require('../../src/index');
-var Dropin = require('../../src/dropin');
-var DropinError = require('../../src/lib/dropin-error');
-var Promise = require('../../src/lib/promise');
-var BraintreeError = require('braintree-web/lib/braintree-error');
-var client = require('braintree-web/client');
-var fake = require('../helpers/fake');
-var dropinConstants = require('../../src/constants');
-var analytics = require('../../src/lib/analytics');
-var {
+const dropin = require('../../src/index');
+const Dropin = require('../../src/dropin');
+const DropinError = require('../../src/lib/dropin-error');
+const Promise = require('../../src/lib/promise');
+const BraintreeError = require('braintree-web/lib/braintree-error');
+const client = require('braintree-web/client');
+const fake = require('../helpers/fake');
+const dropinConstants = require('../../src/constants');
+const analytics = require('../../src/lib/analytics');
+const {
   yields
 } = require('../helpers/yields');
 // TODO this gets transformed to the package.json version when built
 // should we figure out how to actually test this?
-var version = '__VERSION__';
+const version = '__VERSION__';
 
 describe('dropin.create', () => {
   let testContext;
@@ -24,7 +24,7 @@ describe('dropin.create', () => {
   });
 
   beforeEach(() => {
-    var container = document.createElement('div');
+    const container = document.createElement('div');
 
     testContext.form = document.createElement('form');
 
@@ -41,7 +41,7 @@ describe('dropin.create', () => {
   });
 
   test('errors out if no authorization given', done => {
-    dropin.create({}, function (err, instance) {
+    dropin.create({}, (err, instance) => {
       expect(err).toBeInstanceOf(DropinError);
       expect(err.message).toBe('options.authorization is required.');
       expect(instance).not.toBeDefined();
@@ -50,7 +50,7 @@ describe('dropin.create', () => {
   });
 
   test('returns an error if client.create errors', done => {
-    var originalErr = new BraintreeError({
+    const originalErr = new BraintreeError({
       type: 'MERCHANT',
       code: 'CODE',
       message: 'you goofed!!'
@@ -61,7 +61,7 @@ describe('dropin.create', () => {
     dropin.create({
       authorization: 'tokenization_key',
       selector: '#foo'
-    }, function (err, instance) {
+    }, (err, instance) => {
       expect(err).toBeInstanceOf(DropinError);
       expect(err.message).toBe('There was an error creating Drop-in.');
       expect(err._braintreeWebError).toBe(originalErr);
@@ -71,7 +71,7 @@ describe('dropin.create', () => {
   });
 
   test('resolves a Dropin instance if client.create returns successfully', () => {
-      var fakeClient = fake.client();
+      const fakeClient = fake.client();
 
       jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
         callback(null, this);
@@ -91,8 +91,8 @@ describe('dropin.create', () => {
   test(
     'returns an error to callback if Drop-in initialization fails',
     done => {
-      var fakeClient = fake.client();
-      var dropinError = new DropinError('Dropin Error');
+      const fakeClient = fake.client();
+      const dropinError = new DropinError('Dropin Error');
 
       jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(yields(dropinError));
 
@@ -101,7 +101,7 @@ describe('dropin.create', () => {
       dropin.create({
         authorization: 'tokenization_key',
         selector: '#foo'
-      }, function (err, instance) {
+      }, (err, instance) => {
         expect(err).toBe(dropinError);
         expect(instance).not.toBeDefined();
 
@@ -111,7 +111,7 @@ describe('dropin.create', () => {
   );
 
   test('sets the correct analytics metadata', done => {
-    var fakeClient = fake.client();
+    const fakeClient = fake.client();
 
     jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
       callback(null, this);
@@ -122,8 +122,8 @@ describe('dropin.create', () => {
     dropin.create({
       authorization: 'tokenization_key',
       selector: '#foo'
-    }, function () {
-      var configuration = fakeClient.getConfiguration();
+    }, () => {
+      const configuration = fakeClient.getConfiguration();
 
       expect(configuration.analyticsMetadata.integration).toBe(dropinConstants.INTEGRATION);
       expect(configuration.analyticsMetadata.integrationType).toBe(dropinConstants.INTEGRATION);
@@ -136,7 +136,7 @@ describe('dropin.create', () => {
   test(
     'sends web.dropin.started.tokenization-key event when using a tokenization key',
     done => {
-      var fakeClient = fake.client();
+      const fakeClient = fake.client();
 
       jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
         callback(null, this);
@@ -148,7 +148,7 @@ describe('dropin.create', () => {
       dropin.create({
         authorization: fake.tokenizationKey,
         selector: '#foo'
-      }, function () {
+      }, () => {
         expect(analytics.sendEvent).toBeCalledWith(fakeClient, 'started.tokenization-key');
         done();
       });
@@ -158,7 +158,7 @@ describe('dropin.create', () => {
   test(
     'sends web.dropin.started.client-token event when using a client token',
     done => {
-      var fakeConfiguration, fakeClient;
+      let fakeConfiguration, fakeClient;
 
       fakeConfiguration = fake.configuration();
       fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
@@ -177,7 +177,7 @@ describe('dropin.create', () => {
       dropin.create({
         authorization: fake.clientToken,
         selector: '#foo'
-      }, function () {
+      }, () => {
         expect(analytics.sendEvent).toBeCalledWith(fakeClient, 'started.client-token');
         done();
       });

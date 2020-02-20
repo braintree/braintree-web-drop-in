@@ -1,9 +1,9 @@
 'use strict';
 
-var BaseView = require('../../../src/views/base-view');
-var constants = require('../../../src/constants');
-var classList = require('@braintree/class-list');
-var Promise = require('../../../src/lib/promise');
+const BaseView = require('../../../src/views/base-view');
+const constants = require('../../../src/constants');
+const classList = require('@braintree/class-list');
+const Promise = require('../../../src/lib/promise');
 
 describe('BaseView', () => {
   let testContext;
@@ -14,13 +14,13 @@ describe('BaseView', () => {
 
   describe('Constructor', () => {
     test('does not require options to be passed', () => {
-      expect(function () {
+      expect(() => {
         new BaseView(); // eslint-disable-line no-new
       }).not.toThrowError();
     });
 
     test('takes properties from passed options', () => {
-      var view = new BaseView({foo: 'boo', yas: 'gaga'});
+      const view = new BaseView({foo: 'boo', yas: 'gaga'});
 
       expect(view.foo).toBe('boo');
       expect(view.yas).toBe('gaga');
@@ -29,8 +29,8 @@ describe('BaseView', () => {
 
   describe('teardown', () => {
     test('returns a resolved promise', () => {
-      var view = new BaseView();
-      var promise = view.teardown();
+      const view = new BaseView();
+      const promise = view.teardown();
 
       expect(promise).toBeInstanceOf(Promise);
     });
@@ -38,11 +38,11 @@ describe('BaseView', () => {
 
   describe('requestPaymentMethod', () => {
     test('returns a rejected promise', () => {
-      var view = new BaseView();
+      const view = new BaseView();
 
-      return view.requestPaymentMethod().then(function () {
+      return view.requestPaymentMethod().then(() => {
         throw new Error('should not resolve');
-      }).catch(function (err) {
+      }).catch(err => {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toBe(constants.errors.NO_PAYMENT_METHOD_ERROR);
       });
@@ -53,7 +53,7 @@ describe('BaseView', () => {
     test(
       'returns undefined if there is no activeMethodView on instance',
       () => {
-        var view = new BaseView();
+        const view = new BaseView();
 
         expect(view.getPaymentMethod()).toBeUndefined(); // eslint-disable-line no-undefined
       }
@@ -62,7 +62,7 @@ describe('BaseView', () => {
     test(
       'returns undefined if activeMethodView does not have a payment method',
       () => {
-        var view = new BaseView();
+        const view = new BaseView();
 
         view.activeMethodView = {};
 
@@ -73,8 +73,8 @@ describe('BaseView', () => {
     test(
       'returns the payment method object if there is an activeMethodView with a payment method object',
       () => {
-        var view = new BaseView();
-        var paymentMethod = {};
+        const view = new BaseView();
+        const paymentMethod = {};
 
         view.activeMethodView = {
           paymentMethod: paymentMethod
@@ -87,7 +87,7 @@ describe('BaseView', () => {
 
   describe('onSelection', () => {
     test('is a noop function', () => {
-      var view = new BaseView();
+      const view = new BaseView();
 
       expect(view.onSelection).toBeInstanceOf(Function);
     });
@@ -103,7 +103,7 @@ describe('BaseView', () => {
     });
 
     test('adds a loading class to view element', () => {
-      var view = new BaseView({
+      const view = new BaseView({
         element: testContext.element,
         model: testContext.model
       });
@@ -115,7 +115,7 @@ describe('BaseView', () => {
     });
 
     test('ignores adding class if no element is provided', () => {
-      var view = new BaseView({
+      const view = new BaseView({
         model: testContext.model
       });
 
@@ -125,7 +125,7 @@ describe('BaseView', () => {
     });
 
     test('calls preventUserAction on model', () => {
-      var view = new BaseView({
+      const view = new BaseView({
         model: testContext.model
       });
 
@@ -145,7 +145,7 @@ describe('BaseView', () => {
     });
 
     test('adds a loading class to view element', () => {
-      var view = new BaseView({
+      const view = new BaseView({
         element: testContext.element,
         model: testContext.model
       });
@@ -157,7 +157,7 @@ describe('BaseView', () => {
     });
 
     test('ignores adding class if no element is provided', () => {
-      var view = new BaseView({
+      const view = new BaseView({
         model: testContext.model
       });
 
@@ -167,7 +167,7 @@ describe('BaseView', () => {
     });
 
     test('calls allowUserAction on model', () => {
-      var view = new BaseView({
+      const view = new BaseView({
         model: testContext.model
       });
 

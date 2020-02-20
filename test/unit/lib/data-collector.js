@@ -1,10 +1,10 @@
 'use strict';
 
-var fake = require('../../helpers/fake');
-var assets = require('@braintree/asset-loader');
-var Promise = require('../../../src/lib/promise');
-var analytics = require('../../../src/lib/analytics');
-var DataCollector = require('../../../src/lib/data-collector');
+const fake = require('../../helpers/fake');
+const assets = require('@braintree/asset-loader');
+const Promise = require('../../../src/lib/promise');
+const analytics = require('../../../src/lib/analytics');
+const DataCollector = require('../../../src/lib/data-collector');
 
 describe('DataCollector', () => {
   let testContext;
@@ -21,7 +21,7 @@ describe('DataCollector', () => {
 
   describe('initialize', () => {
     beforeEach(() => {
-      var createStub = jest.fn().mockResolvedValue(testContext.dataCollectorInstance);
+      const createStub = jest.fn().mockResolvedValue(testContext.dataCollectorInstance);
 
       function makeFakeBraintree() {
         return {
@@ -40,7 +40,7 @@ describe('DataCollector', () => {
 
       global.braintree = makeFakeBraintree();
 
-      jest.spyOn(assets, 'loadScript').mockImplementation(function () {
+      jest.spyOn(assets, 'loadScript').mockImplementation(() => {
         global.braintree = makeFakeBraintree();
 
         return Promise.resolve();
@@ -54,11 +54,11 @@ describe('DataCollector', () => {
     test(
       'loads datacollector script if data collector does not exist on braintree object',
       () => {
-        var dc = new DataCollector(testContext.config);
+        const dc = new DataCollector(testContext.config);
 
         delete global.braintree.dataCollector;
 
-        return dc.initialize().then(function () {
+        return dc.initialize().then(() => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
             src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
@@ -71,11 +71,11 @@ describe('DataCollector', () => {
     test(
       'loads datacollector script if braintree object does not exist',
       () => {
-        var dc = new DataCollector(testContext.config);
+        const dc = new DataCollector(testContext.config);
 
         delete global.braintree;
 
-        return dc.initialize().then(function () {
+        return dc.initialize().then(() => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
             src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
@@ -86,31 +86,31 @@ describe('DataCollector', () => {
     );
 
     test('does not load datacollector script if it already exists', () => {
-      var dc = new DataCollector(testContext.config);
+      const dc = new DataCollector(testContext.config);
 
-      return dc.initialize().then(function () {
+      return dc.initialize().then(() => {
         expect(assets.loadScript).not.toBeCalled();
       });
     });
 
     test('creates a data collector instance', () => {
-      var dc = new DataCollector(testContext.config);
+      const dc = new DataCollector(testContext.config);
 
       expect(dc._instance).toBeFalsy();
 
-      return dc.initialize().then(function () {
+      return dc.initialize().then(() => {
         expect(dc._instance).toBe(testContext.dataCollectorInstance);
       });
     });
 
     test('resolves even if data collector setup fails', () => {
-      var dc = new DataCollector(testContext.config);
-      var err = new Error('fail');
+      const dc = new DataCollector(testContext.config);
+      const err = new Error('fail');
 
       jest.spyOn(dc, 'log').mockImplementation();
       global.braintree.dataCollector.create.mockRejectedValue(err);
 
-      return dc.initialize().then(function () {
+      return dc.initialize().then(() => {
         expect(dc._instance).toBeFalsy();
         expect(dc.log).toBeCalledWith(err);
         expect(analytics.sendEvent).toBeCalledWith(testContext.config.client, 'data-collector.setup-failed');
@@ -120,7 +120,7 @@ describe('DataCollector', () => {
 
   describe('getDeviceData', () => {
     test('returns device data', () => {
-      var dc = new DataCollector({});
+      const dc = new DataCollector({});
 
       dc._instance = testContext.dataCollectorInstance;
 
@@ -130,11 +130,11 @@ describe('DataCollector', () => {
 
   describe('teardown', () => {
     test('calls teardown on data collector instance', () => {
-      var dc = new DataCollector({});
+      const dc = new DataCollector({});
 
       dc._instance = testContext.dataCollectorInstance;
 
-      return dc.teardown().then(function () {
+      return dc.teardown().then(() => {
         expect(testContext.dataCollectorInstance.teardown).toBeCalledTimes(1);
       });
     });

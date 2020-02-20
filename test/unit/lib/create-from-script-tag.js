@@ -1,9 +1,9 @@
 'use strict';
 
-var createFromScriptTag = require('../../../src/lib/create-from-script-tag');
-var findParentForm = require('../../../src/lib/find-parent-form');
-var analytics = require('../../../src/lib/analytics');
-var {
+const createFromScriptTag = require('../../../src/lib/create-from-script-tag');
+const findParentForm = require('../../../src/lib/find-parent-form');
+const analytics = require('../../../src/lib/analytics');
+const {
   yields
 } = require('../../helpers/yields');
 
@@ -15,7 +15,7 @@ describe('createFromScriptTag', () => {
   });
 
   beforeEach(() => {
-    var container = document.createElement('div');
+    const container = document.createElement('div');
 
     container.id = 'script-container';
     jest.spyOn(analytics, 'sendEvent').mockImplementation();
@@ -52,7 +52,7 @@ describe('createFromScriptTag', () => {
       delete testContext.scriptTag.dataset.braintreeDropinAuthorization;
       jest.spyOn(document, 'createElement');
 
-      expect(function () {
+      expect(() => {
         createFromScriptTag(testContext.createFunction, testContext.scriptTag);
       }).toThrowError('Authorization not found in data-braintree-dropin-authorization attribute');
 
@@ -72,7 +72,7 @@ describe('createFromScriptTag', () => {
   test('throws an error if no form can be found', () => {
     findParentForm.findParentForm.mockReturnValue(null);
 
-    expect(function () {
+    expect(() => {
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
     }).toThrowError('No form found for script tag integration.');
   });
@@ -80,12 +80,12 @@ describe('createFromScriptTag', () => {
   test(
     'inserts container before script tag when form is found',
     done => {
-      var fakeContainer = {};
+      const fakeContainer = {};
 
       jest.spyOn(document, 'createElement').mockReturnValue(fakeContainer);
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         expect(testContext.scriptTag.parentNode.insertBefore).toBeCalledTimes(1);
         expect(testContext.scriptTag.parentNode.insertBefore).toBeCalledWith(fakeContainer, testContext.scriptTag);
         done();
@@ -96,7 +96,7 @@ describe('createFromScriptTag', () => {
   test('calls create with authorization and container', done => {
     createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-    setTimeout(function () {
+    setTimeout(() => {
       expect(testContext.createFunction).toBeCalledTimes(1);
       expect(testContext.createFunction).toBeCalledWith(expect.objectContaining({
         authorization: 'an-authorization',
@@ -109,7 +109,7 @@ describe('createFromScriptTag', () => {
   test('sends an analytics event for script tag integration', done => {
     createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-    setTimeout(function () {
+    setTimeout(() => {
       expect(analytics.sendEvent).toBeCalledTimes(1);
       expect(analytics.sendEvent).toBeCalledWith(testContext.instance._client, 'integration-type.script-tag');
       done();
@@ -121,7 +121,7 @@ describe('createFromScriptTag', () => {
     done => {
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         expect(testContext.fakeForm.addEventListener).toBeCalledTimes(2);
         expect(testContext.fakeForm.addEventListener).toBeCalledWith('submit', expect.any(Function));
         done();
@@ -130,14 +130,14 @@ describe('createFromScriptTag', () => {
   );
 
   test('prevents default form submission', done => {
-    var submitHandler;
-    var fakeEvent = {
+    let submitHandler;
+    const fakeEvent = {
       preventDefault: jest.fn()
     };
 
     createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-    setTimeout(function () {
+    setTimeout(() => {
       submitHandler = testContext.fakeForm.addEventListener.mock.calls[0][1];
       submitHandler(fakeEvent);
 
@@ -147,11 +147,11 @@ describe('createFromScriptTag', () => {
   });
 
   test('calls requestPaymentMethod when form submits', done => {
-    var submitHandler;
+    let submitHandler;
 
     createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-    setTimeout(function () {
+    setTimeout(() => {
       submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
       submitHandler();
 
@@ -163,12 +163,12 @@ describe('createFromScriptTag', () => {
   test(
     'prevents default form submission before Drop-in is created',
     done => {
-      var submitHandler;
-      var fakeEvent = {preventDefault: jest.fn()};
+      let submitHandler;
+      const fakeEvent = {preventDefault: jest.fn()};
 
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         submitHandler = testContext.fakeForm.addEventListener.mock.calls[0][1];
         submitHandler(fakeEvent);
 
@@ -179,11 +179,11 @@ describe('createFromScriptTag', () => {
   );
 
   test('calls requestPaymentMethod when form submits', done => {
-    var submitHandler;
+    let submitHandler;
 
     createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-    setTimeout(function () {
+    setTimeout(() => {
       submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
       submitHandler();
 
@@ -197,8 +197,8 @@ describe('createFromScriptTag', () => {
     done => {
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
-        var submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
+      setTimeout(() => {
+        const submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
         submitHandler();
 
         const input = testContext.fakeForm.appendChild.mock.calls[0][0];
@@ -217,13 +217,13 @@ describe('createFromScriptTag', () => {
   test(
     'does not add nonce and submit form if requestPaymentMethod fails',
     done => {
-      var submitHandler;
+      let submitHandler;
 
       testContext.instance.requestPaymentMethod.mockImplementation(yields(new Error('failure')));
       jest.spyOn(document, 'createElement');
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
         submitHandler();
 
@@ -237,15 +237,15 @@ describe('createFromScriptTag', () => {
   test(
     'uses existing payment_method_nonce input if it already exists',
     done => {
-      var submitHandler;
-      var fakeInput = {};
+      let submitHandler;
+      const fakeInput = {};
 
       testContext.fakeForm.querySelector.mockReturnValue(fakeInput);
       jest.spyOn(document, 'createElement');
 
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
         submitHandler();
 
@@ -261,7 +261,7 @@ describe('createFromScriptTag', () => {
   test(
     'adds device data to form and submits form if request payment method contains device data',
     done => {
-      var submitHandler;
+      let submitHandler;
 
       testContext.instance.requestPaymentMethod.mockImplementation(yields(null, {
         nonce: 'a-nonce',
@@ -269,7 +269,7 @@ describe('createFromScriptTag', () => {
       }));
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
         submitHandler();
 
@@ -286,8 +286,8 @@ describe('createFromScriptTag', () => {
   );
 
   test('uses existing device_data input if it already exists', done => {
-    var submitHandler;
-    var fakeInput = {};
+    let submitHandler;
+    const fakeInput = {};
 
     testContext.fakeForm.querySelector.mockImplementation((selector) => {
       if (selector === '[name="payment_method_nonce"]') {
@@ -304,7 +304,7 @@ describe('createFromScriptTag', () => {
 
     createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-    setTimeout(function () {
+    setTimeout(() => {
       submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
       submitHandler();
 
@@ -318,13 +318,13 @@ describe('createFromScriptTag', () => {
 
   describe('data attributes handling', () => {
     test('accepts strings', done => {
-      var submitHandler;
+      let submitHandler;
 
       testContext.scriptTag.dataset.locale = 'es_ES';
 
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
         submitHandler();
 
@@ -337,7 +337,7 @@ describe('createFromScriptTag', () => {
     });
 
     test('accepts Booleans', done => {
-      var submitHandler;
+      let submitHandler;
 
       // no properties available are booleans
       // but there may be ones in the future
@@ -346,7 +346,7 @@ describe('createFromScriptTag', () => {
 
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
         submitHandler();
 
@@ -359,13 +359,13 @@ describe('createFromScriptTag', () => {
     });
 
     test('accepts arrays', done => {
-      var submitHandler;
+      let submitHandler;
 
       testContext.scriptTag.dataset.paymentOptionPriority = '["paypal", "card"]';
 
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
         submitHandler();
 
@@ -378,7 +378,7 @@ describe('createFromScriptTag', () => {
     });
 
     test('accepts objects', done => {
-      var submitHandler;
+      let submitHandler;
 
       testContext.scriptTag.dataset['paypal.flow'] = 'checkout';
       testContext.scriptTag.dataset['paypal.amount'] = '10.00';
@@ -387,7 +387,7 @@ describe('createFromScriptTag', () => {
 
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(function () {
+      setTimeout(() => {
         submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
         submitHandler();
 

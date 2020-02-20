@@ -1,6 +1,6 @@
 'use strict';
 
-var supportsFlexbox = require('../../../src/lib/supports-flexbox');
+const supportsFlexbox = require('../../../src/lib/supports-flexbox');
 
 describe('supportsFlexbox', () => {
   let testContext;

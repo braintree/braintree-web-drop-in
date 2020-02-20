@@ -1,13 +1,13 @@
 'use strict';
 /* eslint-disable no-new */
 
-var BaseView = require('../../../../src/views/base-view');
-var VenmoView = require('../../../../src/views/payment-sheet-views/venmo-view');
-var btVenmo = require('braintree-web/venmo');
-var fake = require('../../../helpers/fake');
-var fs = require('fs');
+const BaseView = require('../../../../src/views/base-view');
+const VenmoView = require('../../../../src/views/payment-sheet-views/venmo-view');
+const btVenmo = require('braintree-web/venmo');
+const fake = require('../../../helpers/fake');
+const fs = require('fs');
 
-var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
+const mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 
 describe('VenmoView', () => {
   let testContext;
@@ -64,7 +64,7 @@ describe('VenmoView', () => {
     test('starts async dependency', () => {
       jest.spyOn(testContext.view.model, 'asyncDependencyStarting').mockImplementation();
 
-      return testContext.view.initialize().then(function () {
+      return testContext.view.initialize().then(() => {
         expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
       });
     });
@@ -72,13 +72,13 @@ describe('VenmoView', () => {
     test('notifies async dependency', () => {
       jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
 
-      return testContext.view.initialize().then(function () {
+      return testContext.view.initialize().then(() => {
         expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
       });
     });
 
     test('creates an Venmo component', () => {
-      return testContext.view.initialize().then(function () {
+      return testContext.view.initialize().then(() => {
         expect(btVenmo.create).toBeCalledWith(expect.objectContaining({
           client: testContext.view.client
         }));
@@ -91,7 +91,7 @@ describe('VenmoView', () => {
       () => {
         testContext.view.model.merchantConfiguration.venmo = {allowNewBrowserTab: false};
 
-        return testContext.view.initialize().then(function () {
+        return testContext.view.initialize().then(() => {
           expect(btVenmo.create).toBeCalledWith(expect.objectContaining({
             client: testContext.view.client,
             allowNewBrowserTab: false
@@ -103,7 +103,7 @@ describe('VenmoView', () => {
     test(
       'checks if there is a tokenization result on the page already',
       () => {
-        return testContext.view.initialize().then(function () {
+        return testContext.view.initialize().then(() => {
           expect(testContext.fakeVenmoInstance.hasTokenizationResult).toBeCalledTimes(1);
         });
       }
@@ -112,12 +112,12 @@ describe('VenmoView', () => {
     test(
       'reports app switch payload if page has a successful tokenization result',
       () => {
-        var payload = {type: 'VenmoAccount', nonce: 'fake-venmo-nonce'};
+        const payload = {type: 'VenmoAccount', nonce: 'fake-venmo-nonce'};
 
         testContext.fakeVenmoInstance.hasTokenizationResult.mockReturnValue(true);
         testContext.fakeVenmoInstance.tokenize.mockResolvedValue(payload);
 
-        return testContext.view.initialize().then(function () {
+        return testContext.view.initialize().then(() => {
           expect(testContext.fakeVenmoInstance.tokenize).toBeCalledTimes(1);
           expect(testContext.model.reportAppSwitchPayload).toBeCalledTimes(1);
           expect(testContext.model.reportAppSwitchPayload).toBeCalledWith(payload);
@@ -129,12 +129,12 @@ describe('VenmoView', () => {
     test(
       'reports app switch error if page has an unsuccessful tokenization result',
       () => {
-        var error = new Error('failure');
+        const error = new Error('failure');
 
         testContext.fakeVenmoInstance.hasTokenizationResult.mockReturnValue(true);
         testContext.fakeVenmoInstance.tokenize.mockRejectedValue(error);
 
-        return testContext.view.initialize().then(function () {
+        return testContext.view.initialize().then(() => {
           expect(testContext.fakeVenmoInstance.tokenize).toBeCalledTimes(1);
           expect(testContext.model.reportAppSwitchError).toBeCalledTimes(1);
           expect(testContext.model.reportAppSwitchError).toBeCalledWith('venmo', error);
@@ -146,14 +146,14 @@ describe('VenmoView', () => {
     test(
       'does not report app switch error for VENMO_APP_CANCELLED error',
       () => {
-        var error = new Error('failure');
+        const error = new Error('failure');
 
         error.code = 'VENMO_APP_CANCELED';
 
         testContext.fakeVenmoInstance.hasTokenizationResult.mockReturnValue(true);
         testContext.fakeVenmoInstance.tokenize.mockRejectedValue(error);
 
-        return testContext.view.initialize().then(function () {
+        return testContext.view.initialize().then(() => {
           expect(testContext.fakeVenmoInstance.tokenize).toBeCalledTimes(1);
           expect(testContext.model.reportAppSwitchError).not.toBeCalled();
           expect(testContext.model.reportAppSwitchPayload).not.toBeCalled();
@@ -164,13 +164,13 @@ describe('VenmoView', () => {
     test(
       'calls asyncDependencyFailed when Venmo component creation fails',
       () => {
-        var fakeError = new Error('A_FAKE_ERROR');
+        const fakeError = new Error('A_FAKE_ERROR');
 
         jest.spyOn(testContext.view.model, 'asyncDependencyFailed').mockImplementation();
         btVenmo.create.mockRejectedValue(fakeError);
 
-        return testContext.view.initialize().then(function () {
-          var error = testContext.view.model.asyncDependencyFailed.mock.calls[0][0].error;
+        return testContext.view.initialize().then(() => {
+          const error = testContext.view.model.asyncDependencyFailed.mock.calls[0][0].error;
 
           expect(testContext.view.model.asyncDependencyFailed).toBeCalledTimes(1);
           expect(testContext.view.model.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
@@ -183,11 +183,11 @@ describe('VenmoView', () => {
     );
 
     test('sets up a button click handler', () => {
-      var button = document.querySelector('[data-braintree-id="venmo-button"]');
+      const button = document.querySelector('[data-braintree-id="venmo-button"]');
 
       jest.spyOn(button, 'addEventListener');
 
-      return testContext.view.initialize().then(function () {
+      return testContext.view.initialize().then(() => {
         expect(button.addEventListener).toBeCalledTimes(1);
         expect(button.addEventListener).toBeCalledWith('click', expect.any(Function));
       });
@@ -195,9 +195,9 @@ describe('VenmoView', () => {
 
     describe('button click handler', () => {
       beforeEach(() => {
-        var button = document.querySelector('[data-braintree-id="venmo-button"]');
-        var self = this;
-        var view = new VenmoView(testContext.venmoViewOptions);
+        const button = document.querySelector('[data-braintree-id="venmo-button"]');
+        const self = this;
+        const view = new VenmoView(testContext.venmoViewOptions);
 
         jest.spyOn(testContext.model, 'addPaymentMethod').mockImplementation();
         jest.spyOn(testContext.model, 'reportError').mockImplementation();
@@ -206,13 +206,13 @@ describe('VenmoView', () => {
           preventDefault: jest.fn()
         };
 
-        return view.initialize().then(function () {
+        return view.initialize().then(() => {
           testContext.clickHandler = button.addEventListener.mock.calls[0][1];
         });
       });
 
       test('tokenizes with venmo', () => {
-        return testContext.clickHandler(testContext.fakeEvent).then(function () {
+        return testContext.clickHandler(testContext.fakeEvent).then(() => {
           expect(testContext.fakeVenmoInstance.tokenize).toBeCalledTimes(1);
         });
       });
@@ -220,7 +220,7 @@ describe('VenmoView', () => {
       test(
         'adds payment method to model if tokenization is succesful succesful',
         () => {
-          return testContext.clickHandler(testContext.fakeEvent).then(function () {
+          return testContext.clickHandler(testContext.fakeEvent).then(() => {
             expect(testContext.model.addPaymentMethod).toBeCalledTimes(1);
             expect(testContext.model.addPaymentMethod).toBeCalledWith({
               type: 'VenmoAccount',
@@ -231,24 +231,24 @@ describe('VenmoView', () => {
       );
 
       test('reports error if tokenization fails', () => {
-        var error = new Error('venmo failed');
+        const error = new Error('venmo failed');
 
         testContext.fakeVenmoInstance.tokenize.mockRejectedValue(error);
 
-        return testContext.clickHandler(testContext.fakeEvent).then(function () {
+        return testContext.clickHandler(testContext.fakeEvent).then(() => {
           expect(testContext.model.reportError).toBeCalledTimes(1);
           expect(testContext.model.reportError).toBeCalledWith(error);
         });
       });
 
       test('ignores error if code is VENMO_APP_CANCELLED', () => {
-        var error = new Error('venmo failed');
+        const error = new Error('venmo failed');
 
         error.code = 'VENMO_APP_CANCELED';
 
         testContext.fakeVenmoInstance.tokenize.mockRejectedValue(error);
 
-        return testContext.clickHandler(testContext.fakeEvent).then(function () {
+        return testContext.clickHandler(testContext.fakeEvent).then(() => {
           expect(testContext.model.reportError).not.toBeCalled();
         });
       });
@@ -267,13 +267,13 @@ describe('VenmoView', () => {
     test(
       'resolves with false when Venmo Pay is not enabled on the gateway',
       () => {
-        var configuration = fake.configuration();
+        const configuration = fake.configuration();
 
         delete configuration.gatewayConfiguration.payWithVenmo;
 
         testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
 
-        return VenmoView.isEnabled(testContext.options).then(function (result) {
+        return VenmoView.isEnabled(testContext.options).then(result => {
           expect(result).toBe(false);
         });
       }
@@ -284,27 +284,27 @@ describe('VenmoView', () => {
       () => {
         delete testContext.options.merchantConfiguration.venmo;
 
-        return VenmoView.isEnabled(testContext.options).then(function (result) {
+        return VenmoView.isEnabled(testContext.options).then(result => {
           expect(result).toBe(false);
         });
       }
     );
 
     test('resolves with false when browser not supported by Venmo', () => {
-      var merchantConfig = testContext.options.merchantConfiguration.venmo = {
+      const merchantConfig = testContext.options.merchantConfiguration.venmo = {
         allowNewBrowserTab: false
       };
 
       btVenmo.isBrowserSupported.mockReturnValue(false);
 
-      return VenmoView.isEnabled(testContext.options).then(function (result) {
+      return VenmoView.isEnabled(testContext.options).then(result => {
         expect(btVenmo.isBrowserSupported).toBeCalledWith(merchantConfig);
         expect(result).toBe(false);
       });
     });
 
     test('resolves with true when everything is setup for Venmo', () => {
-      return VenmoView.isEnabled(testContext.options).then(function (result) {
+      return VenmoView.isEnabled(testContext.options).then(result => {
         expect(result).toBe(true);
       });
     });

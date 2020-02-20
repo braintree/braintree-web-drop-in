@@ -1,7 +1,7 @@
 'use strict';
 
-var addSelectionEventHandler = require('../../../src/lib/add-selection-event-handler');
-var {
+const addSelectionEventHandler = require('../../../src/lib/add-selection-event-handler');
+const {
   yields
 } = require('../../helpers/yields');
 
@@ -13,11 +13,11 @@ describe('addSelectionEventHandler', () => {
   });
 
   test('adds an event listener for click', () => {
-    var event = {};
-    var element = {
+    const event = {};
+    const element = {
       addEventListener: jest.fn().mockImplementation(yields(event))
     };
-    var func = jest.fn();
+    const func = jest.fn();
 
     addSelectionEventHandler(element, func);
 
@@ -26,10 +26,10 @@ describe('addSelectionEventHandler', () => {
   });
 
   test('adds an event listener for keyup', () => {
-    var element = {
+    const element = {
       addEventListener: jest.fn()
     };
-    var func = jest.fn();
+    const func = jest.fn();
 
     addSelectionEventHandler(element, func);
 
@@ -37,11 +37,11 @@ describe('addSelectionEventHandler', () => {
   });
 
   test('calls handler for keyup when key is enter', () => {
-    var event = {keyCode: 13};
-    var element = {
+    const event = {keyCode: 13};
+    const element = {
       addEventListener: jest.fn()
     };
-    var func = jest.fn();
+    const func = jest.fn();
 
     element.addEventListener.mockImplementation((eventName, cb) => {
       if (eventName === 'keyup') {
@@ -55,11 +55,11 @@ describe('addSelectionEventHandler', () => {
   });
 
   test('does not call handler for keyup when key is not enter', () => {
-    var event = {keyCode: 26};
-    var element = {
+    const event = {keyCode: 26};
+    const element = {
       addEventListener: jest.fn()
     };
-    var func = jest.fn();
+    const func = jest.fn();
 
     element.addEventListener.mockImplementation((eventName, cb) => {
       if (eventName === 'keyup') {

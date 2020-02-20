@@ -1,13 +1,13 @@
 'use strict';
 
-var analytics = require('../../../src/lib/analytics');
-var BaseView = require('../../../src/views/base-view');
-var fake = require('../../helpers/fake');
-var fs = require('fs');
-var PaymentMethodView = require('../../../src/views/payment-method-view');
-var strings = require('../../../src/translations/en_US');
+const analytics = require('../../../src/lib/analytics');
+const BaseView = require('../../../src/views/base-view');
+const fake = require('../../helpers/fake');
+const fs = require('fs');
+const PaymentMethodView = require('../../../src/views/payment-method-view');
+const strings = require('../../../src/translations/en_US');
 
-var paymentMethodHTML = fs.readFileSync(__dirname + '/../../../src/html/payment-method.html', 'utf8');
+const paymentMethodHTML = fs.readFileSync(__dirname + '/../../../src/html/payment-method.html', 'utf8');
 
 describe('PaymentMethodView', () => {
   let testContext;
@@ -50,8 +50,8 @@ describe('PaymentMethodView', () => {
     test(
       'sets the inner HTML correctly when the paymentMethod is a credit card',
       () => {
-        var iconElement, iconContainer, labelElement;
-        var paymentMethod = {
+        let iconElement, iconContainer, labelElement;
+        const paymentMethod = {
           type: 'CreditCard',
           details: {
             cardType: 'Visa',
@@ -77,8 +77,8 @@ describe('PaymentMethodView', () => {
     test(
       'sets the inner HTML correctly when the paymentMethod is a PayPal account',
       () => {
-        var iconElement, iconContainer, labelElement;
-        var paymentMethod = {
+        let iconElement, iconContainer, labelElement;
+        const paymentMethod = {
           type: 'PayPalAccount',
           details: {
             email: 'test@example.com'
@@ -103,8 +103,8 @@ describe('PaymentMethodView', () => {
     test(
       'sets the inner HTML correctly when the paymentMethod is Google Pay',
       () => {
-        var iconElement, iconContainer, labelElement;
-        var paymentMethod = {
+        let iconElement, iconContainer, labelElement;
+        const paymentMethod = {
           type: 'AndroidPayCard',
           details: {
             cardType: 'Visa',
@@ -131,8 +131,8 @@ describe('PaymentMethodView', () => {
     test(
       'sets the inner HTML correctly when the paymentMethod is Apple Pay',
       () => {
-        var iconElement, iconContainer, labelElement;
-        var paymentMethod = {
+        let iconElement, iconContainer, labelElement;
+        const paymentMethod = {
           type: 'ApplePayCard',
           details: {
             cardType: 'Visa',
@@ -159,8 +159,8 @@ describe('PaymentMethodView', () => {
     test(
       'sets the inner HTML correctly when the paymentMethod is Venmo',
       () => {
-        var iconElement, iconContainer, labelElement;
-        var paymentMethod = {
+        let iconElement, iconContainer, labelElement;
+        const paymentMethod = {
           type: 'VenmoAccount',
           details: {
             username: '@name'
@@ -243,7 +243,7 @@ describe('PaymentMethodView', () => {
     });
 
     test('sends an analytic event when a vaulted card is selected', () => {
-      var view = new PaymentMethodView({
+      const view = new PaymentMethodView({
         client: testContext.client,
         model: testContext.model,
         strings: strings,
@@ -265,7 +265,7 @@ describe('PaymentMethodView', () => {
     test(
       'sends an analytic event when a vaulted paypal payment method is selected',
       () => {
-        var view = new PaymentMethodView({
+        const view = new PaymentMethodView({
           client: testContext.client,
           model: testContext.model,
           strings: strings,
@@ -287,7 +287,7 @@ describe('PaymentMethodView', () => {
     test(
       'does not send an analytic event when no payment is selected',
       () => {
-        var view = new PaymentMethodView({
+        const view = new PaymentMethodView({
           client: testContext.client,
           model: testContext.model,
           strings: strings,
@@ -303,7 +303,7 @@ describe('PaymentMethodView', () => {
     test(
       'does not send an analytic event when a non-vaulted PayPal payment method is selected',
       () => {
-        var view = new PaymentMethodView({
+        const view = new PaymentMethodView({
           client: testContext.client,
           model: testContext.model,
           strings: strings,
@@ -327,8 +327,8 @@ describe('PaymentMethodView', () => {
     test(
       'does not call model.changeActivePaymentMethod in click handler when in edit mode',
       () => {
-        var model = fake.model();
-        var view = new PaymentMethodView({
+        const model = fake.model();
+        const view = new PaymentMethodView({
           model: model,
           strings: strings,
           paymentMethod: {
@@ -354,14 +354,14 @@ describe('PaymentMethodView', () => {
     test(
       'calls model.confirmPaymentMethodDeletion when delete icon is clicked',
       () => {
-        var fakeModel = {
+        const fakeModel = {
           confirmPaymentMethodDeletion: jest.fn()
         };
-        var paymentMethod = {
+        const paymentMethod = {
           type: 'Foo',
           nonce: 'nonce'
         };
-        var view = new PaymentMethodView({
+        const view = new PaymentMethodView({
           model: fakeModel,
           strings: strings,
           paymentMethod: paymentMethod

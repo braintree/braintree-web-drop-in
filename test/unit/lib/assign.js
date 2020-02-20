@@ -1,6 +1,6 @@
 'use strict';
 
-var assignModule = require('../../../src/lib/assign');
+const assignModule = require('../../../src/lib/assign');
 
 describe('assign', () => {
   describe('exported function', () => {
@@ -14,14 +14,14 @@ describe('assign', () => {
 
 function runTest(assign) {
   test('does nothing to one object', () => {
-    var obj = {foo: 'bar'};
+    const obj = {foo: 'bar'};
 
     expect(assign(obj)).toBe(obj);
   });
 
   test('merges two objects', () => {
-    var a = {foo: 'yas', bar: 'ugh'};
-    var b = {foo: 'nope', baz: 'wow'};
+    const a = {foo: 'yas', bar: 'ugh'};
+    const b = {foo: 'nope', baz: 'wow'};
 
     expect(assign(a, b)).toEqual({
       foo: 'nope',
@@ -31,9 +31,9 @@ function runTest(assign) {
   });
 
   test('merges three objects', () => {
-    var a = {foo: 'yas', bar: 'ugh'};
-    var b = {foo: 'nope'};
-    var c = {foo: 'wow', baz: 'cool'};
+    const a = {foo: 'yas', bar: 'ugh'};
+    const b = {foo: 'nope'};
+    const c = {foo: 'wow', baz: 'cool'};
 
     expect(assign(a, b, c)).toEqual({
       foo: 'wow',
@@ -43,14 +43,14 @@ function runTest(assign) {
   });
 
   test('returns the first object passed', () => {
-    var a = {foo: 'yas', bar: 'ugh'};
-    var b = {foo: 'nope', baz: 'wow'};
+    const a = {foo: 'yas', bar: 'ugh'};
+    const b = {foo: 'nope', baz: 'wow'};
 
     expect(assign(a, b)).toBe(a);
   });
 
   test("doesn't take inherited properties", () => {
-    var a, b;
+    let a, b;
 
     function Klass() {
       this.foo = 'yas';

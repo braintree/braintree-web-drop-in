@@ -1,6 +1,6 @@
 'use strict';
 
-var findParentForm = require('../../../src/lib/find-parent-form').findParentForm;
+const findParentForm = require('../../../src/lib/find-parent-form').findParentForm;
 
 describe('findParentForm', () => {
   test('returns undefined if the element has no parentNode', () => {
@@ -21,7 +21,7 @@ describe('findParentForm', () => {
   );
 
   test('returns the parent node if it is a form', () => {
-    var form = {
+    const form = {
       nodeName: 'FORM'
     };
 
@@ -33,7 +33,7 @@ describe('findParentForm', () => {
   test(
     'checks recursively until it finds a parent node that is a form',
     () => {
-      var form = {
+      const form = {
         nodeName: 'FORM'
       };
 

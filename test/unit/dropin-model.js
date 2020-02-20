@@ -1,18 +1,18 @@
 'use strict';
 
-var vaultManager = require('braintree-web/vault-manager');
-var analytics = require('../../src/lib/analytics');
-var DropinModel = require('../../src/dropin-model');
-var ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
-var CardView = require('../../src/views/payment-sheet-views/card-view');
-var GooglePayView = require('../../src/views/payment-sheet-views/google-pay-view');
-var PayPalView = require('../../src/views/payment-sheet-views/paypal-view');
-var PayPalCreditView = require('../../src/views/payment-sheet-views/paypal-credit-view');
-var VenmoView = require('../../src/views/payment-sheet-views/venmo-view');
-var EventEmitter = require('@braintree/event-emitter');
-var isHTTPS = require('../../src/lib/is-https');
-var fake = require('../helpers/fake');
-var throwIfResolves = require('../helpers/throw-if-resolves');
+const vaultManager = require('braintree-web/vault-manager');
+const analytics = require('../../src/lib/analytics');
+const DropinModel = require('../../src/dropin-model');
+const ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
+const CardView = require('../../src/views/payment-sheet-views/card-view');
+const GooglePayView = require('../../src/views/payment-sheet-views/google-pay-view');
+const PayPalView = require('../../src/views/payment-sheet-views/paypal-view');
+const PayPalCreditView = require('../../src/views/payment-sheet-views/paypal-credit-view');
+const VenmoView = require('../../src/views/payment-sheet-views/venmo-view');
+const EventEmitter = require('@braintree/event-emitter');
+const isHTTPS = require('../../src/lib/is-https');
+const fake = require('../helpers/fake');
+const throwIfResolves = require('../helpers/throw-if-resolves');
 
 describe('DropinModel', () => {
   let testContext;
@@ -60,20 +60,20 @@ describe('DropinModel', () => {
     });
 
     test('sets componentID', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       expect(model.componentID).toBe(testContext.modelOptions.componentID);
     });
 
     test('sets merchantConfiguration', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       expect(model.merchantConfiguration).toBe(testContext.modelOptions.merchantConfiguration);
     });
 
     describe('isGuestCheckout', () => {
       test('is true when given a tokenization key', () => {
-        var model;
+        let model;
 
         testContext.configuration.authorization = fake.tokenizationKey;
         testContext.configuration.authorizationType = 'TOKENIZATION_KEY';
@@ -84,7 +84,7 @@ describe('DropinModel', () => {
       });
 
       test('is true when given a client token without a customer ID', () => {
-        var model;
+        let model;
 
         testContext.configuration.authorization = fake.clientToken;
         testContext.configuration.authorizationType = 'CLIENT_TOKEN';
@@ -95,7 +95,7 @@ describe('DropinModel', () => {
       });
 
       test('is false when given a client token with a customer ID', () => {
-        var model;
+        let model;
 
         testContext.configuration.authorization = fake.clientTokenWithCustomerID;
         testContext.configuration.authorizationType = 'CLIENT_TOKEN';
@@ -109,7 +109,7 @@ describe('DropinModel', () => {
 
   describe('confirmDropinReady', () => {
     test('sets _setupComplete to true', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       expect(model._setupComplete).toBe(false);
 
@@ -121,9 +121,9 @@ describe('DropinModel', () => {
 
   describe('initialize', () => {
     test('creates a vault manager', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         expect(vaultManager.create).toBeCalledTimes(1);
         expect(vaultManager.create).toBeCalledWith({
           client: testContext.modelOptions.client
@@ -132,26 +132,26 @@ describe('DropinModel', () => {
     });
 
     test('sets existing payment methods as _paymentMethods', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       model.isGuestCheckout = false;
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{type: 'CreditCard', details: {lastTwo: '11'}}]);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         expect(model._paymentMethods).toEqual([{type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}]);
       });
     });
 
     test('_paymentMethods is empty if no existing payment methods', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         expect(model._paymentMethods).toEqual([]);
       });
     });
 
     test('ignores valid, but disabled payment methods', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       model.isGuestCheckout = false;
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
@@ -161,7 +161,7 @@ describe('DropinModel', () => {
       PayPalView.isEnabled.mockResolvedValue(false);
       PayPalCreditView.isEnabled.mockResolvedValue(false);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         expect(model._paymentMethods).toEqual([
           {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}
         ]);
@@ -171,7 +171,7 @@ describe('DropinModel', () => {
     test(
       'ignores payment methods that have errored when calling isEnabled',
       () => {
-        var model = new DropinModel(testContext.modelOptions);
+        const model = new DropinModel(testContext.modelOptions);
 
         model.isGuestCheckout = false;
         testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
@@ -182,7 +182,7 @@ describe('DropinModel', () => {
         PayPalView.isEnabled.mockRejectedValue(new Error('fail'));
         PayPalCreditView.isEnabled.mockResolvedValue(false);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           expect(model._paymentMethods).toEqual([
             {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true}
           ]);
@@ -191,8 +191,8 @@ describe('DropinModel', () => {
     );
 
     test('calls console.error with error if isEnabled errors', () => {
-      var model = new DropinModel(testContext.modelOptions);
-      var error = new Error('fail');
+      const model = new DropinModel(testContext.modelOptions);
+      const error = new Error('fail');
 
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
         {type: 'CreditCard', details: {lastTwo: '11'}},
@@ -202,7 +202,7 @@ describe('DropinModel', () => {
       PayPalView.isEnabled.mockRejectedValue(error);
       PayPalCreditView.isEnabled.mockResolvedValue(false);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         expect(console.error).toBeCalledTimes(2); // eslint-disable-line no-console
         expect(console.error).toBeCalledWith('paypal view errored when checking if it was supported.'); // eslint-disable-line no-console
         expect(console.error).toBeCalledWith(error); // eslint-disable-line no-console
@@ -210,7 +210,7 @@ describe('DropinModel', () => {
     });
 
     test('rejects with an error when there are no payment options', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       ApplePayView.isEnabled.mockResolvedValue(false);
       CardView.isEnabled.mockResolvedValue(false);
@@ -219,7 +219,7 @@ describe('DropinModel', () => {
       PayPalCreditView.isEnabled.mockResolvedValue(false);
       VenmoView.isEnabled.mockResolvedValue(false);
 
-      return model.initialize().then(throwIfResolves).catch(function (err) {
+      return model.initialize().then(throwIfResolves).catch(err => {
         expect(err.message).toBe('No valid payment options available.');
       });
     });
@@ -227,7 +227,7 @@ describe('DropinModel', () => {
     test(
       'throws an error when paymentOptionPriority is an empty array',
       () => {
-        var model;
+        let model;
 
         testContext.configuration.gatewayConfiguration.paypalEnabled = true;
         testContext.modelOptions.merchantConfiguration.paypal = true;
@@ -235,7 +235,7 @@ describe('DropinModel', () => {
 
         model = new DropinModel(testContext.modelOptions);
 
-        return model.initialize().then(throwIfResolves).catch(function (err) {
+        return model.initialize().then(throwIfResolves).catch(err => {
           expect(err.message).toBe('No valid payment options available.');
         });
       }
@@ -244,26 +244,26 @@ describe('DropinModel', () => {
     test(
       'supports cards, PayPal, PayPal Credit, Venmo, Apple Pay and Google Pay and defaults to showing them in correct paymentOptionPriority',
       () => {
-        var model = new DropinModel(testContext.modelOptions);
+        const model = new DropinModel(testContext.modelOptions);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           expect(model.supportedPaymentOptions).toEqual(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']);
         });
       }
     );
 
     test('marks payment method as unsupported if isEnabled rejects', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       GooglePayView.isEnabled.mockRejectedValue(new Error('no google pay'));
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         expect(model.supportedPaymentOptions).toEqual(['card', 'paypal', 'paypalCredit', 'venmo', 'applePay']);
       });
     });
 
     test('uses custom paymentOptionPriority of payment options', () => {
-      var model;
+      let model;
 
       testContext.configuration.gatewayConfiguration.paypalEnabled = true;
       testContext.modelOptions.merchantConfiguration.paypal = true;
@@ -271,13 +271,13 @@ describe('DropinModel', () => {
 
       model = new DropinModel(testContext.modelOptions);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         expect(model.supportedPaymentOptions).toEqual(['paypal', 'card']);
       });
     });
 
     test('ignores duplicates', () => {
-      var model;
+      let model;
 
       testContext.configuration.gatewayConfiguration.paypalEnabled = true;
       testContext.modelOptions.merchantConfiguration.paypal = true;
@@ -285,7 +285,7 @@ describe('DropinModel', () => {
 
       model = new DropinModel(testContext.modelOptions);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         expect(model.supportedPaymentOptions).toEqual(['paypal', 'card']);
       });
     });
@@ -293,9 +293,9 @@ describe('DropinModel', () => {
     test(
       'calls isEnabled on payment method view to determine if payment method is available',
       () => {
-        var model = new DropinModel(testContext.modelOptions);
+        const model = new DropinModel(testContext.modelOptions);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           expect(ApplePayView.isEnabled).toBeCalledTimes(1);
           expect(ApplePayView.isEnabled).toBeCalledWith({
             client: testContext.modelOptions.client,
@@ -333,7 +333,7 @@ describe('DropinModel', () => {
     test(
       'rejects with an error when an unrecognized payment option is specified',
       () => {
-        var model;
+        let model;
 
         testContext.configuration.gatewayConfiguration.paypalEnabled = true;
         testContext.modelOptions.merchantConfiguration.paypal = true;
@@ -341,7 +341,7 @@ describe('DropinModel', () => {
 
         model = new DropinModel(testContext.modelOptions);
 
-        return model.initialize().then(throwIfResolves).catch(function (err) {
+        return model.initialize().then(throwIfResolves).catch(err => {
           expect(err.message).toBe('paymentOptionPriority: Invalid payment option specified.');
         });
       }
@@ -356,7 +356,7 @@ describe('DropinModel', () => {
     });
 
     test('adds a new payment method to _paymentMethods', () => {
-      var paymentMethod = {foo: 'bar'};
+      const paymentMethod = {foo: 'bar'};
 
       testContext.model.addPaymentMethod(paymentMethod);
 
@@ -366,9 +366,9 @@ describe('DropinModel', () => {
     test(
       'emits onAddPaymentMethod event with new payment method',
       done => {
-        var paymentMethod = {foo: 'bar'};
+        const paymentMethod = {foo: 'bar'};
 
-        testContext.model.on('addPaymentMethod', function (emittedPaymentMethod) {
+        testContext.model.on('addPaymentMethod', emittedPaymentMethod => {
           expect(emittedPaymentMethod).toBe(paymentMethod);
           done();
         });
@@ -378,7 +378,7 @@ describe('DropinModel', () => {
     );
 
     test('changes active payment method to active payment method', () => {
-      var paymentMethod = {foo: 'bar'};
+      const paymentMethod = {foo: 'bar'};
 
       testContext.model.addPaymentMethod(paymentMethod);
 
@@ -394,7 +394,7 @@ describe('DropinModel', () => {
     });
 
     test('removes a payment method from _paymentMethods', () => {
-      var paymentMethod = {foo: 'bar'};
+      const paymentMethod = {foo: 'bar'};
 
       testContext.model.addPaymentMethod(paymentMethod);
 
@@ -406,7 +406,7 @@ describe('DropinModel', () => {
     test(
       'does not remove a payment method from _paymentMethods if it only deep equals the existing payment method',
       () => {
-        var paymentMethod = {foo: 'bar'};
+        const paymentMethod = {foo: 'bar'};
 
         testContext.model.addPaymentMethod(paymentMethod);
 
@@ -419,10 +419,10 @@ describe('DropinModel', () => {
     test(
       'emits onRemovePaymentMethod event with new payment method',
       done => {
-        var paymentMethod = {foo: 'bar'};
+        const paymentMethod = {foo: 'bar'};
 
         testContext.model.addPaymentMethod(paymentMethod);
-        testContext.model.on('removePaymentMethod', function (emittedPaymentMethod) {
+        testContext.model.on('removePaymentMethod', emittedPaymentMethod => {
           expect(emittedPaymentMethod).toBe(paymentMethod);
           done();
         });
@@ -434,7 +434,7 @@ describe('DropinModel', () => {
     test(
       'does not emit onRemovePaymentMethod event when payment method does not exist',
       () => {
-        var paymentMethod = {foo: 'bar'};
+        const paymentMethod = {foo: 'bar'};
 
         jest.spyOn(testContext.model, '_emit');
         testContext.model.addPaymentMethod(paymentMethod);
@@ -448,7 +448,7 @@ describe('DropinModel', () => {
 
   describe('getPaymentMethods', () => {
     test('returns a copy of the _paymentMethods array', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       model._paymentMethods = ['these are my payment methods'];
 
@@ -466,7 +466,7 @@ describe('DropinModel', () => {
     });
 
     test('calls out to get vaulted payment methods', () => {
-      return testContext.model.refreshPaymentMethods().then(function () {
+      return testContext.model.refreshPaymentMethods().then(() => {
         expect(testContext.model.getVaultedPaymentMethods).toBeCalledTimes(1);
       });
     });
@@ -474,13 +474,13 @@ describe('DropinModel', () => {
     test('replaces payment methods on model', () => {
       testContext.model._paymentMethods = [{type: 'foo'}];
 
-      return testContext.model.refreshPaymentMethods().then(function () {
+      return testContext.model.refreshPaymentMethods().then(() => {
         expect(testContext.model.getPaymentMethods()).toEqual([testContext.fakeMethod]);
       });
     });
 
     test('remits refresh event', () => {
-      return testContext.model.refreshPaymentMethods().then(function () {
+      return testContext.model.refreshPaymentMethods().then(() => {
         expect(testContext.model._emit).toBeCalledTimes(1);
         expect(testContext.model._emit).toBeCalledWith('refreshPaymentMethods');
       });
@@ -493,7 +493,7 @@ describe('DropinModel', () => {
     });
 
     test('sets new payment method to _activePaymentMethod', () => {
-      var paymentMethod = {foo: 'bar'};
+      const paymentMethod = {foo: 'bar'};
 
       testContext.model.changeActivePaymentMethod(paymentMethod);
 
@@ -503,9 +503,9 @@ describe('DropinModel', () => {
     test(
       'emits changeActivePaymentMethod event with active payment method',
       done => {
-        var paymentMethod = {foo: 'bar'};
+        const paymentMethod = {foo: 'bar'};
 
-        testContext.model.on('changeActivePaymentMethod', function (emittedPaymentMethod) {
+        testContext.model.on('changeActivePaymentMethod', emittedPaymentMethod => {
           expect(emittedPaymentMethod).toBe(paymentMethod);
           done();
         });
@@ -549,7 +549,7 @@ describe('DropinModel', () => {
 
   describe('getActivePaymentMethod', () => {
     test('returns _activePaymentMethod', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       model._activePaymentMethod = 'this is my active payment method';
 
@@ -559,8 +559,8 @@ describe('DropinModel', () => {
 
   describe('reportAppSwitchPayload', () => {
     test('saves app switch payload to instance', () => {
-      var model = new DropinModel(testContext.modelOptions);
-      var payload = {nonce: 'fake-nonce'};
+      const model = new DropinModel(testContext.modelOptions);
+      const payload = {nonce: 'fake-nonce'};
 
       model.reportAppSwitchPayload(payload);
 
@@ -570,8 +570,8 @@ describe('DropinModel', () => {
 
   describe('reportAppSwitchError', () => {
     test('saves app switch error and view id', () => {
-      var model = new DropinModel(testContext.modelOptions);
-      var error = new Error('Error');
+      const model = new DropinModel(testContext.modelOptions);
+      const error = new Error('Error');
 
       model.reportAppSwitchError('view-id', error);
 
@@ -599,7 +599,7 @@ describe('DropinModel', () => {
     });
 
     test('adds an error to the failedDependencies object', () => {
-      var err = new Error('a bad error');
+      const err = new Error('a bad error');
 
       testContext.model.asyncDependencyFailed({
         view: 'id',
@@ -609,8 +609,8 @@ describe('DropinModel', () => {
     });
 
     test('ignores error if failure was already reported', () => {
-      var err = new Error('a bad error');
-      var ignoredError = new Error('a different error');
+      const err = new Error('a bad error');
+      const ignoredError = new Error('a different error');
 
       testContext.model.asyncDependencyFailed({
         view: 'id',
@@ -628,9 +628,9 @@ describe('DropinModel', () => {
     test(
       'emits asyncDependenciesReady event when there are no dependencies initializing',
       done => {
-        var model = new DropinModel(testContext.modelOptions);
+        const model = new DropinModel(testContext.modelOptions);
 
-        model.on('asyncDependenciesReady', function () {
+        model.on('asyncDependenciesReady', () => {
           done();
         });
 
@@ -649,7 +649,7 @@ describe('DropinModel', () => {
     });
 
     test('decrements dependenciesInitializing by one', () => {
-      var model = new DropinModel(testContext.modelOptions);
+      const model = new DropinModel(testContext.modelOptions);
 
       model.dependenciesInitializing = 2;
 
@@ -661,11 +661,11 @@ describe('DropinModel', () => {
     test(
       'emits asyncDependenciesReady event when there are no dependencies initializing',
       done => {
-        var model = new DropinModel(testContext.modelOptions);
+        const model = new DropinModel(testContext.modelOptions);
 
         jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
 
-        model.on('asyncDependenciesReady', function () {
+        model.on('asyncDependenciesReady', () => {
           expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
           done();
         });
@@ -676,8 +676,8 @@ describe('DropinModel', () => {
     );
 
     test('emits asyncDependenciesReady event with prior errors', () => {
-      var model = new DropinModel(testContext.modelOptions);
-      var err = new Error('an earlier dependency failed');
+      const model = new DropinModel(testContext.modelOptions);
+      const err = new Error('an earlier dependency failed');
 
       jest.spyOn(model, '_emit');
 
@@ -695,10 +695,10 @@ describe('DropinModel', () => {
 
   describe('cancelInitialization', () => {
     test('emits cancelInitialization event wth the error', done => {
-      var dropinModel = new DropinModel(testContext.modelOptions);
-      var fakeError = {foo: 'boo'};
+      const dropinModel = new DropinModel(testContext.modelOptions);
+      const fakeError = {foo: 'boo'};
 
-      dropinModel.on('cancelInitialization', function (error) {
+      dropinModel.on('cancelInitialization', error => {
         expect(error).toEqual(fakeError);
         done();
       });
@@ -709,10 +709,10 @@ describe('DropinModel', () => {
 
   describe('reportError', () => {
     test('emits an errorOccurred event with the error', done => {
-      var dropinModel = new DropinModel(testContext.modelOptions);
-      var fakeError = {foo: 'boo'};
+      const dropinModel = new DropinModel(testContext.modelOptions);
+      const fakeError = {foo: 'boo'};
 
-      dropinModel.on('errorOccurred', function (error) {
+      dropinModel.on('errorOccurred', error => {
         expect(error).toEqual(fakeError);
         done();
       });
@@ -723,9 +723,9 @@ describe('DropinModel', () => {
 
   describe('clearError', () => {
     test('emits an errorCleared event', done => {
-      var dropinModel = new DropinModel(testContext.modelOptions);
+      const dropinModel = new DropinModel(testContext.modelOptions);
 
-      dropinModel.on('errorCleared', function () {
+      dropinModel.on('errorCleared', () => {
         done();
       });
 
@@ -737,9 +737,9 @@ describe('DropinModel', () => {
     test(
       'returns false initially if no payment methods are passed in',
       () => {
-        var model = new DropinModel(testContext.modelOptions);
+        const model = new DropinModel(testContext.modelOptions);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           expect(model.isPaymentMethodRequestable()).toBe(false);
         });
       }
@@ -748,12 +748,12 @@ describe('DropinModel', () => {
     test(
       'returns true initially if customer has saved payment methods',
       () => {
-        var model = new DropinModel(testContext.modelOptions);
+        const model = new DropinModel(testContext.modelOptions);
 
         model.isGuestCheckout = false;
         testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{type: 'CreditCard', details: {lastTwo: '11'}}]);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           expect(model.isPaymentMethodRequestable()).toBe(true);
         });
       }
@@ -922,7 +922,7 @@ describe('DropinModel', () => {
     test(
       'includes the paymentMethodIsSelected as true if Drop-in displays a selected payment method',
       () => {
-        var selectedPaymentMethod = {foo: 'bar'};
+        const selectedPaymentMethod = {foo: 'bar'};
 
         testContext.model.setPaymentMethodRequestable({
           isRequestable: true,
@@ -1045,7 +1045,7 @@ describe('DropinModel', () => {
     test(
       'model.confirmPaymentMethodDeletion emits a confirmPaymentMethodDeletion event',
       () => {
-        var paymentMethod = {
+        const paymentMethod = {
           nonce: '123-fake-nonce'
         };
 
@@ -1071,19 +1071,19 @@ describe('DropinModel', () => {
     });
 
     test('emits a startVaultedPaymentMethodDeletion event', () => {
-      return testContext.model.deleteVaultedPaymentMethod().then(function () {
+      return testContext.model.deleteVaultedPaymentMethod().then(() => {
         expect(testContext.model._emit).toBeCalledWith('startVaultedPaymentMethodDeletion');
       });
     });
 
     test('removes stored payment method variable', () => {
-      return testContext.model.deleteVaultedPaymentMethod().then(function () {
+      return testContext.model.deleteVaultedPaymentMethod().then(() => {
         expect(testContext.model._paymentMethodWaitingToBeDeleted).toBeFalsy();
       });
     });
 
     test('uses vault manager to delete payment method', () => {
-      return testContext.model.deleteVaultedPaymentMethod().then(function () {
+      return testContext.model.deleteVaultedPaymentMethod().then(() => {
         expect(testContext.vaultManager.deletePaymentMethod).toBeCalledTimes(1);
         expect(testContext.vaultManager.deletePaymentMethod).toBeCalledWith('a-nonce');
       });
@@ -1094,7 +1094,7 @@ describe('DropinModel', () => {
       () => {
         testContext.model.isGuestCheckout = true;
 
-        return testContext.model.deleteVaultedPaymentMethod().then(function () {
+        return testContext.model.deleteVaultedPaymentMethod().then(() => {
           expect(testContext.vaultManager.deletePaymentMethod).not.toBeCalled();
         });
       }
@@ -1105,7 +1105,7 @@ describe('DropinModel', () => {
       () => {
         testContext.vaultManager.deletePaymentMethod.mockResolvedValue();
 
-        return testContext.model.deleteVaultedPaymentMethod().then(function () {
+        return testContext.model.deleteVaultedPaymentMethod().then(() => {
           expect(testContext.model._emit).toBeCalledWith('finishVaultedPaymentMethodDeletion', undefined);
         });
       }
@@ -1114,22 +1114,22 @@ describe('DropinModel', () => {
     test(
       'emits finishVaultedPaymentMethodDeletion event when deletion is unsuccesful',
       () => {
-        var error = new Error('aaaaaaah!');
+        const error = new Error('aaaaaaah!');
 
         testContext.vaultManager.deletePaymentMethod.mockRejectedValue(error);
 
-        return testContext.model.deleteVaultedPaymentMethod().then(function () {
+        return testContext.model.deleteVaultedPaymentMethod().then(() => {
           expect(testContext.model._emit).toBeCalledWith('finishVaultedPaymentMethodDeletion', expect.any(Error));
         });
       }
     );
 
     test('refetches payment methods', () => {
-      var paymentMethods = [{type: 'CreditCard', nonce: 'a-nonce'}];
+      const paymentMethods = [{type: 'CreditCard', nonce: 'a-nonce'}];
 
       jest.spyOn(testContext.model, 'getVaultedPaymentMethods').mockResolvedValue(paymentMethods);
 
-      return testContext.model.deleteVaultedPaymentMethod().then(function () {
+      return testContext.model.deleteVaultedPaymentMethod().then(() => {
         expect(testContext.model.getVaultedPaymentMethods).toBeCalledTimes(1);
         expect(testContext.model.getPaymentMethods()).toEqual(paymentMethods);
       });
@@ -1164,7 +1164,7 @@ describe('DropinModel', () => {
     beforeEach(() => {
       testContext.model = new DropinModel(testContext.modelOptions);
 
-      return testContext.model.initialize().then(function () {
+      return testContext.model.initialize().then(() => {
         testContext.model.isGuestCheckout = false;
       });
     });
@@ -1175,7 +1175,7 @@ describe('DropinModel', () => {
         testContext.model.isGuestCheckout = false;
         testContext.vaultManager.fetchPaymentMethods.mockRejectedValue(new Error('error'));
 
-        return testContext.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
           expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
             defaultFirst: true
           });
@@ -1189,7 +1189,7 @@ describe('DropinModel', () => {
       () => {
         testContext.model.isGuestCheckout = true;
 
-        return testContext.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
           expect(paymentMethods).toEqual([]);
         });
       }
@@ -1207,7 +1207,7 @@ describe('DropinModel', () => {
           type: 'PayPalAccount'
         }]);
 
-        return testContext.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
           expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
             defaultFirst: true
           });
@@ -1234,7 +1234,7 @@ describe('DropinModel', () => {
         type: 'FooPay'
       }]);
 
-      return testContext.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+      return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
         expect(paymentMethods).toEqual([{
           nonce: '1-nonce',
           type: 'CreditCard',
@@ -1256,7 +1256,7 @@ describe('DropinModel', () => {
         type: 'CreditCard'
       }]);
 
-      return testContext.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+      return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
         expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
           defaultFirst: true
         });
@@ -1275,7 +1275,7 @@ describe('DropinModel', () => {
       ]);
       testContext.model.merchantConfiguration.paypal = {flow: 'vault'};
 
-      return testContext.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+      return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
         expect(paymentMethods).toEqual([
           {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true},
           {type: 'PayPalAccount', details: {email: 'wow@example.com'}, vaulted: true}
@@ -1294,7 +1294,7 @@ describe('DropinModel', () => {
           {type: 'VenmoAccount', details: {}}
         ]);
 
-        return testContext.model.getVaultedPaymentMethods().then(function (paymentMethods) {
+        return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
           expect(paymentMethods).toEqual([
             {type: 'CreditCard', details: {lastTwo: '11'}, vaulted: true},
             {type: 'PayPalAccount', details: {email: 'wow@example.com'}, vaulted: true}

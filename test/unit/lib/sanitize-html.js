@@ -1,6 +1,6 @@
 'use strict';
 
-var sanitizeHtml = require('../../../src/lib/sanitize-html');
+const sanitizeHtml = require('../../../src/lib/sanitize-html');
 
 describe('sanitizeHtml', () => {
   test('converts > and < characters to encoded versions', () => {

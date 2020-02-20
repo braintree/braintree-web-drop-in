@@ -1,17 +1,17 @@
 'use strict';
 
-var BaseView = require('../../../src/views/base-view');
-var CardView = require('../../../src/views/payment-sheet-views/card-view');
-var PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
-var PaymentMethodsView = require('../../../src/views/payment-methods-view');
-var DropinError = require('../../../src/lib/dropin-error');
-var classList = require('@braintree/class-list');
-var fake = require('../../helpers/fake');
-var throwIfResolves = require('../../helpers/throw-if-resolves');
-var fs = require('fs');
-var strings = require('../../../src/translations/en_US');
+const BaseView = require('../../../src/views/base-view');
+const CardView = require('../../../src/views/payment-sheet-views/card-view');
+const PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
+const PaymentMethodsView = require('../../../src/views/payment-methods-view');
+const DropinError = require('../../../src/lib/dropin-error');
+const classList = require('@braintree/class-list');
+const fake = require('../../helpers/fake');
+const throwIfResolves = require('../../helpers/throw-if-resolves');
+const fs = require('fs');
+const strings = require('../../../src/translations/en_US');
 
-var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
+const mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
 describe('PaymentMethodsView', () => {
   let testContext;
@@ -42,8 +42,8 @@ describe('PaymentMethodsView', () => {
 
   describe('_initialize', () => {
     test('adds supported vaulted payment methods', () => {
-      var model, paymentMethodsViews;
-      var modelOptions = fake.modelOptions();
+      let model, paymentMethodsViews;
+      const modelOptions = fake.modelOptions();
 
       modelOptions.client.getConfiguration.mockReturnValue({
         authorization: fake.clientTokenWithCustomerID,
@@ -58,7 +58,7 @@ describe('PaymentMethodsView', () => {
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
       ]);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         paymentMethodsViews = new PaymentMethodsView({
           element: testContext.element,
           model: model,
@@ -75,16 +75,16 @@ describe('PaymentMethodsView', () => {
     });
 
     test('puts default payment method as first item in list', () => {
-      var firstChildLabel, model, paymentMethodsViews;
-      var creditCard = {
+      let firstChildLabel, model, paymentMethodsViews;
+      const creditCard = {
         details: {cardType: 'Visa'},
         type: 'CreditCard'
       };
-      var paypalAccount = {
+      const paypalAccount = {
         details: {email: 'wow@meow.com'},
         type: 'PayPalAccount'
       };
-      var modelOptions = fake.modelOptions();
+      const modelOptions = fake.modelOptions();
 
       modelOptions.client.getConfiguration.mockReturnValue({
         authorization: fake.clientTokenWithCustomerID,
@@ -97,7 +97,7 @@ describe('PaymentMethodsView', () => {
 
       model.getVaultedPaymentMethods.mockResolvedValue([paypalAccount, creditCard]);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         paymentMethodsViews = new PaymentMethodsView({
           element: testContext.element,
           model: model,
@@ -112,8 +112,8 @@ describe('PaymentMethodsView', () => {
     });
 
     test('does not add payment methods if there are none', () => {
-      var model, methodsContainer, paymentMethodsViews;
-      var modelOptions = fake.modelOptions();
+      let model, methodsContainer, paymentMethodsViews;
+      const modelOptions = fake.modelOptions();
 
       modelOptions.client.getConfiguration.mockReturnValue({
         authorization: fake.clientTokenWithCustomerID,
@@ -123,7 +123,7 @@ describe('PaymentMethodsView', () => {
 
       model = fake.model(modelOptions);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
         paymentMethodsViews = new PaymentMethodsView({
           element: testContext.element,
@@ -142,9 +142,9 @@ describe('PaymentMethodsView', () => {
     test(
       'changes the payment method view when the active payment method changes',
       () => {
-        var model, paymentMethodsViews;
-        var fakePaymentMethod = {baz: 'qux'};
-        var modelOptions = fake.modelOptions();
+        let model, paymentMethodsViews;
+        const fakePaymentMethod = {baz: 'qux'};
+        const modelOptions = fake.modelOptions();
 
         jest.useFakeTimers();
 
@@ -153,7 +153,7 @@ describe('PaymentMethodsView', () => {
 
         model.getVaultedPaymentMethods.mockResolvedValue([{foo: 'bar'}, fakePaymentMethod]);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           model.changeActivePaymentMethod({foo: 'bar'});
 
           paymentMethodsViews = new PaymentMethodsView({
@@ -180,17 +180,17 @@ describe('PaymentMethodsView', () => {
     test(
       'updates the paying with label when the active payment method changes',
       () => {
-        var model, paymentMethodsViews;
-        var fakeCard = {type: 'CreditCard', details: {lastTwo: 22}};
-        var fakePayPal = {type: 'PayPalAccount', details: {email: 'buyer@braintreepayments.com'}};
-        var modelOptions = fake.modelOptions();
+        let model, paymentMethodsViews;
+        const fakeCard = {type: 'CreditCard', details: {lastTwo: 22}};
+        const fakePayPal = {type: 'PayPalAccount', details: {email: 'buyer@braintreepayments.com'}};
+        const modelOptions = fake.modelOptions();
 
         modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
         model = fake.model(modelOptions);
 
         model.getVaultedPaymentMethods.mockResolvedValue([fakePayPal, fakeCard]);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           model.isGuestCheckout = false;
 
           paymentMethodsViews = new PaymentMethodsView({
@@ -217,7 +217,7 @@ describe('PaymentMethodsView', () => {
 
   describe('_addPaymentMethod', () => {
     beforeEach(() => {
-      var div = document.createElement('div');
+      const div = document.createElement('div');
 
       div.innerHTML = mainHTML;
       testContext.element = div.querySelector('.braintree-dropin');
@@ -230,9 +230,9 @@ describe('PaymentMethodsView', () => {
     test(
       'does not remove other payment methods in non-guest checkout',
       () => {
-        var model, paymentMethodsViews;
-        var methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
-        var modelOptions = fake.modelOptions();
+        let model, paymentMethodsViews;
+        const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
+        const modelOptions = fake.modelOptions();
 
         modelOptions.client.getConfiguration.mockReturnValue({
           authorization: fake.clientTokenWithCustomerID,
@@ -245,7 +245,7 @@ describe('PaymentMethodsView', () => {
 
         model.getVaultedPaymentMethods.mockResolvedValue([testContext.fakePaymentMethod]);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           paymentMethodsViews = new PaymentMethodsView({
             element: testContext.element,
             model: model,
@@ -264,16 +264,16 @@ describe('PaymentMethodsView', () => {
     );
 
     test('removes other payment methods in guest checkout', () => {
-      var model, paymentMethodsViews;
-      var methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
-      var modelOptions = fake.modelOptions();
+      let model, paymentMethodsViews;
+      const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
+      const modelOptions = fake.modelOptions();
 
       modelOptions.merchantConfiguration.authorization = fake.clientToken;
       model = fake.model(modelOptions);
 
       model.getVaultedPaymentMethods.mockResolvedValue([testContext.fakePaymentMethod]);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         paymentMethodsViews = new PaymentMethodsView({
           element: testContext.element,
           model: model,
@@ -293,14 +293,14 @@ describe('PaymentMethodsView', () => {
     test(
       'does not try to remove a payment method if none exists in guest checkout',
       () => {
-        var model, paymentMethodsViews;
-        var methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
-        var modelOptions = fake.modelOptions();
+        let model, paymentMethodsViews;
+        const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
+        const modelOptions = fake.modelOptions();
 
         modelOptions.merchantConfiguration.authorization = fake.clientToken;
         model = fake.model(modelOptions);
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           paymentMethodsViews = new PaymentMethodsView({
             element: testContext.element,
             model: model,
@@ -321,13 +321,13 @@ describe('PaymentMethodsView', () => {
 
   describe('removeActivePaymentMethod', () => {
     beforeEach(() => {
-      var model;
-      var modelOptions = fake.modelOptions();
+      let model;
+      const modelOptions = fake.modelOptions();
 
       modelOptions.merchantConfiguration.authorization = fake.clientToken;
       model = fake.model(modelOptions);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         testContext.paymentMethodsViews = new PaymentMethodsView({
           element: testContext.element,
           model: model,
@@ -371,7 +371,7 @@ describe('PaymentMethodsView', () => {
 
   describe('_removePaymentMethod', () => {
     beforeEach(() => {
-      var div = document.createElement('div');
+      const div = document.createElement('div');
 
       div.innerHTML = mainHTML;
       testContext.element = div.querySelector('.braintree-dropin');
@@ -383,7 +383,7 @@ describe('PaymentMethodsView', () => {
 
       testContext.model = fake.model();
 
-      return testContext.model.initialize().then(function () {
+      return testContext.model.initialize().then(() => {
         testContext.paymentMethodsViews = new PaymentMethodsView({
           element: div,
           model: testContext.model,
@@ -421,7 +421,7 @@ describe('PaymentMethodsView', () => {
     });
 
     test('ignores payment methods that are not the exact object', () => {
-      var copy = JSON.parse(JSON.stringify(testContext.fakePaymentMethod));
+      const copy = JSON.parse(JSON.stringify(testContext.fakePaymentMethod));
 
       testContext.paymentMethodsViews._removePaymentMethod(copy);
 
@@ -434,14 +434,14 @@ describe('PaymentMethodsView', () => {
     test(
       'resolves a promise with the active payment method from the active method view',
       () => {
-        var paymentMethodsViews;
-        var fakeActiveMethodView = {
+        let paymentMethodsViews;
+        const fakeActiveMethodView = {
           paymentMethod: {foo: 'bar'}
         };
-        var element = document.createElement('div');
-        var model = fake.model();
+        const element = document.createElement('div');
+        const model = fake.model();
 
-        return model.initialize().then(function () {
+        return model.initialize().then(() => {
           element.innerHTML = mainHTML;
           paymentMethodsViews = new PaymentMethodsView({
             element: element,
@@ -455,18 +455,18 @@ describe('PaymentMethodsView', () => {
           paymentMethodsViews.activeMethodView = fakeActiveMethodView;
 
           return paymentMethodsViews.requestPaymentMethod();
-        }).then(function (payload) {
+        }).then(payload => {
           expect(payload).toBe(fakeActiveMethodView.paymentMethod);
         });
       }
     );
 
     test('rejects if there is no activeMethodView', () => {
-      var paymentMethodsViews;
-      var element = document.createElement('div');
-      var model = fake.model();
+      let paymentMethodsViews;
+      const element = document.createElement('div');
+      const model = fake.model();
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         element.innerHTML = mainHTML;
         paymentMethodsViews = new PaymentMethodsView({
           element: element,
@@ -478,21 +478,21 @@ describe('PaymentMethodsView', () => {
         });
 
         return paymentMethodsViews.requestPaymentMethod();
-      }).then(throwIfResolves).catch(function (err) {
+      }).then(throwIfResolves).catch(err => {
         expect(err).toBeInstanceOf(DropinError);
         expect(err.message).toBe('No payment method is available.');
       });
     });
 
     test('rejects if model is in edit mode', () => {
-      var paymentMethodsViews;
-      var fakeActiveMethodView = {
+      let paymentMethodsViews;
+      const fakeActiveMethodView = {
         paymentMethod: {foo: 'bar'}
       };
-      var element = document.createElement('div');
-      var model = fake.model();
+      const element = document.createElement('div');
+      const model = fake.model();
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         element.innerHTML = mainHTML;
         paymentMethodsViews = new PaymentMethodsView({
           element: element,
@@ -507,7 +507,7 @@ describe('PaymentMethodsView', () => {
         jest.spyOn(model, 'isInEditMode').mockReturnValue(true);
 
         return paymentMethodsViews.requestPaymentMethod();
-      }).then(throwIfResolves).catch(function (err) {
+      }).then(throwIfResolves).catch(err => {
         expect(err).toBeInstanceOf(DropinError);
         expect(err.message).toBe('No payment method is available.');
       });
@@ -516,9 +516,9 @@ describe('PaymentMethodsView', () => {
 
   describe('enableEditMode', () => {
     test('calls enableEditMode on each payment method view', () => {
-      var model, paymentMethodsViews;
-      var modelOptions = fake.modelOptions();
-      var element = document.createElement('div');
+      let model, paymentMethodsViews;
+      const modelOptions = fake.modelOptions();
+      const element = document.createElement('div');
 
       element.innerHTML = mainHTML;
 
@@ -536,7 +536,7 @@ describe('PaymentMethodsView', () => {
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
       ]);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         paymentMethodsViews = new PaymentMethodsView({
           element: element,
           model: model,
@@ -560,9 +560,9 @@ describe('PaymentMethodsView', () => {
 
   describe('disableEditMode', () => {
     test('calls disableEditMode on each payment method view', () => {
-      var model, paymentMethodsViews;
-      var modelOptions = fake.modelOptions();
-      var element = document.createElement('div');
+      let model, paymentMethodsViews;
+      const modelOptions = fake.modelOptions();
+      const element = document.createElement('div');
 
       element.innerHTML = mainHTML;
 
@@ -580,7 +580,7 @@ describe('PaymentMethodsView', () => {
         {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
       ]);
 
-      return model.initialize().then(function () {
+      return model.initialize().then(() => {
         paymentMethodsViews = new PaymentMethodsView({
           element: element,
           model: model,
@@ -604,8 +604,8 @@ describe('PaymentMethodsView', () => {
 
   describe('refreshPaymentMethods', () => {
     beforeEach(() => {
-      var modelOptions = fake.modelOptions();
-      var element = document.createElement('div');
+      const modelOptions = fake.modelOptions();
+      const element = document.createElement('div');
 
       element.innerHTML = mainHTML;
 
@@ -625,7 +625,7 @@ describe('PaymentMethodsView', () => {
       ]);
 
 
-      return testContext.model.initialize().then(function () {
+      return testContext.model.initialize().then(() => {
         testContext.paymentMethodsViews = new PaymentMethodsView({
           element: element,
           model: testContext.model,

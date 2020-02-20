@@ -1,11 +1,11 @@
 'use strict';
 
-var BaseView = require('../../../src/views/base-view');
-var DeleteConfirmationView = require('../../../src/views/delete-confirmation-view');
-var fs = require('fs');
-var strings = require('../../../src/translations/en_US');
+const BaseView = require('../../../src/views/base-view');
+const DeleteConfirmationView = require('../../../src/views/delete-confirmation-view');
+const fs = require('fs');
+const strings = require('../../../src/translations/en_US');
 
-var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
+const mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
 describe('DeleteConfirmationView', () => {
   let testContext;
@@ -46,7 +46,7 @@ describe('DeleteConfirmationView', () => {
     });
 
     test('sets up a button click for the yes button', () => {
-      var yesButton = testContext.element.querySelector('[data-braintree-id="delete-confirmation__yes"]');
+      const yesButton = testContext.element.querySelector('[data-braintree-id="delete-confirmation__yes"]');
 
       yesButton.click();
 
@@ -54,7 +54,7 @@ describe('DeleteConfirmationView', () => {
     });
 
     test('sets up a button click for the no button', () => {
-      var noButton = testContext.element.querySelector('[data-braintree-id="delete-confirmation__no"]');
+      const noButton = testContext.element.querySelector('[data-braintree-id="delete-confirmation__no"]');
 
       noButton.click();
 
@@ -66,7 +66,7 @@ describe('DeleteConfirmationView', () => {
     test(
       'applies credit card payment method delete confirmation message',
       () => {
-        var paymentMethod = {
+        const paymentMethod = {
           nonce: 'a-nonce',
           type: 'CreditCard',
           details: {
@@ -83,7 +83,7 @@ describe('DeleteConfirmationView', () => {
     );
 
     test('applies PayPal payment method delete confirmation message', () => {
-      var paymentMethod = {
+      const paymentMethod = {
         nonce: 'a-nonce',
         type: 'PayPalAccount',
         details: {
@@ -97,7 +97,7 @@ describe('DeleteConfirmationView', () => {
     });
 
     test('applies Venmo payment method delete confirmation message', () => {
-      var paymentMethod = {
+      const paymentMethod = {
         nonce: 'a-nonce',
         type: 'VenmoAccount',
         details: {
@@ -113,7 +113,7 @@ describe('DeleteConfirmationView', () => {
     test(
       'applies generic payment method message for non-card, venmo or paypal accounts',
       () => {
-        var paymentMethod = {
+        const paymentMethod = {
           nonce: 'a-nonce',
           type: 'SomeMethod'
         };

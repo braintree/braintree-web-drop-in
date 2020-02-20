@@ -1,7 +1,7 @@
 'use strict';
 
-var dropin = require('../../src/');
-var packageVersion = require('../../package.json').version;
+const dropin = require('../../src/');
+const packageVersion = require('../../package.json').version;
 
 describe('export', () => {
   test('contains create', () => {

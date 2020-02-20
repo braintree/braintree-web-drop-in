@@ -1,10 +1,10 @@
 'use strict';
 
-var fake = require('../../helpers/fake');
-var threeDSecure = require('braintree-web/three-d-secure');
-var classList = require('@braintree/class-list');
-var ThreeDSecure = require('../../../src/lib/three-d-secure');
-var throwIfResolves = require('../../helpers/throw-if-resolves');
+const fake = require('../../helpers/fake');
+const threeDSecure = require('braintree-web/three-d-secure');
+const classList = require('@braintree/class-list');
+const ThreeDSecure = require('../../../src/lib/three-d-secure');
+const throwIfResolves = require('../../helpers/throw-if-resolves');
 
 describe('ThreeDSecure', () => {
   let testContext;
@@ -28,11 +28,11 @@ describe('ThreeDSecure', () => {
     });
 
     test('sets up three d secure', () => {
-      var config = {};
-      var client = {};
-      var tds = new ThreeDSecure(client, config, 'Card Verification');
+      const config = {};
+      const client = {};
+      const tds = new ThreeDSecure(client, config, 'Card Verification');
 
-      return tds.initialize().then(function () {
+      return tds.initialize().then(() => {
         expect(threeDSecure.create).toBeCalledTimes(1);
         expect(threeDSecure.create).toBeCalledWith({
           client: client,
@@ -67,7 +67,7 @@ describe('ThreeDSecure', () => {
         details: {
           bin: '123456'
         }
-      }).then(function (payload) {
+      }).then(payload => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -95,13 +95,13 @@ describe('ThreeDSecure', () => {
         details: {
           bin: '123456'
         }
-      }).then(throwIfResolves).catch(function (err) {
+      }).then(throwIfResolves).catch(err => {
         expect(err.message).toBe('A message');
       });
     });
 
     test('can pass additional data along', () => {
-      var billingAddress = {
+      const billingAddress = {
         foo: 'bar'
       };
 
@@ -116,7 +116,7 @@ describe('ThreeDSecure', () => {
         additionalInformation: {
           shippingMethod: '01'
         }
-      }).then(function (payload) {
+      }).then(payload => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -146,7 +146,7 @@ describe('ThreeDSecure', () => {
       }, {
         nonce: 'bad-nonce',
         bin: 'bad-bin'
-      }).then(function (payload) {
+      }).then(payload => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -172,7 +172,7 @@ describe('ThreeDSecure', () => {
         }
       }, {
         amount: '3.00'
-      }).then(function (payload) {
+      }).then(payload => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -200,7 +200,7 @@ describe('ThreeDSecure', () => {
         additionalInformation: {
           acsWindowSize: '01'
         }
-      }).then(function (payload) {
+      }).then(payload => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -228,7 +228,7 @@ describe('ThreeDSecure', () => {
     });
 
     test('calls teardown on 3ds instance', () => {
-      return testContext.tds.teardown().then(function () {
+      return testContext.tds.teardown().then(() => {
         expect(testContext.threeDSecureInstance.teardown).toBeCalledTimes(1);
       });
     });
@@ -236,7 +236,7 @@ describe('ThreeDSecure', () => {
 
   describe('udpateConfiguration', () => {
     test('updates configuration', () => {
-      var tds = new ThreeDSecure({}, {amount: '10.00', foo: 'bar'}, 'Card Verification');
+      const tds = new ThreeDSecure({}, {amount: '10.00', foo: 'bar'}, 'Card Verification');
 
       tds.updateConfiguration('amount', '23.45');
 

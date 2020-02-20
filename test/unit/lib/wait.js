@@ -1,6 +1,6 @@
 'use strict';
 
-var wait = require('../../../src/lib/wait');
+const wait = require('../../../src/lib/wait');
 
 describe('wait.delay', () => {
   test('returns a promise that resolves after a set amount of time', () => {

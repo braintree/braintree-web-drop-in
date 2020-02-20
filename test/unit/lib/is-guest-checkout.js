@@ -1,11 +1,11 @@
 'use strict';
 
-var fake = require('../../helpers/fake');
-var isGuestCheckout = require('../../../src/lib/is-guest-checkout');
+const fake = require('../../helpers/fake');
+const isGuestCheckout = require('../../../src/lib/is-guest-checkout');
 
 describe('isGuestCheckout', () => {
   test('returns true when given a client with a tokenization key', () => {
-    var fakeClient = fake.client({
+    const fakeClient = fake.client({
       authorizationType: 'TOKENIZATION_KEY',
       authorization: fake.tokenizationKey
     });
@@ -16,7 +16,7 @@ describe('isGuestCheckout', () => {
   test(
     'returns true when given a client with a client token without a customer ID',
     () => {
-      var fakeClient = fake.client({
+      const fakeClient = fake.client({
         authorizationType: 'CLIENT_TOKEN',
         authorization: fake.clientToken
       });
@@ -28,7 +28,7 @@ describe('isGuestCheckout', () => {
   test(
     'returns false when given a client with a client token with a customer ID',
     () => {
-      var fakeClient = fake.client({
+      const fakeClient = fake.client({
         authorizationType: 'CLIENT_TOKEN',
         authorization: fake.clientTokenWithCustomerID
       });

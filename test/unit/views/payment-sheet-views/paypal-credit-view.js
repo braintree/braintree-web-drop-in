@@ -1,8 +1,8 @@
 'use strict';
 /* eslint-disable no-new */
 
-var BasePayPalView = require('../../../../src/views/payment-sheet-views/base-paypal-view');
-var PayPalCreditView = require('../../../../src/views/payment-sheet-views/paypal-credit-view');
+const BasePayPalView = require('../../../../src/views/payment-sheet-views/base-paypal-view');
+const PayPalCreditView = require('../../../../src/views/payment-sheet-views/paypal-credit-view');
 
 describe('PayPalCreditView', () => {
   let testContext;
@@ -33,7 +33,7 @@ describe('PayPalCreditView', () => {
     test('resolves false if base PayPal view resolves false', () => {
       BasePayPalView.isEnabled.mockResolvedValue(false);
 
-      return PayPalCreditView.isEnabled(testContext.options).then(function (result) {
+      return PayPalCreditView.isEnabled(testContext.options).then(result => {
         expect(result).toBe(false);
       });
     });
@@ -41,13 +41,13 @@ describe('PayPalCreditView', () => {
     test('resolves false if merchant did not configure paypalCredit', () => {
       delete testContext.options.merchantConfiguration.paypalCredit;
 
-      return PayPalCreditView.isEnabled(testContext.options).then(function (result) {
+      return PayPalCreditView.isEnabled(testContext.options).then(result => {
         expect(result).toBe(false);
       });
     });
 
     test('resolves true if merchant enabled paypalCredit', () => {
-      return PayPalCreditView.isEnabled(testContext.options).then(function (result) {
+      return PayPalCreditView.isEnabled(testContext.options).then(result => {
         expect(result).toBe(true);
       });
     });

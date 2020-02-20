@@ -1,10 +1,10 @@
 'use strict';
 
-var analytics = require('../../../src/lib/analytics');
-var atob = require('../../../src/lib/polyfill').atob;
-var braintreeClientVersion = require('braintree-web/client').VERSION;
-var constants = require('../../../src/constants');
-var fake = require('../../helpers/fake');
+const analytics = require('../../../src/lib/analytics');
+const atob = require('../../../src/lib/polyfill').atob;
+const braintreeClientVersion = require('braintree-web/client').VERSION;
+const constants = require('../../../src/constants');
+const fake = require('../../helpers/fake');
 
 describe('analytics.sendEvent', () => {
   let testContext;
@@ -18,8 +18,8 @@ describe('analytics.sendEvent', () => {
   });
 
   test('correctly sends an analytics event with a callback', () => {
-    var postArgs, currentTimestamp;
-    var fakeConfiguration = fake.configuration();
+    let postArgs, currentTimestamp;
+    const fakeConfiguration = fake.configuration();
 
     function callback() {}
 
@@ -42,8 +42,8 @@ describe('analytics.sendEvent', () => {
   test(
     'correctly sends an analytics event with no callback (fire-and-forget)',
     () => {
-      var postArgs, currentTimestamp;
-      var fakeConfiguration = fake.configuration();
+      let postArgs, currentTimestamp;
+      const fakeConfiguration = fake.configuration();
 
       analytics.sendEvent(testContext.client, 'test.event.kind');
 
@@ -62,8 +62,8 @@ describe('analytics.sendEvent', () => {
   );
 
   test('correctly formats _meta', () => {
-    var postArgs;
-    var fakeConfiguration = fake.configuration();
+    let postArgs;
+    const fakeConfiguration = fake.configuration();
 
     analytics.sendEvent(testContext.client, 'test.event.kind');
 
@@ -74,8 +74,8 @@ describe('analytics.sendEvent', () => {
   });
 
   test('includes tokenizationKey', () => {
-    var client, postArgs;
-    var fakeConfiguration = fake.configuration();
+    let client, postArgs;
+    const fakeConfiguration = fake.configuration();
 
     fakeConfiguration.authorization = fake.tokenizationKey;
     client = fake.client(fakeConfiguration);
@@ -90,8 +90,8 @@ describe('analytics.sendEvent', () => {
   });
 
   test('includes authorizationFingerprint', () => {
-    var client, fingerprint, postArgs;
-    var fakeConfiguration = fake.configuration();
+    let client, fingerprint, postArgs;
+    const fakeConfiguration = fake.configuration();
 
     fakeConfiguration.authorization = fake.clientToken;
     fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
@@ -108,7 +108,7 @@ describe('analytics.sendEvent', () => {
   });
 
   test('includes braintreeLibraryVersion', () => {
-    var postArgs;
+    let postArgs;
 
     analytics.sendEvent(testContext.client, 'test.event.kind');
 

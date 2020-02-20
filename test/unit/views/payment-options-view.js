@@ -1,16 +1,16 @@
 'use strict';
 
-var BaseView = require('../../../src/views/base-view');
-var CardView = require('../../../src/views/payment-sheet-views/card-view');
-var PaymentOptionsView = require('../../../src/views/payment-options-view');
-var strings = require('../../../src/translations/en_US');
-var fake = require('../../helpers/fake');
-var fs = require('fs');
-var analytics = require('../../../src/lib/analytics');
+const BaseView = require('../../../src/views/base-view');
+const CardView = require('../../../src/views/payment-sheet-views/card-view');
+const PaymentOptionsView = require('../../../src/views/payment-options-view');
+const strings = require('../../../src/translations/en_US');
+const fake = require('../../helpers/fake');
+const fs = require('fs');
+const analytics = require('../../../src/lib/analytics');
 
-var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
+const mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
-var paymentOptionAttributes = {
+const paymentOptionAttributes = {
   applePay: {
     icon: '#logoApplePay',
     optionLabel: 'Paying with Apple Pay',
@@ -89,21 +89,21 @@ describe('PaymentOptionsView', () => {
 
     });
 
-    Object.keys(paymentOptionAttributes).forEach(function (optionName) {
-      var option = paymentOptionAttributes[optionName];
+    Object.keys(paymentOptionAttributes).forEach(optionName => {
+      const option = paymentOptionAttributes[optionName];
 
       test('adds a ' + option.paymentOptionID + ' option', () => {
-        var paymentOptionsView = new PaymentOptionsView({
+        const paymentOptionsView = new PaymentOptionsView({
           client: testContext.client,
           element: testContext.element,
           mainView: {},
           model: modelThatSupports([option.paymentOptionID]),
           strings: strings
         });
-        var label = paymentOptionsView.container.querySelector('.braintree-option__label');
-        var icon = paymentOptionsView.container.querySelector('use');
-        var iconContainer = icon.parentElement;
-        var optionElement = paymentOptionsView.elements[option.paymentOptionID];
+        const label = paymentOptionsView.container.querySelector('.braintree-option__label');
+        const icon = paymentOptionsView.container.querySelector('use');
+        const iconContainer = icon.parentElement;
+        const optionElement = paymentOptionsView.elements[option.paymentOptionID];
 
         expect(label.getAttribute('aria-label')).toBe(option.optionLabel);
         expect(label.innerHTML).toMatch(option.optionTitle);
@@ -120,15 +120,15 @@ describe('PaymentOptionsView', () => {
     });
 
     test('sets the primary view to the payment option when clicked', () => {
-      var mainViewStub = {setPrimaryView: jest.fn()};
-      var paymentOptionsView = new PaymentOptionsView({
+      const mainViewStub = {setPrimaryView: jest.fn()};
+      const paymentOptionsView = new PaymentOptionsView({
         client: testContext.client,
         element: testContext.element,
         mainView: mainViewStub,
         model: modelThatSupports(['card']),
         strings: strings
       });
-      var option = paymentOptionsView.container.querySelector('.braintree-option');
+      const option = paymentOptionsView.container.querySelector('.braintree-option');
 
       option.click();
 
@@ -138,15 +138,15 @@ describe('PaymentOptionsView', () => {
     test(
       'calls model.selectPaymentOption when payment option is clicked',
       () => {
-        var mainViewStub = {setPrimaryView: jest.fn()};
-        var paymentOptionsView = new PaymentOptionsView({
+        const mainViewStub = {setPrimaryView: jest.fn()};
+        const paymentOptionsView = new PaymentOptionsView({
           client: testContext.client,
           element: testContext.element,
           mainView: mainViewStub,
           model: modelThatSupports(['card']),
           strings: strings
         });
-        var option = paymentOptionsView.container.querySelector('.braintree-option');
+        const option = paymentOptionsView.container.querySelector('.braintree-option');
 
         jest.spyOn(paymentOptionsView.model, 'selectPaymentOption').mockImplementation();
 
@@ -159,7 +159,7 @@ describe('PaymentOptionsView', () => {
 
   describe('sends analytics events', () => {
     beforeEach(() => {
-      var wrapper = document.createElement('div');
+      const wrapper = document.createElement('div');
 
       wrapper.innerHTML = mainHTML;
 
@@ -173,16 +173,16 @@ describe('PaymentOptionsView', () => {
       };
     });
 
-    Object.keys(paymentOptionAttributes).forEach(function (optionName) {
-      var option = paymentOptionAttributes[optionName];
+    Object.keys(paymentOptionAttributes).forEach(optionName => {
+      const option = paymentOptionAttributes[optionName];
 
       test(
         'when the ' + option.paymentOptionID + ' option is selected',
         () => {
-          var optionElement, paymentOptionsView;
-          var model = modelThatSupports([option.paymentOptionID]);
-          var viewConfiguration = testContext.viewConfiguration;
-          var eventName = 'selected.' + option.paymentOptionID;
+          let optionElement, paymentOptionsView;
+          const model = modelThatSupports([option.paymentOptionID]);
+          const viewConfiguration = testContext.viewConfiguration;
+          const eventName = 'selected.' + option.paymentOptionID;
 
           jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
@@ -200,7 +200,7 @@ describe('PaymentOptionsView', () => {
 });
 
 function modelThatSupports(supportedPaymentOptions) {
-  var result = fake.model();
+  const result = fake.model();
 
   result.supportedPaymentOptions = supportedPaymentOptions;
 
