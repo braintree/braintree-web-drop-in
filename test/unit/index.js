@@ -9,112 +9,115 @@ var client = require('braintree-web/client');
 var fake = require('../helpers/fake');
 var dropinConstants = require('../../src/constants');
 var analytics = require('../../src/lib/analytics');
-var version = require('../../package.json').version;
+var {
+  yields
+} = require('../helpers/yields');
+// TODO this gets transformed to the package.json version when built
+// should we figure out how to actually test this?
+var version = '__VERSION__';
 
-describe('dropin.create', function () {
-  beforeEach(function () {
+describe('dropin.create', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
+  });
+
+  beforeEach(() => {
     var container = document.createElement('div');
 
-    this.form = document.createElement('form');
+    testContext.form = document.createElement('form');
 
     container.id = 'foo';
 
-    this.form.appendChild(container);
-    document.body.appendChild(this.form);
+    testContext.form.appendChild(container);
+    document.body.appendChild(testContext.form);
 
-    this.sandbox.stub(client, 'create').resolves();
+    jest.spyOn(client, 'create').mockResolvedValue();
   });
 
-  afterEach(function () {
-    document.body.removeChild(this.form);
+  afterEach(() => {
+    document.body.removeChild(testContext.form);
   });
 
-  it('errors out if no authorization given', function (done) {
+  test('errors out if no authorization given', done => {
     dropin.create({}, function (err, instance) {
-      expect(err).to.be.an.instanceof(DropinError);
-      expect(err.message).to.equal('options.authorization is required.');
-      expect(instance).not.to.exist;
+      expect(err).toBeInstanceOf(DropinError);
+      expect(err.message).toBe('options.authorization is required.');
+      expect(instance).not.toBeDefined();
       done();
     });
   });
 
-  it('returns an error if client.create errors', function (done) {
+  test('returns an error if client.create errors', done => {
     var originalErr = new BraintreeError({
       type: 'MERCHANT',
       code: 'CODE',
       message: 'you goofed!!'
     });
 
-    client.create.rejects(originalErr);
+    client.create.mockRejectedValue(originalErr);
 
     dropin.create({
       authorization: 'tokenization_key',
       selector: '#foo'
     }, function (err, instance) {
-      expect(err).to.be.an.instanceof(DropinError);
-      expect(err.message).to.equal('There was an error creating Drop-in.');
-      expect(err._braintreeWebError).to.equal(originalErr);
-      expect(instance).not.to.exist;
+      expect(err).toBeInstanceOf(DropinError);
+      expect(err.message).toBe('There was an error creating Drop-in.');
+      expect(err._braintreeWebError).toBe(originalErr);
+      expect(instance).not.toBeDefined();
       done();
     });
   });
 
-  it('returns a promise if no callback is provided', function () {
-    var promise = dropin.create({
-      authorization: 'tokenization_key',
-      selector: '#foo'
-    }).catch(function () { /* supress errors */ });
+  test('resolves a Dropin instance if client.create returns successfully', () => {
+      var fakeClient = fake.client();
 
-    expect(promise).to.be.an.instanceof(Promise);
-  });
+      jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
+        callback(null, this);
+      });
 
-  it('returns a Dropin instance if client.create returns successfully', function (done) {
+      client.create.mockResolvedValue(fakeClient);
+
+      return dropin.create({
+        authorization: 'tokenization_key',
+        selector: '#foo'
+      }).then(instance => {
+        expect(instance).toBeInstanceOf(Dropin);
+      });
+    }
+  );
+
+  test(
+    'returns an error to callback if Drop-in initialization fails',
+    done => {
+      var fakeClient = fake.client();
+      var dropinError = new DropinError('Dropin Error');
+
+      jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(yields(dropinError));
+
+      client.create.mockResolvedValue(fakeClient);
+
+      dropin.create({
+        authorization: 'tokenization_key',
+        selector: '#foo'
+      }, function (err, instance) {
+        expect(err).toBe(dropinError);
+        expect(instance).not.toBeDefined();
+
+        done();
+      });
+    }
+  );
+
+  test('sets the correct analytics metadata', done => {
     var fakeClient = fake.client();
 
-    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
+    jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
       callback(null, this);
     });
 
-    client.create.resolves(fakeClient);
-
-    dropin.create({
-      authorization: 'tokenization_key',
-      selector: '#foo'
-    }, function (err, instance) {
-      expect(err).not.to.exist;
-      expect(instance).be.an.instanceOf(Dropin);
-
-      done();
-    });
-  });
-
-  it('returns an error to callback if Drop-in initialization fails', function (done) {
-    var fakeClient = fake.client();
-    var dropinError = new DropinError('Dropin Error');
-
-    this.sandbox.stub(Dropin.prototype, '_initialize').yields(dropinError);
-
-    client.create.resolves(fakeClient);
-
-    dropin.create({
-      authorization: 'tokenization_key',
-      selector: '#foo'
-    }, function (err, instance) {
-      expect(err).to.equal(dropinError);
-      expect(instance).not.to.exist;
-
-      done();
-    });
-  });
-
-  it('sets the correct analytics metadata', function (done) {
-    var fakeClient = fake.client();
-
-    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
-      callback(null, this);
-    });
-
-    client.create.resolves(fakeClient);
+    client.create.mockResolvedValue(fakeClient);
 
     dropin.create({
       authorization: 'tokenization_key',
@@ -122,56 +125,62 @@ describe('dropin.create', function () {
     }, function () {
       var configuration = fakeClient.getConfiguration();
 
-      expect(configuration.analyticsMetadata.integration).to.equal(dropinConstants.INTEGRATION);
-      expect(configuration.analyticsMetadata.integrationType).to.equal(dropinConstants.INTEGRATION);
-      expect(configuration.analyticsMetadata.dropinVersion).to.equal(version);
+      expect(configuration.analyticsMetadata.integration).toBe(dropinConstants.INTEGRATION);
+      expect(configuration.analyticsMetadata.integrationType).toBe(dropinConstants.INTEGRATION);
+      expect(configuration.analyticsMetadata.dropinVersion).toBe(version);
 
       done();
     });
   });
 
-  it('sends web.dropin.started.tokenization-key event when using a tokenization key', function (done) {
-    var fakeClient = fake.client();
+  test(
+    'sends web.dropin.started.tokenization-key event when using a tokenization key',
+    done => {
+      var fakeClient = fake.client();
 
-    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
-      callback(null, this);
-    });
-    this.sandbox.stub(analytics, 'sendEvent');
+      jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
+        callback(null, this);
+      });
+      jest.spyOn(analytics, 'sendEvent');
 
-    client.create.resolves(fakeClient);
+      client.create.mockResolvedValue(fakeClient);
 
-    dropin.create({
-      authorization: fake.tokenizationKey,
-      selector: '#foo'
-    }, function () {
-      expect(analytics.sendEvent).to.be.calledWith(fakeClient, 'started.tokenization-key');
-      done();
-    });
-  });
+      dropin.create({
+        authorization: fake.tokenizationKey,
+        selector: '#foo'
+      }, function () {
+        expect(analytics.sendEvent).toBeCalledWith(fakeClient, 'started.tokenization-key');
+        done();
+      });
+    }
+  );
 
-  it('sends web.dropin.started.client-token event when using a client token', function (done) {
-    var fakeConfiguration, fakeClient;
+  test(
+    'sends web.dropin.started.client-token event when using a client token',
+    done => {
+      var fakeConfiguration, fakeClient;
 
-    fakeConfiguration = fake.configuration();
-    fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
-    fakeConfiguration.authorization = fake.clientToken;
+      fakeConfiguration = fake.configuration();
+      fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
+      fakeConfiguration.authorization = fake.clientToken;
 
-    fakeClient = fake.client();
-    fakeClient.getConfiguration.returns(fakeConfiguration);
+      fakeClient = fake.client();
+      fakeClient.getConfiguration.mockReturnValue(fakeConfiguration);
 
-    this.sandbox.stub(Dropin.prototype, '_initialize').callsFake(function (callback) {
-      callback(null, this);
-    });
-    this.sandbox.stub(analytics, 'sendEvent');
+      jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
+        callback(null, this);
+      });
+      jest.spyOn(analytics, 'sendEvent');
 
-    client.create.resolves(fakeClient);
+      client.create.mockResolvedValue(fakeClient);
 
-    dropin.create({
-      authorization: fake.clientToken,
-      selector: '#foo'
-    }, function () {
-      expect(analytics.sendEvent).to.be.calledWith(fakeClient, 'started.client-token');
-      done();
-    });
-  });
+      dropin.create({
+        authorization: fake.clientToken,
+        selector: '#foo'
+      }, function () {
+        expect(analytics.sendEvent).toBeCalledWith(fakeClient, 'started.client-token');
+        done();
+      });
+    }
+  );
 });

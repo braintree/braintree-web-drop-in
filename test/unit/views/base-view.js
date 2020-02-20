@@ -5,160 +5,175 @@ var constants = require('../../../src/constants');
 var classList = require('@braintree/class-list');
 var Promise = require('../../../src/lib/promise');
 
-describe('BaseView', function () {
-  describe('Constructor', function () {
-    it('does not require options to be passed', function () {
+describe('BaseView', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
+  });
+
+  describe('Constructor', () => {
+    test('does not require options to be passed', () => {
       expect(function () {
         new BaseView(); // eslint-disable-line no-new
-      }).not.to.throw();
+      }).not.toThrowError();
     });
 
-    it('takes properties from passed options', function () {
+    test('takes properties from passed options', () => {
       var view = new BaseView({foo: 'boo', yas: 'gaga'});
 
-      expect(view.foo).to.equal('boo');
-      expect(view.yas).to.equal('gaga');
+      expect(view.foo).toBe('boo');
+      expect(view.yas).toBe('gaga');
     });
   });
 
-  describe('teardown', function () {
-    it('returns a resolved promise', function () {
+  describe('teardown', () => {
+    test('returns a resolved promise', () => {
       var view = new BaseView();
       var promise = view.teardown();
 
-      expect(promise).to.be.a.instanceof(Promise);
+      expect(promise).toBeInstanceOf(Promise);
     });
   });
 
-  describe('requestPaymentMethod', function () {
-    it('returns a rejected promise', function () {
+  describe('requestPaymentMethod', () => {
+    test('returns a rejected promise', () => {
       var view = new BaseView();
 
       return view.requestPaymentMethod().then(function () {
         throw new Error('should not resolve');
       }).catch(function (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal(constants.errors.NO_PAYMENT_METHOD_ERROR);
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe(constants.errors.NO_PAYMENT_METHOD_ERROR);
       });
     });
   });
 
-  describe('getPaymentMethod', function () {
-    it('returns undefined if there is no activeMethodView on instance', function () {
+  describe('getPaymentMethod', () => {
+    test(
+      'returns undefined if there is no activeMethodView on instance',
+      () => {
+        var view = new BaseView();
+
+        expect(view.getPaymentMethod()).toBeUndefined(); // eslint-disable-line no-undefined
+      }
+    );
+
+    test(
+      'returns undefined if activeMethodView does not have a payment method',
+      () => {
+        var view = new BaseView();
+
+        view.activeMethodView = {};
+
+        expect(view.getPaymentMethod()).toBeUndefined(); // eslint-disable-line no-undefined
+      }
+    );
+
+    test(
+      'returns the payment method object if there is an activeMethodView with a payment method object',
+      () => {
+        var view = new BaseView();
+        var paymentMethod = {};
+
+        view.activeMethodView = {
+          paymentMethod: paymentMethod
+        };
+
+        expect(view.getPaymentMethod()).toBe(paymentMethod);
+      }
+    );
+  });
+
+  describe('onSelection', () => {
+    test('is a noop function', () => {
       var view = new BaseView();
 
-      expect(view.getPaymentMethod()).to.equal(undefined); // eslint-disable-line no-undefined
-    });
-
-    it('returns undefined if activeMethodView does not have a payment method', function () {
-      var view = new BaseView();
-
-      view.activeMethodView = {};
-
-      expect(view.getPaymentMethod()).to.equal(undefined); // eslint-disable-line no-undefined
-    });
-
-    it('returns the payment method object if there is an activeMethodView with a payment method object', function () {
-      var view = new BaseView();
-      var paymentMethod = {};
-
-      view.activeMethodView = {
-        paymentMethod: paymentMethod
-      };
-
-      expect(view.getPaymentMethod()).to.equal(paymentMethod);
+      expect(view.onSelection).toBeInstanceOf(Function);
     });
   });
 
-  describe('onSelection', function () {
-    it('is a noop function', function () {
-      var view = new BaseView();
-
-      expect(view.onSelection).to.be.a('function');
-    });
-  });
-
-  describe('preventUserAction', function () {
-    beforeEach(function () {
-      this.sandbox.stub(classList, 'add');
-      this.element = global.document.createElement('div');
-      this.model = {
-        preventUserAction: this.sandbox.stub()
+  describe('preventUserAction', () => {
+    beforeEach(() => {
+      jest.spyOn(classList, 'add').mockImplementation();
+      testContext.element = global.document.createElement('div');
+      testContext.model = {
+        preventUserAction: jest.fn()
       };
     });
 
-    it('adds a loading class to view element', function () {
+    test('adds a loading class to view element', () => {
       var view = new BaseView({
-        element: this.element,
-        model: this.model
+        element: testContext.element,
+        model: testContext.model
       });
 
       view.preventUserAction();
 
-      expect(classList.add).to.be.calledOnce;
-      expect(classList.add).to.be.calledWith(this.element, 'braintree-sheet--loading');
+      expect(classList.add).toBeCalledTimes(1);
+      expect(classList.add).toBeCalledWith(testContext.element, 'braintree-sheet--loading');
     });
 
-    it('ignores adding class if no element is provided', function () {
+    test('ignores adding class if no element is provided', () => {
       var view = new BaseView({
-        model: this.model
+        model: testContext.model
       });
 
       view.preventUserAction();
 
-      expect(classList.add).to.not.be.called;
+      expect(classList.add).not.toBeCalled();
     });
 
-    it('calls preventUserAction on model', function () {
+    test('calls preventUserAction on model', () => {
       var view = new BaseView({
-        model: this.model
+        model: testContext.model
       });
 
       view.preventUserAction();
 
-      expect(this.model.preventUserAction).to.be.calledOnce;
+      expect(testContext.model.preventUserAction).toBeCalledTimes(1);
     });
   });
 
-  describe('allowUserAction', function () {
-    beforeEach(function () {
-      this.sandbox.stub(classList, 'remove');
-      this.element = global.document.createElement('div');
-      this.model = {
-        allowUserAction: this.sandbox.stub()
+  describe('allowUserAction', () => {
+    beforeEach(() => {
+      jest.spyOn(classList, 'remove').mockImplementation();
+      testContext.element = global.document.createElement('div');
+      testContext.model = {
+        allowUserAction: jest.fn()
       };
     });
 
-    it('adds a loading class to view element', function () {
+    test('adds a loading class to view element', () => {
       var view = new BaseView({
-        element: this.element,
-        model: this.model
+        element: testContext.element,
+        model: testContext.model
       });
 
       view.allowUserAction();
 
-      expect(classList.remove).to.be.calledOnce;
-      expect(classList.remove).to.be.calledWith(this.element, 'braintree-sheet--loading');
+      expect(classList.remove).toBeCalledTimes(1);
+      expect(classList.remove).toBeCalledWith(testContext.element, 'braintree-sheet--loading');
     });
 
-    it('ignores adding class if no element is provided', function () {
+    test('ignores adding class if no element is provided', () => {
       var view = new BaseView({
-        model: this.model
+        model: testContext.model
       });
 
       view.allowUserAction();
 
-      expect(classList.remove).to.not.be.called;
+      expect(classList.remove).not.toBeCalled();
     });
 
-    it('calls allowUserAction on model', function () {
+    test('calls allowUserAction on model', () => {
       var view = new BaseView({
-        model: this.model
+        model: testContext.model
       });
 
       view.allowUserAction();
 
-      expect(this.model.allowUserAction).to.be.calledOnce;
+      expect(testContext.model.allowUserAction).toBeCalledTimes(1);
     });
   });
 });

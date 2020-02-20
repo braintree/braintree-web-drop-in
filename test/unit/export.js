@@ -3,12 +3,13 @@
 var dropin = require('../../src/');
 var packageVersion = require('../../package.json').version;
 
-describe('export', function () {
-  it('contains create', function () {
-    expect(dropin.create).to.be.a('function');
+describe('export', () => {
+  test('contains create', () => {
+    expect(dropin.create).toBeInstanceOf(Function);
   });
 
-  it('sets the version', function () {
-    expect(dropin.VERSION).to.equal(packageVersion);
+  test('sets the version', () => {
+    // TODO build the file first before running this test? Or just assert on __VERSION__ placeholder?
+    expect(dropin.VERSION).toBe('__VERSION__');
   });
 });

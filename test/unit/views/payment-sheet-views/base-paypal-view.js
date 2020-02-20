@@ -15,13 +15,19 @@ var BasePayPalView = require('../../../../src/views/payment-sheet-views/base-pay
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 
-describe('BasePayPalView', function () {
-  beforeEach(function () {
-    this.paypal = {
+describe('BasePayPalView', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
+  });
+
+  beforeEach(() => {
+    testContext.paypal = {
       Button: {
-        render: this.sandbox.stub().resolves()
+        render: jest.fn().mockResolvedValue()
       },
-      setup: this.sandbox.stub(),
+      setup: jest.fn(),
       FUNDING: {
         FOO: 'foo',
         VENMO: 'venmo',
@@ -29,183 +35,186 @@ describe('BasePayPalView', function () {
         CREDIT: 'credit'
       }
     };
-    this.sandbox.stub(analytics, 'sendEvent');
+    jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
-    global.paypal = this.paypal;
+    global.paypal = testContext.paypal;
 
-    this.model = fake.model();
+    testContext.model = fake.model();
 
-    this.div = document.createElement('div');
-    this.div.innerHTML = mainHTML;
-    document.body.appendChild(this.div);
-    this.element = document.body.querySelector('.braintree-sheet.braintree-paypal');
+    testContext.div = document.createElement('div');
+    testContext.div.innerHTML = mainHTML;
+    document.body.appendChild(testContext.div);
+    testContext.element = document.body.querySelector('.braintree-sheet.braintree-paypal');
 
-    this.model.supportedPaymentOptions = ['card', 'paypal'];
-    this.model.merchantConfiguration.paypal = {flow: 'vault'};
-    this.sandbox.stub(this.model, 'reportError');
+    testContext.model.supportedPaymentOptions = ['card', 'paypal'];
+    testContext.model.merchantConfiguration.paypal = {flow: 'vault'};
+    jest.spyOn(testContext.model, 'reportError').mockImplementation();
 
-    this.configuration = fake.configuration();
-    this.fakeClient = fake.client(this.configuration);
-    this.paypalViewOptions = {
+    testContext.configuration = fake.configuration();
+    testContext.fakeClient = fake.client(testContext.configuration);
+    testContext.paypalViewOptions = {
       strings: {},
-      element: this.element,
-      model: this.model,
-      client: this.fakeClient
+      element: testContext.element,
+      model: testContext.model,
+      client: testContext.fakeClient
     };
-    this.paypalInstance = {
-      createPayment: this.sandbox.stub().resolves(),
-      tokenizePayment: this.sandbox.stub().resolves()
+    testContext.paypalInstance = {
+      createPayment: jest.fn().mockResolvedValue(),
+      tokenizePayment: jest.fn().mockResolvedValue()
     };
-    this.sandbox.stub(PayPalCheckout, 'create').resolves(this.paypalInstance);
+    jest.spyOn(PayPalCheckout, 'create').mockResolvedValue(testContext.paypalInstance);
   });
 
-  afterEach(function () {
-    document.body.removeChild(this.div);
+  afterEach(() => {
+    document.body.innerHTML = '';
   });
 
-  describe('Constructor', function () {
-    it('inherits from BaseView', function () {
-      expect(new BasePayPalView()).to.be.an.instanceOf(BaseView);
+  describe('Constructor', () => {
+    test('inherits from BaseView', () => {
+      expect(new BasePayPalView()).toBeInstanceOf(BaseView);
     });
   });
 
-  describe('initialize', function () {
-    beforeEach(function () {
-      this.view = new BasePayPalView(this.paypalViewOptions);
+  describe('initialize', () => {
+    beforeEach(() => {
+      testContext.view = new BasePayPalView(testContext.paypalViewOptions);
     });
 
-    it('starts async dependency', function () {
-      this.sandbox.stub(this.view.model, 'asyncDependencyStarting');
+    test('starts async dependency', () => {
+      jest.spyOn(testContext.view.model, 'asyncDependencyStarting').mockImplementation();
 
-      return this.view.initialize().then(function () {
-        expect(this.view.model.asyncDependencyStarting).to.be.calledOnce;
-      }.bind(this));
+      return testContext.view.initialize().then(function () {
+        expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
+      });
     });
 
-    it('notifies async dependency', function () {
-      this.sandbox.stub(this.view.model, 'asyncDependencyReady');
+    test('notifies async dependency', () => {
+      jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
 
-      return this.view.initialize().then(function () {
-        expect(this.view.model.asyncDependencyReady).to.be.calledOnce;
-      }.bind(this));
+      return testContext.view.initialize().then(function () {
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
+      });
     });
 
-    it('clones the PayPal config', function () {
-      return this.view.initialize().then(function () {
-        expect(this.view.paypalConfiguration.flow).to.equal(this.model.merchantConfiguration.paypal.flow);
-        expect(this.view.paypalConfiguration).to.not.equal(this.model.merchantConfiguration.paypal);
-      }.bind(this));
+    test('clones the PayPal config', () => {
+      return testContext.view.initialize().then(function () {
+        expect(testContext.view.paypalConfiguration.flow).toBe(testContext.model.merchantConfiguration.paypal.flow);
+        expect(testContext.view.paypalConfiguration).not.toBe(testContext.model.merchantConfiguration.paypal);
+      });
     });
 
-    it('creates a PayPal Checkout component', function () {
-      return this.view.initialize().then(function () {
-        expect(PayPalCheckout.create).to.be.calledWith(this.sandbox.match({
-          client: this.paypalViewOptions.client
+    test('creates a PayPal Checkout component', () => {
+      return testContext.view.initialize().then(function () {
+        expect(PayPalCheckout.create).toBeCalledWith(expect.objectContaining({
+          client: testContext.paypalViewOptions.client
         }));
-        expect(this.view.paypalInstance).to.equal(this.paypalInstance);
-      }.bind(this));
+        expect(testContext.view.paypalInstance).toBe(testContext.paypalInstance);
+      });
     });
 
-    it('calls asyncDependencyFailed with an error when PayPal component creation fails', function () {
-      var fakeError = {
-        code: 'A_REAL_ERROR_CODE'
-      };
+    test(
+      'calls asyncDependencyFailed with an error when PayPal component creation fails',
+      () => {
+        var fakeError = {
+          code: 'A_REAL_ERROR_CODE'
+        };
 
-      this.sandbox.stub(this.view.model, 'asyncDependencyFailed');
-      PayPalCheckout.create.rejects(fakeError);
+        jest.spyOn(testContext.view.model, 'asyncDependencyFailed').mockImplementation();
+        PayPalCheckout.create.mockRejectedValue(fakeError);
 
-      this.view.ID = 'fake-id';
+        testContext.view.ID = 'fake-id';
 
-      return this.view.initialize().then(function () {
-        expect(this.view.model.asyncDependencyFailed).to.be.calledOnce;
-        expect(this.view.model.asyncDependencyFailed).to.be.calledWith({
-          view: 'fake-id',
-          error: fakeError
+        return testContext.view.initialize().then(function () {
+          expect(testContext.view.model.asyncDependencyFailed).toBeCalledTimes(1);
+          expect(testContext.view.model.asyncDependencyFailed).toBeCalledWith({
+            view: 'fake-id',
+            error: fakeError
+          });
         });
-      }.bind(this));
-    });
+      }
+    );
 
-    it('calls asyncDependencyStarting when initializing', function () {
+    test('calls asyncDependencyStarting when initializing', () => {
       var fakeError = {
         code: 'A_REAL_ERROR_CODE'
       };
 
-      PayPalCheckout.create.rejects(fakeError);
+      PayPalCheckout.create.mockRejectedValue(fakeError);
 
-      this.sandbox.stub(DropinModel.prototype, 'asyncDependencyStarting');
-      this.view.initialize();
+      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
+      testContext.view.initialize();
 
-      expect(this.view.model.asyncDependencyStarting).to.be.calledOnce;
+      expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
     });
 
-    it('calls paypal.Button.render', function () {
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledOnce;
-        expect(this.paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-button"]');
-      }.bind(this));
+    test('calls paypal.Button.render', () => {
+      return testContext.view.initialize().then(function () {
+        expect(testContext.paypal.Button.render).toBeCalledTimes(1);
+        expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-button"]');
+      });
     });
 
-    it('can style the PayPal button', function () {
-      this.view.model.merchantConfiguration.paypal.buttonStyle = {
+    test('can style the PayPal button', () => {
+      testContext.view.model.merchantConfiguration.paypal.buttonStyle = {
         size: 'medium',
         color: 'orange',
         shape: 'rect'
       };
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
+      return testContext.view.initialize().then(function () {
+        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
           style: {
             size: 'medium',
             color: 'orange',
             shape: 'rect'
           }
-        });
-      }.bind(this));
+        }), expect.any(String));
+      });
     });
 
-    it('can style the PayPal Credit button', function () {
-      this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
-      this.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
+    test('can style the PayPal Credit button', () => {
+      testContext.view.model.merchantConfiguration.paypalCredit = testContext.view.model.merchantConfiguration.paypal;
+      testContext.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
         size: 'medium',
         color: 'orange',
         shape: 'rect'
       };
-      this.view._isPayPalCredit = true;
+      testContext.view._isPayPalCredit = true;
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
+      return testContext.view.initialize().then(function () {
+        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
           style: {
             size: 'medium',
             color: 'orange',
             shape: 'rect',
             label: 'credit'
           }
-        });
-      }.bind(this));
+        }), expect.any(String));
+      });
     });
 
-    it('cannot style label for PayPal Credit', function () {
-      this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
-      this.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
+    test('cannot style label for PayPal Credit', () => {
+      testContext.view.model.merchantConfiguration.paypalCredit = testContext.view.model.merchantConfiguration.paypal;
+      testContext.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
         label: 'buynow'
       };
-      this.view._isPayPalCredit = true;
+      testContext.view._isPayPalCredit = true;
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
+      return testContext.view.initialize().then(function () {
+        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
           style: {
             label: 'credit'
           }
-        });
-      }.bind(this));
+        }), expect.any(String));
+      });
     });
 
-    it('dissallows all non-paypal payment methods', function () {
-      this.view.model.merchantConfiguration.paypal = this.view.model.merchantConfiguration.paypal;
-      this.view._isPayPalCredit = false;
+    test('dissallows all non-paypal payment methods', () => {
+      testContext.view.model.merchantConfiguration.paypal = testContext.view.model.merchantConfiguration.paypal;
+      testContext.view._isPayPalCredit = false;
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
+      return testContext.view.initialize().then(function () {
+        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
           funding: {
             disallowed: [
               'foo',
@@ -213,356 +222,389 @@ describe('BasePayPalView', function () {
               'credit'
             ]
           }
-        });
-      }.bind(this));
+        }), expect.any(String));
+      });
     });
 
-    it('dissallows all funcing but credit for paypal credit', function () {
-      this.view.model.merchantConfiguration.paypalCredit = this.view.model.merchantConfiguration.paypal;
-      this.view._isPayPalCredit = true;
+    test('dissallows all funcing but credit for paypal credit', () => {
+      testContext.view.model.merchantConfiguration.paypalCredit = testContext.view.model.merchantConfiguration.paypal;
+      testContext.view._isPayPalCredit = true;
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
+      return testContext.view.initialize().then(function () {
+        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
           funding: {
             disallowed: [
               'foo',
               'venmo'
             ]
           }
-        });
-      }.bind(this));
+        }), expect.any(String));
+      });
     });
 
-    it('can set user action to commit for the PayPal button', function () {
-      this.view.model.merchantConfiguration.paypal.commit = true;
+    test('can set user action to commit for the PayPal button', () => {
+      testContext.view.model.merchantConfiguration.paypal.commit = true;
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
+      return testContext.view.initialize().then(function () {
+        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
           commit: true
-        });
-      }.bind(this));
+        }), expect.any(String));
+      });
     });
 
-    it('can set user action to continue for the PayPal button', function () {
-      this.view.model.merchantConfiguration.paypal.commit = false;
+    test('can set user action to continue for the PayPal button', () => {
+      testContext.view.model.merchantConfiguration.paypal.commit = false;
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
+      return testContext.view.initialize().then(function () {
+        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
           commit: false
-        });
-      }.bind(this));
+        }), expect.any(String));
+      });
     });
 
-    it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', function () {
-      this.configuration.gatewayConfiguration.environment = 'production';
+    test(
+      'sets paypal-checkout.js environment to production when gatewayConfiguration is production',
+      () => {
+        testContext.configuration.gatewayConfiguration.environment = 'production';
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
-          env: 'production'
+        return testContext.view.initialize().then(function () {
+          expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
+            env: 'production'
+          }), expect.any(String));
         });
-      }.bind(this));
-    });
+      }
+    );
 
-    it('sets paypal-checkout.js environment to sandbox when gatewayConfiguration is not production', function () {
-      this.configuration.gatewayConfiguration.environment = 'development';
+    test(
+      'sets paypal-checkout.js environment to sandbox when gatewayConfiguration is not production',
+      () => {
+        testContext.configuration.gatewayConfiguration.environment = 'development';
 
-      return this.view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
-          env: 'sandbox'
+        return testContext.view.initialize().then(function () {
+          expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
+            env: 'sandbox'
+          }), expect.any(String));
         });
-      }.bind(this));
-    });
+      }
+    );
 
-    it('calls paypalInstance.createPayment with a locale if one is provided', function () {
-      var localeCode = 'fr_FR';
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
+    test(
+      'calls paypalInstance.createPayment with a locale if one is provided',
+      () => {
+        var localeCode = 'fr_FR';
+        var paypalInstance = testContext.paypalInstance;
+        var model = testContext.model;
 
-      model.merchantConfiguration.locale = localeCode;
+        model.merchantConfiguration.locale = localeCode;
 
-      this.paypal.Button.render.resolves();
+        testContext.paypal.Button.render.mockResolvedValue();
 
-      return this.view.initialize().then(function () {
-        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
+        return testContext.view.initialize().then(function () {
+          var paymentFunction = testContext.paypal.Button.render.mock.calls[0][0].payment;
 
-        return paymentFunction().then(function () {
-          expect(paypalInstance.createPayment).to.be.calledOnce;
-          expect(paypalInstance.createPayment).to.be.calledWithMatch({
+          return paymentFunction().then(function () {
+            expect(paypalInstance.createPayment).toBeCalledTimes(1);
+            expect(paypalInstance.createPayment).toBeCalledWith(expect.objectContaining({
+              locale: 'fr_FR'
+            }));
+          });
+        });
+      }
+    );
+
+    test(
+      'calls paypal.Button.render with a locale if one is provided',
+      () => {
+        var localeCode = 'fr_FR';
+        var model = testContext.model;
+        var view = testContext.view;
+
+        model.merchantConfiguration.locale = localeCode;
+
+        return view.initialize().then(function () {
+          expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
             locale: 'fr_FR'
+          }), expect.any(String));
+        });
+      }
+    );
+
+    test(
+      'docs not call paypalInstance.createPayment with locale when an invalid locale is provided',
+      () => {
+        var invalidLocaleCode = 'en_FOO';
+        var paypalInstance = testContext.paypalInstance;
+        var model = testContext.model;
+
+        model.merchantConfiguration.locale = invalidLocaleCode;
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        return testContext.view.initialize().then(function () {
+          var paymentFunction = testContext.paypal.Button.render.mock.calls[0][0].payment;
+
+          return paymentFunction().then(function () {
+            expect(paypalInstance.createPayment).toBeCalledTimes(1);
+            expect(paypalInstance.createPayment).not.toBeCalledWith(expect.objectContaining({
+              locale: invalidLocaleCode
+            }));
           });
         });
-      }.bind(this));
-    });
+      }
+    );
 
-    it('calls paypal.Button.render with a locale if one is provided', function () {
-      var localeCode = 'fr_FR';
-      var model = this.model;
-      var view = this.view;
+    test(
+      'does not call paypal.Button.render with locale when an invalid locale is provided',
+      () => {
+        var invalidLocaleCode = 'en_FOO';
+        var model = testContext.model;
+        var view = testContext.view;
 
-      model.merchantConfiguration.locale = localeCode;
+        model.merchantConfiguration.locale = invalidLocaleCode;
 
-      return view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledWithMatch({
-          locale: 'fr_FR'
-        });
-      }.bind(this));
-    });
-
-    it('docs not call paypalInstance.createPayment with locale when an invalid locale is provided', function () {
-      var invalidLocaleCode = 'en_FOO';
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
-
-      model.merchantConfiguration.locale = invalidLocaleCode;
-
-      this.paypal.Button.render.resolves();
-
-      return this.view.initialize().then(function () {
-        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
-
-        return paymentFunction().then(function () {
-          expect(paypalInstance.createPayment).to.be.calledOnce;
-          expect(paypalInstance.createPayment).to.not.be.calledWithMatch({
+        return view.initialize().then(function () {
+          expect(testContext.paypal.Button.render).toBeCalledTimes(1);
+          expect(testContext.paypal.Button.render).not.toBeCalledWith(expect.objectContaining({
             locale: invalidLocaleCode
+          }));
+        });
+      }
+    );
+
+    test(
+      'docs not call paypalInstance.createPayment with locale when 2 character locale is provided',
+      () => {
+        var invalidLocaleCode = 'fr';
+        var paypalInstance = testContext.paypalInstance;
+        var model = testContext.model;
+
+        model.merchantConfiguration.locale = invalidLocaleCode;
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        return testContext.view.initialize().then(function () {
+          var paymentFunction = testContext.paypal.Button.render.mock.calls[0][0].payment;
+
+          return paymentFunction().then(function () {
+            expect(paypalInstance.createPayment).toBeCalledTimes(1);
+            expect(paypalInstance.createPayment).not.toBeCalledWith(expect.objectContaining({
+              locale: invalidLocaleCode
+            }));
           });
         });
-      }.bind(this));
-    });
+      }
+    );
 
-    it('does not call paypal.Button.render with locale when an invalid locale is provided', function () {
-      var invalidLocaleCode = 'en_FOO';
-      var model = this.model;
-      var view = this.view;
+    test(
+      'does not call paypal.Button.render with locale when 2 character locale is provided',
+      () => {
+        var invalidLocaleCode = 'fr';
+        var model = testContext.model;
+        var view = testContext.view;
 
-      model.merchantConfiguration.locale = invalidLocaleCode;
+        model.merchantConfiguration.locale = invalidLocaleCode;
 
-      return view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledOnce;
-        expect(this.paypal.Button.render).to.not.be.calledWithMatch({
-          locale: invalidLocaleCode
-        });
-      }.bind(this));
-    });
-
-    it('docs not call paypalInstance.createPayment with locale when 2 character locale is provided', function () {
-      var invalidLocaleCode = 'fr';
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
-
-      model.merchantConfiguration.locale = invalidLocaleCode;
-
-      this.paypal.Button.render.resolves();
-
-      return this.view.initialize().then(function () {
-        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
-
-        return paymentFunction().then(function () {
-          expect(paypalInstance.createPayment).to.be.calledOnce;
-          expect(paypalInstance.createPayment).to.not.be.calledWithMatch({
+        return view.initialize().then(function () {
+          expect(testContext.paypal.Button.render).toBeCalledTimes(1);
+          expect(testContext.paypal.Button.render).not.toBeCalledWith(expect.objectContaining({
             locale: invalidLocaleCode
-          });
+          }));
         });
-      }.bind(this));
-    });
+      }
+    );
 
-    it('does not call paypal.Button.render with locale when 2 character locale is provided', function () {
-      var invalidLocaleCode = 'fr';
-      var model = this.model;
-      var view = this.view;
-
-      model.merchantConfiguration.locale = invalidLocaleCode;
-
-      return view.initialize().then(function () {
-        expect(this.paypal.Button.render).to.be.calledOnce;
-        expect(this.paypal.Button.render).to.not.be.calledWithMatch({
-          locale: invalidLocaleCode
-        });
-      }.bind(this));
-    });
-
-    it('reports errors from createPayment', function () {
-      var model = this.model;
+    test('reports errors from createPayment', () => {
+      var model = testContext.model;
       var error = new Error('create payment error');
 
-      this.paypalInstance.createPayment.rejects(error);
+      testContext.paypalInstance.createPayment.mockRejectedValue(error);
 
-      this.paypal.Button.render.resolves();
+      testContext.paypal.Button.render.mockResolvedValue();
 
-      return this.view.initialize().then(function () {
-        var paymentFunction = this.paypal.Button.render.getCall(0).args[0].payment;
+      return testContext.view.initialize().then(function () {
+        var paymentFunction = testContext.paypal.Button.render.mock.calls[0][0].payment;
 
         return paymentFunction().then(function () {
-          expect(model.reportError).to.be.calledOnce;
-          expect(model.reportError).to.be.calledWith(error);
+          expect(model.reportError).toBeCalledTimes(1);
+          expect(model.reportError).toBeCalledWith(error);
         });
-      }.bind(this));
+      });
     });
 
-    it('reports errors from paypal.Button.render', function () {
+    test('reports errors from paypal.Button.render', () => {
       var error = new Error('setup error');
 
-      this.sandbox.stub(this.model, 'asyncDependencyFailed');
-      this.paypal.Button.render.rejects(error);
+      jest.spyOn(testContext.model, 'asyncDependencyFailed').mockImplementation();
+      testContext.paypal.Button.render.mockRejectedValue(error);
 
-      return this.view.initialize().then(function () {
-        expect(this.model.asyncDependencyFailed).to.be.calledOnce;
-        expect(this.model.asyncDependencyFailed).to.be.calledWithMatch({
-          view: this.view.ID,
+      return testContext.view.initialize().then(function () {
+        expect(testContext.model.asyncDependencyFailed).toBeCalledTimes(1);
+        expect(testContext.model.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
+          view: testContext.view.ID,
           error: error
+        }));
+      });
+    });
+
+    test('calls addPaymentMethod when paypal is tokenized', done => {
+      var paypalInstance = testContext.paypalInstance;
+      var model = testContext.model;
+      var fakePayload = {
+        foo: 'bar'
+      };
+
+      paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+      jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+      testContext.paypal.Button.render.mockResolvedValue();
+
+      testContext.view.initialize().then(function () {
+        var onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+        var tokenizeOptions = {
+          foo: 'bar'
+        };
+
+        onAuthFunction(tokenizeOptions);
+
+        expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+        expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
+
+        setTimeout(function () {
+          expect(model.addPaymentMethod).toBeCalledTimes(1);
+          expect(model.addPaymentMethod).toBeCalledWith(fakePayload);
+
+          done();
+        }, 1);
+      });
+    });
+
+    test(
+      'adds `vaulted: true` to the tokenization payload if flow is vault and is not guest checkout',
+      done => {
+        var paypalInstance = testContext.paypalInstance;
+        var model = testContext.model;
+        var fakePayload = {
+          foo: 'bar',
+          vaulted: true
+        };
+
+        model.isGuestCheckout = false;
+
+        paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+        paypalInstance.paypalConfiguration = {flow: 'vault'};
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        testContext.view.initialize().then(function () {
+          var onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          var tokenizeOptions = {
+            foo: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
+
+          setTimeout(function () {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith(fakePayload);
+
+            done();
+          }, 1);
         });
-      }.bind(this));
-    });
+      }
+    );
 
-    it('calls addPaymentMethod when paypal is tokenized', function (done) {
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
-      var fakePayload = {
-        foo: 'bar'
-      };
-
-      paypalInstance.tokenizePayment.resolves(fakePayload);
-      this.sandbox.stub(model, 'addPaymentMethod');
-
-      this.paypal.Button.render.resolves();
-
-      this.view.initialize().then(function () {
-        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
-        var tokenizeOptions = {
+    test(
+      'does not add `vaulted: true` to the tokenization payload if flow is vault but is guest checkout',
+      done => {
+        var paypalInstance = testContext.paypalInstance;
+        var model = testContext.model;
+        var fakePayload = {
           foo: 'bar'
         };
 
-        onAuthFunction(tokenizeOptions);
+        model.isGuestCheckout = true;
 
-        expect(paypalInstance.tokenizePayment).to.be.calledOnce;
-        expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
+        paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+        paypalInstance.paypalConfiguration = {flow: 'vault'};
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-        setTimeout(function () {
-          expect(model.addPaymentMethod).to.be.calledOnce;
-          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
+        testContext.paypal.Button.render.mockResolvedValue();
 
-          done();
-        }, 100);
-      }.bind(this));
-    });
+        testContext.view.initialize().then(function () {
+          var onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          var tokenizeOptions = {
+            foo: 'bar'
+          };
 
-    it('adds `vaulted: true` to the tokenization payload if flow is vault and is not guest checkout', function (done) {
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
-      var fakePayload = {
-        foo: 'bar',
-        vaulted: true
-      };
+          onAuthFunction(tokenizeOptions);
 
-      model.isGuestCheckout = false;
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
 
-      paypalInstance.tokenizePayment.resolves(fakePayload);
-      paypalInstance.paypalConfiguration = {flow: 'vault'};
-      this.sandbox.stub(model, 'addPaymentMethod');
+          setTimeout(function () {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith(fakePayload);
 
-      this.paypal.Button.render.resolves();
+            done();
+          }, 100);
+        });
+      }
+    );
 
-      this.view.initialize().then(function () {
-        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
-        var tokenizeOptions = {
+    test(
+      'does not add `vaulted: true` to the tokenization payload if flow is checkout and is not guest checkout',
+      done => {
+        var paypalInstance = testContext.paypalInstance;
+        var model = testContext.model;
+        var fakePayload = {
           foo: 'bar'
         };
 
-        onAuthFunction(tokenizeOptions);
+        model.isGuestCheckout = false;
 
-        expect(paypalInstance.tokenizePayment).to.be.calledOnce;
-        expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
+        paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+        paypalInstance.paypalConfiguration = {flow: 'checkout'};
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-        setTimeout(function () {
-          expect(model.addPaymentMethod).to.be.calledOnce;
-          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
+        testContext.paypal.Button.render.mockResolvedValue();
 
-          done();
-        }, 100);
-      }.bind(this));
-    });
+        testContext.view.initialize().then(function () {
+          var onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          var tokenizeOptions = {
+            foo: 'bar'
+          };
 
-    it('does not add `vaulted: true` to the tokenization payload if flow is vault but is guest checkout', function (done) {
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
-      var fakePayload = {
-        foo: 'bar'
-      };
+          onAuthFunction(tokenizeOptions);
 
-      model.isGuestCheckout = true;
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
 
-      paypalInstance.tokenizePayment.resolves(fakePayload);
-      paypalInstance.paypalConfiguration = {flow: 'vault'};
-      this.sandbox.stub(model, 'addPaymentMethod');
+          setTimeout(function () {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith(fakePayload);
 
-      this.paypal.Button.render.resolves();
+            done();
+          }, 100);
+        });
+      }
+    );
 
-      this.view.initialize().then(function () {
-        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
-        var tokenizeOptions = {
-          foo: 'bar'
-        };
-
-        onAuthFunction(tokenizeOptions);
-
-        expect(paypalInstance.tokenizePayment).to.be.calledOnce;
-        expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
-
-        setTimeout(function () {
-          expect(model.addPaymentMethod).to.be.calledOnce;
-          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
-
-          done();
-        }, 100);
-      }.bind(this));
-    });
-
-    it('does not add `vaulted: true` to the tokenization payload if flow is checkout and is not guest checkout', function (done) {
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
-      var fakePayload = {
-        foo: 'bar'
-      };
-
-      model.isGuestCheckout = false;
-
-      paypalInstance.tokenizePayment.resolves(fakePayload);
-      paypalInstance.paypalConfiguration = {flow: 'checkout'};
-      this.sandbox.stub(model, 'addPaymentMethod');
-
-      this.paypal.Button.render.resolves();
-
-      this.view.initialize().then(function () {
-        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
-        var tokenizeOptions = {
-          foo: 'bar'
-        };
-
-        onAuthFunction(tokenizeOptions);
-
-        expect(paypalInstance.tokenizePayment).to.be.calledOnce;
-        expect(paypalInstance.tokenizePayment).to.be.calledWith(tokenizeOptions);
-
-        setTimeout(function () {
-          expect(model.addPaymentMethod).to.be.calledOnce;
-          expect(model.addPaymentMethod).to.be.calledWith(fakePayload);
-
-          done();
-        }, 100);
-      }.bind(this));
-    });
-
-    it('reports errors from tokenizePayment', function (done) {
-      var paypalInstance = this.paypalInstance;
-      var model = this.model;
+    test('reports errors from tokenizePayment', done => {
+      var paypalInstance = testContext.paypalInstance;
+      var model = testContext.model;
       var error = new Error('tokenize error');
 
-      paypalInstance.tokenizePayment.rejects(error);
-      this.sandbox.stub(model, 'addPaymentMethod');
+      paypalInstance.tokenizePayment.mockRejectedValue(error);
+      jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-      this.paypal.Button.render.resolves();
+      testContext.paypal.Button.render.mockResolvedValue();
 
-      this.view.initialize().then(function () {
-        var onAuthFunction = this.paypal.Button.render.getCall(0).args[0].onAuthorize;
+      testContext.view.initialize().then(function () {
+        var onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
         var tokenizeOptions = {
           foo: 'bar'
         };
@@ -570,239 +612,257 @@ describe('BasePayPalView', function () {
         onAuthFunction(tokenizeOptions);
 
         setTimeout(function () {
-          expect(model.reportError).to.be.calledOnce;
-          expect(model.reportError).to.be.calledWith(error);
+          expect(model.reportError).toBeCalledTimes(1);
+          expect(model.reportError).toBeCalledWith(error);
 
           done();
         }, 100);
-      }.bind(this));
-    });
-
-    it('reports errors from paypal-checkout', function () {
-      var model = this.model;
-
-      this.paypal.Button.render.resolves();
-
-      return this.view.initialize().then(function () {
-        var onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
-        var err = new Error('Some error');
-
-        onErrorFunction(err);
-
-        expect(model.reportError).to.be.calledOnce;
-        expect(model.reportError).to.be.calledWith(err);
-      }.bind(this));
-    });
-
-    it('marks dependency as failed if error occurs before setup completes', function (done) {
-      var model = this.model;
-
-      this.sandbox.stub(model, 'asyncDependencyFailed');
-      this.paypal.Button.render.returns({
-        then: this.sandbox.stub()
       });
+    });
 
-      this.view.initialize();
+    test('reports errors from paypal-checkout', () => {
+      var model = testContext.model;
 
-      setTimeout(function () {
-        var onErrorFunction = this.paypal.Button.render.getCall(0).args[0].onError;
+      testContext.paypal.Button.render.mockResolvedValue();
+
+      return testContext.view.initialize().then(function () {
+        var onErrorFunction = testContext.paypal.Button.render.mock.calls[0][0].onError;
         var err = new Error('Some error');
 
         onErrorFunction(err);
 
-        expect(model.reportError).to.not.be.called;
-        expect(model.asyncDependencyFailed).to.be.calledOnce;
-        expect(model.asyncDependencyFailed).to.be.calledWithMatch({
-          view: this.view.ID,
-          error: err
+        expect(model.reportError).toBeCalledTimes(1);
+        expect(model.reportError).toBeCalledWith(err);
+      });
+    });
+
+    test(
+      'marks dependency as failed if error occurs before setup completes',
+      done => {
+        var model = testContext.model;
+
+        jest.spyOn(model, 'asyncDependencyFailed').mockImplementation();
+        testContext.paypal.Button.render.mockReturnValue({
+          then: jest.fn()
         });
-        done();
-      }.bind(this), 10);
-    });
 
-    describe('with PayPal', function () {
-      it('uses the PayPal merchant configuration', function () {
-        this.model.merchantConfiguration.paypal = {
-          flow: 'vault'
-        };
-        this.model.merchantConfiguration.paypalCredit = {
-          flow: 'checkout'
-        };
+        testContext.view.initialize();
 
-        return this.view.initialize().then(function () {
-          expect(this.view.paypalConfiguration.flow).to.equal('vault');
-        }.bind(this));
-      });
+        setTimeout(function () {
+          var onErrorFunction = testContext.paypal.Button.render.mock.calls[0][0].onError;
+          var err = new Error('Some error');
 
-      it('sets offerCredit to false in the PayPal Checkout configuration even if offerCredit is set to true in PayPal configuration', function () {
-        this.model.merchantConfiguration.paypal = {
-          flow: 'checkout',
-          amount: '10.00',
-          currency: 'USD',
-          offerCredit: true
-        };
+          onErrorFunction(err);
 
-        return this.view.initialize().then(function () {
-          expect(this.view.paypalConfiguration.offerCredit).to.equal(false);
-        }.bind(this));
-      });
-
-      it('uses the PayPal button selector', function () {
-        return this.view.initialize().then(function () {
-          expect(this.paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-button"]');
-        }.bind(this));
-      });
-    });
-
-    describe('with PayPal Credit', function () {
-      it('uses the PayPal Credit merchant configuration', function () {
-        this.model.merchantConfiguration.paypal = {
-          flow: 'vault'
-        };
-        this.model.merchantConfiguration.paypalCredit = {
-          flow: 'checkout'
-        };
-
-        this.view._isPayPalCredit = true;
-        this.view.initialize();
-
-        expect(this.view.paypalConfiguration.flow).to.equal('checkout');
-      });
-
-      it('sets offerCredit to true in the PayPal Checkout configuration', function () {
-        this.model.merchantConfiguration.paypalCredit = {
-          flow: 'checkout',
-          amount: '10.00',
-          currency: 'USD'
-        };
-
-        this.view._isPayPalCredit = true;
-
-        return this.view.initialize().then(function () {
-          expect(this.view.paypalConfiguration).to.deep.equal({
-            flow: 'checkout',
-            amount: '10.00',
-            currency: 'USD',
-            offerCredit: true
-          });
-        }.bind(this));
-      });
-
-      it('sets offerCredit to true in the PayPal Checkout configuration even if the configuration sets offerCredit to false', function () {
-        this.model.merchantConfiguration.paypalCredit = {
-          flow: 'checkout',
-          amount: '10.00',
-          currency: 'USD',
-          offerCredit: false
-        };
-
-        this.view._isPayPalCredit = true;
-
-        return this.view.initialize().then(function () {
-          expect(this.view.paypalConfiguration).to.deep.equal({
-            flow: 'checkout',
-            amount: '10.00',
-            currency: 'USD',
-            offerCredit: true
-          });
-        }.bind(this));
-      });
-
-      it('uses the PayPal Credit button selector', function () {
-        this.view._isPayPalCredit = true;
-
-        return this.view.initialize().then(function () {
-          expect(this.paypal.Button.render).to.be.calledWith(this.sandbox.match.object, '[data-braintree-id="paypal-credit-button"]');
-        }.bind(this));
-      });
-
-      it('includes credit style in button configuration', function () {
-        this.view._isPayPalCredit = true;
-
-        return this.view.initialize().then(function () {
-          expect(this.paypal.Button.render).to.be.calledWithMatch({
-            style: {label: 'credit'}
-          });
-        }.bind(this));
-      });
-
-      it('times out if the async dependency is never ready', function (done) {
-        var paypalError = new DropinError('There was an error connecting to PayPal.');
-
-        this.sandbox.useFakeTimers();
-
-        this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
-
-        this.paypal.Button.render.rejects();
-
-        this.view.initialize().then(function () {
-          expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
-            view: this.view.ID,
-            error: paypalError
+          expect(model.reportError).not.toBeCalled();
+          expect(model.asyncDependencyFailed).toBeCalledTimes(1);
+          expect(model.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
+            view: testContext.view.ID,
+            error: err
           }));
           done();
-        }.bind(this));
+        }, 10);
+      }
+    );
 
-        this.sandbox.clock.tick(30001);
+    describe('with PayPal', () => {
+      test('uses the PayPal merchant configuration', () => {
+        testContext.model.merchantConfiguration.paypal = {
+          flow: 'vault'
+        };
+        testContext.model.merchantConfiguration.paypalCredit = {
+          flow: 'checkout'
+        };
+
+        return testContext.view.initialize().then(function () {
+          expect(testContext.view.paypalConfiguration.flow).toBe('vault');
+        });
       });
 
-      it('does not timeout if async dependency sets up', function () {
-        this.sandbox.useFakeTimers();
-        this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
+      test(
+        'sets offerCredit to false in the PayPal Checkout configuration even if offerCredit is set to true in PayPal configuration',
+        () => {
+          testContext.model.merchantConfiguration.paypal = {
+            flow: 'checkout',
+            amount: '10.00',
+            currency: 'USD',
+            offerCredit: true
+          };
 
-        PayPalCheckout.create.resolves(this.paypalInstance);
-        this.paypal.Button.render.resolves();
-
-        return this.view.initialize().then(function () {
-          this.sandbox.clock.tick(10);
-
-          this.sandbox.clock.tick(300001);
-
-          expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.called;
-        }.bind(this));
-      });
-
-      it('does not timeout if async dependency failed early', function () {
-        this.sandbox.useFakeTimers();
-        this.sandbox.stub(DropinModel.prototype, 'asyncDependencyFailed');
-
-        PayPalCheckout.create.resolves(this.paypalInstance);
-        this.paypal.Button.render.rejects();
-
-        return this.view.initialize().then(function () {
-          this.sandbox.clock.tick(300500);
-
-          expect(DropinModel.prototype.asyncDependencyFailed).to.be.calledOnce;
-          expect(DropinModel.prototype.asyncDependencyFailed).to.not.be.calledWithMatch({
-            err: new DropinError('There was an error connecting to PayPal.')
+          return testContext.view.initialize().then(function () {
+            expect(testContext.view.paypalConfiguration.offerCredit).toBe(false);
           });
-        }.bind(this));
+        }
+      );
+
+      test('uses the PayPal button selector', () => {
+        return testContext.view.initialize().then(function () {
+          expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-button"]');
+        });
+      });
+    });
+
+    describe('with PayPal Credit', () => {
+      test('uses the PayPal Credit merchant configuration', () => {
+        testContext.model.merchantConfiguration.paypal = {
+          flow: 'vault'
+        };
+        testContext.model.merchantConfiguration.paypalCredit = {
+          flow: 'checkout'
+        };
+
+        testContext.view._isPayPalCredit = true;
+        testContext.view.initialize();
+
+        expect(testContext.view.paypalConfiguration.flow).toBe('checkout');
+      });
+
+      test(
+        'sets offerCredit to true in the PayPal Checkout configuration',
+        () => {
+          testContext.model.merchantConfiguration.paypalCredit = {
+            flow: 'checkout',
+            amount: '10.00',
+            currency: 'USD'
+          };
+
+          testContext.view._isPayPalCredit = true;
+
+          return testContext.view.initialize().then(function () {
+            expect(testContext.view.paypalConfiguration).toEqual({
+              flow: 'checkout',
+              amount: '10.00',
+              currency: 'USD',
+              offerCredit: true
+            });
+          });
+        }
+      );
+
+      test(
+        'sets offerCredit to true in the PayPal Checkout configuration even if the configuration sets offerCredit to false',
+        () => {
+          testContext.model.merchantConfiguration.paypalCredit = {
+            flow: 'checkout',
+            amount: '10.00',
+            currency: 'USD',
+            offerCredit: false
+          };
+
+          testContext.view._isPayPalCredit = true;
+
+          return testContext.view.initialize().then(function () {
+            expect(testContext.view.paypalConfiguration).toEqual({
+              flow: 'checkout',
+              amount: '10.00',
+              currency: 'USD',
+              offerCredit: true
+            });
+          });
+        }
+      );
+
+      test('uses the PayPal Credit button selector', () => {
+        testContext.view._isPayPalCredit = true;
+
+        return testContext.view.initialize().then(function () {
+          expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-credit-button"]');
+        });
+      });
+
+      test('includes credit style in button configuration', () => {
+        testContext.view._isPayPalCredit = true;
+
+        return testContext.view.initialize().then(function () {
+          expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
+            style: {label: 'credit'}
+          }), expect.any(String));
+        });
+      });
+
+      test('times out if the async dependency is never ready', done => {
+        var paypalError = new DropinError('There was an error connecting to PayPal.');
+
+        jest.useFakeTimers();
+
+        jest.spyOn(DropinModel.prototype, 'asyncDependencyFailed').mockImplementation();
+
+        testContext.paypal.Button.render.mockRejectedValue();
+
+        testContext.view.initialize().then(function () {
+          expect(DropinModel.prototype.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
+            view: testContext.view.ID,
+            error: paypalError
+          }));
+        }).then(() => {
+          jest.runAllTimers();
+          done();
+        });
+
+        jest.advanceTimersByTime(30001);
+      });
+
+      test('does not timeout if async dependency sets up', () => {
+        jest.useFakeTimers();
+        jest.spyOn(DropinModel.prototype, 'asyncDependencyFailed').mockImplementation();
+
+        PayPalCheckout.create.mockResolvedValue(testContext.paypalInstance);
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        return testContext.view.initialize().then(function () {
+          jest.advanceTimersByTime(10);
+
+          jest.advanceTimersByTime(300001);
+
+          expect(DropinModel.prototype.asyncDependencyFailed).not.toBeCalled();
+        }).then(() => {
+          jest.runAllTimers();
+        });
+      });
+
+      test('does not timeout if async dependency failed early', () => {
+        jest.useFakeTimers();
+        jest.spyOn(DropinModel.prototype, 'asyncDependencyFailed').mockImplementation();
+
+        PayPalCheckout.create.mockResolvedValue(testContext.paypalInstance);
+        testContext.paypal.Button.render.mockRejectedValue();
+
+        return testContext.view.initialize().then(function () {
+          jest.advanceTimersByTime(300500);
+
+          expect(DropinModel.prototype.asyncDependencyFailed).toBeCalledTimes(1);
+          expect(DropinModel.prototype.asyncDependencyFailed).not.toBeCalledWith(expect.objectContaining({
+            err: new DropinError('There was an error connecting to PayPal.')
+          }));
+        }).then(() => {
+          jest.runAllTimers();
+        });
       });
     });
   });
 
-  describe('updateConfiguration', function () {
-    it('ignores offerCredit updates', function () {
+  describe('updateConfiguration', () => {
+    test('ignores offerCredit updates', () => {
       var view = new BasePayPalView();
 
       view.paypalConfiguration = {offerCredit: true};
 
       view.updateConfiguration('offerCredit', false);
 
-      expect(view.paypalConfiguration.offerCredit).to.equal(true);
+      expect(view.paypalConfiguration.offerCredit).toBe(true);
     });
 
-    it('ignores locale updates', function () {
+    test('ignores locale updates', () => {
       var view = new BasePayPalView();
 
       view.paypalConfiguration = {locale: 'es'};
 
       view.updateConfiguration('locale', 'il');
 
-      expect(view.paypalConfiguration.locale).to.equal('es');
+      expect(view.paypalConfiguration.locale).toBe('es');
     });
 
-    it('can set properties on paypal config', function () {
+    test('can set properties on paypal config', () => {
       var view = new BasePayPalView();
 
       view.paypalConfiguration = {
@@ -814,7 +874,7 @@ describe('BasePayPalView', function () {
       view.updateConfiguration('amount', '5.32');
       view.updateConfiguration('currency', 'USD');
 
-      expect(view.paypalConfiguration).to.deep.equal({
+      expect(view.paypalConfiguration).toEqual({
         flow: 'checkout',
         amount: '5.32',
         currency: 'USD'
@@ -822,65 +882,68 @@ describe('BasePayPalView', function () {
     });
   });
 
-  describe('isEnabled', function () {
-    beforeEach(function () {
-      this.options = {
-        client: this.fakeClient,
+  describe('isEnabled', () => {
+    beforeEach(() => {
+      testContext.options = {
+        client: testContext.fakeClient,
         merchantConfiguration: {
           paypal: {}
         }
       };
 
-      this.configuration.gatewayConfiguration.paypalEnabled = true;
+      testContext.configuration.gatewayConfiguration.paypalEnabled = true;
       global.paypal = {
         Button: {}
       };
 
-      this.sandbox.stub(assets, 'loadScript').resolves();
+      jest.spyOn(assets, 'loadScript').mockResolvedValue();
     });
 
-    it('resolves false if merchant does not have PayPal enabled on the gateway', function () {
-      this.configuration.gatewayConfiguration.paypalEnabled = false;
+    test(
+      'resolves false if merchant does not have PayPal enabled on the gateway',
+      () => {
+        testContext.configuration.gatewayConfiguration.paypalEnabled = false;
 
-      return BasePayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(false);
+        return BasePayPalView.isEnabled(testContext.options).then(function (result) {
+          expect(result).toBe(false);
+        });
+      }
+    );
+
+    test('resolves false if browser is IE9', () => {
+      jest.spyOn(browserDetection, 'isIe9').mockReturnValue(true);
+
+      return BasePayPalView.isEnabled(testContext.options).then(function (result) {
+        expect(result).toBe(false);
       });
     });
 
-    it('resolves false if browser is IE9', function () {
-      this.sandbox.stub(browserDetection, 'isIe9').returns(true);
+    test('resolves false if browser is IE10', () => {
+      jest.spyOn(browserDetection, 'isIe10').mockReturnValue(true);
 
-      return BasePayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(false);
+      return BasePayPalView.isEnabled(testContext.options).then(function (result) {
+        expect(result).toBe(false);
       });
     });
 
-    it('resolves false if browser is IE10', function () {
-      this.sandbox.stub(browserDetection, 'isIe10').returns(true);
-
-      return BasePayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(false);
+    test('resolves true if global.paypal exists', () => {
+      return BasePayPalView.isEnabled(testContext.options).then(function (result) {
+        expect(result).toBe(true);
       });
     });
 
-    it('resolves true if global.paypal exists', function () {
-      return BasePayPalView.isEnabled(this.options).then(function (result) {
-        expect(result).to.equal(true);
+    test('skips loading paypal script if global.paypal exists', () => {
+      return BasePayPalView.isEnabled(testContext.options).then(function () {
+        expect(assets.loadScript).not.toBeCalled();
       });
     });
 
-    it('skips loading paypal script if global.paypal exists', function () {
-      return BasePayPalView.isEnabled(this.options).then(function () {
-        expect(assets.loadScript).to.not.be.called;
-      });
-    });
-
-    it('loads paypal script if global.paypal does not exist', function () {
+    test('loads paypal script if global.paypal does not exist', () => {
       delete global.paypal;
 
-      return BasePayPalView.isEnabled(this.options).then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith({
+      return BasePayPalView.isEnabled(testContext.options).then(function () {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
           src: 'https://www.paypalobjects.com/api/checkout.min.js',
           id: 'braintree-dropin-paypal-checkout-script',
           dataAttributes: {
@@ -890,118 +953,128 @@ describe('BasePayPalView', function () {
       });
     });
 
-    it('loads paypal script with merchant provided log level for paypal', function () {
-      delete global.paypal;
+    test(
+      'loads paypal script with merchant provided log level for paypal',
+      () => {
+        delete global.paypal;
 
-      this.options.merchantConfiguration.paypal.logLevel = 'error';
+        testContext.options.merchantConfiguration.paypal.logLevel = 'error';
 
-      return BasePayPalView.isEnabled(this.options).then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith({
-          src: 'https://www.paypalobjects.com/api/checkout.min.js',
-          id: 'braintree-dropin-paypal-checkout-script',
-          dataAttributes: {
-            'log-level': 'error'
-          }
+        return BasePayPalView.isEnabled(testContext.options).then(function () {
+          expect(assets.loadScript).toBeCalledTimes(1);
+          expect(assets.loadScript).toBeCalledWith({
+            src: 'https://www.paypalobjects.com/api/checkout.min.js',
+            id: 'braintree-dropin-paypal-checkout-script',
+            dataAttributes: {
+              'log-level': 'error'
+            }
+          });
         });
-      });
-    });
+      }
+    );
 
-    it('loads paypal script with merchant provided log level for paypal credit', function () {
-      delete global.paypal;
+    test(
+      'loads paypal script with merchant provided log level for paypal credit',
+      () => {
+        delete global.paypal;
 
-      delete this.options.merchantConfiguration.paypal;
-      this.options.merchantConfiguration.paypalCredit = {
-        flow: 'vault',
-        logLevel: 'error'
-      };
+        delete testContext.options.merchantConfiguration.paypal;
+        testContext.options.merchantConfiguration.paypalCredit = {
+          flow: 'vault',
+          logLevel: 'error'
+        };
 
-      return BasePayPalView.isEnabled(this.options).then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith({
-          src: 'https://www.paypalobjects.com/api/checkout.min.js',
-          id: 'braintree-dropin-paypal-checkout-script',
-          dataAttributes: {
-            'log-level': 'error'
-          }
+        return BasePayPalView.isEnabled(testContext.options).then(function () {
+          expect(assets.loadScript).toBeCalledTimes(1);
+          expect(assets.loadScript).toBeCalledWith({
+            src: 'https://www.paypalobjects.com/api/checkout.min.js',
+            id: 'braintree-dropin-paypal-checkout-script',
+            dataAttributes: {
+              'log-level': 'error'
+            }
+          });
         });
-      });
-    });
+      }
+    );
 
-    it('loads paypal script with merchant provided log level for paypal if both paypal and paypal credit options are available', function () {
-      delete global.paypal;
+    test(
+      'loads paypal script with merchant provided log level for paypal if both paypal and paypal credit options are available',
+      () => {
+        delete global.paypal;
 
-      this.options.merchantConfiguration.paypal.logLevel = 'error';
-      this.options.merchantConfiguration.paypalCredit = {
-        flow: 'vault',
-        logLevel: 'not-error'
-      };
+        testContext.options.merchantConfiguration.paypal.logLevel = 'error';
+        testContext.options.merchantConfiguration.paypalCredit = {
+          flow: 'vault',
+          logLevel: 'not-error'
+        };
 
-      return BasePayPalView.isEnabled(this.options).then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith({
-          src: 'https://www.paypalobjects.com/api/checkout.min.js',
-          id: 'braintree-dropin-paypal-checkout-script',
-          dataAttributes: {
-            'log-level': 'error'
-          }
+        return BasePayPalView.isEnabled(testContext.options).then(function () {
+          expect(assets.loadScript).toBeCalledTimes(1);
+          expect(assets.loadScript).toBeCalledWith({
+            src: 'https://www.paypalobjects.com/api/checkout.min.js',
+            id: 'braintree-dropin-paypal-checkout-script',
+            dataAttributes: {
+              'log-level': 'error'
+            }
+          });
         });
-      });
-    });
+      }
+    );
 
-    it('resolves true after PayPal script is loaded', function () {
+    test('resolves true after PayPal script is loaded', () => {
       delete global.paypal;
 
-      return BasePayPalView.isEnabled(this.options).then(function (result) {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(result).to.equal(true);
+      return BasePayPalView.isEnabled(testContext.options).then(function (result) {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(result).toBe(true);
       });
     });
 
-    it('resolves false if load script fails', function () {
+    test('resolves false if load script fails', () => {
       delete global.paypal;
 
-      assets.loadScript.rejects();
+      assets.loadScript.mockRejectedValue();
 
-      return BasePayPalView.isEnabled(this.options).then(function (result) {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(result).to.equal(false);
+      return BasePayPalView.isEnabled(testContext.options).then(function (result) {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(result).toBe(false);
       });
     });
 
-    it('returns existing promise if already in progress', function () {
+    test('returns existing promise if already in progress', () => {
       var firstPromise, secondPromise;
 
+      jest.useFakeTimers();
       delete global.paypal;
 
-      assets.loadScript.callsFake(function () {
+      assets.loadScript.mockImplementation(function () {
         return new Promise(function (resolve) {
-          setTimeout(function () {
-            resolve();
-          }, 10);
+          jest.advanceTimersByTime(10);
+          global.paypal = testContext.paypal;
+          resolve();
         });
       });
 
-      firstPromise = BasePayPalView.isEnabled(this.options);
-      secondPromise = BasePayPalView.isEnabled(this.options);
+      firstPromise = BasePayPalView.isEnabled(testContext.options);
+      secondPromise = BasePayPalView.isEnabled(testContext.options);
 
-      expect(firstPromise).to.equal(secondPromise);
+      expect(firstPromise).toEqual(secondPromise);
 
       return secondPromise.then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
+        expect(assets.loadScript).toBeCalledTimes(1);
       });
     });
   });
 
-  describe('requestPaymentMethod', function () {
-    it('always rejects', function () {
-      var view = new BasePayPalView(this.paypalViewOptions);
+  describe('requestPaymentMethod', () => {
+    test('always rejects', () => {
+      var view = new BasePayPalView(testContext.paypalViewOptions);
 
       return view.requestPaymentMethod().then(function () {
         throw new Error('should not resolve');
       }).catch(function (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('No payment method is available.');
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe('No payment method is available.');
       });
     });
   });

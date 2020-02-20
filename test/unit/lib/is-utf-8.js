@@ -2,34 +2,34 @@
 
 var isUtf8 = require('../../../src/lib/is-utf-8');
 
-describe('isUtf8', function () {
-  it('returns true when characterSet is utf-8', function () {
+describe('isUtf8', () => {
+  test('returns true when characterSet is utf-8', () => {
     var win = {
       document: {
         characterSet: 'utf-8'
       }
     };
 
-    expect(isUtf8(win)).to.be.true;
+    expect(isUtf8(win)).toBe(true);
   });
 
-  it('returns true when characterSet is utf-8', function () {
+  test('returns true when characterSet is utf-8', () => {
     var win = {
       document: {
         characterSet: 'utf-8'
       }
     };
 
-    expect(isUtf8(win)).to.be.true;
+    expect(isUtf8(win)).toBe(true);
   });
 
-  it('returns false when characterSet is not utf-8', function () {
+  test('returns false when characterSet is not utf-8', () => {
     var win = {
       document: {
         characterSet: 'something-else'
       }
     };
 
-    expect(isUtf8(win)).to.be.false;
+    expect(isUtf8(win)).toBe(false);
   });
 });

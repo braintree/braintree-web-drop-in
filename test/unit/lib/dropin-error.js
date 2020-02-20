@@ -3,46 +3,46 @@
 var DropinError = require('../../../src/lib/dropin-error');
 var BraintreeError = require('braintree-web/lib/braintree-error');
 
-describe('DropinError', function () {
-  it('inherits from Error', function () {
+describe('DropinError', () => {
+  test('inherits from Error', () => {
     var instance = new DropinError({});
 
-    expect(instance).to.be.an.instanceOf(DropinError);
+    expect(instance).toBeInstanceOf(DropinError);
   });
 
-  it('sets the name to DropinError', function () {
+  test('sets the name to DropinError', () => {
     var instance = new DropinError({});
 
-    expect(instance.name).to.equal('DropinError');
+    expect(instance.name).toBe('DropinError');
   });
 
-  it('can pass in a object and set the message', function () {
+  test('can pass in a object and set the message', () => {
     var instance = new DropinError({
       message: 'Cool message.'
     });
 
-    expect(instance.message).to.equal('Cool message.');
+    expect(instance.message).toBe('Cool message.');
   });
 
-  it('can pass in a string and set the message', function () {
+  test('can pass in a string and set the message', () => {
     var instance = new DropinError('Cool message.');
 
-    expect(instance.message).to.equal('Cool message.');
+    expect(instance.message).toBe('Cool message.');
   });
 
-  it('can pass in an Error object and set the message', function () {
+  test('can pass in an Error object and set the message', () => {
     var instance = new DropinError(new Error('Cool message.'));
 
-    expect(instance.message).to.equal('Cool message.');
+    expect(instance.message).toBe('Cool message.');
   });
 
-  it('can pass in a DropinError object and set the message', function () {
+  test('can pass in a DropinError object and set the message', () => {
     var instance = new DropinError(new DropinError('Cool message.'));
 
-    expect(instance.message).to.equal('Cool message.');
+    expect(instance.message).toBe('Cool message.');
   });
 
-  it('sets the _braintreeWebError when given a BraintreeError', function () {
+  test('sets the _braintreeWebError when given a BraintreeError', () => {
     var btError = new BraintreeError({
       message: 'Cool message.',
       code: 'CODE',
@@ -50,22 +50,25 @@ describe('DropinError', function () {
     });
     var instance = new DropinError(btError);
 
-    expect(instance.message).to.equal('Cool message.');
-    expect(instance._braintreeWebError).to.equal(btError);
+    expect(instance.message).toBe('Cool message.');
+    expect(instance._braintreeWebError).toBe(btError);
   });
 
-  it('sets the _braintreeWebError when not given a BraintreeError', function () {
-    var btError = new BraintreeError({
-      message: 'Cool message.',
-      code: 'CODE',
-      type: 'MERCHANT'
-    });
-    var instance = new DropinError({
-      message: 'Custom message.',
-      braintreeWebError: btError
-    });
+  test(
+    'sets the _braintreeWebError when not given a BraintreeError',
+    () => {
+      var btError = new BraintreeError({
+        message: 'Cool message.',
+        code: 'CODE',
+        type: 'MERCHANT'
+      });
+      var instance = new DropinError({
+        message: 'Custom message.',
+        braintreeWebError: btError
+      });
 
-    expect(instance.message).to.equal('Custom message.');
-    expect(instance._braintreeWebError).to.equal(btError);
-  });
+      expect(instance.message).toBe('Custom message.');
+      expect(instance._braintreeWebError).toBe(btError);
+    }
+  );
 });

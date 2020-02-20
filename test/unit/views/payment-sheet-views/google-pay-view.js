@@ -12,19 +12,25 @@ var fs = require('fs');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 
-describe('GooglePayView', function () {
-  beforeEach(function () {
+describe('GooglePayView', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
+  });
+
+  beforeEach(() => {
     var googlePayButton = document.createElement('button');
 
-    this.model = fake.model();
-    this.fakeClient = fake.client();
+    testContext.model = fake.model();
+    testContext.fakeClient = fake.client();
 
-    this.div = document.createElement('div');
+    testContext.div = document.createElement('div');
 
-    this.div.innerHTML = mainHTML;
-    document.body.appendChild(this.div);
+    testContext.div.innerHTML = mainHTML;
+    document.body.appendChild(testContext.div);
 
-    this.model.merchantConfiguration.googlePay = {
+    testContext.model.merchantConfiguration.googlePay = {
       merchantId: 'merchant-id',
       transactionInfo: {
         currencyCode: 'USD',
@@ -32,15 +38,15 @@ describe('GooglePayView', function () {
         totalPrice: '100.00'
       }
     };
-    this.googlePayViewOptions = {
-      client: this.fakeClient,
+    testContext.googlePayViewOptions = {
+      client: testContext.fakeClient,
       element: document.body.querySelector('.braintree-sheet.braintree-googlePay'),
-      model: this.model,
+      model: testContext.model,
       strings: {}
     };
 
-    this.fakeGooglePayInstance = {
-      createPaymentDataRequest: this.sandbox.stub().returns({
+    testContext.fakeGooglePayInstance = {
+      createPaymentDataRequest: jest.fn().mockReturnValue({
         merchantId: 'merchant-id',
         transactionInfo: {
           currencyCode: 'USD',
@@ -49,12 +55,12 @@ describe('GooglePayView', function () {
         },
         allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
       }),
-      parseResponse: this.sandbox.stub().resolves({
+      parseResponse: jest.fn().mockResolvedValue({
         type: 'AndroidPayCard',
         nonce: 'google-pay-nonce'
       })
     };
-    this.fakeLoadPaymentDataResponse = {
+    testContext.fakeLoadPaymentDataResponse = {
       cardInfo: {
         cardNetwork: 'VISA',
         cardDetails: '1111',
@@ -67,226 +73,241 @@ describe('GooglePayView', function () {
       },
       email: 'foo@example.com'
     };
-    this.sandbox.stub(btGooglePay, 'create').resolves(this.fakeGooglePayInstance);
-    this.sandbox.stub(analytics, 'sendEvent');
+    jest.spyOn(btGooglePay, 'create').mockResolvedValue(testContext.fakeGooglePayInstance);
+    jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
-    this.FakePaymentClient = function FakePayment() {};
-    this.FakePaymentClient.prototype.isReadyToPay = this.sandbox.stub().resolves({result: true});
-    this.FakePaymentClient.prototype.loadPaymentData = this.sandbox.stub().resolves(this.fakeLoadPaymentDataResponse);
-    this.FakePaymentClient.prototype.prefetchPaymentData = this.sandbox.stub().resolves();
-    this.FakePaymentClient.prototype.createButton = this.sandbox.stub().returns(googlePayButton);
+    testContext.FakePaymentClient = function FakePayment() {};
+    testContext.FakePaymentClient.prototype.isReadyToPay = jest.fn().mockResolvedValue({result: true});
+    testContext.FakePaymentClient.prototype.loadPaymentData = jest.fn().mockResolvedValue(testContext.fakeLoadPaymentDataResponse);
+    testContext.FakePaymentClient.prototype.prefetchPaymentData = jest.fn().mockResolvedValue();
+    testContext.FakePaymentClient.prototype.createButton = jest.fn().mockReturnValue(googlePayButton);
 
     global.google = {
       payments: {
         api: {
-          PaymentsClient: this.FakePaymentClient
+          PaymentsClient: testContext.FakePaymentClient
         }
       }
     };
   });
 
-  afterEach(function () {
-    document.body.removeChild(this.div);
+  afterEach(() => {
+    document.body.removeChild(testContext.div);
     delete global.google;
   });
 
-  describe('Constructor', function () {
-    it('inherits from BaseView', function () {
-      expect(new GooglePayView()).to.be.an.instanceOf(BaseView);
+  describe('Constructor', () => {
+    test('inherits from BaseView', () => {
+      expect(new GooglePayView()).toBeInstanceOf(BaseView);
     });
   });
 
-  describe('initialize', function () {
-    beforeEach(function () {
-      this.view = new GooglePayView(this.googlePayViewOptions);
+  describe('initialize', () => {
+    beforeEach(() => {
+      testContext.view = new GooglePayView(testContext.googlePayViewOptions);
     });
 
-    it('starts async dependency', function () {
-      this.sandbox.stub(this.view.model, 'asyncDependencyStarting');
+    test('starts async dependency', () => {
+      jest.spyOn(testContext.view.model, 'asyncDependencyStarting').mockImplementation();
 
-      return this.view.initialize().then(function () {
-        expect(this.view.model.asyncDependencyStarting).to.be.calledOnce;
-      }.bind(this));
-    });
-
-    it('notifies async dependency', function () {
-      this.sandbox.stub(this.view.model, 'asyncDependencyReady');
-
-      return this.view.initialize().then(function () {
-        expect(this.view.model.asyncDependencyReady).to.be.calledOnce;
-      }.bind(this));
-    });
-
-    it('creates a GooglePayment component', function () {
-      return this.view.initialize().then(function () {
-        expect(btGooglePay.create).to.be.calledWith(this.sandbox.match({
-          client: this.view.client
-        }));
-        expect(this.view.googlePayInstance).to.equal(this.fakeGooglePayInstance);
-      }.bind(this));
-    });
-
-    it('can configure GooglePayment component with googleApiVersion', function () {
-      this.model.merchantConfiguration.googlePay.googlePayVersion = 2;
-
-      return this.view.initialize().then(function () {
-        expect(btGooglePay.create).to.be.calledWith(this.sandbox.match({
-          client: this.view.client,
-          googlePayVersion: 2
-        }));
-        expect(this.view.googlePayInstance).to.equal(this.fakeGooglePayInstance);
-      }.bind(this));
-    });
-
-    it('can configure GooglePayment component with googleMerchantId', function () {
-      this.model.merchantConfiguration.googlePay.merchantId = 'foobar';
-
-      return this.view.initialize().then(function () {
-        expect(btGooglePay.create).to.be.calledWith(this.sandbox.match({
-          client: this.view.client,
-          googleMerchantId: 'foobar'
-        }));
-        expect(this.view.googlePayInstance).to.equal(this.fakeGooglePayInstance);
-      }.bind(this));
-    });
-
-    it('creates a Google payments client', function () {
-      return this.view.initialize().then(function () {
-        expect(this.view.paymentsClient).to.be.an.instanceof(this.FakePaymentClient);
-      }.bind(this));
-    });
-
-    it('configures payemnts client with PRODUCTION environment in production', function () {
-      var configuration = fake.configuration();
-
-      configuration.gatewayConfiguration.environment = 'production';
-      this.fakeClient.getConfiguration.returns(configuration);
-      this.sandbox.spy(global.google.payments.api, 'PaymentsClient');
-
-      return this.view.initialize().then(function () {
-        expect(global.google.payments.api.PaymentsClient).to.be.calledWith({
-          environment: 'PRODUCTION'
-        });
+      return testContext.view.initialize().then(function () {
+        expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
       });
     });
 
-    it('configures payemnts client with TEST environment in non-production', function () {
-      var configuration = fake.configuration();
+    test('notifies async dependency', () => {
+      jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
 
-      configuration.gatewayConfiguration.environment = 'sandbox';
-      this.fakeClient.getConfiguration.returns(configuration);
-      this.sandbox.spy(global.google.payments.api, 'PaymentsClient');
-
-      return this.view.initialize().then(function () {
-        expect(global.google.payments.api.PaymentsClient).to.be.calledWith({
-          environment: 'TEST'
-        });
+      return testContext.view.initialize().then(function () {
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
       });
     });
 
-    it('calls asyncDependencyFailed when Google Pay component creation fails', function () {
-      var fakeError = new Error('A_FAKE_ERROR');
-
-      this.sandbox.stub(this.view.model, 'asyncDependencyFailed');
-      btGooglePay.create.rejects(fakeError);
-
-      return this.view.initialize().then(function () {
-        var error = this.view.model.asyncDependencyFailed.args[0][0].error;
-
-        expect(this.view.model.asyncDependencyFailed).to.be.calledOnce;
-        expect(this.view.model.asyncDependencyFailed).to.be.calledWith(this.sandbox.match({
-          view: 'googlePay'
+    test('creates a GooglePayment component', () => {
+      return testContext.view.initialize().then(function () {
+        expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
+          client: testContext.view.client
         }));
-
-        expect(error.message).to.equal(fakeError.message);
-      }.bind(this));
+        expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
+      });
     });
 
-    it('sets up button to tokenize Google Pay', function () {
-      this.sandbox.stub(this.view, 'tokenize').resolves();
+    test(
+      'can configure GooglePayment component with googleApiVersion',
+      () => {
+        testContext.model.merchantConfiguration.googlePay.googlePayVersion = 2;
 
-      return this.view.initialize().then(function () {
-        var handler = this.FakePaymentClient.prototype.createButton.getCall(0).args[0].onClick;
+        return testContext.view.initialize().then(function () {
+          expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
+            client: testContext.view.client,
+            googlePayVersion: 2
+          }));
+          expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
+        });
+      }
+    );
 
-        expect(this.FakePaymentClient.prototype.createButton).to.be.calledOnce;
-        expect(this.FakePaymentClient.prototype.createButton).to.be.calledWith({
+    test(
+      'can configure GooglePayment component with googleMerchantId',
+      () => {
+        testContext.model.merchantConfiguration.googlePay.merchantId = 'foobar';
+
+        return testContext.view.initialize().then(function () {
+          expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
+            client: testContext.view.client,
+            googleMerchantId: 'foobar'
+          }));
+          expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
+        });
+      }
+    );
+
+    test('creates a Google payments client', () => {
+      return testContext.view.initialize().then(function () {
+        expect(testContext.view.paymentsClient).toBeInstanceOf(testContext.FakePaymentClient);
+      });
+    });
+
+    test(
+      'configures payemnts client with PRODUCTION environment in production',
+      () => {
+        var configuration = fake.configuration();
+
+        configuration.gatewayConfiguration.environment = 'production';
+        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        jest.spyOn(global.google.payments.api, 'PaymentsClient');
+
+        return testContext.view.initialize().then(function () {
+          expect(global.google.payments.api.PaymentsClient).toBeCalledWith({
+            environment: 'PRODUCTION'
+          });
+        });
+      }
+    );
+
+    test(
+      'configures payemnts client with TEST environment in non-production',
+      () => {
+        var configuration = fake.configuration();
+
+        configuration.gatewayConfiguration.environment = 'sandbox';
+        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        jest.spyOn(global.google.payments.api, 'PaymentsClient');
+
+        return testContext.view.initialize().then(function () {
+          expect(global.google.payments.api.PaymentsClient).toBeCalledWith({
+            environment: 'TEST'
+          });
+        });
+      }
+    );
+
+    test(
+      'calls asyncDependencyFailed when Google Pay component creation fails',
+      () => {
+        var fakeError = new Error('A_FAKE_ERROR');
+
+        jest.spyOn(testContext.view.model, 'asyncDependencyFailed').mockImplementation();
+        btGooglePay.create.mockRejectedValue(fakeError);
+
+        return testContext.view.initialize().then(function () {
+          var error = testContext.view.model.asyncDependencyFailed.mock.calls[0][0].error;
+
+          expect(testContext.view.model.asyncDependencyFailed).toBeCalledTimes(1);
+          expect(testContext.view.model.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
+            view: 'googlePay'
+          }));
+
+          expect(error.message).toBe(fakeError.message);
+        });
+      }
+    );
+
+    test('sets up button to tokenize Google Pay', () => {
+      jest.spyOn(testContext.view, 'tokenize').mockResolvedValue();
+
+      return testContext.view.initialize().then(function () {
+        var handler = testContext.FakePaymentClient.prototype.createButton.mock.calls[0][0].onClick;
+
+        expect(testContext.FakePaymentClient.prototype.createButton).toBeCalledTimes(1);
+        expect(testContext.FakePaymentClient.prototype.createButton).toBeCalledWith({
           buttonType: 'short',
-          onClick: this.sandbox.match.func
+          onClick: expect.any(Function)
         });
 
-        handler({preventDefault: this.sandbox.stub()});
+        handler({preventDefault: jest.fn()});
 
-        expect(this.view.tokenize).to.be.calledOnce;
-      }.bind(this));
+        expect(testContext.view.tokenize).toBeCalledTimes(1);
+      });
     });
 
-    it('can initialize buttons with custom settings', function () {
-      this.model.merchantConfiguration.googlePay.button = {
+    test('can initialize buttons with custom settings', () => {
+      testContext.model.merchantConfiguration.googlePay.button = {
         buttonType: 'long',
         buttonColor: 'white'
       };
 
-      return this.view.initialize().then(function () {
-        expect(this.FakePaymentClient.prototype.createButton).to.be.calledOnce;
-        expect(this.FakePaymentClient.prototype.createButton).to.be.calledWith({
+      return testContext.view.initialize().then(function () {
+        expect(testContext.FakePaymentClient.prototype.createButton).toBeCalledTimes(1);
+        expect(testContext.FakePaymentClient.prototype.createButton).toBeCalledWith({
           buttonType: 'long',
           buttonColor: 'white',
-          onClick: this.sandbox.match.func
+          onClick: expect.any(Function)
         });
-      }.bind(this));
+      });
     });
 
-    it('cannot override onClick function for button', function () {
-      this.model.merchantConfiguration.googlePay.button = {
+    test('cannot override onClick function for button', () => {
+      testContext.model.merchantConfiguration.googlePay.button = {
         onClick: function () {
           throw new Error('Should never call this error');
         }
       };
-      this.sandbox.stub(this.view, 'tokenize').resolves();
+      jest.spyOn(testContext.view, 'tokenize').mockResolvedValue();
 
-      return this.view.initialize().then(function () {
-        var handler = this.FakePaymentClient.prototype.createButton.getCall(0).args[0].onClick;
+      return testContext.view.initialize().then(function () {
+        var handler = testContext.FakePaymentClient.prototype.createButton.mock.calls[0][0].onClick;
 
-        expect(this.FakePaymentClient.prototype.createButton).to.be.calledOnce;
-        expect(this.FakePaymentClient.prototype.createButton).to.be.calledWith({
+        expect(testContext.FakePaymentClient.prototype.createButton).toBeCalledTimes(1);
+        expect(testContext.FakePaymentClient.prototype.createButton).toBeCalledWith({
           buttonType: 'short',
-          onClick: this.sandbox.match.func
+          onClick: expect.any(Function)
         });
 
         expect(function () {
-          handler({preventDefault: this.sandbox.stub()});
-          expect(this.view.tokenize).to.be.calledOnce;
-        }.bind(this)).to.not.throw();
-      }.bind(this));
+          handler({preventDefault: jest.fn()});
+          expect(testContext.view.tokenize).toBeCalledTimes(1);
+        }).not.toThrowError();
+      });
     });
   });
 
-  describe('tokenize', function () {
-    beforeEach(function () {
-      this.view = new GooglePayView(this.googlePayViewOptions);
-      this.sandbox.stub(this.view.model, 'addPaymentMethod');
-      this.sandbox.stub(this.view.model, 'reportError');
+  describe('tokenize', () => {
+    beforeEach(() => {
+      testContext.view = new GooglePayView(testContext.googlePayViewOptions);
+      jest.spyOn(testContext.view.model, 'addPaymentMethod').mockImplementation();
+      jest.spyOn(testContext.view.model, 'reportError').mockImplementation();
 
-      return this.view.initialize();
+      return testContext.view.initialize();
     });
 
-    it('creates a paymentDataRequest from googlePayConfiguration', function () {
-      return this.view.tokenize().then(function () {
-        expect(this.fakeGooglePayInstance.createPaymentDataRequest).to.be.calledOnce;
-        expect(this.fakeGooglePayInstance.createPaymentDataRequest).to.be.calledWith({
+    test('creates a paymentDataRequest from googlePayConfiguration', () => {
+      return testContext.view.tokenize().then(function () {
+        expect(testContext.fakeGooglePayInstance.createPaymentDataRequest).toBeCalledTimes(1);
+        expect(testContext.fakeGooglePayInstance.createPaymentDataRequest).toBeCalledWith({
           transactionInfo: {
             currencyCode: 'USD',
             totalPriceStatus: 'FINAL',
             totalPrice: '100.00'
           }
         });
-      }.bind(this));
+      });
     });
 
-    it('calls loadPaymentData with paymentDataRequest', function () {
-      return this.view.tokenize().then(function () {
-        expect(this.FakePaymentClient.prototype.loadPaymentData).to.be.calledOnce;
-        expect(this.FakePaymentClient.prototype.loadPaymentData).to.be.calledWith({
+    test('calls loadPaymentData with paymentDataRequest', () => {
+      return testContext.view.tokenize().then(function () {
+        expect(testContext.FakePaymentClient.prototype.loadPaymentData).toBeCalledTimes(1);
+        expect(testContext.FakePaymentClient.prototype.loadPaymentData).toBeCalledWith({
           merchantId: 'merchant-id',
           transactionInfo: {
             currencyCode: 'USD',
@@ -295,261 +316,285 @@ describe('GooglePayView', function () {
           },
           allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
         });
-      }.bind(this));
-    });
-
-    it('parses the response from loadPaymentData', function () {
-      return this.view.tokenize().then(function () {
-        expect(this.fakeGooglePayInstance.parseResponse).to.be.calledOnce;
-        expect(this.fakeGooglePayInstance.parseResponse).to.be.calledWith(this.fakeLoadPaymentDataResponse);
-      }.bind(this));
-    });
-
-    it('adds PaymentMethod to model', function () {
-      return this.view.tokenize().then(function () {
-        expect(this.view.model.addPaymentMethod).to.be.calledOnce;
-        expect(this.view.model.addPaymentMethod).to.be.calledWith({
-          type: 'AndroidPayCard',
-          nonce: 'google-pay-nonce',
-          rawPaymentData: this.fakeLoadPaymentDataResponse
-        });
-      }.bind(this));
-    });
-
-    it('reports error as developerError if error statusCode is DEVELOPER_ERROR', function () {
-      var error = new Error('loadPaymentData error');
-
-      this.sandbox.stub(console, 'error');
-      error.statusCode = 'DEVELOPER_ERROR';
-      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
-
-      return this.view.tokenize().then(function () {
-        expect(this.view.model.reportError).to.be.calledOnce;
-        expect(this.view.model.reportError).to.be.calledWith('developerError');
-      }.bind(this));
-    });
-
-    it('prints detailed error on console if error statusCode is DEVELOPER_ERROR', function () {
-      var error = new Error('loadPaymentData error');
-
-      this.sandbox.stub(console, 'error');
-      error.statusCode = 'DEVELOPER_ERROR';
-      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
-
-      return this.view.tokenize().then(function () {
-        expect(console.error).to.be.calledOnce; // eslint-disable-line no-console
-        expect(console.error).to.be.calledWith(error); // eslint-disable-line no-console
       });
     });
 
-    it('sends analytics when loadPaymentData call fails', function () {
+    test('parses the response from loadPaymentData', () => {
+      return testContext.view.tokenize().then(function () {
+        expect(testContext.fakeGooglePayInstance.parseResponse).toBeCalledTimes(1);
+        expect(testContext.fakeGooglePayInstance.parseResponse).toBeCalledWith(testContext.fakeLoadPaymentDataResponse);
+      });
+    });
+
+    test('adds PaymentMethod to model', () => {
+      return testContext.view.tokenize().then(function () {
+        expect(testContext.view.model.addPaymentMethod).toBeCalledTimes(1);
+        expect(testContext.view.model.addPaymentMethod).toBeCalledWith({
+          type: 'AndroidPayCard',
+          nonce: 'google-pay-nonce',
+          rawPaymentData: testContext.fakeLoadPaymentDataResponse
+        });
+      });
+    });
+
+    test(
+      'reports error as developerError if error statusCode is DEVELOPER_ERROR',
+      () => {
+        var error = new Error('loadPaymentData error');
+
+        jest.spyOn(console, 'error').mockImplementation();
+        error.statusCode = 'DEVELOPER_ERROR';
+        testContext.FakePaymentClient.prototype.loadPaymentData.mockRejectedValue(error);
+
+        return testContext.view.tokenize().then(function () {
+          expect(testContext.view.model.reportError).toBeCalledTimes(1);
+          expect(testContext.view.model.reportError).toBeCalledWith('developerError');
+        });
+      }
+    );
+
+    test(
+      'prints detailed error on console if error statusCode is DEVELOPER_ERROR',
+      () => {
+        var error = new Error('loadPaymentData error');
+
+        jest.spyOn(console, 'error').mockImplementation();
+        error.statusCode = 'DEVELOPER_ERROR';
+        testContext.FakePaymentClient.prototype.loadPaymentData.mockRejectedValue(error);
+
+        return testContext.view.tokenize().then(function () {
+          expect(console.error).toBeCalledTimes(1); // eslint-disable-line no-console
+          expect(console.error).toBeCalledWith(error); // eslint-disable-line no-console
+        });
+      }
+    );
+
+    test('sends analytics when loadPaymentData call fails', () => {
       var error = new Error('loadPaymentData error');
 
       error.statusCode = 'CODE';
-      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+      testContext.FakePaymentClient.prototype.loadPaymentData.mockRejectedValue(error);
 
-      return this.view.tokenize().then(function () {
-        expect(analytics.sendEvent).to.be.calledOnce;
-        expect(analytics.sendEvent).to.be.calledWith(this.fakeClient, 'googlepay.loadPaymentData.failed');
-      }.bind(this));
+      return testContext.view.tokenize().then(function () {
+        expect(analytics.sendEvent).toBeCalledTimes(1);
+        expect(analytics.sendEvent).toBeCalledWith(testContext.fakeClient, 'googlepay.loadPaymentData.failed');
+      });
     });
 
-    it('does not report erorr if statusCode is CANCELLED', function () {
+    test('does not report erorr if statusCode is CANCELLED', () => {
       var error = new Error('loadPaymentData error');
 
       error.statusCode = 'CANCELED';
-      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+      testContext.FakePaymentClient.prototype.loadPaymentData.mockRejectedValue(error);
 
-      return this.view.tokenize().then(function () {
-        expect(this.view.model.reportError).to.not.be.called;
-      }.bind(this));
+      return testContext.view.tokenize().then(function () {
+        expect(testContext.view.model.reportError).not.toBeCalled();
+      });
     });
 
-    it('sends cancelled event for Google Pay cancelation', function () {
+    test('sends cancelled event for Google Pay cancelation', () => {
       var error = new Error('loadPaymentData error');
 
       error.statusCode = 'CANCELED';
-      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+      testContext.FakePaymentClient.prototype.loadPaymentData.mockRejectedValue(error);
 
-      return this.view.tokenize().then(function () {
-        expect(analytics.sendEvent).to.be.calledOnce;
-        expect(analytics.sendEvent).to.be.calledWith(this.fakeClient, 'googlepay.loadPaymentData.canceled');
-      }.bind(this));
+      return testContext.view.tokenize().then(function () {
+        expect(analytics.sendEvent).toBeCalledTimes(1);
+        expect(analytics.sendEvent).toBeCalledWith(testContext.fakeClient, 'googlepay.loadPaymentData.canceled');
+      });
     });
 
-    it('does not send analytics event for developer error', function () {
+    test('does not send analytics event for developer error', () => {
       var error = new Error('loadPaymentData error');
 
-      this.sandbox.stub(console, 'error');
+      jest.spyOn(console, 'error').mockImplementation();
       error.statusCode = 'DEVELOPER_ERROR';
-      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+      testContext.FakePaymentClient.prototype.loadPaymentData.mockRejectedValue(error);
 
-      return this.view.tokenize().then(function () {
-        expect(analytics.sendEvent).to.not.be.called;
+      return testContext.view.tokenize().then(function () {
+        expect(analytics.sendEvent).not.toBeCalled();
       });
     });
 
-    it('does not send analytics event for errors without a statusCode', function () {
-      var error = new Error('error');
+    test(
+      'does not send analytics event for errors without a statusCode',
+      () => {
+        var error = new Error('error');
 
-      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+        testContext.FakePaymentClient.prototype.loadPaymentData.mockRejectedValue(error);
 
-      return this.view.tokenize().then(function () {
-        expect(analytics.sendEvent).to.not.be.called;
-      });
-    });
+        return testContext.view.tokenize().then(function () {
+          expect(analytics.sendEvent).not.toBeCalled();
+        });
+      }
+    );
 
-    it('reports error if loadPaymentData rejects', function () {
+    test('reports error if loadPaymentData rejects', () => {
       var error = new Error('loadPaymentData error');
 
-      this.FakePaymentClient.prototype.loadPaymentData.rejects(error);
+      testContext.FakePaymentClient.prototype.loadPaymentData.mockRejectedValue(error);
 
-      return this.view.tokenize().then(function () {
-        expect(this.view.model.reportError).to.be.calledOnce;
-        expect(this.view.model.reportError).to.be.calledWith(error);
-      }.bind(this));
+      return testContext.view.tokenize().then(function () {
+        expect(testContext.view.model.reportError).toBeCalledTimes(1);
+        expect(testContext.view.model.reportError).toBeCalledWith(error);
+      });
     });
 
-    it('reports error if parseResponse rejects', function () {
+    test('reports error if parseResponse rejects', () => {
       var error = new Error('parseResponse error');
 
-      this.fakeGooglePayInstance.parseResponse.rejects(error);
+      testContext.fakeGooglePayInstance.parseResponse.mockRejectedValue(error);
 
-      return this.view.tokenize().then(function () {
-        expect(this.view.model.reportError).to.be.calledOnce;
-        expect(this.view.model.reportError).to.be.calledWith(error);
-      }.bind(this));
+      return testContext.view.tokenize().then(function () {
+        expect(testContext.view.model.reportError).toBeCalledTimes(1);
+        expect(testContext.view.model.reportError).toBeCalledWith(error);
+      });
     });
   });
 
-  describe('updateConfiguration', function () {
-    beforeEach(function () {
-      this.view = new GooglePayView(this.googlePayViewOptions);
+  describe('updateConfiguration', () => {
+    beforeEach(() => {
+      testContext.view = new GooglePayView(testContext.googlePayViewOptions);
 
-      return this.view.initialize();
+      return testContext.view.initialize();
     });
 
-    it('updates values in googlePayConfiguration', function () {
+    test('updates values in googlePayConfiguration', () => {
       var newTransactionInfo = {
         currencyCode: 'EU',
         totalPriceStatus: 'FINAL',
         totalPrice: '200.00'
       };
 
-      expect(this.view.googlePayConfiguration.transactionInfo).to.deep.equal({
+      expect(testContext.view.googlePayConfiguration.transactionInfo).toEqual({
         currencyCode: 'USD',
         totalPriceStatus: 'FINAL',
         totalPrice: '100.00'
       });
 
-      this.view.updateConfiguration('transactionInfo', newTransactionInfo);
+      testContext.view.updateConfiguration('transactionInfo', newTransactionInfo);
 
-      expect(this.view.googlePayConfiguration.transactionInfo).to.deep.equal(newTransactionInfo);
+      expect(testContext.view.googlePayConfiguration.transactionInfo).toEqual(newTransactionInfo);
     });
   });
 
-  describe('isEnabled', function () {
-    beforeEach(function () {
-      this.sandbox.stub(assets, 'loadScript').resolves();
-      this.fakeOptions = {
-        client: this.fakeClient,
-        merchantConfiguration: this.model.merchantConfiguration
+  describe('isEnabled', () => {
+    beforeEach(() => {
+      jest.spyOn(assets, 'loadScript').mockResolvedValue();
+      testContext.fakeOptions = {
+        client: testContext.fakeClient,
+        merchantConfiguration: testContext.model.merchantConfiguration
       };
     });
 
-    it('resolves with false when gatewayConfiguration does not have android pay', function () {
-      var configuration = fake.configuration();
+    test(
+      'resolves with false when gatewayConfiguration does not have android pay',
+      () => {
+        var configuration = fake.configuration();
 
-      delete configuration.gatewayConfiguration.androidPay;
+        delete configuration.gatewayConfiguration.androidPay;
 
-      this.fakeOptions.client.getConfiguration.returns(configuration);
+        testContext.fakeOptions.client.getConfiguration.mockReturnValue(configuration);
 
-      return GooglePayView.isEnabled(this.fakeOptions).then(function (result) {
-        expect(result).to.equal(false);
-      });
-    });
-
-    it('resolves with false when merhcantConfiguration does not specify Google Pay', function () {
-      delete this.fakeOptions.merchantConfiguration.googlePay;
-
-      return GooglePayView.isEnabled(this.fakeOptions).then(function (result) {
-        expect(result).to.equal(false);
-      });
-    });
-
-    it('loads Google Payment script file when google global does not exist', function () {
-      var storedFakeGoogle = global.google;
-
-      delete global.google;
-
-      assets.loadScript.callsFake(function () {
-        global.google = storedFakeGoogle;
-
-        return Promise.resolve();
-      });
-
-      return GooglePayView.isEnabled(this.fakeOptions).then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith({
-          id: 'braintree-dropin-google-payment-script',
-          src: 'https://pay.google.com/gp/p/js/pay.js'
+        return GooglePayView.isEnabled(testContext.fakeOptions).then(function (result) {
+          expect(result).toBe(false);
         });
-      });
-    });
+      }
+    );
 
-    it('loads Google Payment script file when the payment client on google global does not exist', function () {
-      var storedFakeGoogle = global.google;
+    test(
+      'resolves with false when merhcantConfiguration does not specify Google Pay',
+      () => {
+        delete testContext.fakeOptions.merchantConfiguration.googlePay;
 
-      delete global.google;
-      global.google = {
-        payments: {
-          api: {}
-        }
-      };
-
-      assets.loadScript.callsFake(function () {
-        global.google = storedFakeGoogle;
-
-        return Promise.resolve();
-      });
-
-      return GooglePayView.isEnabled(this.fakeOptions).then(function () {
-        expect(assets.loadScript).to.be.calledOnce;
-        expect(assets.loadScript).to.be.calledWith({
-          id: 'braintree-dropin-google-payment-script',
-          src: 'https://pay.google.com/gp/p/js/pay.js'
+        return GooglePayView.isEnabled(testContext.fakeOptions).then(function (result) {
+          expect(result).toBe(false);
         });
-      });
-    });
+      }
+    );
 
-    it('does not load Google Payment script file if global google pay object already exists', function () {
-      return GooglePayView.isEnabled(this.fakeOptions).then(function () {
-        expect(assets.loadScript).to.not.be.called;
-      });
-    });
+    test(
+      'loads Google Payment script file when google global does not exist',
+      () => {
+        var storedFakeGoogle = global.google;
 
-    it('calls isReadyToPay to check device compatibility', function () {
-      return GooglePayView.isEnabled(this.fakeOptions).then(function () {
-        expect(this.FakePaymentClient.prototype.isReadyToPay).to.be.calledOnce;
-        expect(this.FakePaymentClient.prototype.isReadyToPay).to.be.calledWith({
+        delete global.google;
+
+        assets.loadScript.mockImplementation(function () {
+          global.google = storedFakeGoogle;
+
+          return Promise.resolve();
+        });
+
+        return GooglePayView.isEnabled(testContext.fakeOptions).then(function () {
+          expect(assets.loadScript).toBeCalledTimes(1);
+          expect(assets.loadScript).toBeCalledWith({
+            id: 'braintree-dropin-google-payment-script',
+            src: 'https://pay.google.com/gp/p/js/pay.js'
+          });
+        });
+      }
+    );
+
+    test(
+      'loads Google Payment script file when the payment client on google global does not exist',
+      () => {
+        var storedFakeGoogle = global.google;
+
+        delete global.google;
+        global.google = {
+          payments: {
+            api: {}
+          }
+        };
+
+        assets.loadScript.mockImplementation(function () {
+          global.google = storedFakeGoogle;
+
+          return Promise.resolve();
+        });
+
+        return GooglePayView.isEnabled(testContext.fakeOptions).then(function () {
+          expect(assets.loadScript).toBeCalledTimes(1);
+          expect(assets.loadScript).toBeCalledWith({
+            id: 'braintree-dropin-google-payment-script',
+            src: 'https://pay.google.com/gp/p/js/pay.js'
+          });
+        });
+      }
+    );
+
+    test(
+      'does not load Google Payment script file if global google pay object already exists',
+      () => {
+        return GooglePayView.isEnabled(testContext.fakeOptions).then(function () {
+          expect(assets.loadScript).not.toBeCalled();
+        });
+      }
+    );
+
+    test('calls isReadyToPay to check device compatibility', () => {
+      return GooglePayView.isEnabled(testContext.fakeOptions).then(function () {
+        expect(testContext.FakePaymentClient.prototype.isReadyToPay).toBeCalledTimes(1);
+        expect(testContext.FakePaymentClient.prototype.isReadyToPay).toBeCalledWith({
           allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
         });
-      }.bind(this));
-    });
-
-    it('resolves with false when isReadyToPay is not successful', function () {
-      this.FakePaymentClient.prototype.isReadyToPay.resolves({result: false});
-
-      return GooglePayView.isEnabled(this.fakeOptions).then(function (result) {
-        expect(result).to.equal(false);
       });
     });
 
-    it('resolves with true when isReadyToPay is successful', function () {
-      this.FakePaymentClient.prototype.isReadyToPay.resolves({result: true});
+    test('resolves with false when isReadyToPay is not successful', () => {
+      testContext.FakePaymentClient.prototype.isReadyToPay.mockResolvedValue({result: false});
 
-      return GooglePayView.isEnabled(this.fakeOptions).then(function (result) {
-        expect(result).to.equal(true);
+      return GooglePayView.isEnabled(testContext.fakeOptions).then(function (result) {
+        expect(result).toBe(false);
+      });
+    });
+
+    test('resolves with true when isReadyToPay is successful', () => {
+      testContext.FakePaymentClient.prototype.isReadyToPay.mockResolvedValue({result: true});
+
+      return GooglePayView.isEnabled(testContext.fakeOptions).then(function (result) {
+        expect(result).toBe(true);
       });
     });
   });

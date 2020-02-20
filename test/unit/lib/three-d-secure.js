@@ -6,100 +6,106 @@ var classList = require('@braintree/class-list');
 var ThreeDSecure = require('../../../src/lib/three-d-secure');
 var throwIfResolves = require('../../helpers/throw-if-resolves');
 
-describe('ThreeDSecure', function () {
-  beforeEach(function () {
-    this.threeDSecureInstance = fake.threeDSecureInstance;
-    this.sandbox.stub(this.threeDSecureInstance, 'verifyCard');
-    this.sandbox.stub(this.threeDSecureInstance, 'cancelVerifyCard');
+describe('ThreeDSecure', () => {
+  let testContext;
 
-    this.sandbox.stub(classList, 'add');
-    this.sandbox.stub(classList, 'remove');
+  beforeEach(() => {
+    testContext = {};
   });
 
-  describe('initialize', function () {
-    beforeEach(function () {
-      this.sandbox.stub(threeDSecure, 'create').resolves(this.threeDSecureInstance);
+  beforeEach(() => {
+    testContext.threeDSecureInstance = fake.threeDSecureInstance;
+    jest.spyOn(testContext.threeDSecureInstance, 'verifyCard').mockImplementation();
+    jest.spyOn(testContext.threeDSecureInstance, 'cancelVerifyCard').mockImplementation();
+
+    jest.spyOn(classList, 'add').mockImplementation();
+    jest.spyOn(classList, 'remove').mockImplementation();
+  });
+
+  describe('initialize', () => {
+    beforeEach(() => {
+      jest.spyOn(threeDSecure, 'create').mockResolvedValue(testContext.threeDSecureInstance);
     });
 
-    it('sets up three d secure', function () {
+    test('sets up three d secure', () => {
       var config = {};
       var client = {};
       var tds = new ThreeDSecure(client, config, 'Card Verification');
 
       return tds.initialize().then(function () {
-        expect(threeDSecure.create).to.be.calledOnce;
-        expect(threeDSecure.create).to.be.calledWith({
+        expect(threeDSecure.create).toBeCalledTimes(1);
+        expect(threeDSecure.create).toBeCalledWith({
           client: client,
           version: 2
         });
-        expect(tds._instance).to.equal(this.threeDSecureInstance);
-      }.bind(this));
+        expect(tds._instance).toBe(testContext.threeDSecureInstance);
+      });
     });
   });
 
-  describe('verify', function () {
-    beforeEach(function () {
-      this.config = {
+  describe('verify', () => {
+    beforeEach(() => {
+      testContext.config = {
         client: {},
         amount: '10.00'
       };
 
-      this.tds = new ThreeDSecure({}, this.config, 'Card Verification');
-      this.tds._instance = this.threeDSecureInstance;
+      testContext.tds = new ThreeDSecure({}, testContext.config, 'Card Verification');
+      testContext.tds._instance = testContext.threeDSecureInstance;
 
-      this.sandbox.stub(document.body, 'appendChild');
-      this.threeDSecureInstance.verifyCard.resolves({
+      jest.spyOn(document.body, 'appendChild').mockImplementation();
+      testContext.threeDSecureInstance.verifyCard.mockResolvedValue({
         nonce: 'a-nonce',
         liabilityShifted: true,
         liablityShiftPossible: true
       });
     });
 
-    it('calls verifyCard', function () {
-      return this.tds.verify({
+    test('calls verifyCard', () => {
+      return testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
         }
       }).then(function (payload) {
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
           bin: '123456',
           amount: '10.00',
           additionalInformation: {
             acsWindowSize: '03'
           },
-          onLookupComplete: this.sandbox.match.func
+          onLookupComplete: expect.any(Function)
         });
 
-        expect(payload.nonce).to.equal('a-nonce');
-        expect(payload.liabilityShifted).to.equal(true);
-        expect(payload.liablityShiftPossible).to.equal(true);
-      }.bind(this));
+        expect(payload.nonce).toBe('a-nonce');
+        expect(payload.liabilityShifted).toBe(true);
+        expect(payload.liablityShiftPossible).toBe(true);
+      });
     });
 
-    it('rejects if verifyCard rejects', function () {
-      this.threeDSecureInstance.verifyCard.rejects({
+    test('rejects if verifyCard rejects', () => {
+      testContext.threeDSecureInstance.verifyCard.mockRejectedValue({
         message: 'A message'
       });
 
-      return this.tds.verify({
+      return testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
         }
       }).then(throwIfResolves).catch(function (err) {
-        expect(err.message).to.equal('A message');
+        expect(err.message).toBe('A message');
       });
     });
 
-    it('can pass additional data along', function () {
+    test('can pass additional data along', () => {
       var billingAddress = {
         foo: 'bar'
       };
 
-      return this.tds.verify({
+      return testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
@@ -111,8 +117,8 @@ describe('ThreeDSecure', function () {
           shippingMethod: '01'
         }
       }).then(function (payload) {
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
           bin: '123456',
           amount: '10.00',
@@ -120,19 +126,19 @@ describe('ThreeDSecure', function () {
             shippingMethod: '01',
             acsWindowSize: '03'
           },
-          onLookupComplete: this.sandbox.match.func,
+          onLookupComplete: expect.any(Function),
           billingAddress: billingAddress,
           email: 'foo@example.com'
         });
 
-        expect(payload.nonce).to.equal('a-nonce');
-        expect(payload.liabilityShifted).to.equal(true);
-        expect(payload.liablityShiftPossible).to.equal(true);
-      }.bind(this));
+        expect(payload.nonce).toBe('a-nonce');
+        expect(payload.liabilityShifted).toBe(true);
+        expect(payload.liablityShiftPossible).toBe(true);
+      });
     });
 
-    it('additional config cannot override nonce or bin', function () {
-      return this.tds.verify({
+    test('additional config cannot override nonce or bin', () => {
+      return testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
@@ -141,25 +147,25 @@ describe('ThreeDSecure', function () {
         nonce: 'bad-nonce',
         bin: 'bad-bin'
       }).then(function (payload) {
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
           bin: '123456',
           amount: '10.00',
           additionalInformation: {
             acsWindowSize: '03'
           },
-          onLookupComplete: this.sandbox.match.func
+          onLookupComplete: expect.any(Function)
         });
 
-        expect(payload.nonce).to.equal('a-nonce');
-        expect(payload.liabilityShifted).to.equal(true);
-        expect(payload.liablityShiftPossible).to.equal(true);
-      }.bind(this));
+        expect(payload.nonce).toBe('a-nonce');
+        expect(payload.liabilityShifted).toBe(true);
+        expect(payload.liablityShiftPossible).toBe(true);
+      });
     });
 
-    it('additional config can override amount', function () {
-      return this.tds.verify({
+    test('additional config can override amount', () => {
+      return testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
@@ -167,25 +173,25 @@ describe('ThreeDSecure', function () {
       }, {
         amount: '3.00'
       }).then(function (payload) {
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
           bin: '123456',
           amount: '3.00',
           additionalInformation: {
             acsWindowSize: '03'
           },
-          onLookupComplete: this.sandbox.match.func
+          onLookupComplete: expect.any(Function)
         });
 
-        expect(payload.nonce).to.equal('a-nonce');
-        expect(payload.liabilityShifted).to.equal(true);
-        expect(payload.liablityShiftPossible).to.equal(true);
-      }.bind(this));
+        expect(payload.nonce).toBe('a-nonce');
+        expect(payload.liabilityShifted).toBe(true);
+        expect(payload.liablityShiftPossible).toBe(true);
+      });
     });
 
-    it('additional config can override acsWindowSize', function () {
-      return this.tds.verify({
+    test('additional config can override acsWindowSize', () => {
+      return testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
@@ -195,46 +201,46 @@ describe('ThreeDSecure', function () {
           acsWindowSize: '01'
         }
       }).then(function (payload) {
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledOnce;
-        expect(this.threeDSecureInstance.verifyCard).to.be.calledWith({
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
+        expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
           bin: '123456',
           amount: '10.00',
           additionalInformation: {
             acsWindowSize: '01'
           },
-          onLookupComplete: this.sandbox.match.func
+          onLookupComplete: expect.any(Function)
         });
 
-        expect(payload.nonce).to.equal('a-nonce');
-        expect(payload.liabilityShifted).to.equal(true);
-        expect(payload.liablityShiftPossible).to.equal(true);
-      }.bind(this));
+        expect(payload.nonce).toBe('a-nonce');
+        expect(payload.liabilityShifted).toBe(true);
+        expect(payload.liablityShiftPossible).toBe(true);
+      });
     });
   });
 
-  describe('teardown', function () {
-    beforeEach(function () {
-      this.tds = new ThreeDSecure({}, {}, 'Card Verification');
+  describe('teardown', () => {
+    beforeEach(() => {
+      testContext.tds = new ThreeDSecure({}, {}, 'Card Verification');
 
-      this.tds._instance = this.threeDSecureInstance;
-      this.sandbox.stub(this.threeDSecureInstance, 'teardown').resolves();
+      testContext.tds._instance = testContext.threeDSecureInstance;
+      jest.spyOn(testContext.threeDSecureInstance, 'teardown').mockResolvedValue();
     });
 
-    it('calls teardown on 3ds instance', function () {
-      return this.tds.teardown().then(function () {
-        expect(this.threeDSecureInstance.teardown).to.be.calledOnce;
-      }.bind(this));
+    test('calls teardown on 3ds instance', () => {
+      return testContext.tds.teardown().then(function () {
+        expect(testContext.threeDSecureInstance.teardown).toBeCalledTimes(1);
+      });
     });
   });
 
-  describe('udpateConfiguration', function () {
-    it('updates configuration', function () {
+  describe('udpateConfiguration', () => {
+    test('updates configuration', () => {
       var tds = new ThreeDSecure({}, {amount: '10.00', foo: 'bar'}, 'Card Verification');
 
       tds.updateConfiguration('amount', '23.45');
 
-      expect(tds._config).to.deep.equal({amount: '23.45', foo: 'bar'});
+      expect(tds._config).toEqual({amount: '23.45', foo: 'bar'});
     });
   });
 });

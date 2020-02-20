@@ -2,9 +2,15 @@
 
 var supportsFlexbox = require('../../../src/lib/supports-flexbox');
 
-describe('supportsFlexbox', function () {
-  beforeEach(function () {
-    this.fakeDiv = {
+describe('supportsFlexbox', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
+  });
+
+  beforeEach(() => {
+    testContext.fakeDiv = {
       style: {
         cssText: '',
         length: 0
@@ -12,21 +18,21 @@ describe('supportsFlexbox', function () {
     };
   });
 
-  it('returns true in PhantomJS', function () {
-    expect(supportsFlexbox()).to.equal(true);
+  test('returns true in PhantomJS', () => {
+    expect(supportsFlexbox()).toBe(true);
   });
 
-  it("returns false for browsers that don't support flexbox", function () {
-    this.sandbox.stub(document, 'createElement').returns(this.fakeDiv);
+  test("returns false for browsers that don't support flexbox", () => {
+    jest.spyOn(document, 'createElement').mockReturnValue(testContext.fakeDiv);
 
-    expect(supportsFlexbox()).to.equal(false);
+    expect(supportsFlexbox()).toBe(false);
   });
 
-  it('returns true if the browser supports flexbox', function () {
-    this.sandbox.stub(document, 'createElement').returns(this.fakeDiv);
+  test('returns true if the browser supports flexbox', () => {
+    jest.spyOn(document, 'createElement').mockReturnValue(testContext.fakeDiv);
 
-    this.fakeDiv.style.length = 1;
+    testContext.fakeDiv.style.length = 1;
 
-    expect(supportsFlexbox()).to.equal(true);
+    expect(supportsFlexbox()).toBe(true);
   });
 });

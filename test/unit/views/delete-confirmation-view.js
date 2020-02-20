@@ -7,73 +7,82 @@ var strings = require('../../../src/translations/en_US');
 
 var mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
-describe('DeleteConfirmationView', function () {
-  beforeEach(function () {
-    this.element = document.createElement('div');
-    this.element.innerHTML = mainHTML;
+describe('DeleteConfirmationView', () => {
+  let testContext;
 
-    this.model = {
-      deleteVaultedPaymentMethod: this.sandbox.stub(),
-      cancelDeleteVaultedPaymentMethod: this.sandbox.stub()
+  beforeEach(() => {
+    testContext = {};
+  });
+
+  beforeEach(() => {
+    testContext.element = document.createElement('div');
+    testContext.element.innerHTML = mainHTML;
+
+    testContext.model = {
+      deleteVaultedPaymentMethod: jest.fn(),
+      cancelDeleteVaultedPaymentMethod: jest.fn()
     };
 
-    this.view = new DeleteConfirmationView({
-      element: this.element.querySelector('[data-braintree-id="delete-confirmation"]'),
-      model: this.model,
+    testContext.view = new DeleteConfirmationView({
+      element: testContext.element.querySelector('[data-braintree-id="delete-confirmation"]'),
+      model: testContext.model,
       strings: strings
     });
   });
 
-  describe('Constructor', function () {
-    beforeEach(function () {
-      this.sandbox.stub(DeleteConfirmationView.prototype, '_initialize');
+  describe('Constructor', () => {
+    beforeEach(() => {
+      jest.spyOn(DeleteConfirmationView.prototype, '_initialize').mockImplementation();
     });
 
-    it('inherits from BaseView', function () {
-      expect(new DeleteConfirmationView({})).to.be.an.instanceof(BaseView);
+    test('inherits from BaseView', () => {
+      expect(new DeleteConfirmationView({})).toBeInstanceOf(BaseView);
     });
 
-    it('calls _initialize', function () {
+    test('calls _initialize', () => {
       new DeleteConfirmationView({}); // eslint-disable-line no-new
 
-      expect(DeleteConfirmationView.prototype._initialize).to.have.been.calledOnce;
+      expect(DeleteConfirmationView.prototype._initialize).toBeCalledTimes(1);
     });
 
-    it('sets up a button click for the yes button', function () {
-      var yesButton = this.element.querySelector('[data-braintree-id="delete-confirmation__yes"]');
+    test('sets up a button click for the yes button', () => {
+      var yesButton = testContext.element.querySelector('[data-braintree-id="delete-confirmation__yes"]');
 
       yesButton.click();
 
-      expect(this.model.deleteVaultedPaymentMethod).to.be.calledOnce;
+      expect(testContext.model.deleteVaultedPaymentMethod).toBeCalledTimes(1);
     });
 
-    it('sets up a button click for the no button', function () {
-      var noButton = this.element.querySelector('[data-braintree-id="delete-confirmation__no"]');
+    test('sets up a button click for the no button', () => {
+      var noButton = testContext.element.querySelector('[data-braintree-id="delete-confirmation__no"]');
 
       noButton.click();
 
-      expect(this.model.cancelDeleteVaultedPaymentMethod).to.be.calledOnce;
+      expect(testContext.model.cancelDeleteVaultedPaymentMethod).toBeCalledTimes(1);
     });
   });
 
-  describe('applyPaymentMethod', function () {
-    it('applies credit card payment method delete confirmation message', function () {
-      var paymentMethod = {
-        nonce: 'a-nonce',
-        type: 'CreditCard',
-        details: {
-          cardType: 'Visa',
-          lastFour: '1234',
-          description: 'A card ending in 1234'
-        }
-      };
+  describe('applyPaymentMethod', () => {
+    test(
+      'applies credit card payment method delete confirmation message',
+      () => {
+        var paymentMethod = {
+          nonce: 'a-nonce',
+          type: 'CreditCard',
+          details: {
+            cardType: 'Visa',
+            lastFour: '1234',
+            description: 'A card ending in 1234'
+          }
+        };
 
-      this.view.applyPaymentMethod(paymentMethod);
+        testContext.view.applyPaymentMethod(paymentMethod);
 
-      expect(this.view._messageBox.innerText).to.equal('Delete Visa card ending in 1234?');
-    });
+        expect(testContext.view._messageBox.innerText).toBe('Delete Visa card ending in 1234?');
+      }
+    );
 
-    it('applies PayPal payment method delete confirmation message', function () {
+    test('applies PayPal payment method delete confirmation message', () => {
       var paymentMethod = {
         nonce: 'a-nonce',
         type: 'PayPalAccount',
@@ -82,12 +91,12 @@ describe('DeleteConfirmationView', function () {
         }
       };
 
-      this.view.applyPaymentMethod(paymentMethod);
+      testContext.view.applyPaymentMethod(paymentMethod);
 
-      expect(this.view._messageBox.innerText).to.equal('Delete PayPal account foo@bar.com?');
+      expect(testContext.view._messageBox.innerText).toBe('Delete PayPal account foo@bar.com?');
     });
 
-    it('applies Venmo payment method delete confirmation message', function () {
+    test('applies Venmo payment method delete confirmation message', () => {
       var paymentMethod = {
         nonce: 'a-nonce',
         type: 'VenmoAccount',
@@ -96,20 +105,23 @@ describe('DeleteConfirmationView', function () {
         }
       };
 
-      this.view.applyPaymentMethod(paymentMethod);
+      testContext.view.applyPaymentMethod(paymentMethod);
 
-      expect(this.view._messageBox.innerText).to.equal('Are you sure you want to delete Venmo account with username foobar?');
+      expect(testContext.view._messageBox.innerText).toBe('Are you sure you want to delete Venmo account with username foobar?');
     });
 
-    it('applies generic payment method message for non-card, venmo or paypal accounts', function () {
-      var paymentMethod = {
-        nonce: 'a-nonce',
-        type: 'SomeMethod'
-      };
+    test(
+      'applies generic payment method message for non-card, venmo or paypal accounts',
+      () => {
+        var paymentMethod = {
+          nonce: 'a-nonce',
+          type: 'SomeMethod'
+        };
 
-      this.view.applyPaymentMethod(paymentMethod);
+        testContext.view.applyPaymentMethod(paymentMethod);
 
-      expect(this.view._messageBox.innerText).to.equal('Are you sure you want to delete this payment method?');
-    });
+        expect(testContext.view._messageBox.innerText).toBe('Are you sure you want to delete this payment method?');
+      }
+    );
   });
 });

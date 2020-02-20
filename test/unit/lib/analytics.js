@@ -6,65 +6,74 @@ var braintreeClientVersion = require('braintree-web/client').VERSION;
 var constants = require('../../../src/constants');
 var fake = require('../../helpers/fake');
 
-describe('analytics.sendEvent', function () {
-  beforeEach(function () {
-    this.client = fake.client();
+describe('analytics.sendEvent', () => {
+  let testContext;
+
+  beforeEach(() => {
+    testContext = {};
   });
 
-  it('correctly sends an analytics event with a callback', function () {
+  beforeEach(() => {
+    testContext.client = fake.client();
+  });
+
+  test('correctly sends an analytics event with a callback', () => {
     var postArgs, currentTimestamp;
     var fakeConfiguration = fake.configuration();
 
     function callback() {}
 
-    analytics.sendEvent(this.client, 'test.event.kind', callback);
+    analytics.sendEvent(testContext.client, 'test.event.kind', callback);
 
-    expect(this.client._request).to.have.been.called;
-    postArgs = this.client._request.firstCall.args;
+    expect(testContext.client._request).toBeCalled();
+    postArgs = testContext.client._request.mock.calls[0];
 
-    expect(postArgs[0].url).to.equal(fakeConfiguration.gatewayConfiguration.analytics.url);
-    expect(postArgs[0].method).to.equal('post');
-    expect(postArgs[0].data.analytics[0].kind).to.equal('web.dropin.test.event.kind');
-    expect(postArgs[0].data._meta.sessionId).to.equal(fakeConfiguration.analyticsMetadata.sessionId);
+    expect(postArgs[0].url).toBe(fakeConfiguration.gatewayConfiguration.analytics.url);
+    expect(postArgs[0].method).toBe('post');
+    expect(postArgs[0].data.analytics[0].kind).toBe('web.dropin.test.event.kind');
+    expect(postArgs[0].data._meta.sessionId).toBe(fakeConfiguration.analyticsMetadata.sessionId);
     currentTimestamp = Date.now() / 1000;
-    expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).to.be.lessThan(2);
-    expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).to.be.greaterThan(0);
-    expect(postArgs[1]).to.equal(callback);
-    expect(postArgs[0].timeout).to.equal(constants.ANALYTICS_REQUEST_TIMEOUT_MS);
+    expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).toBeLessThan(2);
+    expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).toBeGreaterThan(0);
+    expect(postArgs[1]).toBe(callback);
+    expect(postArgs[0].timeout).toBe(constants.ANALYTICS_REQUEST_TIMEOUT_MS);
   });
 
-  it('correctly sends an analytics event with no callback (fire-and-forget)', function () {
-    var postArgs, currentTimestamp;
-    var fakeConfiguration = fake.configuration();
+  test(
+    'correctly sends an analytics event with no callback (fire-and-forget)',
+    () => {
+      var postArgs, currentTimestamp;
+      var fakeConfiguration = fake.configuration();
 
-    analytics.sendEvent(this.client, 'test.event.kind');
+      analytics.sendEvent(testContext.client, 'test.event.kind');
 
-    expect(this.client._request).to.have.been.called;
-    postArgs = this.client._request.firstCall.args;
+      expect(testContext.client._request).toBeCalled();
+      postArgs = testContext.client._request.mock.calls[0];
 
-    expect(postArgs[0].url).to.equal(fakeConfiguration.gatewayConfiguration.analytics.url);
-    expect(postArgs[0].method).to.equal('post');
-    expect(postArgs[0].data.analytics[0].kind).to.equal('web.dropin.test.event.kind');
-    expect(postArgs[0].data._meta.sessionId).to.equal(fakeConfiguration.analyticsMetadata.sessionId);
-    currentTimestamp = Date.now() / 1000;
-    expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).to.be.lessThan(2);
-    expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).to.be.greaterThan(0);
-    expect(postArgs[0].timeout).to.equal(constants.ANALYTICS_REQUEST_TIMEOUT_MS);
-  });
+      expect(postArgs[0].url).toBe(fakeConfiguration.gatewayConfiguration.analytics.url);
+      expect(postArgs[0].method).toBe('post');
+      expect(postArgs[0].data.analytics[0].kind).toBe('web.dropin.test.event.kind');
+      expect(postArgs[0].data._meta.sessionId).toBe(fakeConfiguration.analyticsMetadata.sessionId);
+      currentTimestamp = Date.now() / 1000;
+      expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).toBeLessThan(2);
+      expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).toBeGreaterThan(0);
+      expect(postArgs[0].timeout).toBe(constants.ANALYTICS_REQUEST_TIMEOUT_MS);
+    }
+  );
 
-  it('correctly formats _meta', function () {
+  test('correctly formats _meta', () => {
     var postArgs;
     var fakeConfiguration = fake.configuration();
 
-    analytics.sendEvent(this.client, 'test.event.kind');
+    analytics.sendEvent(testContext.client, 'test.event.kind');
 
-    expect(this.client._request).to.have.been.called;
-    postArgs = this.client._request.firstCall.args;
+    expect(testContext.client._request).toBeCalled();
+    postArgs = testContext.client._request.mock.calls[0];
 
-    expect(postArgs[0].data._meta).to.deep.equal(fakeConfiguration.analyticsMetadata);
+    expect(postArgs[0].data._meta).toEqual(fakeConfiguration.analyticsMetadata);
   });
 
-  it('includes tokenizationKey', function () {
+  test('includes tokenizationKey', () => {
     var client, postArgs;
     var fakeConfiguration = fake.configuration();
 
@@ -73,14 +82,14 @@ describe('analytics.sendEvent', function () {
 
     analytics.sendEvent(client, 'test.event.kind');
 
-    expect(client._request).to.have.been.called;
-    postArgs = client._request.firstCall.args;
+    expect(client._request).toBeCalled();
+    postArgs = client._request.mock.calls[0];
 
-    expect(postArgs[0].data.tokenizationKey).to.equal(fakeConfiguration.authorization);
-    expect(postArgs[0].data.authorizationFingerprint).to.not.exist;
+    expect(postArgs[0].data.tokenizationKey).toBe(fakeConfiguration.authorization);
+    expect(postArgs[0].data.authorizationFingerprint).toBeFalsy();
   });
 
-  it('includes authorizationFingerprint', function () {
+  test('includes authorizationFingerprint', () => {
     var client, fingerprint, postArgs;
     var fakeConfiguration = fake.configuration();
 
@@ -91,21 +100,21 @@ describe('analytics.sendEvent', function () {
 
     analytics.sendEvent(client, 'test.event.kind');
 
-    expect(client._request).to.have.been.called;
-    postArgs = client._request.firstCall.args;
+    expect(client._request).toBeCalled();
+    postArgs = client._request.mock.calls[0];
 
-    expect(postArgs[0].data.tokenizationKey).to.not.exist;
-    expect(postArgs[0].data.authorizationFingerprint).to.equal(fingerprint);
+    expect(postArgs[0].data.tokenizationKey).toBeFalsy();
+    expect(postArgs[0].data.authorizationFingerprint).toBe(fingerprint);
   });
 
-  it('includes braintreeLibraryVersion', function () {
+  test('includes braintreeLibraryVersion', () => {
     var postArgs;
 
-    analytics.sendEvent(this.client, 'test.event.kind');
+    analytics.sendEvent(testContext.client, 'test.event.kind');
 
-    expect(this.client._request).to.have.been.called;
-    postArgs = this.client._request.firstCall.args;
+    expect(testContext.client._request).toBeCalled();
+    postArgs = testContext.client._request.mock.calls[0];
 
-    expect(postArgs[0].data.braintreeLibraryVersion).to.equal(braintreeClientVersion);
+    expect(postArgs[0].data.braintreeLibraryVersion).toBe(braintreeClientVersion);
   });
 });
