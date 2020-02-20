@@ -1,4 +1,3 @@
-'use strict';
 
 const kebabCaseToCamelCase = require('../../../src/lib/kebab-case-to-camel-case');
 

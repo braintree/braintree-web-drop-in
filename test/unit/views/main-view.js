@@ -1,4 +1,3 @@
-'use strict';
 
 const MainView = require('../../../src/views/main-view');
 const ApplePayView = require('../../../src/views/payment-sheet-views/apple-pay-view');
@@ -95,7 +94,7 @@ describe('MainView', () => {
         let model, mainView;
         const modelOptions = fake.modelOptions();
 
-        modelOptions.paymentMethods = [{foo: 'bar'}, {baz: 'qux'}];
+        modelOptions.paymentMethods = [{ foo: 'bar' }, { baz: 'qux' }];
         model = fake.model(modelOptions);
 
         return model.initialize().then(() => {
@@ -169,8 +168,8 @@ describe('MainView', () => {
         testContext.model = fake.model();
 
         testContext.model.getVaultedPaymentMethods.mockResolvedValue([
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'PayPalAccount', details: {email: 'me@example.com'}}
+          { type: 'CreditCard', details: { lastTwo: '11' }},
+          { type: 'PayPalAccount', details: { email: 'me@example.com' }}
         ]);
 
         testContext.dropinOptions = {
@@ -205,7 +204,7 @@ describe('MainView', () => {
 
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
 
-          expect(testContext.model.changeActivePaymentMethod).toBeCalledWith({type: 'CreditCard', details: {lastTwo: '11'}});
+          expect(testContext.model.changeActivePaymentMethod).toBeCalledWith({ type: 'CreditCard', details: { lastTwo: '11' }});
         }
       );
 
@@ -796,7 +795,7 @@ describe('MainView', () => {
 
     describe('for changeActivePaymentMethod', () => {
       test('sets the PaymentMethodsView as the primary view', done => {
-        testContext.mainView.paymentMethodsViews.activeMethodView = {setActive: function () {}};
+        testContext.mainView.paymentMethodsViews.activeMethodView = { setActive: function () {} };
         jest.spyOn(testContext.mainView, 'setPrimaryView').mockImplementation();
 
         testContext.model._emit('changeActivePaymentMethod', {});
@@ -812,7 +811,7 @@ describe('MainView', () => {
       test(
         'calls removeActivePaymentMethod if there is an active view',
         done => {
-          const optionsView = {ID: 'options', removeActivePaymentMethod: jest.fn()};
+          const optionsView = { ID: 'options', removeActivePaymentMethod: jest.fn() };
 
           testContext.mainView.addView(optionsView);
 
@@ -996,7 +995,7 @@ describe('MainView', () => {
       describe('and there are payment methods available', () => {
         beforeEach(() => {
           testContext.mainViewOptions.model = fake.model();
-          testContext.mainViewOptions.model.getVaultedPaymentMethods.mockResolvedValue([{type: 'CreditCard', details: {lastTwo: '11'}}]);
+          testContext.mainViewOptions.model.getVaultedPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
 
           return testContext.mainViewOptions.model.initialize().then(() => {
             testContext.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
@@ -1070,7 +1069,7 @@ describe('MainView', () => {
     });
 
     test('calls callback with payload when successful', () => {
-      const stubPaymentMethod = {foo: 'bar'};
+      const stubPaymentMethod = { foo: 'bar' };
 
       jest.spyOn(CardView.prototype, 'requestPaymentMethod').mockResolvedValue(stubPaymentMethod);
 
@@ -1080,7 +1079,7 @@ describe('MainView', () => {
     });
 
     test('sends analytics event for successful CreditCard', () => {
-      const stubPaymentMethod = {type: 'CreditCard'};
+      const stubPaymentMethod = { type: 'CreditCard' };
 
       jest.spyOn(CardView.prototype, 'requestPaymentMethod').mockResolvedValue(stubPaymentMethod);
 
@@ -1090,7 +1089,7 @@ describe('MainView', () => {
     });
 
     test('sends analytics event for successful PayPalAccount', () => {
-      const stubPaymentMethod = {type: 'PayPalAccount'};
+      const stubPaymentMethod = { type: 'PayPalAccount' };
 
       jest.spyOn(CardView.prototype, 'requestPaymentMethod').mockResolvedValue(stubPaymentMethod);
 
@@ -1393,7 +1392,7 @@ describe('MainView', () => {
     });
 
     test('updates delete confirmation view with payment method', () => {
-      const paymentMethod = {nonce: 'a-nonce'};
+      const paymentMethod = { nonce: 'a-nonce' };
 
       testContext.mainView.openConfirmPaymentMethodDeletionDialog(paymentMethod);
 
@@ -1402,7 +1401,7 @@ describe('MainView', () => {
     });
 
     test('sets primary view to delete confirmation view', () => {
-      const paymentMethod = {nonce: 'a-nonce'};
+      const paymentMethod = { nonce: 'a-nonce' };
 
       testContext.mainView.openConfirmPaymentMethodDeletionDialog(paymentMethod);
 

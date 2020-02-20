@@ -1,4 +1,3 @@
-'use strict';
 
 const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
@@ -50,12 +49,12 @@ describe('PaymentMethodsView', () => {
         authorizationType: 'CLIENT_TOKEN',
         gatewayConfiguration: fake.configuration().gatewayConfiguration
       });
-      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+      modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
       model.getVaultedPaymentMethods.mockResolvedValue([
-        {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+        { type: 'CreditCard', details: { lastTwo: '11' }},
+        { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
       ]);
 
       return model.initialize().then(() => {
@@ -77,11 +76,11 @@ describe('PaymentMethodsView', () => {
     test('puts default payment method as first item in list', () => {
       let firstChildLabel, model, paymentMethodsViews;
       const creditCard = {
-        details: {cardType: 'Visa'},
+        details: { cardType: 'Visa' },
         type: 'CreditCard'
       };
       const paypalAccount = {
-        details: {email: 'wow@meow.com'},
+        details: { email: 'wow@meow.com' },
         type: 'PayPalAccount'
       };
       const modelOptions = fake.modelOptions();
@@ -91,7 +90,7 @@ describe('PaymentMethodsView', () => {
         authorizationType: 'CLIENT_TOKEN',
         gatewayConfiguration: fake.configuration().gatewayConfiguration
       });
-      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+      modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
 
@@ -143,7 +142,7 @@ describe('PaymentMethodsView', () => {
       'changes the payment method view when the active payment method changes',
       () => {
         let model, paymentMethodsViews;
-        const fakePaymentMethod = {baz: 'qux'};
+        const fakePaymentMethod = { baz: 'qux' };
         const modelOptions = fake.modelOptions();
 
         jest.useFakeTimers();
@@ -151,10 +150,10 @@ describe('PaymentMethodsView', () => {
         modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
         model = fake.model(modelOptions);
 
-        model.getVaultedPaymentMethods.mockResolvedValue([{foo: 'bar'}, fakePaymentMethod]);
+        model.getVaultedPaymentMethods.mockResolvedValue([{ foo: 'bar' }, fakePaymentMethod]);
 
         return model.initialize().then(() => {
-          model.changeActivePaymentMethod({foo: 'bar'});
+          model.changeActivePaymentMethod({ foo: 'bar' });
 
           paymentMethodsViews = new PaymentMethodsView({
             element: testContext.element,
@@ -181,8 +180,8 @@ describe('PaymentMethodsView', () => {
       'updates the paying with label when the active payment method changes',
       () => {
         let model, paymentMethodsViews;
-        const fakeCard = {type: 'CreditCard', details: {lastTwo: 22}};
-        const fakePayPal = {type: 'PayPalAccount', details: {email: 'buyer@braintreepayments.com'}};
+        const fakeCard = { type: 'CreditCard', details: { lastTwo: 22 }};
+        const fakePayPal = { type: 'PayPalAccount', details: { email: 'buyer@braintreepayments.com' }};
         const modelOptions = fake.modelOptions();
 
         modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
@@ -223,7 +222,7 @@ describe('PaymentMethodsView', () => {
       testContext.element = div.querySelector('.braintree-dropin');
       testContext.fakePaymentMethod = {
         type: 'CreditCard',
-        details: {lastTwo: '11'}
+        details: { lastTwo: '11' }
       };
     });
 
@@ -255,7 +254,7 @@ describe('PaymentMethodsView', () => {
             strings: strings
           });
 
-          model.addPaymentMethod({foo: 'bar'});
+          model.addPaymentMethod({ foo: 'bar' });
 
           expect(paymentMethodsViews.views.length).toBe(2);
           expect(methodsContainer.childElementCount).toBe(2);
@@ -283,7 +282,7 @@ describe('PaymentMethodsView', () => {
           strings: strings
         });
 
-        model.addPaymentMethod({foo: 'bar'});
+        model.addPaymentMethod({ foo: 'bar' });
 
         expect(paymentMethodsViews.views.length).toBe(1);
         expect(methodsContainer.childElementCount).toBe(1);
@@ -310,7 +309,7 @@ describe('PaymentMethodsView', () => {
             strings: strings
           });
 
-          model.addPaymentMethod({foo: 'bar'});
+          model.addPaymentMethod({ foo: 'bar' });
 
           expect(paymentMethodsViews.views.length).toBe(1);
           expect(methodsContainer.childElementCount).toBe(1);
@@ -378,7 +377,7 @@ describe('PaymentMethodsView', () => {
       testContext.element.id = 'fake-method';
       testContext.fakePaymentMethod = {
         type: 'CreditCard',
-        details: {lastTwo: '11'}
+        details: { lastTwo: '11' }
       };
 
       testContext.model = fake.model();
@@ -436,7 +435,7 @@ describe('PaymentMethodsView', () => {
       () => {
         let paymentMethodsViews;
         const fakeActiveMethodView = {
-          paymentMethod: {foo: 'bar'}
+          paymentMethod: { foo: 'bar' }
         };
         const element = document.createElement('div');
         const model = fake.model();
@@ -487,7 +486,7 @@ describe('PaymentMethodsView', () => {
     test('rejects if model is in edit mode', () => {
       let paymentMethodsViews;
       const fakeActiveMethodView = {
-        paymentMethod: {foo: 'bar'}
+        paymentMethod: { foo: 'bar' }
       };
       const element = document.createElement('div');
       const model = fake.model();
@@ -527,13 +526,13 @@ describe('PaymentMethodsView', () => {
         authorizationType: 'CLIENT_TOKEN',
         gatewayConfiguration: fake.configuration().gatewayConfiguration
       });
-      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+      modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
 
       model.getVaultedPaymentMethods.mockResolvedValue([
-        {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+        { type: 'CreditCard', details: { lastTwo: '11' }},
+        { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
       ]);
 
       return model.initialize().then(() => {
@@ -571,13 +570,13 @@ describe('PaymentMethodsView', () => {
         authorizationType: 'CLIENT_TOKEN',
         gatewayConfiguration: fake.configuration().gatewayConfiguration
       });
-      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+      modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
 
       model.getVaultedPaymentMethods.mockResolvedValue([
-        {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}}
+        { type: 'CreditCard', details: { lastTwo: '11' }},
+        { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
       ]);
 
       return model.initialize().then(() => {
@@ -614,16 +613,15 @@ describe('PaymentMethodsView', () => {
         authorizationType: 'CLIENT_TOKEN',
         gatewayConfiguration: fake.configuration().gatewayConfiguration
       });
-      modelOptions.merchantConfiguration.paypal = {flow: 'vault'};
+      modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       testContext.model = fake.model(modelOptions);
 
       testContext.model.getVaultedPaymentMethods.mockResolvedValue([
-        {type: 'CreditCard', details: {lastTwo: '11'}},
-        {type: 'PayPalAccount', details: {email: 'wow@example.com'}},
-        {type: 'VenmoAccount', details: {email: 'wow@example.com'}}
+        { type: 'CreditCard', details: { lastTwo: '11' }},
+        { type: 'PayPalAccount', details: { email: 'wow@example.com' }},
+        { type: 'VenmoAccount', details: { email: 'wow@example.com' }}
       ]);
-
 
       return testContext.model.initialize().then(() => {
         testContext.paymentMethodsViews = new PaymentMethodsView({
@@ -636,10 +634,9 @@ describe('PaymentMethodsView', () => {
           strings: strings
         });
         jest.spyOn(testContext.model, 'getPaymentMethods').mockReturnValue([
-          {type: 'CreditCard', details: {lastTwo: '11'}},
-          {type: 'VenmoAccount', details: {email: 'wow@example.com'}}
+          { type: 'CreditCard', details: { lastTwo: '11' }},
+          { type: 'VenmoAccount', details: { email: 'wow@example.com' }}
         ]);
-
       });
     });
 

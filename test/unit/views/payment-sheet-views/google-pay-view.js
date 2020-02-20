@@ -1,4 +1,4 @@
-'use strict';
+
 /* eslint-disable no-new */
 
 const BaseView = require('../../../../src/views/base-view');
@@ -77,7 +77,7 @@ describe('GooglePayView', () => {
     jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
     testContext.FakePaymentClient = function FakePayment() {};
-    testContext.FakePaymentClient.prototype.isReadyToPay = jest.fn().mockResolvedValue({result: true});
+    testContext.FakePaymentClient.prototype.isReadyToPay = jest.fn().mockResolvedValue({ result: true });
     testContext.FakePaymentClient.prototype.loadPaymentData = jest.fn().mockResolvedValue(testContext.fakeLoadPaymentDataResponse);
     testContext.FakePaymentClient.prototype.prefetchPaymentData = jest.fn().mockResolvedValue();
     testContext.FakePaymentClient.prototype.createButton = jest.fn().mockReturnValue(googlePayButton);
@@ -235,7 +235,7 @@ describe('GooglePayView', () => {
           onClick: expect.any(Function)
         });
 
-        handler({preventDefault: jest.fn()});
+        handler({ preventDefault: jest.fn() });
 
         expect(testContext.view.tokenize).toBeCalledTimes(1);
       });
@@ -275,7 +275,7 @@ describe('GooglePayView', () => {
         });
 
         expect(() => {
-          handler({preventDefault: jest.fn()});
+          handler({ preventDefault: jest.fn() });
           expect(testContext.view.tokenize).toBeCalledTimes(1);
         }).not.toThrowError();
       });
@@ -583,7 +583,7 @@ describe('GooglePayView', () => {
     });
 
     test('resolves with false when isReadyToPay is not successful', () => {
-      testContext.FakePaymentClient.prototype.isReadyToPay.mockResolvedValue({result: false});
+      testContext.FakePaymentClient.prototype.isReadyToPay.mockResolvedValue({ result: false });
 
       return GooglePayView.isEnabled(testContext.fakeOptions).then(result => {
         expect(result).toBe(false);
@@ -591,7 +591,7 @@ describe('GooglePayView', () => {
     });
 
     test('resolves with true when isReadyToPay is successful', () => {
-      testContext.FakePaymentClient.prototype.isReadyToPay.mockResolvedValue({result: true});
+      testContext.FakePaymentClient.prototype.isReadyToPay.mockResolvedValue({ result: true });
 
       return GooglePayView.isEnabled(testContext.fakeOptions).then(result => {
         expect(result).toBe(true);

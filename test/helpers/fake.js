@@ -1,4 +1,3 @@
-'use strict';
 
 var clientToken, clientTokenWithCustomerID, fakeBTInstances;
 var tokenizationKey = 'development_testing_merchant_id';
@@ -47,7 +46,7 @@ function configuration() {
 
 function getState() {
   return {
-    cards: [{type: 'visa'}],
+    cards: [{ type: 'visa' }],
     fields: {
       number: {
         isValid: true

@@ -1,4 +1,3 @@
-'use strict';
 
 const findParentForm = require('../../../src/lib/find-parent-form').findParentForm;
 

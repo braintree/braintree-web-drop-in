@@ -1,4 +1,3 @@
-'use strict';
 
 const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
@@ -120,7 +119,7 @@ describe('PaymentOptionsView', () => {
     });
 
     test('sets the primary view to the payment option when clicked', () => {
-      const mainViewStub = {setPrimaryView: jest.fn()};
+      const mainViewStub = { setPrimaryView: jest.fn() };
       const paymentOptionsView = new PaymentOptionsView({
         client: testContext.client,
         element: testContext.element,
@@ -138,7 +137,7 @@ describe('PaymentOptionsView', () => {
     test(
       'calls model.selectPaymentOption when payment option is clicked',
       () => {
-        const mainViewStub = {setPrimaryView: jest.fn()};
+        const mainViewStub = { setPrimaryView: jest.fn() };
         const paymentOptionsView = new PaymentOptionsView({
           client: testContext.client,
           element: testContext.element,
@@ -168,7 +167,7 @@ describe('PaymentOptionsView', () => {
       testContext.viewConfiguration = {
         client: testContext.client,
         element: testContext.element,
-        mainView: {setPrimaryView: function () {}},
+        mainView: { setPrimaryView: function () {} },
         strings: strings
       };
     });

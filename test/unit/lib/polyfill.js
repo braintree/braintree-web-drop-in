@@ -1,4 +1,3 @@
-'use strict';
 
 const atob = require('../../../src/lib/polyfill')._atob;
 

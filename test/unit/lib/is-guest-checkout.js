@@ -1,4 +1,3 @@
-'use strict';
 
 const fake = require('../../helpers/fake');
 const isGuestCheckout = require('../../../src/lib/is-guest-checkout');

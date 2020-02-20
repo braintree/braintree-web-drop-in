@@ -1,4 +1,3 @@
-'use strict';
 
 const analytics = require('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
@@ -185,7 +184,7 @@ describe('PaymentMethodView', () => {
 
   describe('setActive', () => {
     beforeEach(() => {
-      testContext.context = {element: document.createElement('div')};
+      testContext.context = { element: document.createElement('div') };
       jest.useFakeTimers();
     });
 

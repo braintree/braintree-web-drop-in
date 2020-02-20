@@ -1,4 +1,3 @@
-'use strict';
 
 const fake = require('../../helpers/fake');
 const threeDSecure = require('braintree-web/three-d-secure');
@@ -236,11 +235,11 @@ describe('ThreeDSecure', () => {
 
   describe('udpateConfiguration', () => {
     test('updates configuration', () => {
-      const tds = new ThreeDSecure({}, {amount: '10.00', foo: 'bar'}, 'Card Verification');
+      const tds = new ThreeDSecure({}, { amount: '10.00', foo: 'bar' }, 'Card Verification');
 
       tds.updateConfiguration('amount', '23.45');
 
-      expect(tds._config).toEqual({amount: '23.45', foo: 'bar'});
+      expect(tds._config).toEqual({ amount: '23.45', foo: 'bar' });
     });
   });
 });

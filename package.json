@@ -8,7 +8,7 @@
     "development": "gulp development",
     "server": "gulp server",
     "build:gh-pages": "gulp build:gh-pages",
-    "lint": "echo 'eslint src test'",
+    "lint": "eslint src test",
     "hint": "hint http://localhost:4567",
     "pretest": "npm run lint",
     "test": "jest",

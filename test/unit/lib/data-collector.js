@@ -1,4 +1,3 @@
-'use strict';
 
 const fake = require('../../helpers/fake');
 const assets = require('@braintree/asset-loader');

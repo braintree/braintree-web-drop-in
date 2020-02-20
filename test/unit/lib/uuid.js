@@ -1,4 +1,3 @@
-'use strict';
 
 const uuid = require('../../../src/lib/uuid');
 const isUuid = require('is-uuid');

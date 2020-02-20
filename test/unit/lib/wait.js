@@ -1,4 +1,3 @@
-'use strict';
 
 const wait = require('../../../src/lib/wait');
 

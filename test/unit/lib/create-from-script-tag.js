@@ -1,4 +1,3 @@
-'use strict';
 
 const createFromScriptTag = require('../../../src/lib/create-from-script-tag');
 const findParentForm = require('../../../src/lib/find-parent-form');
@@ -21,7 +20,7 @@ describe('createFromScriptTag', () => {
     jest.spyOn(analytics, 'sendEvent').mockImplementation();
     testContext.instance = {
       _client: 'fake-client',
-      requestPaymentMethod: jest.fn().mockImplementation(yields(null, {nonce: 'a-nonce'}))
+      requestPaymentMethod: jest.fn().mockImplementation(yields(null, { nonce: 'a-nonce' }))
     };
     testContext.scriptTag = document.createElement('script');
     testContext.scriptTag.dataset.braintreeDropinAuthorization = 'an-authorization';
@@ -164,7 +163,7 @@ describe('createFromScriptTag', () => {
     'prevents default form submission before Drop-in is created',
     done => {
       let submitHandler;
-      const fakeEvent = {preventDefault: jest.fn()};
+      const fakeEvent = { preventDefault: jest.fn() };
 
       createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
@@ -192,27 +191,25 @@ describe('createFromScriptTag', () => {
     });
   });
 
-  test(
-    'adds payment method nonce to form and submits form if payment method is requestable',
-    done => {
-      createFromScriptTag(testContext.createFunction, testContext.scriptTag);
+  test('adds payment method nonce to form and submits form if payment method is requestable', (done) => {
+    createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(() => {
-        const submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
-        submitHandler();
+    setTimeout(() => {
+      const submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
 
-        const input = testContext.fakeForm.appendChild.mock.calls[0][0];
+      submitHandler();
 
-        expect(testContext.fakeForm.appendChild).toBeCalledTimes(1);
-        expect(testContext.fakeForm.appendChild).toBeCalledWith(input);
-        expect(input.type).toBe('hidden');
-        expect(input.name).toBe('payment_method_nonce');
-        expect(input.value).toBe('a-nonce');
-        expect(testContext.fakeForm.submit).toBeCalledTimes(1);
-        done();
-      });
-    }
-  );
+      const input = testContext.fakeForm.appendChild.mock.calls[0][0];
+
+      expect(testContext.fakeForm.appendChild).toBeCalledTimes(1);
+      expect(testContext.fakeForm.appendChild).toBeCalledWith(input);
+      expect(input.type).toBe('hidden');
+      expect(input.name).toBe('payment_method_nonce');
+      expect(input.value).toBe('a-nonce');
+      expect(testContext.fakeForm.submit).toBeCalledTimes(1);
+      done();
+    });
+  });
 
   test(
     'does not add nonce and submit form if requestPaymentMethod fails',
@@ -289,7 +286,7 @@ describe('createFromScriptTag', () => {
     let submitHandler;
     const fakeInput = {};
 
-    testContext.fakeForm.querySelector.mockImplementation((selector) => {
+    testContext.fakeForm.querySelector.mockImplementation((selector) => { // eslint-disable-line consistent-return
       if (selector === '[name="payment_method_nonce"]') {
         return {};
       } else if (selector === '[name="device_data"]') {

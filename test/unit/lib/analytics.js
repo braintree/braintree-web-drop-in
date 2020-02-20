@@ -1,4 +1,3 @@
-'use strict';
 
 const analytics = require('../../../src/lib/analytics');
 const atob = require('../../../src/lib/polyfill').atob;

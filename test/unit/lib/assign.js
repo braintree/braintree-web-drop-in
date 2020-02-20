@@ -1,4 +1,3 @@
-'use strict';
 
 const assignModule = require('../../../src/lib/assign');
 
@@ -14,14 +13,14 @@ describe('assign', () => {
 
 function runTest(assign) {
   test('does nothing to one object', () => {
-    const obj = {foo: 'bar'};
+    const obj = { foo: 'bar' };
 
     expect(assign(obj)).toBe(obj);
   });
 
   test('merges two objects', () => {
-    const a = {foo: 'yas', bar: 'ugh'};
-    const b = {foo: 'nope', baz: 'wow'};
+    const a = { foo: 'yas', bar: 'ugh' };
+    const b = { foo: 'nope', baz: 'wow' };
 
     expect(assign(a, b)).toEqual({
       foo: 'nope',
@@ -31,9 +30,9 @@ function runTest(assign) {
   });
 
   test('merges three objects', () => {
-    const a = {foo: 'yas', bar: 'ugh'};
-    const b = {foo: 'nope'};
-    const c = {foo: 'wow', baz: 'cool'};
+    const a = { foo: 'yas', bar: 'ugh' };
+    const b = { foo: 'nope' };
+    const c = { foo: 'wow', baz: 'cool' };
 
     expect(assign(a, b, c)).toEqual({
       foo: 'wow',
@@ -43,8 +42,8 @@ function runTest(assign) {
   });
 
   test('returns the first object passed', () => {
-    const a = {foo: 'yas', bar: 'ugh'};
-    const b = {foo: 'nope', baz: 'wow'};
+    const a = { foo: 'yas', bar: 'ugh' };
+    const b = { foo: 'nope', baz: 'wow' };
 
     expect(assign(a, b)).toBe(a);
   });
@@ -58,7 +57,7 @@ function runTest(assign) {
 
     Klass.prototype.bar = 'ugh';
 
-    a = {foo: 'nope', baz: 'wow'};
+    a = { foo: 'nope', baz: 'wow' };
     b = new Klass();
 
     expect(assign(a, b)).toEqual({

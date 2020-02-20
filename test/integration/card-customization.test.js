@@ -39,7 +39,7 @@ describe('Drop-in card', function () {
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist;
+      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
       expect(result.description).to.include('ending in 11');
       expect(result.details.cardType).to.include('Visa');
     });
@@ -64,7 +64,7 @@ describe('Drop-in card', function () {
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist;
+      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
       expect(result.description).to.include('ending in 11');
       expect(result.details.cardType).to.include('Visa');
     });

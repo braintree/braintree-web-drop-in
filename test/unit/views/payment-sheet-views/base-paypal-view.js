@@ -1,4 +1,4 @@
-'use strict';
+
 /* eslint-disable no-new */
 
 const analytics = require('../../../../src/lib/analytics');
@@ -47,7 +47,7 @@ describe('BasePayPalView', () => {
     testContext.element = document.body.querySelector('.braintree-sheet.braintree-paypal');
 
     testContext.model.supportedPaymentOptions = ['card', 'paypal'];
-    testContext.model.merchantConfiguration.paypal = {flow: 'vault'};
+    testContext.model.merchantConfiguration.paypal = { flow: 'vault' };
     jest.spyOn(testContext.model, 'reportError').mockImplementation();
 
     testContext.configuration = fake.configuration();
@@ -491,7 +491,7 @@ describe('BasePayPalView', () => {
         model.isGuestCheckout = false;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
-        paypalInstance.paypalConfiguration = {flow: 'vault'};
+        paypalInstance.paypalConfiguration = { flow: 'vault' };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
         testContext.paypal.Button.render.mockResolvedValue();
@@ -529,7 +529,7 @@ describe('BasePayPalView', () => {
         model.isGuestCheckout = true;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
-        paypalInstance.paypalConfiguration = {flow: 'vault'};
+        paypalInstance.paypalConfiguration = { flow: 'vault' };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
         testContext.paypal.Button.render.mockResolvedValue();
@@ -567,7 +567,7 @@ describe('BasePayPalView', () => {
         model.isGuestCheckout = false;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
-        paypalInstance.paypalConfiguration = {flow: 'checkout'};
+        paypalInstance.paypalConfiguration = { flow: 'checkout' };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
         testContext.paypal.Button.render.mockResolvedValue();
@@ -775,7 +775,7 @@ describe('BasePayPalView', () => {
 
         return testContext.view.initialize().then(() => {
           expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-            style: {label: 'credit'}
+            style: { label: 'credit' }
           }), expect.any(String));
         });
       });
@@ -845,7 +845,7 @@ describe('BasePayPalView', () => {
     test('ignores offerCredit updates', () => {
       const view = new BasePayPalView();
 
-      view.paypalConfiguration = {offerCredit: true};
+      view.paypalConfiguration = { offerCredit: true };
 
       view.updateConfiguration('offerCredit', false);
 
@@ -855,7 +855,7 @@ describe('BasePayPalView', () => {
     test('ignores locale updates', () => {
       const view = new BasePayPalView();
 
-      view.paypalConfiguration = {locale: 'es'};
+      view.paypalConfiguration = { locale: 'es' };
 
       view.updateConfiguration('locale', 'il');
 

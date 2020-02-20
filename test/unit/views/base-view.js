@@ -1,4 +1,3 @@
-'use strict';
 
 const BaseView = require('../../../src/views/base-view');
 const constants = require('../../../src/constants');
@@ -20,7 +19,7 @@ describe('BaseView', () => {
     });
 
     test('takes properties from passed options', () => {
-      const view = new BaseView({foo: 'boo', yas: 'gaga'});
+      const view = new BaseView({ foo: 'boo', yas: 'gaga' });
 
       expect(view.foo).toBe('boo');
       expect(view.yas).toBe('gaga');

@@ -1,9 +1,7 @@
-'use strict';
 
 const dropin = require('../../src/index');
 const Dropin = require('../../src/dropin');
 const DropinError = require('../../src/lib/dropin-error');
-const Promise = require('../../src/lib/promise');
 const BraintreeError = require('braintree-web/lib/braintree-error');
 const client = require('braintree-web/client');
 const fake = require('../helpers/fake');
@@ -71,21 +69,21 @@ describe('dropin.create', () => {
   });
 
   test('resolves a Dropin instance if client.create returns successfully', () => {
-      const fakeClient = fake.client();
+    const fakeClient = fake.client();
 
-      jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
-        callback(null, this);
-      });
+    jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
+      callback(null, this); // eslint-disable-line no-invalid-this
+    });
 
-      client.create.mockResolvedValue(fakeClient);
+    client.create.mockResolvedValue(fakeClient);
 
-      return dropin.create({
-        authorization: 'tokenization_key',
-        selector: '#foo'
-      }).then(instance => {
-        expect(instance).toBeInstanceOf(Dropin);
-      });
-    }
+    return dropin.create({
+      authorization: 'tokenization_key',
+      selector: '#foo'
+    }).then(instance => {
+      expect(instance).toBeInstanceOf(Dropin);
+    });
+  }
   );
 
   test(

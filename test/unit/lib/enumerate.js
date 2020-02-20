@@ -1,4 +1,3 @@
-'use strict';
 
 const enumerate = require('../../../src/lib/enumerate');
 

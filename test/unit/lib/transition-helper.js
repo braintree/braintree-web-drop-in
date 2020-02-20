@@ -1,4 +1,3 @@
-'use strict';
 
 const browserDetection = require('../../../src/lib/browser-detection');
 const onTransitionEnd = require('../../../src/lib/transition-helper').onTransitionEnd;
@@ -15,7 +14,7 @@ describe('onTransitionEnd', () => {
 
   beforeEach(() => {
     testContext.fakePropertyName = 'fake-property-name';
-    testContext.fakeEvent = {propertyName: testContext.fakePropertyName};
+    testContext.fakeEvent = { propertyName: testContext.fakePropertyName };
   });
 
   test('immediately calls callback when IE9', done => {

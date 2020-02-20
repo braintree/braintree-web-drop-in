@@ -1,4 +1,4 @@
-'use strict';
+
 /* eslint-disable no-new */
 
 const BaseView = require('../../../../src/views/base-view');
@@ -89,7 +89,7 @@ describe('VenmoView', () => {
     test(
       'passes in merchant configuration when creating venmo component',
       () => {
-        testContext.view.model.merchantConfiguration.venmo = {allowNewBrowserTab: false};
+        testContext.view.model.merchantConfiguration.venmo = { allowNewBrowserTab: false };
 
         return testContext.view.initialize().then(() => {
           expect(btVenmo.create).toBeCalledWith(expect.objectContaining({
@@ -112,7 +112,7 @@ describe('VenmoView', () => {
     test(
       'reports app switch payload if page has a successful tokenization result',
       () => {
-        const payload = {type: 'VenmoAccount', nonce: 'fake-venmo-nonce'};
+        const payload = { type: 'VenmoAccount', nonce: 'fake-venmo-nonce' };
 
         testContext.fakeVenmoInstance.hasTokenizationResult.mockReturnValue(true);
         testContext.fakeVenmoInstance.tokenize.mockResolvedValue(payload);
@@ -196,7 +196,6 @@ describe('VenmoView', () => {
     describe('button click handler', () => {
       beforeEach(() => {
         const button = document.querySelector('[data-braintree-id="venmo-button"]');
-        const self = this;
         const view = new VenmoView(testContext.venmoViewOptions);
 
         jest.spyOn(testContext.model, 'addPaymentMethod').mockImplementation();

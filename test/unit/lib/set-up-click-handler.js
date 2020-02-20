@@ -1,4 +1,3 @@
-'use strict';
 
 const addSelectionEventHandler = require('../../../src/lib/add-selection-event-handler');
 const {
@@ -6,12 +5,6 @@ const {
 } = require('../../helpers/yields');
 
 describe('addSelectionEventHandler', () => {
-  let testContext;
-
-  beforeEach(() => {
-    testContext = {};
-  });
-
   test('adds an event listener for click', () => {
     const event = {};
     const element = {
@@ -37,7 +30,7 @@ describe('addSelectionEventHandler', () => {
   });
 
   test('calls handler for keyup when key is enter', () => {
-    const event = {keyCode: 13};
+    const event = { keyCode: 13 };
     const element = {
       addEventListener: jest.fn()
     };
@@ -55,7 +48,7 @@ describe('addSelectionEventHandler', () => {
   });
 
   test('does not call handler for keyup when key is not enter', () => {
-    const event = {keyCode: 26};
+    const event = { keyCode: 26 };
     const element = {
       addEventListener: jest.fn()
     };

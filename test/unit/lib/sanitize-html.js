@@ -1,4 +1,3 @@
-'use strict';
 
 const sanitizeHtml = require('../../../src/lib/sanitize-html');
 

@@ -1,4 +1,4 @@
-'use strict';
+
 /* eslint-disable no-new */
 
 const BasePayPalView = require('../../../../src/views/payment-sheet-views/base-paypal-view');

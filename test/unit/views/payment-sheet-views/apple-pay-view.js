@@ -1,4 +1,4 @@
-'use strict';
+
 /* eslint-disable no-new */
 
 const BaseView = require('../../../../src/views/base-view');
@@ -223,8 +223,6 @@ describe('ApplePayView', () => {
 
     describe('button click handler', () => {
       beforeEach(() => {
-        const self = this;
-
         testContext.view = new ApplePayView(testContext.applePayViewOptions);
 
         return testContext.view.initialize().then(() => {
@@ -263,7 +261,7 @@ describe('ApplePayView', () => {
 
       describe('session.onvalidatemerchant', () => {
         test('performs merchant validation', () => {
-          const stubEvent = {validationURL: 'fake'};
+          const stubEvent = { validationURL: 'fake' };
 
           testContext.buttonClickHandler();
           testContext.fakeApplePaySession.onvalidatemerchant(stubEvent);
@@ -286,7 +284,7 @@ describe('ApplePayView', () => {
             };
 
             testContext.buttonClickHandler();
-            testContext.fakeApplePaySession.onvalidatemerchant({validationURL: 'fake'});
+            testContext.fakeApplePaySession.onvalidatemerchant({ validationURL: 'fake' });
           }
         );
 
@@ -303,7 +301,7 @@ describe('ApplePayView', () => {
             };
 
             testContext.buttonClickHandler();
-            testContext.fakeApplePaySession.onvalidatemerchant({validationURL: 'fake'});
+            testContext.fakeApplePaySession.onvalidatemerchant({ validationURL: 'fake' });
           }
         );
       });
@@ -311,20 +309,20 @@ describe('ApplePayView', () => {
       describe('session.onpaymentauthorized', () => {
         test('calls tokenize with the Apple Pay token', () => {
           const stubEvent = {
-            payment: {token: 'foo'}
+            payment: { token: 'foo' }
           };
 
           testContext.buttonClickHandler();
           testContext.fakeApplePaySession.onpaymentauthorized(stubEvent);
 
-          expect(testContext.fakeApplePayInstance.tokenize).toBeCalledWith({token: 'foo'});
+          expect(testContext.fakeApplePayInstance.tokenize).toBeCalledWith({ token: 'foo' });
         });
 
         describe('on tokenization success', () => {
           test(
             'completes payment on ApplePaySession with status success',
             done => {
-              testContext.fakeApplePayInstance.tokenize.mockResolvedValue({foo: 'bar'});
+              testContext.fakeApplePayInstance.tokenize.mockResolvedValue({ foo: 'bar' });
               testContext.fakeApplePaySession.completePayment = status => {
                 expect(status).toBe(global.ApplePaySession.STATUS_SUCCESS);
 
@@ -335,7 +333,7 @@ describe('ApplePayView', () => {
 
               testContext.buttonClickHandler();
               testContext.fakeApplePaySession.onpaymentauthorized({
-                payment: {token: 'foo'}
+                payment: { token: 'foo' }
               });
             }
           );
@@ -355,15 +353,15 @@ describe('ApplePayView', () => {
 
             testContext.buttonClickHandler();
             testContext.fakeApplePaySession.onpaymentauthorized({
-              payment: {token: 'foo'}
+              payment: { token: 'foo' }
             });
           });
 
           test(
             'provides shipping and billing contact in payment method when present in ApplePayPayment',
             done => {
-              const fakeShippingContact = {hey: 'now'};
-              const fakeBillingContact = {you: 'are an all-star'};
+              const fakeShippingContact = { hey: 'now' };
+              const fakeBillingContact = { you: 'are an all-star' };
 
               testContext.fakeApplePayInstance.tokenize.mockResolvedValue({
                 nonce: 'fake-nonce',
@@ -404,7 +402,7 @@ describe('ApplePayView', () => {
 
               testContext.buttonClickHandler();
               testContext.fakeApplePaySession.onpaymentauthorized({
-                payment: {token: 'foo'}
+                payment: { token: 'foo' }
               });
             }
           );

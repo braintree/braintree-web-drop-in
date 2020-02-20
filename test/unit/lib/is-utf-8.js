@@ -1,4 +1,3 @@
-'use strict';
 
 const isUtf8 = require('../../../src/lib/is-utf-8');
 

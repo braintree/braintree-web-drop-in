@@ -1,4 +1,3 @@
-'use strict';
 
 const DropinError = require('../../../src/lib/dropin-error');
 const BraintreeError = require('braintree-web/lib/braintree-error');
