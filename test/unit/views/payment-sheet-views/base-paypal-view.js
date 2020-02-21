@@ -479,7 +479,7 @@ describe('BasePayPalView', () => {
     });
 
     test(
-      'adds `vaulted: true` to the tokenization payload if flow is vault and is not guest checkout',
+      'adds `vaulted: true` to the tokenization payload if flow is vault and global autovaulting iis eenabled',
       done => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;
@@ -488,7 +488,7 @@ describe('BasePayPalView', () => {
           vaulted: true
         };
 
-        model.isGuestCheckout = false;
+        model.vaultManagerConfig.autoVaultPaymentMethods = true;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
         paypalInstance.paypalConfiguration = { flow: 'vault' };
@@ -518,7 +518,7 @@ describe('BasePayPalView', () => {
     );
 
     test(
-      'does not add `vaulted: true` to the tokenization payload if flow is vault but is guest checkout',
+      'does not add `vaulted: true` to the tokenization payload if flow is vault but global auto-vaulting is not enabled',
       done => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;
@@ -526,7 +526,7 @@ describe('BasePayPalView', () => {
           foo: 'bar'
         };
 
-        model.isGuestCheckout = true;
+        model.vaultManagerConfig.autoVaultPaymentMethods = false;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
         paypalInstance.paypalConfiguration = { flow: 'vault' };
@@ -556,7 +556,7 @@ describe('BasePayPalView', () => {
     );
 
     test(
-      'does not add `vaulted: true` to the tokenization payload if flow is checkout and is not guest checkout',
+      'does not add `vaulted: true` to the tokenization payload if flow is checkout',
       done => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;
@@ -564,7 +564,7 @@ describe('BasePayPalView', () => {
           foo: 'bar'
         };
 
-        model.isGuestCheckout = false;
+        model.vaultManagerConfig.autoVaultPaymentMethods = true;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
         paypalInstance.paypalConfiguration = { flow: 'checkout' };

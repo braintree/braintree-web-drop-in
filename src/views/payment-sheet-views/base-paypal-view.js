@@ -58,8 +58,10 @@ BasePayPalView.prototype.initialize = function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
       },
       onAuthorize: function (data) {
+        var shouldVault = self._shouldVault();
+
         return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
-          if (self.paypalConfiguration.flow === 'vault' && !self.model.isGuestCheckout) {
+          if (shouldVault) {
             tokenizePayload.vaulted = true;
           }
           self.model.addPaymentMethod(tokenizePayload);
@@ -120,6 +122,10 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
   if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
     this.paypalConfiguration[key] = value;
   }
+};
+
+BasePayPalView.prototype._shouldVault = function () {
+  return this.paypalConfiguration.flow === 'vault' && this.model.vaultManagerConfig.autoVaultPaymentMethods;
 };
 
 BasePayPalView.isEnabled = function (options) {
