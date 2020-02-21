@@ -1,6 +1,7 @@
 'use strict';
 
 var analytics = require('./lib/analytics');
+var assign = require('./lib/assign').assign;
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('@braintree/event-emitter');
 var constants = require('./constants');
@@ -24,10 +25,17 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
+var DEFAULT_VAULT_MANAGER_SETTINGS = {
+  autoVaultPaymentMethods: true,
+  presentVaultedPaymentMethods: true,
+  preselectVaultedPaymentMethod: true,
+  allowCustomerToDeletePaymentMethods: false
+};
 
 function DropinModel(options) {
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
+  this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS, this.merchantConfiguration.vaultManager);
 
   this.isGuestCheckout = isGuestCheckout(options.client);
 
