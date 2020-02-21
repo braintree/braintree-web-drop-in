@@ -36,6 +36,9 @@ function DropinModel(options) {
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
   this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS, this.merchantConfiguration.vaultManager);
+  // TODO - when auth gets passed in instead of a client
+  // if is a tokenization key
+  // change vault manager config settings
 
   this.isGuestCheckout = isGuestCheckout(options.client);
 
