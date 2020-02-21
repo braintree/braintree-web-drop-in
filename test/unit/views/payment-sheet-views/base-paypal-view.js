@@ -986,6 +986,32 @@ describe('BasePayPalView', () => {
         currency: 'USD'
       });
     });
+
+    test('can set properties on vault config', () => {
+      const view = new BasePayPalView();
+
+      view.paypalConfiguration = {
+        flow: 'vault',
+        amount: '10.00'
+      };
+      view.vaultConfig = {
+        autoVault: true
+      };
+
+      view.updateConfiguration('vault', {
+        autoVault: false,
+        foo: 'bar'
+      });
+
+      expect(view.vaultConfig).toEqual({
+        autoVault: false,
+        foo: 'bar'
+      });
+      expect(view.paypalConfiguration).toEqual({
+        flow: 'vault',
+        amount: '10.00'
+      });
+    });
   });
 
   describe('isEnabled', () => {

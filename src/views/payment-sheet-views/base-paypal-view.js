@@ -125,6 +125,12 @@ BasePayPalView.prototype.requestPaymentMethod = function () {
 };
 
 BasePayPalView.prototype.updateConfiguration = function (key, value) {
+  if (key === 'vault') {
+    this.vaultConfig = value;
+
+    return;
+  }
+
   if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
     this.paypalConfiguration[key] = value;
   }
