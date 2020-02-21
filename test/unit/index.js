@@ -57,7 +57,7 @@ describe('dropin.create', () => {
     client.create.mockRejectedValue(originalErr);
 
     dropin.create({
-      authorization: 'tokenization_key',
+      authorization: fake.tokenizationKey,
       selector: '#foo'
     }, (err, instance) => {
       expect(err).toBeInstanceOf(DropinError);
@@ -78,7 +78,7 @@ describe('dropin.create', () => {
     client.create.mockResolvedValue(fakeClient);
 
     return dropin.create({
-      authorization: 'tokenization_key',
+      authorization: fake.tokenizationKey,
       selector: '#foo'
     }).then(instance => {
       expect(instance).toBeInstanceOf(Dropin);
@@ -97,7 +97,7 @@ describe('dropin.create', () => {
       client.create.mockResolvedValue(fakeClient);
 
       dropin.create({
-        authorization: 'tokenization_key',
+        authorization: fake.tokenizationKey,
         selector: '#foo'
       }, (err, instance) => {
         expect(err).toBe(dropinError);
@@ -118,7 +118,7 @@ describe('dropin.create', () => {
     client.create.mockResolvedValue(fakeClient);
 
     dropin.create({
-      authorization: 'tokenization_key',
+      authorization: fake.tokenizationKey,
       selector: '#foo'
     }, () => {
       const configuration = fakeClient.getConfiguration();

@@ -6,6 +6,7 @@ CHANGELOG
 * TODO: list new features here
 
 _Breaking Changes_
+* Drop support for IE 9-10
 * Payment methods will no longer automatically be hidden or error on setup if mercant is not enabled for them
 
 1.22.1
