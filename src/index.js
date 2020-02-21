@@ -148,6 +148,7 @@ var VERSION = '__VERSION__';
  * @param {string} [currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {string} [buttonStyle] The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles) are available.
  * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
+ * @param {boolean} [autoVault] Can be used to opt in or opt of the global [`vaultManager` settings](#~vaultManagerCreateOptions) for autovaulting.
  */
 
 /** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
@@ -164,6 +165,35 @@ var VERSION = '__VERSION__';
  * @param {string} [googlePayVersion=1] The version of the Google Pay API to use. Defaults to 1, but 2 can be passed in.
  * @param {external:GooglePayTransactionInfo} transactionInfo The transaction details necessary for processing the payment.
  * @param {external:GooglePayButtonOptions} [button] The button options for configuring the look of the Google Pay button. The `onClick` property cannot be overwritten.
+ */
+
+/** @typedef {object} vaultManagerCreateOptions Options for managing the customer's vault. Must be used with a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id).
+ *
+ * @param {boolean} [autoVaultPaymentMethods=true]  Whether or not to auto-vault payment methods as they are added by the customer. This can be opted out on a per payment method basis as well.
+ * @param {boolean} [presentVaultedPaymentMethods=true] Whether or not to present a customer's saved payment methods.
+ * @param {boolean} [preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when `presentVaultedPaymentMethods` is set to `true` and the customer has saved payment methods.
+ * @param {boolean} [allowCustomerToDeletePaymentMethods=false] Whether or not to allow a customer to delete saved payment methods. *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system.
+ *
+ * @example <caption>Overriding global auto-vaulting behavior</caption>
+ * // will autovault all payment methods except for PayPal
+ * braintree.dropin.create({
+ *   vaultManager: {
+ *     autoVaultPaymentMethods: true // can also just omit this line
+ *   },
+ *   paypal: {
+ *     autoVault: false
+ *   }
+ * });
+ *
+ * // will only autovault PayPal
+ * braintree.dropin.create({
+ *   vaultManager: {
+ *     autoVaultPaymentMethods: false
+ *   },
+ *   paypal: {
+ *     autoVault: true
+ *   }
+ * });
  */
 
 /**
@@ -254,9 +284,9 @@ var VERSION = '__VERSION__';
  *
  * @param {(boolean|object)} [options.threeDSecure] It's recomended that you pass `true` here to enable 3D Secure and pass the configuration options for 3D Secure into {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.See [`threeDSecureOptions`](#~threeDSecureOptions) for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
- * @param {boolean} [options.vaultManager=false] Whether or not to allow a customer to delete saved payment methods when used with a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id). *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system. This feature is not supported in Internet Explorer 9.
+ * @param {object} [options.vaultManager] The configuration options for vault management.
  *
- * @param {boolean} [options.preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
+ * See [`vaultManagerCreateOptions`](#~vaultManagerCreateOptions) for `vaultManager` options.
  *
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
  * @returns {(void|Promise)} Returns a promise if no callback is provided.
