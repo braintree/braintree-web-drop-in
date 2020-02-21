@@ -212,7 +212,9 @@ describe('MainView', () => {
         'does not set the first payment method to be the active payment method if configured not to',
         () => {
           jest.spyOn(testContext.model, 'changeActivePaymentMethod');
-          testContext.model.merchantConfiguration.preselectVaultedPaymentMethod = false;
+          testContext.model.merchantConfiguration.vaultManager = {
+            preselectVaultedPaymentMethod: false
+          };
           jest.spyOn(MainView.prototype, 'setPrimaryView').mockImplementation();
 
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
@@ -226,7 +228,9 @@ describe('MainView', () => {
       test(
         'sends preselect analytic event when a vaulted card is preselected',
         () => {
-          testContext.model.merchantConfiguration.preselectVaultedPaymentMethod = true;
+          testContext.model.merchantConfiguration.vaultManager = {
+            preselectVaultedPaymentMethod: true
+          };
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
 
           expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'vaulted-card.preselect');
@@ -236,7 +240,9 @@ describe('MainView', () => {
       test(
         'does not send preselect analytic event when a vaulted card is not preselected',
         () => {
-          testContext.model.merchantConfiguration.preselectVaultedPaymentMethod = false;
+          testContext.model.merchantConfiguration.vaultManager = {
+            preselectVaultedPaymentMethod: false
+          };
 
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
 
