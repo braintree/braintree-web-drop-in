@@ -257,26 +257,10 @@ describe('VenmoView', () => {
   describe('isEnabled', () => {
     beforeEach(() => {
       testContext.options = {
-        client: testContext.fakeClient,
         merchantConfiguration: testContext.model.merchantConfiguration
       };
       jest.spyOn(btVenmo, 'isBrowserSupported').mockReturnValue(true);
     });
-
-    test(
-      'resolves with false when Venmo Pay is not enabled on the gateway',
-      () => {
-        const configuration = fake.configuration();
-
-        delete configuration.gatewayConfiguration.payWithVenmo;
-
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
-
-        return VenmoView.isEnabled(testContext.options).then(result => {
-          expect(result).toBe(false);
-        });
-      }
-    );
 
     test(
       'resolves with false when Venmo Pay is not enabled by merchant',

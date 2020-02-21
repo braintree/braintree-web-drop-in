@@ -103,8 +103,7 @@ ApplePayView.prototype.updateConfiguration = function (key, value) {
 };
 
 ApplePayView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
+  var applePayEnabled = Boolean(options.merchantConfiguration.applePay);
   var applePaySessionVersion = options.merchantConfiguration.applePay && options.merchantConfiguration.applePay.applePaySessionVersion;
   var applePayBrowserSupported;
 

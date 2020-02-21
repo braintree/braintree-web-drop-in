@@ -368,7 +368,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
   }
 
   return SheetView.isEnabled({
-    client: options.client,
+    environment: options.environment,
     merchantConfiguration: options.merchantConfiguration
   }).catch(function (error) {
     console.error(SheetView.ID + ' view errored when checking if it was supported.'); // eslint-disable-line no-console

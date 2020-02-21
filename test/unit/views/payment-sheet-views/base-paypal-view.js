@@ -885,7 +885,6 @@ describe('BasePayPalView', () => {
   describe('isEnabled', () => {
     beforeEach(() => {
       testContext.options = {
-        client: testContext.fakeClient,
         merchantConfiguration: {
           paypal: {}
         }
@@ -898,17 +897,6 @@ describe('BasePayPalView', () => {
 
       jest.spyOn(assets, 'loadScript').mockResolvedValue();
     });
-
-    test(
-      'resolves false if merchant does not have PayPal enabled on the gateway',
-      () => {
-        testContext.configuration.gatewayConfiguration.paypalEnabled = false;
-
-        return BasePayPalView.isEnabled(testContext.options).then(result => {
-          expect(result).toBe(false);
-        });
-      }
-    );
 
     test('resolves false if browser is IE9', () => {
       jest.spyOn(browserDetection, 'isIe9').mockReturnValue(true);

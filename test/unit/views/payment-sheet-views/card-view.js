@@ -733,20 +733,13 @@ describe('CardView', () => {
   describe('isEnabled', () => {
     beforeEach(() => {
       testContext.fakeOptions = {
-        client: testContext.client,
         merchantConfiguration: {}
       };
     });
 
     test(
-      'resovles with true when there is at least one supported card type',
+      'resolves with true when no merchant configuratoin provided',
       () => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.creditCards.supportedCardTypes = ['visa'];
-
-        testContext.client.getConfiguration.mockReturnValue(configuration);
-
         return CardView.isEnabled(testContext.fakeOptions).then(result => {
           expect(result).toBe(true);
         });
@@ -756,27 +749,7 @@ describe('CardView', () => {
     test(
       'resovles with false when merchant configuration sets card to false',
       () => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.creditCards.supportedCardTypes = ['visa'];
-
-        testContext.client.getConfiguration.mockReturnValue(configuration);
         testContext.fakeOptions.merchantConfiguration.card = false;
-
-        return CardView.isEnabled(testContext.fakeOptions).then(result => {
-          expect(result).toBe(false);
-        });
-      }
-    );
-
-    test(
-      'resovles with false when there are no supported card types',
-      () => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.creditCards.supportedCardTypes = [];
-
-        testContext.client.getConfiguration.mockReturnValue(configuration);
 
         return CardView.isEnabled(testContext.fakeOptions).then(result => {
           expect(result).toBe(false);

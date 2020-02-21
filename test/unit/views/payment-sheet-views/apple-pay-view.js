@@ -414,26 +414,10 @@ describe('ApplePayView', () => {
   describe('isEnabled', () => {
     beforeEach(() => {
       testContext.options = {
-        client: testContext.fakeClient,
         merchantConfiguration: testContext.model.merchantConfiguration
       };
       jest.spyOn(isHTTPS, 'isHTTPS').mockReturnValue(true);
     });
-
-    test(
-      'resolves with false when Apple Pay is not enabled on the gateway',
-      () => {
-        const configuration = fake.configuration();
-
-        delete configuration.gatewayConfiguration.applePayWeb;
-
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
-
-        return ApplePayView.isEnabled(testContext.options).then(result => {
-          expect(result).toBe(false);
-        });
-      }
-    );
 
     test(
       'resolves with false when Apple Pay is not enabled by merchant',

@@ -636,10 +636,9 @@ CardView.prototype._isCardTypeSupported = function (cardType) {
 };
 
 CardView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
   var disabledByMerchant = options.merchantConfiguration.card === false;
 
-  return Promise.resolve(!disabledByMerchant && gatewayConfiguration.creditCards.supportedCardTypes.length > 0);
+  return Promise.resolve(!disabledByMerchant);
 };
 
 function isNormalFieldElement(element) {

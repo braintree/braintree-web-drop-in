@@ -6,7 +6,7 @@ CHANGELOG
 * TODO: list new features here
 
 _Breaking Changes_
-* TODO: list them here
+* Payment methods will no longer automatically be hidden or error on setup if mercant is not enabled for them
 
 1.22.1
 ------

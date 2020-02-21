@@ -30,6 +30,7 @@ describe('DropinModel', () => {
     jest.spyOn(vaultManager, 'create').mockResolvedValue(testContext.vaultManager);
     testContext.modelOptions = {
       client: fake.client(testContext.configuration),
+      environment: 'sandbox',
       componentID: 'foo123',
       merchantConfiguration: {
         authorization: fake.clientToken,
@@ -297,32 +298,32 @@ describe('DropinModel', () => {
         return model.initialize().then(() => {
           expect(ApplePayView.isEnabled).toBeCalledTimes(1);
           expect(ApplePayView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'sandbox',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(CardView.isEnabled).toBeCalledTimes(1);
           expect(CardView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'sandbox',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(GooglePayView.isEnabled).toBeCalledTimes(1);
           expect(GooglePayView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'sandbox',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(PayPalView.isEnabled).toBeCalledTimes(1);
           expect(PayPalView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'sandbox',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(PayPalCreditView.isEnabled).toBeCalledTimes(1);
           expect(PayPalCreditView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'sandbox',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(VenmoView.isEnabled).toBeCalledTimes(1);
           expect(VenmoView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'sandbox',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
         });

@@ -74,8 +74,7 @@ VenmoView.prototype._isIgnorableError = function (error) {
 };
 
 VenmoView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
+  var venmoEnabled = Boolean(options.merchantConfiguration.venmo);
 
   if (!venmoEnabled) {
     return Promise.resolve(false);

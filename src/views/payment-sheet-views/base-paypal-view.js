@@ -123,12 +123,7 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
 };
 
 BasePayPalView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
   var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
-
-  if (!gatewayConfiguration.paypalEnabled) {
-    return Promise.resolve(false);
-  }
 
   if (browserDetection.isIe9() || browserDetection.isIe10()) {
     analytics.sendEvent(options.client, options.viewID + '.checkout.js-browser-not-supported');

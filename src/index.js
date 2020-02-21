@@ -109,6 +109,7 @@ var createFromScriptTag = require('./lib/create-from-script-tag');
 var constants = require('./constants');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
+var parseEnvironemnt = require('./lib/parse-environment');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -549,9 +550,13 @@ var VERSION = '__VERSION__';
  */
 
 function create(options) {
+  var env;
+
   if (!options.authorization) {
     return Promise.reject(new DropinError('options.authorization is required.'));
   }
+
+  env = parseEnvironemnt(options.authorization);
 
   return client.create({
     authorization: options.authorization
@@ -572,6 +577,8 @@ function create(options) {
     return new Promise(function (resolve, reject) {
       new Dropin({
         merchantConfiguration: options,
+        // TODO parse this for real from authorization
+        environment: env,
         client: clientInstance
       })._initialize(function (err, instance) {
         if (err) {
