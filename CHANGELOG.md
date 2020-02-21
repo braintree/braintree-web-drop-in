@@ -3,7 +3,7 @@ CHANGELOG
 
 2.0.0 - unreleased
 -----
-* TODO: list new features here
+* PayPal can now override global autovaulting preferences with `paypal.vault.autoVault`
 
 _Breaking Changes_
 * Drop support for IE 9-10

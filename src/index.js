@@ -148,7 +148,8 @@ var VERSION = '__VERSION__';
  * @param {string} [currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {string} [buttonStyle] The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles) are available.
  * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
- * @param {boolean} [autoVault] Can be used to opt in or opt of the global [`vaultManager` settings](#~vaultManagerCreateOptions) for autovaulting.
+ * @param {object} [vault] Options for how vaulting should be handled with PayPal accounts.
+ * @param {boolean} [vault.autoVault] Can be used to opt in or opt of the global [`vaultManager` settings](#~vaultManagerCreateOptions) for autovaulting.
  */
 
 /** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.

@@ -31,7 +31,11 @@ BasePayPalView.prototype.initialize = function () {
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
   var paypalConfiguration = this.model.merchantConfiguration[paypalType];
 
-  this.paypalConfiguration = assign({}, paypalConfiguration);
+  this.paypalConfiguration = assign({}, {
+    vault: {}
+  }, paypalConfiguration);
+  this.vaultConfig = this.paypalConfiguration.vault;
+  delete this.paypalConfiguration.vault;
 
   this.model.asyncDependencyStarting();
   asyncDependencyTimeoutHandler = setTimeout(function () {
@@ -59,6 +63,8 @@ BasePayPalView.prototype.initialize = function () {
       },
       onAuthorize: function (data) {
         var shouldVault = self._shouldVault();
+
+        data.vault = shouldVault;
 
         return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
           if (shouldVault) {
@@ -125,7 +131,15 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
 };
 
 BasePayPalView.prototype._shouldVault = function () {
-  return this.paypalConfiguration.flow === 'vault' && this.model.vaultManagerConfig.autoVaultPaymentMethods;
+  if (this.paypalConfiguration.flow !== 'vault') {
+    return false;
+  }
+
+  if (this.vaultConfig.hasOwnProperty('autoVault')) {
+    return this.vaultConfig.autoVault;
+  }
+
+  return this.model.vaultManagerConfig.autoVaultPaymentMethods;
 };
 
 BasePayPalView.isEnabled = function (options) {

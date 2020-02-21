@@ -479,13 +479,12 @@ describe('BasePayPalView', () => {
     });
 
     test(
-      'adds `vaulted: true` to the tokenization payload if flow is vault and global autovaulting iis eenabled',
+      'vaults and adds `vaulted: true` to the tokenization payload if flow is vault and global autovaulting iis enabled',
       done => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;
         const fakePayload = {
-          foo: 'bar',
-          vaulted: true
+          foo: 'bar'
         };
 
         model.vaultManagerConfig.autoVaultPaymentMethods = true;
@@ -499,17 +498,72 @@ describe('BasePayPalView', () => {
         testContext.view.initialize().then(() => {
           const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
           const tokenizeOptions = {
-            foo: 'bar'
+            data: 'bar'
           };
 
           onAuthFunction(tokenizeOptions);
 
           expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
-          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: true
+          });
 
           setTimeout(() => {
             expect(model.addPaymentMethod).toBeCalledTimes(1);
-            expect(model.addPaymentMethod).toBeCalledWith(fakePayload);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar',
+              vaulted: true
+            });
+
+            done();
+          }, 1);
+        });
+      }
+    );
+
+    test(
+      'vaults and adds `vaulted: true` to the tokenization payload if flow is vault and global autovaulting iis not enabled but local autovaulting is',
+      done => {
+        const paypalInstance = testContext.paypalInstance;
+        const model = testContext.model;
+        const fakePayload = {
+          foo: 'bar'
+        };
+
+        model.vaultManagerConfig.autoVaultPaymentMethods = false;
+
+        paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+        paypalInstance.paypalConfiguration = {
+          flow: 'vault'
+        };
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        model.merchantConfiguration.paypal.vault = {
+          autoVault: true
+        };
+        testContext.view.initialize().then(() => {
+          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const tokenizeOptions = {
+            data: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: true
+          });
+
+          setTimeout(() => {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar',
+              vaulted: true
+            });
 
             done();
           }, 1);
@@ -537,13 +591,62 @@ describe('BasePayPalView', () => {
         testContext.view.initialize().then(() => {
           const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
           const tokenizeOptions = {
-            foo: 'bar'
+            data: 'bar'
           };
 
           onAuthFunction(tokenizeOptions);
 
           expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
-          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: false
+          });
+
+          setTimeout(() => {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar'
+            });
+
+            done();
+          }, 100);
+        });
+      }
+    );
+
+    test(
+      'does not add `vaulted: true` to the tokenization payload if flow is vault and global auto-vaulting is enabled enabled but local autoVault setting is false',
+      done => {
+        const paypalInstance = testContext.paypalInstance;
+        const model = testContext.model;
+        const fakePayload = {
+          foo: 'bar'
+        };
+
+        model.vaultManagerConfig.autoVaultPaymentMethods = true;
+        model.merchantConfiguration.paypal.vault = {
+          autoVault: false
+        };
+
+        paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+        paypalInstance.paypalConfiguration = { flow: 'vault' };
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        testContext.view.initialize().then(() => {
+          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const tokenizeOptions = {
+            data: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: false
+          });
 
           setTimeout(() => {
             expect(model.addPaymentMethod).toBeCalledTimes(1);
@@ -567,7 +670,7 @@ describe('BasePayPalView', () => {
         model.vaultManagerConfig.autoVaultPaymentMethods = true;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
-        paypalInstance.paypalConfiguration = { flow: 'checkout' };
+        model.merchantConfiguration.paypal = { flow: 'checkout' };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
         testContext.paypal.Button.render.mockResolvedValue();
@@ -575,13 +678,16 @@ describe('BasePayPalView', () => {
         testContext.view.initialize().then(() => {
           const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
           const tokenizeOptions = {
-            foo: 'bar'
+            data: 'bar'
           };
 
           onAuthFunction(tokenizeOptions);
 
           expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
-          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: false
+          });
 
           setTimeout(() => {
             expect(model.addPaymentMethod).toBeCalledTimes(1);
