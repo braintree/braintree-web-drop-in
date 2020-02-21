@@ -13,6 +13,9 @@ _Breaking Changes_
   * can opt out of `presentVaultedPaymentMethods`
   * can opt into `allowCustomerToDeletePaymentMethods`
   * `preselectVaultedPaymentMethod` has been moved out of a top level and into `vaultManager`
+* `card` option updates
+  * `vault.vaultCard` is now `vault.autoVault`
+  * `vault.allowVaultCardOverride` is now `vault.allowAutoVaultOverride`
 
 1.22.1
 ------

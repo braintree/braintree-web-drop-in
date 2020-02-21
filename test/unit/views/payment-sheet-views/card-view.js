@@ -234,10 +234,10 @@ describe('CardView', () => {
     test('removes hidden class from save card input if configured', () => {
       testContext.model.merchantConfiguration.card = {
         vault: {
-          allowVaultCardOverride: true
+          allowAutoVaultOverride: true
         }
       };
-      testContext.model.isGuestCheckout = false;
+      testContext.model.vaultManagerConfig.autoVaultPaymentMethods = true;
 
       testContext.view = new CardView({
         element: testContext.element,
@@ -258,7 +258,7 @@ describe('CardView', () => {
       'does not remove hidden class from save card input if not configured',
       () => {
         testContext.model.merchantConfiguration.card = {};
-        testContext.model.isGuestCheckout = false;
+        testContext.model.vaultManagerConfig.autoVaultPaymentMethods = true;
 
         testContext.view = new CardView({
           element: testContext.element,
@@ -279,7 +279,7 @@ describe('CardView', () => {
     test('sets checked value for save card input', () => {
       testContext.model.merchantConfiguration.card = {
         vault: {
-          vaultCard: false
+          autoVault: false
         }
       };
 
@@ -1949,6 +1949,7 @@ describe('CardView', () => {
           _setupCardholderName: jest.fn(),
           client: fake.client(),
           merchantConfiguration: {
+            vault: {},
             authorization: fake.configuration().authorization,
             card: {}
           },
@@ -2379,7 +2380,7 @@ describe('CardView', () => {
     test(
       'includes `vaulted: true` in tokenization payload if not guest checkout',
       () => {
-        testContext.context.model.isGuestCheckout = false;
+        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
 
         return CardView.prototype.tokenize.call(testContext.context).then(payload => {
           expect(payload.vaulted).toBe(true);
@@ -2390,7 +2391,7 @@ describe('CardView', () => {
     test(
       'does not include `vaulted: true` in tokenization payload if save card input is not checked',
       () => {
-        testContext.context.model.isGuestCheckout = false;
+        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
         testContext.context.saveCardInput.checked = false;
 
         return CardView.prototype.tokenize.call(testContext.context).then(payload => {
@@ -2402,7 +2403,7 @@ describe('CardView', () => {
     test(
       'does not include `vaulted: true` in tokenization payload if guest checkout',
       () => {
-        testContext.context.model.isGuestCheckout = true;
+        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = false;
 
         return CardView.prototype.tokenize.call(testContext.context).then(payload => {
           expect(payload.vaulted).toBeFalsy();
@@ -2479,8 +2480,26 @@ describe('CardView', () => {
       }
     );
 
-    test('vaults on tokenization if not using guest checkout', () => {
-      testContext.context.model.isGuestCheckout = false;
+    test('vaults on tokenization if auto vaulting is configured', () => {
+      testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+
+      return CardView.prototype.tokenize.call(testContext.context).then(() => {
+        expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: true });
+      });
+    });
+
+    test('does not vault on tokenization if auto vaulting is configured globally, but set to not vault locally', () => {
+      testContext.context.merchantConfiguration.vault.autoVault = false;
+      testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+
+      return CardView.prototype.tokenize.call(testContext.context).then(() => {
+        expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
+      });
+    });
+
+    test('vaults on tokenization if auto vaulting is configured globally to not vault, but set to vault locally', () => {
+      testContext.context.merchantConfiguration.vault.autoVault = true;
+      testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = false;
 
       return CardView.prototype.tokenize.call(testContext.context).then(() => {
         expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: true });
@@ -2490,7 +2509,7 @@ describe('CardView', () => {
     test(
       'does not vault on tokenization if save card input is not checked',
       () => {
-        testContext.context.model.isGuestCheckout = false;
+        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
         testContext.context.saveCardInput.checked = false;
 
         return CardView.prototype.tokenize.call(testContext.context).then(() => {
@@ -2499,8 +2518,20 @@ describe('CardView', () => {
       }
     );
 
-    test('does not vault on tokenization if using guest checkout', () => {
-      testContext.context.model.isGuestCheckout = true;
+    test(
+      'does not vault on tokenization if save card input is not checked when autovaulting is set locally',
+      () => {
+        testContext.context.merchantConfiguration.vault.autoVault = true;
+        testContext.context.saveCardInput.checked = false;
+
+        return CardView.prototype.tokenize.call(testContext.context).then(() => {
+          expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
+        });
+      }
+    );
+
+    test('does not vault on tokenization if autovaulting is set to false', () => {
+      testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = false;
 
       return CardView.prototype.tokenize.call(testContext.context).then(() => {
         expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
@@ -2537,6 +2568,7 @@ describe('CardView', () => {
       'does not clear fields after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false',
       () => {
         testContext.context.merchantConfiguration = {
+          vault: {},
           clearFieldsAfterTokenization: false
         };
         testContext.context.hostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
@@ -2551,6 +2583,7 @@ describe('CardView', () => {
       'does not clear cardholder name field after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false',
       () => {
         testContext.context.merchantConfiguration = {
+          vault: {},
           clearFieldsAfterTokenization: false
         };
         testContext.context.hasCardholderName = true;

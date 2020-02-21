@@ -78,11 +78,11 @@ CardView.prototype.initialize = function () {
     }
   }.bind(this));
 
-  if (!this.model.isGuestCheckout && this.merchantConfiguration.vault.allowVaultCardOverride === true) {
+  if (this.model.vaultManagerConfig.autoVaultPaymentMethods && this.merchantConfiguration.vault.allowAutoVaultOverride === true) {
     classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
   }
 
-  if (this.merchantConfiguration.vault.vaultCard === false) {
+  if (this.merchantConfiguration.vault.autoVault === false) {
     this.saveCardInput.checked = false;
   }
 
@@ -496,7 +496,11 @@ CardView.prototype.teardown = function () {
 };
 
 CardView.prototype._shouldVault = function () {
-  return !this.model.isGuestCheckout && this.saveCardInput.checked;
+  if (this.merchantConfiguration.vault.hasOwnProperty('autoVault')) {
+    return this.merchantConfiguration.vault.autoVault && this.saveCardInput.checked;
+  }
+
+  return this.model.vaultManagerConfig.autoVaultPaymentMethods && this.saveCardInput.checked;
 };
 
 CardView.prototype._generateFieldSelector = function (field) {
