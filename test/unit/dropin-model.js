@@ -176,7 +176,6 @@ describe('DropinModel', () => {
     test('sets existing payment methods as _paymentMethods', () => {
       const model = new DropinModel(testContext.modelOptions);
 
-      model.isGuestCheckout = false;
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
 
       return model.initialize().then(() => {
@@ -195,7 +194,6 @@ describe('DropinModel', () => {
     test('ignores valid, but disabled payment methods', () => {
       const model = new DropinModel(testContext.modelOptions);
 
-      model.isGuestCheckout = false;
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
         { type: 'CreditCard', details: { lastTwo: '11' }},
         { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
@@ -215,7 +213,6 @@ describe('DropinModel', () => {
       () => {
         const model = new DropinModel(testContext.modelOptions);
 
-        model.isGuestCheckout = false;
         testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
           { type: 'CreditCard', details: { lastTwo: '11' }},
           { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
@@ -792,7 +789,6 @@ describe('DropinModel', () => {
       () => {
         const model = new DropinModel(testContext.modelOptions);
 
-        model.isGuestCheckout = false;
         testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
 
         return model.initialize().then(() => {
@@ -1107,7 +1103,6 @@ describe('DropinModel', () => {
         nonce: 'a-nonce',
         vaulted: true
       };
-      testContext.model.isGuestCheckout = false;
       jest.spyOn(testContext.model, '_emit').mockImplementation();
 
       return testContext.model.initialize();
@@ -1207,15 +1202,12 @@ describe('DropinModel', () => {
     beforeEach(() => {
       testContext.model = new DropinModel(testContext.modelOptions);
 
-      return testContext.model.initialize().then(() => {
-        testContext.model.isGuestCheckout = false;
-      });
+      return testContext.model.initialize();
     });
 
     test(
       'resolves with payment methods as empty array when vault manager errors',
       () => {
-        testContext.model.isGuestCheckout = false;
         testContext.vaultManager.fetchPaymentMethods.mockRejectedValue(new Error('error'));
 
         return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
@@ -1228,9 +1220,9 @@ describe('DropinModel', () => {
     );
 
     test(
-      'resolves with payment methods as empty array when in guest checkout',
+      'resolves with payment methods as empty array when presentVaultedPaymentMethods is false',
       () => {
-        testContext.model.isGuestCheckout = true;
+        testContext.model.vaultManagerConfig.presentVaultedPaymentMethods = false;
 
         return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
           expect(paymentMethods).toEqual([]);
@@ -1241,7 +1233,6 @@ describe('DropinModel', () => {
     test(
       'resolves with payment methods from vault manager when not in guest checkout',
       () => {
-        testContext.model.isGuestCheckout = false;
         testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
           nonce: '1-nonce',
           type: 'CreditCard'
@@ -1268,7 +1259,6 @@ describe('DropinModel', () => {
     );
 
     test('only resolves supported payment method types', () => {
-      testContext.model.isGuestCheckout = false;
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
         nonce: '1-nonce',
         type: 'CreditCard'
@@ -1287,7 +1277,6 @@ describe('DropinModel', () => {
     });
 
     test('includes vaulted property on payment method objects', () => {
-      testContext.model.isGuestCheckout = false;
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
         nonce: '1-nonce',
         type: 'CreditCard'

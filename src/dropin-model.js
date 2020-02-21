@@ -298,7 +298,7 @@ DropinModel.prototype.cancelDeleteVaultedPaymentMethod = function () {
 DropinModel.prototype.getVaultedPaymentMethods = function () {
   var self = this;
 
-  if (self.isGuestCheckout) {
+  if (!self.vaultManagerConfig.presentVaultedPaymentMethods) {
     return Promise.resolve([]);
   }
 
