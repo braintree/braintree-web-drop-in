@@ -25,6 +25,8 @@ var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
+var ASSETS_URL = 'https://assets.braintreegateway.com';
+
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
@@ -738,12 +740,11 @@ Dropin.prototype._removeStylesheet = function () {
 };
 
 Dropin.prototype._injectStylesheet = function () {
-  var stylesheetUrl, assetsUrl;
+  var stylesheetUrl;
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
-  assetsUrl = this._client.getConfiguration().gatewayConfiguration.assetsUrl;
-  stylesheetUrl = assetsUrl + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
+  stylesheetUrl = ASSETS_URL + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
 
   assets.loadStylesheet({
     href: stylesheetUrl,
