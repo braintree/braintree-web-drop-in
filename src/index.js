@@ -577,7 +577,6 @@ function create(options) {
     return new Promise(function (resolve, reject) {
       new Dropin({
         merchantConfiguration: options,
-        // TODO parse this for real from authorization
         environment: env,
         client: clientInstance
       })._initialize(function (err, instance) {
