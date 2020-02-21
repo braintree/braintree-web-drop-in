@@ -1104,7 +1104,8 @@ describe('DropinModel', () => {
       testContext.model = new DropinModel(testContext.modelOptions);
 
       testContext.model._paymentMethodWaitingToBeDeleted = {
-        nonce: 'a-nonce'
+        nonce: 'a-nonce',
+        vaulted: true
       };
       testContext.model.isGuestCheckout = false;
       jest.spyOn(testContext.model, '_emit').mockImplementation();
@@ -1132,9 +1133,9 @@ describe('DropinModel', () => {
     });
 
     test(
-      'does not vault manager to delete payment method if in guest checkout mode',
+      'does not vault manager to delete payment method if payment method is not vaulted',
       () => {
-        testContext.model.isGuestCheckout = true;
+        delete testContext.model._paymentMethodWaitingToBeDeleted.vaulted;
 
         return testContext.model.deleteVaultedPaymentMethod().then(() => {
           expect(testContext.vaultManager.deletePaymentMethod).not.toBeCalled();

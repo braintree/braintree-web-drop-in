@@ -273,7 +273,7 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
 
   this._emit('startVaultedPaymentMethodDeletion');
 
-  if (!self.isGuestCheckout) {
+  if (this._paymentMethodWaitingToBeDeleted.vaulted) {
     promise = this._vaultManager.deletePaymentMethod(this._paymentMethodWaitingToBeDeleted.nonce).catch(function (err) {
       error = err;
     });
