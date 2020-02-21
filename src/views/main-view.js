@@ -380,7 +380,7 @@ MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
 
 MainView.prototype._sendToDefaultView = function () {
   var paymentMethods = this.model.getPaymentMethods();
-  var vaultManagerConfig = this.model.merchantConfiguration.vaultManager || {};
+  var vaultManagerConfig = this.model.vaultManagerConfig;
   var preselectVaultedPaymentMethod = vaultManagerConfig.preselectVaultedPaymentMethod !== false;
 
   if (paymentMethods.length > 0) {
