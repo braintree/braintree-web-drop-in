@@ -97,6 +97,16 @@ DropinModel.prototype.removePaymentMethod = function (paymentMethod) {
   this._emit('removePaymentMethod', paymentMethod);
 };
 
+DropinModel.prototype.removeUnvaultedPaymentMethods = function (filter) {
+  filter = filter || function () { return true; };
+
+  this.getPaymentMethods().forEach(function (paymentMethod) {
+    if (filter(paymentMethod) && !paymentMethod.vaulted) {
+      this.removePaymentMethod(paymentMethod);
+    }
+  }.bind(this));
+};
+
 DropinModel.prototype.refreshPaymentMethods = function () {
   var self = this;
 

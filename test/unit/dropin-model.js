@@ -496,6 +496,52 @@ describe('DropinModel', () => {
     });
   });
 
+  describe('removeUnvaultedPaymentMethods', () => {
+    test('removes all unvaulted payment methods', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      model._paymentMethods = [];
+
+      const unvaultedPaymentMethod = { id: 'unvaulted-1' };
+      const vaultedPaymentMethod = { id: 'vaulted', vaulted: true };
+      const otherUnvaultedPaymentMethod = { id: 'unvaulted-2' };
+
+      model.addPaymentMethod(unvaultedPaymentMethod);
+      model.addPaymentMethod(vaultedPaymentMethod);
+      model.addPaymentMethod(otherUnvaultedPaymentMethod);
+
+      model.removeUnvaultedPaymentMethods();
+
+      expect(model._paymentMethods).toEqual([{
+        id: 'vaulted', vaulted: true
+      }]);
+    });
+
+    test('removes all unvaulted payment methods that match specified filter', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      model._paymentMethods = [];
+
+      const unvaultedPaymentMethod = { id: 'unvaulted-1' };
+      const vaultedPaymentMethod = { id: 'vaulted', vaulted: true };
+      const otherUnvaultedPaymentMethod = { id: 'unvaulted-2' };
+
+      model.addPaymentMethod(unvaultedPaymentMethod);
+      model.addPaymentMethod(vaultedPaymentMethod);
+      model.addPaymentMethod(otherUnvaultedPaymentMethod);
+
+      model.removeUnvaultedPaymentMethods((paymentMethod) => {
+        return paymentMethod.id === 'unvaulted-1';
+      });
+
+      expect(model._paymentMethods).toEqual([{
+        id: 'vaulted', vaulted: true
+      }, {
+        id: 'unvaulted-2'
+      }]);
+    });
+  });
+
   describe('refreshPaymentMethods', () => {
     beforeEach(() => {
       testContext.model = new DropinModel(testContext.modelOptions);

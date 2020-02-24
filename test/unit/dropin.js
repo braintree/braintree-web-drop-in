@@ -1412,7 +1412,8 @@ describe('Dropin', () => {
         }
       };
       instance._model = {
-        getPaymentMethods: jest.fn().mockReturnValue([])
+        getPaymentMethods: jest.fn().mockReturnValue([]),
+        removeUnvaultedPaymentMethods: jest.fn()
       };
 
       instance.updateConfiguration('paypal', 'foo', 'bar');
@@ -1442,7 +1443,8 @@ describe('Dropin', () => {
         }
       };
       instance._model = {
-        getPaymentMethods: jest.fn().mockReturnValue([])
+        getPaymentMethods: jest.fn().mockReturnValue([]),
+        removeUnvaultedPaymentMethods: jest.fn()
       };
 
       instance.updateConfiguration('paypalCredit', 'foo', 'bar');
@@ -1472,7 +1474,8 @@ describe('Dropin', () => {
         }
       };
       instance._model = {
-        getPaymentMethods: jest.fn().mockReturnValue([])
+        getPaymentMethods: jest.fn().mockReturnValue([]),
+        removeUnvaultedPaymentMethods: jest.fn()
       };
 
       instance.updateConfiguration('applePay', 'foo', 'bar');
@@ -1502,7 +1505,8 @@ describe('Dropin', () => {
         }
       };
       instance._model = {
-        getPaymentMethods: jest.fn().mockReturnValue([])
+        getPaymentMethods: jest.fn().mockReturnValue([]),
+        removeUnvaultedPaymentMethods: jest.fn()
       };
 
       instance.updateConfiguration('googlePay', 'foo', 'bar');
@@ -1541,7 +1545,7 @@ describe('Dropin', () => {
     );
 
     test(
-      'removes saved paypal payment methods if they are not vaulted',
+      'removes only saved paypal payment methods if they are not vaulted',
       () => {
         const instance = new Dropin(testContext.dropinOptions);
         const getViewStub = jest.fn();
@@ -1568,7 +1572,8 @@ describe('Dropin', () => {
             { nonce: '4', type: 'PayPalAccount', vaulted: true },
             { nonce: '5', type: 'PayPalAccount' }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1581,56 +1586,31 @@ describe('Dropin', () => {
 
         instance.updateConfiguration('paypal', 'foo', 'bar');
 
-        expect(instance._model.getPaymentMethods).toBeCalledTimes(1);
-        expect(instance._model.removePaymentMethod).toBeCalledTimes(2);
-        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '3', type: 'PayPalAccount' });
-        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '5', type: 'PayPalAccount' });
+        expect(instance._model.removeUnvaultedPaymentMethods).toBeCalledTimes(1);
+
+        const filter = instance._model.removeUnvaultedPaymentMethods.mock.calls[0][0];
+
+        expect(filter({
+          type: 'PayPalAccount'
+        })).toBe(true);
+
+        expect(filter({
+          type: 'CreditCard'
+        })).toBe(false);
+        expect(filter({
+          type: 'AndroidPayCard'
+        })).toBe(false);
+        expect(filter({
+          type: 'ApplePayCard'
+        })).toBe(false);
+        expect(filter({
+          type: 'VenmoAccount'
+        })).toBe(false);
       }
     );
 
     test(
-      'does not call removePaymentMethod if no non-vaulted paypal accounts are avaialble',
-      () => {
-        const instance = new Dropin(testContext.dropinOptions);
-        const getViewStub = jest.fn();
-        const fakePayPalView = {
-          updateConfiguration: jest.fn()
-        };
-        const fakeMethodsView = {
-          getPaymentMethod: jest.fn().mockReturnValue(null)
-        };
-
-        instance._mainView = {
-          getView: getViewStub,
-          primaryView: {
-            ID: 'view'
-          }
-        };
-        instance._model = {
-          getPaymentMethods: jest.fn().mockReturnValue([
-            { nonce: '1', type: 'PayPalAccount', vaulted: true },
-            { nonce: '2', type: 'CreditCard', vaulted: true },
-            { nonce: '3', type: 'PayPalAccount', vaulted: true }
-          ]),
-          removePaymentMethod: jest.fn()
-        };
-
-        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
-          if (arg === 'paypal') {
-            return fakePayPalView;
-          } else if (arg === 'methods') {
-            return fakeMethodsView;
-          }
-        });
-
-        instance.updateConfiguration('paypal', 'foo', 'bar');
-
-        expect(instance._model.removePaymentMethod).not.toBeCalled();
-      }
-    );
-
-    test(
-      'removes saved applePay payment methods if they are not vaulted',
+      'removes only saved applePay payment methods if they are not vaulted',
       () => {
         const instance = new Dropin(testContext.dropinOptions);
         const getViewStub = jest.fn();
@@ -1657,7 +1637,8 @@ describe('Dropin', () => {
             { nonce: '4', type: 'ApplePayCard', vaulted: true },
             { nonce: '5', type: 'ApplePayCard' }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1670,56 +1651,31 @@ describe('Dropin', () => {
 
         instance.updateConfiguration('applePay', 'foo', 'bar');
 
-        expect(instance._model.getPaymentMethods).toBeCalledTimes(1);
-        expect(instance._model.removePaymentMethod).toBeCalledTimes(2);
-        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '3', type: 'ApplePayCard' });
-        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '5', type: 'ApplePayCard' });
+        expect(instance._model.removeUnvaultedPaymentMethods).toBeCalledTimes(1);
+
+        const filter = instance._model.removeUnvaultedPaymentMethods.mock.calls[0][0];
+
+        expect(filter({
+          type: 'ApplePayCard'
+        })).toBe(true);
+
+        expect(filter({
+          type: 'CreditCard'
+        })).toBe(false);
+        expect(filter({
+          type: 'PayPalAccount'
+        })).toBe(false);
+        expect(filter({
+          type: 'AndroidPayCard'
+        })).toBe(false);
+        expect(filter({
+          type: 'VenmoAccount'
+        })).toBe(false);
       }
     );
 
     test(
-      'does not call removePaymentMethod if no non-vaulted applePay accounts are avaialble',
-      () => {
-        const instance = new Dropin(testContext.dropinOptions);
-        const getViewStub = jest.fn();
-        const fakeApplePayView = {
-          updateConfiguration: jest.fn()
-        };
-        const fakeMethodsView = {
-          getPaymentMethod: jest.fn().mockReturnValue(null)
-        };
-
-        instance._mainView = {
-          getView: getViewStub,
-          primaryView: {
-            ID: 'view'
-          }
-        };
-        instance._model = {
-          getPaymentMethods: jest.fn().mockReturnValue([
-            { nonce: '1', type: 'ApplePayCard', vaulted: true },
-            { nonce: '2', type: 'CreditCard', vaulted: true },
-            { nonce: '3', type: 'ApplePayCard', vaulted: true }
-          ]),
-          removePaymentMethod: jest.fn()
-        };
-
-        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
-          if (arg === 'applePay') {
-            return fakeApplePayView;
-          } else if (arg === 'methods') {
-            return fakeMethodsView;
-          }
-        });
-
-        instance.updateConfiguration('applePay', 'foo', 'bar');
-
-        expect(instance._model.removePaymentMethod).not.toBeCalled();
-      }
-    );
-
-    test(
-      'removes saved googlePay payment methods if they are not vaulted',
+      'removes only saved googlePay payment methods if they are not vaulted',
       () => {
         const instance = new Dropin(testContext.dropinOptions);
         const getViewStub = jest.fn();
@@ -1746,7 +1702,8 @@ describe('Dropin', () => {
             { nonce: '4', type: 'AndroidPayCard', vaulted: true },
             { nonce: '5', type: 'AndroidPayCard' }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1759,51 +1716,26 @@ describe('Dropin', () => {
 
         instance.updateConfiguration('googlePay', 'foo', 'bar');
 
-        expect(instance._model.getPaymentMethods).toBeCalledTimes(1);
-        expect(instance._model.removePaymentMethod).toBeCalledTimes(2);
-        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '3', type: 'AndroidPayCard' });
-        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '5', type: 'AndroidPayCard' });
-      }
-    );
+        expect(instance._model.removeUnvaultedPaymentMethods).toBeCalledTimes(1);
 
-    test(
-      'does not call removePaymentMethod if no non-vaulted googlePay accounts are avaialble',
-      () => {
-        const instance = new Dropin(testContext.dropinOptions);
-        const getViewStub = jest.fn();
-        const fakeGooglePayView = {
-          updateConfiguration: jest.fn()
-        };
-        const fakeMethodsView = {
-          getPaymentMethod: jest.fn().mockReturnValue(null)
-        };
+        const filter = instance._model.removeUnvaultedPaymentMethods.mock.calls[0][0];
 
-        instance._mainView = {
-          getView: getViewStub,
-          primaryView: {
-            ID: 'view'
-          }
-        };
-        instance._model = {
-          getPaymentMethods: jest.fn().mockReturnValue([
-            { nonce: '1', type: 'AndroidPayCard', vaulted: true },
-            { nonce: '2', type: 'CreditCard', vaulted: true },
-            { nonce: '3', type: 'AndroidPayCard', vaulted: true }
-          ]),
-          removePaymentMethod: jest.fn()
-        };
+        expect(filter({
+          type: 'AndroidPayCard'
+        })).toBe(true);
 
-        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
-          if (arg === 'googlePay') {
-            return fakeGooglePayView;
-          } else if (arg === 'methods') {
-            return fakeMethodsView;
-          }
-        });
-
-        instance.updateConfiguration('googlePay', 'foo', 'bar');
-
-        expect(instance._model.removePaymentMethod).not.toBeCalled();
+        expect(filter({
+          type: 'CreditCard'
+        })).toBe(false);
+        expect(filter({
+          type: 'PayPalAccount'
+        })).toBe(false);
+        expect(filter({
+          type: 'ApplePayCard'
+        })).toBe(false);
+        expect(filter({
+          type: 'VenmoAccount'
+        })).toBe(false);
       }
     );
 
@@ -1831,7 +1763,8 @@ describe('Dropin', () => {
         instance._model = {
           getPaymentMethods: jest.fn().mockReturnValue([]),
           supportedPaymentOptions: ['paypal', 'card'],
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1873,7 +1806,8 @@ describe('Dropin', () => {
         instance._model = {
           getPaymentMethods: jest.fn().mockReturnValue([]),
           supportedPaymentOptions: ['paypal'],
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1914,7 +1848,8 @@ describe('Dropin', () => {
         };
         instance._model = {
           getPaymentMethods: jest.fn().mockReturnValue([]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1956,7 +1891,8 @@ describe('Dropin', () => {
           getPaymentMethods: jest.fn().mockReturnValue([
             { nonce: '1', type: 'CreditCard' }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2002,7 +1938,8 @@ describe('Dropin', () => {
         ]),
         refreshPaymentMethods: jest.fn().mockResolvedValue(),
         removeActivePaymentMethod: jest.fn(),
-        removePaymentMethod: jest.fn()
+        removePaymentMethod: jest.fn(),
+        removeUnvaultedPaymentMethods: jest.fn()
       };
 
       getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2043,7 +1980,8 @@ describe('Dropin', () => {
             { nonce: '3', type: 'PayPalAccount', vaulted: true }
           ]),
           removeActivePaymentMethod: jest.fn(),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2083,7 +2021,8 @@ describe('Dropin', () => {
           getPaymentMethods: jest.fn().mockReturnValue([]),
           removeActivePaymentMethod: jest.fn(),
           supportedPaymentOptions: ['paypal', 'card'],
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2124,7 +2063,8 @@ describe('Dropin', () => {
           getPaymentMethods: jest.fn().mockReturnValue([]),
           removeActivePaymentMethod: jest.fn(),
           supportedPaymentOptions: ['paypal'],
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2164,7 +2104,8 @@ describe('Dropin', () => {
           refreshPaymentMethods: jest.fn().mockResolvedValue(),
           getPaymentMethods: jest.fn().mockReturnValue([]),
           removeActivePaymentMethod: jest.fn(),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2205,7 +2146,8 @@ describe('Dropin', () => {
             { nonce: '1', type: 'CreditCard' }
           ]),
           removeActivePaymentMethod: jest.fn(),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          removeUnvaultedPaymentMethods: jest.fn()
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2244,7 +2186,8 @@ describe('Dropin', () => {
           { nonce: '1', type: 'CreditCard' }
         ]),
         removeActivePaymentMethod: jest.fn(),
-        removePaymentMethod: jest.fn()
+        removePaymentMethod: jest.fn(),
+        removeUnvaultedPaymentMethods: jest.fn()
       };
 
       getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return

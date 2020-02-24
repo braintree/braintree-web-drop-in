@@ -434,7 +434,7 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
     return;
   }
 
-  this._removeUnvaultedPaymentMethods(function (paymentMethod) {
+  this._model.removeUnvaultedPaymentMethods(function (paymentMethod) {
     return paymentMethod.type === constants.paymentMethodTypes[property];
   });
   this._navigateToInitialView();
@@ -465,7 +465,7 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
  * });
  */
 Dropin.prototype.clearSelectedPaymentMethod = function () {
-  this._removeUnvaultedPaymentMethods();
+  this._model.removeUnvaultedPaymentMethods();
   this._model.removeActivePaymentMethod();
 
   if (this._model.getPaymentMethods().length === 0) {
@@ -532,16 +532,6 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
     model: this._model,
     strings: this._strings
   });
-};
-
-Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
-  filter = filter || function () { return true; };
-
-  this._model.getPaymentMethods().forEach(function (paymentMethod) {
-    if (filter(paymentMethod) && !paymentMethod.vaulted) {
-      this._model.removePaymentMethod(paymentMethod);
-    }
-  }.bind(this));
 };
 
 Dropin.prototype._navigateToInitialView = function () {
