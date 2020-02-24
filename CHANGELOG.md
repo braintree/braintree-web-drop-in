@@ -7,7 +7,7 @@ CHANGELOG
 
 _Breaking Changes_
 * Drop support for IE 9-10
-* Payment methods will no longer automatically be hidden or error on setup if mercant is not enabled for them
+* Payment methods will no longer automatically be hidden or error on setup if merchant is not enabled for them
 * `vaultManager` in create options is now an object instead of a boolean
   * can opt out of `autoVaultPaymentMethods`
   * can opt out of `presentVaultedPaymentMethods`
