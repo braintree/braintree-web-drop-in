@@ -24,20 +24,22 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var DEFAULT_VAULT_MANAGER_SETTINGS = {
+var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_CLIENT_TOKEN = {
   autoVaultPaymentMethods: true,
   presentVaultedPaymentMethods: true,
   preselectVaultedPaymentMethod: true,
+  allowCustomerToDeletePaymentMethods: false
+};
+var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY = {
+  autoVaultPaymentMethods: false,
+  presentVaultedPaymentMethods: false,
+  preselectVaultedPaymentMethod: false,
   allowCustomerToDeletePaymentMethods: false
 };
 
 function DropinModel(options) {
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
-  this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS, this.merchantConfiguration.vaultManager);
-  // TODO - when auth gets passed in instead of a client
-  // if is a tokenization key
-  // change vault manager config settings
 
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
@@ -52,6 +54,15 @@ EventEmitter.createChild(DropinModel);
 
 DropinModel.prototype.initialize = function () {
   var self = this;
+
+  if (this._options.authType === constants.authorizationTypes.CLIENT_TOKEN) {
+    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_CLIENT_TOKEN, this.merchantConfiguration.vaultManager);
+  } else {
+    if (this.merchantConfiguration.vaultManager) {
+      return Promise.reject(new DropinError('vaultManager cannot be used with tokenization keys.'));
+    }
+    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY);
+  }
 
   return vaultManager.create({
     client: self._options.client

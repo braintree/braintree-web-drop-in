@@ -31,6 +31,7 @@ describe('DropinModel', () => {
     testContext.modelOptions = {
       client: fake.client(testContext.configuration),
       environment: 'sandbox',
+      authType: 'CLIENT_TOKEN',
       componentID: 'foo123',
       merchantConfiguration: {
         authorization: fake.clientToken,
@@ -70,48 +71,6 @@ describe('DropinModel', () => {
 
       expect(model.merchantConfiguration).toBe(testContext.modelOptions.merchantConfiguration);
     });
-
-    test('sets vault manager config with defaults if not provided', () => {
-      const model = new DropinModel(testContext.modelOptions);
-
-      expect(model.vaultManagerConfig).toEqual({
-        autoVaultPaymentMethods: true,
-        presentVaultedPaymentMethods: true,
-        preselectVaultedPaymentMethod: true,
-        allowCustomerToDeletePaymentMethods: false
-      });
-    });
-
-    test('overrides the vault manager config if provided', () => {
-      testContext.modelOptions.merchantConfiguration.vaultManager = {
-        autoVaultPaymentMethods: false,
-        presentVaultedPaymentMethods: false,
-        preselectVaultedPaymentMethod: false,
-        allowCustomerToDeletePaymentMethods: true
-      };
-      const model = new DropinModel(testContext.modelOptions);
-
-      expect(model.vaultManagerConfig).toEqual({
-        autoVaultPaymentMethods: false,
-        presentVaultedPaymentMethods: false,
-        preselectVaultedPaymentMethod: false,
-        allowCustomerToDeletePaymentMethods: true
-      });
-    });
-
-    test('provides vault manager defaults when only some options are provided', () => {
-      testContext.modelOptions.merchantConfiguration.vaultManager = {
-        autoVaultPaymentMethods: false
-      };
-      const model = new DropinModel(testContext.modelOptions);
-
-      expect(model.vaultManagerConfig).toEqual({
-        autoVaultPaymentMethods: false,
-        presentVaultedPaymentMethods: true,
-        preselectVaultedPaymentMethod: true,
-        allowCustomerToDeletePaymentMethods: false
-      });
-    });
   });
 
   describe('confirmDropinReady', () => {
@@ -127,6 +86,78 @@ describe('DropinModel', () => {
   });
 
   describe('initialize', () => {
+    test('sets vault manager config with defaults for client tokens if not provided', async () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: true,
+        presentVaultedPaymentMethods: true,
+        preselectVaultedPaymentMethod: true,
+        allowCustomerToDeletePaymentMethods: false
+      });
+    });
+
+    test('sets vault manager config with defaults for tokenization keys if not provided', async () => {
+      testContext.modelOptions.authType = 'TOKENIZATION_KEY';
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: false,
+        preselectVaultedPaymentMethod: false,
+        allowCustomerToDeletePaymentMethods: false
+      });
+    });
+
+    test('rejects with an error when passing a vault manager option with a tokeniation key', async () => {
+      testContext.modelOptions.authType = 'TOKENIZATION_KEY';
+      testContext.modelOptions.merchantConfiguration.vaultManager = {
+        autoVaultPaymentMethods: true
+      };
+      const model = new DropinModel(testContext.modelOptions);
+
+      await expect(model.initialize()).rejects.toThrow('vaultManager cannot be used with tokenization keys.');
+    });
+
+    test('overrides the vault manager config if provided', async () => {
+      testContext.modelOptions.merchantConfiguration.vaultManager = {
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: false,
+        preselectVaultedPaymentMethod: false,
+        allowCustomerToDeletePaymentMethods: true
+      };
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: false,
+        preselectVaultedPaymentMethod: false,
+        allowCustomerToDeletePaymentMethods: true
+      });
+    });
+
+    test('provides vault manager defaults when only some options are provided', async () => {
+      testContext.modelOptions.merchantConfiguration.vaultManager = {
+        autoVaultPaymentMethods: false
+      };
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: true,
+        preselectVaultedPaymentMethod: true,
+        allowCustomerToDeletePaymentMethods: false
+      });
+    });
+
     test('creates a vault manager', () => {
       const model = new DropinModel(testContext.modelOptions);
 
