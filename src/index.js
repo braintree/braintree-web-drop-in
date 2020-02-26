@@ -581,13 +581,13 @@ var VERSION = '__VERSION__';
  */
 
 function create(options) {
-  var env;
+  var parsedAuthorization;
 
   if (!options.authorization) {
     return Promise.reject(new DropinError('options.authorization is required.'));
   }
 
-  env = parseAuthorization(options.authorization).environment;
+  parsedAuthorization = parseAuthorization(options.authorization);
 
   return client.create({
     authorization: options.authorization
@@ -608,7 +608,8 @@ function create(options) {
     return new Promise(function (resolve, reject) {
       new Dropin({
         merchantConfiguration: options,
-        environment: env,
+        environment: parsedAuthorization.environment,
+        authType: parsedAuthorization.authType,
         client: clientInstance
       })._initialize(function (err, instance) {
         if (err) {

@@ -268,6 +268,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 function Dropin(options) {
   this._client = options.client;
   this._environment = options.environment;
+  this._authType = options.authType;
   this._componentID = uuid();
   this._dropinWrapper = document.createElement('div');
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentID;
@@ -348,6 +349,7 @@ Dropin.prototype._initialize = function (callback) {
 
   self._model = new DropinModel({
     environment: self._environment,
+    authType: self._authType,
     client: self._client,
     componentID: self._componentID,
     merchantConfiguration: self._merchantConfiguration
