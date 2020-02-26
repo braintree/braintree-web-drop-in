@@ -7,7 +7,6 @@ var EventEmitter = require('@braintree/event-emitter');
 var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
-var isGuestCheckout = require('./lib/is-guest-checkout');
 var Promise = require('./lib/promise');
 var paymentSheetViews = require('./views/payment-sheet-views');
 var vaultManager = require('braintree-web/vault-manager');
@@ -39,8 +38,6 @@ function DropinModel(options) {
   // TODO - when auth gets passed in instead of a client
   // if is a tokenization key
   // change vault manager config settings
-
-  this.isGuestCheckout = isGuestCheckout(options.client);
 
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;

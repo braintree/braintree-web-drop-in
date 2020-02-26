@@ -112,41 +112,6 @@ describe('DropinModel', () => {
         allowCustomerToDeletePaymentMethods: false
       });
     });
-
-    describe('isGuestCheckout', () => {
-      test('is true when given a tokenization key', () => {
-        let model;
-
-        testContext.configuration.authorization = fake.tokenizationKey;
-        testContext.configuration.authorizationType = 'TOKENIZATION_KEY';
-
-        model = new DropinModel(testContext.modelOptions);
-
-        expect(model.isGuestCheckout).toBe(true);
-      });
-
-      test('is true when given a client token without a customer ID', () => {
-        let model;
-
-        testContext.configuration.authorization = fake.clientToken;
-        testContext.configuration.authorizationType = 'CLIENT_TOKEN';
-
-        model = new DropinModel(testContext.modelOptions);
-
-        expect(model.isGuestCheckout).toBe(true);
-      });
-
-      test('is false when given a client token with a customer ID', () => {
-        let model;
-
-        testContext.configuration.authorization = fake.clientTokenWithCustomerID;
-        testContext.configuration.authorizationType = 'CLIENT_TOKEN';
-
-        model = new DropinModel(testContext.modelOptions);
-
-        expect(model.isGuestCheckout).toBe(false);
-      });
-    });
   });
 
   describe('confirmDropinReady', () => {
