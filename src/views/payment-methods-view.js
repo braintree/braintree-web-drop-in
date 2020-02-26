@@ -35,12 +35,11 @@ PaymentMethodsView.prototype._initialize = function () {
   this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
   this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
   this.model.on('refreshPaymentMethods', this.refreshPaymentMethods.bind(this));
+  this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
 
   this.refreshPaymentMethods();
 
   if (this.model.merchantConfiguration.vaultManager) {
-    this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
-
     addSelectionEventHandler(this._editButton, function () {
       if (this.model.isInEditMode()) {
         this.model.disableEditMode();
@@ -105,10 +104,9 @@ PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
     strings: this.strings
   });
 
-  if (this.model.isGuestCheckout && this.container.firstChild) {
-    this.container.removeChild(this.container.firstChild);
-    this.views.pop();
-  }
+  this.model.removeUnvaultedPaymentMethods(function (pm) {
+    return pm.nonce !== paymentMethod.nonce;
+  });
 
   if (this.container.firstChild) {
     this.container.insertBefore(paymentMethodView.element, this.container.firstChild);

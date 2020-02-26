@@ -190,8 +190,6 @@ describe('PaymentMethodsView', () => {
         model.getVaultedPaymentMethods.mockResolvedValue([fakePayPal, fakeCard]);
 
         return model.initialize().then(() => {
-          model.isGuestCheckout = false;
-
           paymentMethodsViews = new PaymentMethodsView({
             element: testContext.element,
             model: model,
@@ -262,18 +260,14 @@ describe('PaymentMethodsView', () => {
       }
     );
 
-    test('removes other payment methods in guest checkout', () => {
-      let model, paymentMethodsViews;
-      const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
+    test('removes unvaulted payment methods when adding a new payment method', () => {
       const modelOptions = fake.modelOptions();
+      const model = fake.model(modelOptions);
 
-      modelOptions.merchantConfiguration.authorization = fake.clientToken;
-      model = fake.model(modelOptions);
-
-      model.getVaultedPaymentMethods.mockResolvedValue([testContext.fakePaymentMethod]);
+      jest.spyOn(model, 'removeUnvaultedPaymentMethods').mockImplementation();
 
       return model.initialize().then(() => {
-        paymentMethodsViews = new PaymentMethodsView({
+        new PaymentMethodsView({ // eslint-disable-line no-new
           element: testContext.element,
           model: model,
           merchantConfiguration: {
@@ -282,10 +276,12 @@ describe('PaymentMethodsView', () => {
           strings: strings
         });
 
-        model.addPaymentMethod({ foo: 'bar' });
+        model.addPaymentMethod({ nonce: 'fake-nonce' });
+        const removeUnvaultedPaymentMethodsFilter = model.removeUnvaultedPaymentMethods.mock.calls[0][0];
 
-        expect(paymentMethodsViews.views.length).toBe(1);
-        expect(methodsContainer.childElementCount).toBe(1);
+        expect(model.removeUnvaultedPaymentMethods).toBeCalledTimes(1);
+        expect(removeUnvaultedPaymentMethodsFilter({ nonce: 'other-nonce' })).toBe(true);
+        expect(removeUnvaultedPaymentMethodsFilter({ nonce: 'fake-nonce' })).toBe(false);
       });
     });
 
