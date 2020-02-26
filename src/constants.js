@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = {
+  authorizationTypes: {
+    CLIENT_TOKEN: 'CLIENT_TOKEN',
+    TOKENIZATION_KEY: 'TOKENIZATION_KEY'
+  },
   paymentOptionIDs: {
     card: 'card',
     paypal: 'paypal',
