@@ -78,7 +78,6 @@ MainView.prototype._initialize = function () {
   this.paymentMethodsViews = new PaymentMethodsView({
     element: this.element,
     model: this.model,
-    client: this.client,
     strings: this.strings
   });
   this.addView(this.paymentMethodsViews);
