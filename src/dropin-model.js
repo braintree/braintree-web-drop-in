@@ -150,7 +150,7 @@ DropinModel.prototype.selectPaymentOption = function (paymentViewID) {
 };
 
 DropinModel.prototype.enableEditMode = function () {
-  analytics.sendEvent(this._options.client, 'manager.appeared');
+  this.sendEvent('manager.appeared');
   this._isInEditMode = true;
   this._emit('enableEditMode');
 };
@@ -167,6 +167,10 @@ DropinModel.prototype.isInEditMode = function () {
 DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {
   this._paymentMethodWaitingToBeDeleted = paymentMethod;
   this._emit('confirmPaymentMethodDeletion', paymentMethod);
+};
+
+DropinModel.prototype.sendEvent = function (eventName) {
+  analytics.sendEvent(this._options.client, eventName);
 };
 
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
