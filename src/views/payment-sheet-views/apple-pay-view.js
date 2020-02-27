@@ -20,6 +20,7 @@ ApplePayView.ID = ApplePayView.prototype.ID = paymentOptionIDs.applePay;
 
 ApplePayView.prototype.initialize = function () {
   var self = this;
+  // TODO pull env from authorization instead
   var isProduction = self.client.getConfiguration().gatewayConfiguration.environment === 'production';
 
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
@@ -29,6 +30,7 @@ ApplePayView.prototype.initialize = function () {
 
   self.model.asyncDependencyStarting();
 
+  // TODO use auth
   return btApplePay.create({client: this.client}).then(function (applePayInstance) {
     var buttonDiv = self.getElementById('apple-pay-button');
 

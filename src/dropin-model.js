@@ -64,6 +64,7 @@ DropinModel.prototype.initialize = function () {
     this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY);
   }
 
+  // TODO switch to authorization
   return vaultManager.create({
     client: self._options.client
   }).then(function (vaultManagerInstance) {
@@ -327,6 +328,8 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
     return Promise.resolve([]);
   }
 
+  // TODO find a way to make this not be blocked by waiting for the client
+  // may require some design work
   return self._vaultManager.fetchPaymentMethods({
     defaultFirst: true
   }).then(function (paymentMethods) {

@@ -17,6 +17,7 @@ VenmoView.ID = VenmoView.prototype.ID = paymentOptionIDs.venmo;
 
 VenmoView.prototype.initialize = function () {
   var self = this;
+  // TODO switch to auth
   var venmoConfiguration = assign({}, self.model.merchantConfiguration.venmo, {client: this.client});
 
   self.model.asyncDependencyStarting();

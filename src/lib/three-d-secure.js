@@ -14,6 +14,7 @@ ThreeDSecure.prototype.initialize = function () {
   var self = this;
 
   return threeDSecure.create({
+    // TODO use auth instead
     client: this._client,
     version: 2
   }).then(function (instance) {

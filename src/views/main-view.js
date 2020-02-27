@@ -59,6 +59,7 @@ MainView.prototype._initialize = function () {
     if (this.model.supportedPaymentOptions.indexOf(sheetViewKey) !== -1) {
       PaymentSheetView = sheetViews[sheetViewKey];
 
+      // TODO eliminate from payment sheet view
       paymentSheetView = new PaymentSheetView({
         element: this.getElementById(PaymentSheetView.ID),
         mainView: this,

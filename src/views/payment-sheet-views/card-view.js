@@ -154,11 +154,26 @@ CardView.prototype._sendRequestableEvent = function () {
 };
 
 CardView.prototype._generateHostedFieldsOptions = function () {
+  // TODO this is going to be a tricky one
+  // we won't know what challenges the merchant needs to present
+  // until after we have the client, but we don't want to wait on the client
+  // to display the card form.
+  // Basic plan right now is to show the number, exp date and cvv fields by default
+  // (and let the merchant opt out of them) and let the merchant opt into the
+  // postal code field. When we go to tokenize, we'll first wait for the client
+  // to finish setting up, and then dynamically add the postal code field
+  // if that challenge is required _and_ the client token was generated with a customer
+  // id _and_ we intend to vault the card. (otherwise it will fail the vaulting process)
+  //
+  // This will require updates to the client configuration to indicate if the client
+  // token was generated with a customer id, and updates to Hosted Fields to allow
+  // dynamically adding/removing fields from the card form
   var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
   var hasCVVChallenge = challenges.indexOf('cvv') !== -1;
   var hasPostalCodeChallenge = challenges.indexOf('postal_code') !== -1;
   var overrides = this.merchantConfiguration.overrides;
   var options = {
+    // TODO switch to auth
     client: this.client,
     fields: {
       number: {
@@ -262,6 +277,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
 CardView.prototype._validateForm = function (showFieldErrors) {
   var card, cardType, cardTypeSupported, state;
   var isValid = true;
+  // TODO let hosted fields handle this
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   if (!this.hostedFieldsInstance) {
@@ -619,6 +635,10 @@ CardView.prototype.onSelection = function () {
 };
 
 CardView.prototype._hideUnsupportedCardIcons = function () {
+  // TODO should we just not show supported card icons?
+  // or show them when we know the supported card types?
+  // or hide the ones that we realize are unsupported?
+  // let merchant specify supported card types
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
@@ -633,6 +653,7 @@ CardView.prototype._hideUnsupportedCardIcons = function () {
 };
 
 CardView.prototype._isCardTypeSupported = function (cardType) {
+  // TODO let hosted fields handle this instead
   var configurationCardType = constants.configurationCardTypes[cardType];
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 

@@ -19,6 +19,7 @@ DataCollector.prototype.initialize = function () {
       return Promise.resolve();
     }
 
+    // TODO pull off BT web create module
     braintreeWebVersion = self._config.client.getVersion();
 
     return assets.loadScript({
@@ -26,6 +27,7 @@ DataCollector.prototype.initialize = function () {
       id: constants.DATA_COLLECTOR_SCRIPT_ID
     });
   }).then(function () {
+    // TODO use auth instead
     return global.braintree.dataCollector.create(self._config);
   }).then(function (instance) {
     self._instance = instance;
@@ -41,11 +43,13 @@ DataCollector.prototype.log = function (message) {
   console.log(message); // eslint-disable-line no-console
 };
 
+// TODO convert to async
 DataCollector.prototype.getDeviceData = function () {
   if (!this._instance) {
     return '';
   }
 
+  // TODO use async method instead
   return this._instance.deviceData;
 };
 

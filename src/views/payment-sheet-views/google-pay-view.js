@@ -45,6 +45,7 @@ GooglePayView.prototype.initialize = function () {
   self.model.asyncDependencyStarting();
 
   return btGooglePay.create({
+    // TODO switch to auth
     client: self.client,
     googlePayVersion: googlePayVersion,
     googleMerchantId: merchantId

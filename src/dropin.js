@@ -347,6 +347,7 @@ Dropin.prototype._initialize = function (callback) {
   self._dropinWrapper.innerHTML = svgHTML + localizedHTML;
   container.appendChild(self._dropinWrapper);
 
+  // TODO eliminate client form model
   self._model = new DropinModel({
     environment: self._environment,
     authType: self._authType,
@@ -486,6 +487,7 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
 
 Dropin.prototype._setUpDataCollector = function () {
   var self = this;
+  // TODO eliminate client from DC
   var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
 
   this._model.asyncDependencyStarting();
@@ -507,6 +509,7 @@ Dropin.prototype._setUpThreeDSecure = function () {
 
   this._model.asyncDependencyStarting();
 
+  // TODO eliminate client form 3ds
   this._threeDSecure = new ThreeDSecure(this._client, config);
 
   this._threeDSecure.initialize().then(function () {
@@ -528,6 +531,7 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
     this._setUpThreeDSecure();
   }
 
+  // TODO eliminate client form main view
   this._mainView = new MainView({
     client: this._client,
     element: this._dropinWrapper,
