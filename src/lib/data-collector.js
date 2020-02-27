@@ -1,5 +1,6 @@
 'use strict';
 
+var braintreeWebVersion = require('braintree-web/client').VERSION;
 var constants = require('../constants');
 var analytics = require('./analytics');
 var assets = require('@braintree/asset-loader');
@@ -13,14 +14,9 @@ DataCollector.prototype.initialize = function () {
   var self = this;
 
   return Promise.resolve().then(function () {
-    var braintreeWebVersion;
-
     if (global.braintree && global.braintree.dataCollector) {
       return Promise.resolve();
     }
-
-    // TODO pull off BT web create module
-    braintreeWebVersion = self._config.client.getVersion();
 
     return assets.loadScript({
       src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',

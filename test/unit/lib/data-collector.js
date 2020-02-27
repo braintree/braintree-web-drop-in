@@ -1,5 +1,6 @@
 jest.mock('../../../src/lib/analytics');
 
+const btWebVersion = require('braintree-web/client').VERSION;
 const fake = require('../../helpers/fake');
 const assets = require('@braintree/asset-loader');
 const Promise = require('../../../src/lib/promise');
@@ -32,7 +33,6 @@ describe('DataCollector', () => {
 
       testContext.config = {
         client: {
-          getVersion: jest.fn().mockReturnValue('1.2.3')
         },
         kount: true
       };
@@ -60,7 +60,7 @@ describe('DataCollector', () => {
         return dc.initialize().then(() => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
-            src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
+            src: `https://js.braintreegateway.com/web/${btWebVersion}/js/data-collector.min.js`,
             id: 'braintree-dropin-data-collector-script'
           });
         });
@@ -77,7 +77,7 @@ describe('DataCollector', () => {
         return dc.initialize().then(() => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
-            src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
+            src: `https://js.braintreegateway.com/web/${btWebVersion}/js/data-collector.min.js`,
             id: 'braintree-dropin-data-collector-script'
           });
         });
