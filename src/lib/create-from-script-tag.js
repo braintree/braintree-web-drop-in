@@ -1,6 +1,5 @@
 'use strict';
 
-var analytics = require('./analytics');
 var find = require('./find-parent-form');
 var uuid = require('./uuid');
 var DropinError = require('./dropin-error');
@@ -108,7 +107,7 @@ function createFromScriptTag(createFunction, scriptTag) {
   });
 
   createFunction(createOptions).then(function (instance) {
-    analytics.sendEvent(instance._client, 'integration-type.script-tag');
+    instance._model.sendEvent('integration-type.script-tag');
     form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
         if (requestPaymentError) {

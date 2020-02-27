@@ -20,6 +20,9 @@ describe('createFromScriptTag', () => {
     jest.spyOn(analytics, 'sendEvent').mockImplementation();
     testContext.instance = {
       _client: 'fake-client',
+      _model: {
+        sendEvent: jest.fn()
+      },
       requestPaymentMethod: jest.fn().mockImplementation(yields(null, { nonce: 'a-nonce' }))
     };
     testContext.scriptTag = document.createElement('script');
@@ -109,8 +112,8 @@ describe('createFromScriptTag', () => {
     createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
     setTimeout(() => {
-      expect(analytics.sendEvent).toBeCalledTimes(1);
-      expect(analytics.sendEvent).toBeCalledWith(testContext.instance._client, 'integration-type.script-tag');
+      expect(testContext.instance._model.sendEvent).toBeCalledTimes(1);
+      expect(testContext.instance._model.sendEvent).toBeCalledWith('integration-type.script-tag');
       done();
     });
   });
