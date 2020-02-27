@@ -116,6 +116,8 @@ function model(options) {
 function modelOptions() {
   return {
     client: client(),
+    environment: 'sandbox',
+    authType: 'CLIENT_TOKEN',
     componentID: 'foo123',
     merchantConfiguration: {
       authorization: tokenizationKey

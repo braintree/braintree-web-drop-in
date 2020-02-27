@@ -63,6 +63,8 @@ describe('BasePayPalView', () => {
       tokenizePayment: jest.fn().mockResolvedValue()
     };
     jest.spyOn(PayPalCheckout, 'create').mockResolvedValue(testContext.paypalInstance);
+
+    return testContext.model.initialize();
   });
 
   afterEach(() => {

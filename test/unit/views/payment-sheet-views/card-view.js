@@ -1019,7 +1019,9 @@ describe('CardView', () => {
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
           jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
+          return testContext.context.model.initialize().then(() => {
+            return CardView.prototype.initialize.call(testContext.context);
+          }).then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
             expect(numberFieldError.textContent).toBe('Please fill out a card number.');
           });
@@ -1072,7 +1074,9 @@ describe('CardView', () => {
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
           jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 
-          CardView.prototype.initialize.call(testContext.context).then(() => {
+          return testContext.context.model.initialize().then(() => {
+            return CardView.prototype.initialize.call(testContext.context);
+          }).then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
 
             fakeHostedField.focus();
@@ -1126,7 +1130,9 @@ describe('CardView', () => {
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
           jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
+          return testContext.context.model.initialize().then(() => {
+            return CardView.prototype.initialize.call(testContext.context);
+          }).then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
           });
         }
@@ -1173,7 +1179,9 @@ describe('CardView', () => {
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
           jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
+          return testContext.context.model.initialize().then(() => {
+            return CardView.prototype.initialize.call(testContext.context);
+          }).then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
           });
         }

@@ -42,6 +42,8 @@ describe('Dropin', () => {
 
     testContext.dropinOptions = {
       client: testContext.client,
+      environment: 'sandbox',
+      authType: 'CLIENT_TOKEN',
       merchantConfiguration: {
         container: '#foo',
         authorization: fake.tokenizationKey
@@ -360,12 +362,6 @@ describe('Dropin', () => {
     test('requests payment methods if a customerId is provided', done => {
       let instance;
 
-      testContext.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
-
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([]);
 
       instance = new Dropin(testContext.dropinOptions);
@@ -393,11 +389,6 @@ describe('Dropin', () => {
       done => {
         let instance;
 
-        testContext.client.getConfiguration.mockReturnValue({
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        });
         testContext.client.request.mockRejectedValue(new Error('This failed'));
 
         instance = new Dropin(testContext.dropinOptions);
@@ -415,11 +406,6 @@ describe('Dropin', () => {
       let instance;
       const paymentMethodsPayload = { paymentMethods: []};
 
-      testContext.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
       testContext.client.request.mockResolvedValue(paymentMethodsPayload);
 
       instance = new Dropin(testContext.dropinOptions);
