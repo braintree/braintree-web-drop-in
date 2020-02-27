@@ -119,7 +119,6 @@ MainView.prototype._initialize = function () {
 
   if (this._hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
-      client: this.client,
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
       model: this.model,

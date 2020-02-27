@@ -1,6 +1,5 @@
 'use strict';
 
-var analytics = require('../lib/analytics');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var BaseView = require('./base-view');
 var fs = require('fs');
@@ -34,7 +33,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   var clickHandler = function clickHandler() {
     this.mainView.setPrimaryView(paymentOptionID);
     this.model.selectPaymentOption(paymentOptionID);
-    analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
+    this.model.sendEvent('selected.' + paymentOptionIDs[paymentOptionID]);
   }.bind(this);
 
   div.className = 'braintree-option braintree-option__' + paymentOptionID;

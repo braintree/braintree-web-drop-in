@@ -5,7 +5,6 @@ const PaymentOptionsView = require('../../../src/views/payment-options-view');
 const strings = require('../../../src/translations/en_US');
 const fake = require('../../helpers/fake');
 const fs = require('fs');
-const analytics = require('../../../src/lib/analytics');
 
 const mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
@@ -183,15 +182,13 @@ describe('PaymentOptionsView', () => {
           const viewConfiguration = testContext.viewConfiguration;
           const eventName = 'selected.' + option.paymentOptionID;
 
-          jest.spyOn(analytics, 'sendEvent').mockImplementation();
-
           viewConfiguration.model = model;
           paymentOptionsView = new PaymentOptionsView(viewConfiguration);
           optionElement = paymentOptionsView.container.querySelector('.braintree-option');
 
           optionElement.click();
 
-          expect(analytics.sendEvent).toBeCalledWith(paymentOptionsView.client, eventName);
+          expect(model.sendEvent).toBeCalledWith(eventName);
         }
       );
     });
