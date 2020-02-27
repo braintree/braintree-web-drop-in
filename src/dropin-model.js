@@ -40,6 +40,7 @@ var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY = {
 function DropinModel(options) {
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
+  this.environment = options.environment;
 
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;

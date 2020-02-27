@@ -13,6 +13,7 @@ var Promise = require('../../lib/promise');
 
 var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
+// TODO Hosted Fields should be able to supply methods for fetching challenges and supported card types
 function CardView() {
   BaseView.apply(this, arguments);
 }

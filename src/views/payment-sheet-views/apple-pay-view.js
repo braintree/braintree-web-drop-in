@@ -20,8 +20,7 @@ ApplePayView.ID = ApplePayView.prototype.ID = paymentOptionIDs.applePay;
 
 ApplePayView.prototype.initialize = function () {
   var self = this;
-  // TODO pull env from authorization instead
-  var isProduction = self.client.getConfiguration().gatewayConfiguration.environment === 'production';
+  var isProduction = this.model.environment === 'production';
 
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
   self.applePaySessionVersion = self.applePayConfiguration.applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;

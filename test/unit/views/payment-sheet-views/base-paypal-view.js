@@ -268,7 +268,7 @@ describe('BasePayPalView', () => {
     test(
       'sets paypal-checkout.js environment to production when gatewayConfiguration is production',
       () => {
-        testContext.configuration.gatewayConfiguration.environment = 'production';
+        testContext.view.model.environment = 'production';
 
         return testContext.view.initialize().then(() => {
           expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
@@ -281,7 +281,7 @@ describe('BasePayPalView', () => {
     test(
       'sets paypal-checkout.js environment to sandbox when gatewayConfiguration is not production',
       () => {
-        testContext.configuration.gatewayConfiguration.environment = 'development';
+        testContext.view.model.environment = 'development';
 
         return testContext.view.initialize().then(() => {
           expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({

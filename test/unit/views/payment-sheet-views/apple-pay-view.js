@@ -156,10 +156,7 @@ describe('ApplePayView', () => {
     test(
       'reports error when canMakePaymentsWithActiveCard returns false in production mode',
       done => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.environment = 'production';
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        testContext.model.environment = 'production';
 
         global.ApplePaySession.canMakePaymentsWithActiveCard = jest.fn().mockResolvedValue(false);
 
@@ -176,10 +173,7 @@ describe('ApplePayView', () => {
     test(
       'reports developer error when canMakePaymentsWithActiveCard returns false in sandbox mode',
       done => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.environment = 'sandbox';
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        testContext.model.environment = 'sandbox';
 
         jest.spyOn(console, 'error').mockImplementation();
         global.ApplePaySession.canMakePaymentsWithActiveCard = jest.fn().mockResolvedValue(false);
