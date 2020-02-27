@@ -1,6 +1,5 @@
 'use strict';
 
-var analytics = require('../lib/analytics');
 var BaseView = require('./base-view');
 var classList = require('@braintree/class-list');
 var constants = require('../constants');
@@ -95,7 +94,7 @@ PaymentMethodView.prototype._choosePaymentMethod = function () {
     return;
   }
   if (this.paymentMethod.vaulted) {
-    analytics.sendEvent(this.client, 'vaulted-' + constants.analyticsKinds[this.paymentMethod.type] + '.select');
+    this.model.sendEvent('vaulted-' + constants.analyticsKinds[this.paymentMethod.type] + '.select');
   }
 
   this.model.changeActivePaymentMethod(this.paymentMethod);

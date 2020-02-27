@@ -108,6 +108,7 @@ function model(options) {
   modelInstance = new DropinModel(options);
 
   jest.spyOn(modelInstance, 'getVaultedPaymentMethods').mockResolvedValue([]);
+  jest.spyOn(modelInstance, 'sendEvent').mockImplementation();
 
   return modelInstance;
 }
