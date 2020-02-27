@@ -1,3 +1,4 @@
+jest.mock('../../../../src/lib/analytics');
 
 /* eslint-disable no-new */
 
@@ -75,7 +76,6 @@ describe('GooglePayView', () => {
       email: 'foo@example.com'
     };
     jest.spyOn(btGooglePay, 'create').mockResolvedValue(testContext.fakeGooglePayInstance);
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
     testContext.FakePaymentClient = function FakePayment() {};
     testContext.FakePaymentClient.prototype.isReadyToPay = jest.fn().mockResolvedValue({ result: true });

@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const analytics = require('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
@@ -16,7 +17,6 @@ describe('PaymentMethodView', () => {
     testContext.div = document.createElement('div');
     testContext.div.innerHTML = paymentMethodHTML;
     document.body.appendChild(testContext.div);
-    jest.spyOn(analytics, 'sendEvent');
   });
 
   describe('Constructor', () => {

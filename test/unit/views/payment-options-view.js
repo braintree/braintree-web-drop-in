@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const analytics = require('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
@@ -55,7 +56,6 @@ describe('PaymentOptionsView', () => {
   beforeEach(() => {
     testContext = {};
     testContext.client = fake.client();
-    jest.spyOn(analytics, 'sendEvent');
   });
 
   describe('Constructor', () => {

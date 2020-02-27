@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const MainView = require('../../../src/views/main-view');
 const ApplePayView = require('../../../src/views/payment-sheet-views/apple-pay-view');
@@ -33,7 +34,6 @@ describe('MainView', () => {
     testContext.client = fake.client();
     jest.spyOn(CardView.prototype, 'getPaymentMethod').mockImplementation();
     jest.spyOn(BasePayPalView.prototype, 'initialize').mockImplementation();
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
   });
 
   describe('Constructor', () => {

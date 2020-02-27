@@ -1,7 +1,9 @@
+jest.mock('../../../../src/lib/analytics');
 
 /* eslint-disable no-new */
 
-const analytics = require('../../../../src/lib/analytics');
+// TODO should we assert on some analytics?
+// const analytics = require('../../../../src/lib/analytics');
 const browserDetection = require('../../../../src/lib/browser-detection');
 const BaseView = require('../../../../src/views/base-view');
 const DropinModel = require('../../../../src/dropin-model');
@@ -35,7 +37,6 @@ describe('BasePayPalView', () => {
         CREDIT: 'credit'
       }
     };
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
     global.paypal = testContext.paypal;
 

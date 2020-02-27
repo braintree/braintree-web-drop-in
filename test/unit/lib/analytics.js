@@ -1,4 +1,3 @@
-
 var client = require('braintree-web/client');
 const analytics = require('../../../src/lib/analytics');
 const atob = require('../../../src/lib/polyfill').atob;

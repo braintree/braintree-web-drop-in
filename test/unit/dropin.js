@@ -1,3 +1,4 @@
+jest.mock('../../src/lib/analytics');
 
 const Dropin = require('../../src/dropin/');
 const DropinModel = require('../../src/dropin-model');
@@ -50,7 +51,6 @@ describe('Dropin', () => {
       }
     };
 
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
     jest.spyOn(CardView.prototype, 'getPaymentMethod').mockImplementation();
     jest.spyOn(hostedFields, 'create').mockResolvedValue(fake.hostedFieldsInstance);
     jest.spyOn(paypalCheckout, 'create').mockResolvedValue(fake.paypalInstance);

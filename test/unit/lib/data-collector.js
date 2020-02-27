@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const fake = require('../../helpers/fake');
 const assets = require('@braintree/asset-loader');
@@ -13,7 +14,6 @@ describe('DataCollector', () => {
   });
 
   beforeEach(() => {
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
     testContext.dataCollectorInstance = fake.dataCollectorInstance;
     jest.spyOn(testContext.dataCollectorInstance, 'teardown').mockResolvedValue();
   });

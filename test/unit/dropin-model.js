@@ -1,6 +1,8 @@
+jest.mock('../../src/lib/analytics');
 
 const vaultManager = require('braintree-web/vault-manager');
-const analytics = require('../../src/lib/analytics');
+// TODO should we assert on some analtyics
+// const analytics = require('../../src/lib/analytics');
 const DropinModel = require('../../src/dropin-model');
 const ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
 const CardView = require('../../src/views/payment-sheet-views/card-view');
@@ -40,7 +42,6 @@ describe('DropinModel', () => {
       },
       paymentMethods: []
     };
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
     jest.spyOn(console, 'error').mockImplementation();
 
     jest.spyOn(isHTTPS, 'isHTTPS').mockReturnValue(true);

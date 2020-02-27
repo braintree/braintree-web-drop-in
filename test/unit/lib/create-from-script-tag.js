@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const createFromScriptTag = require('../../../src/lib/create-from-script-tag');
 const findParentForm = require('../../../src/lib/find-parent-form');
@@ -17,7 +18,6 @@ describe('createFromScriptTag', () => {
     const container = document.createElement('div');
 
     container.id = 'script-container';
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
     testContext.instance = {
       requestPaymentMethod: jest.fn().mockImplementation(yields(null, { nonce: 'a-nonce' }))
     };

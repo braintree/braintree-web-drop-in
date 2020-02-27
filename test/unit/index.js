@@ -1,3 +1,4 @@
+jest.mock('../../src/lib/analytics');
 
 const dropin = require('../../src/index');
 const Dropin = require('../../src/dropin');
@@ -25,7 +26,6 @@ describe('dropin.create', () => {
     document.body.appendChild(testContext.form);
 
     jest.spyOn(client, 'create').mockResolvedValue();
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
     jest.spyOn(analytics, 'setupAnalytics').mockImplementation();
   });
 
