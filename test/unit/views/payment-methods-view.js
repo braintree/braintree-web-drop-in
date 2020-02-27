@@ -44,11 +44,6 @@ describe('PaymentMethodsView', () => {
       let model, paymentMethodsViews;
       const modelOptions = fake.modelOptions();
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
@@ -85,11 +80,6 @@ describe('PaymentMethodsView', () => {
       };
       const modelOptions = fake.modelOptions();
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
@@ -113,12 +103,6 @@ describe('PaymentMethodsView', () => {
     test('does not add payment methods if there are none', () => {
       let model, methodsContainer, paymentMethodsViews;
       const modelOptions = fake.modelOptions();
-
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
 
       model = fake.model(modelOptions);
 
@@ -230,12 +214,6 @@ describe('PaymentMethodsView', () => {
         let model, paymentMethodsViews;
         const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
         const modelOptions = fake.modelOptions();
-
-        modelOptions.client.getConfiguration.mockReturnValue({
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        });
 
         modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
         model = fake.model(modelOptions);
