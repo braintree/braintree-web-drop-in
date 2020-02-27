@@ -206,14 +206,14 @@ MainView.prototype.requestPaymentMethod = function () {
   var activePaymentView = this.getView(this.model.getActivePaymentView());
 
   return activePaymentView.requestPaymentMethod().then(function (payload) {
-    analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
+    analytics.sendEvent('request-payment-method.' + analyticsKinds[payload.type]);
 
     return payload;
-  }.bind(this)).catch(function (err) {
-    analytics.sendEvent(this.client, 'request-payment-method.error');
+  }).catch(function (err) {
+    analytics.sendEvent('request-payment-method.error');
 
     return Promise.reject(err);
-  }.bind(this));
+  });
 };
 
 MainView.prototype.hideLoadingIndicator = function () {
@@ -384,7 +384,7 @@ MainView.prototype._sendToDefaultView = function () {
 
   if (paymentMethods.length > 0) {
     if (preselectVaultedPaymentMethod) {
-      analytics.sendEvent(this.client, 'vaulted-card.preselect');
+      analytics.sendEvent('vaulted-card.preselect');
 
       this.model.changeActivePaymentMethod(paymentMethods[0]);
     } else {

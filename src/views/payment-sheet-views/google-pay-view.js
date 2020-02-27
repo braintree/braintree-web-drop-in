@@ -85,11 +85,11 @@ GooglePayView.prototype.tokenize = function () {
       console.error(err); // eslint-disable-line no-console
       reportedError = 'developerError';
     } else if (err.statusCode === 'CANCELED') {
-      analytics.sendEvent(self.client, 'googlepay.loadPaymentData.canceled');
+      analytics.sendEvent('googlepay.loadPaymentData.canceled');
 
       return;
     } else if (err.statusCode) {
-      analytics.sendEvent(self.client, 'googlepay.loadPaymentData.failed');
+      analytics.sendEvent('googlepay.loadPaymentData.failed');
     }
 
     self.model.reportError(reportedError);

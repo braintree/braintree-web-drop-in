@@ -1,4 +1,5 @@
 
+const analytics = require('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
 const PaymentOptionsView = require('../../../src/views/payment-options-view');
@@ -53,10 +54,8 @@ describe('PaymentOptionsView', () => {
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     testContext.client = fake.client();
+    jest.spyOn(analytics, 'sendEvent');
   });
 
   describe('Constructor', () => {
@@ -188,7 +187,7 @@ describe('PaymentOptionsView', () => {
 
           optionElement.click();
 
-          expect(model.sendEvent).toBeCalledWith(eventName);
+          expect(analytics.sendEvent).toBeCalledWith(eventName);
         }
       );
     });

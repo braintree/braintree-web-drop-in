@@ -32,7 +32,7 @@ DataCollector.prototype.initialize = function () {
   }).then(function (instance) {
     self._instance = instance;
   }).catch(function (err) {
-    analytics.sendEvent(self._config.client, 'data-collector.setup-failed');
+    analytics.sendEvent('data-collector.setup-failed');
     // log the Data Collector setup error
     // but do not prevent Drop-in from loading
     self.log(err);

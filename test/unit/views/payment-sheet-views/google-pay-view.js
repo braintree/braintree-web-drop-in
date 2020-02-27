@@ -375,7 +375,7 @@ describe('GooglePayView', () => {
 
       return testContext.view.tokenize().then(() => {
         expect(analytics.sendEvent).toBeCalledTimes(1);
-        expect(analytics.sendEvent).toBeCalledWith(testContext.fakeClient, 'googlepay.loadPaymentData.failed');
+        expect(analytics.sendEvent).toBeCalledWith('googlepay.loadPaymentData.failed');
       });
     });
 
@@ -398,7 +398,7 @@ describe('GooglePayView', () => {
 
       return testContext.view.tokenize().then(() => {
         expect(analytics.sendEvent).toBeCalledTimes(1);
-        expect(analytics.sendEvent).toBeCalledWith(testContext.fakeClient, 'googlepay.loadPaymentData.canceled');
+        expect(analytics.sendEvent).toBeCalledWith('googlepay.loadPaymentData.canceled');
       });
     });
 

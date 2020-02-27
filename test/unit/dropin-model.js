@@ -1097,15 +1097,6 @@ describe('DropinModel', () => {
       expect(testContext.model._emit).toBeCalledWith('enableEditMode');
     });
 
-    test('sends an analytics event', () => {
-      jest.spyOn(testContext.model, 'sendEvent');
-
-      testContext.model.enableEditMode();
-
-      expect(testContext.model.sendEvent).toBeCalledTimes(1);
-      expect(testContext.model.sendEvent).toBeCalledWith('manager.appeared');
-    });
-
     test('model.enableEditMode sets isInEditMode to true', () => {
       expect(testContext.model.isInEditMode()).toBe(false);
 
@@ -1385,20 +1376,5 @@ describe('DropinModel', () => {
         });
       }
     );
-  });
-
-  describe('sendEvent', () => {
-    beforeEach(() => {
-      testContext.model = new DropinModel(testContext.modelOptions);
-
-      return testContext.model.initialize();
-    });
-
-    it('sends analtyics events', () => {
-      testContext.model.sendEvent('event-name');
-
-      expect(analytics.sendEvent).toBeCalledTimes(1);
-      expect(analytics.sendEvent).toBeCalledWith(expect.anything(), 'event-name');
-    });
   });
 });

@@ -104,7 +104,7 @@ describe('Dropin', () => {
 
       instance._initialize(err => {
         expect(err.message).toBe('options.container is required.');
-        expect(analytics.sendEvent).toBeCalledWith(instance._client, 'configuration-error');
+        expect(analytics.sendEvent).toBeCalledWith('configuration-error');
         done();
       });
     });
@@ -118,7 +118,7 @@ describe('Dropin', () => {
 
       instance._initialize(err => {
         expect(err.message).toBe('Must only have one options.selector or options.container.');
-        expect(analytics.sendEvent).toBeCalledWith(instance._client, 'configuration-error');
+        expect(analytics.sendEvent).toBeCalledWith('configuration-error');
         done();
       });
     });
@@ -139,7 +139,7 @@ describe('Dropin', () => {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toBe('All payment options failed to load.');
         expect(instance._dropinWrapper.innerHTML).toBe('');
-        expect(analytics.sendEvent).toBeCalledWith(instance._client, 'load-error');
+        expect(analytics.sendEvent).toBeCalledWith('load-error');
         done();
       });
     });
@@ -208,7 +208,7 @@ describe('Dropin', () => {
         instance._initialize(err => {
           expect(err).toBeInstanceOf(Error);
           expect(err.message).toBe('options.selector or options.container must reference a valid DOM node.');
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'configuration-error');
+          expect(analytics.sendEvent).toBeCalledWith('configuration-error');
           done();
         });
       }
@@ -227,7 +227,7 @@ describe('Dropin', () => {
         instance._initialize(err => {
           expect(err).toBeInstanceOf(Error);
           expect(err.message).toBe('options.selector or options.container must reference an empty DOM node.');
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'configuration-error');
+          expect(analytics.sendEvent).toBeCalledWith('configuration-error');
           done();
         });
       }
@@ -248,7 +248,7 @@ describe('Dropin', () => {
         instance._initialize(err => {
           expect(err).toBeInstanceOf(Error);
           expect(err.message).toBe('options.selector or options.container must reference an empty DOM node.');
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'configuration-error');
+          expect(analytics.sendEvent).toBeCalledWith('configuration-error');
           done();
         });
       }
@@ -267,7 +267,7 @@ describe('Dropin', () => {
         instance._initialize(err => {
           expect(err).toBeInstanceOf(Error);
           expect(err.message).toBe('options.selector or options.container must reference a valid DOM node.');
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'configuration-error');
+          expect(analytics.sendEvent).toBeCalledWith('configuration-error');
           done();
         });
       }
@@ -503,7 +503,7 @@ describe('Dropin', () => {
 
         instance._initialize(() => {
           expect(analytics.sendEvent).toBeCalledTimes(1);
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'appeared');
+          expect(analytics.sendEvent).toBeCalledWith('appeared');
           done();
         });
 
@@ -525,8 +525,8 @@ describe('Dropin', () => {
         ]);
 
         instance._initialize(() => {
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'vaulted-card.appear');
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'vaulted-paypal.appear');
+          expect(analytics.sendEvent).toBeCalledWith('vaulted-card.appear');
+          expect(analytics.sendEvent).toBeCalledWith('vaulted-paypal.appear');
           done();
         });
       }
@@ -545,8 +545,8 @@ describe('Dropin', () => {
         ]);
 
         instance._initialize(() => {
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'vaulted-card.appear');
-          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'vaulted-paypal.appear');
+          expect(analytics.sendEvent).toBeCalledWith('vaulted-card.appear');
+          expect(analytics.sendEvent).toBeCalledWith('vaulted-paypal.appear');
           done();
         });
       }
@@ -565,8 +565,8 @@ describe('Dropin', () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
 
         instance._initialize(() => {
-          expect(analytics.sendEvent).not.toBeCalledWith(instance._client, 'vaulted-card.appear');
-          expect(analytics.sendEvent).not.toBeCalledWith(instance._client, 'vaulted-paypal.appear');
+          expect(analytics.sendEvent).not.toBeCalledWith('vaulted-card.appear');
+          expect(analytics.sendEvent).not.toBeCalledWith('vaulted-paypal.appear');
 
           done();
         });
@@ -596,8 +596,8 @@ describe('Dropin', () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
 
         instance._initialize(() => {
-          expect(analytics.sendEvent).not.toBeCalledWith(instance._client, 'vaulted-card.appear');
-          expect(analytics.sendEvent).not.toBeCalledWith(instance._client, 'vaulted-paypal.appear');
+          expect(analytics.sendEvent).not.toBeCalledWith('vaulted-card.appear');
+          expect(analytics.sendEvent).not.toBeCalledWith('vaulted-paypal.appear');
 
           done();
         });
@@ -625,7 +625,7 @@ describe('Dropin', () => {
         ]);
 
         instance._initialize(() => {
-          expect(analytics.sendEvent).not.toBeCalledWith(instance._client, 'vaulted-card.appear');
+          expect(analytics.sendEvent).not.toBeCalledWith('vaulted-card.appear');
           done();
         });
       }

@@ -112,7 +112,7 @@ describe('DataCollector', () => {
       return dc.initialize().then(() => {
         expect(dc._instance).toBeFalsy();
         expect(dc.log).toBeCalledWith(err);
-        expect(analytics.sendEvent).toBeCalledWith(testContext.config.client, 'data-collector.setup-failed');
+        expect(analytics.sendEvent).toBeCalledWith('data-collector.setup-failed');
       });
     });
   });

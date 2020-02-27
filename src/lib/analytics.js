@@ -1,20 +1,50 @@
 'use strict';
 
+var btClient = require('braintree-web/client');
 var atob = require('./polyfill').atob;
 var constants = require('../constants');
 var Promise = require('./promise');
 var braintreeClientVersion = require('braintree-web/client').VERSION;
+var VERSION = '__VERSION__';
+
+var clientPromise;
 
 function _millisToSeconds(millis) {
   return Math.floor(millis / 1000);
 }
 
-function sendAnalyticsEvent(clientPromise, kind) {
+function setupAnalytics(authorization) {
+  clientPromise = btClient.create({
+    authorization: authorization
+  }).then(function (clientInstance) {
+    var configuration = clientInstance.getConfiguration();
+
+    configuration.analyticsMetadata.integration = constants.INTEGRATION;
+    configuration.analyticsMetadata.integrationType = constants.INTEGRATION;
+    configuration.analyticsMetadata.dropinVersion = VERSION;
+
+    clientInstance.getConfiguration = function () {
+      return configuration;
+    };
+
+    return clientInstance;
+  });
+
+  return clientPromise;
+}
+
+function resetClientPromise() {
+  clientPromise = null;
+}
+
+function sendAnalyticsEvent(kind) {
   var timestamp = _millisToSeconds(Date.now());
 
-  return Promise.resolve().then(function () {
-    return clientPromise;
-  }).then(function (client) {
+  if (!clientPromise) {
+    return Promise.reject(new Error('Client not available.'));
+  }
+
+  return clientPromise.then(function (client) {
     var configuration = client.getConfiguration();
     var url = configuration.gatewayConfiguration.analytics.url;
     var data = {
@@ -46,5 +76,7 @@ function sendAnalyticsEvent(clientPromise, kind) {
 }
 
 module.exports = {
-  sendEvent: sendAnalyticsEvent
+  resetClientPromise: resetClientPromise,
+  sendEvent: sendAnalyticsEvent,
+  setupAnalytics: setupAnalytics
 };

@@ -106,7 +106,6 @@
 var Dropin = require('./dropin');
 var client = require('braintree-web/client');
 var createFromScriptTag = require('./lib/create-from-script-tag');
-var constants = require('./constants');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 var parseAuthorization = require('./lib/parse-authorization');
@@ -589,6 +588,8 @@ function create(options) {
 
   parsedAuthorization = parseAuthorization(options.authorization);
 
+  analytics.setupAnalytics(options.authorization);
+
   return client.create({
     authorization: options.authorization
   }).catch(function (err) {
@@ -597,12 +598,10 @@ function create(options) {
       braintreeWebError: err
     }));
   }).then(function (clientInstance) {
-    clientInstance = setAnalyticsIntegration(clientInstance);
-
     if (clientInstance.getConfiguration().authorizationType === 'TOKENIZATION_KEY') {
-      analytics.sendEvent(clientInstance, 'started.tokenization-key');
+      analytics.sendEvent('started.tokenization-key');
     } else {
-      analytics.sendEvent(clientInstance, 'started.client-token');
+      analytics.sendEvent('started.client-token');
     }
 
     return new Promise(function (resolve, reject) {
@@ -622,20 +621,6 @@ function create(options) {
       });
     });
   });
-}
-
-function setAnalyticsIntegration(clientInstance) {
-  var configuration = clientInstance.getConfiguration();
-
-  configuration.analyticsMetadata.integration = constants.INTEGRATION;
-  configuration.analyticsMetadata.integrationType = constants.INTEGRATION;
-  configuration.analyticsMetadata.dropinVersion = VERSION;
-
-  clientInstance.getConfiguration = function () {
-    return configuration;
-  };
-
-  return clientInstance;
 }
 
 // we check for document's existence to support server side rendering

@@ -233,7 +233,7 @@ describe('MainView', () => {
           };
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
 
-          expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'vaulted-card.preselect');
+          expect(analytics.sendEvent).toBeCalledWith('vaulted-card.preselect');
         }
       );
 
@@ -246,7 +246,7 @@ describe('MainView', () => {
 
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
 
-          expect(analytics.sendEvent).not.toBeCalledWith(testContext.client, 'vaulted-card.preselect');
+          expect(analytics.sendEvent).not.toBeCalledWith('vaulted-card.preselect');
         }
       );
 
@@ -1070,7 +1070,7 @@ describe('MainView', () => {
         throw new Error('should not resolve');
       }).catch(err => {
         expect(err).toBe(fakeError);
-        expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'request-payment-method.error');
+        expect(analytics.sendEvent).toBeCalledWith('request-payment-method.error');
       });
     });
 
@@ -1090,7 +1090,7 @@ describe('MainView', () => {
       jest.spyOn(CardView.prototype, 'requestPaymentMethod').mockResolvedValue(stubPaymentMethod);
 
       return testContext.mainView.requestPaymentMethod().then(() => {
-        expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'request-payment-method.card');
+        expect(analytics.sendEvent).toBeCalledWith('request-payment-method.card');
       });
     });
 
@@ -1100,7 +1100,7 @@ describe('MainView', () => {
       jest.spyOn(CardView.prototype, 'requestPaymentMethod').mockResolvedValue(stubPaymentMethod);
 
       return testContext.mainView.requestPaymentMethod().then(() => {
-        expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'request-payment-method.paypal');
+        expect(analytics.sendEvent).toBeCalledWith('request-payment-method.paypal');
       });
     });
 

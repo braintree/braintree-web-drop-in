@@ -1,4 +1,5 @@
 
+const analytics = require('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
 const fake = require('../../helpers/fake');
 const fs = require('fs');
@@ -12,12 +13,10 @@ describe('PaymentMethodView', () => {
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     testContext.div = document.createElement('div');
     testContext.div.innerHTML = paymentMethodHTML;
     document.body.appendChild(testContext.div);
+    jest.spyOn(analytics, 'sendEvent');
   });
 
   describe('Constructor', () => {
@@ -254,7 +253,7 @@ describe('PaymentMethodView', () => {
 
       view._choosePaymentMethod();
 
-      expect(testContext.model.sendEvent).toBeCalledWith('vaulted-card.select');
+      expect(analytics.sendEvent).toBeCalledWith('vaulted-card.select');
     });
 
     test(
@@ -274,7 +273,7 @@ describe('PaymentMethodView', () => {
 
         view._choosePaymentMethod();
 
-        expect(testContext.model.sendEvent).toBeCalledWith('vaulted-paypal.select');
+        expect(analytics.sendEvent).toBeCalledWith('vaulted-paypal.select');
       }
     );
 
@@ -289,7 +288,7 @@ describe('PaymentMethodView', () => {
 
         view._choosePaymentMethod();
 
-        expect(testContext.model.sendEvent).not.toBeCalled();
+        expect(analytics.sendEvent).not.toBeCalled();
       }
     );
 
@@ -310,7 +309,7 @@ describe('PaymentMethodView', () => {
 
         view._choosePaymentMethod();
 
-        expect(testContext.model.sendEvent).not.toBeCalled();
+        expect(analytics.sendEvent).not.toBeCalled();
       }
     );
   });

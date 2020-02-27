@@ -154,7 +154,7 @@ BasePayPalView.isEnabled = function (options) {
   var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
 
   if (browserDetection.isIe9() || browserDetection.isIe10()) {
-    analytics.sendEvent(options.client, options.viewID + '.checkout.js-browser-not-supported');
+    analytics.sendEvent(options.viewID + '.checkout.js-browser-not-supported');
 
     return Promise.resolve(false);
   }

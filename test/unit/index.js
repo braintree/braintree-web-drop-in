@@ -5,23 +5,16 @@ const DropinError = require('../../src/lib/dropin-error');
 const BraintreeError = require('braintree-web/lib/braintree-error');
 const client = require('braintree-web/client');
 const fake = require('../helpers/fake');
-const dropinConstants = require('../../src/constants');
 const analytics = require('../../src/lib/analytics');
 const {
   yields
 } = require('../helpers/yields');
-// TODO this gets transformed to the package.json version when built
-// should we figure out how to actually test this?
-const version = '__VERSION__';
 
 describe('dropin.create', () => {
   let testContext;
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     const container = document.createElement('div');
 
     testContext.form = document.createElement('form');
@@ -32,6 +25,8 @@ describe('dropin.create', () => {
     document.body.appendChild(testContext.form);
 
     jest.spyOn(client, 'create').mockResolvedValue();
+    jest.spyOn(analytics, 'sendEvent').mockImplementation();
+    jest.spyOn(analytics, 'setupAnalytics').mockImplementation();
   });
 
   afterEach(() => {
@@ -47,7 +42,7 @@ describe('dropin.create', () => {
     });
   });
 
-  test('returns an error if client.create errors', done => {
+  test('returns an error if client.create errors', async () => {
     const originalErr = new BraintreeError({
       type: 'MERCHANT',
       code: 'CODE',
@@ -56,15 +51,12 @@ describe('dropin.create', () => {
 
     client.create.mockRejectedValue(originalErr);
 
-    dropin.create({
+    await expect(dropin.create({
       authorization: fake.tokenizationKey,
       selector: '#foo'
-    }, (err, instance) => {
-      expect(err).toBeInstanceOf(DropinError);
-      expect(err.message).toBe('There was an error creating Drop-in.');
-      expect(err._braintreeWebError).toBe(originalErr);
-      expect(instance).not.toBeDefined();
-      done();
+    })).rejects.toMatchObject({
+      message: 'There was an error creating Drop-in.',
+      _braintreeWebError: originalErr
     });
   });
 
@@ -108,29 +100,6 @@ describe('dropin.create', () => {
     }
   );
 
-  test('sets the correct analytics metadata', done => {
-    const fakeClient = fake.client();
-
-    jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
-      callback(null, this);
-    });
-
-    client.create.mockResolvedValue(fakeClient);
-
-    dropin.create({
-      authorization: fake.tokenizationKey,
-      selector: '#foo'
-    }, () => {
-      const configuration = fakeClient.getConfiguration();
-
-      expect(configuration.analyticsMetadata.integration).toBe(dropinConstants.INTEGRATION);
-      expect(configuration.analyticsMetadata.integrationType).toBe(dropinConstants.INTEGRATION);
-      expect(configuration.analyticsMetadata.dropinVersion).toBe(version);
-
-      done();
-    });
-  });
-
   test(
     'sends web.dropin.started.tokenization-key event when using a tokenization key',
     done => {
@@ -139,7 +108,6 @@ describe('dropin.create', () => {
       jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
         callback(null, this);
       });
-      jest.spyOn(analytics, 'sendEvent');
 
       client.create.mockResolvedValue(fakeClient);
 
@@ -147,7 +115,7 @@ describe('dropin.create', () => {
         authorization: fake.tokenizationKey,
         selector: '#foo'
       }, () => {
-        expect(analytics.sendEvent).toBeCalledWith(fakeClient, 'started.tokenization-key');
+        expect(analytics.sendEvent).toBeCalledWith('started.tokenization-key');
         done();
       });
     }
@@ -168,7 +136,6 @@ describe('dropin.create', () => {
       jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
         callback(null, this);
       });
-      jest.spyOn(analytics, 'sendEvent');
 
       client.create.mockResolvedValue(fakeClient);
 
@@ -176,7 +143,7 @@ describe('dropin.create', () => {
         authorization: fake.clientToken,
         selector: '#foo'
       }, () => {
-        expect(analytics.sendEvent).toBeCalledWith(fakeClient, 'started.client-token');
+        expect(analytics.sendEvent).toBeCalledWith('started.client-token');
         done();
       });
     }
