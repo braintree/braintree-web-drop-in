@@ -164,7 +164,10 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     fields: {
       number: {
         selector: this._generateFieldSelector('number'),
-        placeholder: generateCardNumberPlaceholder()
+        placeholder: generateCardNumberPlaceholder(),
+        // enforces card type as part of validity for hosted fields
+        // without providing any overrides
+        supportedCardBrands: {}
       },
       expirationDate: {
         selector: this._generateFieldSelector('expiration'),
@@ -296,14 +299,13 @@ CardView.prototype._validateForm = function (showFieldErrors) {
     }
   }.bind(this));
 
-  if (state.fields.number.isValid) {
+  if (!state.fields.number.isValid) {
+    // TODO fixup to not use supported card types from gw
     card = state.cards[0];
     cardType = card && constants.configurationCardTypes[card.type];
     cardTypeSupported = cardType && supportedCardTypes.indexOf(cardType) !== -1;
 
     if (!cardTypeSupported) {
-      isValid = false;
-
       if (showFieldErrors) {
         this.showFieldError('number', this.strings.unsupportedCardTypeError);
       }
@@ -518,12 +520,14 @@ CardView.prototype._onBlurEvent = function (event) {
   if (shouldApplyFieldEmptyError(field)) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
-    this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
-  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
-    this.showFieldError('number', this.strings.unsupportedCardTypeError);
+    if (event.emittedBy === 'number' && event.cards && event.cards[0] && !event.cards[0].supported) {
+      this.showFieldError('number', this.strings.unsupportedCardTypeError);
+    } else {
+      this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
+    }
   }
 
-  setTimeout(function () {
+  window.setTimeout(function () {
     // when focusing on a field by clicking the label,
     // we need to wait a bit for the iframe to be
     // focused properly before applying validations
@@ -582,14 +586,8 @@ CardView.prototype._onNotEmptyEvent = function (event) {
 };
 
 CardView.prototype._onValidityChangeEvent = function (event) {
-  var isValid;
   var field = event.fields[event.emittedBy];
-
-  if (event.emittedBy === 'number' && event.cards[0]) {
-    isValid = field.isValid && this._isCardTypeSupported(event.cards[0].type);
-  } else {
-    isValid = field.isValid;
-  }
+  var isValid = field.isValid;
 
   classList.toggle(field.container, 'braintree-form__field--valid', isValid);
 
@@ -636,14 +634,6 @@ CardView.prototype._hideUnsupportedCardIcons = function () {
       classList.add(cardIcon, 'braintree-hidden');
     }
   }.bind(this));
-};
-
-CardView.prototype._isCardTypeSupported = function (cardType) {
-  // TODO let hosted fields handle this instead
-  var configurationCardType = constants.configurationCardTypes[cardType];
-  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
-
-  return supportedCardTypes.indexOf(configurationCardType) !== -1;
 };
 
 CardView.isEnabled = function (options) {
