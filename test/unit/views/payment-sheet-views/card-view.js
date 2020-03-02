@@ -52,16 +52,7 @@ describe('CardView', () => {
       return testContext.model.initialize();
     });
 
-    test('has cvv if supplied in challenges', () => {
-      testContext.client.getConfiguration.mockReturnValue({
-        gatewayConfiguration: {
-          challenges: ['cvv'],
-          creditCards: {
-            supportedCardTypes: []
-          }
-        }
-      });
-
+    test('has cvv by default', async () => {
       testContext.view = new CardView({
         element: testContext.element,
         mainView: testContext.mainView,
@@ -70,46 +61,18 @@ describe('CardView', () => {
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.element.querySelector('[data-braintree-id="cvv-field-group"]')).toBeDefined();
-      });
+      await testContext.view.initialize();
+
+      expect(testContext.element.querySelector('[data-braintree-id="cvv-field-group"]')).toBeTruthy();
     });
 
-    test(
-      'does not have cvv if supplied in challenges, but hosted fields overrides sets cvv to null',
-      () => {
-        testContext.client.getConfiguration.mockReturnValue({
-          gatewayConfiguration: {
-            challenges: ['cvv'],
-            creditCards: {
-              supportedCardTypes: []
-            }
-          }
-        });
+    test('does not have cvv if merchant passes `card.cvv.collect = false`', async () => {
+      testContext.model.merchantConfiguration.card = {
+        cvv: {
+          collect: false
+        }
+      };
 
-        testContext.model.merchantConfiguration.card = {
-          overrides: {
-            fields: {
-              cvv: null
-            }
-          }
-        };
-
-        testContext.view = new CardView({
-          element: testContext.element,
-          mainView: testContext.mainView,
-          model: testContext.model,
-          client: testContext.client,
-          strings: strings
-        });
-
-        return testContext.view.initialize().then(() => {
-          expect(testContext.element.querySelector('[data-braintree-id="cvv-field-group"]')).toBeFalsy();
-        });
-      }
-    );
-
-    test('does not have cvv if not supplied in challenges', () => {
       testContext.view = new CardView({
         element: testContext.element,
         mainView: testContext.mainView,
@@ -118,9 +81,9 @@ describe('CardView', () => {
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.element.querySelector('[data-braintree-id="cvv-field-group"]')).toBeFalsy();
-      });
+      await testContext.view.initialize();
+
+      expect(testContext.element.querySelector('[data-braintree-id="cvv-field-group"]')).toBeFalsy();
     });
 
     test('has postal code if supplied in challenges', () => {
@@ -347,7 +310,7 @@ describe('CardView', () => {
       }
     );
 
-    test('creates Hosted Fields with number and expiration date', () => {
+    test('creates Hosted Fields with number, cvv and expiration date', () => {
       testContext.view = new CardView({
         element: testContext.element,
         mainView: testContext.mainView,
@@ -361,11 +324,10 @@ describe('CardView', () => {
           client: testContext.client,
           fields: {
             number: expect.any(Object),
+            cvv: expect.any(Object),
             expirationDate: expect.any(Object)
           }
         }));
-        expect(hostedFields.create.mock.calls[0][0]).not.toHaveProperty('fields.cvv');
-        expect(hostedFields.create.mock.calls[0][0]).not.toHaveProperty('fields.postalCode');
       });
     });
 
@@ -588,12 +550,15 @@ describe('CardView', () => {
       });
     });
 
-    test(
+    test.skip(
       'does not add hosted fields elements for fields that are not present',
       () => {
         let hostedFieldsConfiguredFields;
 
         testContext.model.merchantConfiguration.card = {
+          cvv: {
+            collect: false
+          },
           overrides: {
             fields: {
               postalCode: {
@@ -1495,14 +1460,11 @@ describe('CardView', () => {
             setAttribute: jest.fn()
           };
 
-          testContext.context.client.getConfiguration.mockReturnValue({
-            gatewayConfiguration: {
-              challenges: [],
-              creditCards: {
-                supportedCardTypes: []
-              }
+          testContext.context.model.merchantConfiguration.card = {
+            cvv: {
+              collect: false
             }
-          });
+          };
 
           jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 

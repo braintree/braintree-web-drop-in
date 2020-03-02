@@ -170,7 +170,6 @@ CardView.prototype._generateHostedFieldsOptions = function () {
   // token was generated with a customer id, and updates to Hosted Fields to allow
   // dynamically adding/removing fields from the card form
   var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
-  var hasCVVChallenge = challenges.indexOf('cvv') !== -1;
   var hasPostalCodeChallenge = challenges.indexOf('postal_code') !== -1;
   var overrides = this.merchantConfiguration.overrides;
   var options = {
@@ -220,7 +219,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     }
   };
 
-  if (!hasCVVChallenge) {
+  if (this.merchantConfiguration.cvv && this.merchantConfiguration.cvv.collect === false) {
     delete options.fields.cvv;
   }
 
