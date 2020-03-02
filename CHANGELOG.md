@@ -9,15 +9,18 @@ _Breaking Changes_
 * Drop support for IE 9-10
 * Whenever a new payment method is added, all other unvaulted payment methods will be removed from avaialble payment methods
 * Payment methods will no longer automatically be hidden or error on setup if merchant is not enabled for them
-* `vaultManager` in create options is now an object instead of a boolean
-  * can opt out of `autoVaultPaymentMethods`
-  * can opt out of `presentVaultedPaymentMethods`
-  * can opt into `allowCustomerToDeletePaymentMethods`
-  * `preselectVaultedPaymentMethod` has been moved out of a top level and into `vaultManager`
-* `vaultManager` cannot be used with tokenization keys
-* `card` option updates
-  * `vault.vaultCard` is now `vault.autoVault`
-  * `vault.allowVaultCardOverride` is now `vault.allowAutoVaultOverride`
+* Credit card view changes
+  * `card` configuration changes
+    - `card.vault.vaultCard` is now `card.vault.autoVault`
+    - `card.vault.allowVaultCardOverride` is now `card.vault.allowAutoVaultOverride`
+* Vault Management changes
+  * `vaultManager` configuration changes
+    - cannot be used with tokenization keys
+    - create options is now an object instead of a boolean
+    - can opt out of `vaultManager.autoVaultPaymentMethods`
+    - can opt out of `vaultManager.presentVaultedPaymentMethods`
+    - can opt into `vaultManager.allowCustomerToDeletePaymentMethods`
+    - `preselectVaultedPaymentMethod` has been moved out of a top level and into `vaultManager`
 
 1.22.1
 ------
