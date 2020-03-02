@@ -13,7 +13,6 @@ var Promise = require('../../lib/promise');
 
 var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
-// TODO Hosted Fields should be able to supply methods for fetching challenges and supported card types
 function CardView() {
   BaseView.apply(this, arguments);
 }
@@ -264,10 +263,8 @@ CardView.prototype._generateHostedFieldsOptions = function () {
 };
 
 CardView.prototype._validateForm = function (showFieldErrors) {
-  var card, cardType, cardTypeSupported, state;
+  var card, state;
   var isValid = true;
-  // TODO let hosted fields handle this
-  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   if (!this.hostedFieldsInstance) {
     return false;
@@ -299,16 +296,11 @@ CardView.prototype._validateForm = function (showFieldErrors) {
     }
   }.bind(this));
 
-  if (!state.fields.number.isValid) {
-    // TODO fixup to not use supported card types from gw
-    card = state.cards[0];
-    cardType = card && constants.configurationCardTypes[card.type];
-    cardTypeSupported = cardType && supportedCardTypes.indexOf(cardType) !== -1;
+  if (showFieldErrors && !state.fields.number.isValid) {
+    card = state.cards && state.cards[0];
 
-    if (!cardTypeSupported) {
-      if (showFieldErrors) {
-        this.showFieldError('number', this.strings.unsupportedCardTypeError);
-      }
+    if (card && !card.supported) {
+      this.showFieldError('number', this.strings.unsupportedCardTypeError);
     }
   }
 
