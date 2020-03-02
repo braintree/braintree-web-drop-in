@@ -14,6 +14,7 @@ _Breaking Changes_
     - `card.vault.vaultCard` is now `card.vault.autoVault`
     - `card.vault.allowVaultCardOverride` is now `card.vault.allowAutoVaultOverride`
     - Previously, CVV would only be presented as a field if merchant had the [CVV rule configured in the control panel](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules). Now CVV will always be presented unless it is specifically removed by passing `card.cvv = { collect: false }`
+    - Previously, postal code would only be presented as a field if merchant had the [postal code AVS rule configured in the control panel](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules). Now postal code will not be presented unless it is specifically enabled by passing `card.postalCode = { collect: true }`
 * Vault Management changes
   * `vaultManager` configuration changes
     - cannot be used with tokenization keys

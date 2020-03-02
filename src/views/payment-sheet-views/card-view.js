@@ -155,22 +155,8 @@ CardView.prototype._sendRequestableEvent = function () {
 };
 
 CardView.prototype._generateHostedFieldsOptions = function () {
-  // TODO this is going to be a tricky one
-  // we won't know what challenges the merchant needs to present
-  // until after we have the client, but we don't want to wait on the client
-  // to display the card form.
-  // Basic plan right now is to show the number, exp date and cvv fields by default
-  // (and let the merchant opt out of them) and let the merchant opt into the
-  // postal code field. When we go to tokenize, we'll first wait for the client
-  // to finish setting up, and then dynamically add the postal code field
-  // if that challenge is required _and_ the client token was generated with a customer
-  // id _and_ we intend to vault the card. (otherwise it will fail the vaulting process)
-  //
-  // This will require updates to the client configuration to indicate if the client
-  // token was generated with a customer id, and updates to Hosted Fields to allow
-  // dynamically adding/removing fields from the card form
-  var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
-  var hasPostalCodeChallenge = challenges.indexOf('postal_code') !== -1;
+  var shouldNotCollectCVV = this.merchantConfiguration.cvv && this.merchantConfiguration.cvv.collect === false;
+  var shouldCollectPostalCode = this.merchantConfiguration.postalCode && this.merchantConfiguration.postalCode.collect === true;
   var overrides = this.merchantConfiguration.overrides;
   var options = {
     // TODO switch to auth
@@ -219,11 +205,11 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     }
   };
 
-  if (this.merchantConfiguration.cvv && this.merchantConfiguration.cvv.collect === false) {
+  if (shouldNotCollectCVV) {
     delete options.fields.cvv;
   }
 
-  if (!hasPostalCodeChallenge) {
+  if (!shouldCollectPostalCode) {
     delete options.fields.postalCode;
   }
 

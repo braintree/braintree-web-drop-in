@@ -86,15 +86,12 @@ describe('CardView', () => {
       expect(testContext.element.querySelector('[data-braintree-id="cvv-field-group"]')).toBeFalsy();
     });
 
-    test('has postal code if supplied in challenges', () => {
-      testContext.client.getConfiguration.mockReturnValue({
-        gatewayConfiguration: {
-          challenges: ['postal_code'],
-          creditCards: {
-            supportedCardTypes: []
-          }
+    test('has postal code if merchant passes `card.postalCode.collect = true`', async () => {
+      testContext.model.merchantConfiguration.card = {
+        postalCode: {
+          collect: true
         }
-      });
+      };
 
       testContext.view = new CardView({
         element: testContext.element,
@@ -104,46 +101,12 @@ describe('CardView', () => {
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.element.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeDefined();
-      });
+      await testContext.view.initialize();
+
+      expect(testContext.element.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeTruthy();
     });
 
-    test(
-      'does not have postal code if supplied in challenges, but hosted fields overrides sets postal code to null',
-      () => {
-        testContext.client.getConfiguration.mockReturnValue({
-          gatewayConfiguration: {
-            challenges: ['postal_code'],
-            creditCards: {
-              supportedCardTypes: []
-            }
-          }
-        });
-
-        testContext.model.merchantConfiguration.card = {
-          overrides: {
-            fields: {
-              postalCode: null
-            }
-          }
-        };
-
-        testContext.view = new CardView({
-          element: testContext.element,
-          mainView: testContext.mainView,
-          model: testContext.model,
-          client: testContext.client,
-          strings: strings
-        });
-
-        return testContext.view.initialize().then(() => {
-          expect(testContext.element.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeFalsy();
-        });
-      }
-    );
-
-    test('does not have postal code if not supplied in challenges', () => {
+    test('does not have postal code by default', async () => {
       testContext.view = new CardView({
         element: testContext.element,
         mainView: testContext.mainView,
@@ -152,9 +115,9 @@ describe('CardView', () => {
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.element.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeFalsy();
-      });
+      await testContext.view.initialize();
+
+      expect(testContext.element.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeFalsy();
     });
 
     test('has cardholderName if provided in merchant configuration', () => {
@@ -331,43 +294,14 @@ describe('CardView', () => {
       });
     });
 
-    test('creates Hosted Fields with cvv if included in challenges', () => {
-      testContext.client.getConfiguration.mockReturnValue({
-        gatewayConfiguration: {
-          challenges: ['cvv'],
-          creditCards: {
-            supportedCardTypes: []
-          }
-        }
-      });
-
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
-        client: testContext.client,
-        strings: strings,
-        merchantConfiguration: {
-          authorization: fake.clientToken
-        }
-      });
-
-      return testContext.view.initialize().then(() => {
-        expect(hostedFields.create.mock.calls[0][0].fields).toHaveProperty('cvv');
-      });
-    });
-
     test(
-      'creates Hosted Fields with postal code if included in challenges',
+      'creates Hosted Fields with postal code if included in config',
       () => {
-        testContext.client.getConfiguration.mockReturnValue({
-          gatewayConfiguration: {
-            challenges: ['postal_code'],
-            creditCards: {
-              supportedCardTypes: []
-            }
+        testContext.model.merchantConfiguration.card = {
+          postalCode: {
+            collect: true
           }
-        });
+        };
 
         testContext.view = new CardView({
           element: testContext.element,
@@ -458,7 +392,6 @@ describe('CardView', () => {
 
       testContext.client.getConfiguration.mockReturnValue({
         gatewayConfiguration: {
-          challenges: [],
           creditCards: {
             supportedCardTypes: ['UnionPay']
           }
@@ -483,14 +416,11 @@ describe('CardView', () => {
     test('sets field placeholders', () => {
       let hostedFieldsConfiguredFields;
 
-      testContext.client.getConfiguration.mockReturnValue({
-        gatewayConfiguration: {
-          challenges: ['cvv', 'postal_code'],
-          creditCards: {
-            supportedCardTypes: []
-          }
+      testContext.model.merchantConfiguration.card = {
+        postalCode: {
+          collect: true
         }
-      });
+      };
 
       testContext.view = new CardView({
         element: testContext.element,
@@ -513,14 +443,6 @@ describe('CardView', () => {
     test('allows overriding field options for hosted fields', () => {
       let hostedFieldsConfiguredFields;
 
-      testContext.client.getConfiguration.mockReturnValue({
-        gatewayConfiguration: {
-          challenges: ['cvv', 'postal_code'],
-          creditCards: {
-            supportedCardTypes: []
-          }
-        }
-      });
       testContext.model.merchantConfiguration.card = {
         overrides: {
           fields: {
@@ -786,7 +708,6 @@ describe('CardView', () => {
           model: model,
           client: fake.client({
             gatewayConfiguration: {
-              challenges: ['cvv'],
               creditCards: {
                 supportedCardTypes: []
               }
@@ -924,7 +845,6 @@ describe('CardView', () => {
 
         testContext.context.client.getConfiguration.mockReturnValue({
           gatewayConfiguration: {
-            challenges: ['cvv'],
             creditCards: {
               supportedCardTypes: ['Visa']
             }
@@ -970,7 +890,6 @@ describe('CardView', () => {
             authorization: fake.clientToken,
             authorizationType: 'CLIENT_TOKEN',
             gatewayConfiguration: {
-              challenges: ['cvv'],
               creditCards: {
                 supportedCardTypes: ['Visa']
               }
@@ -1025,7 +944,6 @@ describe('CardView', () => {
             authorization: fake.clientToken,
             authorizationType: 'CLIENT_TOKEN',
             gatewayConfiguration: {
-              challenges: ['cvv'],
               creditCards: {
                 supportedCardTypes: ['Visa']
               }
@@ -1081,7 +999,6 @@ describe('CardView', () => {
             authorization: fake.clientToken,
             authorizationType: 'CLIENT_TOKEN',
             gatewayConfiguration: {
-              challenges: ['cvv'],
               creditCards: {
                 supportedCardTypes: ['Visa']
               }
@@ -1130,7 +1047,6 @@ describe('CardView', () => {
             authorization: fake.clientToken,
             authorizationType: 'CLIENT_TOKEN',
             gatewayConfiguration: {
-              challenges: ['cvv'],
               creditCards: {
                 supportedCardTypes: ['Visa']
               }
@@ -1658,7 +1574,6 @@ describe('CardView', () => {
 
           testContext.context.client.getConfiguration.mockReturnValue({
             gatewayConfiguration: {
-              challenges: ['cvv'],
               creditCards: {
                 supportedCardTypes: ['Visa']
               }
@@ -1699,7 +1614,6 @@ describe('CardView', () => {
 
           testContext.context.client.getConfiguration.mockReturnValue({
             gatewayConfiguration: {
-              challenges: ['cvv'],
               creditCards: {
                 supportedCardTypes: ['Visa']
               }
@@ -1740,7 +1654,6 @@ describe('CardView', () => {
 
           testContext.context.client.getConfiguration.mockReturnValue({
             gatewayConfiguration: {
-              challenges: ['cvv'],
               creditCards: {
                 supportedCardTypes: ['Visa']
               }
