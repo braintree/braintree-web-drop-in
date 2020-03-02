@@ -611,10 +611,11 @@ CardView.prototype.onSelection = function () {
 };
 
 CardView.prototype._hideUnsupportedCardIcons = function () {
-  // TODO should we just not show supported card icons?
-  // or show them when we know the supported card types?
-  // or hide the ones that we realize are unsupported?
-  // let merchant specify supported card types
+  // TODO wait for bt-web release with hosted fields
+  // method to fetch supported card types, then unhide
+  // the supported ones. Optionally add a config method
+  // to `card` create options to configure what card
+  // types to display
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
