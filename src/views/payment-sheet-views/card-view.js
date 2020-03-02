@@ -31,7 +31,6 @@ CardView.prototype.initialize = function () {
   hfOptions = this._generateHostedFieldsOptions();
 
   cardIcons.innerHTML = cardIconHTML;
-  this._hideUnsupportedCardIcons();
 
   this.hasCVV = hfOptions.fields.cvv;
   this.hasCardholderName = Boolean(this.merchantConfiguration.cardholderName);
@@ -90,6 +89,7 @@ CardView.prototype.initialize = function () {
 
   return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
+    this._showSupportedCardIcons();
     this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
     this.hostedFieldsInstance.on('cardTypeChange', this._onCardTypeChangeEvent.bind(this));
     this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
@@ -610,23 +610,25 @@ CardView.prototype.onSelection = function () {
   }
 };
 
-CardView.prototype._hideUnsupportedCardIcons = function () {
-  // TODO wait for bt-web release with hosted fields
-  // method to fetch supported card types, then unhide
-  // the supported ones. Optionally add a config method
-  // to `card` create options to configure what card
-  // types to display
-  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+CardView.prototype._showSupportedCardIcons = function () {
+  var self = this;
 
-  Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
-    var cardIcon;
-    var configurationCardType = constants.configurationCardTypes[paymentMethodCardType];
+  // TODO remove this when sdk is released with the real function
+  this.hostedFieldsInstance.getSupportedCardTypes = function () {
+    return Promise.resolve(['Visa', 'Mastercard', 'American Express', 'JCB']);
+  };
 
-    if (supportedCardTypes.indexOf(configurationCardType) === -1) {
-      cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');
-      classList.add(cardIcon, 'braintree-hidden');
-    }
-  }.bind(this));
+  this.hostedFieldsInstance.getSupportedCardTypes().then(function (supportedCardTypes) {
+    Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
+      var cardIcon;
+      var configurationKey = constants.configurationCardTypes[paymentMethodCardType];
+
+      if (supportedCardTypes.indexOf(paymentMethodCardType) > -1) {
+        cardIcon = self.getElementById(configurationKey + '-card-icon');
+        classList.remove(cardIcon, 'braintree-hidden');
+      }
+    });
+  });
 };
 
 CardView.isEnabled = function (options) {

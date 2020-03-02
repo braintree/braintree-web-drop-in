@@ -39,14 +39,13 @@ module.exports = {
     Maestro: 'maestro'
   },
   configurationCardTypes: {
-    visa: 'Visa',
-    'master-card': 'MasterCard',
-    'american-express': 'American Express',
-    'diners-club': 'Discover',
-    discover: 'Discover',
-    jcb: 'JCB',
-    unionpay: 'UnionPay',
-    maestro: 'Maestro'
+    Visa: 'visa',
+    Mastercard: 'mastercard',
+    'American Express': 'american-express',
+    Discover: 'discover',
+    JCB: 'jcb',
+    UnionPay: 'unionpay',
+    Maestro: 'maestro'
   },
   errors: {
     NO_PAYMENT_METHOD_ERROR: 'No payment method is available.',

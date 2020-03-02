@@ -347,8 +347,9 @@ describe('CardView', () => {
       }
     );
 
-    test('shows supported card icons', () => {
-      const supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa'];
+    test('shows supported card icons', (done) => {
+      const unsupportedCardTypes = ['maestro', 'diners-club', 'unionpay', 'discover'];
+      const supportedCardTypes = ['visa', 'mastercard', 'american-express', 'jcb'];
 
       testContext.view = new CardView({
         element: testContext.element,
@@ -358,32 +359,21 @@ describe('CardView', () => {
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        supportedCardTypes.forEach(cardType => {
-          const cardIcon = testContext.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
+      testContext.view.initialize().then(() => {
+        setTimeout(() => {
+          unsupportedCardTypes.forEach(cardType => {
+            const cardIcon = testContext.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
-          expect(cardIcon.classList.contains('braintree-hidden')).toBe(false);
-        });
-      });
-    });
+            expect(cardIcon.classList.contains('braintree-hidden')).toBe(true);
+          });
+          supportedCardTypes.forEach(cardType => {
+            const cardIcon = testContext.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
-    test('hides unsupported card icons', () => {
-      const unsupportedCardTypes = ['maestro', 'diners-club'];
+            expect(cardIcon.classList.contains('braintree-hidden')).toBe(false);
+          });
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
-        client: testContext.client,
-        strings: strings
-      });
-
-      return testContext.view.initialize().then(() => {
-        unsupportedCardTypes.forEach(cardType => {
-          const cardIcon = testContext.element.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
-
-          expect(cardIcon.classList.contains('braintree-hidden')).toBe(true);
-        });
+          done();
+        }, 1);
       });
     });
 
@@ -719,7 +709,7 @@ describe('CardView', () => {
           },
           strings: strings,
           tokenize: CardView.prototype.tokenize,
-          _hideUnsupportedCardIcons: function () {},
+          _showSupportedCardIcons: function () {},
           _isCardTypeSupported: CardView.prototype._isCardTypeSupported,
           _onBlurEvent: function () {},
           _onCardTypeChangeEvent: function () {},
