@@ -24,6 +24,10 @@ _Breaking Changes_
     - can opt into `vaultManager.allowCustomerToDeletePaymentMethods`
     - `preselectVaultedPaymentMethod` has been moved out of a top level and into `vaultManager`
 
+unreleased
+----------
+- Update braintree-web to v3.59.0
+
 1.22.1
 ------
 - Fix issue where payment requestable event would not fire when switching between vaulted payment methods (#499)
