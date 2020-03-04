@@ -1,13 +1,16 @@
 'use strict';
 
 var braintreeWebVersion = require('braintree-web/client').VERSION;
+var assign = require('./assign').assign;
 var constants = require('../constants');
 var analytics = require('./analytics');
 var assets = require('@braintree/asset-loader');
 var Promise = require('./promise');
 
 function DataCollector(config) {
-  this._config = config;
+  this._config = assign(config, {
+    useDefferedClient: true
+  });
 }
 
 DataCollector.prototype.initialize = function () {
@@ -39,14 +42,16 @@ DataCollector.prototype.log = function (message) {
   console.log(message); // eslint-disable-line no-console
 };
 
-// TODO convert to async
 DataCollector.prototype.getDeviceData = function () {
   if (!this._instance) {
-    return '';
+    return Promise.resolve('');
   }
 
-  // TODO use async method instead
-  return this._instance.deviceData;
+  // TODO do we want to maintain the behavior
+  // where if data collector instantiation fails
+  // we just return an empty string for for device data
+  // or should we actually error now?
+  return this._instance.getDeviceData();
 };
 
 DataCollector.prototype.teardown = function () {

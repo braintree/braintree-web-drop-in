@@ -836,7 +836,7 @@ describe('Dropin', () => {
 
     test('sets up datacollector', () => {
       Dropin.prototype._setUpDataCollector.call({
-        _client: testContext.client,
+        _authorization: 'fake-auth',
         _model: testContext.model,
         _strings: {},
         _merchantConfiguration: {
@@ -859,7 +859,7 @@ describe('Dropin', () => {
         DataCollector.prototype.initialize.mockRejectedValue(error);
 
         Dropin.prototype._setUpDataCollector.call({
-          _client: testContext.client,
+          _authorization: 'fake-auth',
           _model: testContext.model,
           _merchantConfiguration: {
             threeDSecure: {
@@ -881,7 +881,7 @@ describe('Dropin', () => {
       jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
 
       Dropin.prototype._setUpDataCollector.call({
-        _client: testContext.client,
+        _authorization: 'fake-auth',
         _merchantConfiguration: {
           threeDSecure: {
             foo: 'bar'

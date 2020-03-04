@@ -32,8 +32,7 @@ describe('DataCollector', () => {
       }
 
       testContext.config = {
-        client: {
-        },
+        authorization: 'fake-auth',
         kount: true
       };
 
@@ -92,13 +91,19 @@ describe('DataCollector', () => {
       });
     });
 
-    test('creates a data collector instance', () => {
+    test('creates a data collector instance using deferred method', () => {
       const dc = new DataCollector(testContext.config);
 
       expect(dc._instance).toBeFalsy();
 
       return dc.initialize().then(() => {
         expect(dc._instance).toBe(testContext.dataCollectorInstance);
+        expect(global.braintree.dataCollector.create).toBeCalledTimes(1);
+        expect(global.braintree.dataCollector.create).toBeCalledWith({
+          authorization: 'fake-auth',
+          kount: true,
+          useDefferedClient: true
+        });
       });
     });
 
@@ -118,12 +123,22 @@ describe('DataCollector', () => {
   });
 
   describe('getDeviceData', () => {
-    test('returns device data', () => {
+    test('resolves with empty string when data collector instance is not avaialble', async () => {
+      const dc = new DataCollector({});
+
+      const data = await dc.getDeviceData();
+
+      expect(data).toBe('');
+    });
+
+    test('resolves device data', async () => {
       const dc = new DataCollector({});
 
       dc._instance = testContext.dataCollectorInstance;
 
-      expect(dc.getDeviceData()).toBe('device-data');
+      const data = await dc.getDeviceData();
+
+      expect(data).toBe('device-data');
     });
   });
 

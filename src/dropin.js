@@ -266,6 +266,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @classdesc This class represents a Drop-in component, that will create a pre-made UI for accepting cards and PayPal on your page. Instances of this class have methods for requesting a payment method and subscribing to events. For more information, see the [Drop-in guide](https://developers.braintreepayments.com/guides/drop-in/javascript/v3) in the Braintree Developer Docs. To be used in conjunction with the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/).
  */
 function Dropin(options) {
+  this._authorization = options.authorization;
   this._client = options.client;
   this._environment = options.environment;
   this._authType = options.authType;
@@ -487,8 +488,7 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
 
 Dropin.prototype._setUpDataCollector = function () {
   var self = this;
-  // TODO eliminate client from DC
-  var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
+  var config = assign({}, self._merchantConfiguration.dataCollector, {authorization: self._authorization});
 
   this._model.asyncDependencyStarting();
   this._dataCollector = new DataCollector(config);

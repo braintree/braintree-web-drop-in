@@ -69,6 +69,7 @@ clientTokenWithCustomerID = btoa(JSON.stringify(clientTokenWithCustomerID));
 fakeBTInstances = {
   dataCollector: {
     deviceData: 'device-data',
+    getDeviceData: jest.fn().mockResolvedValue('device-data'),
     teardown: function () {}
   },
   hostedFields: {
