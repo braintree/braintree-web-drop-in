@@ -55,7 +55,6 @@ describe('PaymentOptionsView', () => {
 
   beforeEach(() => {
     testContext = {};
-    testContext.client = fake.client();
   });
 
   describe('Constructor', () => {
@@ -91,7 +90,6 @@ describe('PaymentOptionsView', () => {
 
       test('adds a ' + option.paymentOptionID + ' option', () => {
         const paymentOptionsView = new PaymentOptionsView({
-          client: testContext.client,
           element: testContext.element,
           mainView: {},
           model: modelThatSupports([option.paymentOptionID]),
@@ -119,7 +117,6 @@ describe('PaymentOptionsView', () => {
     test('sets the primary view to the payment option when clicked', () => {
       const mainViewStub = { setPrimaryView: jest.fn() };
       const paymentOptionsView = new PaymentOptionsView({
-        client: testContext.client,
         element: testContext.element,
         mainView: mainViewStub,
         model: modelThatSupports(['card']),
@@ -137,7 +134,6 @@ describe('PaymentOptionsView', () => {
       () => {
         const mainViewStub = { setPrimaryView: jest.fn() };
         const paymentOptionsView = new PaymentOptionsView({
-          client: testContext.client,
           element: testContext.element,
           mainView: mainViewStub,
           model: modelThatSupports(['card']),
@@ -163,7 +159,6 @@ describe('PaymentOptionsView', () => {
       testContext.element = wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
 
       testContext.viewConfiguration = {
-        client: testContext.client,
         element: testContext.element,
         mainView: { setPrimaryView: function () {} },
         strings: strings

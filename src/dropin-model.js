@@ -63,11 +63,13 @@ DropinModel.prototype.initialize = function () {
 
   if (this.authType === constants.authorizationTypes.CLIENT_TOKEN) {
     this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_CLIENT_TOKEN, this.merchantConfiguration.vaultManager);
+    analytics.sendEvent('started.client-token');
   } else {
     if (this.merchantConfiguration.vaultManager) {
       return Promise.reject(new DropinError('vaultManager cannot be used with tokenization keys.'));
     }
     this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY);
+    analytics.sendEvent('started.tokenization-key');
   }
 
   return vaultManager.create({

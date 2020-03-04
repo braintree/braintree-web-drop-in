@@ -483,7 +483,6 @@ describe('Dropin', () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
 
         instance._initialize(() => {
-          expect(analytics.sendEvent).toBeCalledTimes(1);
           expect(analytics.sendEvent).toBeCalledWith('appeared');
           done();
         });

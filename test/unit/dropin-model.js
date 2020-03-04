@@ -12,6 +12,7 @@ const PayPalCreditView = require('../../src/views/payment-sheet-views/paypal-cre
 const VenmoView = require('../../src/views/payment-sheet-views/venmo-view');
 const EventEmitter = require('@braintree/event-emitter');
 const isHTTPS = require('../../src/lib/is-https');
+const analytics = require('../../src/lib/analytics');
 const fake = require('../helpers/fake');
 const throwIfResolves = require('../helpers/throw-if-resolves');
 
@@ -83,6 +84,24 @@ describe('DropinModel', () => {
   });
 
   describe('initialize', () => {
+    test('sends web.dropin.started.tokenization-key event when using a tokenization key', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.tokenizationKey;
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(analytics.sendEvent).toBeCalledWith('started.tokenization-key');
+    });
+
+    test('sends web.dropin.started.client-token event when using a client token', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientToken;
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(analytics.sendEvent).toBeCalledWith('started.client-token');
+    });
+
     test('sets vault manager config with defaults for client tokens if not provided', async () => {
       const model = new DropinModel(testContext.modelOptions);
 

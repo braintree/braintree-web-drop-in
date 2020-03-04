@@ -104,11 +104,9 @@
  */
 
 var Dropin = require('./dropin');
-var client = require('braintree-web/client');
 var createFromScriptTag = require('./lib/create-from-script-tag');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
-var parseAuthorization = require('./lib/parse-authorization');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
@@ -580,45 +578,23 @@ var VERSION = '__VERSION__';
  */
 
 function create(options) {
-  var parsedAuthorization;
-
   if (!options.authorization) {
     return Promise.reject(new DropinError('options.authorization is required.'));
   }
 
-  parsedAuthorization = parseAuthorization(options.authorization);
-
   analytics.setupAnalytics(options.authorization);
 
-  return client.create({
-    authorization: options.authorization
-  }).catch(function (err) {
-    return Promise.reject(new DropinError({
-      message: 'There was an error creating Drop-in.',
-      braintreeWebError: err
-    }));
-  }).then(function (clientInstance) {
-    if (clientInstance.getConfiguration().authorizationType === 'TOKENIZATION_KEY') {
-      analytics.sendEvent('started.tokenization-key');
-    } else {
-      analytics.sendEvent('started.client-token');
-    }
+  return new Promise(function (resolve, reject) {
+    new Dropin({
+      merchantConfiguration: options
+    })._initialize(function (err, instance) {
+      if (err) {
+        reject(err);
 
-    return new Promise(function (resolve, reject) {
-      new Dropin({
-        merchantConfiguration: options,
-        environment: parsedAuthorization.environment,
-        authType: parsedAuthorization.authType,
-        client: clientInstance
-      })._initialize(function (err, instance) {
-        if (err) {
-          reject(err);
+        return;
+      }
 
-          return;
-        }
-
-        resolve(instance);
-      });
+      resolve(instance);
     });
   });
 }

@@ -1,5 +1,6 @@
-
 /* eslint-disable no-new */
+
+jest.mock('../../../../src/lib/analytics');
 
 const BaseView = require('../../../../src/views/base-view');
 const ApplePayView = require('../../../../src/views/payment-sheet-views/apple-pay-view');
