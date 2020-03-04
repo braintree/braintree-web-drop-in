@@ -42,10 +42,8 @@ describe('CardView', () => {
 
   describe('initialize', () => {
     beforeEach(() => {
-      testContext.hostedFieldsInstance = {
-        on: jest.fn(),
-        getSupportedCardTypes: jest.fn().mockResolvedValue([])
-      };
+      testContext.hostedFieldsInstance = fake.hostedFieldsInstance;
+      fake.hostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([]);
       jest.spyOn(hostedFields, 'create').mockResolvedValue(testContext.hostedFieldsInstance);
 
       testContext.model = fake.model();
@@ -874,18 +872,7 @@ describe('CardView', () => {
           document.body.appendChild(fakeHostedField);
           fakeHostedField.focus();
 
-          testContext.context.client.getConfiguration.mockReturnValue({
-            authorization: fake.clientToken,
-            authorizationType: 'CLIENT_TOKEN',
-            gatewayConfiguration: {
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
-            }
-          });
-
-          modelOptions.client.getConfiguration = testContext.context.client.getConfiguration;
-
+          modelOptions.merchantConfiguration.authorization = fake.clientToken;
           testContext.context.model = fake.model(modelOptions);
 
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
@@ -930,18 +917,7 @@ describe('CardView', () => {
           document.body.appendChild(fakeHostedField);
           fakeElement.focus();
 
-          testContext.context.client.getConfiguration.mockReturnValue({
-            authorization: fake.clientToken,
-            authorizationType: 'CLIENT_TOKEN',
-            gatewayConfiguration: {
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
-            }
-          });
-
-          modelOptions.client.getConfiguration = testContext.context.client.getConfiguration;
-
+          modelOptions.merchantConfiguration.authorization = fake.clientToken;
           testContext.context.model = fake.model(modelOptions);
 
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
@@ -985,18 +961,7 @@ describe('CardView', () => {
           document.body.appendChild(fakeElement);
           fakeElement.focus();
 
-          testContext.context.client.getConfiguration.mockReturnValue({
-            authorization: fake.clientToken,
-            authorizationType: 'CLIENT_TOKEN',
-            gatewayConfiguration: {
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
-            }
-          });
-
-          modelOptions.client.getConfiguration = testContext.context.client.getConfiguration;
-
+          modelOptions.merchantConfiguration.authorization = fake.clientToken;
           testContext.context.model = fake.model(modelOptions);
 
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
@@ -1033,18 +998,7 @@ describe('CardView', () => {
           document.body.appendChild(fakeElement);
           fakeElement.focus();
 
-          testContext.context.client.getConfiguration.mockReturnValue({
-            authorization: fake.clientToken,
-            authorizationType: 'CLIENT_TOKEN',
-            gatewayConfiguration: {
-              creditCards: {
-                supportedCardTypes: ['Visa']
-              }
-            }
-          });
-
-          modelOptions.client.getConfiguration = testContext.context.client.getConfiguration;
-
+          modelOptions.merchantConfiguration.authorization = fake.clientToken;
           testContext.context.model = fake.model(modelOptions);
 
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
@@ -1759,24 +1713,18 @@ describe('CardView', () => {
 
   describe('tokenize', () => {
     beforeEach(() => {
-      testContext.fakeHostedFieldsInstance = {
-        clear: jest.fn(),
-        getState: jest.fn().mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isValid: true
-            },
-            expirationDate: {
-              isValid: true
-            }
+      fake.hostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa', supported: true }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
           }
-        }),
-        removeAttribute: jest.fn(),
-        setAttribute: jest.fn(),
-        setMessage: jest.fn(),
-        tokenize: jest.fn().mockResolvedValue({})
-      };
+        }
+      });
+      fake.hostedFieldsInstance.tokenize.mockResolvedValue({});
       testContext.model = fake.model();
 
       return testContext.model.initialize().then(() => {
@@ -1787,7 +1735,7 @@ describe('CardView', () => {
             checked: true
           },
           getElementById: BaseView.prototype.getElementById,
-          hostedFieldsInstance: testContext.fakeHostedFieldsInstance,
+          hostedFieldsInstance: fake.hostedFieldsInstance,
           fieldErrors: {},
           model: testContext.model,
           preventUserAction: BaseView.prototype.preventUserAction,
@@ -1844,7 +1792,7 @@ describe('CardView', () => {
 
       return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(err => {
         expect(err).toBeDefined();
-        expect(testContext.fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+        expect(fake.hostedFieldsInstance.tokenize).not.toBeCalled();
       });
     });
 
@@ -1866,7 +1814,7 @@ describe('CardView', () => {
         jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
 
         return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(err => {
-          expect(testContext.fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+          expect(fake.hostedFieldsInstance.tokenize).not.toBeCalled();
           expect(testContext.context.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
           expect(err.message).toBe('No payment method is available.');
         });
@@ -1901,7 +1849,7 @@ describe('CardView', () => {
         jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
 
         return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(err => {
-          expect(testContext.fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+          expect(fake.hostedFieldsInstance.tokenize).not.toBeCalled();
           expect(testContext.context.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
           expect(err.message).toBe('No payment method is available.');
         });
@@ -1934,7 +1882,7 @@ describe('CardView', () => {
 
         return CardView.prototype.tokenize.call(testContext.context).then(() => {
           expect(testContext.context.model.reportError).not.toBeCalled();
-          expect(testContext.fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
+          expect(fake.hostedFieldsInstance.tokenize).toBeCalledTimes(1);
         });
       }
     );
@@ -1956,7 +1904,7 @@ describe('CardView', () => {
 
       return CardView.prototype.tokenize.call(testContext.context).then(() => {
         expect(testContext.context.model.reportError).not.toBeCalled();
-        expect(testContext.fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
+        expect(fake.hostedFieldsInstance.tokenize).toBeCalledTimes(1);
       });
     });
 
@@ -1999,7 +1947,7 @@ describe('CardView', () => {
         jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
 
         return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(err => {
-          expect(testContext.fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+          expect(fake.hostedFieldsInstance.tokenize).not.toBeCalled();
           expect(testContext.context.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
           expect(err.message).toBe('No payment method is available.');
         });
@@ -2474,7 +2422,7 @@ describe('CardView', () => {
     test(
       'does not update the active payment method when tokenize fails',
       () => {
-        testContext.context.hostedFieldsInstance.tokenize.mockRejectedValue(new Error('bad happen'));
+        fake.hostedFieldsInstance.tokenize.mockRejectedValue(new Error('bad happen'));
         jest.spyOn(testContext.model, 'addPaymentMethod').mockImplementation();
 
         return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {

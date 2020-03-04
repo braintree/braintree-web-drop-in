@@ -8,6 +8,7 @@ var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var Promise = require('./lib/promise');
+var parseAuthorization = require('./lib/parse-authorization');
 var paymentSheetViews = require('./views/payment-sheet-views');
 var vaultManager = require('braintree-web/vault-manager');
 
@@ -38,9 +39,13 @@ var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY = {
 };
 
 function DropinModel(options) {
+  var parsedAuthorization = parseAuthorization(options.merchantConfiguration.authorization);
+
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
-  this.environment = options.environment;
+  this.environment = parsedAuthorization.environment;
+  this.authType = parsedAuthorization.authType;
+  this.authorization = options.merchantConfiguration.authorization;
 
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
@@ -56,7 +61,7 @@ EventEmitter.createChild(DropinModel);
 DropinModel.prototype.initialize = function () {
   var self = this;
 
-  if (this._options.authType === constants.authorizationTypes.CLIENT_TOKEN) {
+  if (this.authType === constants.authorizationTypes.CLIENT_TOKEN) {
     this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_CLIENT_TOKEN, this.merchantConfiguration.vaultManager);
   } else {
     if (this.merchantConfiguration.vaultManager) {
@@ -65,13 +70,16 @@ DropinModel.prototype.initialize = function () {
     this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY);
   }
 
-  // TODO switch to authorization
   return vaultManager.create({
-    client: self._options.client
+    authorization: self.authorization
   }).then(function (vaultManagerInstance) {
     self._vaultManager = vaultManagerInstance;
 
-    return getSupportedPaymentOptions(self._options);
+    return getSupportedPaymentOptions({
+      environment: self.environment,
+      authType: self.authType,
+      merchantConfiguration: self.merchantConfiguration
+    });
   }).then(function (paymentOptions) {
     self.supportedPaymentOptions = paymentOptions;
 

@@ -25,15 +25,8 @@ describe('DropinModel', () => {
   beforeEach(() => {
     testContext.configuration = fake.configuration();
 
-    testContext.vaultManager = {
-      fetchPaymentMethods: jest.fn().mockResolvedValue([]),
-      deletePaymentMethod: jest.fn().mockResolvedValue()
-    };
-    jest.spyOn(vaultManager, 'create').mockResolvedValue(testContext.vaultManager);
+    jest.spyOn(vaultManager, 'create').mockResolvedValue(fake.vaultManagerInstance);
     testContext.modelOptions = {
-      client: fake.client(testContext.configuration),
-      environment: 'sandbox',
-      authType: 'CLIENT_TOKEN',
       componentID: 'foo123',
       merchantConfiguration: {
         authorization: fake.clientToken,
@@ -54,6 +47,9 @@ describe('DropinModel', () => {
     jest.spyOn(PayPalView, 'isEnabled').mockResolvedValue(true);
     jest.spyOn(PayPalCreditView, 'isEnabled').mockResolvedValue(true);
     jest.spyOn(VenmoView, 'isEnabled').mockResolvedValue(true);
+
+    fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([]);
+    fake.vaultManagerInstance.deletePaymentMethod.mockResolvedValue();
   });
 
   describe('Constructor', () => {
@@ -101,7 +97,7 @@ describe('DropinModel', () => {
     });
 
     test('sets vault manager config with defaults for tokenization keys if not provided', async () => {
-      testContext.modelOptions.authType = 'TOKENIZATION_KEY';
+      testContext.modelOptions.merchantConfiguration.authorization = fake.tokenizationKey;
       const model = new DropinModel(testContext.modelOptions);
 
       await model.initialize();
@@ -115,7 +111,7 @@ describe('DropinModel', () => {
     });
 
     test('rejects with an error when passing a vault manager option with a tokeniation key', async () => {
-      testContext.modelOptions.authType = 'TOKENIZATION_KEY';
+      testContext.modelOptions.merchantConfiguration.authorization = fake.tokenizationKey;
       testContext.modelOptions.merchantConfiguration.vaultManager = {
         autoVaultPaymentMethods: true
       };
@@ -165,7 +161,7 @@ describe('DropinModel', () => {
       return model.initialize().then(() => {
         expect(vaultManager.create).toBeCalledTimes(1);
         expect(vaultManager.create).toBeCalledWith({
-          client: testContext.modelOptions.client
+          authorization: fake.clientToken
         });
       });
     });
@@ -173,7 +169,9 @@ describe('DropinModel', () => {
     test('sets existing payment methods as _paymentMethods', () => {
       const model = new DropinModel(testContext.modelOptions);
 
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
+        { type: 'CreditCard', details: { lastTwo: '11' }}
+      ]);
 
       return model.initialize().then(() => {
         expect(model._paymentMethods).toEqual([{ type: 'CreditCard', details: { lastTwo: '11' }, vaulted: true }]);
@@ -191,7 +189,7 @@ describe('DropinModel', () => {
     test('ignores valid, but disabled payment methods', () => {
       const model = new DropinModel(testContext.modelOptions);
 
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
         { type: 'CreditCard', details: { lastTwo: '11' }},
         { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
       ]);
@@ -210,7 +208,7 @@ describe('DropinModel', () => {
       () => {
         const model = new DropinModel(testContext.modelOptions);
 
-        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
           { type: 'CreditCard', details: { lastTwo: '11' }},
           { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
         ]);
@@ -230,7 +228,7 @@ describe('DropinModel', () => {
       const model = new DropinModel(testContext.modelOptions);
       const error = new Error('fail');
 
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
         { type: 'CreditCard', details: { lastTwo: '11' }},
         { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
       ]);
@@ -334,32 +332,32 @@ describe('DropinModel', () => {
         return model.initialize().then(() => {
           expect(ApplePayView.isEnabled).toBeCalledTimes(1);
           expect(ApplePayView.isEnabled).toBeCalledWith({
-            environment: 'sandbox',
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(CardView.isEnabled).toBeCalledTimes(1);
           expect(CardView.isEnabled).toBeCalledWith({
-            environment: 'sandbox',
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(GooglePayView.isEnabled).toBeCalledTimes(1);
           expect(GooglePayView.isEnabled).toBeCalledWith({
-            environment: 'sandbox',
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(PayPalView.isEnabled).toBeCalledTimes(1);
           expect(PayPalView.isEnabled).toBeCalledWith({
-            environment: 'sandbox',
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(PayPalCreditView.isEnabled).toBeCalledTimes(1);
           expect(PayPalCreditView.isEnabled).toBeCalledWith({
-            environment: 'sandbox',
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(VenmoView.isEnabled).toBeCalledTimes(1);
           expect(VenmoView.isEnabled).toBeCalledWith({
-            environment: 'sandbox',
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
         });
@@ -832,7 +830,7 @@ describe('DropinModel', () => {
       () => {
         const model = new DropinModel(testContext.modelOptions);
 
-        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
 
         return model.initialize().then(() => {
           expect(model.isPaymentMethodRequestable()).toBe(true);
@@ -1165,8 +1163,8 @@ describe('DropinModel', () => {
 
     test('uses vault manager to delete payment method', () => {
       return testContext.model.deleteVaultedPaymentMethod().then(() => {
-        expect(testContext.vaultManager.deletePaymentMethod).toBeCalledTimes(1);
-        expect(testContext.vaultManager.deletePaymentMethod).toBeCalledWith('a-nonce');
+        expect(fake.vaultManagerInstance.deletePaymentMethod).toBeCalledTimes(1);
+        expect(fake.vaultManagerInstance.deletePaymentMethod).toBeCalledWith('a-nonce');
       });
     });
 
@@ -1176,7 +1174,7 @@ describe('DropinModel', () => {
         delete testContext.model._paymentMethodWaitingToBeDeleted.vaulted;
 
         return testContext.model.deleteVaultedPaymentMethod().then(() => {
-          expect(testContext.vaultManager.deletePaymentMethod).not.toBeCalled();
+          expect(fake.vaultManagerInstance.deletePaymentMethod).not.toBeCalled();
         });
       }
     );
@@ -1184,7 +1182,7 @@ describe('DropinModel', () => {
     test(
       'emits finishVaultedPaymentMethodDeletion event when deletion is succesful',
       () => {
-        testContext.vaultManager.deletePaymentMethod.mockResolvedValue();
+        fake.vaultManagerInstance.deletePaymentMethod.mockResolvedValue();
 
         return testContext.model.deleteVaultedPaymentMethod().then(() => {
           expect(testContext.model._emit).toBeCalledWith('finishVaultedPaymentMethodDeletion', undefined); // eslint-disable-line no-undefined
@@ -1197,7 +1195,7 @@ describe('DropinModel', () => {
       () => {
         const error = new Error('aaaaaaah!');
 
-        testContext.vaultManager.deletePaymentMethod.mockRejectedValue(error);
+        fake.vaultManagerInstance.deletePaymentMethod.mockRejectedValue(error);
 
         return testContext.model.deleteVaultedPaymentMethod().then(() => {
           expect(testContext.model._emit).toBeCalledWith('finishVaultedPaymentMethodDeletion', expect.any(Error));
@@ -1251,10 +1249,10 @@ describe('DropinModel', () => {
     test(
       'resolves with payment methods as empty array when vault manager errors',
       () => {
-        testContext.vaultManager.fetchPaymentMethods.mockRejectedValue(new Error('error'));
+        fake.vaultManagerInstance.fetchPaymentMethods.mockRejectedValue(new Error('error'));
 
         return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
-          expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
+          expect(fake.vaultManagerInstance.fetchPaymentMethods).toBeCalledWith({
             defaultFirst: true
           });
           expect(paymentMethods).toEqual([]);
@@ -1276,7 +1274,7 @@ describe('DropinModel', () => {
     test(
       'resolves with payment methods from vault manager when not in guest checkout',
       () => {
-        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{
           nonce: '1-nonce',
           type: 'CreditCard'
         }, {
@@ -1285,7 +1283,7 @@ describe('DropinModel', () => {
         }]);
 
         return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
-          expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
+          expect(fake.vaultManagerInstance.fetchPaymentMethods).toBeCalledWith({
             defaultFirst: true
           });
           expect(paymentMethods).toEqual([{
@@ -1302,7 +1300,7 @@ describe('DropinModel', () => {
     );
 
     test('only resolves supported payment method types', () => {
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{
         nonce: '1-nonce',
         type: 'CreditCard'
       }, {
@@ -1320,7 +1318,7 @@ describe('DropinModel', () => {
     });
 
     test('includes vaulted property on payment method objects', () => {
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{
         nonce: '1-nonce',
         type: 'CreditCard'
       }, {
@@ -1332,7 +1330,7 @@ describe('DropinModel', () => {
       }]);
 
       return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
-        expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
+        expect(fake.vaultManagerInstance.fetchPaymentMethods).toBeCalledWith({
           defaultFirst: true
         });
         expect(paymentMethods[0].vaulted).toBe(true);
@@ -1342,7 +1340,7 @@ describe('DropinModel', () => {
     });
 
     test('ignores invalid payment methods', () => {
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
         { type: 'CreditCard', details: { lastTwo: '11' }},
         { type: 'PayPalAccount', details: { email: 'wow@example.com' }},
         { type: 'InvalidMethod', details: {}},
@@ -1361,7 +1359,7 @@ describe('DropinModel', () => {
     test(
       'ignores vaulted payment methods that cannot be used client side',
       () => {
-        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
           { type: 'CreditCard', details: { lastTwo: '11' }},
           { type: 'PayPalAccount', details: { email: 'wow@example.com' }},
           { type: 'ApplePayCard', details: {}},

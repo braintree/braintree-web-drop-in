@@ -43,8 +43,6 @@ describe('Dropin', () => {
 
     testContext.dropinOptions = {
       client: testContext.client,
-      environment: 'sandbox',
-      authType: 'CLIENT_TOKEN',
       merchantConfiguration: {
         container: '#foo',
         authorization: fake.tokenizationKey
@@ -55,6 +53,8 @@ describe('Dropin', () => {
     jest.spyOn(hostedFields, 'create').mockResolvedValue(fake.hostedFieldsInstance);
     jest.spyOn(paypalCheckout, 'create').mockResolvedValue(fake.paypalInstance);
     jest.spyOn(threeDSecure, 'create').mockResolvedValue(fake.threeDSecureInstance);
+
+    fake.hostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -364,13 +364,14 @@ describe('Dropin', () => {
 
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([]);
 
+      testContext.dropinOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
         try {
           expect(vaultManager.create).toBeCalledTimes(1);
           expect(vaultManager.create).toBeCalledWith({
-            client: testContext.client
+            authorization: fake.clientTokenWithCustomerID
           });
           expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledTimes(1);
           expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith(expect.objectContaining({
@@ -402,12 +403,13 @@ describe('Dropin', () => {
       }
     );
 
-    test('creates a MainView a customerId exists', done => {
+    test('creates a MainView when  a customerId exists', done => {
       let instance;
       const paymentMethodsPayload = { paymentMethods: []};
 
       testContext.client.request.mockResolvedValue(paymentMethodsPayload);
 
+      testContext.dropinOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
@@ -418,6 +420,8 @@ describe('Dropin', () => {
     });
 
     test('creates a MainView a customerId does not exist', done => {
+      testContext.dropinOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
@@ -1057,7 +1061,9 @@ describe('Dropin', () => {
         const instance = new Dropin(testContext.dropinOptions);
 
         instance._initialize(() => {
-          jest.spyOn(instance._mainView, 'requestPaymentMethod');
+          jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue({
+            nonce: 'fake-nonce'
+          });
           instance.requestPaymentMethod(() => {
             expect(instance._mainView.requestPaymentMethod).toBeCalledTimes(1);
             done();

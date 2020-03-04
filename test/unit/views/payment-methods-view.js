@@ -495,11 +495,7 @@ describe('PaymentMethodsView', () => {
 
       element.innerHTML = mainHTML;
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
@@ -539,11 +535,7 @@ describe('PaymentMethodsView', () => {
 
       element.innerHTML = mainHTML;
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
@@ -582,11 +574,7 @@ describe('PaymentMethodsView', () => {
 
       element.innerHTML = mainHTML;
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       testContext.model = fake.model(modelOptions);

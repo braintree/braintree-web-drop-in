@@ -162,10 +162,13 @@ describe('MainView', () => {
     describe('with vaulted payment methods', () => {
       beforeEach(() => {
         const element = document.createElement('div');
+        const fakeModelOptions = fake.modelOptions();
+
+        fakeModelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
 
         element.innerHTML = templateHTML;
 
-        testContext.model = fake.model();
+        testContext.model = fake.model(fakeModelOptions);
 
         testContext.model.getVaultedPaymentMethods.mockResolvedValue([
           { type: 'CreditCard', details: { lastTwo: '11' }},
