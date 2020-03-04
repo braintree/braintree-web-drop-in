@@ -44,7 +44,8 @@ module.exports = {
     'American Express': 'american-express',
     Discover: 'discover',
     JCB: 'jcb',
-    UnionPay: 'unionpay',
+    // always hide UnionPay cards because Drop-in cannot support the flow
+    // UnionPay: 'unionpay',
     Maestro: 'maestro'
   },
   errors: {

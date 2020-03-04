@@ -380,29 +380,26 @@ describe('CardView', () => {
       });
     });
 
-    test('does not show UnionPay icon even if it is supported', () => {
-      let unionPayCardIcon;
-
-      testContext.client.getConfiguration.mockReturnValue({
-        gatewayConfiguration: {
-          creditCards: {
-            supportedCardTypes: ['UnionPay']
-          }
-        }
-      });
+    test('does not show UnionPay icon even if it is supported', (done) => {
+      fake.hostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([
+        'UnionPay'
+      ]);
 
       testContext.view = new CardView({
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
       return testContext.view.initialize().then(() => {
-        unionPayCardIcon = testContext.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
+        setTimeout(() => {
+          var unionPayCardIcon = testContext.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
 
-        expect(unionPayCardIcon.classList.contains('braintree-hidden')).toBe(true);
+          expect(unionPayCardIcon.classList.contains('braintree-hidden')).toBe(true);
+
+          done();
+        }, 1);
       });
     });
 
