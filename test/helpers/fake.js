@@ -51,6 +51,7 @@ clientToken = btoa(JSON.stringify(clientToken));
 
 clientTokenWithCustomerID = configuration().gatewayConfiguration;
 clientTokenWithCustomerID.authorizationFingerprint = 'encoded_auth_fingerprint&customer_id=abc123';
+clientTokenWithCustomerID.hasCustomer = true;
 clientTokenWithCustomerID = btoa(JSON.stringify(clientTokenWithCustomerID));
 
 fakeBTInstances = {

@@ -7,16 +7,22 @@ function _isTokenizationKey(str) {
 }
 
 function parseEnviornment(auth) {
+  var parsedClientToken;
+
   if (_isTokenizationKey(auth)) {
     return {
       authType: authorizationTypes.TOKENIZATION_KEY,
-      environment: auth.split('_')[0]
+      environment: auth.split('_')[0],
+      hasCustomer: false
     };
   }
 
+  parsedClientToken = JSON.parse(window.atob(auth));
+
   return {
     authType: authorizationTypes.CLIENT_TOKEN,
-    environment: JSON.parse(window.atob(auth)).environment
+    environment: parsedClientToken.environment,
+    hasCustomer: Boolean(parsedClientToken.hasCustomer)
   };
 }
 

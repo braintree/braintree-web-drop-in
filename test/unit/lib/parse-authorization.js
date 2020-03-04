@@ -10,11 +10,23 @@ describe('parseAuthorization', () => {
     expect(parseAuthorization(fake.tokenizationKey).authType).toBe('TOKENIZATION_KEY');
   });
 
+  test('returns hasCustomer field as false from tokenization key', () => {
+    expect(parseAuthorization(fake.tokenizationKey).hasCustomer).toBe(false);
+  });
+
   test('returns environment from client token', () => {
     expect(parseAuthorization(fake.clientToken).environment).toBe('development');
   });
 
   test('returns authType from client token', () => {
     expect(parseAuthorization(fake.clientToken).authType).toBe('CLIENT_TOKEN');
+  });
+
+  test('returns hasCustomer field as false from client token without a customer', () => {
+    expect(parseAuthorization(fake.clientToken).hasCustomer).toBe(false);
+  });
+
+  test('returns hasCustomer field as true from client token with a customer', () => {
+    expect(parseAuthorization(fake.clientTokenWithCustomerID).hasCustomer).toBe(true);
   });
 });
