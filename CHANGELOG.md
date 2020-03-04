@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Update braintree-web to v3.59.0
+
 1.22.1
 ------
 - Fix issue where payment requestable event would not fire when switching between vaulted payment methods (#499)
