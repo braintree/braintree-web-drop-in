@@ -31,7 +31,6 @@ describe('Dropin', () => {
 
   beforeEach(() => {
     testContext = {};
-    testContext.client = fake.client();
     testContext.vaultManager = {
       fetchPaymentMethods: jest.fn().mockResolvedValue([])
     };
@@ -42,7 +41,6 @@ describe('Dropin', () => {
     document.body.appendChild(testContext.container);
 
     testContext.dropinOptions = {
-      client: testContext.client,
       merchantConfiguration: {
         container: '#foo',
         authorization: fake.tokenizationKey
@@ -385,29 +383,8 @@ describe('Dropin', () => {
       });
     });
 
-    test(
-      'does not fail if there is an error getting existing payment methods',
-      done => {
-        let instance;
-
-        testContext.client.request.mockRejectedValue(new Error('This failed'));
-
-        instance = new Dropin(testContext.dropinOptions);
-
-        instance._initialize(() => {
-          expect(hostedFields.create).toBeCalled();
-          expect(instance._model.getPaymentMethods()).toHaveLength(0);
-
-          done();
-        });
-      }
-    );
-
-    test('creates a MainView when  a customerId exists', done => {
+    test('creates a MainView when a customerId exists', done => {
       let instance;
-      const paymentMethodsPayload = { paymentMethods: []};
-
-      testContext.client.request.mockResolvedValue(paymentMethodsPayload);
 
       testContext.dropinOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       instance = new Dropin(testContext.dropinOptions);
@@ -828,7 +805,6 @@ describe('Dropin', () => {
     beforeEach(() => {
       testContext.model = fake.model({
         componentID: 'foo',
-        client: testContext.client,
         merchantConfiguration: {
           container: '#foo',
           authorization: fake.tokenizationKey
@@ -902,7 +878,6 @@ describe('Dropin', () => {
     beforeEach(() => {
       testContext.model = fake.model({
         componentID: 'foo',
-        client: testContext.client,
         merchantConfiguration: {
           container: '#foo',
           authorization: fake.tokenizationKey

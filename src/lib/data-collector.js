@@ -26,7 +26,6 @@ DataCollector.prototype.initialize = function () {
       id: constants.DATA_COLLECTOR_SCRIPT_ID
     });
   }).then(function () {
-    // TODO use auth instead
     return global.braintree.dataCollector.create(self._config);
   }).then(function (instance) {
     self._instance = instance;

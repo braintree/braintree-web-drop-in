@@ -525,9 +525,7 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
     this._setUpThreeDSecure();
   }
 
-  // TODO eliminate client form main view
   this._mainView = new MainView({
-    client: this._client,
     element: this._dropinWrapper,
     model: this._model,
     strings: this._strings
