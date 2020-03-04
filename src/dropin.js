@@ -509,8 +509,7 @@ Dropin.prototype._setUpThreeDSecure = function () {
 
   this._model.asyncDependencyStarting();
 
-  // TODO eliminate client form 3ds
-  this._threeDSecure = new ThreeDSecure(this._client, config);
+  this._threeDSecure = new ThreeDSecure(this._authorization, config);
 
   this._threeDSecure.initialize().then(function () {
     self._model.asyncDependencyReady();

@@ -28,13 +28,13 @@ describe('ThreeDSecure', () => {
 
     test('sets up three d secure', () => {
       const config = {};
-      const client = {};
-      const tds = new ThreeDSecure(client, config, 'Card Verification');
+      const auth = 'fake-auth';
+      const tds = new ThreeDSecure(auth, config, 'Card Verification');
 
       return tds.initialize().then(() => {
         expect(threeDSecure.create).toBeCalledTimes(1);
         expect(threeDSecure.create).toBeCalledWith({
-          client: client,
+          authorization: 'fake-auth',
           version: 2
         });
         expect(tds._instance).toBe(testContext.threeDSecureInstance);
@@ -45,7 +45,7 @@ describe('ThreeDSecure', () => {
   describe('verify', () => {
     beforeEach(() => {
       testContext.config = {
-        client: {},
+        authorization: 'fake-auth',
         amount: '10.00'
       };
 

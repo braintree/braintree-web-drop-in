@@ -5,8 +5,8 @@ var threeDSecure = require('braintree-web/three-d-secure');
 
 var DEFAULT_ACS_WINDOW_SIZE = '03';
 
-function ThreeDSecure(client, merchantConfiguration) {
-  this._client = client;
+function ThreeDSecure(authorization, merchantConfiguration) {
+  this._authorization = authorization;
   this._config = merchantConfiguration;
 }
 
@@ -14,8 +14,7 @@ ThreeDSecure.prototype.initialize = function () {
   var self = this;
 
   return threeDSecure.create({
-    // TODO use auth instead
-    client: this._client,
+    authorization: this._authorization,
     version: 2
   }).then(function (instance) {
     self._instance = instance;
