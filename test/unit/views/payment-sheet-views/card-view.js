@@ -26,8 +26,6 @@ describe('CardView', () => {
     testContext.div.innerHTML = mainHTML;
     document.body.appendChild(testContext.div);
     testContext.element = document.body.querySelector('.braintree-sheet.braintree-card');
-
-    testContext.client = fake.client();
   });
 
   afterEach(() => {
@@ -56,7 +54,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -76,7 +73,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -96,7 +92,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -110,7 +105,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -128,7 +122,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -146,7 +139,6 @@ describe('CardView', () => {
           element: testContext.element,
           mainView: testContext.mainView,
           model: testContext.model,
-          client: testContext.client,
           strings: strings
         });
 
@@ -168,7 +160,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -189,7 +180,6 @@ describe('CardView', () => {
           element: testContext.element,
           mainView: testContext.mainView,
           model: testContext.model,
-          client: testContext.client,
           strings: strings
         });
 
@@ -212,7 +202,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -228,7 +217,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -244,7 +232,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -260,7 +247,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -274,13 +260,12 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
       return testContext.view.initialize().then(() => {
         expect(hostedFields.create).toBeCalledWith(expect.objectContaining({
-          client: testContext.client,
+          authorization: testContext.view.model.authorization,
           fields: {
             number: expect.any(Object),
             cvv: expect.any(Object),
@@ -303,7 +288,6 @@ describe('CardView', () => {
           element: testContext.element,
           mainView: testContext.mainView,
           model: testContext.model,
-          client: testContext.client,
           strings: strings,
           merchantConfiguration: {
             authorization: fake.clientToken
@@ -330,7 +314,6 @@ describe('CardView', () => {
           element: testContext.element,
           mainView: testContext.mainView,
           model: testContext.model,
-          client: testContext.client,
           strings: strings
         });
 
@@ -358,7 +341,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -416,7 +398,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -450,7 +431,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -493,7 +473,6 @@ describe('CardView', () => {
           element: testContext.element,
           mainView: testContext.mainView,
           model: testContext.model,
-          client: testContext.client,
           strings: strings
         });
 
@@ -523,7 +502,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -554,7 +532,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -590,7 +567,6 @@ describe('CardView', () => {
           element: testContext.element,
           mainView: testContext.mainView,
           model: testContext.model,
-          client: testContext.client,
           strings: strings
         });
 
@@ -649,7 +625,6 @@ describe('CardView', () => {
         element: testContext.element,
         mainView: testContext.mainView,
         model: testContext.model,
-        client: testContext.client,
         strings: strings
       });
 
@@ -668,7 +643,6 @@ describe('CardView', () => {
           element: testContext.element,
           mainView: testContext.mainView,
           model: testContext.model,
-          client: testContext.client,
           strings: strings
         });
 
@@ -696,13 +670,6 @@ describe('CardView', () => {
           hideFieldError: CardView.prototype.hideFieldError,
           showFieldError: CardView.prototype.showFieldError,
           model: model,
-          client: fake.client({
-            gatewayConfiguration: {
-              creditCards: {
-                supportedCardTypes: []
-              }
-            }
-          }),
           _shouldVault: CardView.prototype._shouldVault,
           saveCardInput: {
             checked: true
@@ -1741,7 +1708,6 @@ describe('CardView', () => {
           _validateExtraInput: CardView.prototype._validateExtraInput,
           _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
           _setupCardholderName: jest.fn(),
-          client: fake.client(),
           merchantConfiguration: {
             vault: {},
             authorization: fake.configuration().authorization,

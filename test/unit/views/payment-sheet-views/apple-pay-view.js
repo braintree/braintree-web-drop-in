@@ -21,8 +21,6 @@ describe('ApplePayView', () => {
     testContext.model = fake.model();
 
     return testContext.model.initialize().then(() => {
-      testContext.fakeClient = fake.client();
-
       testContext.div = document.createElement('div');
 
       testContext.fakeApplePaySession = {
@@ -51,7 +49,6 @@ describe('ApplePayView', () => {
         displayName: 'Unit Test Display Name'
       };
       testContext.applePayViewOptions = {
-        client: testContext.fakeClient,
         element: document.body.querySelector('.braintree-sheet.braintree-applePay'),
         model: testContext.model,
         strings: {}
@@ -100,7 +97,7 @@ describe('ApplePayView', () => {
     test('creates an ApplePay component', () => {
       return testContext.view.initialize().then(() => {
         expect(btApplePay.create).toBeCalledWith(expect.objectContaining({
-          client: testContext.view.client
+          authorization: testContext.view.model.authorization
         }));
         expect(testContext.view.applePayInstance).toBe(testContext.fakeApplePayInstance);
       });

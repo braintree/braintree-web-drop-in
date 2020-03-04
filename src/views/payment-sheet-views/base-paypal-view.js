@@ -45,8 +45,9 @@ BasePayPalView.prototype.initialize = function () {
     });
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
-  // TODO use auth instead
-  return btPaypal.create({client: this.client}).then(function (paypalInstance) {
+  return btPaypal.create({
+    authorization: this.model.authorization
+  }).then(function (paypalInstance) {
     var checkoutJSConfiguration;
     var buttonSelector = '[data-braintree-id="paypal-button"]';
     var environment = self.model.environment === 'production' ? 'production' : 'sandbox';

@@ -158,8 +158,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
   var shouldCollectPostalCode = this.merchantConfiguration.postalCode && this.merchantConfiguration.postalCode.collect === true;
   var overrides = this.merchantConfiguration.overrides;
   var options = {
-    // TODO switch to auth
-    client: this.client,
+    authorization: this.model.authorization,
     fields: {
       number: {
         selector: this._generateFieldSelector('number'),

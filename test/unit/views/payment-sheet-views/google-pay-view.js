@@ -24,7 +24,6 @@ describe('GooglePayView', () => {
     const googlePayButton = document.createElement('button');
 
     testContext.model = fake.model();
-    testContext.fakeClient = fake.client();
 
     testContext.div = document.createElement('div');
 
@@ -40,7 +39,6 @@ describe('GooglePayView', () => {
       }
     };
     testContext.googlePayViewOptions = {
-      client: testContext.fakeClient,
       environment: 'sandbox',
       element: document.body.querySelector('.braintree-sheet.braintree-googlePay'),
       model: testContext.model,
@@ -127,7 +125,6 @@ describe('GooglePayView', () => {
     test('creates a GooglePayment component', () => {
       return testContext.view.initialize().then(() => {
         expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
-          client: testContext.view.client
         }));
         expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
       });
@@ -140,7 +137,6 @@ describe('GooglePayView', () => {
 
         return testContext.view.initialize().then(() => {
           expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
-            client: testContext.view.client,
             googlePayVersion: 2
           }));
           expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
@@ -155,7 +151,6 @@ describe('GooglePayView', () => {
 
         return testContext.view.initialize().then(() => {
           expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
-            client: testContext.view.client,
             googleMerchantId: 'foobar'
           }));
           expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
@@ -172,7 +167,7 @@ describe('GooglePayView', () => {
     test(
       'configures payments client with PRODUCTION environment in production',
       () => {
-        testContext.view.environment = 'production';
+        testContext.view.model.environment = 'production';
         jest.spyOn(global.google.payments.api, 'PaymentsClient');
 
         return testContext.view.initialize().then(() => {
@@ -186,10 +181,7 @@ describe('GooglePayView', () => {
     test(
       'configures payments client with TEST environment in non-production',
       () => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.environment = 'sandbox';
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        testContext.view.model.environment = 'sandbox';
         jest.spyOn(global.google.payments.api, 'PaymentsClient');
 
         return testContext.view.initialize().then(() => {

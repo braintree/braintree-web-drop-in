@@ -45,13 +45,12 @@ GooglePayView.prototype.initialize = function () {
   self.model.asyncDependencyStarting();
 
   return btGooglePay.create({
-    // TODO switch to auth
-    client: self.client,
+    authorization: this.model.authorization,
     googlePayVersion: googlePayVersion,
     googleMerchantId: merchantId
   }).then(function (googlePayInstance) {
     self.googlePayInstance = googlePayInstance;
-    self.paymentsClient = createPaymentsClient(self.environment);
+    self.paymentsClient = createPaymentsClient(self.model.environment);
   }).then(function () {
     var buttonContainer = self.getElementById('google-pay-button');
 

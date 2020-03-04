@@ -52,12 +52,10 @@ describe('BasePayPalView', () => {
     jest.spyOn(testContext.model, 'reportError').mockImplementation();
 
     testContext.configuration = fake.configuration();
-    testContext.fakeClient = fake.client(testContext.configuration);
     testContext.paypalViewOptions = {
       strings: {},
       element: testContext.element,
-      model: testContext.model,
-      client: testContext.fakeClient
+      model: testContext.model
     };
     testContext.paypalInstance = {
       createPayment: jest.fn().mockResolvedValue(),
@@ -109,7 +107,7 @@ describe('BasePayPalView', () => {
     test('creates a PayPal Checkout component', () => {
       return testContext.view.initialize().then(() => {
         expect(PayPalCheckout.create).toBeCalledWith(expect.objectContaining({
-          client: testContext.paypalViewOptions.client
+          authorization: testContext.view.model.authorization
         }));
         expect(testContext.view.paypalInstance).toBe(testContext.paypalInstance);
       });

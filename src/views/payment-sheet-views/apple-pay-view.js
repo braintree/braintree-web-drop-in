@@ -29,8 +29,9 @@ ApplePayView.prototype.initialize = function () {
 
   self.model.asyncDependencyStarting();
 
-  // TODO use auth
-  return btApplePay.create({client: this.client}).then(function (applePayInstance) {
+  return btApplePay.create({
+    authorization: this.model.authorization
+  }).then(function (applePayInstance) {
     var buttonDiv = self.getElementById('apple-pay-button');
 
     self.applePayInstance = applePayInstance;
