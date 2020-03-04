@@ -43,7 +43,8 @@ describe('CardView', () => {
   describe('initialize', () => {
     beforeEach(() => {
       testContext.hostedFieldsInstance = {
-        on: jest.fn()
+        on: jest.fn(),
+        getSupportedCardTypes: jest.fn().mockResolvedValue([])
       };
       jest.spyOn(hostedFields, 'create').mockResolvedValue(testContext.hostedFieldsInstance);
 
@@ -254,24 +255,21 @@ describe('CardView', () => {
       });
     });
 
-    test(
-      'notifies async dependency is ready when Hosted Fields is created',
-      () => {
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
+    test('notifies async dependency is ready when Hosted Fields is created', async () => {
+      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
 
-        testContext.view = new CardView({
-          element: testContext.element,
-          mainView: testContext.mainView,
-          model: testContext.model,
-          client: testContext.client,
-          strings: strings
-        });
+      testContext.view = new CardView({
+        element: testContext.element,
+        mainView: testContext.mainView,
+        model: testContext.model,
+        client: testContext.client,
+        strings: strings
+      });
 
-        return testContext.view.initialize().then(() => {
-          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
-        });
-      }
-    );
+      await testContext.view.initialize();
+
+      expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
+    });
 
     test('creates Hosted Fields with number, cvv and expiration date', () => {
       testContext.view = new CardView({
@@ -350,6 +348,13 @@ describe('CardView', () => {
     test('shows supported card icons', (done) => {
       const unsupportedCardTypes = ['maestro', 'diners-club', 'unionpay', 'discover'];
       const supportedCardTypes = ['visa', 'mastercard', 'american-express', 'jcb'];
+
+      testContext.hostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([
+        'Visa',
+        'Mastercard',
+        'American Express',
+        'JCB'
+      ]);
 
       testContext.view = new CardView({
         element: testContext.element,

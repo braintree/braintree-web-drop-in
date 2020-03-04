@@ -613,11 +613,6 @@ CardView.prototype.onSelection = function () {
 CardView.prototype._showSupportedCardIcons = function () {
   var self = this;
 
-  // TODO remove this when sdk is released with the real function
-  this.hostedFieldsInstance.getSupportedCardTypes = function () {
-    return Promise.resolve(['Visa', 'Mastercard', 'American Express', 'JCB']);
-  };
-
   this.hostedFieldsInstance.getSupportedCardTypes().then(function (supportedCardTypes) {
     Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
       var cardIcon;

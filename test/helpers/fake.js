@@ -74,6 +74,7 @@ fakeBTInstances = {
   hostedFields: {
     getState: getState,
     on: function () {},
+    getSupportedCardTypes: jest.fn().mockResolvedValue([]),
     setAttribute: function () {},
     setMessage: function () {},
     tokenize: function () {}
