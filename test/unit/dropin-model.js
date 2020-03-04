@@ -1,8 +1,6 @@
 jest.mock('../../src/lib/analytics');
 
 const vaultManager = require('braintree-web/vault-manager');
-// TODO should we assert on some analtyics
-// const analytics = require('../../src/lib/analytics');
 const DropinModel = require('../../src/dropin-model');
 const ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
 const CardView = require('../../src/views/payment-sheet-views/card-view');
@@ -102,7 +100,8 @@ describe('DropinModel', () => {
       expect(analytics.sendEvent).toBeCalledWith('started.client-token');
     });
 
-    test('sets vault manager config with defaults for client tokens if not provided', async () => {
+    test('sets vault manager config with defaults for client tokens with customer ids if not provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       const model = new DropinModel(testContext.modelOptions);
 
       await model.initialize();
@@ -111,6 +110,20 @@ describe('DropinModel', () => {
         autoVaultPaymentMethods: true,
         presentVaultedPaymentMethods: true,
         preselectVaultedPaymentMethod: true,
+        allowCustomerToDeletePaymentMethods: false
+      });
+    });
+
+    test('sets vault manager config with defaults for client tokens without customer ids if not provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientToken;
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: false,
+        preselectVaultedPaymentMethod: false,
         allowCustomerToDeletePaymentMethods: false
       });
     });
@@ -140,6 +153,7 @@ describe('DropinModel', () => {
     });
 
     test('overrides the vault manager config if provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       testContext.modelOptions.merchantConfiguration.vaultManager = {
         autoVaultPaymentMethods: false,
         presentVaultedPaymentMethods: false,
@@ -159,6 +173,7 @@ describe('DropinModel', () => {
     });
 
     test('provides vault manager defaults when only some options are provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       testContext.modelOptions.merchantConfiguration.vaultManager = {
         autoVaultPaymentMethods: false
       };
@@ -186,6 +201,8 @@ describe('DropinModel', () => {
     });
 
     test('sets existing payment methods as _paymentMethods', () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
       const model = new DropinModel(testContext.modelOptions);
 
       fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
@@ -198,6 +215,8 @@ describe('DropinModel', () => {
     });
 
     test('_paymentMethods is empty if no existing payment methods', () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
       const model = new DropinModel(testContext.modelOptions);
 
       return model.initialize().then(() => {
@@ -206,6 +225,8 @@ describe('DropinModel', () => {
     });
 
     test('ignores valid, but disabled payment methods', () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
       const model = new DropinModel(testContext.modelOptions);
 
       fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
@@ -225,6 +246,8 @@ describe('DropinModel', () => {
     test(
       'ignores payment methods that have errored when calling isEnabled',
       () => {
+        testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
         const model = new DropinModel(testContext.modelOptions);
 
         fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
@@ -834,7 +857,7 @@ describe('DropinModel', () => {
 
   describe('isPaymentMethodRequestable', () => {
     test(
-      'returns false initially if no payment methods are passed in',
+      'returns false initially if no payment methods are available',
       () => {
         const model = new DropinModel(testContext.modelOptions);
 
@@ -847,6 +870,7 @@ describe('DropinModel', () => {
     test(
       'returns true initially if customer has saved payment methods',
       () => {
+        testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
         const model = new DropinModel(testContext.modelOptions);
 
         fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
@@ -1260,6 +1284,7 @@ describe('DropinModel', () => {
 
   describe('getVaultedPaymentMethods', () => {
     beforeEach(() => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       testContext.model = new DropinModel(testContext.modelOptions);
 
       return testContext.model.initialize();

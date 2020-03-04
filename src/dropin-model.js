@@ -25,13 +25,13 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_CLIENT_TOKEN = {
+var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID = {
   autoVaultPaymentMethods: true,
   presentVaultedPaymentMethods: true,
   preselectVaultedPaymentMethod: true,
   allowCustomerToDeletePaymentMethods: false
 };
-var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY = {
+var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID = {
   autoVaultPaymentMethods: false,
   presentVaultedPaymentMethods: false,
   preselectVaultedPaymentMethod: false,
@@ -44,6 +44,7 @@ function DropinModel(options) {
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
   this.environment = parsedAuthorization.environment;
+  this.hasCustomer = parsedAuthorization.hasCustomer;
   this.authType = parsedAuthorization.authType;
   this.authorization = options.merchantConfiguration.authorization;
 
@@ -62,14 +63,17 @@ DropinModel.prototype.initialize = function () {
   var self = this;
 
   if (this.authType === constants.authorizationTypes.CLIENT_TOKEN) {
-    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_CLIENT_TOKEN, this.merchantConfiguration.vaultManager);
     analytics.sendEvent('started.client-token');
+  } else {
+    analytics.sendEvent('started.tokenization-key');
+  }
+  if (this.hasCustomer) {
+    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID, this.merchantConfiguration.vaultManager);
   } else {
     if (this.merchantConfiguration.vaultManager) {
       return Promise.reject(new DropinError('vaultManager cannot be used with tokenization keys.'));
     }
-    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_TOKENIZATION_KEY);
-    analytics.sendEvent('started.tokenization-key');
+    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID);
   }
 
   return vaultManager.create({
@@ -335,8 +339,6 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
     return Promise.resolve([]);
   }
 
-  // TODO find a way to make this not be blocked by waiting for the client
-  // may require some design work
   return self._vaultManager.fetchPaymentMethods({
     defaultFirst: true
   }).then(function (paymentMethods) {
