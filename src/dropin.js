@@ -709,7 +709,11 @@ Dropin.prototype.requestPaymentMethod = function (options) {
     return payload;
   }).then(function (payload) {
     if (self._dataCollector) {
-      payload.deviceData = self._dataCollector.getDeviceData();
+      return self._dataCollector.getDeviceData().then(function (deviceData) {
+        payload.deviceData = deviceData;
+
+        return payload;
+      });
     }
 
     return payload;
