@@ -98,7 +98,8 @@ describe('ApplePayView', () => {
     test('creates an ApplePay component', () => {
       return testContext.view.initialize().then(() => {
         expect(btApplePay.create).toBeCalledWith(expect.objectContaining({
-          authorization: testContext.view.model.authorization
+          authorization: testContext.view.model.authorization,
+          useDeferredClient: true
         }));
         expect(testContext.view.applePayInstance).toBe(testContext.fakeApplePayInstance);
       });

@@ -30,7 +30,8 @@ ApplePayView.prototype.initialize = function () {
   self.model.asyncDependencyStarting();
 
   return btApplePay.create({
-    authorization: this.model.authorization
+    authorization: this.model.authorization,
+    useDeferredClient: true
   }).then(function (applePayInstance) {
     var buttonDiv = self.getElementById('apple-pay-button');
 

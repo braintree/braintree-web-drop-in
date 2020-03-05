@@ -47,7 +47,8 @@ GooglePayView.prototype.initialize = function () {
   return btGooglePay.create({
     authorization: this.model.authorization,
     googlePayVersion: googlePayVersion,
-    googleMerchantId: merchantId
+    googleMerchantId: merchantId,
+    useDeferredClient: true
   }).then(function (googlePayInstance) {
     self.googlePayInstance = googlePayInstance;
     self.paymentsClient = createPaymentsClient(self.model.environment);
