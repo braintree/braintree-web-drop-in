@@ -346,7 +346,6 @@ Dropin.prototype._initialize = function (callback) {
   container.appendChild(self._dropinWrapper);
 
   self._model = new DropinModel({
-    authorization: self._authorization,
     componentID: self._componentID,
     merchantConfiguration: self._merchantConfiguration
   });
