@@ -87,6 +87,8 @@ CardView.prototype.initialize = function () {
 
   this.model.asyncDependencyStarting();
 
+  // TODO we need some way to check if the merchant is actually enabled to process
+  // credit cards and then disable the card view if they are not
   return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
     this._showSupportedCardIcons();

@@ -30,6 +30,10 @@ DataCollector.prototype.initialize = function () {
   }).then(function (instance) {
     self._instance = instance;
   }).catch(function (err) {
+    // TODO we need a way to bubble up errors 
+    // back to the merchant in the case where
+    // something goes wrong when setting up data collector
+    // instead of silently failing
     analytics.sendEvent('data-collector.setup-failed');
     // log the Data Collector setup error
     // but do not prevent Drop-in from loading
@@ -46,10 +50,6 @@ DataCollector.prototype.getDeviceData = function () {
     return Promise.resolve('');
   }
 
-  // TODO do we want to maintain the behavior
-  // where if data collector instantiation fails
-  // we just return an empty string for device data
-  // or should we actually error now?
   return this._instance.getDeviceData();
 };
 
