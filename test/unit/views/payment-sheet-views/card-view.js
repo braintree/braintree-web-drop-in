@@ -601,7 +601,7 @@ describe('CardView', () => {
     );
 
     test(
-      'resovles with false when merchant configuration sets card to false',
+      'resolves with false when merchant configuration sets card to false',
       () => {
         testContext.fakeOptions.merchantConfiguration.card = false;
 
