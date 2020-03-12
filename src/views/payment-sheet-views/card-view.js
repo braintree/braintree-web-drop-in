@@ -155,7 +155,7 @@ CardView.prototype._sendRequestableEvent = function () {
 
 CardView.prototype._generateHostedFieldsOptions = function () {
   var shouldNotCollectCVV = this.merchantConfiguration.cvv && this.merchantConfiguration.cvv.collect === false;
-  var shouldCollectPostalCode = this.merchantConfiguration.postalCode && this.merchantConfiguration.postalCode.collect === true;
+  var shouldNotCollectPostalCode = !(this.merchantConfiguration.postalCode && this.merchantConfiguration.postalCode.collect === true);
   var overrides = this.merchantConfiguration.overrides;
   var options = {
     authorization: this.model.authorization,
@@ -210,7 +210,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     delete options.fields.cvv;
   }
 
-  if (!shouldCollectPostalCode) {
+  if (shouldNotCollectPostalCode) {
     delete options.fields.postalCode;
   }
 
