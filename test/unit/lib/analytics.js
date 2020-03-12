@@ -1,6 +1,5 @@
 const client = require('braintree-web/client');
 const analytics = require('../../../src/lib/analytics');
-const atob = require('../../../src/lib/polyfill').atob;
 const braintreeClientVersion = require('braintree-web/client').VERSION;
 const constants = require('../../../src/constants');
 const fake = require('../../helpers/fake');
@@ -111,7 +110,7 @@ describe('analytics', () => {
 
       fakeConfiguration.authorization = fake.clientToken;
       fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
-      fingerprint = JSON.parse(atob(fakeConfiguration.authorization)).authorizationFingerprint;
+      fingerprint = JSON.parse(window.atob(fakeConfiguration.authorization)).authorizationFingerprint;
       testContext.client.getConfiguration = jest.fn().mockReturnValue(fakeConfiguration);
 
       // set up again with the new auth type

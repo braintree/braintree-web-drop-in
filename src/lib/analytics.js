@@ -1,7 +1,6 @@
 'use strict';
 
 var btClient = require('braintree-web/client');
-var atob = require('./polyfill').atob;
 var constants = require('../constants');
 var Promise = require('./promise');
 var braintreeClientVersion = require('braintree-web/client').VERSION;
@@ -59,7 +58,7 @@ function sendAnalyticsEvent(kind) {
     if (configuration.authorizationType === 'TOKENIZATION_KEY') {
       data.tokenizationKey = configuration.authorization;
     } else {
-      data.authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
+      data.authorizationFingerprint = JSON.parse(window.atob(configuration.authorization)).authorizationFingerprint;
     }
 
     return new Promise(function (resolve) {
