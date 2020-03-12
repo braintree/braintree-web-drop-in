@@ -6,7 +6,7 @@ function _isTokenizationKey(str) {
   return /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_[a-zA-Z0-9_]+$/.test(str);
 }
 
-function parseEnviornment(auth) {
+function parseEnvironment(auth) {
   var parsedClientToken;
 
   if (_isTokenizationKey(auth)) {
@@ -26,4 +26,4 @@ function parseEnviornment(auth) {
   };
 }
 
-module.exports = parseEnviornment;
+module.exports = parseEnvironment;

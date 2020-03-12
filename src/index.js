@@ -167,10 +167,10 @@ var VERSION = '__VERSION__';
 
 /** @typedef {object} vaultManagerCreateOptions Options for managing the customer's vault. Must be used with a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id).
  *
- * @param {boolean} [autoVaultPaymentMethods=true]  Whether or not to auto-vault payment methods as they are added by the customer. This can be opted out on a per payment method basis as well.
- * @param {boolean} [presentVaultedPaymentMethods=true] Whether or not to present a customer's saved payment methods.
- * @param {boolean} [preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when `presentVaultedPaymentMethods` is set to `true` and the customer has saved payment methods.
- * @param {boolean} [allowCustomerToDeletePaymentMethods=false] Whether or not to allow a customer to delete saved payment methods. *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system.
+ * @param {boolean} [autoVaultPaymentMethods=true]  Auto-vault payment methods as they are added by the customer. This can be opted out on a per payment method basis as well.
+ * @param {boolean} [presentVaultedPaymentMethods=true] Present a customer's saved payment methods.
+ * @param {boolean} [preselectVaultedPaymentMethod=true] Initialize Drop-in with a vaulted payment method pre-selected. Only applicable when `presentVaultedPaymentMethods` is set to `true` and the customer has saved payment methods.
+ * @param {boolean} [allowCustomerToDeletePaymentMethods=false] Allow customer to delete saved payment methods. *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system.
  *
  * @example <caption>Overriding global auto-vaulting behavior</caption>
  * // will autovault all payment methods except for PayPal
@@ -280,7 +280,7 @@ var VERSION = '__VERSION__';
  *
  * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
- * @param {(boolean|object)} [options.threeDSecure] It's recomended that you pass `true` here to enable 3D Secure and pass the configuration options for 3D Secure into {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.See [`threeDSecureOptions`](#~threeDSecureOptions) for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
+ * @param {(boolean|object)} [options.threeDSecure] It's recommended that you pass `true` here to enable 3D Secure and pass the configuration options for 3D Secure into {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.See [`threeDSecureOptions`](#~threeDSecureOptions) for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
  * @param {object} [options.vaultManager] The configuration options for vault management.
  *

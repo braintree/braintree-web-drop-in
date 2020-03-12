@@ -7,7 +7,7 @@ CHANGELOG
 
 _Breaking Changes_
 * Drop support for IE 9-10
-* Whenever a new payment method is added, all other unvaulted payment methods will be removed from avaialble payment methods
+* Whenever a new payment method is added, all other unvaulted payment methods will be removed from available payment methods
 * Payment methods will no longer automatically be hidden or error on setup if merchant is not enabled for them
 * Credit card view changes
   * `card` configuration changes

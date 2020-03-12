@@ -9,7 +9,7 @@ var Promise = require('./promise');
 
 function DataCollector(config) {
   this._config = assign(config, {
-    useDefferedClient: true
+    useDeferredClient: true
   });
 }
 
@@ -48,7 +48,7 @@ DataCollector.prototype.getDeviceData = function () {
 
   // TODO do we want to maintain the behavior
   // where if data collector instantiation fails
-  // we just return an empty string for for device data
+  // we just return an empty string for device data
   // or should we actually error now?
   return this._instance.getDeviceData();
 };

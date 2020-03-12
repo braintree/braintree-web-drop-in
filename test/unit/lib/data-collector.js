@@ -102,7 +102,7 @@ describe('DataCollector', () => {
         expect(global.braintree.dataCollector.create).toBeCalledWith({
           authorization: 'fake-auth',
           kount: true,
-          useDefferedClient: true
+          useDeferredClient: true
         });
       });
     });

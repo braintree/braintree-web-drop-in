@@ -524,7 +524,7 @@ describe('BasePayPalView', () => {
     );
 
     test(
-      'vaults and adds `vaulted: true` to the tokenization payload if flow is vault and global autovaulting iis not enabled but local autovaulting is',
+      'vaults and adds `vaulted: true` to the tokenization payload if flow is vault and global autovaulting is not enabled but local autovaulting is',
       done => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;

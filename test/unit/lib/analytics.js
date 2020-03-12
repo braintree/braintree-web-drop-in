@@ -1,4 +1,4 @@
-var client = require('braintree-web/client');
+const client = require('braintree-web/client');
 const analytics = require('../../../src/lib/analytics');
 const atob = require('../../../src/lib/polyfill').atob;
 const braintreeClientVersion = require('braintree-web/client').VERSION;
@@ -28,7 +28,7 @@ describe('analytics', () => {
       });
     });
 
-    test('sets metatdata on the client', async () => {
+    test('sets metadata on the client', async () => {
       const clientInstance = await analytics.setupAnalytics('fake-auth');
 
       const config = clientInstance.getConfiguration();
