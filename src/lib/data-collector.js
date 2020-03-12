@@ -30,7 +30,7 @@ DataCollector.prototype.initialize = function () {
   }).then(function (instance) {
     self._instance = instance;
   }).catch(function (err) {
-    // TODO we need a way to bubble up errors 
+    // TODO we need a way to bubble up errors
     // back to the merchant in the case where
     // something goes wrong when setting up data collector
     // instead of silently failing
