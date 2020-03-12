@@ -45,12 +45,13 @@ GooglePayView.prototype.initialize = function () {
   self.model.asyncDependencyStarting();
 
   return btGooglePay.create({
-    client: self.client,
+    authorization: this.model.authorization,
     googlePayVersion: googlePayVersion,
-    googleMerchantId: merchantId
+    googleMerchantId: merchantId,
+    useDeferredClient: true
   }).then(function (googlePayInstance) {
     self.googlePayInstance = googlePayInstance;
-    self.paymentsClient = createPaymentsClient(self.client);
+    self.paymentsClient = createPaymentsClient(self.model.environment);
   }).then(function () {
     var buttonContainer = self.getElementById('google-pay-button');
 
@@ -84,11 +85,11 @@ GooglePayView.prototype.tokenize = function () {
       console.error(err); // eslint-disable-line no-console
       reportedError = 'developerError';
     } else if (err.statusCode === 'CANCELED') {
-      analytics.sendEvent(self.client, 'googlepay.loadPaymentData.canceled');
+      analytics.sendEvent('googlepay.loadPaymentData.canceled');
 
       return;
     } else if (err.statusCode) {
-      analytics.sendEvent(self.client, 'googlepay.loadPaymentData.failed');
+      analytics.sendEvent('googlepay.loadPaymentData.failed');
     }
 
     self.model.reportError(reportedError);
@@ -100,9 +101,7 @@ GooglePayView.prototype.updateConfiguration = function (key, value) {
 };
 
 GooglePayView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-
-  if (!(gatewayConfiguration.androidPay && Boolean(options.merchantConfiguration.googlePay))) {
+  if (!options.merchantConfiguration.googlePay) {
     return Promise.resolve(false);
   }
 
@@ -116,7 +115,7 @@ GooglePayView.isEnabled = function (options) {
 
     return Promise.resolve();
   }).then(function () {
-    var paymentsClient = createPaymentsClient(options.client);
+    var paymentsClient = createPaymentsClient(options.environment);
 
     return paymentsClient.isReadyToPay({
       allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']
@@ -126,9 +125,9 @@ GooglePayView.isEnabled = function (options) {
   });
 };
 
-function createPaymentsClient(client) {
+function createPaymentsClient(environment) {
   return new global.google.payments.api.PaymentsClient({
-    environment: client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'PRODUCTION' : 'TEST'
+    environment: environment === 'production' ? 'PRODUCTION' : 'TEST'
   });
 }
 

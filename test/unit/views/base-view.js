@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const BaseView = require('../../../src/views/base-view');
 const constants = require('../../../src/constants');

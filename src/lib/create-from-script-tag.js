@@ -5,7 +5,7 @@ var find = require('./find-parent-form');
 var uuid = require('./uuid');
 var DropinError = require('./dropin-error');
 var kebabCaseToCamelCase = require('./kebab-case-to-camel-case');
-var WHITELISTED_DATA_ATTRIBUTES = [
+var ALLOWLISTED_DATA_ATTRIBUTES = [
   'locale',
   'payment-option-priority',
 
@@ -97,7 +97,7 @@ function createFromScriptTag(createFunction, scriptTag) {
     container: container
   };
 
-  WHITELISTED_DATA_ATTRIBUTES.forEach(function (compositeKey) {
+  ALLOWLISTED_DATA_ATTRIBUTES.forEach(function (compositeKey) {
     var value = scriptTag.getAttribute('data-' + compositeKey);
 
     if (value == null) {
@@ -108,7 +108,7 @@ function createFromScriptTag(createFunction, scriptTag) {
   });
 
   createFunction(createOptions).then(function (instance) {
-    analytics.sendEvent(instance._client, 'integration-type.script-tag');
+    analytics.sendEvent('integration-type.script-tag');
     form.addEventListener('submit', function () {
       instance.requestPaymentMethod(function (requestPaymentError, payload) {
         if (requestPaymentError) {

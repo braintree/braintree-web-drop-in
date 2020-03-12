@@ -2,6 +2,7 @@
 var clientToken, clientTokenWithCustomerID, fakeBTInstances;
 var tokenizationKey = 'development_testing_merchant_id';
 var braintreeVersion = require('braintree-web').VERSION;
+var vaultManager = require('braintree-web/vault-manager');
 var DropinModel = require('../../src/dropin-model');
 
 function configuration() {
@@ -44,39 +45,30 @@ function configuration() {
   };
 }
 
-function getState() {
-  return {
-    cards: [{ type: 'visa' }],
-    fields: {
-      number: {
-        isValid: true
-      },
-      expirationDate: {
-        isValid: false
-      }
-    }
-  };
-}
-
 clientToken = configuration().gatewayConfiguration;
 clientToken.authorizationFingerprint = 'encoded_auth_fingerprint';
 clientToken = btoa(JSON.stringify(clientToken));
 
 clientTokenWithCustomerID = configuration().gatewayConfiguration;
 clientTokenWithCustomerID.authorizationFingerprint = 'encoded_auth_fingerprint&customer_id=abc123';
+clientTokenWithCustomerID.hasCustomer = true;
 clientTokenWithCustomerID = btoa(JSON.stringify(clientTokenWithCustomerID));
 
 fakeBTInstances = {
   dataCollector: {
     deviceData: 'device-data',
+    getDeviceData: jest.fn().mockResolvedValue('device-data'),
     teardown: function () {}
   },
   hostedFields: {
-    getState: getState,
-    on: function () {},
-    setAttribute: function () {},
-    setMessage: function () {},
-    tokenize: function () {}
+    clear: jest.fn(),
+    getState: jest.fn(),
+    on: jest.fn(),
+    getSupportedCardTypes: jest.fn(),
+    setAttribute: jest.fn(),
+    removeAttribute: jest.fn(),
+    setMessage: jest.fn(),
+    tokenize: jest.fn()
   },
   paypal: {
     createPayment: function () {},
@@ -86,6 +78,10 @@ fakeBTInstances = {
     verifyCard: function () {},
     cancelVerifyCard: function () {},
     teardown: function () {}
+  },
+  vaultManager: {
+    fetchPaymentMethods: jest.fn(),
+    deletePaymentMethod: jest.fn()
   }
 };
 
@@ -108,13 +104,13 @@ function model(options) {
   modelInstance = new DropinModel(options);
 
   jest.spyOn(modelInstance, 'getVaultedPaymentMethods').mockResolvedValue([]);
+  jest.spyOn(vaultManager, 'create').mockResolvedValue(fakeBTInstances.vaultManager);
 
   return modelInstance;
 }
 
 function modelOptions() {
   return {
-    client: client(),
     componentID: 'foo123',
     merchantConfiguration: {
       authorization: tokenizationKey
@@ -132,6 +128,7 @@ module.exports = {
   hostedFieldsInstance: fakeBTInstances.hostedFields,
   paypalInstance: fakeBTInstances.paypal,
   threeDSecureInstance: fakeBTInstances.threeDSecure,
+  vaultManagerInstance: fakeBTInstances.vaultManager,
   modelOptions: modelOptions,
   tokenizationKey: tokenizationKey
 };

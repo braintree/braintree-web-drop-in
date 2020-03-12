@@ -31,7 +31,11 @@ BasePayPalView.prototype.initialize = function () {
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
   var paypalConfiguration = this.model.merchantConfiguration[paypalType];
 
-  this.paypalConfiguration = assign({}, paypalConfiguration);
+  this.paypalConfiguration = assign({}, {
+    vault: {}
+  }, paypalConfiguration);
+  this.vaultConfig = this.paypalConfiguration.vault;
+  delete this.paypalConfiguration.vault;
 
   this.model.asyncDependencyStarting();
   asyncDependencyTimeoutHandler = setTimeout(function () {
@@ -41,10 +45,12 @@ BasePayPalView.prototype.initialize = function () {
     });
   }, ASYNC_DEPENDENCY_TIMEOUT);
 
-  return btPaypal.create({client: this.client}).then(function (paypalInstance) {
+  return btPaypal.create({
+    authorization: this.model.authorization
+  }).then(function (paypalInstance) {
     var checkoutJSConfiguration;
     var buttonSelector = '[data-braintree-id="paypal-button"]';
-    var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
+    var environment = self.model.environment === 'production' ? 'production' : 'sandbox';
     var locale = self.model.merchantConfiguration.locale;
 
     self.paypalInstance = paypalInstance;
@@ -58,8 +64,12 @@ BasePayPalView.prototype.initialize = function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
       },
       onAuthorize: function (data) {
+        var shouldVault = self._shouldVault();
+
+        data.vault = shouldVault;
+
         return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
-          if (self.paypalConfiguration.flow === 'vault' && !self.model.isGuestCheckout) {
+          if (shouldVault) {
             tokenizePayload.vaulted = true;
           }
           self.model.addPaymentMethod(tokenizePayload);
@@ -117,21 +127,34 @@ BasePayPalView.prototype.requestPaymentMethod = function () {
 };
 
 BasePayPalView.prototype.updateConfiguration = function (key, value) {
+  if (key === 'vault') {
+    this.vaultConfig = value;
+
+    return;
+  }
+
   if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
     this.paypalConfiguration[key] = value;
   }
 };
 
-BasePayPalView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
-
-  if (!gatewayConfiguration.paypalEnabled) {
-    return Promise.resolve(false);
+BasePayPalView.prototype._shouldVault = function () {
+  if (this.paypalConfiguration.flow !== 'vault') {
+    return false;
   }
 
+  if (this.vaultConfig.hasOwnProperty('autoVault')) {
+    return this.vaultConfig.autoVault;
+  }
+
+  return this.model.vaultManagerConfig.autoVaultPaymentMethods;
+};
+
+BasePayPalView.isEnabled = function (options) {
+  var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
+
   if (browserDetection.isIe9() || browserDetection.isIe10()) {
-    analytics.sendEvent(options.client, options.viewID + '.checkout.js-browser-not-supported');
+    analytics.sendEvent(options.viewID + '.checkout.js-browser-not-supported');
 
     return Promise.resolve(false);
   }

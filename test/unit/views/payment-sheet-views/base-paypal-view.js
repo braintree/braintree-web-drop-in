@@ -1,7 +1,9 @@
+jest.mock('../../../../src/lib/analytics');
 
 /* eslint-disable no-new */
 
-const analytics = require('../../../../src/lib/analytics');
+// TODO should we assert on some analytics?
+// const analytics = require('../../../../src/lib/analytics');
 const browserDetection = require('../../../../src/lib/browser-detection');
 const BaseView = require('../../../../src/views/base-view');
 const DropinModel = require('../../../../src/dropin-model');
@@ -35,7 +37,6 @@ describe('BasePayPalView', () => {
         CREDIT: 'credit'
       }
     };
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
     global.paypal = testContext.paypal;
 
@@ -51,18 +52,18 @@ describe('BasePayPalView', () => {
     jest.spyOn(testContext.model, 'reportError').mockImplementation();
 
     testContext.configuration = fake.configuration();
-    testContext.fakeClient = fake.client(testContext.configuration);
     testContext.paypalViewOptions = {
       strings: {},
       element: testContext.element,
-      model: testContext.model,
-      client: testContext.fakeClient
+      model: testContext.model
     };
     testContext.paypalInstance = {
       createPayment: jest.fn().mockResolvedValue(),
       tokenizePayment: jest.fn().mockResolvedValue()
     };
     jest.spyOn(PayPalCheckout, 'create').mockResolvedValue(testContext.paypalInstance);
+
+    return testContext.model.initialize();
   });
 
   afterEach(() => {
@@ -106,7 +107,7 @@ describe('BasePayPalView', () => {
     test('creates a PayPal Checkout component', () => {
       return testContext.view.initialize().then(() => {
         expect(PayPalCheckout.create).toBeCalledWith(expect.objectContaining({
-          client: testContext.paypalViewOptions.client
+          authorization: testContext.view.model.authorization
         }));
         expect(testContext.view.paypalInstance).toBe(testContext.paypalInstance);
       });
@@ -265,7 +266,7 @@ describe('BasePayPalView', () => {
     test(
       'sets paypal-checkout.js environment to production when gatewayConfiguration is production',
       () => {
-        testContext.configuration.gatewayConfiguration.environment = 'production';
+        testContext.view.model.environment = 'production';
 
         return testContext.view.initialize().then(() => {
           expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
@@ -278,7 +279,7 @@ describe('BasePayPalView', () => {
     test(
       'sets paypal-checkout.js environment to sandbox when gatewayConfiguration is not production',
       () => {
-        testContext.configuration.gatewayConfiguration.environment = 'development';
+        testContext.view.model.environment = 'development';
 
         return testContext.view.initialize().then(() => {
           expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
@@ -479,16 +480,15 @@ describe('BasePayPalView', () => {
     });
 
     test(
-      'adds `vaulted: true` to the tokenization payload if flow is vault and is not guest checkout',
+      'vaults and adds `vaulted: true` to the tokenization payload if flow is vault and global autovaulting iis enabled',
       done => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;
         const fakePayload = {
-          foo: 'bar',
-          vaulted: true
+          foo: 'bar'
         };
 
-        model.isGuestCheckout = false;
+        model.vaultManagerConfig.autoVaultPaymentMethods = true;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
         paypalInstance.paypalConfiguration = { flow: 'vault' };
@@ -499,17 +499,23 @@ describe('BasePayPalView', () => {
         testContext.view.initialize().then(() => {
           const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
           const tokenizeOptions = {
-            foo: 'bar'
+            data: 'bar'
           };
 
           onAuthFunction(tokenizeOptions);
 
           expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
-          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: true
+          });
 
           setTimeout(() => {
             expect(model.addPaymentMethod).toBeCalledTimes(1);
-            expect(model.addPaymentMethod).toBeCalledWith(fakePayload);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar',
+              vaulted: true
+            });
 
             done();
           }, 1);
@@ -518,7 +524,7 @@ describe('BasePayPalView', () => {
     );
 
     test(
-      'does not add `vaulted: true` to the tokenization payload if flow is vault but is guest checkout',
+      'vaults and adds `vaulted: true` to the tokenization payload if flow is vault and global autovaulting is not enabled but local autovaulting is',
       done => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;
@@ -526,7 +532,56 @@ describe('BasePayPalView', () => {
           foo: 'bar'
         };
 
-        model.isGuestCheckout = true;
+        model.vaultManagerConfig.autoVaultPaymentMethods = false;
+
+        paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+        paypalInstance.paypalConfiguration = {
+          flow: 'vault'
+        };
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        model.merchantConfiguration.paypal.vault = {
+          autoVault: true
+        };
+        testContext.view.initialize().then(() => {
+          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const tokenizeOptions = {
+            data: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: true
+          });
+
+          setTimeout(() => {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar',
+              vaulted: true
+            });
+
+            done();
+          }, 1);
+        });
+      }
+    );
+
+    test(
+      'does not add `vaulted: true` to the tokenization payload if flow is vault but global auto-vaulting is not enabled',
+      done => {
+        const paypalInstance = testContext.paypalInstance;
+        const model = testContext.model;
+        const fakePayload = {
+          foo: 'bar'
+        };
+
+        model.vaultManagerConfig.autoVaultPaymentMethods = false;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
         paypalInstance.paypalConfiguration = { flow: 'vault' };
@@ -537,13 +592,62 @@ describe('BasePayPalView', () => {
         testContext.view.initialize().then(() => {
           const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
           const tokenizeOptions = {
-            foo: 'bar'
+            data: 'bar'
           };
 
           onAuthFunction(tokenizeOptions);
 
           expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
-          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: false
+          });
+
+          setTimeout(() => {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar'
+            });
+
+            done();
+          }, 100);
+        });
+      }
+    );
+
+    test(
+      'does not add `vaulted: true` to the tokenization payload if flow is vault and global auto-vaulting is enabled enabled but local autoVault setting is false',
+      done => {
+        const paypalInstance = testContext.paypalInstance;
+        const model = testContext.model;
+        const fakePayload = {
+          foo: 'bar'
+        };
+
+        model.vaultManagerConfig.autoVaultPaymentMethods = true;
+        model.merchantConfiguration.paypal.vault = {
+          autoVault: false
+        };
+
+        paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+        paypalInstance.paypalConfiguration = { flow: 'vault' };
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        testContext.view.initialize().then(() => {
+          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const tokenizeOptions = {
+            data: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: false
+          });
 
           setTimeout(() => {
             expect(model.addPaymentMethod).toBeCalledTimes(1);
@@ -556,7 +660,7 @@ describe('BasePayPalView', () => {
     );
 
     test(
-      'does not add `vaulted: true` to the tokenization payload if flow is checkout and is not guest checkout',
+      'does not add `vaulted: true` to the tokenization payload if flow is checkout',
       done => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;
@@ -564,10 +668,10 @@ describe('BasePayPalView', () => {
           foo: 'bar'
         };
 
-        model.isGuestCheckout = false;
+        model.vaultManagerConfig.autoVaultPaymentMethods = true;
 
         paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
-        paypalInstance.paypalConfiguration = { flow: 'checkout' };
+        model.merchantConfiguration.paypal = { flow: 'checkout' };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
         testContext.paypal.Button.render.mockResolvedValue();
@@ -575,13 +679,16 @@ describe('BasePayPalView', () => {
         testContext.view.initialize().then(() => {
           const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
           const tokenizeOptions = {
-            foo: 'bar'
+            data: 'bar'
           };
 
           onAuthFunction(tokenizeOptions);
 
           expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
-          expect(paypalInstance.tokenizePayment).toBeCalledWith(tokenizeOptions);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            data: 'bar',
+            vault: false
+          });
 
           setTimeout(() => {
             expect(model.addPaymentMethod).toBeCalledTimes(1);
@@ -880,12 +987,37 @@ describe('BasePayPalView', () => {
         currency: 'USD'
       });
     });
+
+    test('can set properties on vault config', () => {
+      const view = new BasePayPalView();
+
+      view.paypalConfiguration = {
+        flow: 'vault',
+        amount: '10.00'
+      };
+      view.vaultConfig = {
+        autoVault: true
+      };
+
+      view.updateConfiguration('vault', {
+        autoVault: false,
+        foo: 'bar'
+      });
+
+      expect(view.vaultConfig).toEqual({
+        autoVault: false,
+        foo: 'bar'
+      });
+      expect(view.paypalConfiguration).toEqual({
+        flow: 'vault',
+        amount: '10.00'
+      });
+    });
   });
 
   describe('isEnabled', () => {
     beforeEach(() => {
       testContext.options = {
-        client: testContext.fakeClient,
         merchantConfiguration: {
           paypal: {}
         }
@@ -898,17 +1030,6 @@ describe('BasePayPalView', () => {
 
       jest.spyOn(assets, 'loadScript').mockResolvedValue();
     });
-
-    test(
-      'resolves false if merchant does not have PayPal enabled on the gateway',
-      () => {
-        testContext.configuration.gatewayConfiguration.paypalEnabled = false;
-
-        return BasePayPalView.isEnabled(testContext.options).then(result => {
-          expect(result).toBe(false);
-        });
-      }
-    );
 
     test('resolves false if browser is IE9', () => {
       jest.spyOn(browserDetection, 'isIe9').mockReturnValue(true);

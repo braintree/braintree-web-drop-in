@@ -1,4 +1,6 @@
+jest.mock('../../../src/lib/analytics');
 
+const btWebVersion = require('braintree-web/client').VERSION;
 const fake = require('../../helpers/fake');
 const assets = require('@braintree/asset-loader');
 const Promise = require('../../../src/lib/promise');
@@ -13,7 +15,6 @@ describe('DataCollector', () => {
   });
 
   beforeEach(() => {
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
     testContext.dataCollectorInstance = fake.dataCollectorInstance;
     jest.spyOn(testContext.dataCollectorInstance, 'teardown').mockResolvedValue();
   });
@@ -31,9 +32,7 @@ describe('DataCollector', () => {
       }
 
       testContext.config = {
-        client: {
-          getVersion: jest.fn().mockReturnValue('1.2.3')
-        },
+        authorization: 'fake-auth',
         kount: true
       };
 
@@ -60,7 +59,7 @@ describe('DataCollector', () => {
         return dc.initialize().then(() => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
-            src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
+            src: `https://js.braintreegateway.com/web/${btWebVersion}/js/data-collector.min.js`,
             id: 'braintree-dropin-data-collector-script'
           });
         });
@@ -77,7 +76,7 @@ describe('DataCollector', () => {
         return dc.initialize().then(() => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
-            src: 'https://js.braintreegateway.com/web/1.2.3/js/data-collector.min.js',
+            src: `https://js.braintreegateway.com/web/${btWebVersion}/js/data-collector.min.js`,
             id: 'braintree-dropin-data-collector-script'
           });
         });
@@ -92,13 +91,19 @@ describe('DataCollector', () => {
       });
     });
 
-    test('creates a data collector instance', () => {
+    test('creates a data collector instance using deferred method', () => {
       const dc = new DataCollector(testContext.config);
 
       expect(dc._instance).toBeFalsy();
 
       return dc.initialize().then(() => {
         expect(dc._instance).toBe(testContext.dataCollectorInstance);
+        expect(global.braintree.dataCollector.create).toBeCalledTimes(1);
+        expect(global.braintree.dataCollector.create).toBeCalledWith({
+          authorization: 'fake-auth',
+          kount: true,
+          useDeferredClient: true
+        });
       });
     });
 
@@ -112,18 +117,28 @@ describe('DataCollector', () => {
       return dc.initialize().then(() => {
         expect(dc._instance).toBeFalsy();
         expect(dc.log).toBeCalledWith(err);
-        expect(analytics.sendEvent).toBeCalledWith(testContext.config.client, 'data-collector.setup-failed');
+        expect(analytics.sendEvent).toBeCalledWith('data-collector.setup-failed');
       });
     });
   });
 
   describe('getDeviceData', () => {
-    test('returns device data', () => {
+    test('resolves with empty string when data collector instance is not avaialble', async () => {
+      const dc = new DataCollector({});
+
+      const data = await dc.getDeviceData();
+
+      expect(data).toBe('');
+    });
+
+    test('resolves device data', async () => {
       const dc = new DataCollector({});
 
       dc._instance = testContext.dataCollectorInstance;
 
-      expect(dc.getDeviceData()).toBe('device-data');
+      const data = await dc.getDeviceData();
+
+      expect(data).toBe('device-data');
     });
   });
 

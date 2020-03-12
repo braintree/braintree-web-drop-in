@@ -1,3 +1,4 @@
+jest.mock('../../../../src/lib/analytics');
 
 /* eslint-disable no-new */
 
@@ -23,7 +24,6 @@ describe('GooglePayView', () => {
     const googlePayButton = document.createElement('button');
 
     testContext.model = fake.model();
-    testContext.fakeClient = fake.client();
 
     testContext.div = document.createElement('div');
 
@@ -39,7 +39,7 @@ describe('GooglePayView', () => {
       }
     };
     testContext.googlePayViewOptions = {
-      client: testContext.fakeClient,
+      environment: 'sandbox',
       element: document.body.querySelector('.braintree-sheet.braintree-googlePay'),
       model: testContext.model,
       strings: {}
@@ -74,7 +74,6 @@ describe('GooglePayView', () => {
       email: 'foo@example.com'
     };
     jest.spyOn(btGooglePay, 'create').mockResolvedValue(testContext.fakeGooglePayInstance);
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
 
     testContext.FakePaymentClient = function FakePayment() {};
     testContext.FakePaymentClient.prototype.isReadyToPay = jest.fn().mockResolvedValue({ result: true });
@@ -126,7 +125,6 @@ describe('GooglePayView', () => {
     test('creates a GooglePayment component', () => {
       return testContext.view.initialize().then(() => {
         expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
-          client: testContext.view.client
         }));
         expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
       });
@@ -139,7 +137,6 @@ describe('GooglePayView', () => {
 
         return testContext.view.initialize().then(() => {
           expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
-            client: testContext.view.client,
             googlePayVersion: 2
           }));
           expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
@@ -154,7 +151,6 @@ describe('GooglePayView', () => {
 
         return testContext.view.initialize().then(() => {
           expect(btGooglePay.create).toBeCalledWith(expect.objectContaining({
-            client: testContext.view.client,
             googleMerchantId: 'foobar'
           }));
           expect(testContext.view.googlePayInstance).toBe(testContext.fakeGooglePayInstance);
@@ -169,12 +165,9 @@ describe('GooglePayView', () => {
     });
 
     test(
-      'configures payemnts client with PRODUCTION environment in production',
+      'configures payments client with PRODUCTION environment in production',
       () => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.environment = 'production';
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        testContext.view.model.environment = 'production';
         jest.spyOn(global.google.payments.api, 'PaymentsClient');
 
         return testContext.view.initialize().then(() => {
@@ -186,12 +179,9 @@ describe('GooglePayView', () => {
     );
 
     test(
-      'configures payemnts client with TEST environment in non-production',
+      'configures payments client with TEST environment in non-production',
       () => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.environment = 'sandbox';
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        testContext.view.model.environment = 'sandbox';
         jest.spyOn(global.google.payments.api, 'PaymentsClient');
 
         return testContext.view.initialize().then(() => {
@@ -377,7 +367,7 @@ describe('GooglePayView', () => {
 
       return testContext.view.tokenize().then(() => {
         expect(analytics.sendEvent).toBeCalledTimes(1);
-        expect(analytics.sendEvent).toBeCalledWith(testContext.fakeClient, 'googlepay.loadPaymentData.failed');
+        expect(analytics.sendEvent).toBeCalledWith('googlepay.loadPaymentData.failed');
       });
     });
 
@@ -400,7 +390,7 @@ describe('GooglePayView', () => {
 
       return testContext.view.tokenize().then(() => {
         expect(analytics.sendEvent).toBeCalledTimes(1);
-        expect(analytics.sendEvent).toBeCalledWith(testContext.fakeClient, 'googlepay.loadPaymentData.canceled');
+        expect(analytics.sendEvent).toBeCalledWith('googlepay.loadPaymentData.canceled');
       });
     });
 
@@ -482,25 +472,10 @@ describe('GooglePayView', () => {
     beforeEach(() => {
       jest.spyOn(assets, 'loadScript').mockResolvedValue();
       testContext.fakeOptions = {
-        client: testContext.fakeClient,
+        environment: 'sandbox',
         merchantConfiguration: testContext.model.merchantConfiguration
       };
     });
-
-    test(
-      'resolves with false when gatewayConfiguration does not have android pay',
-      () => {
-        const configuration = fake.configuration();
-
-        delete configuration.gatewayConfiguration.androidPay;
-
-        testContext.fakeOptions.client.getConfiguration.mockReturnValue(configuration);
-
-        return GooglePayView.isEnabled(testContext.fakeOptions).then(result => {
-          expect(result).toBe(false);
-        });
-      }
-    );
 
     test(
       'resolves with false when merhcantConfiguration does not specify Google Pay',
@@ -595,6 +570,36 @@ describe('GooglePayView', () => {
 
       return GooglePayView.isEnabled(testContext.fakeOptions).then(result => {
         expect(result).toBe(true);
+      });
+    });
+
+    test('creates a payment client in test mode when using sandbox environment', () => {
+      jest.spyOn(global.google.payments.api, 'PaymentsClient').mockReturnValue({
+        isReadyToPay: jest.fn().mockResolvedValue({
+          result: true
+        })
+      });
+      testContext.fakeOptions.environment = 'sandbox';
+
+      return GooglePayView.isEnabled(testContext.fakeOptions).then(() => {
+        expect(global.google.payments.api.PaymentsClient).toBeCalledWith({
+          environment: 'TEST'
+        });
+      });
+    });
+
+    test('creates a payment client in production mode when using production environment', () => {
+      jest.spyOn(global.google.payments.api, 'PaymentsClient').mockReturnValue({
+        isReadyToPay: jest.fn().mockResolvedValue({
+          result: true
+        })
+      });
+      testContext.fakeOptions.environment = 'production';
+
+      return GooglePayView.isEnabled(testContext.fakeOptions).then(() => {
+        expect(global.google.payments.api.PaymentsClient).toBeCalledWith({
+          environment: 'PRODUCTION'
+        });
       });
     });
   });

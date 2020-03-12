@@ -31,7 +31,6 @@ CardView.prototype.initialize = function () {
   hfOptions = this._generateHostedFieldsOptions();
 
   cardIcons.innerHTML = cardIconHTML;
-  this._hideUnsupportedCardIcons();
 
   this.hasCVV = hfOptions.fields.cvv;
   this.hasCardholderName = Boolean(this.merchantConfiguration.cardholderName);
@@ -78,18 +77,21 @@ CardView.prototype.initialize = function () {
     }
   }.bind(this));
 
-  if (!this.model.isGuestCheckout && this.merchantConfiguration.vault.allowVaultCardOverride === true) {
+  if (this.model.vaultManagerConfig.autoVaultPaymentMethods && this.merchantConfiguration.vault.allowAutoVaultOverride === true) {
     classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
   }
 
-  if (this.merchantConfiguration.vault.vaultCard === false) {
+  if (this.merchantConfiguration.vault.autoVault === false) {
     this.saveCardInput.checked = false;
   }
 
   this.model.asyncDependencyStarting();
 
+  // TODO we need some way to check if the merchant is actually enabled to process
+  // credit cards and then disable the card view if they are not
   return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
+    this._showSupportedCardIcons();
     this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
     this.hostedFieldsInstance.on('cardTypeChange', this._onCardTypeChangeEvent.bind(this));
     this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
@@ -154,16 +156,18 @@ CardView.prototype._sendRequestableEvent = function () {
 };
 
 CardView.prototype._generateHostedFieldsOptions = function () {
-  var challenges = this.client.getConfiguration().gatewayConfiguration.challenges;
-  var hasCVVChallenge = challenges.indexOf('cvv') !== -1;
-  var hasPostalCodeChallenge = challenges.indexOf('postal_code') !== -1;
+  var shouldNotCollectCVV = this.merchantConfiguration.cvv && this.merchantConfiguration.cvv.collect === false;
+  var shouldNotCollectPostalCode = !(this.merchantConfiguration.postalCode && this.merchantConfiguration.postalCode.collect === true);
   var overrides = this.merchantConfiguration.overrides;
   var options = {
-    client: this.client,
+    authorization: this.model.authorization,
     fields: {
       number: {
         selector: this._generateFieldSelector('number'),
-        placeholder: generateCardNumberPlaceholder()
+        placeholder: generateCardNumberPlaceholder(),
+        // enforces card type as part of validity for hosted fields
+        // without providing any overrides
+        supportedCardBrands: {}
       },
       expirationDate: {
         selector: this._generateFieldSelector('expiration'),
@@ -204,11 +208,11 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     }
   };
 
-  if (!hasCVVChallenge) {
+  if (shouldNotCollectCVV) {
     delete options.fields.cvv;
   }
 
-  if (!hasPostalCodeChallenge) {
+  if (shouldNotCollectPostalCode) {
     delete options.fields.postalCode;
   }
 
@@ -260,9 +264,8 @@ CardView.prototype._generateHostedFieldsOptions = function () {
 };
 
 CardView.prototype._validateForm = function (showFieldErrors) {
-  var card, cardType, cardTypeSupported, state;
+  var card, state;
   var isValid = true;
-  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
   if (!this.hostedFieldsInstance) {
     return false;
@@ -294,17 +297,11 @@ CardView.prototype._validateForm = function (showFieldErrors) {
     }
   }.bind(this));
 
-  if (state.fields.number.isValid) {
-    card = state.cards[0];
-    cardType = card && constants.configurationCardTypes[card.type];
-    cardTypeSupported = cardType && supportedCardTypes.indexOf(cardType) !== -1;
+  if (showFieldErrors && !state.fields.number.isValid) {
+    card = state.cards && state.cards[0];
 
-    if (!cardTypeSupported) {
-      isValid = false;
-
-      if (showFieldErrors) {
-        this.showFieldError('number', this.strings.unsupportedCardTypeError);
-      }
+    if (card && !card.supported) {
+      this.showFieldError('number', this.strings.unsupportedCardTypeError);
     }
   }
 
@@ -496,7 +493,11 @@ CardView.prototype.teardown = function () {
 };
 
 CardView.prototype._shouldVault = function () {
-  return !this.model.isGuestCheckout && this.saveCardInput.checked;
+  if (this.merchantConfiguration.vault.hasOwnProperty('autoVault')) {
+    return this.merchantConfiguration.vault.autoVault && this.saveCardInput.checked;
+  }
+
+  return this.model.vaultManagerConfig.autoVaultPaymentMethods && this.saveCardInput.checked;
 };
 
 CardView.prototype._generateFieldSelector = function (field) {
@@ -512,12 +513,14 @@ CardView.prototype._onBlurEvent = function (event) {
   if (shouldApplyFieldEmptyError(field)) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
-    this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
-  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
-    this.showFieldError('number', this.strings.unsupportedCardTypeError);
+    if (event.emittedBy === 'number' && event.cards && event.cards[0] && !event.cards[0].supported) {
+      this.showFieldError('number', this.strings.unsupportedCardTypeError);
+    } else {
+      this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
+    }
   }
 
-  setTimeout(function () {
+  window.setTimeout(function () {
     // when focusing on a field by clicking the label,
     // we need to wait a bit for the iframe to be
     // focused properly before applying validations
@@ -576,14 +579,8 @@ CardView.prototype._onNotEmptyEvent = function (event) {
 };
 
 CardView.prototype._onValidityChangeEvent = function (event) {
-  var isValid;
   var field = event.fields[event.emittedBy];
-
-  if (event.emittedBy === 'number' && event.cards[0]) {
-    isValid = field.isValid && this._isCardTypeSupported(event.cards[0].type);
-  } else {
-    isValid = field.isValid;
-  }
+  var isValid = field.isValid;
 
   classList.toggle(field.container, 'braintree-form__field--valid', isValid);
 
@@ -614,32 +611,26 @@ CardView.prototype.onSelection = function () {
   }
 };
 
-CardView.prototype._hideUnsupportedCardIcons = function () {
-  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
+CardView.prototype._showSupportedCardIcons = function () {
+  var self = this;
 
-  Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
-    var cardIcon;
-    var configurationCardType = constants.configurationCardTypes[paymentMethodCardType];
+  this.hostedFieldsInstance.getSupportedCardTypes().then(function (supportedCardTypes) {
+    Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
+      var cardIcon;
+      var configurationKey = constants.configurationCardTypes[paymentMethodCardType];
 
-    if (supportedCardTypes.indexOf(configurationCardType) === -1) {
-      cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');
-      classList.add(cardIcon, 'braintree-hidden');
-    }
-  }.bind(this));
-};
-
-CardView.prototype._isCardTypeSupported = function (cardType) {
-  var configurationCardType = constants.configurationCardTypes[cardType];
-  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
-
-  return supportedCardTypes.indexOf(configurationCardType) !== -1;
+      if (supportedCardTypes.indexOf(paymentMethodCardType) > -1) {
+        cardIcon = self.getElementById(configurationKey + '-card-icon');
+        classList.remove(cardIcon, 'braintree-hidden');
+      }
+    });
+  });
 };
 
 CardView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
   var disabledByMerchant = options.merchantConfiguration.card === false;
 
-  return Promise.resolve(!disabledByMerchant && gatewayConfiguration.creditCards.supportedCardTypes.length > 0);
+  return Promise.resolve(!disabledByMerchant);
 };
 
 function isNormalFieldElement(element) {

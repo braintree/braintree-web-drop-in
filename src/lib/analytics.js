@@ -1,41 +1,81 @@
 'use strict';
 
-var atob = require('./polyfill').atob;
+var btClient = require('braintree-web/client');
 var constants = require('../constants');
+var Promise = require('./promise');
 var braintreeClientVersion = require('braintree-web/client').VERSION;
+var VERSION = '__VERSION__';
+
+var clientPromise;
 
 function _millisToSeconds(millis) {
   return Math.floor(millis / 1000);
 }
 
-function sendAnalyticsEvent(client, kind, callback) {
-  var configuration = client.getConfiguration();
-  var analyticsRequest = client._request;
-  var timestamp = _millisToSeconds(Date.now());
-  var url = configuration.gatewayConfiguration.analytics.url;
-  var data = {
-    analytics: [{
-      kind: constants.ANALYTICS_PREFIX + kind,
-      timestamp: timestamp
-    }],
-    _meta: configuration.analyticsMetadata,
-    braintreeLibraryVersion: braintreeClientVersion
-  };
+function setupAnalytics(authorization) {
+  clientPromise = btClient.create({
+    authorization: authorization
+  }).then(function (clientInstance) {
+    var configuration = clientInstance.getConfiguration();
 
-  if (configuration.authorizationType === 'TOKENIZATION_KEY') {
-    data.tokenizationKey = configuration.authorization;
-  } else {
-    data.authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
+    configuration.analyticsMetadata.integration = constants.INTEGRATION;
+    configuration.analyticsMetadata.integrationType = constants.INTEGRATION;
+    configuration.analyticsMetadata.dropinVersion = VERSION;
+
+    clientInstance.getConfiguration = function () {
+      return configuration;
+    };
+
+    return clientInstance;
+  });
+
+  return clientPromise;
+}
+
+function resetClientPromise() {
+  clientPromise = null;
+}
+
+function sendAnalyticsEvent(kind) {
+  var timestamp = _millisToSeconds(Date.now());
+
+  if (!clientPromise) {
+    return Promise.reject(new Error('Client not available.'));
   }
 
-  analyticsRequest({
-    url: url,
-    method: 'post',
-    data: data,
-    timeout: constants.ANALYTICS_REQUEST_TIMEOUT_MS
-  }, callback);
+  return clientPromise.then(function (client) {
+    var configuration = client.getConfiguration();
+    var url = configuration.gatewayConfiguration.analytics.url;
+    var data = {
+      analytics: [{
+        kind: constants.ANALYTICS_PREFIX + kind,
+        timestamp: timestamp
+      }],
+      _meta: configuration.analyticsMetadata,
+      braintreeLibraryVersion: braintreeClientVersion
+    };
+
+    if (configuration.authorizationType === 'TOKENIZATION_KEY') {
+      data.tokenizationKey = configuration.authorization;
+    } else {
+      data.authorizationFingerprint = JSON.parse(window.atob(configuration.authorization)).authorizationFingerprint;
+    }
+
+    return new Promise(function (resolve) {
+      client._request({
+        url: url,
+        method: 'post',
+        data: data,
+        timeout: constants.ANALYTICS_REQUEST_TIMEOUT_MS
+      }, function () {
+        resolve();
+      });
+    });
+  });
 }
 
 module.exports = {
-  sendEvent: sendAnalyticsEvent
+  resetClientPromise: resetClientPromise,
+  sendEvent: sendAnalyticsEvent,
+  setupAnalytics: setupAnalytics
 };

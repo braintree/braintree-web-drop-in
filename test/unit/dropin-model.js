@@ -1,6 +1,6 @@
+jest.mock('../../src/lib/analytics');
 
 const vaultManager = require('braintree-web/vault-manager');
-const analytics = require('../../src/lib/analytics');
 const DropinModel = require('../../src/dropin-model');
 const ApplePayView = require('../../src/views/payment-sheet-views/apple-pay-view');
 const CardView = require('../../src/views/payment-sheet-views/card-view');
@@ -10,6 +10,7 @@ const PayPalCreditView = require('../../src/views/payment-sheet-views/paypal-cre
 const VenmoView = require('../../src/views/payment-sheet-views/venmo-view');
 const EventEmitter = require('@braintree/event-emitter');
 const isHTTPS = require('../../src/lib/is-https');
+const analytics = require('../../src/lib/analytics');
 const fake = require('../helpers/fake');
 const throwIfResolves = require('../helpers/throw-if-resolves');
 
@@ -23,13 +24,8 @@ describe('DropinModel', () => {
   beforeEach(() => {
     testContext.configuration = fake.configuration();
 
-    testContext.vaultManager = {
-      fetchPaymentMethods: jest.fn().mockResolvedValue([]),
-      deletePaymentMethod: jest.fn().mockResolvedValue()
-    };
-    jest.spyOn(vaultManager, 'create').mockResolvedValue(testContext.vaultManager);
+    jest.spyOn(vaultManager, 'create').mockResolvedValue(fake.vaultManagerInstance);
     testContext.modelOptions = {
-      client: fake.client(testContext.configuration),
       componentID: 'foo123',
       merchantConfiguration: {
         authorization: fake.clientToken,
@@ -38,7 +34,6 @@ describe('DropinModel', () => {
       },
       paymentMethods: []
     };
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
     jest.spyOn(console, 'error').mockImplementation();
 
     jest.spyOn(isHTTPS, 'isHTTPS').mockReturnValue(true);
@@ -51,6 +46,9 @@ describe('DropinModel', () => {
     jest.spyOn(PayPalView, 'isEnabled').mockResolvedValue(true);
     jest.spyOn(PayPalCreditView, 'isEnabled').mockResolvedValue(true);
     jest.spyOn(VenmoView, 'isEnabled').mockResolvedValue(true);
+
+    fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([]);
+    fake.vaultManagerInstance.deletePaymentMethod.mockResolvedValue();
   });
 
   describe('Constructor', () => {
@@ -69,41 +67,6 @@ describe('DropinModel', () => {
 
       expect(model.merchantConfiguration).toBe(testContext.modelOptions.merchantConfiguration);
     });
-
-    describe('isGuestCheckout', () => {
-      test('is true when given a tokenization key', () => {
-        let model;
-
-        testContext.configuration.authorization = fake.tokenizationKey;
-        testContext.configuration.authorizationType = 'TOKENIZATION_KEY';
-
-        model = new DropinModel(testContext.modelOptions);
-
-        expect(model.isGuestCheckout).toBe(true);
-      });
-
-      test('is true when given a client token without a customer ID', () => {
-        let model;
-
-        testContext.configuration.authorization = fake.clientToken;
-        testContext.configuration.authorizationType = 'CLIENT_TOKEN';
-
-        model = new DropinModel(testContext.modelOptions);
-
-        expect(model.isGuestCheckout).toBe(true);
-      });
-
-      test('is false when given a client token with a customer ID', () => {
-        let model;
-
-        testContext.configuration.authorization = fake.clientTokenWithCustomerID;
-        testContext.configuration.authorizationType = 'CLIENT_TOKEN';
-
-        model = new DropinModel(testContext.modelOptions);
-
-        expect(model.isGuestCheckout).toBe(false);
-      });
-    });
   });
 
   describe('confirmDropinReady', () => {
@@ -119,22 +82,132 @@ describe('DropinModel', () => {
   });
 
   describe('initialize', () => {
+    test('sends web.dropin.started.tokenization-key event when using a tokenization key', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.tokenizationKey;
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(analytics.sendEvent).toBeCalledWith('started.tokenization-key');
+    });
+
+    test('sends web.dropin.started.client-token event when using a client token', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientToken;
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(analytics.sendEvent).toBeCalledWith('started.client-token');
+    });
+
+    test('sets vault manager config with defaults for client tokens with customer ids if not provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: true,
+        presentVaultedPaymentMethods: true,
+        preselectVaultedPaymentMethod: true,
+        allowCustomerToDeletePaymentMethods: false
+      });
+    });
+
+    test('sets vault manager config with defaults for client tokens without customer ids if not provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientToken;
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: false,
+        preselectVaultedPaymentMethod: false,
+        allowCustomerToDeletePaymentMethods: false
+      });
+    });
+
+    test('sets vault manager config with defaults for tokenization keys if not provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.tokenizationKey;
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: false,
+        preselectVaultedPaymentMethod: false,
+        allowCustomerToDeletePaymentMethods: false
+      });
+    });
+
+    test('rejects with an error when passing a vault manager option with a tokeniation key', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.tokenizationKey;
+      testContext.modelOptions.merchantConfiguration.vaultManager = {
+        autoVaultPaymentMethods: true
+      };
+      const model = new DropinModel(testContext.modelOptions);
+
+      await expect(model.initialize()).rejects.toThrow('vaultManager cannot be used with tokenization keys.');
+    });
+
+    test('overrides the vault manager config if provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      testContext.modelOptions.merchantConfiguration.vaultManager = {
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: false,
+        preselectVaultedPaymentMethod: false,
+        allowCustomerToDeletePaymentMethods: true
+      };
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: false,
+        preselectVaultedPaymentMethod: false,
+        allowCustomerToDeletePaymentMethods: true
+      });
+    });
+
+    test('provides vault manager defaults when only some options are provided', async () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      testContext.modelOptions.merchantConfiguration.vaultManager = {
+        autoVaultPaymentMethods: false
+      };
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.vaultManagerConfig).toEqual({
+        autoVaultPaymentMethods: false,
+        presentVaultedPaymentMethods: true,
+        preselectVaultedPaymentMethod: true,
+        allowCustomerToDeletePaymentMethods: false
+      });
+    });
+
     test('creates a vault manager', () => {
       const model = new DropinModel(testContext.modelOptions);
 
       return model.initialize().then(() => {
         expect(vaultManager.create).toBeCalledTimes(1);
         expect(vaultManager.create).toBeCalledWith({
-          client: testContext.modelOptions.client
+          authorization: fake.clientToken
         });
       });
     });
 
     test('sets existing payment methods as _paymentMethods', () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
       const model = new DropinModel(testContext.modelOptions);
 
-      model.isGuestCheckout = false;
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
+        { type: 'CreditCard', details: { lastTwo: '11' }}
+      ]);
 
       return model.initialize().then(() => {
         expect(model._paymentMethods).toEqual([{ type: 'CreditCard', details: { lastTwo: '11' }, vaulted: true }]);
@@ -142,6 +215,8 @@ describe('DropinModel', () => {
     });
 
     test('_paymentMethods is empty if no existing payment methods', () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
       const model = new DropinModel(testContext.modelOptions);
 
       return model.initialize().then(() => {
@@ -150,10 +225,11 @@ describe('DropinModel', () => {
     });
 
     test('ignores valid, but disabled payment methods', () => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
       const model = new DropinModel(testContext.modelOptions);
 
-      model.isGuestCheckout = false;
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
         { type: 'CreditCard', details: { lastTwo: '11' }},
         { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
       ]);
@@ -170,10 +246,11 @@ describe('DropinModel', () => {
     test(
       'ignores payment methods that have errored when calling isEnabled',
       () => {
+        testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+
         const model = new DropinModel(testContext.modelOptions);
 
-        model.isGuestCheckout = false;
-        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
           { type: 'CreditCard', details: { lastTwo: '11' }},
           { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
         ]);
@@ -193,7 +270,7 @@ describe('DropinModel', () => {
       const model = new DropinModel(testContext.modelOptions);
       const error = new Error('fail');
 
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
         { type: 'CreditCard', details: { lastTwo: '11' }},
         { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
       ]);
@@ -297,32 +374,32 @@ describe('DropinModel', () => {
         return model.initialize().then(() => {
           expect(ApplePayView.isEnabled).toBeCalledTimes(1);
           expect(ApplePayView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(CardView.isEnabled).toBeCalledTimes(1);
           expect(CardView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(GooglePayView.isEnabled).toBeCalledTimes(1);
           expect(GooglePayView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(PayPalView.isEnabled).toBeCalledTimes(1);
           expect(PayPalView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(PayPalCreditView.isEnabled).toBeCalledTimes(1);
           expect(PayPalCreditView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
           expect(VenmoView.isEnabled).toBeCalledTimes(1);
           expect(VenmoView.isEnabled).toBeCalledWith({
-            client: testContext.modelOptions.client,
+            environment: 'development',
             merchantConfiguration: testContext.modelOptions.merchantConfiguration
           });
         });
@@ -453,6 +530,52 @@ describe('DropinModel', () => {
 
       expect(model.getPaymentMethods()).not.toBe(model._paymentMethods);
       expect(model.getPaymentMethods()).toEqual(model._paymentMethods);
+    });
+  });
+
+  describe('removeUnvaultedPaymentMethods', () => {
+    test('removes all unvaulted payment methods', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      model._paymentMethods = [];
+
+      const unvaultedPaymentMethod = { id: 'unvaulted-1' };
+      const vaultedPaymentMethod = { id: 'vaulted', vaulted: true };
+      const otherUnvaultedPaymentMethod = { id: 'unvaulted-2' };
+
+      model.addPaymentMethod(unvaultedPaymentMethod);
+      model.addPaymentMethod(vaultedPaymentMethod);
+      model.addPaymentMethod(otherUnvaultedPaymentMethod);
+
+      model.removeUnvaultedPaymentMethods();
+
+      expect(model._paymentMethods).toEqual([{
+        id: 'vaulted', vaulted: true
+      }]);
+    });
+
+    test('removes all unvaulted payment methods that match specified filter', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      model._paymentMethods = [];
+
+      const unvaultedPaymentMethod = { id: 'unvaulted-1' };
+      const vaultedPaymentMethod = { id: 'vaulted', vaulted: true };
+      const otherUnvaultedPaymentMethod = { id: 'unvaulted-2' };
+
+      model.addPaymentMethod(unvaultedPaymentMethod);
+      model.addPaymentMethod(vaultedPaymentMethod);
+      model.addPaymentMethod(otherUnvaultedPaymentMethod);
+
+      model.removeUnvaultedPaymentMethods((paymentMethod) => {
+        return paymentMethod.id === 'unvaulted-1';
+      });
+
+      expect(model._paymentMethods).toEqual([{
+        id: 'vaulted', vaulted: true
+      }, {
+        id: 'unvaulted-2'
+      }]);
     });
   });
 
@@ -734,7 +857,7 @@ describe('DropinModel', () => {
 
   describe('isPaymentMethodRequestable', () => {
     test(
-      'returns false initially if no payment methods are passed in',
+      'returns false initially if no payment methods are available',
       () => {
         const model = new DropinModel(testContext.modelOptions);
 
@@ -747,10 +870,10 @@ describe('DropinModel', () => {
     test(
       'returns true initially if customer has saved payment methods',
       () => {
+        testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
         const model = new DropinModel(testContext.modelOptions);
 
-        model.isGuestCheckout = false;
-        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{ type: 'CreditCard', details: { lastTwo: '11' }}]);
 
         return model.initialize().then(() => {
           expect(model.isPaymentMethodRequestable()).toBe(true);
@@ -1061,9 +1184,9 @@ describe('DropinModel', () => {
       testContext.model = new DropinModel(testContext.modelOptions);
 
       testContext.model._paymentMethodWaitingToBeDeleted = {
-        nonce: 'a-nonce'
+        nonce: 'a-nonce',
+        vaulted: true
       };
-      testContext.model.isGuestCheckout = false;
       jest.spyOn(testContext.model, '_emit').mockImplementation();
 
       return testContext.model.initialize();
@@ -1083,18 +1206,18 @@ describe('DropinModel', () => {
 
     test('uses vault manager to delete payment method', () => {
       return testContext.model.deleteVaultedPaymentMethod().then(() => {
-        expect(testContext.vaultManager.deletePaymentMethod).toBeCalledTimes(1);
-        expect(testContext.vaultManager.deletePaymentMethod).toBeCalledWith('a-nonce');
+        expect(fake.vaultManagerInstance.deletePaymentMethod).toBeCalledTimes(1);
+        expect(fake.vaultManagerInstance.deletePaymentMethod).toBeCalledWith('a-nonce');
       });
     });
 
     test(
-      'does not vault manager to delete payment method if in guest checkout mode',
+      'does not vault manager to delete payment method if payment method is not vaulted',
       () => {
-        testContext.model.isGuestCheckout = true;
+        delete testContext.model._paymentMethodWaitingToBeDeleted.vaulted;
 
         return testContext.model.deleteVaultedPaymentMethod().then(() => {
-          expect(testContext.vaultManager.deletePaymentMethod).not.toBeCalled();
+          expect(fake.vaultManagerInstance.deletePaymentMethod).not.toBeCalled();
         });
       }
     );
@@ -1102,7 +1225,7 @@ describe('DropinModel', () => {
     test(
       'emits finishVaultedPaymentMethodDeletion event when deletion is succesful',
       () => {
-        testContext.vaultManager.deletePaymentMethod.mockResolvedValue();
+        fake.vaultManagerInstance.deletePaymentMethod.mockResolvedValue();
 
         return testContext.model.deleteVaultedPaymentMethod().then(() => {
           expect(testContext.model._emit).toBeCalledWith('finishVaultedPaymentMethodDeletion', undefined); // eslint-disable-line no-undefined
@@ -1115,7 +1238,7 @@ describe('DropinModel', () => {
       () => {
         const error = new Error('aaaaaaah!');
 
-        testContext.vaultManager.deletePaymentMethod.mockRejectedValue(error);
+        fake.vaultManagerInstance.deletePaymentMethod.mockRejectedValue(error);
 
         return testContext.model.deleteVaultedPaymentMethod().then(() => {
           expect(testContext.model._emit).toBeCalledWith('finishVaultedPaymentMethodDeletion', expect.any(Error));
@@ -1161,21 +1284,19 @@ describe('DropinModel', () => {
 
   describe('getVaultedPaymentMethods', () => {
     beforeEach(() => {
+      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       testContext.model = new DropinModel(testContext.modelOptions);
 
-      return testContext.model.initialize().then(() => {
-        testContext.model.isGuestCheckout = false;
-      });
+      return testContext.model.initialize();
     });
 
     test(
       'resolves with payment methods as empty array when vault manager errors',
       () => {
-        testContext.model.isGuestCheckout = false;
-        testContext.vaultManager.fetchPaymentMethods.mockRejectedValue(new Error('error'));
+        fake.vaultManagerInstance.fetchPaymentMethods.mockRejectedValue(new Error('error'));
 
         return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
-          expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
+          expect(fake.vaultManagerInstance.fetchPaymentMethods).toBeCalledWith({
             defaultFirst: true
           });
           expect(paymentMethods).toEqual([]);
@@ -1184,9 +1305,9 @@ describe('DropinModel', () => {
     );
 
     test(
-      'resolves with payment methods as empty array when in guest checkout',
+      'resolves with payment methods as empty array when presentVaultedPaymentMethods is false',
       () => {
-        testContext.model.isGuestCheckout = true;
+        testContext.model.vaultManagerConfig.presentVaultedPaymentMethods = false;
 
         return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
           expect(paymentMethods).toEqual([]);
@@ -1197,8 +1318,7 @@ describe('DropinModel', () => {
     test(
       'resolves with payment methods from vault manager when not in guest checkout',
       () => {
-        testContext.model.isGuestCheckout = false;
-        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{
           nonce: '1-nonce',
           type: 'CreditCard'
         }, {
@@ -1207,7 +1327,7 @@ describe('DropinModel', () => {
         }]);
 
         return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
-          expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
+          expect(fake.vaultManagerInstance.fetchPaymentMethods).toBeCalledWith({
             defaultFirst: true
           });
           expect(paymentMethods).toEqual([{
@@ -1224,8 +1344,7 @@ describe('DropinModel', () => {
     );
 
     test('only resolves supported payment method types', () => {
-      testContext.model.isGuestCheckout = false;
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{
         nonce: '1-nonce',
         type: 'CreditCard'
       }, {
@@ -1243,8 +1362,7 @@ describe('DropinModel', () => {
     });
 
     test('includes vaulted property on payment method objects', () => {
-      testContext.model.isGuestCheckout = false;
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{
         nonce: '1-nonce',
         type: 'CreditCard'
       }, {
@@ -1256,7 +1374,7 @@ describe('DropinModel', () => {
       }]);
 
       return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
-        expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
+        expect(fake.vaultManagerInstance.fetchPaymentMethods).toBeCalledWith({
           defaultFirst: true
         });
         expect(paymentMethods[0].vaulted).toBe(true);
@@ -1266,7 +1384,7 @@ describe('DropinModel', () => {
     });
 
     test('ignores invalid payment methods', () => {
-      testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+      fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
         { type: 'CreditCard', details: { lastTwo: '11' }},
         { type: 'PayPalAccount', details: { email: 'wow@example.com' }},
         { type: 'InvalidMethod', details: {}},
@@ -1285,7 +1403,7 @@ describe('DropinModel', () => {
     test(
       'ignores vaulted payment methods that cannot be used client side',
       () => {
-        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([
           { type: 'CreditCard', details: { lastTwo: '11' }},
           { type: 'PayPalAccount', details: { email: 'wow@example.com' }},
           { type: 'ApplePayCard', details: {}},

@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = {
+  authorizationTypes: {
+    CLIENT_TOKEN: 'CLIENT_TOKEN',
+    TOKENIZATION_KEY: 'TOKENIZATION_KEY'
+  },
   paymentOptionIDs: {
     card: 'card',
     paypal: 'paypal',
@@ -35,14 +39,12 @@ module.exports = {
     Maestro: 'maestro'
   },
   configurationCardTypes: {
-    visa: 'Visa',
-    'master-card': 'MasterCard',
-    'american-express': 'American Express',
-    'diners-club': 'Discover',
-    discover: 'Discover',
-    jcb: 'JCB',
-    unionpay: 'UnionPay',
-    maestro: 'Maestro'
+    Visa: 'visa',
+    Mastercard: 'mastercard',
+    'American Express': 'american-express',
+    Discover: 'discover',
+    JCB: 'jcb',
+    Maestro: 'maestro'
   },
   errors: {
     NO_PAYMENT_METHOD_ERROR: 'No payment method is available.',

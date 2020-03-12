@@ -1,11 +1,12 @@
+jest.mock('../../../src/lib/analytics');
 
+const analytics = require('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
 const PaymentOptionsView = require('../../../src/views/payment-options-view');
 const strings = require('../../../src/translations/en_US');
 const fake = require('../../helpers/fake');
 const fs = require('fs');
-const analytics = require('../../../src/lib/analytics');
 
 const mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
 
@@ -56,10 +57,6 @@ describe('PaymentOptionsView', () => {
     testContext = {};
   });
 
-  beforeEach(() => {
-    testContext.client = fake.client();
-  });
-
   describe('Constructor', () => {
     beforeEach(() => {
       jest.spyOn(PaymentOptionsView.prototype, '_initialize').mockImplementation();
@@ -93,7 +90,6 @@ describe('PaymentOptionsView', () => {
 
       test('adds a ' + option.paymentOptionID + ' option', () => {
         const paymentOptionsView = new PaymentOptionsView({
-          client: testContext.client,
           element: testContext.element,
           mainView: {},
           model: modelThatSupports([option.paymentOptionID]),
@@ -121,7 +117,6 @@ describe('PaymentOptionsView', () => {
     test('sets the primary view to the payment option when clicked', () => {
       const mainViewStub = { setPrimaryView: jest.fn() };
       const paymentOptionsView = new PaymentOptionsView({
-        client: testContext.client,
         element: testContext.element,
         mainView: mainViewStub,
         model: modelThatSupports(['card']),
@@ -139,7 +134,6 @@ describe('PaymentOptionsView', () => {
       () => {
         const mainViewStub = { setPrimaryView: jest.fn() };
         const paymentOptionsView = new PaymentOptionsView({
-          client: testContext.client,
           element: testContext.element,
           mainView: mainViewStub,
           model: modelThatSupports(['card']),
@@ -165,7 +159,6 @@ describe('PaymentOptionsView', () => {
       testContext.element = wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
 
       testContext.viewConfiguration = {
-        client: testContext.client,
         element: testContext.element,
         mainView: { setPrimaryView: function () {} },
         strings: strings
@@ -183,15 +176,13 @@ describe('PaymentOptionsView', () => {
           const viewConfiguration = testContext.viewConfiguration;
           const eventName = 'selected.' + option.paymentOptionID;
 
-          jest.spyOn(analytics, 'sendEvent').mockImplementation();
-
           viewConfiguration.model = model;
           paymentOptionsView = new PaymentOptionsView(viewConfiguration);
           optionElement = paymentOptionsView.container.querySelector('.braintree-option');
 
           optionElement.click();
 
-          expect(analytics.sendEvent).toBeCalledWith(paymentOptionsView.client, eventName);
+          expect(analytics.sendEvent).toBeCalledWith(eventName);
         }
       );
     });

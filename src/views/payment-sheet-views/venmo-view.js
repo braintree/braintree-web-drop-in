@@ -17,7 +17,9 @@ VenmoView.ID = VenmoView.prototype.ID = paymentOptionIDs.venmo;
 
 VenmoView.prototype.initialize = function () {
   var self = this;
-  var venmoConfiguration = assign({}, self.model.merchantConfiguration.venmo, {client: this.client});
+  var venmoConfiguration = assign({}, self.model.merchantConfiguration.venmo, {
+    authorization: this.model.authorization
+  });
 
   self.model.asyncDependencyStarting();
 
@@ -74,8 +76,7 @@ VenmoView.prototype._isIgnorableError = function (error) {
 };
 
 VenmoView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var venmoEnabled = gatewayConfiguration.payWithVenmo && Boolean(options.merchantConfiguration.venmo);
+  var venmoEnabled = Boolean(options.merchantConfiguration.venmo);
 
   if (!venmoEnabled) {
     return Promise.resolve(false);

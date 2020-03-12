@@ -63,7 +63,6 @@ MainView.prototype._initialize = function () {
         element: this.getElementById(PaymentSheetView.ID),
         mainView: this,
         model: this.model,
-        client: this.client,
         strings: this.strings
       });
       paymentSheetView.initialize();
@@ -78,7 +77,6 @@ MainView.prototype._initialize = function () {
   this.paymentMethodsViews = new PaymentMethodsView({
     element: this.element,
     model: this.model,
-    client: this.client,
     strings: this.strings
   });
   this.addView(this.paymentMethodsViews);
@@ -119,7 +117,6 @@ MainView.prototype._initialize = function () {
 
   if (this._hasMultiplePaymentOptions) {
     paymentOptionsView = new PaymentOptionsView({
-      client: this.client,
       element: this.getElementById(PaymentOptionsView.ID),
       mainView: this,
       model: this.model,
@@ -207,14 +204,14 @@ MainView.prototype.requestPaymentMethod = function () {
   var activePaymentView = this.getView(this.model.getActivePaymentView());
 
   return activePaymentView.requestPaymentMethod().then(function (payload) {
-    analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
+    analytics.sendEvent('request-payment-method.' + analyticsKinds[payload.type]);
 
     return payload;
-  }.bind(this)).catch(function (err) {
-    analytics.sendEvent(this.client, 'request-payment-method.error');
+  }).catch(function (err) {
+    analytics.sendEvent('request-payment-method.error');
 
     return Promise.reject(err);
-  }.bind(this));
+  });
 };
 
 MainView.prototype.hideLoadingIndicator = function () {
@@ -380,11 +377,12 @@ MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
 
 MainView.prototype._sendToDefaultView = function () {
   var paymentMethods = this.model.getPaymentMethods();
-  var preselectVaultedPaymentMethod = this.model.merchantConfiguration.preselectVaultedPaymentMethod !== false;
+  var vaultManagerConfig = this.model.vaultManagerConfig;
+  var preselectVaultedPaymentMethod = vaultManagerConfig.preselectVaultedPaymentMethod !== false;
 
   if (paymentMethods.length > 0) {
     if (preselectVaultedPaymentMethod) {
-      analytics.sendEvent(this.client, 'vaulted-card.preselect');
+      analytics.sendEvent('vaulted-card.preselect');
 
       this.model.changeActivePaymentMethod(paymentMethods[0]);
     } else {

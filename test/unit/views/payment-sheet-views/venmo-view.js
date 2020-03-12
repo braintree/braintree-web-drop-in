@@ -1,3 +1,4 @@
+jest.mock('../../../../src/lib/analytics');
 
 /* eslint-disable no-new */
 
@@ -17,8 +18,6 @@ describe('VenmoView', () => {
   });
 
   beforeEach(() => {
-    testContext.fakeClient = fake.client();
-
     testContext.model = fake.model();
     jest.spyOn(testContext.model, 'reportAppSwitchPayload').mockImplementation();
     jest.spyOn(testContext.model, 'reportAppSwitchError').mockImplementation();
@@ -30,7 +29,6 @@ describe('VenmoView', () => {
 
     testContext.model.merchantConfiguration.venmo = true;
     testContext.venmoViewOptions = {
-      client: testContext.fakeClient,
       element: document.body.querySelector('.braintree-sheet.braintree-venmo'),
       model: testContext.model,
       strings: {}
@@ -80,7 +78,7 @@ describe('VenmoView', () => {
     test('creates an Venmo component', () => {
       return testContext.view.initialize().then(() => {
         expect(btVenmo.create).toBeCalledWith(expect.objectContaining({
-          client: testContext.view.client
+          authorization: testContext.view.model.authorization
         }));
         expect(testContext.view.venmoInstance).toBe(testContext.fakeVenmoInstance);
       });
@@ -93,7 +91,7 @@ describe('VenmoView', () => {
 
         return testContext.view.initialize().then(() => {
           expect(btVenmo.create).toBeCalledWith(expect.objectContaining({
-            client: testContext.view.client,
+            authorization: testContext.view.model.authorization,
             allowNewBrowserTab: false
           }));
         });
@@ -257,26 +255,10 @@ describe('VenmoView', () => {
   describe('isEnabled', () => {
     beforeEach(() => {
       testContext.options = {
-        client: testContext.fakeClient,
         merchantConfiguration: testContext.model.merchantConfiguration
       };
       jest.spyOn(btVenmo, 'isBrowserSupported').mockReturnValue(true);
     });
-
-    test(
-      'resolves with false when Venmo Pay is not enabled on the gateway',
-      () => {
-        const configuration = fake.configuration();
-
-        delete configuration.gatewayConfiguration.payWithVenmo;
-
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
-
-        return VenmoView.isEnabled(testContext.options).then(result => {
-          expect(result).toBe(false);
-        });
-      }
-    );
 
     test(
       'resolves with false when Venmo Pay is not enabled by merchant',

@@ -20,7 +20,7 @@ ApplePayView.ID = ApplePayView.prototype.ID = paymentOptionIDs.applePay;
 
 ApplePayView.prototype.initialize = function () {
   var self = this;
-  var isProduction = self.client.getConfiguration().gatewayConfiguration.environment === 'production';
+  var isProduction = this.model.environment === 'production';
 
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
   self.applePaySessionVersion = self.applePayConfiguration.applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;
@@ -29,7 +29,10 @@ ApplePayView.prototype.initialize = function () {
 
   self.model.asyncDependencyStarting();
 
-  return btApplePay.create({client: this.client}).then(function (applePayInstance) {
+  return btApplePay.create({
+    authorization: this.model.authorization,
+    useDeferredClient: true
+  }).then(function (applePayInstance) {
     var buttonDiv = self.getElementById('apple-pay-button');
 
     self.applePayInstance = applePayInstance;
@@ -103,8 +106,7 @@ ApplePayView.prototype.updateConfiguration = function (key, value) {
 };
 
 ApplePayView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-  var applePayEnabled = gatewayConfiguration.applePayWeb && Boolean(options.merchantConfiguration.applePay);
+  var applePayEnabled = Boolean(options.merchantConfiguration.applePay);
   var applePaySessionVersion = options.merchantConfiguration.applePay && options.merchantConfiguration.applePay.applePaySessionVersion;
   var applePayBrowserSupported;
 

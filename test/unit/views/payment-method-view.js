@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const analytics = require('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
@@ -13,9 +14,6 @@ describe('PaymentMethodView', () => {
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     testContext.div = document.createElement('div');
     testContext.div.innerHTML = paymentMethodHTML;
     document.body.appendChild(testContext.div);
@@ -236,14 +234,11 @@ describe('PaymentMethodView', () => {
 
   describe('selecting payment methods', () => {
     beforeEach(() => {
-      testContext.client = fake.client();
       testContext.model = fake.model();
-      jest.spyOn(analytics, 'sendEvent').mockImplementation();
     });
 
     test('sends an analytic event when a vaulted card is selected', () => {
       const view = new PaymentMethodView({
-        client: testContext.client,
         model: testContext.model,
         strings: strings,
         paymentMethod: {
@@ -258,14 +253,13 @@ describe('PaymentMethodView', () => {
 
       view._choosePaymentMethod();
 
-      expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'vaulted-card.select');
+      expect(analytics.sendEvent).toBeCalledWith('vaulted-card.select');
     });
 
     test(
       'sends an analytic event when a vaulted paypal payment method is selected',
       () => {
         const view = new PaymentMethodView({
-          client: testContext.client,
           model: testContext.model,
           strings: strings,
           paymentMethod: {
@@ -279,7 +273,7 @@ describe('PaymentMethodView', () => {
 
         view._choosePaymentMethod();
 
-        expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'vaulted-paypal.select');
+        expect(analytics.sendEvent).toBeCalledWith('vaulted-paypal.select');
       }
     );
 
@@ -287,7 +281,6 @@ describe('PaymentMethodView', () => {
       'does not send an analytic event when no payment is selected',
       () => {
         const view = new PaymentMethodView({
-          client: testContext.client,
           model: testContext.model,
           strings: strings,
           paymentMethod: {}
@@ -295,7 +288,7 @@ describe('PaymentMethodView', () => {
 
         view._choosePaymentMethod();
 
-        expect(analytics.sendEvent).not.toBeCalledWith(testContext.client, 'vaulted-card.select');
+        expect(analytics.sendEvent).not.toBeCalled();
       }
     );
 
@@ -303,7 +296,6 @@ describe('PaymentMethodView', () => {
       'does not send an analytic event when a non-vaulted PayPal payment method is selected',
       () => {
         const view = new PaymentMethodView({
-          client: testContext.client,
           model: testContext.model,
           strings: strings,
           paymentMethod: {
@@ -317,7 +309,7 @@ describe('PaymentMethodView', () => {
 
         view._choosePaymentMethod();
 
-        expect(analytics.sendEvent).not.toBeCalledWith(testContext.client, 'vaulted-paypal.select');
+        expect(analytics.sendEvent).not.toBeCalled();
       }
     );
   });

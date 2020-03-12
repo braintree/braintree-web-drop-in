@@ -10,7 +10,7 @@
     "build:gh-pages": "gulp build:gh-pages",
     "lint": "eslint src test",
     "hint": "hint http://localhost:4567",
-    "pretest": "npm run lint",
+    "posttest": "npm run lint",
     "test": "jest",
     "test:hint": "npm-run-all -n -s build -pr server hint",
     "test:integration": "wdio wdio.conf.js",

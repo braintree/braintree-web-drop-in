@@ -1,3 +1,4 @@
+jest.mock('../../../../src/lib/analytics');
 
 /* eslint-disable no-new */
 

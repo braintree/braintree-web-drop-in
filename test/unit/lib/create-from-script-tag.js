@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const createFromScriptTag = require('../../../src/lib/create-from-script-tag');
 const findParentForm = require('../../../src/lib/find-parent-form');
@@ -17,9 +18,7 @@ describe('createFromScriptTag', () => {
     const container = document.createElement('div');
 
     container.id = 'script-container';
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
     testContext.instance = {
-      _client: 'fake-client',
       requestPaymentMethod: jest.fn().mockImplementation(yields(null, { nonce: 'a-nonce' }))
     };
     testContext.scriptTag = document.createElement('script');
@@ -110,7 +109,7 @@ describe('createFromScriptTag', () => {
 
     setTimeout(() => {
       expect(analytics.sendEvent).toBeCalledTimes(1);
-      expect(analytics.sendEvent).toBeCalledWith(testContext.instance._client, 'integration-type.script-tag');
+      expect(analytics.sendEvent).toBeCalledWith('integration-type.script-tag');
       done();
     });
   });

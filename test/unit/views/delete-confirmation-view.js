@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const BaseView = require('../../../src/views/base-view');
 const DeleteConfirmationView = require('../../../src/views/delete-confirmation-view');

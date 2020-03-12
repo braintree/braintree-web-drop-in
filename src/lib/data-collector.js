@@ -1,25 +1,25 @@
 'use strict';
 
+var braintreeWebVersion = require('braintree-web/client').VERSION;
+var assign = require('./assign').assign;
 var constants = require('../constants');
 var analytics = require('./analytics');
 var assets = require('@braintree/asset-loader');
 var Promise = require('./promise');
 
 function DataCollector(config) {
-  this._config = config;
+  this._config = assign(config, {
+    useDeferredClient: true
+  });
 }
 
 DataCollector.prototype.initialize = function () {
   var self = this;
 
   return Promise.resolve().then(function () {
-    var braintreeWebVersion;
-
     if (global.braintree && global.braintree.dataCollector) {
       return Promise.resolve();
     }
-
-    braintreeWebVersion = self._config.client.getVersion();
 
     return assets.loadScript({
       src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
@@ -30,7 +30,11 @@ DataCollector.prototype.initialize = function () {
   }).then(function (instance) {
     self._instance = instance;
   }).catch(function (err) {
-    analytics.sendEvent(self._config.client, 'data-collector.setup-failed');
+    // TODO we need a way to bubble up errors
+    // back to the merchant in the case where
+    // something goes wrong when setting up data collector
+    // instead of silently failing
+    analytics.sendEvent('data-collector.setup-failed');
     // log the Data Collector setup error
     // but do not prevent Drop-in from loading
     self.log(err);
@@ -43,10 +47,10 @@ DataCollector.prototype.log = function (message) {
 
 DataCollector.prototype.getDeviceData = function () {
   if (!this._instance) {
-    return '';
+    return Promise.resolve('');
   }
 
-  return this._instance.deviceData;
+  return this._instance.getDeviceData();
 };
 
 DataCollector.prototype.teardown = function () {

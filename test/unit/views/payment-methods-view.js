@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
@@ -44,11 +45,6 @@ describe('PaymentMethodsView', () => {
       let model, paymentMethodsViews;
       const modelOptions = fake.modelOptions();
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
@@ -85,11 +81,6 @@ describe('PaymentMethodsView', () => {
       };
       const modelOptions = fake.modelOptions();
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
@@ -113,12 +104,6 @@ describe('PaymentMethodsView', () => {
     test('does not add payment methods if there are none', () => {
       let model, methodsContainer, paymentMethodsViews;
       const modelOptions = fake.modelOptions();
-
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
 
       model = fake.model(modelOptions);
 
@@ -190,8 +175,6 @@ describe('PaymentMethodsView', () => {
         model.getVaultedPaymentMethods.mockResolvedValue([fakePayPal, fakeCard]);
 
         return model.initialize().then(() => {
-          model.isGuestCheckout = false;
-
           paymentMethodsViews = new PaymentMethodsView({
             element: testContext.element,
             model: model,
@@ -233,12 +216,6 @@ describe('PaymentMethodsView', () => {
         const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
         const modelOptions = fake.modelOptions();
 
-        modelOptions.client.getConfiguration.mockReturnValue({
-          authorization: fake.clientTokenWithCustomerID,
-          authorizationType: 'CLIENT_TOKEN',
-          gatewayConfiguration: fake.configuration().gatewayConfiguration
-        });
-
         modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
         model = fake.model(modelOptions);
 
@@ -262,18 +239,14 @@ describe('PaymentMethodsView', () => {
       }
     );
 
-    test('removes other payment methods in guest checkout', () => {
-      let model, paymentMethodsViews;
-      const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
+    test('removes unvaulted payment methods when adding a new payment method', () => {
       const modelOptions = fake.modelOptions();
+      const model = fake.model(modelOptions);
 
-      modelOptions.merchantConfiguration.authorization = fake.clientToken;
-      model = fake.model(modelOptions);
-
-      model.getVaultedPaymentMethods.mockResolvedValue([testContext.fakePaymentMethod]);
+      jest.spyOn(model, 'removeUnvaultedPaymentMethods').mockImplementation();
 
       return model.initialize().then(() => {
-        paymentMethodsViews = new PaymentMethodsView({
+        new PaymentMethodsView({ // eslint-disable-line no-new
           element: testContext.element,
           model: model,
           merchantConfiguration: {
@@ -282,10 +255,12 @@ describe('PaymentMethodsView', () => {
           strings: strings
         });
 
-        model.addPaymentMethod({ foo: 'bar' });
+        model.addPaymentMethod({ nonce: 'fake-nonce' });
+        const removeUnvaultedPaymentMethodsFilter = model.removeUnvaultedPaymentMethods.mock.calls[0][0];
 
-        expect(paymentMethodsViews.views.length).toBe(1);
-        expect(methodsContainer.childElementCount).toBe(1);
+        expect(model.removeUnvaultedPaymentMethods).toBeCalledTimes(1);
+        expect(removeUnvaultedPaymentMethodsFilter({ nonce: 'other-nonce' })).toBe(true);
+        expect(removeUnvaultedPaymentMethodsFilter({ nonce: 'fake-nonce' })).toBe(false);
       });
     });
 
@@ -521,11 +496,7 @@ describe('PaymentMethodsView', () => {
 
       element.innerHTML = mainHTML;
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
@@ -565,11 +536,7 @@ describe('PaymentMethodsView', () => {
 
       element.innerHTML = mainHTML;
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       model = fake.model(modelOptions);
@@ -608,11 +575,7 @@ describe('PaymentMethodsView', () => {
 
       element.innerHTML = mainHTML;
 
-      modelOptions.client.getConfiguration.mockReturnValue({
-        authorization: fake.clientTokenWithCustomerID,
-        authorizationType: 'CLIENT_TOKEN',
-        gatewayConfiguration: fake.configuration().gatewayConfiguration
-      });
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
       modelOptions.merchantConfiguration.paypal = { flow: 'vault' };
 
       testContext.model = fake.model(modelOptions);

@@ -1,13 +1,14 @@
 'use strict';
 
 var analytics = require('./lib/analytics');
+var assign = require('./lib/assign').assign;
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('@braintree/event-emitter');
 var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
-var isGuestCheckout = require('./lib/is-guest-checkout');
 var Promise = require('./lib/promise');
+var parseAuthorization = require('./lib/parse-authorization');
 var paymentSheetViews = require('./views/payment-sheet-views');
 var vaultManager = require('braintree-web/vault-manager');
 
@@ -24,17 +25,32 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
+var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID = {
+  autoVaultPaymentMethods: true,
+  presentVaultedPaymentMethods: true,
+  preselectVaultedPaymentMethod: true,
+  allowCustomerToDeletePaymentMethods: false
+};
+var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID = {
+  autoVaultPaymentMethods: false,
+  presentVaultedPaymentMethods: false,
+  preselectVaultedPaymentMethod: false,
+  allowCustomerToDeletePaymentMethods: false
+};
 
 function DropinModel(options) {
+  var parsedAuthorization = parseAuthorization(options.merchantConfiguration.authorization);
+
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
-
-  this.isGuestCheckout = isGuestCheckout(options.client);
+  this.environment = parsedAuthorization.environment;
+  this.hasCustomer = parsedAuthorization.hasCustomer;
+  this.authType = parsedAuthorization.authType;
+  this.authorization = options.merchantConfiguration.authorization;
 
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
-  this._options = options;
   this._setupComplete = false;
 
   EventEmitter.call(this);
@@ -45,12 +61,30 @@ EventEmitter.createChild(DropinModel);
 DropinModel.prototype.initialize = function () {
   var self = this;
 
+  if (this.authType === constants.authorizationTypes.CLIENT_TOKEN) {
+    analytics.sendEvent('started.client-token');
+  } else {
+    analytics.sendEvent('started.tokenization-key');
+  }
+  if (this.hasCustomer) {
+    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID, this.merchantConfiguration.vaultManager);
+  } else {
+    if (this.merchantConfiguration.vaultManager) {
+      return Promise.reject(new DropinError('vaultManager cannot be used with tokenization keys.'));
+    }
+    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID);
+  }
+
   return vaultManager.create({
-    client: self._options.client
+    authorization: self.authorization
   }).then(function (vaultManagerInstance) {
     self._vaultManager = vaultManagerInstance;
 
-    return getSupportedPaymentOptions(self._options);
+    return getSupportedPaymentOptions({
+      environment: self.environment,
+      authType: self.authType,
+      merchantConfiguration: self.merchantConfiguration
+    });
   }).then(function (paymentOptions) {
     self.supportedPaymentOptions = paymentOptions;
 
@@ -84,6 +118,16 @@ DropinModel.prototype.removePaymentMethod = function (paymentMethod) {
 
   this._paymentMethods.splice(paymentMethodLocation, 1);
   this._emit('removePaymentMethod', paymentMethod);
+};
+
+DropinModel.prototype.removeUnvaultedPaymentMethods = function (filter) {
+  filter = filter || function () { return true; };
+
+  this.getPaymentMethods().forEach(function (paymentMethod) {
+    if (filter(paymentMethod) && !paymentMethod.vaulted) {
+      this.removePaymentMethod(paymentMethod);
+    }
+  }.bind(this));
 };
 
 DropinModel.prototype.refreshPaymentMethods = function () {
@@ -121,7 +165,7 @@ DropinModel.prototype.selectPaymentOption = function (paymentViewID) {
 };
 
 DropinModel.prototype.enableEditMode = function () {
-  analytics.sendEvent(this._options.client, 'manager.appeared');
+  analytics.sendEvent('manager.appeared');
   this._isInEditMode = true;
   this._emit('enableEditMode');
 };
@@ -265,7 +309,7 @@ DropinModel.prototype.deleteVaultedPaymentMethod = function () {
 
   this._emit('startVaultedPaymentMethodDeletion');
 
-  if (!self.isGuestCheckout) {
+  if (this._paymentMethodWaitingToBeDeleted.vaulted) {
     promise = this._vaultManager.deletePaymentMethod(this._paymentMethodWaitingToBeDeleted.nonce).catch(function (err) {
       error = err;
     });
@@ -290,7 +334,7 @@ DropinModel.prototype.cancelDeleteVaultedPaymentMethod = function () {
 DropinModel.prototype.getVaultedPaymentMethods = function () {
   var self = this;
 
-  if (self.isGuestCheckout) {
+  if (!self.vaultManagerConfig.presentVaultedPaymentMethods) {
     return Promise.resolve([]);
   }
 
@@ -368,7 +412,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
   }
 
   return SheetView.isEnabled({
-    client: options.client,
+    environment: options.environment,
     merchantConfiguration: options.merchantConfiguration
   }).catch(function (error) {
     console.error(SheetView.ID + ' view errored when checking if it was supported.'); // eslint-disable-line no-console

@@ -1,5 +1,6 @@
-
 /* eslint-disable no-new */
+
+jest.mock('../../../../src/lib/analytics');
 
 const BaseView = require('../../../../src/views/base-view');
 const ApplePayView = require('../../../../src/views/payment-sheet-views/apple-pay-view');
@@ -21,8 +22,6 @@ describe('ApplePayView', () => {
     testContext.model = fake.model();
 
     return testContext.model.initialize().then(() => {
-      testContext.fakeClient = fake.client();
-
       testContext.div = document.createElement('div');
 
       testContext.fakeApplePaySession = {
@@ -51,7 +50,6 @@ describe('ApplePayView', () => {
         displayName: 'Unit Test Display Name'
       };
       testContext.applePayViewOptions = {
-        client: testContext.fakeClient,
         element: document.body.querySelector('.braintree-sheet.braintree-applePay'),
         model: testContext.model,
         strings: {}
@@ -100,7 +98,8 @@ describe('ApplePayView', () => {
     test('creates an ApplePay component', () => {
       return testContext.view.initialize().then(() => {
         expect(btApplePay.create).toBeCalledWith(expect.objectContaining({
-          client: testContext.view.client
+          authorization: testContext.view.model.authorization,
+          useDeferredClient: true
         }));
         expect(testContext.view.applePayInstance).toBe(testContext.fakeApplePayInstance);
       });
@@ -156,10 +155,7 @@ describe('ApplePayView', () => {
     test(
       'reports error when canMakePaymentsWithActiveCard returns false in production mode',
       done => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.environment = 'production';
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        testContext.model.environment = 'production';
 
         global.ApplePaySession.canMakePaymentsWithActiveCard = jest.fn().mockResolvedValue(false);
 
@@ -176,10 +172,7 @@ describe('ApplePayView', () => {
     test(
       'reports developer error when canMakePaymentsWithActiveCard returns false in sandbox mode',
       done => {
-        const configuration = fake.configuration();
-
-        configuration.gatewayConfiguration.environment = 'sandbox';
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
+        testContext.model.environment = 'sandbox';
 
         jest.spyOn(console, 'error').mockImplementation();
         global.ApplePaySession.canMakePaymentsWithActiveCard = jest.fn().mockResolvedValue(false);
@@ -414,26 +407,10 @@ describe('ApplePayView', () => {
   describe('isEnabled', () => {
     beforeEach(() => {
       testContext.options = {
-        client: testContext.fakeClient,
         merchantConfiguration: testContext.model.merchantConfiguration
       };
       jest.spyOn(isHTTPS, 'isHTTPS').mockReturnValue(true);
     });
-
-    test(
-      'resolves with false when Apple Pay is not enabled on the gateway',
-      () => {
-        const configuration = fake.configuration();
-
-        delete configuration.gatewayConfiguration.applePayWeb;
-
-        testContext.fakeClient.getConfiguration.mockReturnValue(configuration);
-
-        return ApplePayView.isEnabled(testContext.options).then(result => {
-          expect(result).toBe(false);
-        });
-      }
-    );
 
     test(
       'resolves with false when Apple Pay is not enabled by merchant',

@@ -1,3 +1,4 @@
+jest.mock('../../../src/lib/analytics');
 
 const MainView = require('../../../src/views/main-view');
 const ApplePayView = require('../../../src/views/payment-sheet-views/apple-pay-view');
@@ -30,10 +31,8 @@ describe('MainView', () => {
 
   beforeEach(() => {
     testContext = {};
-    testContext.client = fake.client();
     jest.spyOn(CardView.prototype, 'getPaymentMethod').mockImplementation();
     jest.spyOn(BasePayPalView.prototype, 'initialize').mockImplementation();
-    jest.spyOn(analytics, 'sendEvent').mockImplementation();
   });
 
   describe('Constructor', () => {
@@ -59,7 +58,6 @@ describe('MainView', () => {
       element.innerHTML = templateHTML;
 
       testContext.mainViewOptions = {
-        client: testContext.client,
         element: element,
         merchantConfiguration: {
           authorization: fake.tokenizationKey
@@ -162,10 +160,13 @@ describe('MainView', () => {
     describe('with vaulted payment methods', () => {
       beforeEach(() => {
         const element = document.createElement('div');
+        const fakeModelOptions = fake.modelOptions();
+
+        fakeModelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
 
         element.innerHTML = templateHTML;
 
-        testContext.model = fake.model();
+        testContext.model = fake.model(fakeModelOptions);
 
         testContext.model.getVaultedPaymentMethods.mockResolvedValue([
           { type: 'CreditCard', details: { lastTwo: '11' }},
@@ -173,7 +174,6 @@ describe('MainView', () => {
         ]);
 
         testContext.dropinOptions = {
-          client: testContext.client,
           merchantConfiguration: {
             container: '#foo',
             authorization: fake.tokenizationKey
@@ -184,7 +184,6 @@ describe('MainView', () => {
           testContext.model.supportedPaymentOptions = ['card', 'paypal'];
 
           testContext.mainViewOptions = {
-            client: testContext.client,
             element: element,
             merchantConfiguration: {
               authorization: fake.tokenizationKey
@@ -212,7 +211,9 @@ describe('MainView', () => {
         'does not set the first payment method to be the active payment method if configured not to',
         () => {
           jest.spyOn(testContext.model, 'changeActivePaymentMethod');
-          testContext.model.merchantConfiguration.preselectVaultedPaymentMethod = false;
+          testContext.model.vaultManagerConfig = {
+            preselectVaultedPaymentMethod: false
+          };
           jest.spyOn(MainView.prototype, 'setPrimaryView').mockImplementation();
 
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
@@ -226,21 +227,25 @@ describe('MainView', () => {
       test(
         'sends preselect analytic event when a vaulted card is preselected',
         () => {
-          testContext.model.merchantConfiguration.preselectVaultedPaymentMethod = true;
+          testContext.model.vaultManagerConfig = {
+            preselectVaultedPaymentMethod: true
+          };
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
 
-          expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'vaulted-card.preselect');
+          expect(analytics.sendEvent).toBeCalledWith('vaulted-card.preselect');
         }
       );
 
       test(
         'does not send preselect analytic event when a vaulted card is not preselected',
         () => {
-          testContext.model.merchantConfiguration.preselectVaultedPaymentMethod = false;
+          testContext.model.vaultManagerConfig = {
+            preselectVaultedPaymentMethod: false
+          };
 
           new MainView(testContext.mainViewOptions); // eslint-disable-line no-new
 
-          expect(analytics.sendEvent).not.toBeCalledWith(testContext.client, 'vaulted-card.preselect');
+          expect(analytics.sendEvent).not.toBeCalledWith('vaulted-card.preselect');
         }
       );
 
@@ -264,7 +269,6 @@ describe('MainView', () => {
 
         return testContext.model.initialize().then(() => {
           testContext.mainViewOptions = {
-            client: testContext.client,
             element: element,
             merchantConfiguration: {
               authorization: fake.tokenizationKey
@@ -338,7 +342,6 @@ describe('MainView', () => {
         testContext.mainViewOptions = {
           element: wrapper,
           model: model,
-          client: testContext.client,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
           },
@@ -684,7 +687,6 @@ describe('MainView', () => {
           _sendToDefaultView: jest.fn(),
           _onChangeActivePaymentMethodView: jest.fn(),
           model: model,
-          client: fake.client(),
           setPrimaryView: jest.fn(),
           showSheetError: jest.fn(),
           allowUserAction: jest.fn(),
@@ -766,7 +768,6 @@ describe('MainView', () => {
         testContext.mainViewOptions = {
           element: testContext.element,
           model: testContext.model,
-          client: testContext.client,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
           },
@@ -920,7 +921,6 @@ describe('MainView', () => {
       return model.initialize().then(() => {
         testContext.mainViewOptions = {
           element: testContext.wrapper,
-          client: testContext.client,
           model: model,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
@@ -1038,7 +1038,6 @@ describe('MainView', () => {
         testContext.mainView = new MainView({
           element: testContext.wrapper,
           model: model,
-          client: testContext.client,
           merchantConfiguration: {
             authorization: 'fake_tokenization_key'
           },
@@ -1064,7 +1063,7 @@ describe('MainView', () => {
         throw new Error('should not resolve');
       }).catch(err => {
         expect(err).toBe(fakeError);
-        expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'request-payment-method.error');
+        expect(analytics.sendEvent).toBeCalledWith('request-payment-method.error');
       });
     });
 
@@ -1084,7 +1083,7 @@ describe('MainView', () => {
       jest.spyOn(CardView.prototype, 'requestPaymentMethod').mockResolvedValue(stubPaymentMethod);
 
       return testContext.mainView.requestPaymentMethod().then(() => {
-        expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'request-payment-method.card');
+        expect(analytics.sendEvent).toBeCalledWith('request-payment-method.card');
       });
     });
 
@@ -1094,7 +1093,7 @@ describe('MainView', () => {
       jest.spyOn(CardView.prototype, 'requestPaymentMethod').mockResolvedValue(stubPaymentMethod);
 
       return testContext.mainView.requestPaymentMethod().then(() => {
-        expect(analytics.sendEvent).toBeCalledWith(testContext.client, 'request-payment-method.paypal');
+        expect(analytics.sendEvent).toBeCalledWith('request-payment-method.paypal');
       });
     });
 
@@ -1111,7 +1110,6 @@ describe('MainView', () => {
 
           testContext.mainView = new MainView({
             element: testContext.wrapper,
-            client: testContext.client,
             model: model,
             merchantConfiguration: {
               authorization: fake.clientTokenWithCustomerID
@@ -1253,7 +1251,6 @@ describe('MainView', () => {
       return model.initialize().then(() => {
         model.supportedPaymentOptions = ['card'];
         testContext.mainViewOptions = {
-          client: testContext.client,
           element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
@@ -1302,7 +1299,6 @@ describe('MainView', () => {
       return model.initialize().then(() => {
         model.supportedPaymentOptions = ['card'];
         testContext.mainViewOptions = {
-          client: testContext.client,
           element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
@@ -1376,7 +1372,6 @@ describe('MainView', () => {
       return model.initialize().then(() => {
         model.supportedPaymentOptions = ['card'];
         testContext.mainViewOptions = {
-          client: testContext.client,
           element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
@@ -1420,7 +1415,6 @@ describe('MainView', () => {
       return model.initialize().then(() => {
         model.supportedPaymentOptions = ['card'];
         testContext.mainViewOptions = {
-          client: testContext.client,
           element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
@@ -1451,7 +1445,6 @@ describe('MainView', () => {
       return model.initialize().then(() => {
         model.supportedPaymentOptions = ['card'];
         testContext.mainViewOptions = {
-          client: testContext.client,
           element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey
@@ -1488,7 +1481,6 @@ describe('MainView', () => {
       return model.initialize().then(() => {
         model.supportedPaymentOptions = ['card'];
         testContext.mainViewOptions = {
-          client: testContext.client,
           element: element,
           merchantConfiguration: {
             authorization: fake.tokenizationKey

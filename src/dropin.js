@@ -25,6 +25,8 @@ var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
+var ASSETS_URL = 'https://assets.braintreegateway.com';
+
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
@@ -264,7 +266,6 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @classdesc This class represents a Drop-in component, that will create a pre-made UI for accepting cards and PayPal on your page. Instances of this class have methods for requesting a payment method and subscribing to events. For more information, see the [Drop-in guide](https://developers.braintreepayments.com/guides/drop-in/javascript/v3) in the Braintree Developer Docs. To be used in conjunction with the [Braintree Server SDKs](https://developers.braintreepayments.com/start/hello-server/).
  */
 function Dropin(options) {
-  this._client = options.client;
   this._componentID = uuid();
   this._dropinWrapper = document.createElement('div');
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentID;
@@ -272,6 +273,7 @@ function Dropin(options) {
   this._dropinWrapper.style.display = 'none';
   this._dropinWrapper.className = 'braintree-loading';
   this._merchantConfiguration = options.merchantConfiguration;
+  this._authorization = this._merchantConfiguration.authorization;
 
   EventEmitter.call(this);
 }
@@ -286,12 +288,12 @@ Dropin.prototype._initialize = function (callback) {
   self._injectStylesheet();
 
   if (!container) {
-    analytics.sendEvent(self._client, 'configuration-error');
+    analytics.sendEvent('configuration-error');
     callback(new DropinError('options.container is required.'));
 
     return;
   } else if (self._merchantConfiguration.container && self._merchantConfiguration.selector) {
-    analytics.sendEvent(self._client, 'configuration-error');
+    analytics.sendEvent('configuration-error');
     callback(new DropinError('Must only have one options.selector or options.container.'));
 
     return;
@@ -302,14 +304,14 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   if (!container || container.nodeType !== 1) {
-    analytics.sendEvent(self._client, 'configuration-error');
+    analytics.sendEvent('configuration-error');
     callback(new DropinError('options.selector or options.container must reference a valid DOM node.'));
 
     return;
   }
 
   if (container.innerHTML.trim()) {
-    analytics.sendEvent(self._client, 'configuration-error');
+    analytics.sendEvent('configuration-error');
     callback(new DropinError('options.selector or options.container must reference an empty DOM node.'));
 
     return;
@@ -344,7 +346,6 @@ Dropin.prototype._initialize = function (callback) {
   container.appendChild(self._dropinWrapper);
 
   self._model = new DropinModel({
-    client: self._client,
     componentID: self._componentID,
     merchantConfiguration: self._merchantConfiguration
   });
@@ -352,13 +353,13 @@ Dropin.prototype._initialize = function (callback) {
   self._model.initialize().then(function () {
     self._model.on('cancelInitialization', function (err) {
       self._dropinWrapper.innerHTML = '';
-      analytics.sendEvent(self._client, 'load-error');
+      analytics.sendEvent('load-error');
       callback(err);
     });
 
     self._model.on('asyncDependenciesReady', function () {
       if (self._model.dependencySuccessCount >= 1) {
-        analytics.sendEvent(self._client, 'appeared');
+        analytics.sendEvent('appeared');
         self._disableErroredPaymentMethods();
 
         self._handleAppSwitch();
@@ -430,7 +431,7 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
     return;
   }
 
-  this._removeUnvaultedPaymentMethods(function (paymentMethod) {
+  this._model.removeUnvaultedPaymentMethods(function (paymentMethod) {
     return paymentMethod.type === constants.paymentMethodTypes[property];
   });
   this._navigateToInitialView();
@@ -461,7 +462,7 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
  * });
  */
 Dropin.prototype.clearSelectedPaymentMethod = function () {
-  this._removeUnvaultedPaymentMethods();
+  this._model.removeUnvaultedPaymentMethods();
   this._model.removeActivePaymentMethod();
 
   if (this._model.getPaymentMethods().length === 0) {
@@ -480,7 +481,7 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
 
 Dropin.prototype._setUpDataCollector = function () {
   var self = this;
-  var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
+  var config = assign({}, self._merchantConfiguration.dataCollector, {authorization: self._authorization});
 
   this._model.asyncDependencyStarting();
   this._dataCollector = new DataCollector(config);
@@ -501,7 +502,7 @@ Dropin.prototype._setUpThreeDSecure = function () {
 
   this._model.asyncDependencyStarting();
 
-  this._threeDSecure = new ThreeDSecure(this._client, config);
+  this._threeDSecure = new ThreeDSecure(this._authorization, config);
 
   this._threeDSecure.initialize().then(function () {
     self._model.asyncDependencyReady();
@@ -523,21 +524,10 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
   }
 
   this._mainView = new MainView({
-    client: this._client,
     element: this._dropinWrapper,
     model: this._model,
     strings: this._strings
   });
-};
-
-Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
-  filter = filter || function () { return true; };
-
-  this._model.getPaymentMethods().forEach(function (paymentMethod) {
-    if (filter(paymentMethod) && !paymentMethod.vaulted) {
-      this._model.removePaymentMethod(paymentMethod);
-    }
-  }.bind(this));
 };
 
 Dropin.prototype._navigateToInitialView = function () {
@@ -603,7 +593,7 @@ Dropin.prototype._sendVaultedPaymentMethodAppearAnalyticsEvents = function () {
 
     typesThatSentAnEvent[type] = true;
 
-    analytics.sendEvent(this._client, 'vaulted-' + constants.analyticsKinds[type] + '.appear');
+    analytics.sendEvent('vaulted-' + constants.analyticsKinds[type] + '.appear');
   }
 };
 
@@ -718,7 +708,11 @@ Dropin.prototype.requestPaymentMethod = function (options) {
     return payload;
   }).then(function (payload) {
     if (self._dataCollector) {
-      payload.deviceData = self._dataCollector.getDeviceData();
+      return self._dataCollector.getDeviceData().then(function (deviceData) {
+        payload.deviceData = deviceData;
+
+        return payload;
+      });
     }
 
     return payload;
@@ -736,12 +730,11 @@ Dropin.prototype._removeStylesheet = function () {
 };
 
 Dropin.prototype._injectStylesheet = function () {
-  var stylesheetUrl, assetsUrl;
+  var stylesheetUrl;
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
-  assetsUrl = this._client.getConfiguration().gatewayConfiguration.assetsUrl;
-  stylesheetUrl = assetsUrl + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
+  stylesheetUrl = ASSETS_URL + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
 
   assets.loadStylesheet({
     href: stylesheetUrl,

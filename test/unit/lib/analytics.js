@@ -1,50 +1,60 @@
-
+const client = require('braintree-web/client');
 const analytics = require('../../../src/lib/analytics');
-const atob = require('../../../src/lib/polyfill').atob;
 const braintreeClientVersion = require('braintree-web/client').VERSION;
 const constants = require('../../../src/constants');
 const fake = require('../../helpers/fake');
+const {
+  yieldsAsync
+} = require('../../helpers/yields');
 
-describe('analytics.sendEvent', () => {
+describe('analytics', () => {
   let testContext;
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     testContext.client = fake.client();
+    testContext.client._request.mockImplementation(yieldsAsync());
+    jest.spyOn(client, 'create').mockResolvedValue(testContext.client);
   });
 
-  test('correctly sends an analytics event with a callback', () => {
-    let postArgs, currentTimestamp;
-    const fakeConfiguration = fake.configuration();
+  describe('setupAnalytics', () => {
+    test('creates a client to use with sendEvent', async () => {
+      await analytics.setupAnalytics('fake-auth');
 
-    function callback() {}
+      expect(client.create).toBeCalledTimes(1);
+      expect(client.create).toBeCalledWith({
+        authorization: 'fake-auth'
+      });
+    });
 
-    analytics.sendEvent(testContext.client, 'test.event.kind', callback);
+    test('sets metadata on the client', async () => {
+      const clientInstance = await analytics.setupAnalytics('fake-auth');
 
-    expect(testContext.client._request).toBeCalled();
-    postArgs = testContext.client._request.mock.calls[0];
+      const config = clientInstance.getConfiguration();
 
-    expect(postArgs[0].url).toBe(fakeConfiguration.gatewayConfiguration.analytics.url);
-    expect(postArgs[0].method).toBe('post');
-    expect(postArgs[0].data.analytics[0].kind).toBe('web.dropin.test.event.kind');
-    expect(postArgs[0].data._meta.sessionId).toBe(fakeConfiguration.analyticsMetadata.sessionId);
-    currentTimestamp = Date.now() / 1000;
-    expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).toBeLessThan(2);
-    expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).toBeGreaterThan(0);
-    expect(postArgs[1]).toBe(callback);
-    expect(postArgs[0].timeout).toBe(constants.ANALYTICS_REQUEST_TIMEOUT_MS);
+      // this gets interpolated with the package version when built
+      expect(config.analyticsMetadata.dropinVersion).toBe('__VERSION__');
+      expect(config.analyticsMetadata.integration).toBe('dropin2');
+      expect(config.analyticsMetadata.integrationType).toBe('dropin2');
+    });
   });
 
-  test(
-    'correctly sends an analytics event with no callback (fire-and-forget)',
-    () => {
+  describe('sendEvent', () => {
+    beforeEach(async () => {
+      await analytics.setupAnalytics('fake-auth');
+    });
+
+    test('throws an error if client is not already setup', async () => {
+      analytics.resetClientPromise();
+
+      await expect(analytics.sendEvent('test.event.kind')).rejects.toThrow('Client not available.');
+    });
+
+    test('correctly sends an analytics event', async () => {
       let postArgs, currentTimestamp;
       const fakeConfiguration = fake.configuration();
 
-      analytics.sendEvent(testContext.client, 'test.event.kind');
+      await analytics.sendEvent('test.event.kind');
 
       expect(testContext.client._request).toBeCalled();
       postArgs = testContext.client._request.mock.calls[0];
@@ -57,63 +67,73 @@ describe('analytics.sendEvent', () => {
       expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).toBeLessThan(2);
       expect(currentTimestamp - postArgs[0].data.analytics[0].timestamp).toBeGreaterThan(0);
       expect(postArgs[0].timeout).toBe(constants.ANALYTICS_REQUEST_TIMEOUT_MS);
-    }
-  );
+    });
 
-  test('correctly formats _meta', () => {
-    let postArgs;
-    const fakeConfiguration = fake.configuration();
+    test('correctly formats _meta', async () => {
+      let postArgs;
+      const fakeConfiguration = fake.configuration();
 
-    analytics.sendEvent(testContext.client, 'test.event.kind');
+      fakeConfiguration.analyticsMetadata.dropinVersion = '__VERSION__';
+      fakeConfiguration.analyticsMetadata.integration = 'dropin2';
+      fakeConfiguration.analyticsMetadata.integrationType = 'dropin2';
 
-    expect(testContext.client._request).toBeCalled();
-    postArgs = testContext.client._request.mock.calls[0];
+      await analytics.sendEvent('test.event.kind');
 
-    expect(postArgs[0].data._meta).toEqual(fakeConfiguration.analyticsMetadata);
-  });
+      expect(testContext.client._request).toBeCalled();
+      postArgs = testContext.client._request.mock.calls[0];
 
-  test('includes tokenizationKey', () => {
-    let client, postArgs;
-    const fakeConfiguration = fake.configuration();
+      expect(postArgs[0].data._meta).toEqual(fakeConfiguration.analyticsMetadata);
+    });
 
-    fakeConfiguration.authorization = fake.tokenizationKey;
-    client = fake.client(fakeConfiguration);
+    test('includes tokenizationKey', async () => {
+      let postArgs;
+      const fakeConfiguration = fake.configuration();
 
-    analytics.sendEvent(client, 'test.event.kind');
+      fakeConfiguration.authorization = fake.tokenizationKey;
+      testContext.client.getConfiguration = jest.fn().mockReturnValue(fakeConfiguration);
 
-    expect(client._request).toBeCalled();
-    postArgs = client._request.mock.calls[0];
+      // set up again with the new auth type
+      await analytics.setupAnalytics('fake-auth');
 
-    expect(postArgs[0].data.tokenizationKey).toBe(fakeConfiguration.authorization);
-    expect(postArgs[0].data.authorizationFingerprint).toBeFalsy();
-  });
+      await analytics.sendEvent('test.event.kind');
 
-  test('includes authorizationFingerprint', () => {
-    let client, fingerprint, postArgs;
-    const fakeConfiguration = fake.configuration();
+      expect(testContext.client._request).toBeCalled();
+      postArgs = testContext.client._request.mock.calls[0];
 
-    fakeConfiguration.authorization = fake.clientToken;
-    fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
-    fingerprint = JSON.parse(atob(fakeConfiguration.authorization)).authorizationFingerprint;
-    client = fake.client(fakeConfiguration);
+      expect(postArgs[0].data.tokenizationKey).toBe(fakeConfiguration.authorization);
+      expect(postArgs[0].data.authorizationFingerprint).toBeFalsy();
+    });
 
-    analytics.sendEvent(client, 'test.event.kind');
+    test('includes authorizationFingerprint', async () => {
+      let fingerprint, postArgs;
+      const fakeConfiguration = fake.configuration();
 
-    expect(client._request).toBeCalled();
-    postArgs = client._request.mock.calls[0];
+      fakeConfiguration.authorization = fake.clientToken;
+      fakeConfiguration.authorizationType = 'CLIENT_TOKEN';
+      fingerprint = JSON.parse(window.atob(fakeConfiguration.authorization)).authorizationFingerprint;
+      testContext.client.getConfiguration = jest.fn().mockReturnValue(fakeConfiguration);
 
-    expect(postArgs[0].data.tokenizationKey).toBeFalsy();
-    expect(postArgs[0].data.authorizationFingerprint).toBe(fingerprint);
-  });
+      // set up again with the new auth type
+      await analytics.setupAnalytics('fake-auth');
 
-  test('includes braintreeLibraryVersion', () => {
-    let postArgs;
+      await analytics.sendEvent('test.event.kind');
 
-    analytics.sendEvent(testContext.client, 'test.event.kind');
+      expect(testContext.client._request).toBeCalled();
+      postArgs = testContext.client._request.mock.calls[0];
 
-    expect(testContext.client._request).toBeCalled();
-    postArgs = testContext.client._request.mock.calls[0];
+      expect(postArgs[0].data.tokenizationKey).toBeFalsy();
+      expect(postArgs[0].data.authorizationFingerprint).toBe(fingerprint);
+    });
 
-    expect(postArgs[0].data.braintreeLibraryVersion).toBe(braintreeClientVersion);
+    test('includes braintreeLibraryVersion', async () => {
+      let postArgs;
+
+      await analytics.sendEvent('test.event.kind');
+
+      expect(testContext.client._request).toBeCalled();
+      postArgs = testContext.client._request.mock.calls[0];
+
+      expect(postArgs[0].data.braintreeLibraryVersion).toBe(braintreeClientVersion);
+    });
   });
 });

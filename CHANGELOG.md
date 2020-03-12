@@ -3,10 +3,26 @@ CHANGELOG
 
 2.0.0 - unreleased
 -----
-* TODO: list new features here
+* PayPal can now override global autovaulting preferences with `paypal.vault.autoVault`
 
 _Breaking Changes_
-* TODO: list them here
+* Drop support for IE 9-10
+* Whenever a new payment method is added, all other unvaulted payment methods will be removed from available payment methods
+* Payment methods will no longer automatically be hidden or error on setup if merchant is not enabled for them
+* Credit card view changes
+  * `card` configuration changes
+    - `card.vault.vaultCard` is now `card.vault.autoVault`
+    - `card.vault.allowVaultCardOverride` is now `card.vault.allowAutoVaultOverride`
+    - Previously, CVV would only be presented as a field if merchant had the [CVV rule configured in the control panel](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules). Now CVV will always be presented unless it is specifically removed by passing `card.cvv = { collect: false }`
+    - Previously, postal code would only be presented as a field if merchant had the [postal code AVS rule configured in the control panel](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules). Now postal code will not be presented unless it is specifically enabled by passing `card.postalCode = { collect: true }`
+* Vault Management changes
+  * `vaultManager` configuration changes
+    - cannot be used with tokenization keys
+    - create options is now an object instead of a boolean
+    - can opt out of `vaultManager.autoVaultPaymentMethods`
+    - can opt out of `vaultManager.presentVaultedPaymentMethods`
+    - can opt into `vaultManager.allowCustomerToDeletePaymentMethods`
+    - `preselectVaultedPaymentMethod` has been moved out of a top level and into `vaultManager`
 
 unreleased
 ----------
