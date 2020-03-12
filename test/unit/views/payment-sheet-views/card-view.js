@@ -377,7 +377,7 @@ describe('CardView', () => {
 
       return testContext.view.initialize().then(() => {
         setTimeout(() => {
-          var unionPayCardIcon = testContext.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
+          const unionPayCardIcon = testContext.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
 
           expect(unionPayCardIcon.classList.contains('braintree-hidden')).toBe(true);
 
