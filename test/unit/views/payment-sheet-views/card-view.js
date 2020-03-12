@@ -592,7 +592,7 @@ describe('CardView', () => {
     });
 
     test(
-      'resolves with true when no merchant configuratoin provided',
+      'resolves with true when no merchant configuration provided',
       () => {
         return CardView.isEnabled(testContext.fakeOptions).then(result => {
           expect(result).toBe(true);
