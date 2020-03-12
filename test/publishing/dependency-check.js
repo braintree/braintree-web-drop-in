@@ -1,14 +1,12 @@
-
-var execSync = require('child_process').execSync;
-var fs = require('fs');
-
-var dependencies = require('../../package.json').dependencies;
-var dependencyNames = Object.keys(dependencies);
-var dependencyPackages = dependencyNames.map(function (depName) {
-  var depPackages = {};
-  var depVersion = dependencies[depName];
-  var cmd = 'npm view --json ' + depName + '@' + depVersion + ' dependencies';
-  var result = execSync(cmd).toString();
+const { execSync } = require('child_process');
+const fs = require('fs');
+const { dependencies } = require('../../package.json');
+const dependencyNames = Object.keys(dependencies);
+const dependencyPackages = dependencyNames.map(depName => {
+  let depPackages = {};
+  const depVersion = dependencies[depName];
+  const cmd = `npm view --json ${depName}@${depVersion} dependencies`;
+  const result = execSync(cmd).toString();
 
   if (result) {
     depPackages = JSON.parse(result);
@@ -20,22 +18,20 @@ var dependencyPackages = dependencyNames.map(function (depName) {
   };
 });
 
-describe('Shared dependency', function () {
-  dependencyPackages.forEach(function (depPkg) {
-    describe(depPkg.name, function () {
-      var sharedDependencyNames = Object.keys(depPkg.dependencies).filter(function (d) {
-        return dependencyNames.indexOf(d) !== -1;
-      });
+describe('Shared dependency', () => {
+  dependencyPackages.forEach(depPkg => {
+    describe(depPkg.name, () => {
+      const sharedDependencyNames = Object.keys(depPkg.dependencies).filter(d => dependencyNames.indexOf(d) !== -1);
 
-      sharedDependencyNames.forEach(function (sharedDepName) {
-        var sharedDepVersion = depPkg.dependencies[sharedDepName];
+      sharedDependencyNames.forEach(sharedDepName => {
+        const sharedDepVersion = depPkg.dependencies[sharedDepName];
 
-        it('uses ' + sharedDepName + '@' + sharedDepVersion, function (done) {
-          var nestedNodeModulePath = './node_modules/' + depPkg.name + '/node_modules/';
+        it(`uses ${sharedDepName}@${sharedDepVersion}`, done => {
+          const nestedNodeModulePath = `./node_modules/${depPkg.name}/node_modules/`;
 
-          fs.exists(nestedNodeModulePath + sharedDepName, function (exists) {
+          fs.exists(nestedNodeModulePath + sharedDepName, exists => {
             if (exists) {
-              done(new Error('Found ' + sharedDepName + ' with a different version in ' + depPkg.name));
+              done(new Error(`Found ${sharedDepName} with a different version in ${depPkg.name}`));
             } else {
               done();
             }

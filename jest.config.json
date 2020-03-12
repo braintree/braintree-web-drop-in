@@ -11,6 +11,7 @@
     "<rootDir>/../test/"
   ],
   "testMatch": [
-    "**/unit/**/*.js"
+    "**/unit/**/*.js",
+    "**/publishing/**/*.js"
   ]
 }

@@ -1,12 +1,9 @@
+const fs = require('fs');
+const translations = require('../../src/translations');
+const englishTranslation = require('../../src/translations/en_US');
+const englishTranslationKeys = Object.keys(englishTranslation);
 
-var fs = require('fs');
-var expect = require('chai').expect;
-
-var translations = require('../../src/translations');
-var englishTranslation = require('../../src/translations/en_US');
-var englishTranslationKeys = Object.keys(englishTranslation);
-
-var locales = fs.readdirSync('./src/translations').filter(function (fileName) {
+const locales = fs.readdirSync('./src/translations').filter(fileName => {
   if (fileName.indexOf('.js') === -1) {
     return false;
   }
@@ -16,34 +13,30 @@ var locales = fs.readdirSync('./src/translations').filter(function (fileName) {
   }
 
   return true;
-}).map(function (fileName) {
-  return fileName.substring(0, fileName.length - 3); // remove .js ending
-});
+}).map(fileName => fileName.substring(0, fileName.length - 3)); // remove .js ending
 
-describe('translations', function () {
-  locales.forEach(function (key) {
-    it(key + ' locale has a key for each english translation', function () {
-      var translation = require('../../src/translations/' + key);
-      var translationKeys = Object.keys(translation);
+describe('translations', () => {
+  locales.forEach(key => {
+    it(`${key} locale has a key for each english translation`, () => {
+      const translation = require(`../../src/translations/${key}`);
+      const translationKeys = Object.keys(translation);
 
-      englishTranslationKeys.forEach(function (translationKey) {
-        expect(translation[translationKey]).be.a('string');
+      englishTranslationKeys.forEach(translationKey => {
+        expect(typeof translation[translationKey]).toBe('string');
       });
 
-      expect(translationKeys.length).to.equal(englishTranslationKeys.length);
+      expect(translationKeys.length).toBe(englishTranslationKeys.length);
     });
   });
 
-  it('each 2 character alias corresponds to a translation object', function () {
-    Object.keys(translations.twoCharacterLocaleAliases).forEach(function (key) {
-      expect(translations.twoCharacterLocaleAliases[key]).to.be.an('object');
+  it('each 2 character alias corresponds to a translation object', () => {
+    Object.keys(translations.twoCharacterLocaleAliases).forEach(key => {
+      expect(translations.twoCharacterLocaleAliases[key]).toBeInstanceOf(Object);
     });
   });
 
-  it('fiveCharacterLocales do not clobber twoCharacterLocalAliases', function () {
-    expect(Object.keys(translations.translations).length).to.eq(
-      Object.keys(translations.twoCharacterLocaleAliases).length +
-      Object.keys(translations.fiveCharacterLocales).length
-    );
+  it('fiveCharacterLocales do not clobber twoCharacterLocalAliases', () => {
+    expect(Object.keys(translations.translations).length).toBe(Object.keys(translations.twoCharacterLocaleAliases).length +
+      Object.keys(translations.fiveCharacterLocales).length);
   });
 });
