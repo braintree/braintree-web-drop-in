@@ -51,7 +51,6 @@ function DropinModel(options) {
   this.dependenciesInitializing = 0;
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
-  this._options = options;
   this._setupComplete = false;
 
   EventEmitter.call(this);
