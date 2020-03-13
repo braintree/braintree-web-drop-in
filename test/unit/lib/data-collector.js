@@ -12,9 +12,6 @@ describe('DataCollector', () => {
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     testContext.dataCollectorInstance = fake.dataCollectorInstance;
     jest.spyOn(testContext.dataCollectorInstance, 'teardown').mockResolvedValue();
   });
@@ -49,41 +46,35 @@ describe('DataCollector', () => {
       delete global.braintree;
     });
 
-    test(
-      'loads datacollector script if data collector does not exist on braintree object',
-      () => {
-        const dc = new DataCollector(testContext.config);
+    it('loads datacollector script if data collector does not exist on braintree object', () => {
+      const dc = new DataCollector(testContext.config);
 
-        delete global.braintree.dataCollector;
+      delete global.braintree.dataCollector;
 
-        return dc.initialize().then(() => {
-          expect(assets.loadScript).toBeCalledTimes(1);
-          expect(assets.loadScript).toBeCalledWith({
-            src: `https://js.braintreegateway.com/web/${btWebVersion}/js/data-collector.min.js`,
-            id: 'braintree-dropin-data-collector-script'
-          });
+      return dc.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: `https://js.braintreegateway.com/web/${btWebVersion}/js/data-collector.min.js`,
+          id: 'braintree-dropin-data-collector-script'
         });
-      }
-    );
+      });
+    });
 
-    test(
-      'loads datacollector script if braintree object does not exist',
-      () => {
-        const dc = new DataCollector(testContext.config);
+    it('loads datacollector script if braintree object does not exist', () => {
+      const dc = new DataCollector(testContext.config);
 
-        delete global.braintree;
+      delete global.braintree;
 
-        return dc.initialize().then(() => {
-          expect(assets.loadScript).toBeCalledTimes(1);
-          expect(assets.loadScript).toBeCalledWith({
-            src: `https://js.braintreegateway.com/web/${btWebVersion}/js/data-collector.min.js`,
-            id: 'braintree-dropin-data-collector-script'
-          });
+      return dc.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: `https://js.braintreegateway.com/web/${btWebVersion}/js/data-collector.min.js`,
+          id: 'braintree-dropin-data-collector-script'
         });
-      }
-    );
+      });
+    });
 
-    test('does not load datacollector script if it already exists', () => {
+    it('does not load datacollector script if it already exists', () => {
       const dc = new DataCollector(testContext.config);
 
       return dc.initialize().then(() => {
@@ -91,7 +82,7 @@ describe('DataCollector', () => {
       });
     });
 
-    test('creates a data collector instance using deferred method', () => {
+    it('creates a data collector instance using deferred method', () => {
       const dc = new DataCollector(testContext.config);
 
       expect(dc._instance).toBeFalsy();
@@ -107,7 +98,7 @@ describe('DataCollector', () => {
       });
     });
 
-    test('resolves even if data collector setup fails', () => {
+    it('resolves even if data collector setup fails', () => {
       const dc = new DataCollector(testContext.config);
       const err = new Error('fail');
 
@@ -123,15 +114,15 @@ describe('DataCollector', () => {
   });
 
   describe('getDeviceData', () => {
-    test('resolves with empty string when data collector instance is not avaialble', async () => {
-      const dc = new DataCollector({});
+    it('resolves with empty string when data collector instance is not avaialble', async () => {
+        const dc = new DataCollector({});
 
-      const data = await dc.getDeviceData();
+        const data = await dc.getDeviceData();
 
-      expect(data).toBe('');
-    });
+        expect(data).toBe('');
+      });
 
-    test('resolves device data', async () => {
+    it('resolves device data', async () => {
       const dc = new DataCollector({});
 
       dc._instance = testContext.dataCollectorInstance;
@@ -143,7 +134,7 @@ describe('DataCollector', () => {
   });
 
   describe('teardown', () => {
-    test('calls teardown on data collector instance', () => {
+    it('calls teardown on data collector instance', () => {
       const dc = new DataCollector({});
 
       dc._instance = testContext.dataCollectorInstance;

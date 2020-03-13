@@ -1,4 +1,3 @@
-
 const supportsFlexbox = require('../../../src/lib/supports-flexbox');
 
 describe('supportsFlexbox', () => {
@@ -6,9 +5,6 @@ describe('supportsFlexbox', () => {
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     testContext.fakeDiv = {
       style: {
         cssText: '',
@@ -17,17 +13,17 @@ describe('supportsFlexbox', () => {
     };
   });
 
-  test('returns true in PhantomJS', () => {
+  it('returns true in PhantomJS', () => {
     expect(supportsFlexbox()).toBe(true);
   });
 
-  test("returns false for browsers that don't support flexbox", () => {
+  it('returns false for browsers that don\'t support flexbox', () => {
     jest.spyOn(document, 'createElement').mockReturnValue(testContext.fakeDiv);
 
     expect(supportsFlexbox()).toBe(false);
   });
 
-  test('returns true if the browser supports flexbox', () => {
+  it('returns true if the browser supports flexbox', () => {
     jest.spyOn(document, 'createElement').mockReturnValue(testContext.fakeDiv);
 
     testContext.fakeDiv.style.length = 1;

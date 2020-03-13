@@ -1,9 +1,8 @@
-
-const uuid = require('../../../src/lib/uuid');
 const isUuid = require('is-uuid');
+const uuid = require('../../../src/lib/uuid');
 
 describe('uuid', () => {
-  test('returns valid v4 UUIDs', () => {
+  it('returns valid v4 UUIDs', () => {
     let i;
 
     for (i = 0; i < 10; i++) {

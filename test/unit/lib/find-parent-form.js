@@ -1,25 +1,21 @@
-
 const findParentForm = require('../../../src/lib/find-parent-form').findParentForm;
 
 describe('findParentForm', () => {
-  test('returns undefined if the element has no parentNode', () => {
+  it('returns undefined if the element has no parentNode', () => {
     expect(findParentForm({})).toBeUndefined();
   });
 
-  test(
-    'checks recursively and returns undefined if no parentNode is a form',
-    () => {
-      expect(findParentForm({
+  it('checks recursively and returns undefined if no parentNode is a form', () => {
+    expect(findParentForm({
+      parentNode: {
         parentNode: {
-          parentNode: {
-            parentNode: {}
-          }
+          parentNode: {}
         }
-      })).toBeUndefined();
-    }
-  );
+      }
+    })).toBeUndefined();
+  });
 
-  test('returns the parent node if it is a form', () => {
+  it('returns the parent node if it is a form', () => {
     const form = {
       nodeName: 'FORM'
     };
@@ -29,20 +25,17 @@ describe('findParentForm', () => {
     })).toBe(form);
   });
 
-  test(
-    'checks recursively until it finds a parent node that is a form',
-    () => {
-      const form = {
-        nodeName: 'FORM'
-      };
+  it('checks recursively until it finds a parent node that is a form', () => {
+    const form = {
+      nodeName: 'FORM'
+    };
 
-      expect(findParentForm({
+    expect(findParentForm({
+      parentNode: {
         parentNode: {
-          parentNode: {
-            parentNode: form
-          }
+          parentNode: form
         }
-      })).toBe(form);
-    }
-  );
+      }
+    })).toBe(form);
+  });
 });

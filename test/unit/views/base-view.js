@@ -3,7 +3,6 @@ jest.mock('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
 const constants = require('../../../src/constants');
 const classList = require('@braintree/class-list');
-const Promise = require('../../../src/lib/promise');
 
 describe('BaseView', () => {
   let testContext;
@@ -13,13 +12,13 @@ describe('BaseView', () => {
   });
 
   describe('Constructor', () => {
-    test('does not require options to be passed', () => {
+    it('does not require options to be passed', () => {
       expect(() => {
         new BaseView(); // eslint-disable-line no-new
       }).not.toThrowError();
     });
 
-    test('takes properties from passed options', () => {
+    it('takes properties from passed options', () => {
       const view = new BaseView({ foo: 'boo', yas: 'gaga' });
 
       expect(view.foo).toBe('boo');
@@ -27,17 +26,10 @@ describe('BaseView', () => {
     });
   });
 
-  describe('teardown', () => {
-    test('returns a resolved promise', () => {
-      const view = new BaseView();
-      const promise = view.teardown();
-
-      expect(promise).toBeInstanceOf(Promise);
-    });
-  });
+  describe.todo('teardown');
 
   describe('requestPaymentMethod', () => {
-    test('returns a rejected promise', () => {
+    it('returns a rejected promise', () => {
       const view = new BaseView();
 
       return view.requestPaymentMethod().then(() => {
@@ -50,43 +42,34 @@ describe('BaseView', () => {
   });
 
   describe('getPaymentMethod', () => {
-    test(
-      'returns undefined if there is no activeMethodView on instance',
-      () => {
-        const view = new BaseView();
+    it('returns undefined if there is no activeMethodView on instance', () => {
+      const view = new BaseView();
 
-        expect(view.getPaymentMethod()).toBeUndefined(); // eslint-disable-line no-undefined
-      }
-    );
+      expect(view.getPaymentMethod()).toBeUndefined();
+    });
 
-    test(
-      'returns undefined if activeMethodView does not have a payment method',
-      () => {
-        const view = new BaseView();
+    it('returns undefined if activeMethodView does not have a payment method', () => {
+      const view = new BaseView();
 
-        view.activeMethodView = {};
+      view.activeMethodView = {};
 
-        expect(view.getPaymentMethod()).toBeUndefined(); // eslint-disable-line no-undefined
-      }
-    );
+      expect(view.getPaymentMethod()).toBeUndefined();
+    });
 
-    test(
-      'returns the payment method object if there is an activeMethodView with a payment method object',
-      () => {
-        const view = new BaseView();
-        const paymentMethod = {};
+    it('returns the payment method object if there is an activeMethodView with a payment method object', () => {
+      const view = new BaseView();
+      const paymentMethod = {};
 
-        view.activeMethodView = {
-          paymentMethod: paymentMethod
-        };
+      view.activeMethodView = {
+        paymentMethod
+      };
 
-        expect(view.getPaymentMethod()).toBe(paymentMethod);
-      }
-    );
+      expect(view.getPaymentMethod()).toBe(paymentMethod);
+    });
   });
 
   describe('onSelection', () => {
-    test('is a noop function', () => {
+    it('is a noop function', () => {
       const view = new BaseView();
 
       expect(view.onSelection).toBeInstanceOf(Function);
@@ -102,7 +85,7 @@ describe('BaseView', () => {
       };
     });
 
-    test('adds a loading class to view element', () => {
+    it('adds a loading class to view element', () => {
       const view = new BaseView({
         element: testContext.element,
         model: testContext.model
@@ -114,7 +97,7 @@ describe('BaseView', () => {
       expect(classList.add).toBeCalledWith(testContext.element, 'braintree-sheet--loading');
     });
 
-    test('ignores adding class if no element is provided', () => {
+    it('ignores adding class if no element is provided', () => {
       const view = new BaseView({
         model: testContext.model
       });
@@ -124,7 +107,7 @@ describe('BaseView', () => {
       expect(classList.add).not.toBeCalled();
     });
 
-    test('calls preventUserAction on model', () => {
+    it('calls preventUserAction on model', () => {
       const view = new BaseView({
         model: testContext.model
       });
@@ -144,7 +127,7 @@ describe('BaseView', () => {
       };
     });
 
-    test('adds a loading class to view element', () => {
+    it('adds a loading class to view element', () => {
       const view = new BaseView({
         element: testContext.element,
         model: testContext.model
@@ -156,7 +139,7 @@ describe('BaseView', () => {
       expect(classList.remove).toBeCalledWith(testContext.element, 'braintree-sheet--loading');
     });
 
-    test('ignores adding class if no element is provided', () => {
+    it('ignores adding class if no element is provided', () => {
       const view = new BaseView({
         model: testContext.model
       });
@@ -166,7 +149,7 @@ describe('BaseView', () => {
       expect(classList.remove).not.toBeCalled();
     });
 
-    test('calls allowUserAction on model', () => {
+    it('calls allowUserAction on model', () => {
       const view = new BaseView({
         model: testContext.model
       });
