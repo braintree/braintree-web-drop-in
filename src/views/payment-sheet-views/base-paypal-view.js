@@ -1,17 +1,17 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
-var BaseView = require('../base-view');
-var btPaypal = require('braintree-web/paypal-checkout');
-var DropinError = require('../../lib/dropin-error');
-var constants = require('../../constants');
-var assets = require('@braintree/asset-loader');
-var translations = require('../../translations').fiveCharacterLocales;
-var Promise = require('../../lib/promise');
+const assign = require('../../lib/assign').assign;
+const BaseView = require('../base-view');
+const btPaypal = require('braintree-web/paypal-checkout');
+const DropinError = require('../../lib/dropin-error');
+const constants = require('../../constants');
+const assets = require('@braintree/asset-loader');
+const translations = require('../../translations').fiveCharacterLocales;
+const Promise = require('../../lib/promise');
 
-var ASYNC_DEPENDENCY_TIMEOUT = 30000;
-var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
-var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
+const ASYNC_DEPENDENCY_TIMEOUT = 30000;
+const READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
+const DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
 
 var paypalScriptLoadInProgressPromise;
 
@@ -23,11 +23,11 @@ BasePayPalView.prototype = Object.create(BaseView.prototype);
 
 BasePayPalView.prototype.initialize = function () {
   var asyncDependencyTimeoutHandler;
-  var isCredit = Boolean(this._isPayPalCredit);
+  const isCredit = Boolean(this._isPayPalCredit);
   var setupComplete = false;
-  var self = this;
-  var paypalType = isCredit ? 'paypalCredit' : 'paypal';
-  var paypalConfiguration = this.model.merchantConfiguration[paypalType];
+  const self = this;
+  const paypalType = isCredit ? 'paypalCredit' : 'paypal';
+  const paypalConfiguration = this.model.merchantConfiguration[paypalType];
 
   this.paypalConfiguration = assign({}, {
     vault: {}
@@ -48,8 +48,8 @@ BasePayPalView.prototype.initialize = function () {
   }).then(function (paypalInstance) {
     var checkoutJSConfiguration;
     var buttonSelector = '[data-braintree-id="paypal-button"]';
-    var environment = self.model.environment === 'production' ? 'production' : 'sandbox';
-    var locale = self.model.merchantConfiguration.locale;
+    const environment = self.model.environment === 'production' ? 'production' : 'sandbox';
+    const locale = self.model.merchantConfiguration.locale;
 
     self.paypalInstance = paypalInstance;
 
@@ -62,7 +62,7 @@ BasePayPalView.prototype.initialize = function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
       },
       onAuthorize: function (data) {
-        var shouldVault = self._shouldVault();
+        const shouldVault = self._shouldVault();
 
         data.vault = shouldVault;
 
@@ -149,7 +149,7 @@ BasePayPalView.prototype._shouldVault = function () {
 };
 
 BasePayPalView.isEnabled = function (options) {
-  var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
+  const merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
 
   if (global.paypal && global.paypal.Button) {
     return Promise.resolve(true);

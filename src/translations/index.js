@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
 'use strict';
 
-var assign = require('../lib/assign').assign;
+const assign = require('../lib/assign').assign;
 
-var fiveCharacterLocales = {
+const fiveCharacterLocales = {
   da_DK: require('./da_DK'),
   de_DE: require('./de_DE'),
   en_US: require('./en_US'),
@@ -29,7 +29,7 @@ var fiveCharacterLocales = {
   zh_TW: require('./zh_TW')
 };
 
-var twoCharacterLocaleAliases = {
+const twoCharacterLocaleAliases = {
   da: fiveCharacterLocales.da_DK,
   de: fiveCharacterLocales.de_DE,
   en: fiveCharacterLocales.en_US,

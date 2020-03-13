@@ -1,13 +1,13 @@
 'use strict';
 
-var BaseView = require('./base-view');
-var classList = require('@braintree/class-list');
-var constants = require('../constants');
-var fs = require('fs');
-var analytics = require('../lib/analytics');
-var addSelectionEventHandler = require('../lib/add-selection-event-handler');
+const BaseView = require('./base-view');
+const classList = require('@braintree/class-list');
+const constants = require('../constants');
+const fs = require('fs');
+const analytics = require('../lib/analytics');
+const addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
-var paymentMethodHTML = fs.readFileSync(__dirname + '/../html/payment-method.html', 'utf8');
+const paymentMethodHTML = fs.readFileSync(__dirname + '/../html/payment-method.html', 'utf8');
 
 function PaymentMethodView() {
   BaseView.apply(this, arguments);
@@ -21,8 +21,8 @@ PaymentMethodView.prototype.constructor = PaymentMethodView;
 PaymentMethodView.prototype._initialize = function () {
   var endingInText;
   var html = paymentMethodHTML;
-  var paymentMethodCardTypes = constants.paymentMethodCardTypes;
-  var paymentMethodTypes = constants.paymentMethodTypes;
+  const paymentMethodCardTypes = constants.paymentMethodCardTypes;
+  const paymentMethodTypes = constants.paymentMethodTypes;
 
   this.element = document.createElement('div');
   this.element.className = 'braintree-method';

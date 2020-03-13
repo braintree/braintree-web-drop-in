@@ -1,14 +1,14 @@
 'use strict';
 
-var BaseView = require('./base-view');
-var PaymentMethodView = require('./payment-method-view');
-var DropinError = require('../lib/dropin-error');
-var classList = require('@braintree/class-list');
-var errors = require('../constants').errors;
-var Promise = require('../lib/promise');
-var addSelectionEventHandler = require('../lib/add-selection-event-handler');
+const BaseView = require('./base-view');
+const PaymentMethodView = require('./payment-method-view');
+const DropinError = require('../lib/dropin-error');
+const classList = require('@braintree/class-list');
+const errors = require('../constants').errors;
+const Promise = require('../lib/promise');
+const addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
-var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
+const PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
   PayPalAccount: 'PayPal',
   ApplePayCard: 'Apple Pay',
@@ -97,7 +97,7 @@ PaymentMethodsView.prototype.disableEditMode = function () {
 };
 
 PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
-  var paymentMethodView = new PaymentMethodView({
+  const paymentMethodView = new PaymentMethodView({
     model: this.model,
     paymentMethod: paymentMethod,
     strings: this.strings
@@ -131,7 +131,7 @@ PaymentMethodsView.prototype._removePaymentMethod = function (paymentMethod) {
 
 PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentMethod) {
   var i;
-  var previousActiveMethodView = this.activeMethodView;
+  const previousActiveMethodView = this.activeMethodView;
 
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
@@ -158,7 +158,7 @@ PaymentMethodsView.prototype.requestPaymentMethod = function () {
 
 PaymentMethodsView.prototype.refreshPaymentMethods = function () {
   var i;
-  var paymentMethods = this.model.getPaymentMethods();
+  const paymentMethods = this.model.getPaymentMethods();
 
   this.views.forEach(function (view) {
     this.container.removeChild(view.element);

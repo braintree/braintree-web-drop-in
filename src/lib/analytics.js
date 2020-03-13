@@ -1,9 +1,9 @@
 'use strict';
 
-var btClient = require('braintree-web/client');
-var constants = require('../constants');
-var Promise = require('./promise');
-var braintreeClientVersion = require('braintree-web/client').VERSION;
+const btClient = require('braintree-web/client');
+const constants = require('../constants');
+const Promise = require('./promise');
+const braintreeClientVersion = require('braintree-web/client').VERSION;
 var VERSION = '__VERSION__';
 
 var clientPromise;
@@ -16,7 +16,7 @@ function setupAnalytics(authorization) {
   clientPromise = btClient.create({
     authorization: authorization
   }).then(function (clientInstance) {
-    var configuration = clientInstance.getConfiguration();
+    const configuration = clientInstance.getConfiguration();
 
     configuration.analyticsMetadata.integration = constants.INTEGRATION;
     configuration.analyticsMetadata.integrationType = constants.INTEGRATION;
@@ -37,16 +37,16 @@ function resetClientPromise() {
 }
 
 function sendAnalyticsEvent(kind) {
-  var timestamp = _millisToSeconds(Date.now());
+  const timestamp = _millisToSeconds(Date.now());
 
   if (!clientPromise) {
     return Promise.reject(new Error('Client not available.'));
   }
 
   return clientPromise.then(function (client) {
-    var configuration = client.getConfiguration();
-    var url = configuration.gatewayConfiguration.analytics.url;
-    var data = {
+    const configuration = client.getConfiguration();
+    const url = configuration.gatewayConfiguration.analytics.url;
+    const data = {
       analytics: [{
         kind: constants.ANALYTICS_PREFIX + kind,
         timestamp: timestamp

@@ -1,10 +1,10 @@
 'use strict';
 
-var assign = require('../lib/assign').assign;
-var classList = require('@braintree/class-list');
-var DropinError = require('../lib/dropin-error');
-var errors = require('../constants').errors;
-var Promise = require('../lib/promise');
+const assign = require('../lib/assign').assign;
+const classList = require('@braintree/class-list');
+const DropinError = require('../lib/dropin-error');
+const errors = require('../constants').errors;
+const Promise = require('../lib/promise');
 
 function BaseView(options) {
   options = options || {};

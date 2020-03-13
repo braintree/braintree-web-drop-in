@@ -1,47 +1,47 @@
 'use strict';
 
-var assign = require('./lib/assign').assign;
-var analytics = require('./lib/analytics');
-var classList = require('@braintree/class-list');
-var constants = require('./constants');
-var DropinError = require('./lib/dropin-error');
-var DropinModel = require('./dropin-model');
-var EventEmitter = require('@braintree/event-emitter');
-var assets = require('@braintree/asset-loader');
-var fs = require('fs');
-var MainView = require('./views/main-view');
-var paymentMethodsViewID = require('./views/payment-methods-view').ID;
-var paymentOptionsViewID = require('./views/payment-options-view').ID;
-var paymentOptionIDs = constants.paymentOptionIDs;
-var translations = require('./translations').translations;
-var isUtf8 = require('./lib/is-utf-8');
-var uuid = require('./lib/uuid');
-var Promise = require('./lib/promise');
-var sanitizeHtml = require('./lib/sanitize-html');
-var DataCollector = require('./lib/data-collector');
-var ThreeDSecure = require('./lib/three-d-secure');
-var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
+const assign = require('./lib/assign').assign;
+const analytics = require('./lib/analytics');
+const classList = require('@braintree/class-list');
+const constants = require('./constants');
+const DropinError = require('./lib/dropin-error');
+const DropinModel = require('./dropin-model');
+const EventEmitter = require('@braintree/event-emitter');
+const assets = require('@braintree/asset-loader');
+const fs = require('fs');
+const MainView = require('./views/main-view');
+const paymentMethodsViewID = require('./views/payment-methods-view').ID;
+const paymentOptionsViewID = require('./views/payment-options-view').ID;
+const paymentOptionIDs = constants.paymentOptionIDs;
+const translations = require('./translations').translations;
+const isUtf8 = require('./lib/is-utf-8');
+const uuid = require('./lib/uuid');
+const Promise = require('./lib/promise');
+const sanitizeHtml = require('./lib/sanitize-html');
+const DataCollector = require('./lib/data-collector');
+const ThreeDSecure = require('./lib/three-d-secure');
+const wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
-var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
-var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
+const mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
+const svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
-var ASSETS_URL = 'https://assets.braintreegateway.com';
+const ASSETS_URL = 'https://assets.braintreegateway.com';
 
-var UPDATABLE_CONFIGURATION_OPTIONS = [
+const UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay,
   'threeDSecure'
 ];
-var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
+const UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE_REMOVED = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = '__VERSION__';
+const HAS_RAW_PAYMENT_DATA = {};
+const VERSION = '__VERSION__';
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -282,7 +282,7 @@ EventEmitter.createChild(Dropin);
 
 Dropin.prototype._initialize = function (callback) {
   var localizedStrings, localizedHTML;
-  var self = this;
+  const self = this;
   var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
 
   self._injectStylesheet();
@@ -337,7 +337,7 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   localizedHTML = Object.keys(self._strings).reduce(function (result, stringKey) {
-    var stringValue = self._strings[stringKey];
+    const stringValue = self._strings[stringKey];
 
     return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
   }, mainHTML);
@@ -480,8 +480,8 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
 };
 
 Dropin.prototype._setUpDataCollector = function () {
-  var self = this;
-  var config = assign({}, self._merchantConfiguration.dataCollector, {authorization: self._authorization});
+  const self = this;
+  const config = assign({}, self._merchantConfiguration.dataCollector, { authorization: self._authorization });
 
   this._model.asyncDependencyStarting();
   this._dataCollector = new DataCollector(config);
@@ -497,8 +497,8 @@ Dropin.prototype._setUpDataCollector = function () {
 };
 
 Dropin.prototype._setUpThreeDSecure = function () {
-  var self = this;
-  var config = assign({}, this._merchantConfiguration.threeDSecure);
+  const self = this;
+  const config = assign({}, this._merchantConfiguration.threeDSecure);
 
   this._model.asyncDependencyStarting();
 
@@ -532,7 +532,7 @@ Dropin.prototype._setUpDependenciesAndViews = function () {
 
 Dropin.prototype._navigateToInitialView = function () {
   var hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
-  var isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
+  const isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
 
   if (isOnMethodsView) {
     hasNoSavedPaymentMethods = this._model.getPaymentMethods().length === 0;
@@ -555,7 +555,7 @@ Dropin.prototype._supportsPaymentOption = function (paymentOption) {
 
 Dropin.prototype._disableErroredPaymentMethods = function () {
   var paymentMethodOptionsElements;
-  var failedDependencies = Object.keys(this._model.failedDependencies);
+  const failedDependencies = Object.keys(this._model.failedDependencies);
 
   if (failedDependencies.length === 0) {
     return;
@@ -564,11 +564,11 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
   paymentMethodOptionsElements = this._mainView.getOptionsElements();
 
   failedDependencies.forEach(function (paymentMethodId) {
-    var element = paymentMethodOptionsElements[paymentMethodId];
-    var div = element.div;
-    var clickHandler = element.clickHandler;
-    var error = this._model.failedDependencies[paymentMethodId];
-    var errorMessageDiv = div.querySelector('.braintree-option__disabled-message');
+    const element = paymentMethodOptionsElements[paymentMethodId];
+    const div = element.div;
+    const clickHandler = element.clickHandler;
+    const error = this._model.failedDependencies[paymentMethodId];
+    const errorMessageDiv = div.querySelector('.braintree-option__disabled-message');
 
     classList.add(div, 'braintree-disabled');
     div.removeEventListener('click', clickHandler);
@@ -579,8 +579,8 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 
 Dropin.prototype._sendVaultedPaymentMethodAppearAnalyticsEvents = function () {
   var i, type;
-  var typesThatSentAnEvent = {};
-  var paymentMethods = this._model._paymentMethods;
+  const typesThatSentAnEvent = {};
+  const paymentMethods = this._model._paymentMethods;
 
   for (i = 0; i < paymentMethods.length; i++) {
     type = paymentMethods[i].type;
@@ -682,7 +682,7 @@ Dropin.prototype._handleAppSwitch = function () {
  * });
  */
 Dropin.prototype.requestPaymentMethod = function (options) {
-  var self = this;
+  const self = this;
 
   options = options || {};
 
@@ -722,7 +722,7 @@ Dropin.prototype.requestPaymentMethod = function (options) {
 };
 
 Dropin.prototype._removeStylesheet = function () {
-  var stylesheet = document.getElementById(constants.STYLESHEET_ID);
+  const stylesheet = document.getElementById(constants.STYLESHEET_ID);
 
   if (stylesheet) {
     stylesheet.parentNode.removeChild(stylesheet);
@@ -750,8 +750,8 @@ Dropin.prototype._injectStylesheet = function () {
  */
 Dropin.prototype.teardown = function () {
   var teardownError;
-  var promise = Promise.resolve();
-  var self = this;
+  const promise = Promise.resolve();
+  const self = this;
 
   this._removeStylesheet();
 
@@ -812,7 +812,7 @@ Dropin.prototype._removeDropinWrapper = function () {
 };
 
 function formatPaymentMethodPayload(paymentMethod) {
-  var formattedPaymentMethod = {
+  const formattedPaymentMethod = {
     nonce: paymentMethod.nonce,
     details: paymentMethod.details,
     type: paymentMethod.type

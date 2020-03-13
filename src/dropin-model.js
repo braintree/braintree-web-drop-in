@@ -1,23 +1,23 @@
 'use strict';
 
-var analytics = require('./lib/analytics');
-var assign = require('./lib/assign').assign;
-var DropinError = require('./lib/dropin-error');
-var EventEmitter = require('@braintree/event-emitter');
-var constants = require('./constants');
-var paymentMethodTypes = constants.paymentMethodTypes;
-var paymentOptionIDs = constants.paymentOptionIDs;
-var Promise = require('./lib/promise');
-var parseAuthorization = require('./lib/parse-authorization');
-var paymentSheetViews = require('./views/payment-sheet-views');
-var vaultManager = require('braintree-web/vault-manager');
+const analytics = require('./lib/analytics');
+const assign = require('./lib/assign').assign;
+const DropinError = require('./lib/dropin-error');
+const EventEmitter = require('@braintree/event-emitter');
+const constants = require('./constants');
+const paymentMethodTypes = constants.paymentMethodTypes;
+const paymentOptionIDs = constants.paymentOptionIDs;
+const Promise = require('./lib/promise');
+const parseAuthorization = require('./lib/parse-authorization');
+const paymentSheetViews = require('./views/payment-sheet-views');
+const vaultManager = require('braintree-web/vault-manager');
 
-var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
+const VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
   paymentMethodTypes.applePay,
   paymentMethodTypes.googlePay,
   paymentMethodTypes.venmo
 ];
-var DEFAULT_PAYMENT_OPTION_PRIORITY = [
+const DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.card,
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
@@ -25,13 +25,13 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID = {
+const DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID = {
   autoVaultPaymentMethods: true,
   presentVaultedPaymentMethods: true,
   preselectVaultedPaymentMethod: true,
   allowCustomerToDeletePaymentMethods: false
 };
-var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID = {
+const DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID = {
   autoVaultPaymentMethods: false,
   presentVaultedPaymentMethods: false,
   preselectVaultedPaymentMethod: false,
@@ -39,7 +39,7 @@ var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID = {
 };
 
 function DropinModel(options) {
-  var parsedAuthorization = parseAuthorization(options.merchantConfiguration.authorization);
+  const parsedAuthorization = parseAuthorization(options.merchantConfiguration.authorization);
 
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
@@ -59,7 +59,7 @@ function DropinModel(options) {
 EventEmitter.createChild(DropinModel);
 
 DropinModel.prototype.initialize = function () {
-  var self = this;
+  const self = this;
 
   if (this.authType === constants.authorizationTypes.CLIENT_TOKEN) {
     analytics.sendEvent('started.client-token');
@@ -110,7 +110,7 @@ DropinModel.prototype.addPaymentMethod = function (paymentMethod) {
 };
 
 DropinModel.prototype.removePaymentMethod = function (paymentMethod) {
-  var paymentMethodLocation = this._paymentMethods.indexOf(paymentMethod);
+  const paymentMethodLocation = this._paymentMethods.indexOf(paymentMethod);
 
   if (paymentMethodLocation === -1) {
     return;
@@ -131,7 +131,7 @@ DropinModel.prototype.removeUnvaultedPaymentMethods = function (filter) {
 };
 
 DropinModel.prototype.refreshPaymentMethods = function () {
-  var self = this;
+  const self = this;
 
   return self.getVaultedPaymentMethods().then(function (paymentMethods) {
     self._paymentMethods = paymentMethods;
@@ -185,9 +185,9 @@ DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {
 };
 
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
-  var requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
-  var nonce = options.selectedPaymentMethod && options.selectedPaymentMethod.nonce;
-  var nonceHasNotChanged = nonce === this._paymentMethodRequestableNonce;
+  const requestableStateHasNotChanged = this.isPaymentMethodRequestable() === options.isRequestable;
+  const nonce = options.selectedPaymentMethod && options.selectedPaymentMethod.nonce;
+  const nonceHasNotChanged = nonce === this._paymentMethodRequestableNonce;
 
   if (!this._setupComplete) {
     // don't emit event until after Drop-in is fully set up
@@ -205,8 +205,8 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
 };
 
 DropinModel.prototype.setPaymentMethodRequestable = function (options) {
-  var shouldEmitEvent = this._shouldEmitRequestableEvent(options);
-  var paymentMethodRequestableResponse = {
+  const shouldEmitEvent = this._shouldEmitRequestableEvent(options);
+  const paymentMethodRequestableResponse = {
     paymentMethodIsSelected: Boolean(options.selectedPaymentMethod),
     type: options.type
   };
@@ -303,7 +303,7 @@ DropinModel.prototype.allowUserAction = function () {
 };
 
 DropinModel.prototype.deleteVaultedPaymentMethod = function () {
-  var self = this;
+  const self = this;
   var promise = Promise.resolve();
   var error;
 
@@ -332,7 +332,7 @@ DropinModel.prototype.cancelDeleteVaultedPaymentMethod = function () {
 };
 
 DropinModel.prototype.getVaultedPaymentMethods = function () {
-  var self = this;
+  const self = this;
 
   if (!self.vaultManagerConfig.presentVaultedPaymentMethods) {
     return Promise.resolve([]);
@@ -352,8 +352,8 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
 };
 
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
-  var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
-    var paymentMethodType = paymentMethodTypes[key];
+  const supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
+    const paymentMethodType = paymentMethodTypes[key];
 
     if (canShowVaultedPaymentMethodType(paymentMethodType)) {
       array.push(paymentMethodType);
@@ -405,7 +405,7 @@ function getPaymentOption(paymentOption, options) {
 }
 
 function isPaymentOptionEnabled(paymentOption, options) {
-  var SheetView = paymentSheetViews[paymentOptionIDs[paymentOption]];
+  const SheetView = paymentSheetViews[paymentOptionIDs[paymentOption]];
 
   if (!SheetView) {
     return Promise.reject(new DropinError('paymentOptionPriority: Invalid payment option specified.'));

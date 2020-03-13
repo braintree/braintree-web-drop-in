@@ -1,12 +1,12 @@
 'use strict';
 
-var analytics = require('../lib/analytics');
-var addSelectionEventHandler = require('../lib/add-selection-event-handler');
-var BaseView = require('./base-view');
-var fs = require('fs');
-var paymentOptionIDs = require('../constants').paymentOptionIDs;
+const analytics = require('../lib/analytics');
+const addSelectionEventHandler = require('../lib/add-selection-event-handler');
+const BaseView = require('./base-view');
+const fs = require('fs');
+const paymentOptionIDs = require('../constants').paymentOptionIDs;
 
-var paymentMethodOptionHTML = fs.readFileSync(__dirname + '/../html/payment-option.html', 'utf8');
+const paymentMethodOptionHTML = fs.readFileSync(__dirname + '/../html/payment-option.html', 'utf8');
 
 function PaymentOptionsView() {
   BaseView.apply(this, arguments);
@@ -29,9 +29,9 @@ PaymentOptionsView.prototype._initialize = function () {
 
 PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
   var paymentSource;
-  var div = document.createElement('div');
+  const div = document.createElement('div');
   var html = paymentMethodOptionHTML;
-  var clickHandler = function clickHandler() {
+  const clickHandler = function clickHandler() {
     this.mainView.setPrimaryView(paymentOptionID);
     this.model.selectPaymentOption(paymentOptionID);
     analytics.sendEvent('selected.' + paymentOptionIDs[paymentOptionID]);

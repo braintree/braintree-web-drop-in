@@ -103,14 +103,14 @@
  * </form>
  */
 
-var Dropin = require('./dropin');
-var createFromScriptTag = require('./lib/create-from-script-tag');
-var analytics = require('./lib/analytics');
-var DropinError = require('./lib/dropin-error');
-var Promise = require('./lib/promise');
-var wrapPromise = require('@braintree/wrap-promise');
+const Dropin = require('./dropin');
+const createFromScriptTag = require('./lib/create-from-script-tag');
+const analytics = require('./lib/analytics');
+const DropinError = require('./lib/dropin-error');
+const Promise = require('./lib/promise');
+const wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = '__VERSION__';
+const VERSION = '__VERSION__';
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.

@@ -1,9 +1,9 @@
 'use strict';
 
-var assign = require('./assign').assign;
-var threeDSecure = require('braintree-web/three-d-secure');
+const assign = require('./assign').assign;
+const threeDSecure = require('braintree-web/three-d-secure');
 
-var DEFAULT_ACS_WINDOW_SIZE = '03';
+const DEFAULT_ACS_WINDOW_SIZE = '03';
 
 function ThreeDSecure(authorization, merchantConfiguration) {
   this._authorization = authorization;
@@ -11,7 +11,7 @@ function ThreeDSecure(authorization, merchantConfiguration) {
 }
 
 ThreeDSecure.prototype.initialize = function () {
-  var self = this;
+  const self = this;
 
   return threeDSecure.create({
     authorization: this._authorization,
@@ -22,7 +22,7 @@ ThreeDSecure.prototype.initialize = function () {
 };
 
 ThreeDSecure.prototype.verify = function (payload, merchantProvidedData) {
-  var verifyOptions = assign({
+  const verifyOptions = assign({
     amount: this._config.amount
   }, merchantProvidedData, {
     nonce: payload.nonce,

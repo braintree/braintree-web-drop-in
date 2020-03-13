@@ -1,14 +1,14 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
-var BaseView = require('../base-view');
-var btApplePay = require('braintree-web/apple-pay');
-var DropinError = require('../../lib/dropin-error');
-var isHTTPS = require('../../lib/is-https');
-var Promise = require('../../lib/promise');
-var paymentOptionIDs = require('../../constants').paymentOptionIDs;
+const assign = require('../../lib/assign').assign;
+const BaseView = require('../base-view');
+const btApplePay = require('braintree-web/apple-pay');
+const DropinError = require('../../lib/dropin-error');
+const isHTTPS = require('../../lib/is-https');
+const Promise = require('../../lib/promise');
+const paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
-var DEFAULT_APPLE_PAY_SESSION_VERSION = 2;
+const DEFAULT_APPLE_PAY_SESSION_VERSION = 2;
 
 function ApplePayView() {
   BaseView.apply(this, arguments);
@@ -19,8 +19,8 @@ ApplePayView.prototype.constructor = ApplePayView;
 ApplePayView.ID = ApplePayView.prototype.ID = paymentOptionIDs.applePay;
 
 ApplePayView.prototype.initialize = function () {
-  var self = this;
-  var isProduction = this.model.environment === 'production';
+  const self = this;
+  const isProduction = this.model.environment === 'production';
 
   self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
   self.applePaySessionVersion = self.applePayConfiguration.applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;
@@ -33,7 +33,7 @@ ApplePayView.prototype.initialize = function () {
     authorization: this.model.authorization,
     useDeferredClient: true
   }).then(function (applePayInstance) {
-    var buttonDiv = self.getElementById('apple-pay-button');
+    const buttonDiv = self.getElementById('apple-pay-button');
 
     self.applePayInstance = applePayInstance;
 
@@ -67,9 +67,9 @@ ApplePayView.prototype.initialize = function () {
 };
 
 ApplePayView.prototype._showPaymentSheet = function () {
-  var self = this;
-  var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
-  var session = new global.ApplePaySession(self.applePaySessionVersion, request);
+  const self = this;
+  const request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
+  const session = new global.ApplePaySession(self.applePaySessionVersion, request);
 
   session.onvalidatemerchant = function (event) {
     self.applePayInstance.performValidation({
@@ -106,7 +106,7 @@ ApplePayView.prototype.updateConfiguration = function (key, value) {
 };
 
 ApplePayView.isEnabled = function (options) {
-  var applePayEnabled = Boolean(options.merchantConfiguration.applePay);
+  const applePayEnabled = Boolean(options.merchantConfiguration.applePay);
   var applePaySessionVersion = options.merchantConfiguration.applePay && options.merchantConfiguration.applePay.applePaySessionVersion;
   var applePayBrowserSupported;
 

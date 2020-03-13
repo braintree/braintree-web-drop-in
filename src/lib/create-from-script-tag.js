@@ -1,11 +1,11 @@
 'use strict';
 
-var analytics = require('./analytics');
-var find = require('./find-parent-form');
-var uuid = require('./uuid');
-var DropinError = require('./dropin-error');
-var kebabCaseToCamelCase = require('./kebab-case-to-camel-case');
-var ALLOWLISTED_DATA_ATTRIBUTES = [
+const analytics = require('./analytics');
+const find = require('./find-parent-form');
+const uuid = require('./uuid');
+const DropinError = require('./dropin-error');
+const kebabCaseToCamelCase = require('./kebab-case-to-camel-case');
+const ALLOWLISTED_DATA_ATTRIBUTES = [
   'locale',
   'payment-option-priority',
 
@@ -45,8 +45,8 @@ function injectHiddenInput(name, value, form) {
 }
 
 function addCompositeKeyValuePairToObject(obj, key, value) {
-  var decomposedKeys = key.split('.');
-  var topLevelKey = kebabCaseToCamelCase(decomposedKeys[0]);
+  const decomposedKeys = key.split('.');
+  const topLevelKey = kebabCaseToCamelCase(decomposedKeys[0]);
 
   if (decomposedKeys.length === 1) {
     obj[topLevelKey] = deserialize(value);
@@ -98,7 +98,7 @@ function createFromScriptTag(createFunction, scriptTag) {
   };
 
   ALLOWLISTED_DATA_ATTRIBUTES.forEach(function (compositeKey) {
-    var value = scriptTag.getAttribute('data-' + compositeKey);
+    const value = scriptTag.getAttribute('data-' + compositeKey);
 
     if (value == null) {
       return;

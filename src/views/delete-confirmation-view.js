@@ -1,8 +1,8 @@
 'use strict';
 
-var BaseView = require('./base-view');
-var addSelectionEventHandler = require('../lib/add-selection-event-handler');
-var paymentMethodTypes = require('../constants').paymentMethodTypes;
+const BaseView = require('./base-view');
+const addSelectionEventHandler = require('../lib/add-selection-event-handler');
+const paymentMethodTypes = require('../constants').paymentMethodTypes;
 
 function DeleteConfirmationView() {
   BaseView.apply(this, arguments);

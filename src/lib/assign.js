@@ -1,6 +1,6 @@
 'use strict';
 
-var assignNormalized = typeof Object.assign === 'function' ? Object.assign : assignPolyfill;
+const assignNormalized = typeof Object.assign === 'function' ? Object.assign : assignPolyfill;
 
 function assignPolyfill(destination) {
   var i, source, key;

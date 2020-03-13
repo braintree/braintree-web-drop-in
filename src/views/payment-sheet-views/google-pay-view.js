@@ -1,13 +1,13 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
-var BaseView = require('../base-view');
-var btGooglePay = require('braintree-web/google-payment');
-var DropinError = require('../../lib/dropin-error');
-var constants = require('../../constants');
-var assets = require('@braintree/asset-loader');
-var Promise = require('../../lib/promise');
-var analytics = require('../../lib/analytics');
+const assign = require('../../lib/assign').assign;
+const BaseView = require('../base-view');
+const btGooglePay = require('braintree-web/google-payment');
+const DropinError = require('../../lib/dropin-error');
+const constants = require('../../constants');
+const assets = require('@braintree/asset-loader');
+const Promise = require('../../lib/promise');
+const analytics = require('../../lib/analytics');
 
 function GooglePayView() {
   BaseView.apply(this, arguments);
@@ -18,7 +18,7 @@ GooglePayView.prototype.constructor = GooglePayView;
 GooglePayView.ID = GooglePayView.prototype.ID = constants.paymentOptionIDs.googlePay;
 
 GooglePayView.prototype.initialize = function () {
-  var self = this;
+  const self = this;
   var buttonOptions, googlePayVersion, merchantId;
 
   self.googlePayConfiguration = assign({}, self.model.merchantConfiguration.googlePay);
@@ -53,7 +53,7 @@ GooglePayView.prototype.initialize = function () {
     self.googlePayInstance = googlePayInstance;
     self.paymentsClient = createPaymentsClient(self.model.environment);
   }).then(function () {
-    var buttonContainer = self.getElementById('google-pay-button');
+    const buttonContainer = self.getElementById('google-pay-button');
 
     buttonContainer.appendChild(self.paymentsClient.createButton(buttonOptions));
 
@@ -67,8 +67,8 @@ GooglePayView.prototype.initialize = function () {
 };
 
 GooglePayView.prototype.tokenize = function () {
-  var self = this;
-  var paymentDataRequest = self.googlePayInstance.createPaymentDataRequest(self.googlePayConfiguration);
+  const self = this;
+  const paymentDataRequest = self.googlePayInstance.createPaymentDataRequest(self.googlePayConfiguration);
   var rawPaymentData;
 
   return self.paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
@@ -115,7 +115,7 @@ GooglePayView.isEnabled = function (options) {
 
     return Promise.resolve();
   }).then(function () {
-    var paymentsClient = createPaymentsClient(options.environment);
+    const paymentsClient = createPaymentsClient(options.environment);
 
     return paymentsClient.isReadyToPay({
       allowedPaymentMethods: ['CARD', 'TOKENIZED_CARD']

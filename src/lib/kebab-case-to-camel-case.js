@@ -1,9 +1,9 @@
 'use strict';
 
 function kebabCaseToCamelCase(kebab) {
-  var parts = kebab.split('-');
-  var first = parts.shift();
-  var capitalizedParts = parts.map(function (part) {
+  const parts = kebab.split('-');
+  const first = parts.shift();
+  const capitalizedParts = parts.map(function (part) {
     return part.charAt(0).toUpperCase() + part.substring(1);
   });
 

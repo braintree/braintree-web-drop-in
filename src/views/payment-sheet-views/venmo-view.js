@@ -1,11 +1,11 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
-var BaseView = require('../base-view');
-var btVenmo = require('braintree-web/venmo');
-var DropinError = require('../../lib/dropin-error');
-var Promise = require('../../lib/promise');
-var paymentOptionIDs = require('../../constants').paymentOptionIDs;
+const assign = require('../../lib/assign').assign;
+const BaseView = require('../base-view');
+const btVenmo = require('braintree-web/venmo');
+const DropinError = require('../../lib/dropin-error');
+const Promise = require('../../lib/promise');
+const paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
 function VenmoView() {
   BaseView.apply(this, arguments);
@@ -16,8 +16,8 @@ VenmoView.prototype.constructor = VenmoView;
 VenmoView.ID = VenmoView.prototype.ID = paymentOptionIDs.venmo;
 
 VenmoView.prototype.initialize = function () {
-  var self = this;
-  var venmoConfiguration = assign({}, self.model.merchantConfiguration.venmo, {
+  const self = this;
+  const venmoConfiguration = assign({}, self.model.merchantConfiguration.venmo, {
     authorization: this.model.authorization
   });
 
@@ -39,7 +39,7 @@ VenmoView.prototype.initialize = function () {
       self.model.reportAppSwitchError(paymentOptionIDs.venmo, err);
     });
   }).then(function () {
-    var button = self.getElementById('venmo-button');
+    const button = self.getElementById('venmo-button');
 
     button.addEventListener('click', function (event) {
       event.preventDefault();
@@ -76,7 +76,7 @@ VenmoView.prototype._isIgnorableError = function (error) {
 };
 
 VenmoView.isEnabled = function (options) {
-  var venmoEnabled = Boolean(options.merchantConfiguration.venmo);
+  const venmoEnabled = Boolean(options.merchantConfiguration.venmo);
 
   if (!venmoEnabled) {
     return Promise.resolve(false);

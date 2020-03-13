@@ -1,8 +1,8 @@
 'use strict';
 
-var paymentOptionIDs = require('../../constants').paymentOptionIDs;
+const paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
-var result = {};
+const result = {};
 
 result[paymentOptionIDs.applePay] = require('./apple-pay-view');
 result[paymentOptionIDs.card] = require('./card-view');

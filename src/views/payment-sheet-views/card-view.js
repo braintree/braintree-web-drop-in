@@ -1,17 +1,17 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
-var fs = require('fs');
-var BaseView = require('../base-view');
-var classList = require('@braintree/class-list');
-var constants = require('../../constants');
-var DropinError = require('../../lib/dropin-error');
-var hostedFields = require('braintree-web/hosted-fields');
-var isUtf8 = require('../../lib/is-utf-8');
-var transitionHelper = require('../../lib/transition-helper');
-var Promise = require('../../lib/promise');
+const assign = require('../../lib/assign').assign;
+const fs = require('fs');
+const BaseView = require('../base-view');
+const classList = require('@braintree/class-list');
+const constants = require('../../constants');
+const DropinError = require('../../lib/dropin-error');
+const hostedFields = require('braintree-web/hosted-fields');
+const isUtf8 = require('../../lib/is-utf-8');
+const transitionHelper = require('../../lib/transition-helper');
+const Promise = require('../../lib/promise');
 
-var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
+const cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
 function CardView() {
   BaseView.apply(this, arguments);
@@ -23,8 +23,8 @@ CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 
 CardView.prototype.initialize = function () {
   var cvvFieldGroup, postalCodeFieldGroup, hfOptions;
-  var cardholderNameField = this.getElementById('cardholder-name-field-group');
-  var cardIcons = this.getElementById('card-view-icons');
+  const cardholderNameField = this.getElementById('cardholder-name-field-group');
+  const cardIcons = this.getElementById('card-view-icons');
 
   this.merchantConfiguration = this.model.merchantConfiguration.card || {};
   this.merchantConfiguration.vault = this.merchantConfiguration.vault || {};
@@ -108,14 +108,14 @@ CardView.prototype.initialize = function () {
 };
 
 CardView.prototype._setupExtraInput = function (extraInput) {
-  var self = this;
-  var fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
-  var field = this.getElementById(fieldNameKebab + '-field-group');
-  var input = field.querySelector('input');
-  var nameContainer = field.querySelector('.braintree-form__hosted-field');
+  const self = this;
+  const fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
+  const field = this.getElementById(fieldNameKebab + '-field-group');
+  const input = field.querySelector('input');
+  const nameContainer = field.querySelector('.braintree-form__hosted-field');
 
   input.addEventListener('keyup', function () {
-    var valid = self._validateExtraInput(extraInput, true);
+    const valid = self._validateExtraInput(extraInput, true);
 
     classList.toggle(nameContainer, 'braintree-form__field--valid', valid);
 
@@ -141,7 +141,7 @@ CardView.prototype._setupExtraInput = function (extraInput) {
 };
 
 CardView.prototype._removeExtraInput = function (extraInput) {
-  var field = this.getElementById(camelCaseToKebabCase(extraInput.fieldName) + '-field-group');
+  const field = this.getElementById(camelCaseToKebabCase(extraInput.fieldName) + '-field-group');
 
   field.parentNode.removeChild(field);
 };
@@ -156,10 +156,10 @@ CardView.prototype._sendRequestableEvent = function () {
 };
 
 CardView.prototype._generateHostedFieldsOptions = function () {
-  var shouldNotCollectCVV = this.merchantConfiguration.cvv && this.merchantConfiguration.cvv.collect === false;
-  var shouldNotCollectPostalCode = !(this.merchantConfiguration.postalCode && this.merchantConfiguration.postalCode.collect === true);
-  var overrides = this.merchantConfiguration.overrides;
-  var options = {
+  const shouldNotCollectCVV = this.merchantConfiguration.cvv && this.merchantConfiguration.cvv.collect === false;
+  const shouldNotCollectPostalCode = !(this.merchantConfiguration.postalCode && this.merchantConfiguration.postalCode.collect === true);
+  const overrides = this.merchantConfiguration.overrides;
+  const options = {
     authorization: this.model.authorization,
     fields: {
       number: {
@@ -274,7 +274,7 @@ CardView.prototype._validateForm = function (showFieldErrors) {
   state = this.hostedFieldsInstance.getState();
 
   Object.keys(state.fields).forEach(function (key) {
-    var field = state.fields[key];
+    const field = state.fields[key];
 
     if (!showFieldErrors && !isValid) {
       // return early if form is already invalid
@@ -323,9 +323,9 @@ CardView.prototype._validateForm = function (showFieldErrors) {
 };
 
 CardView.prototype._validateExtraInput = function (extraInput, showFieldError) {
-  var fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
-  var field = this.getElementById(fieldNameKebab + '-field-group');
-  var input = field.querySelector('input');
+  const fieldNameKebab = camelCaseToKebabCase(extraInput.fieldName);
+  const field = this.getElementById(fieldNameKebab + '-field-group');
+  const input = field.querySelector('input');
   var valid = true;
 
   if (extraInput.required) {
@@ -337,7 +337,7 @@ CardView.prototype._validateExtraInput = function (extraInput, showFieldError) {
   }
 
   extraInput.validations.forEach(function (validation) {
-    var validationPassed = validation.isValid(input.value);
+    const validationPassed = validation.isValid(input.value);
 
     if (!validationPassed && showFieldError) {
       this.showFieldError(extraInput.fieldName, validation.error);
@@ -350,7 +350,7 @@ CardView.prototype._validateExtraInput = function (extraInput, showFieldError) {
 };
 
 CardView.prototype.getPaymentMethod = function () { // eslint-disable-line consistent-return
-  var formIsValid = this._validateForm();
+  const formIsValid = this._validateForm();
 
   if (formIsValid) {
     return {
@@ -361,9 +361,9 @@ CardView.prototype.getPaymentMethod = function () { // eslint-disable-line consi
 
 CardView.prototype.tokenize = function () {
   var transitionCallback;
-  var self = this;
-  var state = self.hostedFieldsInstance.getState();
-  var tokenizeOptions = {
+  const self = this;
+  const state = self.hostedFieldsInstance.getState();
+  const tokenizeOptions = {
     vault: this._shouldVault()
   };
 
@@ -383,7 +383,7 @@ CardView.prototype.tokenize = function () {
   self._isTokenizing = true;
 
   return self.hostedFieldsInstance.tokenize(tokenizeOptions).then(function (payload) {
-    var retainCardFields = self.merchantConfiguration.clearFieldsAfterTokenization === false;
+    const retainCardFields = self.merchantConfiguration.clearFieldsAfterTokenization === false;
 
     if (!retainCardFields) {
       Object.keys(state.fields).forEach(function (field) {
@@ -437,8 +437,8 @@ CardView.prototype.tokenize = function () {
 
 CardView.prototype.showFieldError = function (field, errorMessage) {
   var fieldError;
-  var fieldGroup = this.getElementById(camelCaseToKebabCase(field) + '-field-group');
-  var input = fieldGroup.querySelector('input');
+  const fieldGroup = this.getElementById(camelCaseToKebabCase(field) + '-field-group');
+  const input = fieldGroup.querySelector('input');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToKebabCase(field) + '-field-error');
@@ -465,8 +465,8 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
 };
 
 CardView.prototype.hideFieldError = function (field) {
-  var fieldGroup = this.getElementById(camelCaseToKebabCase(field) + '-field-group');
-  var input = fieldGroup.querySelector('input');
+  const fieldGroup = this.getElementById(camelCaseToKebabCase(field) + '-field-group');
+  const input = fieldGroup.querySelector('input');
 
   if (!this.fieldErrors.hasOwnProperty(field)) {
     this.fieldErrors[field] = this.getElementById(camelCaseToKebabCase(field) + '-field-error');
@@ -505,8 +505,8 @@ CardView.prototype._generateFieldSelector = function (field) {
 };
 
 CardView.prototype._onBlurEvent = function (event) {
-  var field = event.fields[event.emittedBy];
-  var fieldGroup = this.getElementById(camelCaseToKebabCase(event.emittedBy) + '-field-group');
+  const field = event.fields[event.emittedBy];
+  const fieldGroup = this.getElementById(camelCaseToKebabCase(event.emittedBy) + '-field-group');
 
   classList.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
@@ -536,7 +536,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   var cvvHrefLink = '#iconCVVBack';
   var cvvDescriptor = this.strings.cvvThreeDigitLabelSubheading;
   var cvvPlaceholder = addBullets(3);
-  var numberFieldGroup = this.getElementById('number-field-group');
+  const numberFieldGroup = this.getElementById('number-field-group');
 
   if (event.cards.length === 1) {
     cardType = event.cards[0].type;
@@ -569,7 +569,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 };
 
 CardView.prototype._onFocusEvent = function (event) {
-  var fieldGroup = this.getElementById(camelCaseToKebabCase(event.emittedBy) + '-field-group');
+  const fieldGroup = this.getElementById(camelCaseToKebabCase(event.emittedBy) + '-field-group');
 
   classList.add(fieldGroup, 'braintree-form__field-group--is-focused');
 };
@@ -579,8 +579,8 @@ CardView.prototype._onNotEmptyEvent = function (event) {
 };
 
 CardView.prototype._onValidityChangeEvent = function (event) {
-  var field = event.fields[event.emittedBy];
-  var isValid = field.isValid;
+  const field = event.fields[event.emittedBy];
+  const isValid = field.isValid;
 
   classList.toggle(field.container, 'braintree-form__field--valid', isValid);
 
@@ -612,12 +612,12 @@ CardView.prototype.onSelection = function () {
 };
 
 CardView.prototype._showSupportedCardIcons = function () {
-  var self = this;
+  const self = this;
 
   this.hostedFieldsInstance.getSupportedCardTypes().then(function (supportedCardTypes) {
     Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
       var cardIcon;
-      var configurationKey = constants.configurationCardTypes[paymentMethodCardType];
+      const configurationKey = constants.configurationCardTypes[paymentMethodCardType];
 
       if (supportedCardTypes.indexOf(paymentMethodCardType) > -1) {
         cardIcon = self.getElementById(configurationKey + '-card-icon');
@@ -628,7 +628,7 @@ CardView.prototype._showSupportedCardIcons = function () {
 };
 
 CardView.isEnabled = function (options) {
-  var disabledByMerchant = options.merchantConfiguration.card === false;
+  const disabledByMerchant = options.merchantConfiguration.card === false;
 
   return Promise.resolve(!disabledByMerchant);
 };
@@ -642,8 +642,8 @@ function shouldApplyFieldEmptyError(field) {
 }
 
 function isCardViewElement() {
-  var activeId = document.activeElement && document.activeElement.id;
-  var isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
+  const activeId = document.activeElement && document.activeElement.id;
+  const isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
 
   return isHostedFieldsElement || isNormalFieldElement(document.activeElement);
 }
@@ -658,20 +658,20 @@ function capitalize(string) {
 
 function normalizeStyles(styles) {
   Object.keys(styles).forEach(function (style) {
-    var transformedKeyName = camelCaseToKebabCase(style);
+    const transformedKeyName = camelCaseToKebabCase(style);
 
     styles[transformedKeyName] = styles[style];
   });
 }
 
 function addBullets(number) {
-  var bulletCharacter = isUtf8() ? '•' : '*';
+  const bulletCharacter = isUtf8() ? '•' : '*';
 
   return Array(number + 1).join(bulletCharacter);
 }
 
 function generateCardNumberPlaceholder() {
-  var four = addBullets(4);
+  const four = addBullets(4);
 
   return [four, four, four, four].join(' ');
 }

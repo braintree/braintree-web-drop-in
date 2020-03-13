@@ -83,6 +83,7 @@
   },
   "browserslist": [
     "last 2 versions",
-    "iOS 8"
+    "iOS 8",
+    "IE 11"
   ]
 }

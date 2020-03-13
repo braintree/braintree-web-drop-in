@@ -1,6 +1,6 @@
 'use strict';
 
-var authorizationTypes = require('../constants').authorizationTypes;
+const authorizationTypes = require('../constants').authorizationTypes;
 
 function _isTokenizationKey(str) {
   return /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_[a-zA-Z0-9_]+$/.test(str);

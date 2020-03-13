@@ -1,19 +1,19 @@
 'use strict';
 
-var analytics = require('../lib/analytics');
-var analyticsKinds = require('../constants').analyticsKinds;
-var BaseView = require('./base-view');
-var classList = require('@braintree/class-list');
-var sheetViews = require('./payment-sheet-views');
-var PaymentMethodsView = require('./payment-methods-view');
-var PaymentOptionsView = require('./payment-options-view');
-var DeleteConfirmationView = require('./delete-confirmation-view');
-var addSelectionEventHandler = require('../lib/add-selection-event-handler');
-var Promise = require('../lib/promise');
-var wait = require('../lib/wait');
+const analytics = require('../lib/analytics');
+const analyticsKinds = require('../constants').analyticsKinds;
+const BaseView = require('./base-view');
+const classList = require('@braintree/class-list');
+const sheetViews = require('./payment-sheet-views');
+const PaymentMethodsView = require('./payment-methods-view');
+const PaymentOptionsView = require('./payment-options-view');
+const DeleteConfirmationView = require('./delete-confirmation-view');
+const addSelectionEventHandler = require('../lib/add-selection-event-handler');
+const Promise = require('../lib/promise');
+const wait = require('../lib/wait');
 
-var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
-var DEVELOPER_MISCONFIGURATION_MESSAGE = require('../constants').errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
+const CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+const DEVELOPER_MISCONFIGURATION_MESSAGE = require('../constants').errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
 
 function MainView() {
   BaseView.apply(this, arguments);
@@ -96,7 +96,7 @@ MainView.prototype._initialize = function () {
   this.model.on('changeActivePaymentView', this._onChangeActivePaymentMethodView.bind(this));
 
   this.model.on('removeActivePaymentMethod', function () {
-    var activePaymentView = this.getView(this.model.getActivePaymentView());
+    const activePaymentView = this.getView(this.model.getActivePaymentView());
 
     if (activePaymentView && typeof activePaymentView.removeActivePaymentMethod === 'function') {
       activePaymentView.removeActivePaymentMethod();
@@ -127,7 +127,7 @@ MainView.prototype._initialize = function () {
 };
 
 MainView.prototype._onChangeActivePaymentMethodView = function (id) {
-  var activePaymentView = this.getView(id);
+  const activePaymentView = this.getView(id);
 
   if (id === PaymentMethodsView.ID) {
     classList.add(this.paymentMethodsViews.container, 'braintree-methods--active');
@@ -194,7 +194,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
 };
 
 MainView.prototype.requestPaymentMethod = function () {
-  var activePaymentView = this.getView(this.model.getActivePaymentView());
+  const activePaymentView = this.getView(this.model.getActivePaymentView());
 
   return activePaymentView.requestPaymentMethod().then(function (payload) {
     analytics.sendEvent('request-payment-method.' + analyticsKinds[payload.type]);
@@ -221,7 +221,7 @@ MainView.prototype.showLoadingIndicator = function () {
 
 MainView.prototype.toggleAdditionalOptions = function () {
   var sheetViewID;
-  var isPaymentSheetView = this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1;
+  const isPaymentSheetView = this.paymentSheetViewIDs.indexOf(this.primaryView.ID) !== -1;
 
   this.hideToggle();
 
@@ -257,7 +257,7 @@ MainView.prototype.hideToggle = function () {
 
 MainView.prototype.showSheetError = function (error) {
   var errorMessage;
-  var genericErrorMessage = this.strings.genericError;
+  const genericErrorMessage = this.strings.genericError;
 
   if (this.strings.hasOwnProperty(error)) {
     errorMessage = this.strings[error];
@@ -291,8 +291,8 @@ MainView.prototype.allowUserAction = function () {
 
 MainView.prototype.teardown = function () {
   var error;
-  var viewNames = Object.keys(this._views);
-  var teardownPromises = viewNames.map(function (view) {
+  const viewNames = Object.keys(this._views);
+  const teardownPromises = viewNames.map(function (view) {
     return this._views[view].teardown().catch(function (err) {
       error = err;
     });
@@ -348,7 +348,7 @@ MainView.prototype.startVaultedPaymentMethodDeletion = function () {
 };
 
 MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
-  var self = this;
+  const self = this;
 
   this.paymentMethodsViews.refreshPaymentMethods();
 
@@ -369,9 +369,9 @@ MainView.prototype.finishVaultedPaymentMethodDeletion = function (error) {
 };
 
 MainView.prototype._sendToDefaultView = function () {
-  var paymentMethods = this.model.getPaymentMethods();
-  var vaultManagerConfig = this.model.vaultManagerConfig;
-  var preselectVaultedPaymentMethod = vaultManagerConfig.preselectVaultedPaymentMethod !== false;
+  const paymentMethods = this.model.getPaymentMethods();
+  const vaultManagerConfig = this.model.vaultManagerConfig;
+  const preselectVaultedPaymentMethod = vaultManagerConfig.preselectVaultedPaymentMethod !== false;
 
   if (paymentMethods.length > 0) {
     if (preselectVaultedPaymentMethod) {

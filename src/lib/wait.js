@@ -1,6 +1,6 @@
 'use strict';
 
-var Promise = require('./promise');
+const Promise = require('./promise');
 
 function delay(time) {
   time = time || 0;

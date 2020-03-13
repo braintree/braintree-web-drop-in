@@ -1,11 +1,11 @@
 'use strict';
 
-var braintreeWebVersion = require('braintree-web/client').VERSION;
-var assign = require('./assign').assign;
-var constants = require('../constants');
-var analytics = require('./analytics');
-var assets = require('@braintree/asset-loader');
-var Promise = require('./promise');
+const braintreeWebVersion = require('braintree-web/client').VERSION;
+const assign = require('./assign').assign;
+const constants = require('../constants');
+const analytics = require('./analytics');
+const assets = require('@braintree/asset-loader');
+const Promise = require('./promise');
 
 function DataCollector(config) {
   this._config = assign(config, {
@@ -14,7 +14,7 @@ function DataCollector(config) {
 }
 
 DataCollector.prototype.initialize = function () {
-  var self = this;
+  const self = this;
 
   return Promise.resolve().then(function () {
     if (global.braintree && global.braintree.dataCollector) {
