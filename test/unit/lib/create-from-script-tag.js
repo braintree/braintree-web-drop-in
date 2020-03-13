@@ -175,41 +175,41 @@ describe('createFromScriptTag', () => {
   });
 
   it('adds payment method nonce to form and submits form if payment method is requestable', done => {
-      createFromScriptTag(testContext.createFunction, testContext.scriptTag);
+    createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(() => {
-        const submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
+    setTimeout(() => {
+      const submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
 
-        submitHandler();
+      submitHandler();
 
-        const input = testContext.fakeForm.appendChild.mock.calls[0][0];
+      const input = testContext.fakeForm.appendChild.mock.calls[0][0];
 
-        expect(testContext.fakeForm.appendChild).toBeCalledTimes(1);
-        expect(testContext.fakeForm.appendChild).toBeCalledWith(input);
-        expect(input.type).toBe('hidden');
-        expect(input.name).toBe('payment_method_nonce');
-        expect(input.value).toBe('a-nonce');
-        expect(testContext.fakeForm.submit).toBeCalledTimes(1);
-        done();
-      });
+      expect(testContext.fakeForm.appendChild).toBeCalledTimes(1);
+      expect(testContext.fakeForm.appendChild).toBeCalledWith(input);
+      expect(input.type).toBe('hidden');
+      expect(input.name).toBe('payment_method_nonce');
+      expect(input.value).toBe('a-nonce');
+      expect(testContext.fakeForm.submit).toBeCalledTimes(1);
+      done();
     });
+  });
 
   it('does not add nonce and submit form if requestPaymentMethod fails', done => {
-      let submitHandler;
+    let submitHandler;
 
-      testContext.instance.requestPaymentMethod.mockImplementation(yields(new Error('failure')));
-      jest.spyOn(document, 'createElement');
-      createFromScriptTag(testContext.createFunction, testContext.scriptTag);
+    testContext.instance.requestPaymentMethod.mockImplementation(yields(new Error('failure')));
+    jest.spyOn(document, 'createElement');
+    createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(() => {
-        submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
-        submitHandler();
+    setTimeout(() => {
+      submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
+      submitHandler();
 
-        expect(document.createElement).not.toBeCalledWith('input');
-        expect(testContext.fakeForm.submit).not.toBeCalled();
-        done();
-      });
+      expect(document.createElement).not.toBeCalledWith('input');
+      expect(testContext.fakeForm.submit).not.toBeCalled();
+      done();
     });
+  });
 
   it('uses existing payment_method_nonce input if it already exists', done => {
     let submitHandler;
@@ -233,28 +233,28 @@ describe('createFromScriptTag', () => {
   });
 
   it('adds device data to form and submits form if request payment method contains device data', done => {
-      let submitHandler;
+    let submitHandler;
 
-      testContext.instance.requestPaymentMethod.mockImplementation(yields(null, {
-        nonce: 'a-nonce',
-        deviceData: 'some-data'
-      }));
-      createFromScriptTag(testContext.createFunction, testContext.scriptTag);
+    testContext.instance.requestPaymentMethod.mockImplementation(yields(null, {
+      nonce: 'a-nonce',
+      deviceData: 'some-data'
+    }));
+    createFromScriptTag(testContext.createFunction, testContext.scriptTag);
 
-      setTimeout(() => {
-        submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
-        submitHandler();
+    setTimeout(() => {
+      submitHandler = testContext.fakeForm.addEventListener.mock.calls[1][1];
+      submitHandler();
 
-        const deviceDataInput = testContext.fakeForm.appendChild.mock.calls[1][0];
+      const deviceDataInput = testContext.fakeForm.appendChild.mock.calls[1][0];
 
-        expect(testContext.fakeForm.appendChild).toBeCalledTimes(2);
-        expect(deviceDataInput.type).toBe('hidden');
-        expect(deviceDataInput.name).toBe('device_data');
-        expect(deviceDataInput.value).toBe('some-data');
-        expect(testContext.fakeForm.submit).toBeCalledTimes(1);
-        done();
-      });
+      expect(testContext.fakeForm.appendChild).toBeCalledTimes(2);
+      expect(deviceDataInput.type).toBe('hidden');
+      expect(deviceDataInput.name).toBe('device_data');
+      expect(deviceDataInput.value).toBe('some-data');
+      expect(testContext.fakeForm.submit).toBeCalledTimes(1);
+      done();
     });
+  });
 
   it('uses existing device_data input if it already exists', done => {
     let submitHandler;

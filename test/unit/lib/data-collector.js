@@ -115,12 +115,12 @@ describe('DataCollector', () => {
 
   describe('getDeviceData', () => {
     it('resolves with empty string when data collector instance is not avaialble', async () => {
-        const dc = new DataCollector({});
+      const dc = new DataCollector({});
 
-        const data = await dc.getDeviceData();
+      const data = await dc.getDeviceData();
 
-        expect(data).toBe('');
-      });
+      expect(data).toBe('');
+    });
 
     it('resolves device data', async () => {
       const dc = new DataCollector({});

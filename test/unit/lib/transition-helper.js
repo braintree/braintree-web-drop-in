@@ -28,32 +28,32 @@ describe('onTransitionEnd', () => {
   });
 
   it('immediately calls callback when a parent element has display: none', done => {
-      const topLevelElement = document.createElement('div');
-      const middleElement = document.createElement('div');
-      const element = document.createElement('div');
+    const topLevelElement = document.createElement('div');
+    const middleElement = document.createElement('div');
+    const element = document.createElement('div');
 
-      topLevelElement.style.display = 'none';
-      middleElement.appendChild(element);
-      topLevelElement.appendChild(middleElement);
+    topLevelElement.style.display = 'none';
+    middleElement.appendChild(element);
+    topLevelElement.appendChild(middleElement);
 
-      onTransitionEnd(element, testContext.fakePropertyName, done);
-    });
+    onTransitionEnd(element, testContext.fakePropertyName, done);
+  });
 
   it('calls callback after onTransitionEnd end when the event propertyName matches', done => {
-      const element = document.createElement('div');
+    const element = document.createElement('div');
 
-      jest.spyOn(element, 'addEventListener').mockImplementation((eventName, cb) => {
-        cb(testContext.fakeEvent);
-      });
-      jest.spyOn(browserDetection, 'isIe9').mockReturnValue(false);
-
-      onTransitionEnd(element, testContext.fakePropertyName, () => {
-        expect(element.addEventListener).toBeCalledTimes(1);
-        expect(element.addEventListener).toBeCalledWith('transitionend', expect.any(Function));
-
-        done();
-      });
+    jest.spyOn(element, 'addEventListener').mockImplementation((eventName, cb) => {
+      cb(testContext.fakeEvent);
     });
+    jest.spyOn(browserDetection, 'isIe9').mockReturnValue(false);
+
+    onTransitionEnd(element, testContext.fakePropertyName, () => {
+      expect(element.addEventListener).toBeCalledTimes(1);
+      expect(element.addEventListener).toBeCalledWith('transitionend', expect.any(Function));
+
+      done();
+    });
+  });
 
   it('removes event listener after callback is called', done => {
     const element = document.createElement('div');

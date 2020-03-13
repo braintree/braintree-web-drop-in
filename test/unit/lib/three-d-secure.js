@@ -110,7 +110,7 @@ describe('ThreeDSecure', () => {
         additionalInformation: {
           shippingMethod: '01'
         }
-      }).then(({liabilityShifted, liablityShiftPossible, nonce}) => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -140,7 +140,7 @@ describe('ThreeDSecure', () => {
       }, {
         nonce: 'bad-nonce',
         bin: 'bad-bin'
-      }).then(({liabilityShifted, liablityShiftPossible, nonce}) => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -165,7 +165,7 @@ describe('ThreeDSecure', () => {
         }
       }, {
         amount: '3.00'
-      }).then(({liabilityShifted, liablityShiftPossible, nonce}) => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -192,7 +192,7 @@ describe('ThreeDSecure', () => {
         additionalInformation: {
           acsWindowSize: '01'
         }
-      }).then(({liabilityShifted, liablityShiftPossible, nonce}) => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
