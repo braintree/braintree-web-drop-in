@@ -4,7 +4,6 @@ jest.mock('../../../../src/lib/analytics');
 
 // TODO should we assert on some analytics?
 // const analytics = require('../../../../src/lib/analytics');
-const browserDetection = require('../../../../src/lib/browser-detection');
 const BaseView = require('../../../../src/views/base-view');
 const DropinModel = require('../../../../src/dropin-model');
 const DropinError = require('../../../../src/lib/dropin-error');
@@ -1029,22 +1028,6 @@ describe('BasePayPalView', () => {
       };
 
       jest.spyOn(assets, 'loadScript').mockResolvedValue();
-    });
-
-    test('resolves false if browser is IE9', () => {
-      jest.spyOn(browserDetection, 'isIe9').mockReturnValue(true);
-
-      return BasePayPalView.isEnabled(testContext.options).then(result => {
-        expect(result).toBe(false);
-      });
-    });
-
-    test('resolves false if browser is IE10', () => {
-      jest.spyOn(browserDetection, 'isIe10').mockReturnValue(true);
-
-      return BasePayPalView.isEnabled(testContext.options).then(result => {
-        expect(result).toBe(false);
-      });
     });
 
     test('resolves true if global.paypal exists', () => {
