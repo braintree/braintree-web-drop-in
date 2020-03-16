@@ -11,7 +11,6 @@ var DeleteConfirmationView = require('./delete-confirmation-view');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var Promise = require('../lib/promise');
 var wait = require('../lib/wait');
-var supportsFlexbox = require('../lib/supports-flexbox');
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 var DEVELOPER_MISCONFIGURATION_MESSAGE = require('../constants').errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
@@ -43,8 +42,6 @@ MainView.prototype._initialize = function () {
 
   this.loadingContainer = this.getElementById('loading-container');
   this.dropinContainer = this.element.querySelector('.braintree-dropin');
-
-  this.supportsFlexbox = supportsFlexbox();
 
   this.model.on('asyncDependenciesReady', this.hideLoadingIndicator.bind(this));
 
@@ -183,10 +180,6 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
     this.getElementById('lower-container').appendChild(this.getElementById('options'));
   } else if (id === PaymentOptionsView.ID) {
     this.hideToggle();
-  }
-
-  if (!this.supportsFlexbox) {
-    this.element.setAttribute('data-braintree-no-flexbox', true);
   }
 
   paymentMethod = this.primaryView.getPaymentMethod();
