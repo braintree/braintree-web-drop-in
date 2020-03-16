@@ -340,37 +340,37 @@ describe('MainView', () => {
     });
 
     describe.each([
-      ['Apple Pay', ApplePayView],
-      ['Card', CardView],
-      ['Payment Methods', PaymentMethodsView],
-      ['Payment Options', PaymentOptionsView],
-      ['PayPal', PayPalView],
-      ['Google Pay', GooglePayView]
-    ])('when given a %s view', (description, View) => {
+      [ApplePayView.ID],
+      [CardView.ID],
+      [PaymentMethodsView.ID],
+      [PaymentOptionsView.ID],
+      [PayPalView.ID],
+      [GooglePayView.ID]
+    ])('when given a %s view', (viewID) => {
       it('shows the selected view by updating the classname of the drop-in wrapper', () => {
         const mainView = new MainView(testContext.mainViewOptions);
 
-        mainView.setPrimaryView(View.ID);
+        mainView.setPrimaryView(viewID);
 
         return wait.delay(1).then(() => {
-          expect(mainView.element.className).toBe(`braintree-show-${View.ID}`);
+          expect(mainView.element.className).toBe(`braintree-show-${viewID}`);
         });
       });
 
       it('sets the view as the primary view', () => {
         const mainView = new MainView(testContext.mainViewOptions);
 
-        mainView.setPrimaryView(View.ID);
+        mainView.setPrimaryView(viewID);
 
-        expect(mainView.primaryView).toBe(mainView.getView(View.ID));
+        expect(mainView.primaryView).toBe(mainView.getView(viewID));
       });
 
       it('changes the active payment option', () => {
         const mainView = new MainView(testContext.mainViewOptions);
 
-        mainView.setPrimaryView(View.ID);
+        mainView.setPrimaryView(viewID);
 
-        expect(mainView.model.getActivePaymentView()).toBe(View.ID);
+        expect(mainView.model.getActivePaymentView()).toBe(viewID);
       });
     });
 
