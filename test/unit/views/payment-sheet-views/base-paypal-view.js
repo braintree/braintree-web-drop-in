@@ -8,7 +8,6 @@ const browserDetection = require('../../../../src/lib/browser-detection');
 const BaseView = require('../../../../src/views/base-view');
 const DropinModel = require('../../../../src/dropin-model');
 const DropinError = require('../../../../src/lib/dropin-error');
-const Promise = require('../../../../src/lib/promise');
 const assets = require('@braintree/asset-loader');
 const fake = require('../../../helpers/fake');
 const fs = require('fs');
@@ -79,6 +78,11 @@ describe('BasePayPalView', () => {
   describe('initialize', () => {
     beforeEach(() => {
       testContext.view = new BasePayPalView(testContext.paypalViewOptions);
+      jest.spyOn(assets, 'loadScript').mockResolvedValue();
+    });
+
+    afterEach(() => {
+      BasePayPalView.resetPayPalScriptPromise();
     });
 
     test('starts async dependency', () => {
@@ -110,6 +114,29 @@ describe('BasePayPalView', () => {
           authorization: testContext.view.model.authorization
         }));
         expect(testContext.view.paypalInstance).toBe(testContext.paypalInstance);
+      });
+    });
+
+    test('adds PayPal SDK to page', () => {
+      return testContext.view.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: 'https://www.paypalobjects.com/api/checkout.min.js',
+          id: 'braintree-dropin-paypal-sdk-script',
+          dataAttributes: {
+            'log-level': 'warn'
+          }
+        });
+      });
+    });
+
+    test('only attempts to load PayPal SDK once', () => {
+      return Promise.all([
+        testContext.view.initialize(),
+        testContext.view.initialize(),
+        testContext.view.initialize()
+      ]).then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
       });
     });
 
@@ -1031,13 +1058,6 @@ describe('BasePayPalView', () => {
           paypal: {}
         }
       };
-
-      testContext.configuration.gatewayConfiguration.paypalEnabled = true;
-      global.paypal = {
-        Button: {}
-      };
-
-      jest.spyOn(assets, 'loadScript').mockResolvedValue();
     });
 
     test('resolves false if browser is IE9', () => {
@@ -1056,142 +1076,9 @@ describe('BasePayPalView', () => {
       });
     });
 
-    test('resolves true if global.paypal exists', () => {
+    test('resolves true with supported browser', () => {
       return BasePayPalView.isEnabled(testContext.options).then(result => {
         expect(result).toBe(true);
-      });
-    });
-
-    test('skips loading paypal script if global.paypal exists', () => {
-      return BasePayPalView.isEnabled(testContext.options).then(() => {
-        expect(assets.loadScript).not.toBeCalled();
-      });
-    });
-
-    test('loads paypal script if global.paypal does not exist', () => {
-      delete global.paypal;
-
-      return BasePayPalView.isEnabled(testContext.options).then(() => {
-        expect(assets.loadScript).toBeCalledTimes(1);
-        expect(assets.loadScript).toBeCalledWith({
-          src: 'https://www.paypalobjects.com/api/checkout.min.js',
-          id: 'braintree-dropin-paypal-sdk-script',
-          dataAttributes: {
-            'log-level': 'warn'
-          }
-        });
-      });
-    });
-
-    test(
-      'loads paypal script with merchant provided log level for paypal',
-      () => {
-        delete global.paypal;
-
-        testContext.options.merchantConfiguration.paypal.logLevel = 'error';
-
-        return BasePayPalView.isEnabled(testContext.options).then(() => {
-          expect(assets.loadScript).toBeCalledTimes(1);
-          expect(assets.loadScript).toBeCalledWith({
-            src: 'https://www.paypalobjects.com/api/checkout.min.js',
-            id: 'braintree-dropin-paypal-sdk-script',
-            dataAttributes: {
-              'log-level': 'error'
-            }
-          });
-        });
-      }
-    );
-
-    test(
-      'loads paypal script with merchant provided log level for paypal credit',
-      () => {
-        delete global.paypal;
-
-        delete testContext.options.merchantConfiguration.paypal;
-        testContext.options.merchantConfiguration.paypalCredit = {
-          flow: 'vault',
-          logLevel: 'error'
-        };
-
-        return BasePayPalView.isEnabled(testContext.options).then(() => {
-          expect(assets.loadScript).toBeCalledTimes(1);
-          expect(assets.loadScript).toBeCalledWith({
-            src: 'https://www.paypalobjects.com/api/checkout.min.js',
-            id: 'braintree-dropin-paypal-sdk-script',
-            dataAttributes: {
-              'log-level': 'error'
-            }
-          });
-        });
-      }
-    );
-
-    test(
-      'loads paypal script with merchant provided log level for paypal if both paypal and paypal credit options are available',
-      () => {
-        delete global.paypal;
-
-        testContext.options.merchantConfiguration.paypal.logLevel = 'error';
-        testContext.options.merchantConfiguration.paypalCredit = {
-          flow: 'vault',
-          logLevel: 'not-error'
-        };
-
-        return BasePayPalView.isEnabled(testContext.options).then(() => {
-          expect(assets.loadScript).toBeCalledTimes(1);
-          expect(assets.loadScript).toBeCalledWith({
-            src: 'https://www.paypalobjects.com/api/checkout.min.js',
-            id: 'braintree-dropin-paypal-sdk-script',
-            dataAttributes: {
-              'log-level': 'error'
-            }
-          });
-        });
-      }
-    );
-
-    test('resolves true after PayPal script is loaded', () => {
-      delete global.paypal;
-
-      return BasePayPalView.isEnabled(testContext.options).then(result => {
-        expect(assets.loadScript).toBeCalledTimes(1);
-        expect(result).toBe(true);
-      });
-    });
-
-    test('resolves false if load script fails', () => {
-      delete global.paypal;
-
-      assets.loadScript.mockRejectedValue();
-
-      return BasePayPalView.isEnabled(testContext.options).then(result => {
-        expect(assets.loadScript).toBeCalledTimes(1);
-        expect(result).toBe(false);
-      });
-    });
-
-    test('returns existing promise if already in progress', () => {
-      let firstPromise, secondPromise;
-
-      jest.useFakeTimers();
-      delete global.paypal;
-
-      assets.loadScript.mockImplementation(() => {
-        return new Promise(resolve => {
-          jest.advanceTimersByTime(10);
-          global.paypal = testContext.paypal;
-          resolve();
-        });
-      });
-
-      firstPromise = BasePayPalView.isEnabled(testContext.options);
-      secondPromise = BasePayPalView.isEnabled(testContext.options);
-
-      expect(firstPromise).toEqual(secondPromise);
-
-      return secondPromise.then(() => {
-        expect(assets.loadScript).toBeCalledTimes(1);
       });
     });
   });

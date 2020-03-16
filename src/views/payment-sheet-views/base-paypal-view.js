@@ -48,27 +48,37 @@ BasePayPalView.prototype.initialize = function () {
   return btPaypal.create({
     authorization: this.model.authorization
   }).then(function (paypalInstance) {
-    var checkoutJSConfiguration;
+    self.paypalInstance = paypalInstance;
+    self.paypalConfiguration.offerCredit = Boolean(isCredit);
+
+    if (!paypalScriptLoadInProgressPromise) {
+      paypalScriptLoadInProgressPromise = assets.loadScript({
+        src: constants.PAYPAL_SDK_JS_SOURCE,
+        id: constants.PAYPAL_SDK_SCRIPT_ID,
+        dataAttributes: {
+          'log-level': self.paypalConfiguration.logLevel || DEFAULT_PAYPAL_SDK_LOG_LEVEL
+        }
+      });
+    }
+
+    return paypalScriptLoadInProgressPromise;
+  }).then(function () {
     var buttonSelector = '[data-braintree-id="paypal-button"]';
     var environment = self.model.environment === 'production' ? 'production' : 'sandbox';
     var locale = self.model.merchantConfiguration.locale;
-
-    self.paypalInstance = paypalInstance;
-
-    self.paypalConfiguration.offerCredit = Boolean(isCredit);
-    checkoutJSConfiguration = {
+    var checkoutJSConfiguration = {
       env: environment,
       style: self.paypalConfiguration.buttonStyle || {},
       commit: self.paypalConfiguration.commit,
       payment: function () {
-        return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
+        return self.paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
       },
       onAuthorize: function (data) {
         var shouldVault = self._shouldVault();
 
         data.vault = shouldVault;
 
-        return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
+        return self.paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
           if (shouldVault) {
             tokenizePayload.vaulted = true;
           }
@@ -151,39 +161,17 @@ BasePayPalView.prototype._shouldVault = function () {
 };
 
 BasePayPalView.isEnabled = function (options) {
-  var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
-
   if (browserDetection.isIe9() || browserDetection.isIe10()) {
     analytics.sendEvent(options.viewID + '.checkout.js-browser-not-supported');
 
     return Promise.resolve(false);
   }
 
-  if (global.paypal && global.paypal.Button) {
-    return Promise.resolve(true);
-  }
+  return Promise.resolve(true);
+};
 
-  if (paypalScriptLoadInProgressPromise) {
-    return paypalScriptLoadInProgressPromise;
-  }
-
-  paypalScriptLoadInProgressPromise = assets.loadScript({
-    src: constants.PAYPAL_SDK_JS_SOURCE,
-    id: constants.PAYPAL_SDK_SCRIPT_ID,
-    dataAttributes: {
-      'log-level': merchantPayPalConfig.logLevel || DEFAULT_PAYPAL_SDK_LOG_LEVEL
-    }
-  }).then(function () {
-    return Promise.resolve(true);
-  }).catch(function () {
-    return Promise.resolve(false);
-  }).then(function (result) {
-    paypalScriptLoadInProgressPromise = null;
-
-    return Promise.resolve(result);
-  });
-
-  return paypalScriptLoadInProgressPromise;
+BasePayPalView.resetPayPalScriptPromise = function () {
+  paypalScriptLoadInProgressPromise = null;
 };
 
 module.exports = BasePayPalView;
