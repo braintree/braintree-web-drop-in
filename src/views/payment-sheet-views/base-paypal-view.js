@@ -13,7 +13,7 @@ var Promise = require('../../lib/promise');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
-var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
+var DEFAULT_PAYPAL_SDK_LOG_LEVEL = 'warn';
 
 var paypalScriptLoadInProgressPromise;
 
@@ -168,10 +168,10 @@ BasePayPalView.isEnabled = function (options) {
   }
 
   paypalScriptLoadInProgressPromise = assets.loadScript({
-    src: constants.CHECKOUT_JS_SOURCE,
-    id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+    src: constants.PAYPAL_SDK_JS_SOURCE,
+    id: constants.PAYPAL_SDK_SCRIPT_ID,
     dataAttributes: {
-      'log-level': merchantPayPalConfig.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+      'log-level': merchantPayPalConfig.logLevel || DEFAULT_PAYPAL_SDK_LOG_LEVEL
     }
   }).then(function () {
     return Promise.resolve(true);

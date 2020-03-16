@@ -1066,7 +1066,7 @@ describe('BasePayPalView', () => {
         expect(assets.loadScript).toBeCalledTimes(1);
         expect(assets.loadScript).toBeCalledWith({
           src: 'https://www.paypalobjects.com/api/checkout.min.js',
-          id: 'braintree-dropin-paypal-checkout-script',
+          id: 'braintree-dropin-paypal-sdk-script',
           dataAttributes: {
             'log-level': 'warn'
           }
@@ -1085,7 +1085,7 @@ describe('BasePayPalView', () => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
             src: 'https://www.paypalobjects.com/api/checkout.min.js',
-            id: 'braintree-dropin-paypal-checkout-script',
+            id: 'braintree-dropin-paypal-sdk-script',
             dataAttributes: {
               'log-level': 'error'
             }
@@ -1109,7 +1109,7 @@ describe('BasePayPalView', () => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
             src: 'https://www.paypalobjects.com/api/checkout.min.js',
-            id: 'braintree-dropin-paypal-checkout-script',
+            id: 'braintree-dropin-paypal-sdk-script',
             dataAttributes: {
               'log-level': 'error'
             }
@@ -1133,7 +1133,7 @@ describe('BasePayPalView', () => {
           expect(assets.loadScript).toBeCalledTimes(1);
           expect(assets.loadScript).toBeCalledWith({
             src: 'https://www.paypalobjects.com/api/checkout.min.js',
-            id: 'braintree-dropin-paypal-checkout-script',
+            id: 'braintree-dropin-paypal-sdk-script',
             dataAttributes: {
               'log-level': 'error'
             }
