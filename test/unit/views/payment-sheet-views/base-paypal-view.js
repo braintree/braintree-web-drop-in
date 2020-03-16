@@ -969,6 +969,16 @@ describe('BasePayPalView', () => {
       expect(view.paypalConfiguration.locale).toBe('es');
     });
 
+    test('ignores flow updates', () => {
+      const view = new BasePayPalView();
+
+      view.paypalConfiguration = { flow: 'vault' };
+
+      view.updateConfiguration('flow', 'checkout');
+
+      expect(view.paypalConfiguration.flow).toBe('vault');
+    });
+
     test('can set properties on paypal config', () => {
       const view = new BasePayPalView();
 
@@ -977,12 +987,11 @@ describe('BasePayPalView', () => {
         amount: '10.00'
       };
 
-      view.updateConfiguration('flow', 'checkout');
       view.updateConfiguration('amount', '5.32');
       view.updateConfiguration('currency', 'USD');
 
       expect(view.paypalConfiguration).toEqual({
-        flow: 'checkout',
+        flow: 'vault',
         amount: '5.32',
         currency: 'USD'
       });
