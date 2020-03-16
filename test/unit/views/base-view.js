@@ -26,7 +26,15 @@ describe('BaseView', () => {
     });
   });
 
-  describe.todo('teardown');
+  describe('teardown', () => {
+    it('resolves immediately with no result', () => {
+      const view = new BaseView();
+
+      return view.teardown().then(res => {
+        expect(res).not.toBeDefined();
+      });
+    });
+  });
 
   describe('requestPaymentMethod', () => {
     it('returns a rejected promise', () => {
