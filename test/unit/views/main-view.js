@@ -432,6 +432,7 @@ describe('MainView', () => {
           });
         });
       });
+
       describe('in a guest checkout flow', () => {
         it('shows the additional options button if there are multiple payment options', () => {
           let mainView;
@@ -794,11 +795,8 @@ describe('MainView', () => {
         });
 
         describe.each([
-          [CardView.ID, CardView],
-          [PayPalView.ID, PayPalView]
-        ])('when using a %s sheet', (viewID, PaymentSheetView) => {
-          const ID = PaymentSheetView.ID;
-
+          [CardView.ID], [PayPalView.ID]
+        ])('when using a %s sheet', (ID) => {
           beforeEach(() => {
             wait.delay.mockResolvedValue();
             testContext.model._emit('changeActivePaymentView', ID);
