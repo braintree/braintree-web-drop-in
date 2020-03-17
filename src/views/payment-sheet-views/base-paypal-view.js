@@ -1,8 +1,6 @@
 'use strict';
 
-var analytics = require('../../lib/analytics');
 var assign = require('../../lib/assign').assign;
-var browserDetection = require('../../lib/browser-detection');
 var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
@@ -152,12 +150,6 @@ BasePayPalView.prototype._shouldVault = function () {
 
 BasePayPalView.isEnabled = function (options) {
   var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
-
-  if (browserDetection.isIe9() || browserDetection.isIe10()) {
-    analytics.sendEvent(options.viewID + '.checkout.js-browser-not-supported');
-
-    return Promise.resolve(false);
-  }
 
   if (global.paypal && global.paypal.Button) {
     return Promise.resolve(true);

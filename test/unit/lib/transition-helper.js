@@ -1,4 +1,3 @@
-const browserDetection = require('../../../src/lib/browser-detection');
 const onTransitionEnd = require('../../../src/lib/transition-helper').onTransitionEnd;
 const { yields } = require('../../helpers/yields');
 
@@ -9,14 +8,6 @@ describe('onTransitionEnd', () => {
     testContext = {};
     testContext.fakePropertyName = 'fake-property-name';
     testContext.fakeEvent = { propertyName: testContext.fakePropertyName };
-  });
-
-  it('immediately calls callback when IE9', done => {
-    const element = document.createElement('div');
-
-    jest.spyOn(browserDetection, 'isIe9').mockReturnValue(true);
-
-    onTransitionEnd(element, testContext.fakePropertyName, done);
   });
 
   it('immediately calls callback when element has display: none', done => {
@@ -45,7 +36,6 @@ describe('onTransitionEnd', () => {
     jest.spyOn(element, 'addEventListener').mockImplementation((eventName, cb) => {
       cb(testContext.fakeEvent);
     });
-    jest.spyOn(browserDetection, 'isIe9').mockReturnValue(false);
 
     onTransitionEnd(element, testContext.fakePropertyName, () => {
       expect(element.addEventListener).toBeCalledTimes(1);
@@ -60,7 +50,6 @@ describe('onTransitionEnd', () => {
 
     jest.spyOn(element, 'addEventListener').mockImplementation(yields(testContext.fakeEvent));
     jest.spyOn(element, 'removeEventListener').mockImplementation();
-    jest.spyOn(browserDetection, 'isIe9').mockReturnValue(false);
 
     onTransitionEnd(element, testContext.fakePropertyName, () => {
       expect(element.removeEventListener).toBeCalledTimes(1);
@@ -76,7 +65,6 @@ describe('onTransitionEnd', () => {
     let handler;
 
     jest.spyOn(element, 'addEventListener').mockImplementation(yields(testContext.fakeEvent));
-    jest.spyOn(browserDetection, 'isIe9').mockReturnValue(false);
 
     onTransitionEnd(element, 'rogue-property-name', callbackSpy);
 

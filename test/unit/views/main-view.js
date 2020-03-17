@@ -374,28 +374,6 @@ describe('MainView', () => {
       });
     });
 
-    it('applies no-flexbox data attribute when flexbox is not supported', () => {
-      const mainView = new MainView(testContext.mainViewOptions);
-      const wrapper = mainView.element;
-
-      mainView.supportsFlexbox = false;
-
-      mainView.setPrimaryView(CardView.ID);
-
-      expect(wrapper.dataset.braintreeNoFlexbox).toBe('true');
-    });
-
-    it('does not apply no-flexbox data attribute when flexbox is supported', () => {
-      const mainView = new MainView(testContext.mainViewOptions);
-      const wrapper = mainView.element;
-
-      mainView.supportsFlexbox = true;
-
-      mainView.setPrimaryView(CardView.ID);
-
-      expect(wrapper.dataset.braintreeNoFlexbox).toBeFalsy();
-    });
-
     describe.each(Object.keys(sheetViews))('when given a %s view', sheetViewKey => {
       const SheetView = sheetViews[sheetViewKey];
 
