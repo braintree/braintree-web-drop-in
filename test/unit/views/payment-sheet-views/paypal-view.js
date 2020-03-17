@@ -10,13 +10,10 @@ describe('PayPalView', () => {
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     jest.spyOn(PayPalView.prototype, 'initialize').mockImplementation();
   });
 
-  test('inherits from BasePayPalView', () => {
+  it('inherits from BasePayPalView', () => {
     expect(new PayPalView()).toBeInstanceOf(BasePayPalView);
   });
 
@@ -31,7 +28,7 @@ describe('PayPalView', () => {
       jest.spyOn(BasePayPalView, 'isEnabled').mockResolvedValue(true);
     });
 
-    test('resolves false if base PayPal view resolves false', () => {
+    it('resolves false if base PayPal view resolves false', () => {
       BasePayPalView.isEnabled.mockResolvedValue(false);
 
       return PayPalView.isEnabled(testContext.options).then(result => {
@@ -39,7 +36,7 @@ describe('PayPalView', () => {
       });
     });
 
-    test('resolves false if merchant did not configure paypal', () => {
+    it('resolves false if merchant did not configure paypal', () => {
       delete testContext.options.merchantConfiguration.paypal;
 
       return PayPalView.isEnabled(testContext.options).then(result => {
@@ -47,10 +44,8 @@ describe('PayPalView', () => {
       });
     });
 
-    test('resolves true if merchant enabled paypal', () => {
-      return PayPalView.isEnabled(testContext.options).then(result => {
-        expect(result).toBe(true);
-      });
-    });
+    it('resolves true if merchant enabled paypal', () =>
+      expect(PayPalView.isEnabled(testContext.options)).resolves.toBe(true)
+    );
   });
 });

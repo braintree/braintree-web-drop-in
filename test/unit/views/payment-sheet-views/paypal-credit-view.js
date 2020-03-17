@@ -10,13 +10,10 @@ describe('PayPalCreditView', () => {
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     jest.spyOn(PayPalCreditView.prototype, 'initialize').mockImplementation();
   });
 
-  test('inherits from BasePayPalView', () => {
+  it('inherits from BasePayPalView', () => {
     expect(new PayPalCreditView()).toBeInstanceOf(BasePayPalView);
   });
 
@@ -31,7 +28,7 @@ describe('PayPalCreditView', () => {
       jest.spyOn(BasePayPalView, 'isEnabled').mockResolvedValue(true);
     });
 
-    test('resolves false if base PayPal view resolves false', () => {
+    it('resolves false if base PayPal view resolves false', () => {
       BasePayPalView.isEnabled.mockResolvedValue(false);
 
       return PayPalCreditView.isEnabled(testContext.options).then(result => {
@@ -39,7 +36,7 @@ describe('PayPalCreditView', () => {
       });
     });
 
-    test('resolves false if merchant did not configure paypalCredit', () => {
+    it('resolves false if merchant did not configure paypalCredit', () => {
       delete testContext.options.merchantConfiguration.paypalCredit;
 
       return PayPalCreditView.isEnabled(testContext.options).then(result => {
@@ -47,10 +44,8 @@ describe('PayPalCreditView', () => {
       });
     });
 
-    test('resolves true if merchant enabled paypalCredit', () => {
-      return PayPalCreditView.isEnabled(testContext.options).then(result => {
-        expect(result).toBe(true);
-      });
-    });
+    it('resolves true if merchant enabled paypalCredit', () =>
+      expect(PayPalCreditView.isEnabled(testContext.options)).resolves.toBe(true)
+    );
   });
 });

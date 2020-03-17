@@ -1,4 +1,3 @@
-
 const fake = require('../../helpers/fake');
 const threeDSecure = require('braintree-web/three-d-secure');
 const classList = require('@braintree/class-list');
@@ -10,9 +9,6 @@ describe('ThreeDSecure', () => {
 
   beforeEach(() => {
     testContext = {};
-  });
-
-  beforeEach(() => {
     testContext.threeDSecureInstance = fake.threeDSecureInstance;
     jest.spyOn(testContext.threeDSecureInstance, 'verifyCard').mockImplementation();
     jest.spyOn(testContext.threeDSecureInstance, 'cancelVerifyCard').mockImplementation();
@@ -26,7 +22,7 @@ describe('ThreeDSecure', () => {
       jest.spyOn(threeDSecure, 'create').mockResolvedValue(testContext.threeDSecureInstance);
     });
 
-    test('sets up three d secure', () => {
+    it('sets up three d secure', () => {
       const config = {};
       const auth = 'fake-auth';
       const tds = new ThreeDSecure(auth, config, 'Card Verification');
@@ -60,13 +56,13 @@ describe('ThreeDSecure', () => {
       });
     });
 
-    test('calls verifyCard', () => {
-      return testContext.tds.verify({
+    it('calls verifyCard', () =>
+      testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
         }
-      }).then(payload => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -78,13 +74,12 @@ describe('ThreeDSecure', () => {
           onLookupComplete: expect.any(Function)
         });
 
-        expect(payload.nonce).toBe('a-nonce');
-        expect(payload.liabilityShifted).toBe(true);
-        expect(payload.liablityShiftPossible).toBe(true);
-      });
-    });
+        expect(nonce).toBe('a-nonce');
+        expect(liabilityShifted).toBe(true);
+        expect(liablityShiftPossible).toBe(true);
+      }));
 
-    test('rejects if verifyCard rejects', () => {
+    it('rejects if verifyCard rejects', () => {
       testContext.threeDSecureInstance.verifyCard.mockRejectedValue({
         message: 'A message'
       });
@@ -94,12 +89,12 @@ describe('ThreeDSecure', () => {
         details: {
           bin: '123456'
         }
-      }).then(throwIfResolves).catch(err => {
-        expect(err.message).toBe('A message');
+      }).then(throwIfResolves).catch(({ message }) => {
+        expect(message).toBe('A message');
       });
     });
 
-    test('can pass additional data along', () => {
+    it('can pass additional data along', () => {
       const billingAddress = {
         foo: 'bar'
       };
@@ -115,7 +110,7 @@ describe('ThreeDSecure', () => {
         additionalInformation: {
           shippingMethod: '01'
         }
-      }).then(payload => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -130,14 +125,14 @@ describe('ThreeDSecure', () => {
           email: 'foo@example.com'
         });
 
-        expect(payload.nonce).toBe('a-nonce');
-        expect(payload.liabilityShifted).toBe(true);
-        expect(payload.liablityShiftPossible).toBe(true);
+        expect(nonce).toBe('a-nonce');
+        expect(liabilityShifted).toBe(true);
+        expect(liablityShiftPossible).toBe(true);
       });
     });
 
-    test('additional config cannot override nonce or bin', () => {
-      return testContext.tds.verify({
+    it('additional config cannot override nonce or bin', () =>
+      testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
@@ -145,7 +140,7 @@ describe('ThreeDSecure', () => {
       }, {
         nonce: 'bad-nonce',
         bin: 'bad-bin'
-      }).then(payload => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -157,21 +152,20 @@ describe('ThreeDSecure', () => {
           onLookupComplete: expect.any(Function)
         });
 
-        expect(payload.nonce).toBe('a-nonce');
-        expect(payload.liabilityShifted).toBe(true);
-        expect(payload.liablityShiftPossible).toBe(true);
-      });
-    });
+        expect(nonce).toBe('a-nonce');
+        expect(liabilityShifted).toBe(true);
+        expect(liablityShiftPossible).toBe(true);
+      }));
 
-    test('additional config can override amount', () => {
-      return testContext.tds.verify({
+    it('additional config can override amount', () =>
+      testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
         }
       }, {
         amount: '3.00'
-      }).then(payload => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -183,14 +177,13 @@ describe('ThreeDSecure', () => {
           onLookupComplete: expect.any(Function)
         });
 
-        expect(payload.nonce).toBe('a-nonce');
-        expect(payload.liabilityShifted).toBe(true);
-        expect(payload.liablityShiftPossible).toBe(true);
-      });
-    });
+        expect(nonce).toBe('a-nonce');
+        expect(liabilityShifted).toBe(true);
+        expect(liablityShiftPossible).toBe(true);
+      }));
 
-    test('additional config can override acsWindowSize', () => {
-      return testContext.tds.verify({
+    it('additional config can override acsWindowSize', () =>
+      testContext.tds.verify({
         nonce: 'old-nonce',
         details: {
           bin: '123456'
@@ -199,7 +192,7 @@ describe('ThreeDSecure', () => {
         additionalInformation: {
           acsWindowSize: '01'
         }
-      }).then(payload => {
+      }).then(({ liabilityShifted, liablityShiftPossible, nonce }) => {
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledTimes(1);
         expect(testContext.threeDSecureInstance.verifyCard).toBeCalledWith({
           nonce: 'old-nonce',
@@ -211,11 +204,10 @@ describe('ThreeDSecure', () => {
           onLookupComplete: expect.any(Function)
         });
 
-        expect(payload.nonce).toBe('a-nonce');
-        expect(payload.liabilityShifted).toBe(true);
-        expect(payload.liablityShiftPossible).toBe(true);
-      });
-    });
+        expect(nonce).toBe('a-nonce');
+        expect(liabilityShifted).toBe(true);
+        expect(liablityShiftPossible).toBe(true);
+      }));
   });
 
   describe('teardown', () => {
@@ -226,15 +218,14 @@ describe('ThreeDSecure', () => {
       jest.spyOn(testContext.threeDSecureInstance, 'teardown').mockResolvedValue();
     });
 
-    test('calls teardown on 3ds instance', () => {
-      return testContext.tds.teardown().then(() => {
+    it('calls teardown on 3ds instance', () =>
+      testContext.tds.teardown().then(() => {
         expect(testContext.threeDSecureInstance.teardown).toBeCalledTimes(1);
-      });
-    });
+      }));
   });
 
   describe('udpateConfiguration', () => {
-    test('updates configuration', () => {
+    it('updates configuration', () => {
       const tds = new ThreeDSecure({}, { amount: '10.00', foo: 'bar' }, 'Card Verification');
 
       tds.updateConfiguration('amount', '23.45');

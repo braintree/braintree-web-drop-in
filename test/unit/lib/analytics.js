@@ -1,11 +1,9 @@
 const client = require('braintree-web/client');
+const { VERSION: braintreeClientVersion } = require('braintree-web/client');
 const analytics = require('../../../src/lib/analytics');
-const braintreeClientVersion = require('braintree-web/client').VERSION;
 const constants = require('../../../src/constants');
 const fake = require('../../helpers/fake');
-const {
-  yieldsAsync
-} = require('../../helpers/yields');
+const { yieldsAsync } = require('../../helpers/yields');
 
 describe('analytics', () => {
   let testContext;
@@ -18,7 +16,7 @@ describe('analytics', () => {
   });
 
   describe('setupAnalytics', () => {
-    test('creates a client to use with sendEvent', async () => {
+    it('creates a client to use with sendEvent', async () => {
       await analytics.setupAnalytics('fake-auth');
 
       expect(client.create).toBeCalledTimes(1);
@@ -27,7 +25,7 @@ describe('analytics', () => {
       });
     });
 
-    test('sets metadata on the client', async () => {
+    it('sets metadata on the client', async () => {
       const clientInstance = await analytics.setupAnalytics('fake-auth');
 
       const config = clientInstance.getConfiguration();
@@ -44,13 +42,13 @@ describe('analytics', () => {
       await analytics.setupAnalytics('fake-auth');
     });
 
-    test('throws an error if client is not already setup', async () => {
+    it('throws an error if client is not already setup', async () => {
       analytics.resetClientPromise();
 
       await expect(analytics.sendEvent('test.event.kind')).rejects.toThrow('Client not available.');
     });
 
-    test('correctly sends an analytics event', async () => {
+    it('correctly sends an analytics event', async () => {
       let postArgs, currentTimestamp;
       const fakeConfiguration = fake.configuration();
 
@@ -69,7 +67,7 @@ describe('analytics', () => {
       expect(postArgs[0].timeout).toBe(constants.ANALYTICS_REQUEST_TIMEOUT_MS);
     });
 
-    test('correctly formats _meta', async () => {
+    it('correctly formats _meta', async () => {
       let postArgs;
       const fakeConfiguration = fake.configuration();
 
@@ -85,7 +83,7 @@ describe('analytics', () => {
       expect(postArgs[0].data._meta).toEqual(fakeConfiguration.analyticsMetadata);
     });
 
-    test('includes tokenizationKey', async () => {
+    it('includes tokenizationKey', async () => {
       let postArgs;
       const fakeConfiguration = fake.configuration();
 
@@ -104,7 +102,7 @@ describe('analytics', () => {
       expect(postArgs[0].data.authorizationFingerprint).toBeFalsy();
     });
 
-    test('includes authorizationFingerprint', async () => {
+    it('includes authorizationFingerprint', async () => {
       let fingerprint, postArgs;
       const fakeConfiguration = fake.configuration();
 
@@ -125,7 +123,7 @@ describe('analytics', () => {
       expect(postArgs[0].data.authorizationFingerprint).toBe(fingerprint);
     });
 
-    test('includes braintreeLibraryVersion', async () => {
+    it('includes braintreeLibraryVersion', async () => {
       let postArgs;
 
       await analytics.sendEvent('test.event.kind');

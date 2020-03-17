@@ -1,9 +1,9 @@
 
-var clientToken, clientTokenWithCustomerID, fakeBTInstances;
-var tokenizationKey = 'development_testing_merchant_id';
-var braintreeVersion = require('braintree-web').VERSION;
-var vaultManager = require('braintree-web/vault-manager');
-var DropinModel = require('../../src/dropin-model');
+let clientToken, clientTokenWithCustomerID, fakeBTInstances;
+const tokenizationKey = 'development_testing_merchant_id';
+const braintreeVersion = require('braintree-web').VERSION;
+const vaultManager = require('braintree-web/vault-manager');
+const DropinModel = require('../../src/dropin-model');
 
 function configuration() {
   return {
@@ -97,7 +97,7 @@ function client(conf) {
 }
 
 function model(options) {
-  var modelInstance;
+  let modelInstance;
 
   options = options || modelOptions();
 

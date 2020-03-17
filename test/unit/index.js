@@ -28,11 +28,11 @@ describe('dropin.create', () => {
     document.body.removeChild(testContext.form);
   });
 
-  test('errors out if no authorization given', async () => {
+  it('errors out if no authorization given', async () => {
     await expect(dropin.create({})).rejects.toThrow('options.authorization is required.');
   });
 
-  test('sets up analytics', async () => {
+  it('sets up analytics', async () => {
     jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
       callback(null, this); // eslint-disable-line no-invalid-this
     });
@@ -46,7 +46,7 @@ describe('dropin.create', () => {
     expect(analytics.setupAnalytics).toBeCalledWith(fake.tokenizationKey);
   });
 
-  test('resolves a Dropin instance', async () => {
+  it('resolves a Dropin instance', async () => {
     jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(function (callback) {
       callback(null, this); // eslint-disable-line no-invalid-this
     });
@@ -59,7 +59,7 @@ describe('dropin.create', () => {
     expect(instance).toBeInstanceOf(Dropin);
   });
 
-  test('returns an error to callback if Drop-in initialization fails', async () => {
+  it('returns an error to callback if Drop-in initialization fails', async () => {
     const dropinError = new DropinError('Dropin Error');
 
     jest.spyOn(Dropin.prototype, '_initialize').mockImplementation(yields(dropinError));
