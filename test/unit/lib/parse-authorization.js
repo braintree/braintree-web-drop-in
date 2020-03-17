@@ -2,31 +2,31 @@ const parseAuthorization = require('../../../src/lib/parse-authorization');
 const fake = require('../../helpers/fake');
 
 describe('parseAuthorization', () => {
-  test('returns environment from tokenization key', () => {
+  it('returns environment from tokenization key', () => {
     expect(parseAuthorization(fake.tokenizationKey).environment).toBe('development');
   });
 
-  test('returns authType from tokenization key', () => {
+  it('returns authType from tokenization key', () => {
     expect(parseAuthorization(fake.tokenizationKey).authType).toBe('TOKENIZATION_KEY');
   });
 
-  test('returns hasCustomer field as false from tokenization key', () => {
+  it('returns hasCustomer field as false from tokenization key', () => {
     expect(parseAuthorization(fake.tokenizationKey).hasCustomer).toBe(false);
   });
 
-  test('returns environment from client token', () => {
+  it('returns environment from client token', () => {
     expect(parseAuthorization(fake.clientToken).environment).toBe('development');
   });
 
-  test('returns authType from client token', () => {
+  it('returns authType from client token', () => {
     expect(parseAuthorization(fake.clientToken).authType).toBe('CLIENT_TOKEN');
   });
 
-  test('returns hasCustomer field as false from client token without a customer', () => {
+  it('returns hasCustomer field as false from client token without a customer', () => {
     expect(parseAuthorization(fake.clientToken).hasCustomer).toBe(false);
   });
 
-  test('returns hasCustomer field as true from client token with a customer', () => {
+  it('returns hasCustomer field as true from client token with a customer', () => {
     expect(parseAuthorization(fake.clientTokenWithCustomerID).hasCustomer).toBe(true);
   });
 });

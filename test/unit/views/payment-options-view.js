@@ -1,14 +1,14 @@
 jest.mock('../../../src/lib/analytics');
 
-const analytics = require('../../../src/lib/analytics');
+const fs = require('fs');
 const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
 const PaymentOptionsView = require('../../../src/views/payment-options-view');
+const analytics = require('../../../src/lib/analytics');
 const strings = require('../../../src/translations/en_US');
 const fake = require('../../helpers/fake');
-const fs = require('fs');
 
-const mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
+const mainHTML = fs.readFileSync(`${__dirname}/../../../src/html/main.html`, 'utf8');
 
 const paymentOptionAttributes = {
   applePay: {
@@ -62,11 +62,11 @@ describe('PaymentOptionsView', () => {
       jest.spyOn(PaymentOptionsView.prototype, '_initialize').mockImplementation();
     });
 
-    test('inherits from BaseView', () => {
+    it('inherits from BaseView', () => {
       expect(new PaymentOptionsView({})).toBeInstanceOf(BaseView);
     });
 
-    test('calls _initialize', () => {
+    it('calls _initialize', () => {
       new PaymentOptionsView({}); // eslint-disable-line no-new
 
       expect(PaymentOptionsView.prototype._initialize).toBeCalledTimes(1);
@@ -78,7 +78,7 @@ describe('PaymentOptionsView', () => {
       testContext.wrapper = document.createElement('div');
       testContext.wrapper.innerHTML = mainHTML;
 
-      testContext.element = testContext.wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
+      testContext.element = testContext.wrapper.querySelector(`[data-braintree-id="${PaymentOptionsView.ID}"]`);
     });
 
     afterEach(() => {
@@ -88,7 +88,7 @@ describe('PaymentOptionsView', () => {
     Object.keys(paymentOptionAttributes).forEach(optionName => {
       const option = paymentOptionAttributes[optionName];
 
-      test('adds a ' + option.paymentOptionID + ' option', () => {
+      it(`adds a ${option.paymentOptionID} option`, () => {
         const paymentOptionsView = new PaymentOptionsView({
           element: testContext.element,
           mainView: {},
@@ -114,7 +114,7 @@ describe('PaymentOptionsView', () => {
       });
     });
 
-    test('sets the primary view to the payment option when clicked', () => {
+    it('sets the primary view to the payment option when clicked', () => {
       const mainViewStub = { setPrimaryView: jest.fn() };
       const paymentOptionsView = new PaymentOptionsView({
         element: testContext.element,
@@ -129,25 +129,22 @@ describe('PaymentOptionsView', () => {
       expect(mainViewStub.setPrimaryView).toBeCalledWith(CardView.ID);
     });
 
-    test(
-      'calls model.selectPaymentOption when payment option is clicked',
-      () => {
-        const mainViewStub = { setPrimaryView: jest.fn() };
-        const paymentOptionsView = new PaymentOptionsView({
-          element: testContext.element,
-          mainView: mainViewStub,
-          model: modelThatSupports(['card']),
-          strings: strings
-        });
-        const option = paymentOptionsView.container.querySelector('.braintree-option');
+    it('calls model.selectPaymentOption when payment option is clicked', () => {
+      const mainViewStub = { setPrimaryView: jest.fn() };
+      const paymentOptionsView = new PaymentOptionsView({
+        element: testContext.element,
+        mainView: mainViewStub,
+        model: modelThatSupports(['card']),
+        strings: strings
+      });
+      const option = paymentOptionsView.container.querySelector('.braintree-option');
 
-        jest.spyOn(paymentOptionsView.model, 'selectPaymentOption').mockImplementation();
+      jest.spyOn(paymentOptionsView.model, 'selectPaymentOption').mockImplementation();
 
-        option.click();
+      option.click();
 
-        expect(paymentOptionsView.model.selectPaymentOption).toBeCalledWith(CardView.ID);
-      }
-    );
+      expect(paymentOptionsView.model.selectPaymentOption).toBeCalledWith(CardView.ID);
+    });
   });
 
   describe('sends analytics events', () => {
@@ -156,7 +153,7 @@ describe('PaymentOptionsView', () => {
 
       wrapper.innerHTML = mainHTML;
 
-      testContext.element = wrapper.querySelector('[data-braintree-id="' + PaymentOptionsView.ID + '"]');
+      testContext.element = wrapper.querySelector(`[data-braintree-id="${PaymentOptionsView.ID}"]`);
 
       testContext.viewConfiguration = {
         element: testContext.element,
@@ -168,23 +165,20 @@ describe('PaymentOptionsView', () => {
     Object.keys(paymentOptionAttributes).forEach(optionName => {
       const option = paymentOptionAttributes[optionName];
 
-      test(
-        'when the ' + option.paymentOptionID + ' option is selected',
-        () => {
-          let optionElement, paymentOptionsView;
-          const model = modelThatSupports([option.paymentOptionID]);
-          const viewConfiguration = testContext.viewConfiguration;
-          const eventName = 'selected.' + option.paymentOptionID;
+      it(`when the ${option.paymentOptionID} option is selected`, () => {
+        let optionElement, paymentOptionsView;
+        const model = modelThatSupports([option.paymentOptionID]);
+        const viewConfiguration = testContext.viewConfiguration;
+        const eventName = `selected.${option.paymentOptionID}`;
 
-          viewConfiguration.model = model;
-          paymentOptionsView = new PaymentOptionsView(viewConfiguration);
-          optionElement = paymentOptionsView.container.querySelector('.braintree-option');
+        viewConfiguration.model = model;
+        paymentOptionsView = new PaymentOptionsView(viewConfiguration);
+        optionElement = paymentOptionsView.container.querySelector('.braintree-option');
 
-          optionElement.click();
+        optionElement.click();
 
-          expect(analytics.sendEvent).toBeCalledWith(eventName);
-        }
-      );
+        expect(analytics.sendEvent).toBeCalledWith(eventName);
+      });
     });
   });
 });
