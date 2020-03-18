@@ -15,8 +15,10 @@ _Breaking Changes_
     - `card.vault.allowVaultCardOverride` is now `card.vault.allowAutoVaultOverride`
     - Previously, CVV would only be presented as a field if merchant had the [CVV rule configured in the control panel](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules). Now CVV will always be presented unless it is specifically removed by passing `card.cvv = { collect: false }`
     - Previously, postal code would only be presented as a field if merchant had the [postal code AVS rule configured in the control panel](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules). Now postal code will not be presented unless it is specifically enabled by passing `card.postalCode = { collect: true }`
-* PayPal view changes
+* PayPal/PayPal Credit view changes
   * `updateConfiguration` can no longer update the `flow` in the PayPal config
+  * PayPal Credit cannot be instantiated with the `vault` flow. When attempted, PayPal Credit will not appear as an option
+  * PayPal and PayPal Credit cannot be instantiated with different flows (`vault` vs `checkout`). When attempted, PayPal Credit will not appear as an option
 * Vault Management changes
   * `vaultManager` configuration changes
     - cannot be used with tokenization keys

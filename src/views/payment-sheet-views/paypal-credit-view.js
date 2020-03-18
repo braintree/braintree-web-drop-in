@@ -20,8 +20,25 @@ PayPalCreditView.isEnabled = function (options) {
     return Promise.resolve(false);
   }
 
+  // TODO currently, the PayPal SDK does not support the vault flow
+  // for PayPal Credit. Remove this check when the PayPal SDK supports it.
+  if (options.merchantConfiguration.paypalCredit.flow === 'vault') {
+    return Promise.resolve(false);
+  }
+
+  // TODO currently, the PayPal SDK does not support having
+  // 2 PayPal buttons on the page with different flows (vault or checkout)
+  // For this reason, we're temporarilly disabling the PP Credit
+  // setup if the PayPal view is created with the vault flow,
+  // since the credit button cannot be used with the vault flow
+  // at this time. Remove this check when the PayPal SDK supports it.
+  if (options.merchantConfiguration.paypal && options.merchantConfiguration.paypal.flow === 'vault') {
+    return Promise.resolve(false);
+  }
+
   return BasePayPalView.isEnabled(assign({
     viewID: PayPalCreditView.ID
   }, options));
 };
+
 module.exports = PayPalCreditView;
