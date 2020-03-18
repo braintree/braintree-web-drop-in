@@ -18,6 +18,12 @@ module.exports = {
   module: {
     rules: [
       {
+        enforce: 'post',
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: 'eslint-loader'
+      },
+      {
         test: /\.less$/,
         use: [
           {

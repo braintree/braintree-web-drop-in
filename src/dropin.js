@@ -507,7 +507,7 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
 
 Dropin.prototype._setUpDataCollector = function () {
   var self = this;
-  var config = assign({}, self._merchantConfiguration.dataCollector, {authorization: self._authorization});
+  var config = assign({}, self._merchantConfiguration.dataCollector, { authorization: self._authorization });
 
   this._model.asyncDependencyStarting();
   this._dataCollector = new DataCollector(config);
