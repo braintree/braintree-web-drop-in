@@ -4,6 +4,7 @@
   "clearMocks": true,
   "coverageDirectory": "<rootDir>/../test/coverage",
   "displayName": "Drop-in",
+  "moduleFileExtensions": ["js", "html"],
   "restoreMocks": true,
   "//": "In the future, tests should live in the same directory as the files they are testing",
   "roots": [
@@ -13,5 +14,8 @@
   "testMatch": [
     "**/unit/**/*.js",
     "**/publishing/**/*.js"
-  ]
+  ],
+  "transform": {
+    "^.+\\.html$": "<rootDir>/../test/helpers/html-loader.js"
+  }
 }

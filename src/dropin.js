@@ -21,8 +21,8 @@ var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
-import mainHTML from './html/main.html';
-import svgHTML from './html/svgs.html';
+var mainHTML = require('./html/main.html');
+var svgHTML = require('./html/svgs.html');
 
 var ASSETS_URL = 'https://assets.braintreegateway.com';
 

@@ -6,7 +6,7 @@ var constants = require('../constants');
 var analytics = require('../lib/analytics');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
-import paymentMethodHTML from '../html/payment-method.html';
+var paymentMethodHTML = require('../html/payment-method.html');
 
 function PaymentMethodView() {
   BaseView.apply(this, arguments);

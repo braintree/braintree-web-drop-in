@@ -10,7 +10,7 @@ var isUtf8 = require('../../lib/is-utf-8');
 var transitionHelper = require('../../lib/transition-helper');
 var Promise = require('../../lib/promise');
 
-import cardIconHTML from '../../html/card-icons.html';
+var cardIconHTML = require('../../html/card-icons.html');
 
 function CardView() {
   BaseView.apply(this, arguments);

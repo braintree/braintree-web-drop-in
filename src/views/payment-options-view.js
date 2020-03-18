@@ -5,7 +5,7 @@ var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var BaseView = require('./base-view');
 var paymentOptionIDs = require('../constants').paymentOptionIDs;
 
-import paymentMethodOptionHTML from '../html/payment-option.html';
+var paymentMethodOptionHTML = require('../html/payment-option.html');
 
 function PaymentOptionsView() {
   BaseView.apply(this, arguments);
