@@ -55,17 +55,7 @@ BasePayPalView.prototype.initialize = function () {
     self.paypalInstance = paypalInstance;
     self.paypalConfiguration.offerCredit = Boolean(isCredit);
 
-    if (!paypalScriptLoadInProgressPromise) {
-      paypalScriptLoadInProgressPromise = assets.loadScript({
-        src: constants.PAYPAL_SDK_JS_SOURCE,
-        id: constants.PAYPAL_SDK_SCRIPT_ID,
-        dataAttributes: {
-          'log-level': self.paypalConfiguration.logLevel || DEFAULT_PAYPAL_SDK_LOG_LEVEL
-        }
-      });
-    }
-
-    return paypalScriptLoadInProgressPromise;
+    return self._loadPayPalSDK();
   }).then(function () {
     var buttonSelector = '[data-braintree-id="paypal-button"]';
     var environment = self.model.environment === 'production' ? 'production' : 'sandbox';
@@ -150,6 +140,20 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
   if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
     this.paypalConfiguration[key] = value;
   }
+};
+
+BasePayPalView.prototype._loadPayPalSDK = function () {
+  if (!paypalScriptLoadInProgressPromise) {
+    paypalScriptLoadInProgressPromise = assets.loadScript({
+      src: constants.PAYPAL_SDK_JS_SOURCE,
+      id: constants.PAYPAL_SDK_SCRIPT_ID,
+      dataAttributes: {
+        'log-level': this.paypalConfiguration.logLevel || DEFAULT_PAYPAL_SDK_LOG_LEVEL
+      }
+    });
+  }
+
+  return paypalScriptLoadInProgressPromise;
 };
 
 BasePayPalView.prototype._shouldVault = function () {
