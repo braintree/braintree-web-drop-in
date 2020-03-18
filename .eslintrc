@@ -1,15 +1,38 @@
----
-  extends: braintree/client
-
-  rules:
-    valid-jsdoc:
-      - 2
-      - prefer:
-          return: returns
-        requireReturn: true
-        requireParamDescription: true
-        requireReturnDescription: true
-
-  globals:
-    __dirname: true
-    process: true
+{
+  "extends": [
+    "braintree/client",
+    "braintree/es6"
+  ],
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "globals": {
+    "__dirname": true
+  },
+  "rules": {
+    "valid-jsdoc": [
+      2,
+      {
+        "prefer": {
+          "return": "returns"
+        },
+        "requireReturn": true,
+        "requireParamDescription": true,
+        "requireReturnDescription": true
+      }
+    ],
+    "object-curly-spacing": [
+      "error",
+      "always",
+      {
+        "arraysInObjects": false,
+        "objectsInObjects": false
+      }
+    ]
+  }
+}

@@ -1,7 +1,6 @@
 'use strict';
 
 var assign = require('../../lib/assign').assign;
-var fs = require('fs');
 var BaseView = require('../base-view');
 var classList = require('@braintree/class-list');
 var constants = require('../../constants');
@@ -11,7 +10,7 @@ var isUtf8 = require('../../lib/is-utf-8');
 var transitionHelper = require('../../lib/transition-helper');
 var Promise = require('../../lib/promise');
 
-var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
+import cardIconHTML from '../../html/card-icons.html';
 
 function CardView() {
   BaseView.apply(this, arguments);

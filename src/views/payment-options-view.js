@@ -3,10 +3,9 @@
 var analytics = require('../lib/analytics');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var BaseView = require('./base-view');
-var fs = require('fs');
 var paymentOptionIDs = require('../constants').paymentOptionIDs;
 
-var paymentMethodOptionHTML = fs.readFileSync(__dirname + '/../html/payment-option.html', 'utf8');
+import paymentMethodOptionHTML from '../html/payment-option.html';
 
 function PaymentOptionsView() {
   BaseView.apply(this, arguments);
