@@ -1,17 +1,17 @@
 jest.mock('../../../src/lib/analytics');
 
+const fs = require('fs');
+const classList = require('@braintree/class-list');
 const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
-const PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
-const PaymentMethodsView = require('../../../src/views/payment-methods-view');
 const DropinError = require('../../../src/lib/dropin-error');
-const classList = require('@braintree/class-list');
+const PaymentMethodsView = require('../../../src/views/payment-methods-view');
+const PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 const fake = require('../../helpers/fake');
 const throwIfResolves = require('../../helpers/throw-if-resolves');
-const fs = require('fs');
 const strings = require('../../../src/translations/en_US');
 
-const mainHTML = fs.readFileSync(__dirname + '/../../../src/html/main.html', 'utf8');
+const mainHTML = fs.readFileSync(`${__dirname}/../../../src/html/main.html`, 'utf8');
 
 describe('PaymentMethodsView', () => {
   let testContext;
@@ -29,11 +29,11 @@ describe('PaymentMethodsView', () => {
       jest.spyOn(PaymentMethodsView.prototype, '_initialize').mockImplementation();
     });
 
-    test('inherits from BaseView', () => {
+    it('inherits from BaseView', () => {
       expect(new PaymentMethodsView({})).toBeInstanceOf(BaseView);
     });
 
-    test('calls _initialize', () => {
+    it('calls _initialize', () => {
       new PaymentMethodsView({}); // eslint-disable-line no-new
 
       expect(PaymentMethodsView.prototype._initialize).toBeCalledTimes(1);
@@ -41,7 +41,7 @@ describe('PaymentMethodsView', () => {
   });
 
   describe('_initialize', () => {
-    test('adds supported vaulted payment methods', () => {
+    it('adds supported vaulted payment methods', () => {
       let model, paymentMethodsViews;
       const modelOptions = fake.modelOptions();
 
@@ -69,7 +69,7 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test('puts default payment method as first item in list', () => {
+    it('puts default payment method as first item in list', () => {
       let firstChildLabel, model, paymentMethodsViews;
       const creditCard = {
         details: { cardType: 'Visa' },
@@ -101,7 +101,7 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test('does not add payment methods if there are none', () => {
+    it('does not add payment methods if there are none', () => {
       let model, methodsContainer, paymentMethodsViews;
       const modelOptions = fake.modelOptions();
 
@@ -123,78 +123,72 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test(
-      'changes the payment method view when the active payment method changes',
-      () => {
-        let model, paymentMethodsViews;
-        const fakePaymentMethod = { baz: 'qux' };
-        const modelOptions = fake.modelOptions();
+    it('changes the payment method view when the active payment method changes', () => {
+      let model, paymentMethodsViews;
+      const fakePaymentMethod = { baz: 'qux' };
+      const modelOptions = fake.modelOptions();
 
-        jest.useFakeTimers();
+      jest.useFakeTimers();
 
-        modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-        model = fake.model(modelOptions);
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      model = fake.model(modelOptions);
 
-        model.getVaultedPaymentMethods.mockResolvedValue([{ foo: 'bar' }, fakePaymentMethod]);
+      model.getVaultedPaymentMethods.mockResolvedValue([{ foo: 'bar' }, fakePaymentMethod]);
 
-        return model.initialize().then(() => {
-          model.changeActivePaymentMethod({ foo: 'bar' });
+      return model.initialize().then(() => {
+        model.changeActivePaymentMethod({ foo: 'bar' });
 
-          paymentMethodsViews = new PaymentMethodsView({
-            element: testContext.element,
-            model: model,
-            merchantConfiguration: {
-              authorization: fake.clientTokenWithCustomerID
-            },
-            strings: strings
-          });
-
-          paymentMethodsViews._addPaymentMethod(fakePaymentMethod);
-
-          model.changeActivePaymentMethod(fakePaymentMethod);
-
-          expect(paymentMethodsViews.activeMethodView.paymentMethod).toBe(fakePaymentMethod);
-          jest.advanceTimersByTime(1001);
-          expect(paymentMethodsViews.activeMethodView.element.className).toMatch('braintree-method--active');
-          jest.advanceTimersByTime();
+        paymentMethodsViews = new PaymentMethodsView({
+          element: testContext.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
         });
-      }
-    );
 
-    test(
-      'updates the paying with label when the active payment method changes',
-      () => {
-        let model, paymentMethodsViews;
-        const fakeCard = { type: 'CreditCard', details: { lastTwo: 22 }};
-        const fakePayPal = { type: 'PayPalAccount', details: { email: 'buyer@braintreepayments.com' }};
-        const modelOptions = fake.modelOptions();
+        paymentMethodsViews._addPaymentMethod(fakePaymentMethod);
 
-        modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-        model = fake.model(modelOptions);
+        model.changeActivePaymentMethod(fakePaymentMethod);
 
-        model.getVaultedPaymentMethods.mockResolvedValue([fakePayPal, fakeCard]);
+        expect(paymentMethodsViews.activeMethodView.paymentMethod).toBe(fakePaymentMethod);
+        jest.advanceTimersByTime(1001);
+        expect(paymentMethodsViews.activeMethodView.element.className).toMatch('braintree-method--active');
+        jest.advanceTimersByTime();
+      });
+    });
 
-        return model.initialize().then(() => {
-          paymentMethodsViews = new PaymentMethodsView({
-            element: testContext.element,
-            model: model,
-            merchantConfiguration: {
-              authorization: fake.clientTokenWithCustomerID
-            },
-            strings: strings
-          });
+    it('updates the paying with label when the active payment method changes', () => {
+      let model, paymentMethodsViews;
+      const fakeCard = { type: 'CreditCard', details: { lastTwo: 22 }};
+      const fakePayPal = { type: 'PayPalAccount', details: { email: 'buyer@braintreepayments.com' }};
+      const modelOptions = fake.modelOptions();
 
-          paymentMethodsViews._addPaymentMethod(fakePayPal);
-          paymentMethodsViews._addPaymentMethod(fakeCard);
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      model = fake.model(modelOptions);
 
-          model.changeActivePaymentMethod(fakeCard);
-          expect(paymentMethodsViews.getElementById('methods-label').textContent).toBe('Paying with Card');
+      model.getVaultedPaymentMethods.mockResolvedValue([fakePayPal, fakeCard]);
 
-          model.changeActivePaymentMethod(fakePayPal);
-          expect(paymentMethodsViews.getElementById('methods-label').textContent).toBe('Paying with PayPal');
+      return model.initialize().then(() => {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: testContext.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
         });
-      }
-    );
+
+        paymentMethodsViews._addPaymentMethod(fakePayPal);
+        paymentMethodsViews._addPaymentMethod(fakeCard);
+
+        model.changeActivePaymentMethod(fakeCard);
+        expect(paymentMethodsViews.getElementById('methods-label').textContent).toBe('Paying with Card');
+
+        model.changeActivePaymentMethod(fakePayPal);
+        expect(paymentMethodsViews.getElementById('methods-label').textContent).toBe('Paying with PayPal');
+      });
+    });
   });
 
   describe('_addPaymentMethod', () => {
@@ -209,37 +203,34 @@ describe('PaymentMethodsView', () => {
       };
     });
 
-    test(
-      'does not remove other payment methods in non-guest checkout',
-      () => {
-        let model, paymentMethodsViews;
-        const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
-        const modelOptions = fake.modelOptions();
+    it('does not remove other payment methods in non-guest checkout', () => {
+      let model, paymentMethodsViews;
+      const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
+      const modelOptions = fake.modelOptions();
 
-        modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-        model = fake.model(modelOptions);
+      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
+      model = fake.model(modelOptions);
 
-        model.getVaultedPaymentMethods.mockResolvedValue([testContext.fakePaymentMethod]);
+      model.getVaultedPaymentMethods.mockResolvedValue([testContext.fakePaymentMethod]);
 
-        return model.initialize().then(() => {
-          paymentMethodsViews = new PaymentMethodsView({
-            element: testContext.element,
-            model: model,
-            merchantConfiguration: {
-              authorization: fake.clientTokenWithCustomerID
-            },
-            strings: strings
-          });
-
-          model.addPaymentMethod({ foo: 'bar' });
-
-          expect(paymentMethodsViews.views.length).toBe(2);
-          expect(methodsContainer.childElementCount).toBe(2);
+      return model.initialize().then(() => {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: testContext.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
         });
-      }
-    );
 
-    test('removes unvaulted payment methods when adding a new payment method', () => {
+        model.addPaymentMethod({ foo: 'bar' });
+
+        expect(paymentMethodsViews.views.length).toBe(2);
+        expect(methodsContainer.childElementCount).toBe(2);
+      });
+    });
+
+    it('removes unvaulted payment methods when adding a new payment method', () => {
       const modelOptions = fake.modelOptions();
       const model = fake.model(modelOptions);
 
@@ -264,33 +255,30 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test(
-      'does not try to remove a payment method if none exists in guest checkout',
-      () => {
-        let model, paymentMethodsViews;
-        const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
-        const modelOptions = fake.modelOptions();
+    it('does not try to remove a payment method if none exists in guest checkout', () => {
+      let model, paymentMethodsViews;
+      const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
+      const modelOptions = fake.modelOptions();
 
-        modelOptions.merchantConfiguration.authorization = fake.clientToken;
-        model = fake.model(modelOptions);
+      modelOptions.merchantConfiguration.authorization = fake.clientToken;
+      model = fake.model(modelOptions);
 
-        return model.initialize().then(() => {
-          paymentMethodsViews = new PaymentMethodsView({
-            element: testContext.element,
-            model: model,
-            merchantConfiguration: {
-              authorization: fake.clientToken
-            },
-            strings: strings
-          });
-
-          model.addPaymentMethod({ foo: 'bar' });
-
-          expect(paymentMethodsViews.views.length).toBe(1);
-          expect(methodsContainer.childElementCount).toBe(1);
+      return model.initialize().then(() => {
+        paymentMethodsViews = new PaymentMethodsView({
+          element: testContext.element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientToken
+          },
+          strings: strings
         });
-      }
-    );
+
+        model.addPaymentMethod({ foo: 'bar' });
+
+        expect(paymentMethodsViews.views.length).toBe(1);
+        expect(methodsContainer.childElementCount).toBe(1);
+      });
+    });
   });
 
   describe('removeActivePaymentMethod', () => {
@@ -319,28 +307,25 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test('sets the active method view to not active', () => {
+    it('sets the active method view to not active', () => {
       testContext.paymentMethodsViews.removeActivePaymentMethod();
 
       expect(testContext.activeMethodView.setActive).toBeCalledTimes(1);
       expect(testContext.activeMethodView.setActive).toBeCalledWith(false);
     });
 
-    test('removes active method view from instance', () => {
+    it('removes active method view from instance', () => {
       testContext.paymentMethodsViews.removeActivePaymentMethod();
 
       expect(testContext.paymentMethodsViews.activeMethodView).toBeFalsy();
     });
 
-    test(
-      'applies class to heading label to hide it when no payment methods are selected',
-      () => {
-        testContext.paymentMethodsViews.removeActivePaymentMethod();
+    it('applies class to heading label to hide it when no payment methods are selected', () => {
+      testContext.paymentMethodsViews.removeActivePaymentMethod();
 
-        expect(classList.add).toBeCalledTimes(1);
-        expect(classList.add).toBeCalledWith(expect.anything(), 'braintree-no-payment-method-selected');
-      }
-    );
+      expect(classList.add).toBeCalledTimes(1);
+      expect(classList.add).toBeCalledWith(expect.anything(), 'braintree-no-payment-method-selected');
+    });
   });
 
   describe('_removePaymentMethod', () => {
@@ -379,7 +364,7 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test('removes specified payment method from views', () => {
+    it('removes specified payment method from views', () => {
       expect(testContext.paymentMethodsViews.views[0].paymentMethod).toBe(testContext.fakePaymentMethod);
 
       testContext.paymentMethodsViews._removePaymentMethod(testContext.fakePaymentMethod);
@@ -387,14 +372,14 @@ describe('PaymentMethodsView', () => {
       expect(testContext.paymentMethodsViews.views[0]).toBeFalsy();
     });
 
-    test('removes specified payment method div from DOM', () => {
+    it('removes specified payment method div from DOM', () => {
       testContext.paymentMethodsViews._removePaymentMethod(testContext.fakePaymentMethod);
 
       expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledTimes(1);
       expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledWith(testContext.element);
     });
 
-    test('ignores payment methods that are not the exact object', () => {
+    it('ignores payment methods that are not the exact object', () => {
       const copy = JSON.parse(JSON.stringify(testContext.fakePaymentMethod));
 
       testContext.paymentMethodsViews._removePaymentMethod(copy);
@@ -405,37 +390,34 @@ describe('PaymentMethodsView', () => {
   });
 
   describe('requestPaymentMethod', () => {
-    test(
-      'resolves a promise with the active payment method from the active method view',
-      () => {
-        let paymentMethodsViews;
-        const fakeActiveMethodView = {
-          paymentMethod: { foo: 'bar' }
-        };
-        const element = document.createElement('div');
-        const model = fake.model();
+    it('resolves a promise with the active payment method from the active method view', () => {
+      let paymentMethodsViews;
+      const fakeActiveMethodView = {
+        paymentMethod: { foo: 'bar' }
+      };
+      const element = document.createElement('div');
+      const model = fake.model();
 
-        return model.initialize().then(() => {
-          element.innerHTML = mainHTML;
-          paymentMethodsViews = new PaymentMethodsView({
-            element: element,
-            model: model,
-            merchantConfiguration: {
-              authorization: fake.clientTokenWithCustomerID
-            },
-            strings: strings
-          });
-
-          paymentMethodsViews.activeMethodView = fakeActiveMethodView;
-
-          return paymentMethodsViews.requestPaymentMethod();
-        }).then(payload => {
-          expect(payload).toBe(fakeActiveMethodView.paymentMethod);
+      return model.initialize().then(() => {
+        element.innerHTML = mainHTML;
+        paymentMethodsViews = new PaymentMethodsView({
+          element: element,
+          model: model,
+          merchantConfiguration: {
+            authorization: fake.clientTokenWithCustomerID
+          },
+          strings: strings
         });
-      }
-    );
 
-    test('rejects if there is no activeMethodView', () => {
+        paymentMethodsViews.activeMethodView = fakeActiveMethodView;
+
+        return paymentMethodsViews.requestPaymentMethod();
+      }).then(payload => {
+        expect(payload).toBe(fakeActiveMethodView.paymentMethod);
+      });
+    });
+
+    it('rejects if there is no activeMethodView', () => {
       let paymentMethodsViews;
       const element = document.createElement('div');
       const model = fake.model();
@@ -458,7 +440,7 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test('rejects if model is in edit mode', () => {
+    it('rejects if model is in edit mode', () => {
       let paymentMethodsViews;
       const fakeActiveMethodView = {
         paymentMethod: { foo: 'bar' }
@@ -489,7 +471,7 @@ describe('PaymentMethodsView', () => {
   });
 
   describe('enableEditMode', () => {
-    test('calls enableEditMode on each payment method view', () => {
+    it('calls enableEditMode on each payment method view', () => {
       let model, paymentMethodsViews;
       const modelOptions = fake.modelOptions();
       const element = document.createElement('div');
@@ -529,7 +511,7 @@ describe('PaymentMethodsView', () => {
   });
 
   describe('disableEditMode', () => {
-    test('calls disableEditMode on each payment method view', () => {
+    it('calls disableEditMode on each payment method view', () => {
       let model, paymentMethodsViews;
       const modelOptions = fake.modelOptions();
       const element = document.createElement('div');
@@ -603,7 +585,7 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test('removes all payment method views from container', () => {
+    it('removes all payment method views from container', () => {
       jest.spyOn(testContext.paymentMethodsViews.container, 'removeChild').mockImplementation();
 
       testContext.paymentMethodsViews.refreshPaymentMethods();
@@ -611,15 +593,12 @@ describe('PaymentMethodsView', () => {
       expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledTimes(3);
     });
 
-    test(
-      'calls addPaymentMethod for each payment method on the model',
-      () => {
-        jest.spyOn(testContext.paymentMethodsViews, '_addPaymentMethod').mockImplementation();
+    it('calls addPaymentMethod for each payment method on the model', () => {
+      jest.spyOn(testContext.paymentMethodsViews, '_addPaymentMethod').mockImplementation();
 
-        testContext.paymentMethodsViews.refreshPaymentMethods();
+      testContext.paymentMethodsViews.refreshPaymentMethods();
 
-        expect(testContext.paymentMethodsViews._addPaymentMethod).toBeCalledTimes(2);
-      }
-    );
+      expect(testContext.paymentMethodsViews._addPaymentMethod).toBeCalledTimes(2);
+    });
   });
 });

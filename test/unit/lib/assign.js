@@ -1,4 +1,3 @@
-
 const assignModule = require('../../../src/lib/assign');
 
 describe('assign', () => {
@@ -12,13 +11,13 @@ describe('assign', () => {
 });
 
 function runTest(assign) {
-  test('does nothing to one object', () => {
+  it('does nothing to one object', () => {
     const obj = { foo: 'bar' };
 
     expect(assign(obj)).toBe(obj);
   });
 
-  test('merges two objects', () => {
+  it('merges two objects', () => {
     const a = { foo: 'yas', bar: 'ugh' };
     const b = { foo: 'nope', baz: 'wow' };
 
@@ -29,7 +28,7 @@ function runTest(assign) {
     });
   });
 
-  test('merges three objects', () => {
+  it('merges three objects', () => {
     const a = { foo: 'yas', bar: 'ugh' };
     const b = { foo: 'nope' };
     const c = { foo: 'wow', baz: 'cool' };
@@ -41,14 +40,14 @@ function runTest(assign) {
     });
   });
 
-  test('returns the first object passed', () => {
+  it('returns the first object passed', () => {
     const a = { foo: 'yas', bar: 'ugh' };
     const b = { foo: 'nope', baz: 'wow' };
 
     expect(assign(a, b)).toBe(a);
   });
 
-  test("doesn't take inherited properties", () => {
+  it('doesn\'t take inherited properties', () => {
     let a, b;
 
     function Klass() {

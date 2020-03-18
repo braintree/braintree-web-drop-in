@@ -1,11 +1,8 @@
-
 const addSelectionEventHandler = require('../../../src/lib/add-selection-event-handler');
-const {
-  yields
-} = require('../../helpers/yields');
+const { yields } = require('../../helpers/yields');
 
 describe('addSelectionEventHandler', () => {
-  test('adds an event listener for click', () => {
+  it('adds an event listener for click', () => {
     const event = {};
     const element = {
       addEventListener: jest.fn().mockImplementation(yields(event))
@@ -18,7 +15,7 @@ describe('addSelectionEventHandler', () => {
     expect(func).toBeCalledWith(event);
   });
 
-  test('adds an event listener for keyup', () => {
+  it('adds an event listener for keyup', () => {
     const element = {
       addEventListener: jest.fn()
     };
@@ -29,7 +26,7 @@ describe('addSelectionEventHandler', () => {
     expect(element.addEventListener).toBeCalledWith('keyup', expect.any(Function));
   });
 
-  test('calls handler for keyup when key is enter', () => {
+  it('calls handler for keyup when key is enter', () => {
     const event = { keyCode: 13 };
     const element = {
       addEventListener: jest.fn()
@@ -47,7 +44,7 @@ describe('addSelectionEventHandler', () => {
     expect(func).toBeCalled();
   });
 
-  test('does not call handler for keyup when key is not enter', () => {
+  it('does not call handler for keyup when key is not enter', () => {
     const event = { keyCode: 26 };
     const element = {
       addEventListener: jest.fn()

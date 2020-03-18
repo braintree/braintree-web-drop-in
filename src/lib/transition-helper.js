@@ -1,7 +1,5 @@
 'use strict';
 
-var browserDetection = require('./browser-detection');
-
 function isHidden(element) {
   if (!element) { // no parentNode, so nothing containing the element is hidden
     return false;
@@ -15,7 +13,7 @@ function isHidden(element) {
 }
 
 function onTransitionEnd(element, propertyName, callback) {
-  if (browserDetection.isIe9() || isHidden(element)) {
+  if (isHidden(element)) {
     callback();
 
     return;

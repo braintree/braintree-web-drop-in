@@ -10,7 +10,6 @@
   },
   "globals":{
     "global": true,
-    "jest": true,
     "$": true,
     "$$": true,
     "browser": true
@@ -24,6 +23,7 @@
         "arraysInObjects": false,
         "objectsInObjects": false
       }
-    ]
+    ],
+    "no-console": 0
   }
 }
