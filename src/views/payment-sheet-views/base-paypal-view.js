@@ -10,7 +10,13 @@ var translations = require('../../translations').fiveCharacterLocales;
 var Promise = require('../../lib/promise');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
-var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale', 'flow'];
+var READ_ONLY_CONFIGURATION_OPTIONS = [
+  'commit',
+  'flow',
+  'intent',
+  'locale',
+  'offerCredit'
+];
 var DEFAULT_PAYPAL_SDK_LOG_LEVEL = 'warn';
 
 var paypalScriptLoadInProgressPromise;

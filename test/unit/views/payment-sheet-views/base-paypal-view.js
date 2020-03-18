@@ -954,6 +954,26 @@ describe('BasePayPalView', () => {
       expect(view.paypalConfiguration.flow).toBe('vault');
     });
 
+    it('ignores commit updates', () => {
+      const view = new BasePayPalView();
+
+      view.paypalConfiguration = { commit: true };
+
+      view.updateConfiguration('commit', false);
+
+      expect(view.paypalConfiguration.commit).toBe(true);
+    });
+
+    it('ignores intent updates', () => {
+      const view = new BasePayPalView();
+
+      view.paypalConfiguration = { intent: 'sale' };
+
+      view.updateConfiguration('intent', 'capture');
+
+      expect(view.paypalConfiguration.intent).toBe('sale');
+    });
+
     it('can set properties on paypal config', () => {
       const view = new BasePayPalView();
 
