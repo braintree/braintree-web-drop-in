@@ -17,7 +17,7 @@ var READ_ONLY_CONFIGURATION_OPTIONS = [
   'locale',
   'offerCredit'
 ];
-var DEFAULT_PAYPAL_SDK_LOG_LEVEL = 'warn';
+var DEFAULT_INTENT = 'authorize';
 
 var paypalScriptLoadInProgressPromise;
 
@@ -143,13 +143,35 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
 };
 
 BasePayPalView.prototype._loadPayPalSDK = function () {
+  var config = this.paypalConfiguration;
+
   if (!paypalScriptLoadInProgressPromise) {
-    paypalScriptLoadInProgressPromise = assets.loadScript({
-      src: constants.PAYPAL_SDK_JS_SOURCE,
-      id: constants.PAYPAL_SDK_SCRIPT_ID,
-      dataAttributes: {
-        'log-level': this.paypalConfiguration.logLevel || DEFAULT_PAYPAL_SDK_LOG_LEVEL
+    paypalScriptLoadInProgressPromise = this.paypalInstance.getClientId().then(function (id) {
+      var src = constants.PAYPAL_SDK_JS_SOURCE + '?client-id=' + id + '&components=buttons,funding-eligibility';
+      var intent = config.intent;
+
+      if (config.flow === 'vault') {
+        src += '&vault=true';
+      } else {
+        intent = intent || DEFAULT_INTENT;
       }
+
+      if (intent) {
+        src += '&intent=' + intent;
+      }
+
+      if (config.locale) {
+        src += '&locale=' + config.locale;
+      }
+
+      if (config.commit) {
+        src += '&commit=' + config.commit;
+      }
+
+      return assets.loadScript({
+        src: src,
+        id: constants.PAYPAL_SDK_SCRIPT_ID
+      });
     });
   }
 

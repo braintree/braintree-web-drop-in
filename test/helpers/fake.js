@@ -72,7 +72,8 @@ fakeBTInstances = {
   },
   paypal: {
     createPayment: function () {},
-    tokenizePayment: function () {}
+    tokenizePayment: function () {},
+    getClientId: function () {}
   },
   threeDSecure: {
     verifyCard: function () {},

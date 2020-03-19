@@ -53,7 +53,7 @@ module.exports = {
   ANALYTICS_REQUEST_TIMEOUT_MS: 2000,
   ANALYTICS_PREFIX: 'web.dropin.',
   CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT: 200,
-  PAYPAL_SDK_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.min.js',
+  PAYPAL_SDK_JS_SOURCE: 'https://www.paypal.com/sdk/js',
   GOOGLE_PAYMENT_SOURCE: 'https://pay.google.com/gp/p/js/pay.js',
   INTEGRATION: 'dropin2',
   PAYPAL_SDK_SCRIPT_ID: 'braintree-dropin-paypal-sdk-script',

@@ -54,7 +54,8 @@ describe('BasePayPalView', () => {
     };
     testContext.paypalInstance = {
       createPayment: jest.fn().mockResolvedValue(),
-      tokenizePayment: jest.fn().mockResolvedValue()
+      tokenizePayment: jest.fn().mockResolvedValue(),
+      getClientId: jest.fn().mockResolvedValue('client-id')
     };
     jest.spyOn(PayPalCheckout, 'create').mockResolvedValue(testContext.paypalInstance);
 
@@ -117,11 +118,61 @@ describe('BasePayPalView', () => {
       return testContext.view.initialize().then(() => {
         expect(assets.loadScript).toBeCalledTimes(1);
         expect(assets.loadScript).toBeCalledWith({
-          src: 'https://www.paypalobjects.com/api/checkout.min.js',
-          id: 'braintree-dropin-paypal-sdk-script',
-          dataAttributes: {
-            'log-level': 'warn'
-          }
+          src: expect.stringMatching('https://www.paypal.com/sdk/js\\?client-id=client-id&components=buttons,funding-eligibility'),
+          id: 'braintree-dropin-paypal-sdk-script'
+        });
+      });
+    });
+
+    it('adds vault param when using vault flow', () => {
+      testContext.model.merchantConfiguration.paypal.flow = 'vault';
+
+      return testContext.view.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons,funding-eligibility&vault=true',
+          id: 'braintree-dropin-paypal-sdk-script'
+        });
+      });
+    });
+
+    it('adds default intent PayPal SDK to page when using checkout flow', () => {
+      testContext.model.merchantConfiguration.paypal.flow = 'checkout';
+
+      return testContext.view.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons,funding-eligibility&intent=authorize',
+          id: 'braintree-dropin-paypal-sdk-script'
+        });
+      });
+    });
+
+    it('can override default intent in PayPal SDK', () => {
+      testContext.model.merchantConfiguration.paypal.flow = 'checkout';
+      testContext.model.merchantConfiguration.paypal.intent = 'sale';
+
+      return testContext.view.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons,funding-eligibility&intent=sale',
+          id: 'braintree-dropin-paypal-sdk-script'
+        });
+      });
+    });
+
+    it.each([
+      ['locale', 'es'],
+      ['commit', true],
+      ['intent', 'sale']
+    ])('adds %s param to PayPal SDK script if provided', (param, value) => {
+      testContext.model.merchantConfiguration.paypal[param] = value;
+
+      return testContext.view.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: expect.stringMatching(`&${param}=${value}`),
+          id: 'braintree-dropin-paypal-sdk-script'
         });
       });
     });
