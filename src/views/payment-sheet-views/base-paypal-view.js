@@ -76,6 +76,7 @@ BasePayPalView.prototype.initialize = function () {
       onError: reportError
     };
 
+    // TODO this logic should really be handled by the PayPal Credit view
     if (isCredit) {
       fundingSource = global.paypal.FUNDING.CREDIT;
       buttonSelector = '[data-braintree-id="paypal-credit-button"]';
