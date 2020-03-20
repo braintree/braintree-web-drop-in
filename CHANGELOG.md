@@ -21,6 +21,7 @@ _Breaking Changes_
   * PayPal Credit cannot be instantiated with the `vault` flow. When attempted, PayPal Credit will not appear as an option
   * PayPal and PayPal Credit cannot be instantiated with different flows (`vault` vs `checkout`). When attempted, PayPal Credit will not appear as an option
   * `logLevel` is no longer a supported property
+  * `style` is no longer a supported property
 * Vault Management changes
   * `vaultManager` configuration changes
     - cannot be used with tokenization keys
