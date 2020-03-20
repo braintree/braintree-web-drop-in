@@ -26,7 +26,7 @@ _Breaking Changes_
 
 unreleased
 ----------
-- Update braintree-web to v3.59.0
+- Update braintree-web to v3.60.0
 
 1.22.1
 ------
