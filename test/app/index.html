@@ -88,8 +88,8 @@
   <p>Update PayPal Configuration<p/>
 
   <div>
-    <input type="radio" name="flow" onclick="setFlow('vault')" id="paypal-config-vault" checked><label for="vault"> Use Vault flow</label><br>
-    <input type="radio" name="flow" onclick="setFlow('checkout')" id="paypal-config-checkout"><label for="checkout"> Use Checkout flow</label>
+    <input type="radio" name="flow" onclick="updateAmount('9.99')" id="paypal-config-9" checked><label for="vault"> Set Amount to $9.99</label><br>
+    <input type="radio" name="flow" onclick="updateAmount('1.00')" id="paypal-config-1"><label for="checkout"> Set Amount to $1.00</label>
   </div>
 </div>
 
@@ -274,21 +274,9 @@
     });
   }
 
-  function setFlow(flow) {
-    dropinInstance.updateConfiguration('paypal', 'flow', flow);
-    dropinInstance.updateConfiguration('paypalCredit', 'flow', flow);
-
-    if (flow === 'checkout') {
-      dropinInstance.updateConfiguration('paypal', 'amount', '9.99');
-      dropinInstance.updateConfiguration('paypal', 'currency', 'USD');
-      dropinInstance.updateConfiguration('paypalCredit', 'amount', '9.99');
-      dropinInstance.updateConfiguration('paypalCredit', 'currency', 'USD');
-    } else {
-      dropinInstance.updateConfiguration('paypal', 'amount', null);
-      dropinInstance.updateConfiguration('paypal', 'currency', null);
-      dropinInstance.updateConfiguration('paypalCredit', 'amount', null);
-      dropinInstance.updateConfiguration('paypalCredit', 'currency', null);
-    }
+  function updateAmount(amount) {
+    dropinInstance.updateConfiguration('paypal', 'amount', amount);
+    dropinInstance.updateConfiguration('paypalCredit', 'amount', amount);
   }
 
   createButton.addEventListener('click', createDropin);

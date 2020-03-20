@@ -95,7 +95,7 @@ browser.addCommand('hostedFieldSendInput', function (key, value) {
 browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
   const parentWindow = browser.getWindowHandle();
 
-  $('.braintree-sheet__button--paypal iframe.zoid-visible').click();
+  $('.braintree-sheet__button--paypal iframe.visible').click();
 
   browser.waitUntil(() => {
     return browser.getWindowHandles().length > 1;
@@ -172,6 +172,8 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
   browser.switchToWindow(parentWindow);
 
   browser.waitForElementToDissapear('.paypal-checkout-sandbox-iframe');
+
+  $('.braintree-methods--active').waitForDisplayed();
 });
 
 browser.addCommand('waitForElementToDissapear', function (selector) {
@@ -187,9 +189,9 @@ browser.addCommand('clickOption', function (type) {
 });
 
 browser.addCommand('submitPay', function (waitForResult = true) {
-  const button = $('input[type="submit"]');
+  $('input[type="submit"]').waitForEnabled();
 
-  button.click();
+  $('input[type="submit"]').click();
 
   if (waitForResult) {
     // to not resolve submitPay until result is finished

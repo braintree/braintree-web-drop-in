@@ -17,7 +17,7 @@ describe('Drop-in#updateConfiguration', function () {
       showUpdatePayPalMenu: true
     });
 
-    $('#paypal-config-checkout').click();
+    $('#paypal-config-1').click();
 
     browser.clickOption('paypal');
 
@@ -25,7 +25,7 @@ describe('Drop-in#updateConfiguration', function () {
       expect($('body').getHTML().toLowerCase()).to.not.include('future payments');
     });
 
-    $('#paypal-config-vault').click();
+    $('#paypal-config-9').click();
     browser.clickOption('paypal');
 
     browser.openPayPalAndCompleteLogin(function () {
@@ -45,7 +45,7 @@ describe('Drop-in#updateConfiguration', function () {
       showUpdatePayPalMenu: true
     });
 
-    $('#paypal-config-checkout').click();
+    $('#paypal-config-1').click();
 
     browser.clickOption('paypalCredit');
 
@@ -53,7 +53,7 @@ describe('Drop-in#updateConfiguration', function () {
       expect($('body').getHTML().toLowerCase()).to.not.include('future payments');
     });
 
-    $('#paypal-config-vault').click();
+    $('#paypal-config-9').click();
     browser.clickOption('paypalCredit');
 
     browser.openPayPalAndCompleteLogin(function () {
@@ -73,7 +73,7 @@ describe('Drop-in#updateConfiguration', function () {
       showUpdatePayPalMenu: true
     });
 
-    $('#paypal-config-checkout').click();
+    $('#paypal-config-1').click();
 
     browser.clickOption('paypal');
 
@@ -81,7 +81,7 @@ describe('Drop-in#updateConfiguration', function () {
 
     expect(browser.dropin().getHTML()).to.include(process.env.PAYPAL_USERNAME);
 
-    $('#paypal-config-vault').click();
+    $('#paypal-config-9').click();
 
     expect(browser.dropin().getHTML()).to.not.include(process.env.PAYPAL_USERNAME);
   });
