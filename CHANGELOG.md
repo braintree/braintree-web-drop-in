@@ -17,7 +17,7 @@ _Breaking Changes_
     - Previously, postal code would only be presented as a field if merchant had the [postal code AVS rule configured in the control panel](https://articles.braintreepayments.com/guides/fraud-tools/basic/avs-cvv-rules). Now postal code will not be presented unless it is specifically enabled by passing `card.postalCode = { collect: true }`
 * PayPal/PayPal Credit view changes
   * Update PayPal SDK from v4 to v5
-  * `updateConfiguration` can no longer update the `commit`, `flow`, or `intent` in the PayPal config
+  * `updateConfiguration` can no longer update the `commit`, `currency`, `flow`, or `intent` in the PayPal config
   * PayPal Credit cannot be instantiated with the `vault` flow. When attempted, PayPal Credit will not appear as an option
   * PayPal and PayPal Credit cannot be instantiated with different flows (`vault` vs `checkout`). When attempted, PayPal Credit will not appear as an option
   * `logLevel` is no longer a supported property

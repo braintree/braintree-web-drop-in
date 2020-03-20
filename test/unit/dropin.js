@@ -81,9 +81,10 @@ describe('Dropin', () => {
         FUNDING: {
           PAYPAL: 'paypal'
         },
-        Button: {
+        Buttons: jest.fn().mockReturnValue({
+          isEligible: jest.fn().mockReturnValue(true),
           render: jest.fn().mockResolvedValue()
-        },
+        }),
         setup: jest.fn()
       };
 

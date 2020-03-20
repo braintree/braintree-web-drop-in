@@ -19,11 +19,15 @@ describe('BasePayPalView', () => {
   let testContext;
 
   beforeEach(() => {
-    testContext = {};
+    testContext = {
+      render: jest.fn().mockResolvedValue(),
+      isEligible: jest.fn().mockReturnValue(true)
+    };
     testContext.paypal = {
-      Button: {
-        render: jest.fn().mockResolvedValue()
-      },
+      Buttons: jest.fn().mockReturnValue({
+        isEligible: testContext.isEligible,
+        render: testContext.render
+      }),
       setup: jest.fn(),
       FUNDING: {
         FOO: 'foo',
@@ -118,7 +122,7 @@ describe('BasePayPalView', () => {
       return testContext.view.initialize().then(() => {
         expect(assets.loadScript).toBeCalledTimes(1);
         expect(assets.loadScript).toBeCalledWith({
-          src: expect.stringMatching('https://www.paypal.com/sdk/js\\?client-id=client-id&components=buttons,funding-eligibility'),
+          src: expect.stringMatching('https://www.paypal.com/sdk/js\\?client-id=client-id&components=buttons'),
           id: 'braintree-dropin-paypal-sdk-script'
         });
       });
@@ -130,7 +134,7 @@ describe('BasePayPalView', () => {
       return testContext.view.initialize().then(() => {
         expect(assets.loadScript).toBeCalledTimes(1);
         expect(assets.loadScript).toBeCalledWith({
-          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons,funding-eligibility&vault=true',
+          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons&vault=true',
           id: 'braintree-dropin-paypal-sdk-script'
         });
       });
@@ -142,7 +146,7 @@ describe('BasePayPalView', () => {
       return testContext.view.initialize().then(() => {
         expect(assets.loadScript).toBeCalledTimes(1);
         expect(assets.loadScript).toBeCalledWith({
-          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons,funding-eligibility&intent=authorize',
+          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons&intent=authorize',
           id: 'braintree-dropin-paypal-sdk-script'
         });
       });
@@ -155,15 +159,15 @@ describe('BasePayPalView', () => {
       return testContext.view.initialize().then(() => {
         expect(assets.loadScript).toBeCalledTimes(1);
         expect(assets.loadScript).toBeCalledWith({
-          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons,funding-eligibility&intent=sale',
+          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons&intent=sale',
           id: 'braintree-dropin-paypal-sdk-script'
         });
       });
     });
 
     it.each([
-      ['locale', 'es'],
       ['commit', true],
+      ['currency', 'usd'],
       ['intent', 'sale']
     ])('adds %s param to PayPal SDK script if provided', (param, value) => {
       testContext.model.merchantConfiguration.paypal[param] = value;
@@ -174,6 +178,34 @@ describe('BasePayPalView', () => {
           src: expect.stringMatching(`&${param}=${value}`),
           id: 'braintree-dropin-paypal-sdk-script'
         });
+      });
+    });
+
+    it('passes locale from merchant configuration', () => {
+      testContext.model.merchantConfiguration.locale = 'da_DK';
+
+      return testContext.view.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons&vault=true&locale=da_DK',
+          id: 'braintree-dropin-paypal-sdk-script'
+        });
+
+        expect(testContext.view.paypalConfiguration.locale).toBe('da_DK');
+      });
+    });
+
+    it('only passes locale if it is a suported locale', () => {
+      testContext.model.merchantConfiguration.locale = 'foo';
+
+      return testContext.view.initialize().then(() => {
+        expect(assets.loadScript).toBeCalledTimes(1);
+        expect(assets.loadScript).toBeCalledWith({
+          src: 'https://www.paypal.com/sdk/js?client-id=client-id&components=buttons&vault=true',
+          id: 'braintree-dropin-paypal-sdk-script'
+        });
+
+        expect(testContext.view.paypalConfiguration.locale).toBeUndefined();
       });
     });
 
@@ -219,173 +251,33 @@ describe('BasePayPalView', () => {
       expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
     });
 
-    it('calls paypal.Button.render', () => {
+    it('renders the PayPal button', () => {
       return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledTimes(1);
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-button"]');
+        expect(testContext.paypal.Buttons).toBeCalledTimes(1);
+        expect(testContext.paypal.Buttons).toBeCalledWith(expect.objectContaining({
+          fundingSource: 'paypal'
+        }));
+        expect(testContext.render).toBeCalledTimes(1);
+        expect(testContext.render).toBeCalledWith('[data-braintree-id="paypal-button"]');
       });
     });
 
-    it('can style the PayPal button', () => {
-      testContext.view.model.merchantConfiguration.paypal.buttonStyle = {
-        size: 'medium',
-        color: 'orange',
-        shape: 'rect'
-      };
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          style: {
-            size: 'medium',
-            color: 'orange',
-            shape: 'rect'
-          }
-        }), expect.any(String));
-      });
-    });
-
-    it('can style the PayPal Credit button', () => {
-      testContext.view.model.merchantConfiguration.paypalCredit = testContext.view.model.merchantConfiguration.paypal;
-      testContext.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
-        size: 'medium',
-        color: 'orange',
-        shape: 'rect'
+    it('renders the PayPal credit button', () => {
+      testContext.model.merchantConfiguration.paypalCredit = {
+        flow: 'checkout',
+        amount: '10.00',
+        currency: 'USD',
+        offerCredit: false
       };
       testContext.view._isPayPalCredit = true;
 
       return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          style: {
-            size: 'medium',
-            color: 'orange',
-            shape: 'rect',
-            label: 'credit'
-          }
-        }), expect.any(String));
-      });
-    });
-
-    it('cannot style label for PayPal Credit', () => {
-      testContext.view.model.merchantConfiguration.paypalCredit = testContext.view.model.merchantConfiguration.paypal;
-      testContext.view.model.merchantConfiguration.paypalCredit.buttonStyle = {
-        label: 'buynow'
-      };
-      testContext.view._isPayPalCredit = true;
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          style: {
-            label: 'credit'
-          }
-        }), expect.any(String));
-      });
-    });
-
-    it('dissallows all non-paypal payment methods', () => {
-      testContext.view.model.merchantConfiguration.paypal = testContext.view.model.merchantConfiguration.paypal;
-      testContext.view._isPayPalCredit = false;
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          funding: {
-            disallowed: [
-              'foo',
-              'venmo',
-              'credit'
-            ]
-          }
-        }), expect.any(String));
-      });
-    });
-
-    it('dissallows all funcing but credit for paypal credit', () => {
-      testContext.view.model.merchantConfiguration.paypalCredit = testContext.view.model.merchantConfiguration.paypal;
-      testContext.view._isPayPalCredit = true;
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          funding: {
-            disallowed: [
-              'foo',
-              'venmo'
-            ]
-          }
-        }), expect.any(String));
-      });
-    });
-
-    it('can set user action to commit for the PayPal button', () => {
-      testContext.view.model.merchantConfiguration.paypal.commit = true;
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          commit: true
-        }), expect.any(String));
-      });
-    });
-
-    it('can set user action to continue for the PayPal button', () => {
-      testContext.view.model.merchantConfiguration.paypal.commit = false;
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          commit: false
-        }), expect.any(String));
-      });
-    });
-
-    it('sets paypal-checkout.js environment to production when gatewayConfiguration is production', () => {
-      testContext.view.model.environment = 'production';
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          env: 'production'
-        }), expect.any(String));
-      });
-    });
-
-    it('sets paypal-checkout.js environment to sandbox when gatewayConfiguration is not production', () => {
-      testContext.view.model.environment = 'development';
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          env: 'sandbox'
-        }), expect.any(String));
-      });
-    });
-
-    it('calls paypalInstance.createPayment with a locale if one is provided', () => {
-      const localeCode = 'fr_FR';
-      const paypalInstance = testContext.paypalInstance;
-      const model = testContext.model;
-
-      model.merchantConfiguration.locale = localeCode;
-
-      testContext.paypal.Button.render.mockResolvedValue();
-
-      return testContext.view.initialize().then(() => {
-        const paymentFunction = testContext.paypal.Button.render.mock.calls[0][0].payment;
-
-        return paymentFunction().then(() => {
-          expect(paypalInstance.createPayment).toBeCalledTimes(1);
-          expect(paypalInstance.createPayment).toBeCalledWith(expect.objectContaining({
-            locale: 'fr_FR'
-          }));
-        });
-      });
-    });
-
-    it('calls paypal.Button.render with a locale if one is provided', () => {
-      const localeCode = 'fr_FR';
-      const model = testContext.model;
-      const view = testContext.view;
-
-      model.merchantConfiguration.locale = localeCode;
-
-      return view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-          locale: 'fr_FR'
-        }), expect.any(String));
+        expect(testContext.paypal.Buttons).toBeCalledTimes(1);
+        expect(testContext.paypal.Buttons).toBeCalledWith(expect.objectContaining({
+          fundingSource: 'credit'
+        }));
+        expect(testContext.render).toBeCalledTimes(1);
+        expect(testContext.render).toBeCalledWith('[data-braintree-id="paypal-credit-button"]');
       });
     });
 
@@ -396,10 +288,10 @@ describe('BasePayPalView', () => {
 
       model.merchantConfiguration.locale = invalidLocaleCode;
 
-      testContext.paypal.Button.render.mockResolvedValue();
+      testContext.render.mockResolvedValue();
 
       return testContext.view.initialize().then(() => {
-        const paymentFunction = testContext.paypal.Button.render.mock.calls[0][0].payment;
+        const paymentFunction = testContext.paypal.Buttons.mock.calls[0][0].createBillingAgreement;
 
         return paymentFunction().then(() => {
           expect(paypalInstance.createPayment).toBeCalledTimes(1);
@@ -407,21 +299,6 @@ describe('BasePayPalView', () => {
             locale: invalidLocaleCode
           }));
         });
-      });
-    });
-
-    it('does not call paypal.Button.render with locale when an invalid locale is provided', () => {
-      const invalidLocaleCode = 'en_FOO';
-      const model = testContext.model;
-      const view = testContext.view;
-
-      model.merchantConfiguration.locale = invalidLocaleCode;
-
-      return view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledTimes(1);
-        expect(testContext.paypal.Button.render).not.toBeCalledWith(expect.objectContaining({
-          locale: invalidLocaleCode
-        }));
       });
     });
 
@@ -432,10 +309,10 @@ describe('BasePayPalView', () => {
 
       model.merchantConfiguration.locale = invalidLocaleCode;
 
-      testContext.paypal.Button.render.mockResolvedValue();
+      testContext.render.mockResolvedValue();
 
       return testContext.view.initialize().then(() => {
-        const paymentFunction = testContext.paypal.Button.render.mock.calls[0][0].payment;
+        const paymentFunction = testContext.paypal.Buttons.mock.calls[0][0].createBillingAgreement;
 
         return paymentFunction().then(() => {
           expect(paypalInstance.createPayment).toBeCalledTimes(1);
@@ -446,31 +323,20 @@ describe('BasePayPalView', () => {
       });
     });
 
-    it('does not call paypal.Button.render with locale when 2 character locale is provided', () => {
-      const invalidLocaleCode = 'fr';
-      const model = testContext.model;
-      const view = testContext.view;
-
-      model.merchantConfiguration.locale = invalidLocaleCode;
-
-      return view.initialize().then(() => {
-        expect(testContext.paypal.Button.render).toBeCalledTimes(1);
-        expect(testContext.paypal.Button.render).not.toBeCalledWith(expect.objectContaining({
-          locale: invalidLocaleCode
-        }));
-      });
-    });
-
-    it('reports errors from createPayment', () => {
+    it.each([
+      ['createBillingAgreement', 'vault'],
+      ['createOrder', 'checkout']
+    ], 'reports errors from %s', (functionName, flow) => {
       const model = testContext.model;
       const error = new Error('create payment error');
 
       testContext.paypalInstance.createPayment.mockRejectedValue(error);
+      model.merchantConfiguration.paypal.flow = flow;
 
-      testContext.paypal.Button.render.mockResolvedValue();
+      testContext.render.mockResolvedValue();
 
       return testContext.view.initialize().then(() => {
-        const paymentFunction = testContext.paypal.Button.render.mock.calls[0][0].payment;
+        const paymentFunction = testContext.paypal.Buttons.mock.calls[0][0][functionName];
 
         return paymentFunction().then(() => {
           expect(model.reportError).toBeCalledTimes(1);
@@ -479,17 +345,32 @@ describe('BasePayPalView', () => {
       });
     });
 
-    it('reports errors from paypal.Button.render', () => {
+    it('reports errors from render', () => {
       const error = new Error('setup error');
 
       jest.spyOn(testContext.model, 'asyncDependencyFailed').mockImplementation();
-      testContext.paypal.Button.render.mockRejectedValue(error);
+      testContext.render.mockRejectedValue(error);
 
       return testContext.view.initialize().then(() => {
         expect(testContext.model.asyncDependencyFailed).toBeCalledTimes(1);
         expect(testContext.model.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
           view: testContext.view.ID,
           error: error
+        }));
+      });
+    });
+
+    it('reports errors from button not being elligible', () => {
+      jest.spyOn(testContext.model, 'asyncDependencyFailed').mockImplementation();
+      testContext.isEligible.mockReturnValue(false);
+
+      return testContext.view.initialize().then(() => {
+        expect(testContext.model.asyncDependencyFailed).toBeCalledTimes(1);
+        expect(testContext.model.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
+          view: testContext.view.ID,
+          error: expect.objectContaining({
+            message: 'Merchant not elligible for PayPal'
+          })
         }));
       });
     });
@@ -504,10 +385,10 @@ describe('BasePayPalView', () => {
       paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
       jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-      testContext.paypal.Button.render.mockResolvedValue();
+      testContext.render.mockResolvedValue();
 
       testContext.view.initialize().then(() => {
-        const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+        const onAuthFunction = testContext.paypal.Buttons.mock.calls[0][0].onApprove;
         const tokenizeOptions = {
           foo: 'bar'
         };
@@ -540,10 +421,10 @@ describe('BasePayPalView', () => {
         paypalInstance.paypalConfiguration = { flow: 'vault' };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-        testContext.paypal.Button.render.mockResolvedValue();
+        testContext.render.mockResolvedValue();
 
         testContext.view.initialize().then(() => {
-          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const onAuthFunction = testContext.paypal.Buttons.mock.calls[0][0].onApprove;
           const tokenizeOptions = {
             data: 'bar'
           };
@@ -584,13 +465,13 @@ describe('BasePayPalView', () => {
         };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-        testContext.paypal.Button.render.mockResolvedValue();
+        testContext.render.mockResolvedValue();
 
         model.merchantConfiguration.paypal.vault = {
           autoVault: true
         };
         testContext.view.initialize().then(() => {
-          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const onAuthFunction = testContext.paypal.Buttons.mock.calls[0][0].onApprove;
           const tokenizeOptions = {
             data: 'bar'
           };
@@ -615,46 +496,45 @@ describe('BasePayPalView', () => {
         });
       });
 
-    it('does not add `vaulted: true` to the tokenization payload if flow is vault but global auto-vaulting is not enabled',
-      done => {
-        const paypalInstance = testContext.paypalInstance;
-        const model = testContext.model;
-        const fakePayload = {
-          foo: 'bar'
+    it('does not add `vaulted: true` to the tokenization payload if flow is vault but global auto-vaulting is not enabled', done => {
+      const paypalInstance = testContext.paypalInstance;
+      const model = testContext.model;
+      const fakePayload = {
+        foo: 'bar'
+      };
+
+      model.vaultManagerConfig.autoVaultPaymentMethods = false;
+
+      paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
+      paypalInstance.paypalConfiguration = { flow: 'vault' };
+      jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+      testContext.render.mockResolvedValue();
+
+      testContext.view.initialize().then(() => {
+        const onAuthFunction = testContext.paypal.Buttons.mock.calls[0][0].onApprove;
+        const tokenizeOptions = {
+          data: 'bar'
         };
 
-        model.vaultManagerConfig.autoVaultPaymentMethods = false;
+        onAuthFunction(tokenizeOptions);
 
-        paypalInstance.tokenizePayment.mockResolvedValue(fakePayload);
-        paypalInstance.paypalConfiguration = { flow: 'vault' };
-        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+        expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+        expect(paypalInstance.tokenizePayment).toBeCalledWith({
+          data: 'bar',
+          vault: false
+        });
 
-        testContext.paypal.Button.render.mockResolvedValue();
-
-        testContext.view.initialize().then(() => {
-          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
-          const tokenizeOptions = {
-            data: 'bar'
-          };
-
-          onAuthFunction(tokenizeOptions);
-
-          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
-          expect(paypalInstance.tokenizePayment).toBeCalledWith({
-            data: 'bar',
-            vault: false
+        setTimeout(() => {
+          expect(model.addPaymentMethod).toBeCalledTimes(1);
+          expect(model.addPaymentMethod).toBeCalledWith({
+            foo: 'bar'
           });
 
-          setTimeout(() => {
-            expect(model.addPaymentMethod).toBeCalledTimes(1);
-            expect(model.addPaymentMethod).toBeCalledWith({
-              foo: 'bar'
-            });
-
-            done();
-          }, 100);
-        });
+          done();
+        }, 100);
       });
+    });
 
     it('does not add `vaulted: true` to the tokenization payload if flow is vault and global auto-vaulting is enabled enabled but local autoVault setting is false',
       done => {
@@ -673,10 +553,10 @@ describe('BasePayPalView', () => {
         paypalInstance.paypalConfiguration = { flow: 'vault' };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-        testContext.paypal.Button.render.mockResolvedValue();
+        testContext.render.mockResolvedValue();
 
         testContext.view.initialize().then(() => {
-          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const onAuthFunction = testContext.paypal.Buttons.mock.calls[0][0].onApprove;
           const tokenizeOptions = {
             data: 'bar'
           };
@@ -712,10 +592,10 @@ describe('BasePayPalView', () => {
         model.merchantConfiguration.paypal = { flow: 'checkout' };
         jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-        testContext.paypal.Button.render.mockResolvedValue();
+        testContext.render.mockResolvedValue();
 
         testContext.view.initialize().then(() => {
-          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const onAuthFunction = testContext.paypal.Buttons.mock.calls[0][0].onApprove;
           const tokenizeOptions = {
             data: 'bar'
           };
@@ -745,10 +625,10 @@ describe('BasePayPalView', () => {
       paypalInstance.tokenizePayment.mockRejectedValue(error);
       jest.spyOn(model, 'addPaymentMethod').mockImplementation();
 
-      testContext.paypal.Button.render.mockResolvedValue();
+      testContext.render.mockResolvedValue();
 
       testContext.view.initialize().then(() => {
-        const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+        const onAuthFunction = testContext.paypal.Buttons.mock.calls[0][0].onApprove;
         const tokenizeOptions = {
           foo: 'bar'
         };
@@ -767,10 +647,10 @@ describe('BasePayPalView', () => {
     it('reports errors from paypal-checkout', () => {
       const model = testContext.model;
 
-      testContext.paypal.Button.render.mockResolvedValue();
+      testContext.render.mockResolvedValue();
 
       return testContext.view.initialize().then(() => {
-        const onErrorFunction = testContext.paypal.Button.render.mock.calls[0][0].onError;
+        const onErrorFunction = testContext.paypal.Buttons.mock.calls[0][0].onError;
         const err = new Error('Some error');
 
         onErrorFunction(err);
@@ -785,14 +665,14 @@ describe('BasePayPalView', () => {
         const model = testContext.model;
 
         jest.spyOn(model, 'asyncDependencyFailed').mockImplementation();
-        testContext.paypal.Button.render.mockReturnValue({
+        testContext.render.mockReturnValue({
           then: jest.fn()
         });
 
         testContext.view.initialize();
 
         setTimeout(() => {
-          const onErrorFunction = testContext.paypal.Button.render.mock.calls[0][0].onError;
+          const onErrorFunction = testContext.paypal.Buttons.mock.calls[0][0].onError;
           const err = new Error('Some error');
 
           onErrorFunction(err);
@@ -836,7 +716,7 @@ describe('BasePayPalView', () => {
 
       it('uses the PayPal button selector', () => {
         return testContext.view.initialize().then(() => {
-          expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-button"]');
+          expect(testContext.render).toBeCalledWith('[data-braintree-id="paypal-button"]');
         });
       });
     });
@@ -895,24 +775,6 @@ describe('BasePayPalView', () => {
         });
       });
 
-      it('uses the PayPal Credit button selector', () => {
-        testContext.view._isPayPalCredit = true;
-
-        return testContext.view.initialize().then(() => {
-          expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-credit-button"]');
-        });
-      });
-
-      it('includes credit style in button configuration', () => {
-        testContext.view._isPayPalCredit = true;
-
-        return testContext.view.initialize().then(() => {
-          expect(testContext.paypal.Button.render).toBeCalledWith(expect.objectContaining({
-            style: { label: 'credit' }
-          }), expect.any(String));
-        });
-      });
-
       it('times out if the async dependency is never ready', done => {
         const paypalError = new DropinError('There was an error connecting to PayPal.');
 
@@ -920,7 +782,7 @@ describe('BasePayPalView', () => {
 
         jest.spyOn(DropinModel.prototype, 'asyncDependencyFailed').mockImplementation();
 
-        testContext.paypal.Button.render.mockRejectedValue();
+        testContext.render.mockRejectedValue();
 
         testContext.view.initialize().then(() => {
           expect(DropinModel.prototype.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
@@ -940,7 +802,7 @@ describe('BasePayPalView', () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyFailed').mockImplementation();
 
         PayPalCheckout.create.mockResolvedValue(testContext.paypalInstance);
-        testContext.paypal.Button.render.mockResolvedValue();
+        testContext.render.mockResolvedValue();
 
         return testContext.view.initialize().then(() => {
           jest.advanceTimersByTime(10);
@@ -958,7 +820,7 @@ describe('BasePayPalView', () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyFailed').mockImplementation();
 
         PayPalCheckout.create.mockResolvedValue(testContext.paypalInstance);
-        testContext.paypal.Button.render.mockRejectedValue();
+        testContext.render.mockRejectedValue();
 
         return testContext.view.initialize().then(() => {
           jest.advanceTimersByTime(300500);
@@ -1015,6 +877,16 @@ describe('BasePayPalView', () => {
       expect(view.paypalConfiguration.commit).toBe(true);
     });
 
+    it('ignores currency updates', () => {
+      const view = new BasePayPalView();
+
+      view.paypalConfiguration = { currency: 'usd' };
+
+      view.updateConfiguration('currency', 'eur');
+
+      expect(view.paypalConfiguration.currency).toBe('usd');
+    });
+
     it('ignores intent updates', () => {
       const view = new BasePayPalView();
 
@@ -1034,12 +906,10 @@ describe('BasePayPalView', () => {
       };
 
       view.updateConfiguration('amount', '5.32');
-      view.updateConfiguration('currency', 'USD');
 
       expect(view.paypalConfiguration).toEqual({
         flow: 'vault',
-        amount: '5.32',
-        currency: 'USD'
+        amount: '5.32'
       });
     });
 

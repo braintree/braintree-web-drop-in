@@ -12,6 +12,7 @@ var Promise = require('../../lib/promise');
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = [
   'commit',
+  'currency',
   'flow',
   'intent',
   'locale',
@@ -57,17 +58,9 @@ BasePayPalView.prototype.initialize = function () {
 
     return self._loadPayPalSDK();
   }).then(function () {
-    var buttonSelector = '[data-braintree-id="paypal-button"]';
-    var environment = self.model.environment === 'production' ? 'production' : 'sandbox';
-    var locale = self.model.merchantConfiguration.locale;
-    var checkoutJSConfiguration = {
-      env: environment,
-      style: self.paypalConfiguration.buttonStyle || {},
-      commit: self.paypalConfiguration.commit,
-      payment: function () {
-        return self.paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
-      },
-      onAuthorize: function (data) {
+    var button, fundingSource, buttonSelector;
+    var buttonConfig = {
+      onApprove: function (data) {
         var shouldVault = self._shouldVault();
 
         data.vault = shouldVault;
@@ -79,32 +72,33 @@ BasePayPalView.prototype.initialize = function () {
           self.model.addPaymentMethod(tokenizePayload);
         }).catch(reportError);
       },
+
       onError: reportError
     };
 
-    if (locale && locale in translations) {
-      self.paypalConfiguration.locale = locale;
-      checkoutJSConfiguration.locale = locale;
-    }
-    checkoutJSConfiguration.funding = {
-      disallowed: []
-    };
-
-    Object.keys(global.paypal.FUNDING).forEach(function (key) {
-      if (key === 'PAYPAL' || key === 'CREDIT') {
-        return;
-      }
-      checkoutJSConfiguration.funding.disallowed.push(global.paypal.FUNDING[key]);
-    });
-
     if (isCredit) {
+      fundingSource = global.paypal.FUNDING.CREDIT;
       buttonSelector = '[data-braintree-id="paypal-credit-button"]';
-      checkoutJSConfiguration.style.label = 'credit';
     } else {
-      checkoutJSConfiguration.funding.disallowed.push(global.paypal.FUNDING.CREDIT);
+      fundingSource = global.paypal.FUNDING.PAYPAL;
+      buttonSelector = '[data-braintree-id="paypal-button"]';
     }
 
-    return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
+    buttonConfig.fundingSource = fundingSource;
+
+    if (paypalConfiguration.flow === 'vault') {
+      buttonConfig.createBillingAgreement = self._createPaymentResourceHandler(reportError);
+    } else {
+      buttonConfig.createOrder = self._createPaymentResourceHandler(reportError);
+    }
+
+    button = global.paypal.Buttons(buttonConfig); // eslint-disable-line new-cap
+
+    if (!button.isEligible()) {
+      return Promise.reject(new DropinError('Merchant not elligible for PayPal'));
+    }
+
+    return button.render(buttonSelector).then(function () {
       self.model.asyncDependencyReady();
       setupComplete = true;
       clearTimeout(asyncDependencyTimeoutHandler);
@@ -142,30 +136,42 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
   }
 };
 
+BasePayPalView.prototype._createPaymentResourceHandler = function (reportError) {
+  var self = this;
+
+  return function () {
+    return self.paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
+  };
+};
+
 BasePayPalView.prototype._loadPayPalSDK = function () {
   var config = this.paypalConfiguration;
+  var locale = this.model.merchantConfiguration.locale;
 
   if (!paypalScriptLoadInProgressPromise) {
     paypalScriptLoadInProgressPromise = this.paypalInstance.getClientId().then(function (id) {
-      var src = constants.PAYPAL_SDK_JS_SOURCE + '?client-id=' + id + '&components=buttons,funding-eligibility';
+      var src = constants.PAYPAL_SDK_JS_SOURCE + '?client-id=' + id + '&components=buttons';
       var intent = config.intent;
 
+      function updateSrc(param, value) {
+        if (value) {
+          src += '&' + param + '=' + value;
+        }
+      }
+
       if (config.flow === 'vault') {
-        src += '&vault=true';
+        updateSrc('vault', 'true');
       } else {
         intent = intent || DEFAULT_INTENT;
       }
 
-      if (intent) {
-        src += '&intent=' + intent;
-      }
+      updateSrc('intent', intent);
+      updateSrc('commit', config.commit);
+      updateSrc('currency', config.currency);
 
-      if (config.locale) {
-        src += '&locale=' + config.locale;
-      }
-
-      if (config.commit) {
-        src += '&commit=' + config.commit;
+      if (locale in translations) {
+        config.locale = locale;
+        updateSrc('locale', locale);
       }
 
       return assets.loadScript({
