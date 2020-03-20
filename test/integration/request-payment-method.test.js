@@ -107,7 +107,6 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-
       expect($('[data-braintree-id="methods-label"]').getHTML()).to.include('Paying with PayPal');
 
       const result = browser.getResult();

@@ -96,7 +96,7 @@ BasePayPalView.prototype.initialize = function () {
     button = global.paypal.Buttons(buttonConfig); // eslint-disable-line new-cap
 
     if (!button.isEligible()) {
-      return Promise.reject(new DropinError('Merchant not elligible for PayPal'));
+      return Promise.reject(new DropinError('Merchant not eligible for PayPal'));
     }
 
     return button.render(buttonSelector).then(function () {

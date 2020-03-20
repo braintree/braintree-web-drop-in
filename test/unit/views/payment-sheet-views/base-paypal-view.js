@@ -360,7 +360,7 @@ describe('BasePayPalView', () => {
       });
     });
 
-    it('reports errors from button not being elligible', () => {
+    it('reports errors from button not being eligible', () => {
       jest.spyOn(testContext.model, 'asyncDependencyFailed').mockImplementation();
       testContext.isEligible.mockReturnValue(false);
 
@@ -369,7 +369,7 @@ describe('BasePayPalView', () => {
         expect(testContext.model.asyncDependencyFailed).toBeCalledWith(expect.objectContaining({
           view: testContext.view.ID,
           error: expect.objectContaining({
-            message: 'Merchant not elligible for PayPal'
+            message: 'Merchant not eligible for PayPal'
           })
         }));
       });
