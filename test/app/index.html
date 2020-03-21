@@ -229,7 +229,7 @@
     results.textContent = '';
     error.textContent = '';
 
-    braintree.dropin.create(config, function (err, instance) {
+    dropin.create(config, function (err, instance) {
       if (err) {
         ready.textContent = 'error';
         error.textContent = err.message;

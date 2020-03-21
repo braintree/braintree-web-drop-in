@@ -1,4 +1,7 @@
-const { resolve } = require('path');
+'use strict';
+
+const { resolve, join, dirname } = require('path');
+const { readFileSync } = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
@@ -13,7 +16,21 @@ const jsFilename = `web/dropin/${version}/js/dropin.js`;
 const cssFilename = `web/dropin/${version}/css/dropin.css`;
 
 module.exports = {
-  entry: ['./src/index.js', './src/less/main.less'],
+  devServer: {
+    allowedHosts: ['.bt.local'],
+    contentBase: [join(__dirname, 'dist', 'gh-pages'), join(__dirname, 'dist')],
+    liveReload: false,
+    onListening: server => {
+      console.info('Listening on port:', server.listeningApp.address().port);
+    },
+    port: 4567,
+    writeToDisk: true
+  },
+  devtool: 'inline-source-map',
+  entry: [
+    './src/less/main.less',
+    './src/index.js'
+  ],
   mode: 'development',
   module: {
     rules: [
@@ -44,7 +61,8 @@ module.exports = {
             loader: 'less-loader'
           }
         ]
-      }, {
+      },
+      {
         test: /\.html$/i,
         loader: 'html-loader'
       },
@@ -70,30 +88,19 @@ module.exports = {
     }
   },
   output: {
+    library: 'dropin',
+    libraryTarget: 'umd',
     filename: jsFilename,
     path: resolve(__dirname, 'dist')
   },
   plugins: [
-    new SymlinkWebpackPlugin([
-      { origin: `web/dropin/${version}`, symlink: 'web/dropin/dev' },
-      { origin: `gh-pages/docs/${version}`, symlink: 'gh-pages/docs/current' }
-    ]),
-    new MiniCssExtractPlugin({
-      moduleFilename: () => cssFilename
+    new CleanWebpackPlugin(),
+    new JsDocPlugin({
+      conf: './jsdoc/jsdoc.conf.js',
+      cwd: '.',
+      recursive: true
     }),
-    new FileManagerPlugin({
-      onEnd: {
-        copy: [
-          { source: './CHANGELOG.md', destination: './dist/npm' },
-          { source: './README.md', destination: './dist/npm' },
-          { source: `./dist/${jsFilename}`, destination: './dist/npm/dist/browser' },
-          { source: `./dist/${cssFilename}`, destination: './dist/npm' }
-        ],
-        'delete': [
-          './dist/npm/**/__mocks__'
-        ]
-      }
-    }),
+    new MiniCssExtractPlugin({ moduleFilename: () => cssFilename }),
     new CopyPlugin([
       { from: './test/app', to: './gh-pages', globOptions: { dot: true }, transformPath: target => target.replace('test/app', '') },
       { from: './jsdoc/index.html', to: './gh-pages/docs', flatten: true },
@@ -115,15 +122,47 @@ module.exports = {
       {
         from: './src/**/*.js',
         to: './npm',
-        transform: content => content.toString().replace('__VERSION__', version),
+        transform: (content, path) => {
+          let htmlContent,
+            filePath;
+          let jsContent = content.toString('utf8').replace('__VERSION__', version);
+          const htmlPaths = [...jsContent.matchAll(RegExp('require\\(\'(.+)\\.html\'\\)', 'g'))];
+
+          if (htmlPaths.length > 0) {
+            htmlPaths.forEach(foundPath => {
+              filePath = resolve(dirname(path), `${foundPath[1]}.html`);
+              htmlContent = readFileSync(filePath, 'utf8');
+              htmlContent = htmlContent
+                .replace(/\\([\s\S])|(")/g, '\\$1$2')
+                .replace(/\n/g, '\\n')
+                .replace(/ {2,}/g, ' ')
+                .replace(/> +</g, '><');
+
+              jsContent = jsContent.replace(foundPath[0], `"${htmlContent}"`);
+            });
+          }
+
+          return jsContent;
+        },
         transformPath: target => target.replace('src/', '')
       }
     ]),
-    new CleanWebpackPlugin(),
-    new JsDocPlugin({
-      conf: './jsdoc/jsdoc.conf.js',
-      cwd: '.',
-      recursive: true
-    })
+    new FileManagerPlugin({
+      onEnd: {
+        copy: [
+          { source: './CHANGELOG.md', destination: './dist/npm' },
+          { source: './README.md', destination: './dist/npm' },
+          { source: `./dist/${jsFilename}`, destination: './dist/npm/dist/browser' },
+          { source: `./dist/${cssFilename}`, destination: './dist/npm' }
+        ],
+        'delete': [
+          './dist/npm/**/__mocks__'
+        ]
+      }
+    }),
+    new SymlinkWebpackPlugin([
+      { origin: `web/dropin/${version}`, symlink: 'web/dropin/dev' },
+      { origin: `gh-pages/docs/${version}`, symlink: 'gh-pages/docs/current' }
+    ])
   ]
 };
