@@ -145,7 +145,7 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
     // login form is shown again with email already filled in
     // using the iframe system
     browser.waitUntil(() => {
-      return $('#confirmButtonTop').isDisplayed() || $('#injectedUnifiedLogin iframe').isExisting();
+      return browser.confirmButtonIsEnabled() || $('#injectedUnifiedLogin iframe').isExisting();
     }, PAYPAL_TIMEOUT);
 
     if ($('#injectedUnifiedLogin iframe').isExisting()) {
@@ -160,18 +160,44 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
     // end silly safari hack
   }
 
-  $('#confirmButtonTop').waitForDisplayed();
-  browser.waitForElementToDissapear('.spinner');
+  browser.waitForConfirmButtonEnabled();
 
   if (cb) {
     cb();
   }
 
-  $('#confirmButtonTop').click();
+  browser.clickConfirmButton();
 
   browser.switchToWindow(parentWindow);
 
   browser.waitForElementToDissapear('.paypal-checkout-sandbox-iframe');
+});
+
+browser.addCommand('confirmButtonIsEnabled', function () {
+  return ($('#fiSubmitButton').isDisplayed() && $('#fiSubmitButton').isEnabled()) ||
+    ($('#consentButton').isDisplayed() && $('#consentButton').isEnabled()) ||
+    ($('#payment-submit-btn').isDisplayed() && $('#payment-submit-btn').isEnabled()) ||
+    ($('#confirmButtonTop').isDisplayed() && $('#confirmButtonTop').isEnabled());
+});
+
+browser.addCommand('waitForConfirmButtonEnabled', function () {
+  browser.waitUntil(() => {
+    return browser.confirmButtonIsEnabled();
+  }, PAYPAL_TIMEOUT);
+});
+
+browser.addCommand('clickConfirmButton', function () {
+  browser.waitForConfirmButtonEnabled();
+
+  if ($('#fiSubmitButton').isDisplayed()) {
+    $('#fiSubmitButton').click();
+  } else if ($('#consentButton').isDisplayed()) {
+    $('#consentButton').click();
+  } else if ($('#payment-submit-btn').isDisplayed()) {
+    $('#payment-submit-btn').click();
+  } else if ($('#confirmButtonTop').isDisplayed()) {
+    $('#confirmButtonTop').click();
+  }
 });
 
 browser.addCommand('waitForElementToDissapear', function (selector) {
