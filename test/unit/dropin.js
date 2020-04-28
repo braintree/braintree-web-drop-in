@@ -1,5 +1,5 @@
 
-const Dropin = require('../../src/dropin/');
+const Dropin = require('../../src/dropin');
 const DropinModel = require('../../src/dropin-model');
 const EventEmitter = require('@braintree/event-emitter');
 const assets = require('@braintree/asset-loader');
