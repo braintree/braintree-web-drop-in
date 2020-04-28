@@ -140,24 +140,6 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
 
       browser.waitForElementToDissapear('.spinner');
     }
-
-    // safari sometimes fails the initial login, so the
-    // login form is shown again with email already filled in
-    // using the iframe system
-    browser.waitUntil(() => {
-      return browser.confirmButtonIsEnabled() || $('#injectedUnifiedLogin iframe').isExisting();
-    }, PAYPAL_TIMEOUT);
-
-    if ($('#injectedUnifiedLogin iframe').isExisting()) {
-      const loginIframe = $('#injectedUnifiedLogin iframe');
-
-      browser.inFrame(loginIframe, () => {
-        $('#password').typeKeys(process.env.PAYPAL_PASSWORD);
-
-        $('#btnLogin').click();
-      });
-    }
-    // end silly safari hack
   }
 
   browser.waitForConfirmButtonEnabled();
@@ -174,9 +156,9 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
 });
 
 browser.addCommand('confirmButtonIsEnabled', function () {
-  return ($('#fiSubmitButton').isDisplayed() && $('#fiSubmitButton').isEnabled()) ||
+  return ($('#payment-submit-btn').isDisplayed() && $('#payment-submit-btn').isEnabled()) ||
+    ($('#fiSubmitButton').isDisplayed() && $('#fiSubmitButton').isEnabled()) ||
     ($('#consentButton').isDisplayed() && $('#consentButton').isEnabled()) ||
-    ($('#payment-submit-btn').isDisplayed() && $('#payment-submit-btn').isEnabled()) ||
     ($('#confirmButtonTop').isDisplayed() && $('#confirmButtonTop').isEnabled());
 });
 
