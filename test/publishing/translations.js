@@ -30,7 +30,7 @@ describe('translations', function () {
         expect(translation[translationKey]).be.a('string');
       });
 
-      expect(translationKeys.length).toBe(englishTranslationKeys.length);
+      expect(translationKeys.length).to.equal(englishTranslationKeys.length);
     });
   });
 
