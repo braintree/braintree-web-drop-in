@@ -8,7 +8,6 @@ const DEFAULT_START_OPTIONS = {
 };
 const PAYPAL_TIMEOUT = 60000; // 60 seconds
 const BASE_URL = `http://bs-local.com:${PORT}`;
-let sessionId = '';
 
 const DEFAULT_HOSTED_FIELDS_VALUES = {
   number: '4111111111111111',
@@ -16,8 +15,6 @@ const DEFAULT_HOSTED_FIELDS_VALUES = {
   cvv: '123',
   postalCode: '12345'
 };
-
-global.expect = require('chai').expect;
 
 browser.addCommand('start', function (options = {}, overrides = {}) {
   const waitTime = overrides.waitTime || 40000;
