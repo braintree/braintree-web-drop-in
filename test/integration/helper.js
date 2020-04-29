@@ -59,14 +59,6 @@ browser.addCommand('start', function (options = {}, overrides = {}) {
   });
 });
 
-browser.addCommand('reloadSessionOnRetry', () => {
-  if (sessionId === browser.sessionId) {
-    browser.reloadSession();
-  } else {
-    sessionId = browser.sessionId;
-  }
-});
-
 browser.addCommand('getResult', function () {
   browser.waitUntil(() => {
     return $('#results').getHTML(false).trim() !== '';

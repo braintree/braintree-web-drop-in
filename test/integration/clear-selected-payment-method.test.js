@@ -1,8 +1,8 @@
 require('./helper');
 
 describe('Drop-in#clearSelectedPaymentMethod', function () {
-  beforeEach(function () {
-    browser.reloadSessionOnRetry();
+  afterEach(function () {
+    browser.reloadSession();
   });
 
   it('clears a credit card when it is the active payment method', function () {
