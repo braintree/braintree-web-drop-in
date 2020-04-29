@@ -195,7 +195,9 @@ describe('Drop-in card', function () {
 
       browser.waitUntil(() => {
         return browser.getResult().nonce !== oldNonce;
-      }, null, 'Nonce in result never updated.');
+      }, {
+        timeoutMsg: 'Nonce in result never updated.'
+      });
 
       const newNonce = browser.getResult().nonce;
 
