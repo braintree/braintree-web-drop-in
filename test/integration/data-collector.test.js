@@ -1,8 +1,8 @@
 require('./helper');
 
 describe('Drop-in with Data Collector', function () {
-  beforeEach(function () {
-    browser.reloadSessionOnRetry();
+  afterEach(function () {
+    browser.reloadSession();
   });
 
   it('includes device data in request payment method payload', function () {
@@ -20,6 +20,6 @@ describe('Drop-in with Data Collector', function () {
 
     const result = browser.getResult();
 
-    expect(result.deviceData).to.include('correlation_id');
+    expect(result.deviceData).toContain('correlation_id');
   });
 });

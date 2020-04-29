@@ -8,7 +8,6 @@ const DEFAULT_START_OPTIONS = {
 };
 const PAYPAL_TIMEOUT = 60000; // 60 seconds
 const BASE_URL = `http://bs-local.com:${PORT}`;
-let sessionId = '';
 
 const DEFAULT_HOSTED_FIELDS_VALUES = {
   number: '4111111111111111',
@@ -16,8 +15,6 @@ const DEFAULT_HOSTED_FIELDS_VALUES = {
   cvv: '123',
   postalCode: '12345'
 };
-
-global.expect = require('chai').expect;
 
 browser.addCommand('start', function (options = {}, overrides = {}) {
   const waitTime = overrides.waitTime || 40000;
@@ -53,21 +50,19 @@ browser.addCommand('start', function (options = {}, overrides = {}) {
 
   browser.waitUntil(() => {
     return $('#ready').getHTML(false) === 'ready';
-  }, waitTime, `Expected Drop-in to be ready after ${waitTime / 1000} seconds.`);
-});
-
-browser.addCommand('reloadSessionOnRetry', () => {
-  if (sessionId === browser.sessionId) {
-    browser.reloadSession();
-  } else {
-    sessionId = browser.sessionId;
-  }
+  }, {
+    timeout: waitTime,
+    timeoutMsg: `Expected Drop-in to be ready after ${waitTime / 1000} seconds.`
+  });
 });
 
 browser.addCommand('getResult', function () {
   browser.waitUntil(() => {
     return $('#results').getHTML(false).trim() !== '';
-  }, 3000, 'Expected result to be avaialble within 3 seconds.');
+  }, {
+    timeout: 3000,
+    timeoutMsg: 'Expected result to be avaialble within 3 seconds.'
+  });
 
   const resultHtml = $('#results').getHTML(false).trim();
 
@@ -99,7 +94,10 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
 
   browser.waitUntil(() => {
     return browser.getWindowHandles().length > 1;
-  }, PAYPAL_TIMEOUT, 'expected multiple windows to be available.');
+  }, {
+    timeout: PAYPAL_TIMEOUT,
+    timeoutMsg: 'expected multiple windows to be available.'
+  });
 
   const handles = browser.getWindowHandles();
   const popupHandle = handles.find(h => h !== parentWindow);
@@ -165,7 +163,9 @@ browser.addCommand('confirmButtonIsEnabled', function () {
 browser.addCommand('waitForConfirmButtonEnabled', function () {
   browser.waitUntil(() => {
     return browser.confirmButtonIsEnabled();
-  }, PAYPAL_TIMEOUT);
+  }, {
+    timeout: PAYPAL_TIMEOUT
+  });
 });
 
 browser.addCommand('clickConfirmButton', function () {
@@ -187,7 +187,10 @@ browser.addCommand('waitForElementToDissapear', function (selector) {
     const el = $(selector);
 
     return el.isExisting() === false || el.isDisplayed() === false;
-  }, PAYPAL_TIMEOUT, 'expected PayPal spinner to dissapear');
+  }, {
+    timeout: PAYPAL_TIMEOUT,
+    timeoutMsg: 'expected PayPal spinner to dissapear'
+  });
 });
 
 browser.addCommand('clickOption', function (type) {
