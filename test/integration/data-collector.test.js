@@ -1,8 +1,8 @@
 require('./helper');
 
 describe('Drop-in with Data Collector', function () {
-  afterEach(function () {
-    browser.reloadSession();
+  beforeEach(function () {
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   it('includes device data in request payment method payload', function () {

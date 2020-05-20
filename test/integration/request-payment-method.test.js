@@ -1,8 +1,8 @@
 require('./helper');
 
 describe('Drop-in#requestPaymentMethod', function () {
-  afterEach(function () {
-    browser.reloadSession();
+  beforeEach(function () {
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   describe('callback api', function () {
