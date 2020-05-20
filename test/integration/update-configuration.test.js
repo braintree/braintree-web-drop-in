@@ -1,8 +1,8 @@
 require('./helper');
 
 describe('Drop-in#updateConfiguration', function () {
-  afterEach(function () {
-    browser.reloadSession();
+  beforeEach(function () {
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   it('updates PayPal configuration @paypal', function () {

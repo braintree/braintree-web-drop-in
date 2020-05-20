@@ -1,8 +1,8 @@
 require('./helper');
 
 describe('Drop-in Script Tag Integration', function () {
-  afterEach(function () {
-    browser.reloadSession();
+  beforeEach(function () {
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   it('tokenizes a card', function () {

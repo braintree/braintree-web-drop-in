@@ -242,3 +242,9 @@ browser.addCommand('repeatKeys', function (key, numberOfTimes) {
 browser.addCommand('typeKeys', function (keys) {
   this.addValue(keys);
 }, true);
+
+browser.addCommand('reloadSessionOnRetry', (test) => {
+  if (test._currentRetry > 0) {
+    browser.reloadSession();
+  }
+});
