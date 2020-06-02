@@ -1194,7 +1194,7 @@ describe('Dropin', () => {
     });
 
     test(
-      'does not call 3D Secure if payment method is not a credit card',
+      'does not call 3D Secure if payment method is not a credit card or google pay',
       done => {
         let instance;
         const fakePayload = {
@@ -1274,6 +1274,72 @@ describe('Dropin', () => {
           instance.requestPaymentMethod(() => {
             expect(instance._threeDSecure.verify).toBeCalledTimes(1);
             expect(instance._threeDSecure.verify).toBeCalledWith(fakePayload, undefined); // eslint-disable-line no-undefined
+
+            done();
+          });
+        });
+      }
+    );
+
+    test(
+      'calls 3D Secure if payment method nonce payload is a non-network tokenized google pay and does not contain liability info',
+      done => {
+        let instance;
+        const fakePayload = {
+          nonce: 'cool-nonce',
+          type: 'AndroidPayCard',
+          details: {
+            isNetworkTokenized: false
+          }
+        };
+
+        testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+        instance = new Dropin(testContext.dropinOptions);
+
+        instance._initialize(() => {
+          jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+          instance._threeDSecure = {
+            verify: jest.fn().mockResolvedValue({
+              nonce: 'new-nonce',
+              liabilityShifted: true,
+              liabilityShiftPossible: true
+            })
+          };
+
+          instance.requestPaymentMethod(() => {
+            expect(instance._threeDSecure.verify).toBeCalledTimes(1);
+            expect(instance._threeDSecure.verify).toBeCalledWith(fakePayload, undefined); // eslint-disable-line no-undefined
+
+            done();
+          });
+        });
+      }
+    );
+
+    test(
+      'does not call 3D Secure if network tokenized google pay',
+      done => {
+        let instance;
+        const fakePayload = {
+          nonce: 'cool-nonce',
+          type: 'AndroidPayCard',
+          details: {
+            isNetworkTokenized: true
+          }
+        };
+
+        testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+        instance = new Dropin(testContext.dropinOptions);
+
+        jest.spyOn(ThreeDSecure.prototype, 'verify');
+
+        instance._initialize(() => {
+          jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+
+          instance.requestPaymentMethod(() => {
+            expect(ThreeDSecure.prototype.verify).not.toBeCalled();
 
             done();
           });

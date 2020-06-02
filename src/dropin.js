@@ -97,6 +97,8 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
  * @property {string} details.lastFour The last 4 digits of the card.
  * @property {string} details.lastTwo The last 2 digits of the card.
+ * @property {boolean} details.isNetworkTokenized True if the card is network tokenized.
+ * @property {string} details.bin First six digits of card number.
  * @property {external:GooglePayPaymentData} details.rawPaymentData The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.
  * @property {string} type The payment method type, always `AndroidPayCard` when the method requested is a Google Pay Card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
@@ -697,7 +699,10 @@ Dropin.prototype.requestPaymentMethod = function (options) {
   options = options || {};
 
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (self._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
+    if (self._threeDSecure &&
+      (payload.type === constants.paymentMethodTypes.card ||
+      (payload.type === constants.paymentMethodTypes.googlePay && payload.details.isNetworkTokenized === false)) &&
+      payload.liabilityShifted == null) {
       self._mainView.showLoadingIndicator();
 
       return self._threeDSecure.verify(payload, options.threeDSecure).then(function (newPayload) {
