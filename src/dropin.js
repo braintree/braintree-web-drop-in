@@ -699,10 +699,7 @@ Dropin.prototype.requestPaymentMethod = function (options) {
   options = options || {};
 
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (self._threeDSecure &&
-      (payload.type === constants.paymentMethodTypes.card ||
-      (payload.type === constants.paymentMethodTypes.googlePay && payload.details.isNetworkTokenized === false)) &&
-      payload.liabilityShifted == null) {
+    if (self._shouldPerformThreeDSecureVerification(payload)) {
       self._mainView.showLoadingIndicator();
 
       return self._threeDSecure.verify(payload, options.threeDSecure).then(function (newPayload) {
@@ -730,6 +727,26 @@ Dropin.prototype.requestPaymentMethod = function (options) {
   }).then(function (payload) {
     return formatPaymentMethodPayload(payload);
   });
+};
+
+Dropin.prototype._shouldPerformThreeDSecureVerification = function (payload) {
+  if (!this._threeDSecure) {
+    return false;
+  }
+
+  if (payload.liabilityShifted != null) {
+    return false;
+  }
+
+  if (payload.type === constants.paymentMethodTypes.card) {
+    return true;
+  }
+
+  if (payload.type === constants.paymentMethodTypes.googlePay && payload.details.isNetworkTokenized === false) {
+    return true;
+  }
+
+  return false;
 };
 
 Dropin.prototype._removeStylesheet = function () {
