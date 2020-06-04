@@ -1194,7 +1194,7 @@ describe('Dropin', () => {
     });
 
     test(
-      'does not call 3D Secure if payment method is not a credit card or google pay',
+      'does not call 3D Secure if payment method does not support 3DS'
       done => {
         let instance;
         const fakePayload = {
