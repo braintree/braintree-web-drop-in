@@ -97,7 +97,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
  * @property {string} details.lastFour The last 4 digits of the card.
  * @property {string} details.lastTwo The last 2 digits of the card.
- * @property {boolean} details.isNetworkTokenized True if the card is network tokenized.
+ * @property {boolean} details.isNetworkTokenized True if the card is network tokenized. A network tokenized card is a generated virtual card with a device-specific account number (DPAN) that is used in place of the underlying source card.
  * @property {string} details.bin First six digits of card number.
  * @property {external:GooglePayPaymentData} details.rawPaymentData The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.
  * @property {string} type The payment method type, always `AndroidPayCard` when the method requested is a Google Pay Card.
