@@ -171,6 +171,8 @@ browser.addCommand('waitForConfirmButtonEnabled', function () {
 browser.addCommand('clickConfirmButton', function () {
   browser.waitForConfirmButtonEnabled();
 
+  // dismisses a banner about accepting cookies
+  // so that the submit button can be clicked
   if ($('#acceptAllButton').isDisplayed()) {
     $('#acceptAllButton').click();
   }
