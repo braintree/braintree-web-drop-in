@@ -171,6 +171,10 @@ browser.addCommand('waitForConfirmButtonEnabled', function () {
 browser.addCommand('clickConfirmButton', function () {
   browser.waitForConfirmButtonEnabled();
 
+  if ($('#acceptAllButton').isDisplayed()) {
+    $('#acceptAllButton').click();
+  }
+
   if ($('#fiSubmitButton').isDisplayed()) {
     $('#fiSubmitButton').click();
   } else if ($('#consentButton').isDisplayed()) {
