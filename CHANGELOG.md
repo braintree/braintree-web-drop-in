@@ -3,6 +3,7 @@ CHANGELOG
 
 unreleased
 ----------
+- Add 3DS support for non-network tokenized Google Pay cards
 - Update braintree-web to v3.62.1
 
 1.22.1
