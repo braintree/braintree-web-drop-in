@@ -75,10 +75,6 @@ For more substantial changes, you may [fork](https://help.github.com/articles/fo
 
 Drop-in uses the [Braintree JavaScript SDK](http://github.com/braintree/braintree-web). So if a fully customized UI is what you're looking for, Drop-in may be used as a reference implementation for using the JavaScript SDK.
 
-## Releases
-
-Subscribe to our [Google Group](https://groups.google.com/forum/#!forum/braintree-sdk-announce) to be notified when SDK releases go out.
-
 ## License
 
 Drop-in is open source and available under the MIT license. See the [LICENSE](LICENSE) file for more info.
