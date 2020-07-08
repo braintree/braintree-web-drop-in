@@ -54,6 +54,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  * @property {?boolean} liabilityShifted If 3D Secure is configured, whether or not liability did shift.
  * @property {?boolean} liabilityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
+ * @property {?object} threeDSecureInfo If 3D Secure is configured, the `threeDSecureInfo` documented in the [Three D Secure client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/ThreeDSecure.html#~verifyPayload)
  */
 
 /**
@@ -706,6 +707,7 @@ Dropin.prototype.requestPaymentMethod = function (options) {
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
+        payload.threeDSecureInfo = newPayload.threeDSecureInfo;
 
         self._mainView.hideLoadingIndicator();
 
