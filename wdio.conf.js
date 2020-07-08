@@ -124,7 +124,7 @@ if (ONLY_BROWSERS) {
 }
 
 const mochaOpts = {
-  timeout: 100000
+  timeout: 200000
 };
 
 if (!process.env.DISABLE_RETRIES) {
