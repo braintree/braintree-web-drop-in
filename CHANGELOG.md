@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Add 3DS support for non-network tokenized Google Pay cards
+- Add `threeDSecureInfo` to 3DS payload in `requestPaymentMethod`
 - Update braintree-web to v3.63.0
 
 1.22.1

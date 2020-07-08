@@ -1400,7 +1400,10 @@ describe('Dropin', () => {
           verify: jest.fn().mockResolvedValue({
             nonce: 'new-nonce',
             liabilityShifted: true,
-            liabilityShiftPossible: true
+            liabilityShiftPossible: true,
+            threeDSecureInfo: {
+              threeDSecureAuthenticationId: 'id'
+            }
           })
         };
 
@@ -1411,6 +1414,7 @@ describe('Dropin', () => {
           expect(fakePayload.nonce).toBe('new-nonce');
           expect(fakePayload.liabilityShifted).toBe(true);
           expect(fakePayload.liabilityShiftPossible).toBe(true);
+          expect(fakePayload.threeDSecureInfo.threeDSecureAuthenticationId).toBe('id');
 
           done();
         });
