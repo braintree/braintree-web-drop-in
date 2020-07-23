@@ -203,6 +203,7 @@ var VERSION = '__VERSION__';
  * `en_GB`,
  * `en_US`,
  * `es_ES`,
+ * `fi_FI`,
  * `fr_CA`,
  * `fr_FR`,
  * `id_ID`,
