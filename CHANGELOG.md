@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+
+- Use `@braintree/uuid` package for uuid generation
+
 1.23.0
 ------
 - Add 3DS support for non-network tokenized Google Pay cards
