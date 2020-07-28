@@ -1,4 +1,4 @@
-const uuid = require('uuid/v4');
+const uuid = require('@braintree/uuid');
 const browserstack = require('browserstack-local');
 
 // Stop node from complaining about fake memory leaks at higher concurrency

@@ -53,7 +53,6 @@
     "gulp-streamify": "1.0.2",
     "gulp-uglify": "^3.0.2",
     "hint": "^5.3.3",
-    "is-uuid": "1.0.2",
     "jest": "^26.1.0",
     "jsdoc": "^3.6.4",
     "jsdoc-template": "braintree/jsdoc-template#3.2.0",
@@ -72,6 +71,7 @@
     "@braintree/browser-detection": "1.9.0",
     "@braintree/class-list": "0.1.0",
     "@braintree/event-emitter": "0.3.0",
+    "@braintree/uuid": "0.1.0",
     "@braintree/wrap-promise": "2.0.0",
     "braintree-web": "3.63.0",
     "promise-polyfill": "8.1.3"
