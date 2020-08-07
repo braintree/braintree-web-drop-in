@@ -5,6 +5,12 @@ unreleased
 ----------
 
 - Use `@braintree/uuid` package for uuid generation
+- Update braintree-web to v3.64.2
+- Update @braintree/asset-loader to v0.4.4
+- Update @braintree/browser-detection to v1.10.0
+- Update @braintree/class-list to v0.2.0
+- Update @braintree/event-emitter to v0.4.0
+- Update @braintree/wrap-promise to v2.1.0
 
 1.23.0
 ------
