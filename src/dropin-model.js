@@ -26,6 +26,7 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
 ];
 
 function DropinModel(options) {
+  this.rootNode = options.container;
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
 
@@ -36,6 +37,13 @@ function DropinModel(options) {
   this.failedDependencies = {};
   this._options = options;
   this._setupComplete = false;
+
+  if (this.rootNode) {
+    while (this.rootNode.parentNode) {
+      this.rootNode = this.rootNode.parentNode;
+    }
+    this.isInShadowDom = this.rootNode.toString() === '[object ShadowRoot]';
+  }
 
   EventEmitter.call(this);
 }

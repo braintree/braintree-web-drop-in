@@ -838,7 +838,7 @@ describe('CardView', () => {
       return model.initialize().then(() => {
         testContext.context = {
           element: testContext.element,
-          _generateFieldSelector: CardView.prototype._generateFieldSelector,
+          _getFieldContainer: CardView.prototype._getFieldContainer,
           _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
           _validateForm: jest.fn(),
           _sendRequestableEvent: CardView.prototype._sendRequestableEvent,

@@ -11,6 +11,7 @@ unreleased
 - Update @braintree/class-list to v0.2.0
 - Update @braintree/event-emitter to v0.4.0
 - Update @braintree/wrap-promise to v2.1.0
+- Add support for the shadow DOM for the card view
 
 1.23.0
 ------
