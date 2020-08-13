@@ -323,6 +323,8 @@ describe('Dropin', () => {
     });
 
     test('injects stylesheet with correct id', done => {
+      jest.spyOn(assets, 'loadStylesheet');
+
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
@@ -330,6 +332,46 @@ describe('Dropin', () => {
 
         expect(stylesheet).toBeDefined();
         expect(stylesheet.href).toMatch(/assets\.braintreegateway\.com/);
+
+        expect(assets.loadStylesheet).toBeCalledTimes(1);
+        expect(assets.loadStylesheet).toBeCalledWith({
+          id: constants.STYLESHEET_ID,
+          href: expect.stringContaining('assets.braintreegateway.com')
+        });
+
+        done();
+      });
+    });
+
+    test('injects stylesheet into shadow DOM instead of the head', done => {
+      jest.spyOn(assets, 'loadStylesheet');
+
+      const container = document.createElement('div');
+      const insideShadowDOMWrapper = document.createElement('div');
+      const dropinContainer = document.createElement('div');
+      const shadowDom = container.attachShadow({ mode: 'open' });
+
+      dropinContainer.id = 'dropin';
+      insideShadowDOMWrapper.appendChild(dropinContainer);
+      shadowDom.appendChild(insideShadowDOMWrapper);
+
+      document.body.appendChild(container);
+      testContext.dropinOptions.merchantConfiguration.container = dropinContainer;
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        const stylesheet = shadowDom.querySelector(`#${constants.STYLESHEET_ID}`);
+
+        expect(stylesheet).toBeDefined();
+        expect(stylesheet.href).toMatch(/assets\.braintreegateway\.com/);
+
+        expect(assets.loadStylesheet).toBeCalledTimes(1);
+        expect(assets.loadStylesheet).toBeCalledWith({
+          id: constants.STYLESHEET_ID,
+          href: expect.stringContaining('assets.braintreegateway.com'),
+          container: shadowDom
+        });
 
         done();
       });

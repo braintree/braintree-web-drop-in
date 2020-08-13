@@ -38,12 +38,10 @@ function DropinModel(options) {
   this._options = options;
   this._setupComplete = false;
 
-  if (this.rootNode) {
-    while (this.rootNode.parentNode) {
-      this.rootNode = this.rootNode.parentNode;
-    }
-    this.isInShadowDom = this.rootNode.toString() === '[object ShadowRoot]';
+  while (this.rootNode.parentNode) {
+    this.rootNode = this.rootNode.parentNode;
   }
+  this.isInShadowDom = this.rootNode.toString() === '[object ShadowRoot]';
 
   EventEmitter.call(this);
 }

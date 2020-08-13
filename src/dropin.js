@@ -773,7 +773,7 @@ Dropin.prototype._injectStylesheet = function () {
 
   if (this._model.isInShadowDom) {
     // if Drop-in is in the shadow DOM, put the
-    // style sheet in the shadow DOM instead of
+    // style sheet in the shadow DOM node instead of
     // in the head of the document
     loadStylesheetOptions.container = this._model.rootNode;
   }
