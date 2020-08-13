@@ -11,6 +11,7 @@ unreleased
 - Update @braintree/class-list to v0.2.0
 - Update @braintree/event-emitter to v0.4.0
 - Update @braintree/wrap-promise to v2.1.0
+- Fix issue where `threeDSecureInfo` was not included in `requestPaymentMethod` payload
 
 1.23.0
 ------
