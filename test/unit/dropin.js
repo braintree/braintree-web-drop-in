@@ -1411,10 +1411,9 @@ describe('Dropin', () => {
           expect(payload.nonce).toBe('new-nonce');
           expect(payload.liabilityShifted).toBe(true);
           expect(payload.liabilityShiftPossible).toBe(true);
-          expect(fakePayload.nonce).toBe('new-nonce');
-          expect(fakePayload.liabilityShifted).toBe(true);
-          expect(fakePayload.liabilityShiftPossible).toBe(true);
-          expect(fakePayload.threeDSecureInfo.threeDSecureAuthenticationId).toBe('id');
+          expect(payload.liabilityShifted).toBe(true);
+          expect(payload.liabilityShiftPossible).toBe(true);
+          expect(payload.threeDSecureInfo.threeDSecureAuthenticationId).toBe('id');
 
           done();
         });
