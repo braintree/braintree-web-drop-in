@@ -440,6 +440,28 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
 };
 
 /**
+ * Get a list of the available payment methods presented to the user. This is useful for knowing if a paricular payment option was presented to a customer that is browser dependant such as Apple Pay, Google Pay and Venmo. Returns an array of strings. Possible values:
+ * * `applePay`
+ * * `card`
+ * * `googlePay`
+ * * `paypalCredit`
+ * * `paypal`
+ * * `venmo`
+ *
+ * @public
+ * @returns {string[]} An array of possible payment optoins.
+ * @example
+ * var paymentOptions = dropinInstance.getAvailablePaymentOptions(); // ['card', 'venmo', 'paypal']
+ *
+ * if (paymentOptions.includes('venmo')) {
+ *   // special logic for when venmo is displayed
+ * }
+ */
+Dropin.prototype.getAvailablePaymentOptions = function () {
+  return this._model.supportedPaymentOptions;
+};
+
+/**
  * Removes the currently selected payment method and returns the customer to the payment options view. Does not remove vaulted payment methods.
  * @public
  * @returns {void}
