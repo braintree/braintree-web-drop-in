@@ -449,7 +449,7 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
  * * `venmo`
  *
  * @public
- * @returns {string[]} An array of possible payment optoins.
+ * @returns {string[]} An array of possible payment options.
  * @example
  * var paymentOptions = dropinInstance.getAvailablePaymentOptions(); // ['card', 'venmo', 'paypal']
  *
