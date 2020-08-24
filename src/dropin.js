@@ -874,6 +874,10 @@ function formatPaymentMethodPayload(paymentMethod) {
     formattedPaymentMethod.liabilityShiftPossible = paymentMethod.liabilityShiftPossible;
   }
 
+  if (paymentMethod.threeDSecureInfo) {
+    formattedPaymentMethod.threeDSecureInfo = paymentMethod.threeDSecureInfo;
+  }
+
   if (paymentMethod.deviceData) {
     formattedPaymentMethod.deviceData = paymentMethod.deviceData;
   }
