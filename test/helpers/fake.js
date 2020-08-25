@@ -104,6 +104,7 @@ function model(options) {
   var modelInstance;
 
   options = options || modelOptions();
+  options.container = options.container || document.createElement('div');
 
   modelInstance = new DropinModel(options);
 

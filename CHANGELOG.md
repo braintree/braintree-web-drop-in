@@ -13,6 +13,7 @@ unreleased
 - Update @braintree/wrap-promise to v2.1.0
 - Fix issue where `threeDSecureInfo` was not included in `requestPaymentMethod` payload
 - Add `getAvailablePaymentOptions` method to list what payment options have been presented to the customer (closes #594)
+- Add support for the shadow DOM for the card view
 
 1.23.0
 ------

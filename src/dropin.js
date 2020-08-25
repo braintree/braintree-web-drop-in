@@ -286,8 +286,6 @@ Dropin.prototype._initialize = function (callback) {
   var self = this;
   var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
 
-  self._injectStylesheet();
-
   if (!container) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.container is required.'));
@@ -348,9 +346,12 @@ Dropin.prototype._initialize = function (callback) {
 
   self._model = new DropinModel({
     client: self._client,
+    container: container,
     componentID: self._componentID,
     merchantConfiguration: self._merchantConfiguration
   });
+
+  self._injectStylesheet();
 
   self._model.initialize().then(function () {
     self._model.on('cancelInitialization', function (err) {
@@ -782,17 +783,24 @@ Dropin.prototype._removeStylesheet = function () {
 };
 
 Dropin.prototype._injectStylesheet = function () {
-  var stylesheetUrl, assetsUrl;
+  var assetsUrl;
+  var loadStylesheetOptions = {
+    id: constants.STYLESHEET_ID
+  };
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
   assetsUrl = this._client.getConfiguration().gatewayConfiguration.assetsUrl;
-  stylesheetUrl = assetsUrl + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
+  loadStylesheetOptions.href = assetsUrl + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
 
-  assets.loadStylesheet({
-    href: stylesheetUrl,
-    id: constants.STYLESHEET_ID
-  });
+  if (this._model.isInShadowDom) {
+    // if Drop-in is in the shadow DOM, put the
+    // style sheet in the shadow DOM node instead of
+    // in the head of the document
+    loadStylesheetOptions.container = this._model.rootNode;
+  }
+
+  assets.loadStylesheet(loadStylesheetOptions);
 };
 
 /**
