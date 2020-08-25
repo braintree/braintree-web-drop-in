@@ -2085,6 +2085,24 @@ describe('Dropin', () => {
     );
   });
 
+  describe('getAvailablePaymentOptions', () => {
+    test('returns an array of payment options presented to the customer', (done) => {
+      testContext.dropinOptions.merchantConfiguration.paypal = {
+        flow: 'vault'
+      };
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        const result = instance.getAvailablePaymentOptions();
+
+        expect(result).toEqual(['card', 'paypal']);
+
+        done();
+      });
+    });
+  });
+
   describe('clearSelectedPaymentMethod', () => {
     test('refreshes saved payment methods', () => {
       const instance = new Dropin(testContext.dropinOptions);
