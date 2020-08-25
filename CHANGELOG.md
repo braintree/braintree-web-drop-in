@@ -9,7 +9,7 @@ unreleased
 - Update @braintree/asset-loader to v0.4.4
 - Update @braintree/browser-detection to v1.10.0
 - Update @braintree/class-list to v0.2.0
-- Update @braintree/event-emitter to v0.4.0
+- Update @braintree/event-emitter to v0.4.1
 - Update @braintree/wrap-promise to v2.1.0
 - Fix issue where `threeDSecureInfo` was not included in `requestPaymentMethod` payload
 - Add `getAvailablePaymentOptions` method to list what payment options have been presented to the customer (closes #594)
