@@ -71,13 +71,13 @@ describe('DropinModel', () => {
       expect(model.merchantConfiguration).toBe(testContext.modelOptions.merchantConfiguration);
     });
 
-    test('is sets isInShadowDom to false when the container is not in the shadow DOM', () => {
+    test('it sets isInShadowDom to false when the container is not in the shadow DOM', () => {
       const model = new DropinModel(testContext.modelOptions);
 
       expect(model.isInShadowDom).toBe(false);
     });
 
-    test('is sets isInShadowDom to true when the container is in the shadow DOM', () => {
+    test('it sets isInShadowDom to true when the container is in the shadow DOM', () => {
       const container = document.createElement('div');
       const insideShadowDOMWrapper = document.createElement('div');
       const dropinContainer = document.createElement('div');
