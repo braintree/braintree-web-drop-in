@@ -1,0 +1,3667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      braintree-web-drop-in - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      Braintree Drop-in Reference
+    </h3>
+
+    <h3>Classes</h3><ul><li id="Dropin-nav"><a href="Dropin.html">Dropin</a><ul class='methods'><li data-type="method" id="Dropin-clearSelectedPaymentMethod-nav"><a href="Dropin.html#clearSelectedPaymentMethod">clearSelectedPaymentMethod</a></li><li data-type="method" id="Dropin-getAvailablePaymentOptions-nav"><a href="Dropin.html#getAvailablePaymentOptions">getAvailablePaymentOptions</a></li><li data-type="method" id="Dropin-isPaymentMethodRequestable-nav"><a href="Dropin.html#isPaymentMethodRequestable">isPaymentMethodRequestable</a></li><li data-type="method" id="Dropin-off-nav"><a href="Dropin.html#off">off</a></li><li data-type="method" id="Dropin-on-nav"><a href="Dropin.html#on">on</a></li><li data-type="method" id="Dropin-requestPaymentMethod-nav"><a href="Dropin.html#requestPaymentMethod">requestPaymentMethod</a></li><li data-type="method" id="Dropin-teardown-nav"><a href="Dropin.html#teardown">teardown</a></li><li data-type="method" id="Dropin-updateConfiguration-nav"><a href="Dropin.html#updateConfiguration">updateConfiguration</a></li></ul></li></ul><h3>Modules</h3><ul><li id="braintree-web-drop-in-nav"><a href="module-braintree-web-drop-in.html">braintree-web-drop-in</a><ul class='methods'><li data-type="method" id="braintree-web-drop-in-create-nav"><a href="module-braintree-web-drop-in.html#.create">create</a></li></ul></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        braintree-web-drop-in
+      </h1>
+    
+
+    
+
+<section>
+  <header>
+    
+      
+        
+  </header>
+
+  <article>
+    <div class="container-overview">
+      
+        
+          <div class="description">
+            <p>There are two ways to integrate Drop-in into your page: a script tag integration and a JavaScript integration using <a href="#.create"><code>dropin.create</code></a>.</p>
+<p>The script tag integration is the fastest way to integrate. All you need to do is add the Drop-in script inside your form element where you want Drop-in to appear and include a <code>data-braintree-dropin-authorization</code> property with your <a href="https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3">tokenization key</a> or <a href="https://developers.braintreepayments.com/guides/authorization/client-token">client token</a>.</p>
+<p>When your form is submitted, Drop-in will intercept the form submission and attempt to tokenize the payment method. If the tokenization is successful, it will insert the payment method nonce into a hidden input with the name <code>payment_method_nonce</code> and then submit your form. If the tokenization is unsuccessful, a relevant error will be shown in the UI.</p>
+<p>If you have data collector enabled, the device data will be injected into a hidden input with the name <code>device_data</code> before form submission.</p>
+<p>Specify creation options as data attributes in your script tag, as shown in the examples below. The following configuration properties may be set:</p>
+<ul>
+<li><code>data-locale</code></li>
+<li><code>data-card.cardholder-name.required</code></li>
+<li><code>data-payment-option-priority</code></li>
+<li><code>data-data-collector.kount</code></li>
+<li><code>data-data-collector.paypal</code></li>
+<li><code>data-paypal.amount</code></li>
+<li><code>data-paypal.currency</code></li>
+<li><code>data-paypal.flow</code></li>
+<li><code>data-paypal-credit.amount</code></li>
+<li><code>data-paypal-credit.currency</code></li>
+<li><code>data-paypal-credit.flow</code></li>
+</ul>
+<p>For more control and customization, use <a href="#.create"><code>dropin.create</code> instead</a>.</p>
+<p>See our <a href="../../script-tag-integration.html">demo app</a> for an example of using our script tag integration.</p>
+          </div>
+        
+
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line2">line 2</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#braintree-web-drop-in-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="braintree-web-drop-in-examples">Examples</h5>
+    
+  <p class="code-caption">
+    A full example accepting only cards
+  </p>
+
+
+  <pre class="prettyprint"><code>&lt;!DOCTYPE html>
+&lt;html lang="en">
+  &lt;head>
+    &lt;meta charset="utf-8">
+    &lt;title>Checkout&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;form id="payment-form" action="/" method="post">
+      &lt;script src="https://js.braintreegateway.com/web/dropin/1.24.0/js/dropin.min.js"
+       data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+      >&lt;/script>
+      &lt;input type="submit" value="Purchase">&lt;/input>
+    &lt;/form>
+  &lt;/body>
+&lt;/html></code></pre>
+
+  <p class="code-caption">
+    A full example accepting cards, PayPal, and PayPal credit
+  </p>
+
+
+  <pre class="prettyprint"><code>&lt;!DOCTYPE html>
+&lt;html lang="en">
+  &lt;head>
+    &lt;meta charset="utf-8">
+    &lt;title>Checkout&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;form id="payment-form" action="/" method="post">
+      &lt;script src="https://js.braintreegateway.com/web/dropin/1.24.0/js/dropin.min.js"
+       data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+       data-paypal.flow="checkout"
+       data-paypal.amount="10.00"
+       data-paypal.currency="USD"
+       data-paypal-credit.flow="vault"
+      >&lt;/script>
+      &lt;input type="submit" value="Purchase">&lt;/input>
+    &lt;/form>
+  &lt;/body>
+&lt;/html></code></pre>
+
+  <p class="code-caption">
+    Specifying a locale and payment option priority
+  </p>
+
+
+  <pre class="prettyprint"><code>&lt;form id="payment-form" action="/" method="post">
+  &lt;script src="https://js.braintreegateway.com/web/dropin/1.24.0/js/dropin.min.js"
+   data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+   data-locale="de_DE"
+   data-payment-option-priority='["paypal","card", "paypalCredit"]'
+   data-paypal.flow="checkout"
+   data-paypal.amount="10.00"
+   data-paypal.currency="USD"
+   data-paypal-credit.flow="vault"
+  >&lt;/script>
+  &lt;input type="submit" value="Purchase">&lt;/input>
+&lt;/form></code></pre>
+
+  <p class="code-caption">
+    Including an optional cardholder name field in card form
+  </p>
+
+
+  <pre class="prettyprint"><code>&lt;form id="payment-form" action="/" method="post">
+  &lt;script src="https://js.braintreegateway.com/web/dropin/1.24.0/js/dropin.min.js"
+   data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+   data-card.cardholder-name.required="false"
+  >&lt;/script>
+  &lt;input type="submit" value="Purchase">&lt;/input>
+&lt;/form></code></pre>
+
+  <p class="code-caption">
+    Including a required cardholder name field in card form
+  </p>
+
+
+  <pre class="prettyprint"><code>&lt;form id="payment-form" action="/" method="post">
+  &lt;script src="https://js.braintreegateway.com/web/dropin/1.24.0/js/dropin.min.js"
+   data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
+   data-card.cardholder-name.required="true"
+  >&lt;/script>
+  &lt;input type="submit" value="Purchase">&lt;/input>
+&lt;/form></code></pre>
+
+
+  </div>
+
+
+        
+      
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+
+<h4 class="name" id=".VERSION">
+  <span class="type-signature">(static) </span>VERSION<span class="type-signature"> :string</span>
+</h4>
+
+
+
+
+  <div class="description">
+    <p>The current version of Drop-in, i.e. <code>1.24.0</code>.</p>
+  </div>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line612">line 612</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+          
+        
+    
+
+    
+      <h3 class="subsection-title">Methods</h3>
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#.create">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id=".create">
+      <span class="type-signature">(static) </span>create<span class="signature">(options, callback<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {void|Promise}</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>This function is the entry point for <code>braintree.dropin</code>. It is used for creating <a href="Dropin.html">Dropin</a> instances.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>options</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>Object containing all <a href="Dropin.html">Dropin</a> options:</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+        <th>Default</th>
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>authorization</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>A <a href="https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3">tokenization key</a> or a <a href="https://developers.braintreepayments.com/guides/authorization/client-token">client token</a>. If authorization is a client token created with a <a href="https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id">customer ID</a>, Drop-in will render saved payment methods and automatically store any newly-added payment methods in their Vault record.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>container</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    |
+
+    <span class="param-type">
+      HTMLElement
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>A reference to an empty element, such as a <code>&lt;div&gt;</code>, where Drop-in will be included on your page or the selector for the empty element. e.g. <code>#dropin-container</code>.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>selector</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Deprecated: Now an alias for <code>options.container</code>.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>locale</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              `en_US`
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Use this option to change the language, links, and terminology used throughout Drop-in. Supported locales include:
+<code>da_DK</code>,
+<code>de_DE</code>,
+<code>en_AU</code>,
+<code>en_GB</code>,
+<code>en_US</code>,
+<code>es_ES</code>,
+<code>fr_CA</code>,
+<code>fr_FR</code>,
+<code>id_ID</code>,
+<code>it_IT</code>,
+<code>ja_JP</code>,
+<code>ko_KR</code>,
+<code>nl_NL</code>,
+<code>no_NO</code>,
+<code>pl_PL</code>,
+<code>pt_BR</code>,
+<code>pt_PT</code>,
+<code>ru_RU</code>,
+<code>sv_SE</code>,
+<code>th_TH</code>,
+<code>zh_CN</code>,
+<code>zh_HK</code>,
+<code>zh_TW</code>.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>translations</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found <a href="https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js">here</a>. Any strings that are not included will be those from the provided <code>locale</code> or <code>en_US</code> if no <code>locale</code> is provided. See below for an example of creating Drop-in with custom translations.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>paymentOptionPriority</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      array
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: <code>['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']</code>. Payment options omitted from this array will not be offered to the customer.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>card</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    |
+
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The configuration options for cards. See <a href="#~cardCreateOptions"><code>cardCreateOptions</code></a> for all <code>card</code> options. If this option is omitted, cards will still appear as a payment option. To remove cards, pass <code>false</code> for the value.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>paypal</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the <code>paypal</code> parameter and <a href="https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live">enable PayPal in the Braintree Control Panel</a>. To test in Sandbox, you will need to <a href="https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing">link a PayPal sandbox test account to your Braintree sandbox account</a>.</p>
+<p>Some of the PayPal configuration options are listed <a href="#~paypalCreateOptions">here</a>, but for a full list see the <a href="http://braintree.github.io/braintree-web/3.65.0/PayPalCheckout.html#createPayment">PayPal Checkout client reference options</a>.</p>
+<p>PayPal is not <a href="https://developer.paypal.com/docs/checkout/reference/faq/#which-browsers-does-paypal-checkout-support">supported in Internet Explorer versions lower than 11</a>.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>paypalCredit</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the <code>paypalCredit</code> parameter and <a href="https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live">enable PayPal in the Braintree Control Panel</a>.</p>
+<p>Some of the PayPal Credit configuration options are listed <a href="#~paypalCreateOptions">here</a>, but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.65.0/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the <a href="https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3">Braintree Developer Docs</a>.</p>
+<p>PayPal Credit is not <a href="https://developer.paypal.com/docs/checkout/reference/faq/#which-browsers-does-paypal-checkout-support">supported in Internet Explorer versions lower than 11</a>.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>venmo</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    |
+
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The configuration options for Pay with Venmo. To include a Venmo option in your Drop-in integration, include the <code>venmo</code> parameter and <a href="https://articles.braintreepayments.com/guides/payment-methods/venmo#setup">follow the documentation for setting up Venmo in the Braintree control panel</a>. If a user's browser does not support Venmo, the Venmo option will not be rendered.</p>
+<p>See <a href="#~venmoCreateOptions"><code>venmoCreateOptions</code></a> for <code>venmo</code> options.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>applePay</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The configuration options for Apple Pay. To include an Apple Pay option in your Drop-in integration, include the <code>applePay</code> parameter and <a href="https://developers.braintreepayments.com/guides/apple-pay/configuration/javascript/v3">enable Apple Pay in the Braintree Control Panel</a>. If a user's browser does not support Apple Pay, the Apple Pay option will not be rendered. See <a href="https://support.apple.com/en-us/HT201469">Apple's documentation</a> for browser and device support.</p>
+<p>See <a href="#~applePayCreateOptions"><code>applePayCreateOptions</code></a> for <code>applePay</code> options.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>googlePay</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The configuration options for Google Pay. To include a Google Pay option in your Drop-in integration, include the <code>googlePay</code> parameter and <a href="https://developers.braintreepayments.com/guides/google-pay/configuration/javascript/v3">enable Google Pay in the Braintree Control Panel</a>. If a user's browser does not support Google Pay, the Google Pay option will not be rendered. See <a href="https://developers.google.com/pay/api/web/test-and-deploy">Google's documentation</a> for browser and device support.</p>
+<p>See <a href="#~googlePayCreateOptions"><code>googlePayCreateOptions</code></a> for <code>googlePay</code> options.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>dataCollector</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The configuration options for data collector. See <a href="#~dataCollectorOptions"><code>dataCollectorOptions</code></a> for all <code>dataCollector</code> options. If Data Collector is configured and fails to load, Drop-in creation will fail.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>threeDSecure</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    |
+
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>It's recomended that you pass <code>true</code> here to enable 3D Secure and pass the configuration options for 3D Secure into <a href="Dropin.html#requestPaymentMethod">requestPaymentMethod options</a>.See <a href="#~threeDSecureOptions"><code>threeDSecureOptions</code></a> for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>vaultManager</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              false
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Whether or not to allow a customer to delete saved payment methods when used with a <a href="https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id">client token with a customer id</a>. <em>Note:</em> Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system. This feature is not supported in Internet Explorer 9.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>preselectVaultedPaymentMethod</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              true
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a <a href="https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id">client token with a customer id</a> and a customer with saved payment methods.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>callback</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      function
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The second argument, <code>data</code>, is the <a href="Dropin.html">Dropin</a> instance. Returns a promise if no callback is provided.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line191">line 191</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#create-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="create-examples">Examples</h5>
+    
+  <p class="code-caption">
+    A full example of accepting credit cards with callback API
+  </p>
+
+
+  <pre class="prettyprint"><code>&lt;!DOCTYPE html>
+&lt;html lang="en">
+  &lt;head>
+    &lt;meta charset="utf-8">
+    &lt;title>Checkout&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;div id="dropin-container">&lt;/div>
+    &lt;button id="submit-button">Purchase&lt;/button>
+
+    &lt;script src="https://js.braintreegateway.com/web/dropin/1.24.0/js/dropin.min.js">&lt;/script>
+
+    &lt;script>
+      var submitButton = document.querySelector('#submit-button');
+
+      braintree.dropin.create({
+        authorization: 'CLIENT_AUTHORIZATION',
+        container: '#dropin-container'
+      }, function (err, dropinInstance) {
+        if (err) {
+          // Handle any errors that might've occurred when creating Drop-in
+          console.error(err);
+          return;
+        }
+        submitButton.addEventListener('click', function () {
+          dropinInstance.requestPaymentMethod(function (err, payload) {
+            if (err) {
+              // Handle errors in requesting payment method
+            }
+
+            // Send payload.nonce to your server
+          });
+        });
+      });
+    &lt;/script>
+  &lt;/body>
+&lt;/html></code></pre>
+
+  <p class="code-caption">
+    A full example of accepting credit cards with promise API
+  </p>
+
+
+  <pre class="prettyprint"><code>&lt;!DOCTYPE html>
+&lt;html lang="en">
+  &lt;head>
+    &lt;meta charset="utf-8">
+    &lt;title>Checkout&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;div id="dropin-container">&lt;/div>
+    &lt;button id="submit-button">Purchase&lt;/button>
+
+    &lt;script src="https://js.braintreegateway.com/web/dropin/1.24.0/js/dropin.min.js">&lt;/script>
+
+    &lt;script>
+      var submitButton = document.querySelector('#submit-button');
+
+      braintree.dropin.create({
+        authorization: 'CLIENT_AUTHORIZATION',
+        container: '#dropin-container'
+      }).then(function (dropinInstance) {
+        submitButton.addEventListener('click', function () {
+          dropinInstance.requestPaymentMethod().then(function (payload) {
+            // Send payload.nonce to your server
+          }).catch(function (err) {
+            // Handle errors in requesting payment method
+          });
+        });
+      }).catch(function (err) {
+        // Handle any errors that might've occurred when creating Drop-in
+        console.error(err);
+      });
+    &lt;/script>
+  &lt;/body>
+&lt;/html></code></pre>
+
+  <p class="code-caption">
+    Setting up a Drop-in instance to accept credit cards, PayPal, PayPal Credit, Venmo, and Apple Pay
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  applePay: {
+    displayName: 'Merchant Name',
+    paymentRequest: {
+    label: 'Localized Name',
+      total: '10.00'
+    }
+  },
+  paypal: {
+    flow: 'checkout',
+    amount: '10.00',
+    currency: 'USD'
+  },
+ paypalCredit: {
+   flow: 'checkout',
+   amount: '10.00',
+   currency: 'USD'
+  },
+  venmo: true
+}, function (err, dropinInstance) {
+  // Set up a handler to request a payment method and
+  // submit the payment method nonce to your server
+});</code></pre>
+
+  <p class="code-caption">
+    Setting up a Drop-in instance to accept Venmo with restricted browser support
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  venmo: {
+    allowNewBrowserTab: false
+  }
+}, function (err, dropinInstance) {
+  // Set up a handler to request a payment method and
+  // submit the payment method nonce to your server
+});</code></pre>
+
+  <p class="code-caption">
+    Submitting the payment method nonce to the server using a form
+  </p>
+
+
+  <pre class="prettyprint"><code>&lt;!DOCTYPE html>
+&lt;html lang="en">
+  &lt;head>
+    &lt;meta charset="utf-8">
+    &lt;title>Checkout&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;form id="payment-form" action="/" method="post">
+      &lt;div id="dropin-container">&lt;/div>
+      &lt;input type="submit" value="Purchase">&lt;/input>
+      &lt;input type="hidden" id="nonce" name="payment_method_nonce">&lt;/input>
+    &lt;/form>
+
+    &lt;script src="https://js.braintreegateway.com/web/dropin/1.24.0/js/dropin.min.js">&lt;/script>
+
+    &lt;script>
+      var form = document.querySelector('#payment-form');
+      var nonceInput = document.querySelector('#nonce');
+
+      braintree.dropin.create({
+        authorization: 'CLIENT_AUTHORIZATION',
+        container: '#dropin-container'
+      }, function (err, dropinInstance) {
+        if (err) {
+          // Handle any errors that might've occurred when creating Drop-in
+          console.error(err);
+          return;
+        }
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+
+          dropinInstance.requestPaymentMethod(function (err, payload) {
+            if (err) {
+              // Handle errors in requesting payment method
+              return;
+            }
+
+            // Send payload.nonce to your server
+            nonceInput.value = payload.nonce;
+            form.submit();
+          });
+        });
+      });
+    &lt;/script>
+  &lt;/body>
+&lt;/html></code></pre>
+
+  <p class="code-caption">
+    Use your own translations
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  translations: {
+    payingWith: 'You are paying with {{paymentSource}}',
+    chooseAnotherWayToPay: 'My custom chooseAnotherWayToPay string',
+    // Any other custom translation strings
+  }
+}, callback);</code></pre>
+
+  <p class="code-caption">
+    Customizing Drop-in with card form overrides
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  card: {
+    overrides: {
+      fields: {
+        number: {
+          placeholder: '1111 1111 1111 1111' // Update the number field placeholder
+        },
+        postalCode: {
+          minlength: 5 // Set the minimum length of the postal code field
+        },
+        cvv: null // Remove the CVV field from your form
+      },
+      styles: {
+        input: {
+          'font-size': '18px' // Change the font size for all inputs
+        },
+        ':focus': {
+          color: 'red' // Change the focus color to red for all inputs
+        }
+      }
+    }
+  }
+}, callback);</code></pre>
+
+  <p class="code-caption">
+    Mask Card Inputs
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  card: {
+    overrides: {
+      fields: {
+        number: {
+          maskInput: {
+            showLastFour: true
+          }
+        },
+        cvv: {
+          maskInput: true
+        }
+      }
+    }
+  }
+}, callback);</code></pre>
+
+  <p class="code-caption">
+    Including a cardholder name field
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  card: {
+    cardholderName: true
+  }
+}, callback);</code></pre>
+
+  <p class="code-caption">
+    Including a required cardholder name field
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  card: {
+    cardholderName: {
+      required: true
+    }
+  }
+}, callback);</code></pre>
+
+  <p class="code-caption">
+    Enabling 3D Secure
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  threeDSecure: true
+}, function (err, dropinInstance) {
+  // setup payment button
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    dropinInstance.requestPaymentMethod(|
+      threeDSecure: {
+        amount: '100.00',
+        billingAddress: {
+          givenName: 'Jill', // ASCII-printable characters required, else will throw a validation error
+          surname: 'Doe', // ASCII-printable characters required, else will throw a validation error
+          phoneNumber: '8101234567',
+          streetAddress: '555 Smith St.',
+          extendedAddress: '#5',
+          locality: 'Oakland',
+          region: 'CA',
+          postalCode: '12345',
+          countryCodeAlpha2: 'US'
+        },
+        // additional 3ds params
+      }
+    }, function (err, payload) {
+      // inspect payload.liablityShifted
+      // send payload.nonce to server
+    });
+  });
+});</code></pre>
+
+  <p class="code-caption">
+    Enabled Vault Manager
+  </p>
+
+
+  <pre class="prettyprint"><code>braintree.dropin.create({
+  authorization: 'CLIENT_AUTHORIZATION',
+  container: '#dropin-container',
+  vaultManager: true
+}, callback);</code></pre>
+
+
+  </div>
+
+
+      
+    
+
+    
+      <h3 class="subsection-title">Type Definitions</h3>
+
+      
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~applePayCreateOptions">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~applePayCreateOptions">
+      <span class="type-signature"></span>applePayCreateOptions<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The configuration options for Apple Pay.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+        <th>Default</th>
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>buttonStyle</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              black
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Configures the Apple Pay button style. Valid values are <code>black</code>, <code>white</code>, <code>white-outline</code>.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>displayName</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The canonical name for your store. Use a non-localized name. This parameter should be a utf-8 string that is a maximum of 128 characters. The system may display this name to the user.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>applePaySessionVersion</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              2
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The <a href="https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history">version of the <code>ApplePaySession</code></a> to use. It's recommended to use the lowest version that contains all the features you need for your checkout to maximize compatibility.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>paymentRequest</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      <a href="external-ApplePayPaymentRequest.html">external:ApplePayPaymentRequest</a>
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The payment request details to apply on top of those from Braintree.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line152">line 152</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~cardCreateOptions">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~cardCreateOptions">
+      <span class="type-signature"></span>cardCreateOptions<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The configuration options for cards. Internally, Drop-in uses <a href="http://braintree.github.io/braintree-web/3.65.0/module-braintree-web_hosted-fields.html">Hosted Fields</a> to render the card form. The <code>overrides.fields</code> and <code>overrides.styles</code> allow the Hosted Fields to be customized.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+        <th>Default</th>
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>cardholderName</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    |
+
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a <code>true</code>, it will default the field to being present, but not required.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+        <th>Default</th>
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>required</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              false
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>When true, the cardholder name field will be required to request the payment method nonce.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>overrides.fields</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The Hosted Fields [<code>fields</code> options](http://braintree.github.io/braintree-web/3.65.0/module-braintree-web_hosted-fields.html#~fieldOptions). Only <code>number</code>, <code>cvv</code>, <code>expirationDate</code> and <code>postalCode</code> can be configured. Each is a [Hosted Fields <code>field</code> object](http://braintree.github.io/braintree-web/3.65.0/module-braintree-web_hosted-fields.html#~field). <code>selector</code> cannot be modified.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>overrides.styles</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The Hosted Fields [<code>styles</code> options](http://braintree.github.io/braintree-web/3.65.0/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, <a href="https://developers.braintreepayments.com/guides/drop-in/customization/javascript/v3#customize-your-ui">review the documentation for customizing Drop-in</a>.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>clearFieldsAfterTokenization</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              true
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>When false, the card form will not clear the card data when the customer returns to the card view after a successful tokenization.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>vault</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      object
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Configuration for vaulting credit cards. Only applies when using a <a href="https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id">client token with a customer id</a>.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+        <th>Default</th>
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>allowVaultCardOverride</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              false
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>When true, the card form will include an option to let the customer decide not to vault the credit card they enter.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>vaultCard</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              true
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>Whether or not to vault the card upon tokenization. When set to <code>false</code> with <code>allowVaultCardOverride</code> set to <code>false</code>, then cards will not be vaulted.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line117">line 117</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~dataCollectorOptions">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~dataCollectorOptions">
+      <span class="type-signature"></span>dataCollectorOptions<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The configuration options for Data Collector. Requires <a href="https://developers.braintreepayments.com/guides/advanced-fraud-tools/client-side/javascript/v3">advanced fraud protection</a> to be enabled in the Braintree gateway. Contact our <a href="https://developers.braintreepayments.com/forms/contact">support team</a> to configure your Kount ID. The device data will be included on the <a href="Dropin.html#requestPaymentMethod">requestPaymentMethod payload</a>.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>kount</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>If true, Kount fraud data collection is enabled. Required if <code>paypal</code> parameter is not used.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>paypal</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>If true, PayPal fraud data collection is enabled. Required if <code>kount</code> parameter is not used.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line130">line 130</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~googlePayCreateOptions">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~googlePayCreateOptions">
+      <span class="type-signature"></span>googlePayCreateOptions<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The configuration options for Google Pay. Additional options from the few listed here are available, many have default values applied based on the settings found in the Braintree Gateway. For more information, see <a href="https://developers.google.com/pay/api/web/object-reference#request-objects">Google's Documentation</a>.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+        <th>Default</th>
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>merchantId</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The ID provided by Google for processing transactions in production. Not necessary for testing in sandbox.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>googlePayVersion</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              1
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The version of the Google Pay API to use. Defaults to 1, but 2 can be passed in.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>transactionInfo</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      <a href="external-GooglePayTransactionInfo.html">external:GooglePayTransactionInfo</a>
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The transaction details necessary for processing the payment.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>button</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      <a href="external-GooglePayButtonOptions.html">external:GooglePayButtonOptions</a>
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The button options for configuring the look of the Google Pay button. The <code>onClick</code> property cannot be overwritten.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line160">line 160</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~paypalCreateOptions">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~paypalCreateOptions">
+      <span class="type-signature"></span>paypalCreateOptions<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The configuration options for PayPal and PayPalCredit. For a full list of options see the <a href="http://braintree.github.io/braintree-web/3.65.0/PayPalCheckout.html#createPayment">PayPal Checkout client reference options</a>.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>flow</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>Either <code>checkout</code> for a one-time <a href="https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3">Checkout with PayPal</a> flow or <code>vault</code> for a <a href="https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3">Vault flow</a>. Required when using PayPal or PayPal Credit.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>amount</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    |
+
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The amount of the transaction. Required when using the Checkout flow.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>currency</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The currency code of the amount, such as <code>USD</code>. Required when using the Checkout flow.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>buttonStyle</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options <a href="https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles">found here</a> are available.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>commit</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The user action to show on the PayPal review page. If true, a <code>Pay Now</code> button will be shown. If false, a <code>Continue</code> button will be shown.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line143">line 143</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~threeDSecureOptions">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~threeDSecureOptions">
+      <span class="type-signature"></span>threeDSecureOptions<span class="type-signature"> :object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p><em>Deprecated</em> If the <code>threeDSecureOptions</code> passed into the create call is an object, you may set the <code>amount</code> to verify with 3D Secure. However, it's recomended that you pass <code>true</code> instead of a configuration object and do all 3D Secure configuration in the <a href="Dropin.html#requestPaymentMethod">requestPaymentMethod options</a>.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>amount</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The amount to verify with 3D Secure.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line137">line 137</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#~venmoCreateOptions">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="~venmoCreateOptions">
+      <span class="type-signature"></span>venmoCreateOptions<span class="type-signature"> :object|boolean</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The configuration options for Venmo. If <code>true</code> is passed instead of a configuration object, the default settings listed will be used.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+        <th>Default</th>
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>allowNewBrowserTab</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              true
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>If false, it restricts supported browsers to those that can app switch to the Venmo app without opening a new tab.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="index.js.html">index.js</a>, <a href="index.js.html#line186">line 186</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+    
+  </article>
+</section>
+
+
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.5</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+  
+</body>
+</html>
