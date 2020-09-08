@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.24.0
+------
 
 - Use `@braintree/uuid` package for uuid generation
 - Update braintree-web to v3.65.0
