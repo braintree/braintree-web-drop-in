@@ -44,20 +44,6 @@ function configuration() {
   };
 }
 
-function getState() {
-  return {
-    cards: [{ type: 'visa' }],
-    fields: {
-      number: {
-        isValid: true
-      },
-      expirationDate: {
-        isValid: false
-      }
-    }
-  };
-}
-
 clientToken = configuration().gatewayConfiguration;
 clientToken.authorizationFingerprint = 'encoded_auth_fingerprint';
 clientToken = btoa(JSON.stringify(clientToken));
@@ -71,12 +57,27 @@ fakeBTInstances = {
     deviceData: 'device-data',
     teardown: function () {}
   },
-  hostedFields: {
-    getState: getState,
-    on: function () {},
-    setAttribute: function () {},
-    setMessage: function () {},
-    tokenize: function () {}
+  hostedFields() {
+    return {
+      clear: jest.fn(),
+      getState: jest.fn().mockReturnValue({
+        cards: [{ type: 'visa' }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      }),
+      on: jest.fn(),
+      removeAttribute: jest.fn(),
+      setAttribute: jest.fn(),
+      setMessage: jest.fn(),
+      teardown: jest.fn().mockResolvedValue(),
+      tokenize: jest.fn().mockResolvedValue({})
+    };
   },
   paypal: {
     createPayment: function () {},
@@ -130,7 +131,7 @@ module.exports = {
   clientTokenWithCustomerID: clientTokenWithCustomerID,
   configuration: configuration,
   dataCollectorInstance: fakeBTInstances.dataCollector,
-  hostedFieldsInstance: fakeBTInstances.hostedFields,
+  hostedFields: fakeBTInstances.hostedFields,
   paypalInstance: fakeBTInstances.paypal,
   threeDSecureInstance: fakeBTInstances.threeDSecure,
   modelOptions: modelOptions,
