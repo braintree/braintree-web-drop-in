@@ -1875,6 +1875,10 @@ describe('CardView', () => {
           fakeHostedFieldsInstance.getState.mockReturnValue({
             cards: [{ type: 'visa' }],
             fields: {
+              cardholderName: {
+                isEmpty: true,
+                isValid: false
+              },
               number: {
                 isValid: true
               },
@@ -1911,6 +1915,10 @@ describe('CardView', () => {
           fakeHostedFieldsInstance.getState.mockReturnValue({
             cards: [{ type: 'visa' }],
             fields: {
+              cardholderName: {
+                isEmpty: true,
+                isValid: false
+              },
               number: {
                 isValid: true
               },
@@ -1926,6 +1934,9 @@ describe('CardView', () => {
         }).then(() => {
           expect(cardViewWithCardholderName.model.reportError).not.toBeCalled();
           expect(fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
+          expect(fakeHostedFieldsInstance.tokenize).toBeCalledWith(expect.objectContaining({
+            fieldsToTokenize: ['number', 'expirationDate']
+          }));
         });
       }
     );
@@ -1959,46 +1970,6 @@ describe('CardView', () => {
         expect(fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
       });
     });
-
-    test(
-      'calls callback with error when cardholder name length is over 255 characters',
-      () => {
-        let cardViewWithCardholderName;
-
-        expect.assertions(3);
-
-        return makeCardView({
-          card: {
-            cardholderName: true
-          }
-        }).then((view) => {
-          cardViewWithCardholderName = view;
-        }).then(() => {
-          const overLengthValue = Array(257).join('a');
-
-          fakeHostedFieldsInstance.getState.mockReturnValue({
-            cards: [{ type: 'visa' }],
-            fields: {
-              number: {
-                isValid: true
-              },
-              expirationDate: {
-                isValid: true
-              }
-            }
-          });
-          jest.spyOn(cardViewWithCardholderName.model, 'reportError').mockImplementation();
-
-          cardViewWithCardholderName.cardholderNameInput.value = overLengthValue;
-
-          return cardViewWithCardholderName.tokenize().catch(err => {
-            expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
-            expect(cardViewWithCardholderName.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
-            expect(err.message).toBe('No payment method is available.');
-          });
-        });
-      }
-    );
 
     test(
       'reports an error to DropinModel when Hosted Fields tokenization returns an error',
@@ -2383,6 +2354,21 @@ describe('CardView', () => {
       () => {
         let cardViewWithCardholderName;
 
+        fakeHostedFieldsInstance.getState.mockReturnValue({
+          cards: [{ type: 'visa' }],
+          fields: {
+            cardholderName: {
+              isValid: true
+            },
+            number: {
+              isValid: true
+            },
+            expirationDate: {
+              isValid: true
+            }
+          }
+        });
+
         return makeCardView({
           card: {
             cardholderName: true
@@ -2390,11 +2376,10 @@ describe('CardView', () => {
         }).then((view) => {
           cardViewWithCardholderName = view;
           fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
-          cardViewWithCardholderName.cardholderNameInput.value = 'Some value';
 
           return cardViewWithCardholderName.tokenize();
         }).then(() => {
-          expect(cardViewWithCardholderName.cardholderNameInput.value).toBe('');
+          expect(fakeHostedFieldsInstance.clear).toBeCalledWith('cardholderName');
         });
       }
     );
@@ -2418,6 +2403,21 @@ describe('CardView', () => {
       () => {
         let cardViewWithCardholderName;
 
+        fakeHostedFieldsInstance.getState.mockReturnValue({
+          cards: [{ type: 'visa' }],
+          fields: {
+            cardholderName: {
+              isValid: true
+            },
+            number: {
+              isValid: true
+            },
+            expirationDate: {
+              isValid: true
+            }
+          }
+        });
+
         return makeCardView({
           card: {
             clearFieldsAfterTokenization: false,
@@ -2425,12 +2425,11 @@ describe('CardView', () => {
           }
         }).then((view) => {
           cardViewWithCardholderName = view;
-          cardViewWithCardholderName.cardholderNameInput.value = 'Some value';
           fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
 
           return cardViewWithCardholderName.tokenize();
         }).then(() => {
-          expect(cardViewWithCardholderName.cardholderNameInput.value).toBe('Some value');
+          expect(fakeHostedFieldsInstance.clear).not.toBeCalled();
         });
       }
     );
@@ -2662,6 +2661,10 @@ describe('CardView', () => {
   });
 
   describe('onSelection', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
     test('focuses on the number field', () => {
       const view = new CardView({ element: cardElement });
 
@@ -2670,6 +2673,8 @@ describe('CardView', () => {
       };
 
       view.onSelection();
+
+      jest.runAllTimers();
 
       expect(view.hostedFieldsInstance.focus).toBeCalledTimes(1);
       expect(view.hostedFieldsInstance.focus).toBeCalledWith('number');
@@ -2682,6 +2687,8 @@ describe('CardView', () => {
 
       expect(() => {
         view.onSelection();
+
+        jest.runAllTimers();
       }).not.toThrowError();
     });
   });

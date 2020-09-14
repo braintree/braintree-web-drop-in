@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Provide validation to prevent cardholder name fields from being submitted as card numbers
+- Fix issue where hosted fields would not auto focus on card view selection
+
 1.24.0
 ------
 
