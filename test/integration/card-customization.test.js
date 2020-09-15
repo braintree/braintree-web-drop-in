@@ -2,7 +2,7 @@ require('./helper');
 
 describe('Drop-in card', function () {
   beforeEach(function () {
-    browser.reloadSessionOnRetry();
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   describe('cardholderName', function () {
@@ -17,13 +17,13 @@ describe('Drop-in card', function () {
     it('can add a cardholder name field to the card form', function () {
       browser.start(this.options);
 
-      expect(browser.dropin().getHTML()).to.include('Cardholder Name');
+      expect(browser.dropin().getHTML()).toContain('Cardholder Name');
     });
 
     it('does not include cardholder name field if not included in config', function () {
       browser.start();
 
-      expect(browser.dropin().getHTML()).to.not.include('Cardholder Name');
+      expect(browser.dropin().getHTML()).not.toContain('Cardholder Name');
     });
 
     it('does not require cardholder name', function () {
@@ -33,15 +33,15 @@ describe('Drop-in card', function () {
       browser.hostedFieldSendInput('expirationDate');
       browser.hostedFieldSendInput('cvv');
 
-      expect($('#pay-button').isEnabled()).to.equal(true);
+      expect($('#pay-button').isEnabled()).toBe(true);
 
       browser.submitPay();
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
-      expect(result.description).to.include('ending in 11');
-      expect(result.details.cardType).to.include('Visa');
+      expect(result.nonce).toBeTruthy();
+      expect(result.description).toContain('ending in 11');
+      expect(result.details.cardType).toContain('Visa');
     });
 
     it('can set cardholder name to be required', function () {
@@ -54,19 +54,19 @@ describe('Drop-in card', function () {
       browser.hostedFieldSendInput('expirationDate');
       browser.hostedFieldSendInput('cvv');
 
-      expect($('#pay-button').isEnabled()).to.equal(false);
+      expect($('#pay-button').isEnabled()).toBe(false);
 
       $('.braintree-form-cardholder-name input').typeKeys('First Last');
 
-      expect($('#pay-button').isEnabled()).to.equal(true);
+      expect($('#pay-button').isEnabled()).toBe(true);
 
       browser.submitPay();
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
-      expect(result.description).to.include('ending in 11');
-      expect(result.details.cardType).to.include('Visa');
+      expect(result.nonce).toBeTruthy();
+      expect(result.description).toContain('ending in 11');
+      expect(result.details.cardType).toContain('Visa');
     });
   });
 
@@ -84,9 +84,9 @@ describe('Drop-in card', function () {
 
       const cardSheet = browser.findByBtId('card').getHTML();
 
-      expect(cardSheet).to.include('Card Number');
-      expect(cardSheet).to.include('Expiration Date');
-      expect(cardSheet).to.not.include('CVV');
+      expect(cardSheet).toContain('Card Number');
+      expect(cardSheet).toContain('Expiration Date');
+      expect(cardSheet).not.toContain('CVV');
     });
 
     it('can override field configurations', function () {
@@ -105,7 +105,7 @@ describe('Drop-in card', function () {
       const iframe = $('iframe[id="braintree-hosted-field-cvv"]');
 
       browser.inFrame(iframe, () => {
-        expect($('.cvv').getProperty('placeholder')).to.equal('my placeholder');
+        expect($('.cvv').getProperty('placeholder')).toBe('my placeholder');
       });
     });
 
@@ -125,7 +125,7 @@ describe('Drop-in card', function () {
       const iframe = $('iframe[id="braintree-hosted-field-cvv"]');
 
       browser.inFrame(iframe, () => {
-        expect($('.cvv').getProperty('placeholder')).to.equal('');
+        expect($('.cvv').getProperty('placeholder')).toBe('');
       });
     });
 
@@ -146,11 +146,11 @@ describe('Drop-in card', function () {
       });
 
       browser.inFrame($('iframe[id="braintree-hosted-field-cvv"]'), () => {
-        expect($('.cvv').getCSSProperty('font-size').value).to.equal('20px');
+        expect($('.cvv').getCSSProperty('font-size').value).toBe('20px');
       });
 
       browser.inFrame($('iframe[id="braintree-hosted-field-number"]'), function () {
-        expect($('.number').getCSSProperty('font-size').value).to.equal('10px');
+        expect($('.number').getCSSProperty('font-size').value).toBe('10px');
       });
     });
   });
@@ -169,7 +169,7 @@ describe('Drop-in card', function () {
 
       browser.findByBtId('toggle').click();
 
-      expect($('#pay-button').isEnabled()).to.equal(false);
+      expect($('#pay-button').isEnabled()).toBe(false);
     });
 
     it('persists card data after tokenization if false', function () {
@@ -189,17 +189,19 @@ describe('Drop-in card', function () {
 
       browser.findByBtId('toggle').click();
 
-      expect($('#pay-button').isEnabled()).to.equal(true);
+      expect($('#pay-button').isEnabled()).toBe(true);
 
       browser.submitPay();
 
       browser.waitUntil(() => {
         return browser.getResult().nonce !== oldNonce;
-      }, null, 'Nonce in result never updated.');
+      }, {
+        timeoutMsg: 'Nonce in result never updated.'
+      });
 
       const newNonce = browser.getResult().nonce;
 
-      expect(oldNonce).to.not.equal(newNonce);
+      expect(oldNonce).not.toBe(newNonce);
     });
   });
 });

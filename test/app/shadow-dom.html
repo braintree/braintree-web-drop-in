@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="IE=Edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drop-in demo in Shadow DOM</title>
+<style>
+
+  html {
+    font-family: sans-serif;
+    font-size: 16pt;
+    background: #f9f9f9;
+  }
+
+  body {
+    width: 95%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+</style>
+
+</head>
+<body>
+<h1>Braintree Drop-in demo in the Shadow DOM</h1>
+
+<drop-in />
+
+<script src="assign-polyfill.js"></script>
+<script src="web/dropin/dev/js/dropin.js"></script>
+
+<script>
+  customElements.define('drop-in',
+    class extends HTMLElement {
+      constructor() {
+        super();
+
+        var shadow = this.attachShadow({mode: 'open'});
+        var style = document.createElement('style');
+        style.textContent = `
+        .hidden {
+          display: none;
+        }
+
+        #dropin-container, #checkout-form {
+          margin-bottom: 1em;
+        }
+
+        #error {
+          background: #fee;
+          color: tomato;
+          padding: 15px;
+        }
+
+        #error:empty {
+          display: none;
+        }
+
+        input[type="submit"], button {
+          font: inherit;
+          padding: 0.5em 1em;
+          border: 1px solid #d9d9d9;
+          background: #f2f2f2;
+          background-image: linear-gradient(-180deg,#f2f2f2 0,#e6e6e6 100%);
+        }
+
+        button[disabled] {
+          display: none;
+        }
+
+        `;
+        var wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+<pre id="error"></pre>
+
+<form id="checkout-form">
+  <div id="drop-in-container"></div>
+
+  <input id="pay-button" type="submit" value="Pay">
+  <button id="create-button" disabled type="button">Create</button>
+  <button id="teardown-button" type="button">Teardown</button>
+</form>
+
+<pre id="results"></pre>
+        `;
+
+        shadow.appendChild(style);
+        shadow.appendChild(wrapper);
+
+        var dropinContainer = wrapper.querySelector('#drop-in-container');
+        var results = wrapper.querySelector('#results');
+        var error = wrapper.querySelector('#error');
+        var form = wrapper.querySelector('#checkout-form');
+        var createButton = wrapper.querySelector('#create-button');
+        var teardownButton = wrapper.querySelector('#teardown-button');
+        var dropinInstance;
+
+        function createDropin () {
+          results.textContent = '';
+          error.textContent = '';
+
+          braintree.dropin.create({
+            authorization: 'sandbox_f252zhq7_hh4cpc39zq4rgjcg',
+            container: dropinContainer
+          }).then(function (instance) {
+            dropinInstance = instance;
+
+            teardownButton.removeAttribute('disabled');
+            createButton.setAttribute('disabled', true);
+
+          }).catch(function (err) {
+            error.textContent = err.message;
+          });
+        }
+
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+
+          dropinInstance.requestPaymentMethod().then(function (payload) {
+            results.textContent = JSON.stringify(payload, null, 2);
+            error.textContent = '';
+          }).catch(function (err) {
+            error.textContent = err.message;
+            results.textContent = '';
+          });
+        }, false);
+
+        createButton.addEventListener('click', createDropin);
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+
+          dropinInstance.requestPaymentMethod().then(function (payload) {
+            results.textContent = JSON.stringify(payload, null, 2);
+            error.textContent = '';
+          }).catch(function (err) {
+            error.textContent = err.message;
+            results.textContent = '';
+          });
+        }, false);
+
+        teardownButton.addEventListener('click', function () {
+          teardownButton.setAttribute('disabled', true);
+          dropinInstance.teardown().then(function () {
+            results.textContent = 'Teardown successful';
+            createButton.removeAttribute('disabled');
+          }).catch(function (err) {
+            error.textContent = 'Failed to tear down:' + err;
+          })
+        });
+
+        createDropin();
+      }
+    }
+  );
+</script>
+
+</body>
+</html>

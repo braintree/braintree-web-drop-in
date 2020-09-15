@@ -1,4 +1,4 @@
-const uuid = require('uuid/v4');
+const uuid = require('@braintree/uuid');
 const browserstack = require('browserstack-local');
 
 // Stop node from complaining about fake memory leaks at higher concurrency
@@ -124,7 +124,7 @@ if (ONLY_BROWSERS) {
 }
 
 const mochaOpts = {
-  timeout: 90000
+  timeout: 200000
 };
 
 if (!process.env.DISABLE_RETRIES) {
@@ -141,10 +141,8 @@ if (process.env.TEST_GREP) {
 }
 
 exports.config = {
-  runner: 'local',
   user: process.env.BROWSERSTACK_USERNAME,
   key: process.env.BROWSERSTACK_ACCESS_KEY,
-  browserstackLocal: true,
   specs: require('fs')
     .readdirSync('./test/integration')
     .map(f => `./test/integration/${f}`),
@@ -161,7 +159,12 @@ exports.config = {
   waitforTimeout: 20000,
   connectionRetryTimeout: 90000,
   connectionRetryCount: 1,
-  services: ['browserstack'],
+  services: [
+    ['browserstack', {
+      runner: 'local',
+      browserstackLocal: true,
+    }],
+  ],
   framework: 'mocha',
   mochaOpts,
   reporters: ['spec'],

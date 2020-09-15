@@ -163,22 +163,22 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     authorization: this.model.authorization,
     fields: {
       number: {
-        selector: this._generateFieldSelector('number'),
+        container: this._getFieldContainer('number'),
         placeholder: generateCardNumberPlaceholder(),
         // enforces card type as part of validity for hosted fields
         // without providing any overrides
         supportedCardBrands: {}
       },
       expirationDate: {
-        selector: this._generateFieldSelector('expiration'),
+        container: this._getFieldContainer('expiration'),
         placeholder: this.strings.expirationDatePlaceholder
       },
       cvv: {
-        selector: this._generateFieldSelector('cvv'),
+        container: this._getFieldContainer('cvv'),
         placeholder: addBullets(3)
       },
       postalCode: {
-        selector: this._generateFieldSelector('postal-code')
+        container: this._getFieldContainer('postal-code')
       }
     },
     styles: {
@@ -500,8 +500,14 @@ CardView.prototype._shouldVault = function () {
   return this.model.vaultManagerConfig.autoVaultPaymentMethods && this.saveCardInput.checked;
 };
 
-CardView.prototype._generateFieldSelector = function (field) {
-  return '#braintree--dropin__' + this.model.componentID + ' .braintree-form-' + field;
+CardView.prototype._getFieldContainer = function (field) {
+  // we committed to not changing the data-braintree-id fields
+  // so we need to convert this field to the id used in the HTML
+  if (field === 'expiration') {
+    field = 'expiration-date';
+  }
+
+  return this.getElementById(field + '-field-group').querySelector('.braintree-form__hosted-field');
 };
 
 CardView.prototype._onBlurEvent = function (event) {

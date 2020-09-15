@@ -2,7 +2,7 @@ require('./helper');
 
 describe('Drop-in#updateConfiguration', function () {
   beforeEach(function () {
-    browser.reloadSessionOnRetry();
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   it('updates PayPal configuration @paypal', function () {
@@ -22,14 +22,14 @@ describe('Drop-in#updateConfiguration', function () {
     browser.clickOption('paypal');
 
     browser.openPayPalAndCompleteLogin(function () {
-      expect($('body').getHTML().toLowerCase()).to.not.include('future payments');
+      expect($('body').getHTML().toLowerCase()).not.toContain('future payments');
     });
 
     $('#paypal-config-vault').click();
     browser.clickOption('paypal');
 
     browser.openPayPalAndCompleteLogin(function () {
-      expect($('body').getHTML().toLowerCase()).to.include('future payments');
+      expect($('body').getHTML().toLowerCase()).toContain('future payments');
     });
   });
 
@@ -50,14 +50,14 @@ describe('Drop-in#updateConfiguration', function () {
     browser.clickOption('paypalCredit');
 
     browser.openPayPalAndCompleteLogin(function () {
-      expect($('body').getHTML().toLowerCase()).to.not.include('future payments');
+      expect($('body').getHTML().toLowerCase()).not.toContain('future payments');
     });
 
     $('#paypal-config-vault').click();
     browser.clickOption('paypalCredit');
 
     browser.openPayPalAndCompleteLogin(function () {
-      expect($('body').getHTML().toLowerCase()).to.include('future payments');
+      expect($('body').getHTML().toLowerCase()).toContain('future payments');
     });
   });
 
@@ -79,10 +79,10 @@ describe('Drop-in#updateConfiguration', function () {
 
     browser.openPayPalAndCompleteLogin();
 
-    expect(browser.dropin().getHTML()).to.include(process.env.PAYPAL_USERNAME);
+    expect(browser.dropin().getHTML()).toContain(process.env.PAYPAL_USERNAME);
 
     $('#paypal-config-vault').click();
 
-    expect(browser.dropin().getHTML()).to.not.include(process.env.PAYPAL_USERNAME);
+    expect(browser.dropin().getHTML()).not.toContain(process.env.PAYPAL_USERNAME);
   });
 });

@@ -2,7 +2,7 @@
 
 const analytics = require('./analytics');
 const find = require('./find-parent-form');
-const uuid = require('./uuid');
+const uuid = require('@braintree/uuid');
 const DropinError = require('./dropin-error');
 const kebabCaseToCamelCase = require('./kebab-case-to-camel-case');
 const ALLOWLISTED_DATA_ATTRIBUTES = [

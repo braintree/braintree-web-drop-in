@@ -7,7 +7,7 @@ const hostedFields = require('braintree-web/hosted-fields');
 const paypalCheckout = require('braintree-web/paypal-checkout');
 const threeDSecure = require('braintree-web/three-d-secure');
 const vaultManager = require('braintree-web/vault-manager');
-const Dropin = require('../../src/dropin/');
+const Dropin = require('../../src/dropin');
 const CardView = require('../../src/views/payment-sheet-views/card-view');
 const DataCollector = require('../../src/lib/data-collector');
 const DropinModel = require('../../src/dropin-model');
@@ -48,12 +48,14 @@ describe('Dropin', () => {
       }
     };
 
+    const fakeHostedFieldsInstance = fake.hostedFields();
+
     jest.spyOn(CardView.prototype, 'getPaymentMethod').mockImplementation();
-    jest.spyOn(hostedFields, 'create').mockResolvedValue(fake.hostedFieldsInstance);
+    jest.spyOn(hostedFields, 'create').mockResolvedValue(fakeHostedFieldsInstance);
     jest.spyOn(paypalCheckout, 'create').mockResolvedValue(fake.paypalInstance);
     jest.spyOn(threeDSecure, 'create').mockResolvedValue(fake.threeDSecureInstance);
 
-    fake.hostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([]);
+    fakeHostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -306,6 +308,8 @@ describe('Dropin', () => {
     });
 
     it('injects stylesheet with correct id', done => {
+      jest.spyOn(assets, 'loadStylesheet');
+
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
@@ -313,6 +317,46 @@ describe('Dropin', () => {
 
         expect(stylesheet).toBeDefined();
         expect(stylesheet.href).toMatch(/assets\.braintreegateway\.com/);
+
+        expect(assets.loadStylesheet).toBeCalledTimes(1);
+        expect(assets.loadStylesheet).toBeCalledWith({
+          id: constants.STYLESHEET_ID,
+          href: expect.stringContaining('assets.braintreegateway.com')
+        });
+
+        done();
+      });
+    });
+
+    test('injects stylesheet into shadow DOM instead of the head', done => {
+      jest.spyOn(assets, 'loadStylesheet');
+
+      const container = document.createElement('div');
+      const insideShadowDOMWrapper = document.createElement('div');
+      const dropinContainer = document.createElement('div');
+      const shadowDom = container.attachShadow({ mode: 'open' });
+
+      dropinContainer.id = 'dropin';
+      insideShadowDOMWrapper.appendChild(dropinContainer);
+      shadowDom.appendChild(insideShadowDOMWrapper);
+
+      document.body.appendChild(container);
+      testContext.dropinOptions.merchantConfiguration.container = dropinContainer;
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        const stylesheet = shadowDom.querySelector(`#${constants.STYLESHEET_ID}`);
+
+        expect(stylesheet).toBeDefined();
+        expect(stylesheet.href).toMatch(/assets\.braintreegateway\.com/);
+
+        expect(assets.loadStylesheet).toBeCalledTimes(1);
+        expect(assets.loadStylesheet).toBeCalledWith({
+          id: constants.STYLESHEET_ID,
+          href: expect.stringContaining('assets.braintreegateway.com'),
+          container: shadowDom
+        });
 
         done();
       });
@@ -1164,6 +1208,72 @@ describe('Dropin', () => {
       });
     });
 
+    it(
+      'calls 3D Secure if payment method nonce payload is a non-network tokenized google pay and does not contain liability info',
+      done => {
+        let instance;
+        const fakePayload = {
+          nonce: 'cool-nonce',
+          type: 'AndroidPayCard',
+          details: {
+            isNetworkTokenized: false
+          }
+        };
+
+        testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+        instance = new Dropin(testContext.dropinOptions);
+
+        instance._initialize(() => {
+          jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+          instance._threeDSecure = {
+            verify: jest.fn().mockResolvedValue({
+              nonce: 'new-nonce',
+              liabilityShifted: true,
+              liabilityShiftPossible: true
+            })
+          };
+
+          instance.requestPaymentMethod(() => {
+            expect(instance._threeDSecure.verify).toBeCalledTimes(1);
+            expect(instance._threeDSecure.verify).toBeCalledWith(fakePayload, undefined); // eslint-disable-line no-undefined
+
+            done();
+          });
+        });
+      }
+    );
+
+    it(
+      'does not call 3D Secure if network tokenized google pay',
+      done => {
+        let instance;
+        const fakePayload = {
+          nonce: 'cool-nonce',
+          type: 'AndroidPayCard',
+          details: {
+            isNetworkTokenized: true
+          }
+        };
+
+        testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+        instance = new Dropin(testContext.dropinOptions);
+
+        jest.spyOn(ThreeDSecure.prototype, 'verify');
+
+        instance._initialize(() => {
+          jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+
+          instance.requestPaymentMethod(() => {
+            expect(ThreeDSecure.prototype.verify).not.toBeCalled();
+
+            done();
+          });
+        });
+      }
+    );
+
     it('can pass additional 3ds info from merchant', done => {
       let instance;
       const fakePayload = {
@@ -1217,7 +1327,10 @@ describe('Dropin', () => {
           verify: jest.fn().mockResolvedValue({
             nonce: 'new-nonce',
             liabilityShifted: true,
-            liabilityShiftPossible: true
+            liabilityShiftPossible: true,
+            threeDSecureInfo: {
+              threeDSecureAuthenticationId: 'id'
+            }
           })
         };
 
@@ -1225,9 +1338,9 @@ describe('Dropin', () => {
           expect(payload.nonce).toBe('new-nonce');
           expect(payload.liabilityShifted).toBe(true);
           expect(payload.liabilityShiftPossible).toBe(true);
-          expect(fakePayload.nonce).toBe('new-nonce');
-          expect(fakePayload.liabilityShifted).toBe(true);
-          expect(fakePayload.liabilityShiftPossible).toBe(true);
+          expect(payload.liabilityShifted).toBe(true);
+          expect(payload.liabilityShiftPossible).toBe(true);
+          expect(payload.threeDSecureInfo.threeDSecureAuthenticationId).toBe('id');
 
           done();
         });
@@ -1766,6 +1879,42 @@ describe('Dropin', () => {
       instance.updateConfiguration('paypal', 'foo', 'bar');
 
       expect(instance._mainView.setPrimaryView).not.toBeCalled();
+    });
+  });
+
+  describe('getAvailablePaymentOptions', () => {
+    test('returns an array of payment options presented to the customer', (done) => {
+      testContext.dropinOptions.merchantConfiguration.paypal = {
+        flow: 'vault'
+      };
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        const result = instance.getAvailablePaymentOptions();
+
+        expect(result).toEqual(['card', 'paypal']);
+
+        done();
+      });
+    });
+  });
+
+  describe('getAvailablePaymentOptions', () => {
+    test('returns an array of payment options presented to the customer', (done) => {
+      testContext.dropinOptions.merchantConfiguration.paypal = {
+        flow: 'vault'
+      };
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        const result = instance.getAvailablePaymentOptions();
+
+        expect(result).toEqual(['card', 'paypal']);
+
+        done();
+      });
     });
   });
 
