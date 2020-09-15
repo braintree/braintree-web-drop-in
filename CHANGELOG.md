@@ -35,6 +35,27 @@ unreleased
 ----------
 - Update braintree-web to v3.60.0
 
+1.24.0
+------
+
+- Use `@braintree/uuid` package for uuid generation
+- Update braintree-web to v3.65.0
+- Update @braintree/asset-loader to v0.4.4
+- Update @braintree/browser-detection to v1.10.0
+- Update @braintree/class-list to v0.2.0
+- Update @braintree/event-emitter to v0.4.1
+- Update @braintree/wrap-promise to v2.1.0
+- Fix issue where `threeDSecureInfo` was not included in `requestPaymentMethod` payload
+- Add `getAvailablePaymentOptions` method to list what payment options have been presented to the customer (closes #594)
+- Add support for the shadow DOM for the card view
+
+1.23.0
+------
+- Add 3DS support for non-network tokenized Google Pay cards
+- Add `threeDSecureInfo` to 3DS payload in `requestPaymentMethod`
+- Update braintree-web to v3.63.0
+>>>>>>> @{-1}
+
 1.22.1
 ------
 - Fix issue where payment requestable event would not fire when switching between vaulted payment methods (#499)

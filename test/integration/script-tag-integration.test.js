@@ -2,7 +2,7 @@ require('./helper');
 
 describe('Drop-in Script Tag Integration', function () {
   beforeEach(function () {
-    browser.reloadSessionOnRetry();
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   it('tokenizes a card', function () {
@@ -11,7 +11,10 @@ describe('Drop-in Script Tag Integration', function () {
     });
     browser.waitUntil(() => {
       return $('.braintree-option__card').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
-    }, 15000, 'expected Drop-in to be ready after 15 s');
+    }, {
+      timeout: 15000,
+      timeoutMsg: 'expected Drop-in to be ready after 15 s'
+    });
 
     browser.clickOption('card');
 
@@ -25,7 +28,7 @@ describe('Drop-in Script Tag Integration', function () {
       return browser.getUrl().indexOf('script-tag-result.html') > -1;
     });
 
-    expect($('body').getHTML()).to.include('payment_method_nonce:');
+    expect($('body').getHTML()).toContain('payment_method_nonce:');
   });
 
   it('tokenizes PayPal @paypal', function () {
@@ -40,7 +43,10 @@ describe('Drop-in Script Tag Integration', function () {
     });
     browser.waitUntil(() => {
       return $('.braintree-option__card').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
-    }, 15000, 'expected Drop-in to be ready after 15 s');
+    }, {
+      timeout: 15000,
+      timeoutMsg: 'expected Drop-in to be ready after 15 s'
+    });
 
     browser.clickOption('paypal');
 
@@ -52,7 +58,7 @@ describe('Drop-in Script Tag Integration', function () {
       return browser.getUrl().indexOf('script-tag-result.html') > -1;
     });
 
-    expect($('body').getHTML()).to.include('payment_method_nonce:');
+    expect($('body').getHTML()).toContain('payment_method_nonce:');
   });
 
   it('does not submit form if card form is invalid', function () {
@@ -61,7 +67,10 @@ describe('Drop-in Script Tag Integration', function () {
     });
     browser.waitUntil(() => {
       return $('.braintree-option__card').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
-    }, 15000, 'expected Drop-in to be ready after 15 s');
+    }, {
+      timeout: 15000,
+      timeoutMsg: 'expected Drop-in to be ready after 15 s'
+    });
 
     browser.clickOption('card');
 
@@ -73,7 +82,7 @@ describe('Drop-in Script Tag Integration', function () {
 
     const currentUrl = browser.getUrl();
 
-    expect(currentUrl).to.not.include('script-tag-result.html');
+    expect(currentUrl).not.toContain('script-tag-result.html');
   });
 
   it('accepts data attributes as create options', function () {
@@ -82,12 +91,15 @@ describe('Drop-in Script Tag Integration', function () {
     });
     browser.waitUntil(() => {
       return $('.braintree-option__card').isDisplayed() && !$('.braintree-loader__container').isDisplayed();
-    }, 15000, 'expected Drop-in to be ready after 15 s');
+    }, {
+      timeout: 15000,
+      timeoutMsg: 'expected Drop-in to be ready after 15 s'
+    });
 
     const options = $$('[data-braintree-id="options"] .braintree-option__label');
 
-    expect(options[0].getHTML()).to.include('PayPal');
-    expect(options[1].getHTML()).to.include('Card');
-    expect(options[2].getHTML()).to.include('PayPal Credit');
+    expect(options[0].getHTML()).toContain('PayPal');
+    expect(options[1].getHTML()).toContain('Card');
+    expect(options[2].getHTML()).toContain('PayPal Credit');
   });
 });

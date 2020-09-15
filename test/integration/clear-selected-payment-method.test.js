@@ -2,7 +2,7 @@ require('./helper');
 
 describe('Drop-in#clearSelectedPaymentMethod', function () {
   beforeEach(function () {
-    browser.reloadSessionOnRetry();
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   it('clears a credit card when it is the active payment method', function () {
@@ -14,11 +14,11 @@ describe('Drop-in#clearSelectedPaymentMethod', function () {
 
     browser.submitPay();
 
-    expect($('.braintree-method.braintree-method--active').isExisting()).to.equal(true);
+    expect($('.braintree-method.braintree-method--active').isExisting()).toBe(true);
 
     $('#clear-button').click();
 
-    expect($('.braintree-method.braintree-method--active').isExisting()).to.equal(false);
+    expect($('.braintree-method.braintree-method--active').isExisting()).toBe(false);
   });
 
   it('clears paypal when it is the active payment method @paypal', function () {
@@ -32,10 +32,10 @@ describe('Drop-in#clearSelectedPaymentMethod', function () {
 
     browser.submitPay();
 
-    expect($('.braintree-method.braintree-method--active').isExisting()).to.equal(true);
+    expect($('.braintree-method.braintree-method--active').isExisting()).toBe(true);
 
     $('#clear-button').click();
 
-    expect($('.braintree-method.braintree-method--active').isExisting()).to.equal(false);
+    expect($('.braintree-method.braintree-method--active').isExisting()).toBe(false);
   });
 });
