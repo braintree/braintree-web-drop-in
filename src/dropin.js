@@ -15,7 +15,7 @@ var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations').translations;
 var isUtf8 = require('./lib/is-utf-8');
-var uuid = require('./lib/uuid');
+var uuid = require('@braintree/uuid');
 var Promise = require('./lib/promise');
 var sanitizeHtml = require('./lib/sanitize-html');
 var DataCollector = require('./lib/data-collector');
@@ -56,6 +56,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  * @property {?boolean} liabilityShifted If 3D Secure is configured, whether or not liability did shift.
  * @property {?boolean} liabilityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
+ * @property {?object} threeDSecureInfo If 3D Secure is configured, the `threeDSecureInfo` documented in the [Three D Secure client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/ThreeDSecure.html#~verifyPayload)
  */
 
 /**
@@ -99,6 +100,8 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
  * @property {string} details.lastFour The last 4 digits of the card.
  * @property {string} details.lastTwo The last 2 digits of the card.
+ * @property {boolean} details.isNetworkTokenized True if the card is network tokenized. A network tokenized card is a generated virtual card with a device-specific account number (DPAN) that is used in place of the underlying source card.
+ * @property {string} details.bin First six digits of card number.
  * @property {external:GooglePayPaymentData} details.rawPaymentData The raw response back from the Google Pay flow, which includes shipping address, phone and email if passed in as required parameters.
  * @property {string} type The payment method type, always `AndroidPayCard` when the method requested is a Google Pay Card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
@@ -285,8 +288,6 @@ Dropin.prototype._initialize = function (callback) {
   var self = this;
   var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
 
-  self._injectStylesheet();
-
   if (!container) {
     analytics.sendEvent('configuration-error');
     callback(new DropinError('options.container is required.'));
@@ -346,9 +347,13 @@ Dropin.prototype._initialize = function (callback) {
   container.appendChild(self._dropinWrapper);
 
   self._model = new DropinModel({
+    client: self._client,
+    container: container,
     componentID: self._componentID,
     merchantConfiguration: self._merchantConfiguration
   });
+
+  self._injectStylesheet();
 
   self._model.initialize().then(function () {
     self._model.on('cancelInitialization', function (err) {
@@ -435,6 +440,28 @@ Dropin.prototype.updateConfiguration = function (property, key, value) {
     return paymentMethod.type === constants.paymentMethodTypes[property];
   });
   this._navigateToInitialView();
+};
+
+/**
+ * Get a list of the available payment methods presented to the user. This is useful for knowing if a paricular payment option was presented to a customer that is browser dependant such as Apple Pay, Google Pay and Venmo. Returns an array of strings. Possible values:
+ * * `applePay`
+ * * `card`
+ * * `googlePay`
+ * * `paypalCredit`
+ * * `paypal`
+ * * `venmo`
+ *
+ * @public
+ * @returns {string[]} An array of possible payment options.
+ * @example
+ * var paymentOptions = dropinInstance.getAvailablePaymentOptions(); // ['card', 'venmo', 'paypal']
+ *
+ * if (paymentOptions.includes('venmo')) {
+ *   // special logic for when venmo is displayed
+ * }
+ */
+Dropin.prototype.getAvailablePaymentOptions = function () {
+  return this._model.supportedPaymentOptions;
 };
 
 /**
@@ -614,7 +641,7 @@ Dropin.prototype._handleAppSwitch = function () {
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
  * @param {object} [options] All options for requesting a payment method.
- * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/{@pkg bt-web-version}/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. The recommended fields for achieving a 3DS v2 verification are:
+ * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/{@pkg bt-web-version}/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. When 3DS is enabled, both credit cards and non-network tokenized Google Pay cards will perform verfication. The recommended fields for achieving a 3DS v2 verification are:
  * * `email`
  * * `mobilePhoneNumber`
  * * `billingAddress`
@@ -670,7 +697,7 @@ Dropin.prototype._handleAppSwitch = function () {
  *      return;
  *    }
  *
- *    if (payload.liabilityShifted || payload.type !== 'CreditCard') {
+ *    if (payload.liabilityShifted || (payload.type !== 'CreditCard' && payload.type !== 'AndroidPayCard')) {
  *      hiddenNonceInput.value = payload.nonce;
  *      form.submit();
  *    } else {
@@ -687,13 +714,14 @@ Dropin.prototype.requestPaymentMethod = function (options) {
   options = options || {};
 
   return this._mainView.requestPaymentMethod().then(function (payload) {
-    if (self._threeDSecure && payload.type === constants.paymentMethodTypes.card && payload.liabilityShifted == null) {
+    if (self._shouldPerformThreeDSecureVerification(payload)) {
       self._mainView.showLoadingIndicator();
 
       return self._threeDSecure.verify(payload, options.threeDSecure).then(function (newPayload) {
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
+        payload.threeDSecureInfo = newPayload.threeDSecureInfo;
 
         self._mainView.hideLoadingIndicator();
 
@@ -721,6 +749,26 @@ Dropin.prototype.requestPaymentMethod = function (options) {
   });
 };
 
+Dropin.prototype._shouldPerformThreeDSecureVerification = function (payload) {
+  if (!this._threeDSecure) {
+    return false;
+  }
+
+  if (payload.liabilityShifted != null) {
+    return false;
+  }
+
+  if (payload.type === constants.paymentMethodTypes.card) {
+    return true;
+  }
+
+  if (payload.type === constants.paymentMethodTypes.googlePay && payload.details.isNetworkTokenized === false) {
+    return true;
+  }
+
+  return false;
+};
+
 Dropin.prototype._removeStylesheet = function () {
   var stylesheet = document.getElementById(constants.STYLESHEET_ID);
 
@@ -730,16 +778,22 @@ Dropin.prototype._removeStylesheet = function () {
 };
 
 Dropin.prototype._injectStylesheet = function () {
-  var stylesheetUrl;
+  var loadStylesheetOptions = {
+    id: constants.STYLESHEET_ID
+  };
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
-  stylesheetUrl = ASSETS_URL + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
+  loadStylesheetOptions.href = ASSETS_URL + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
 
-  assets.loadStylesheet({
-    href: stylesheetUrl,
-    id: constants.STYLESHEET_ID
-  });
+  if (this._model.isInShadowDom) {
+    // if Drop-in is in the shadow DOM, put the
+    // style sheet in the shadow DOM node instead of
+    // in the head of the document
+    loadStylesheetOptions.container = this._model.rootNode;
+  }
+
+  assets.loadStylesheet(loadStylesheetOptions);
 };
 
 /**
@@ -833,6 +887,10 @@ function formatPaymentMethodPayload(paymentMethod) {
   if (typeof paymentMethod.liabilityShiftPossible === 'boolean') {
     formattedPaymentMethod.liabilityShifted = paymentMethod.liabilityShifted;
     formattedPaymentMethod.liabilityShiftPossible = paymentMethod.liabilityShiftPossible;
+  }
+
+  if (paymentMethod.threeDSecureInfo) {
+    formattedPaymentMethod.threeDSecureInfo = paymentMethod.threeDSecureInfo;
   }
 
   if (paymentMethod.deviceData) {

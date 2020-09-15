@@ -5,7 +5,6 @@ const CardView = require('../../../../src/views/payment-sheet-views/card-view');
 const classList = require('@braintree/class-list');
 const DropinModel = require('../../../../src/dropin-model');
 const fake = require('../../../helpers/fake');
-const throwIfResolves = require('../../../helpers/throw-if-resolves');
 const fs = require('fs');
 const hostedFields = require('braintree-web/hosted-fields');
 const strings = require('../../../../src/translations/en_US');
@@ -18,15 +17,42 @@ const mainHTML = fs.readFileSync(`${__dirname}/../../../../src/html/main.html`, 
 const CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 
 describe('CardView', () => {
-  let testContext;
+  let container, cardElement, fakeHostedFieldsInstance;
+
+  function makeCardView(cardConfiguration = {}) {
+    const card = Object.assign({}, cardConfiguration, {
+      vault: {}
+    });
+    const config = {
+      merchantConfiguration: {
+        card
+      }
+    };
+    const model = fake.model(config);
+
+    container.innerHTML = mainHTML;
+    cardElement = document.body.querySelector('.braintree-sheet.braintree-card');
+
+    return model.initialize().then(() => {
+      const view = new CardView({
+        element: cardElement,
+        model,
+        strings
+      });
+
+      return view.initialize().then(() => view);
+    });
+  }
 
   beforeEach(() => {
-    testContext = {};
-    testContext.div = document.createElement('div');
+    fakeHostedFieldsInstance = fake.hostedFields();
+    jest.spyOn(hostedFields, 'create').mockResolvedValue(fakeHostedFieldsInstance);
 
-    testContext.div.innerHTML = mainHTML;
-    document.body.appendChild(testContext.div);
-    testContext.element = document.body.querySelector('.braintree-sheet.braintree-card');
+    container = document.createElement('div');
+
+    container.innerHTML = mainHTML;
+    document.body.appendChild(container);
+    cardElement = document.body.querySelector('.braintree-sheet.braintree-card');
   });
 
   afterEach(() => {
@@ -35,204 +61,191 @@ describe('CardView', () => {
 
   describe('Constructor', () => {
     it('inherits from BaseView', () => {
-      expect(new CardView({ element: testContext.element })).toBeInstanceOf(BaseView);
+      expect(new CardView({ element: cardElement })).toBeInstanceOf(BaseView);
     });
   });
 
   describe('initialize', () => {
+    let fakeModel;
+
     beforeEach(() => {
-      testContext.hostedFieldsInstance = fake.hostedFieldsInstance;
-      fake.hostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([]);
-      jest.spyOn(hostedFields, 'create').mockResolvedValue(testContext.hostedFieldsInstance);
+      fakeModel = fake.model();
 
-      testContext.model = fake.model();
-
-      return testContext.model.initialize();
+      return fakeModel.initialize();
     });
 
     it('has cvv by default', async () => {
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
-        strings: strings
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        strings
       });
 
-      await testContext.view.initialize();
+      await view.initialize();
 
-      expect(testContext.element.querySelector('[data-braintree-id="cvv-field-group"]')).toBeTruthy();
+      expect(cardElement.querySelector('[data-braintree-id="cvv-field-group"]')).toBeTruthy();
     });
 
     it('does not have cvv if merchant passes `card.cvv.collect = false`',
       async () => {
-        testContext.model.merchantConfiguration.card = {
+        fakeModel.merchantConfiguration.card = {
           cvv: {
             collect: false
           }
         };
 
-        testContext.view = new CardView({
-          element: testContext.element,
-          mainView: testContext.mainView,
-          model: testContext.model,
-          strings: strings
+        const view = new CardView({
+          element: cardElement,
+          model: fakeModel,
+          strings
         });
 
-        await testContext.view.initialize();
+        await view.initialize();
 
-        expect(testContext.element.querySelector('[data-braintree-id="cvv-field-group"]')).toBeFalsy();
+        expect(cardElement.querySelector('[data-braintree-id="cvv-field-group"]')).toBeFalsy();
       });
 
     it('has postal code if merchant passes `card.postalCode.collect = true`',
       async () => {
-        testContext.model.merchantConfiguration.card = {
+        fakeModel.merchantConfiguration.card = {
           postalCode: {
             collect: true
           }
         };
 
-        testContext.view = new CardView({
-          element: testContext.element,
-          mainView: testContext.mainView,
-          model: testContext.model,
-          strings: strings
+        const view = new CardView({
+          element: cardElement,
+          model: fakeModel,
+          strings
         });
 
-        await testContext.view.initialize();
+        await view.initialize();
 
-        expect(testContext.element.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeTruthy();
+        expect(cardElement.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeTruthy();
       });
 
     it('does not have postal code by default', async () => {
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
-        strings: strings
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        strings
       });
 
-      await testContext.view.initialize();
+      await view.initialize();
 
-      expect(testContext.element.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeFalsy();
+      expect(cardElement.querySelector('[data-braintree-id="postal-code-field-group"]')).toBeFalsy();
     });
 
     it('has cardholderName if provided in merchant configuration', () => {
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         cardholderName: true
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).toBeDefined();
+      return view.initialize().then(() => {
+        expect(cardElement.querySelector('[data-braintree-id="cardholder-name-field-group"]')).toBeDefined();
       });
     });
 
     it('does not include cardholderName if not provided in merchant configuration', () => {
-      testContext.model.merchantConfiguration.card = {};
+      fakeModel.merchantConfiguration.card = {};
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.element.querySelector('[data-braintree-id="cardholder-name-field-group"]')).toBeFalsy();
+      return view.initialize().then(() => {
+        expect(cardElement.querySelector('[data-braintree-id="cardholder-name-field-group"]')).toBeFalsy();
       });
     });
 
     it('removes hidden class from save card input if configured', () => {
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         vault: {
           allowAutoVaultOverride: true
         }
       };
-      testContext.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+      fakeModel.vaultManagerConfig.autoVaultPaymentMethods = true;
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         expect(
-          testContext.element.querySelector('[data-braintree-id="save-card-field-group"]').className
+          cardElement.querySelector('[data-braintree-id="save-card-field-group"]').className
         ).not.toMatch('braintree-hidden');
       });
     });
 
     it('does not remove hidden class from save card input if not configured', () => {
-      testContext.model.merchantConfiguration.card = {};
-      testContext.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+      fakeModel.merchantConfiguration.card = {};
+      fakeModel.vaultManagerConfig.autoVaultPaymentMethods = true;
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         expect(
-          testContext.element.querySelector('[data-braintree-id="save-card-field-group"]').className
+          cardElement.querySelector('[data-braintree-id="save-card-field-group"]').className
         ).toMatch('braintree-hidden');
       });
     });
 
     it('sets checked value for save card input', () => {
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         vault: {
           autoVault: false
         }
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.view.saveCardInput.checked).toBe(false);
+      return view.initialize().then(() => {
+        expect(view.saveCardInput.checked).toBe(false);
       });
     });
 
     it('defaults checked value for save card input to true', () => {
-      testContext.model.merchantConfiguration.card = {};
+      fakeModel.merchantConfiguration.card = {};
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.view.saveCardInput.checked).toBe(true);
+      return view.initialize().then(() => {
+        expect(view.saveCardInput.checked).toBe(true);
       });
     });
 
     it('starts async dependency', () => {
       jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         expect(DropinModel.prototype.asyncDependencyStarting).toBeCalledTimes(1);
       });
     });
@@ -241,29 +254,27 @@ describe('CardView', () => {
       async () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
 
-        testContext.view = new CardView({
-          element: testContext.element,
-          mainView: testContext.mainView,
-          model: testContext.model,
+        const view = new CardView({
+          element: cardElement,
+          model: fakeModel,
           strings: strings
         });
 
-        await testContext.view.initialize();
-
-        expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
+        return view.initialize().then(() => {
+          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
+        });
       });
 
-    it('creates Hosted Fields with number, cvv and expiration date', () => {
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+    it('creates Hosted Fields with number and expiration date', () => {
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         expect(hostedFields.create).toBeCalledWith(expect.objectContaining({
-          authorization: testContext.view.model.authorization,
+          authorization: view.model.authorization,
           fields: {
             number: expect.any(Object),
             cvv: expect.any(Object),
@@ -274,23 +285,22 @@ describe('CardView', () => {
     });
 
     it('creates Hosted Fields with postal code if included in config', () => {
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         postalCode: {
           collect: true
         }
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings,
         merchantConfiguration: {
           authorization: fake.clientToken
         }
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         expect(hostedFields.create.mock.calls[0][0].fields).toHaveProperty('postalCode');
       });
     });
@@ -301,99 +311,87 @@ describe('CardView', () => {
       };
 
       hostedFields.create.mockRejectedValue(fakeError);
-      jest.spyOn(testContext.model, 'asyncDependencyFailed').mockImplementation();
+      jest.spyOn(fakeModel, 'asyncDependencyFailed').mockImplementation();
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        expect(testContext.model.asyncDependencyFailed).toBeCalledWith({
+      return view.initialize().then(() => {
+        expect(fakeModel.asyncDependencyFailed).toBeCalledWith({
           view: 'card',
           error: fakeError
         });
       });
     });
 
-    it('shows supported card icons', (done) => {
+    it('shows supported card icons', () => {
       const unsupportedCardTypes = ['maestro', 'diners-club', 'unionpay', 'discover'];
       const supportedCardTypes = ['visa', 'mastercard', 'american-express', 'jcb'];
 
-      testContext.hostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([
+      fakeHostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([
         'Visa',
         'Mastercard',
         'American Express',
         'JCB'
       ]);
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      testContext.view.initialize().then(() => {
-        setTimeout(() => {
-          unsupportedCardTypes.forEach(cardType => {
-            const cardIcon = testContext.element.querySelector(`[data-braintree-id="${cardType}-card-icon"]`);
+      return view.initialize().then(() => {
+        unsupportedCardTypes.forEach(cardType => {
+          const cardIcon = cardElement.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
-            expect(cardIcon.classList.contains('braintree-hidden')).toBe(true);
-          });
-          supportedCardTypes.forEach(cardType => {
-            const cardIcon = testContext.element.querySelector(`[data-braintree-id="${cardType}-card-icon"]`);
+          expect(cardIcon.classList.contains('braintree-hidden')).toBe(true);
+        });
+        supportedCardTypes.forEach(cardType => {
+          const cardIcon = cardElement.querySelector(`[data-braintree-id="${cardType}-card-icon"]`);
 
-            expect(cardIcon.classList.contains('braintree-hidden')).toBe(false);
-          });
-
-          done();
-        }, 1);
+          expect(cardIcon.classList.contains('braintree-hidden')).toBe(false);
+        });
       });
     });
 
-    it('does not show UnionPay icon even if it is supported', (done) => {
-      fake.hostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([
+    it('does not show UnionPay icon even if it is supported', () => {
+      fakeHostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([
         'UnionPay'
       ]);
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
-        setTimeout(() => {
-          const unionPayCardIcon = testContext.element.querySelector('[data-braintree-id="unionpay-card-icon"]');
+      return view.initialize().then(() => {
+        const unionPayCardIcon = cardElement.querySelector('[data-braintree-id="unionpay-card-icon"]');
 
-          expect(unionPayCardIcon.classList.contains('braintree-hidden')).toBe(true);
-
-          done();
-        }, 1);
+        expect(unionPayCardIcon.classList.contains('braintree-hidden')).toBe(true);
       });
     });
 
     it('sets field placeholders', () => {
       let hostedFieldsConfiguredFields;
 
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         postalCode: {
           collect: true
         }
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         hostedFieldsConfiguredFields = hostedFields.create.mock.calls[0][0].fields;
 
         expect(hostedFieldsConfiguredFields.number.placeholder).toBe('•••• •••• •••• ••••');
@@ -406,7 +404,7 @@ describe('CardView', () => {
     it('allows overriding field options for hosted fields', () => {
       let hostedFieldsConfiguredFields;
 
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         overrides: {
           fields: {
             number: {
@@ -419,14 +417,13 @@ describe('CardView', () => {
         }
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         hostedFieldsConfiguredFields = hostedFields.create.mock.calls[0][0].fields;
 
         expect(hostedFieldsConfiguredFields.number.placeholder).toBe('placeholder');
@@ -437,7 +434,7 @@ describe('CardView', () => {
     it('does not add hosted fields elements for fields that are not present', () => {
       let hostedFieldsConfiguredFields;
 
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         cvv: {
           collect: false
         },
@@ -459,14 +456,13 @@ describe('CardView', () => {
         }
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         hostedFieldsConfiguredFields = hostedFields.create.mock.calls[0][0].fields;
 
         expect(hostedFieldsConfiguredFields.cvv).toBeFalsy();
@@ -477,7 +473,7 @@ describe('CardView', () => {
     });
 
     it('ignores changes to selector in field options', () => {
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         overrides: {
           fields: {
             number: {
@@ -487,14 +483,13 @@ describe('CardView', () => {
         }
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
-        strings: strings
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         const hostedFieldsConfiguredFields = hostedFields.create.mock.calls[0][0].fields;
 
         expect(hostedFieldsConfiguredFields.number.selector).not.toBe('#some-selector');
@@ -504,7 +499,7 @@ describe('CardView', () => {
     it('allows overriding styles options for hosted fields', () => {
       let hostedFieldsConfiguredStyles;
 
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         overrides: {
           styles: {
             input: {
@@ -517,14 +512,13 @@ describe('CardView', () => {
         }
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         hostedFieldsConfiguredStyles = hostedFields.create.mock.calls[0][0].styles;
 
         expect(hostedFieldsConfiguredStyles.input.color).toBe('red');
@@ -541,7 +535,7 @@ describe('CardView', () => {
     it('allows overriding styles options with class name for hosted fields', () => {
       let hostedFieldsConfiguredStyles;
 
-      testContext.model.merchantConfiguration.card = {
+      fakeModel.merchantConfiguration.card = {
         overrides: {
           styles: {
             input: 'class-name',
@@ -550,14 +544,13 @@ describe('CardView', () => {
         }
       };
 
-      testContext.view = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
-      return testContext.view.initialize().then(() => {
+      return view.initialize().then(() => {
         hostedFieldsConfiguredStyles = hostedFields.create.mock.calls[0][0].styles;
 
         expect(hostedFieldsConfiguredStyles.input).toBe('class-name');
@@ -570,47 +563,50 @@ describe('CardView', () => {
   });
 
   describe('isEnabled', () => {
+    let fakeOptions;
+
     beforeEach(() => {
-      testContext.fakeOptions = {
+      fakeOptions = {
         merchantConfiguration: {}
       };
     });
 
     it('resolves with true when no merchant configuration provided', () => {
-      return CardView.isEnabled(testContext.fakeOptions).then(result => {
+      return CardView.isEnabled(fakeOptions).then(result => {
         expect(result).toBe(true);
       });
     });
 
     it('resolves with false when merchant configuration sets card to false', () => {
-      testContext.fakeOptions.merchantConfiguration.card = false;
+      fakeOptions.merchantConfiguration.card = false;
 
-      return CardView.isEnabled(testContext.fakeOptions).then(result => {
+      return CardView.isEnabled(fakeOptions).then(result => {
         expect(result).toBe(false);
       });
     });
   });
 
   describe('requestPaymentMethod', () => {
+    let fakeModel;
+
     beforeEach(() => {
-      jest.spyOn(hostedFields, 'create').mockResolvedValue(fake.hostedFieldsInstance);
+      fakeModel = fake.model();
 
-      testContext.model = fake.model();
-
-      return testContext.model.initialize();
+      return fakeModel.initialize();
     });
 
     it('calls the callback with an error when tokenize fails', () => {
+      expect.assertions(2);
+
       const cardView = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
       jest.spyOn(cardView, 'tokenize').mockRejectedValue(new Error('foo'));
 
-      return cardView.requestPaymentMethod().then(throwIfResolves).catch(err => {
+      return cardView.requestPaymentMethod().catch(err => {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toBe('foo');
       });
@@ -618,9 +614,8 @@ describe('CardView', () => {
 
     it('calls the callback with the payload when tokenize is successful', () => {
       const cardView = new CardView({
-        element: testContext.element,
-        mainView: testContext.mainView,
-        model: testContext.model,
+        element: cardElement,
+        model: fakeModel,
         strings: strings
       });
 
@@ -633,53 +628,46 @@ describe('CardView', () => {
   });
 
   describe('Hosted Fields events', () => {
+    let cardView, client;
+
     beforeEach(() => {
       const model = fake.model();
 
+      client = fake.client({
+        gatewayConfiguration: {
+          challenges: ['cvv'],
+          creditCards: {
+            supportedCardTypes: []
+          }
+        }
+      });
+
       return model.initialize().then(() => {
-        testContext.context = {
-          element: testContext.element,
-          _generateFieldSelector: CardView.prototype._generateFieldSelector,
-          _generateHostedFieldsOptions: CardView.prototype._generateHostedFieldsOptions,
-          _validateForm: jest.fn(),
-          _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
-          getElementById: BaseView.prototype.getElementById,
-          hideFieldError: CardView.prototype.hideFieldError,
-          showFieldError: CardView.prototype.showFieldError,
-          model: model,
-          _shouldVault: CardView.prototype._shouldVault,
-          saveCardInput: {
-            checked: true
-          },
-          strings: strings,
-          tokenize: CardView.prototype.tokenize,
-          _showSupportedCardIcons: function () {},
-          _isCardTypeSupported: CardView.prototype._isCardTypeSupported,
-          _onBlurEvent: function () {},
-          _onCardTypeChangeEvent: function () {},
-          _onFocusEvent: function () {},
-          _onNotEmptyEvent: function () {},
-          _onValidityChangeEvent: function () {},
-          _setupExtraInput: function () {},
-          _removeExtraInput: function () {}
-        };
+        cardView = new CardView({
+          element: cardElement,
+          model,
+          client,
+          strings
+        });
       });
     });
 
     describe('onFocusEvent', () => {
+      let eventPayload;
+
       beforeEach(() => {
-        testContext.context._onFocusEvent = CardView.prototype._onFocusEvent;
+        eventPayload = { emittedBy: 'number' };
+
+        fakeHostedFieldsInstance.on.mockImplementation((eventName, handler) => {
+          if (eventName === 'focus') {
+            handler(eventPayload);
+          }
+        });
       });
 
       it('shows default card icon in number field when focused', () => {
-        const hostedFieldsInstance = {
-          on: jest.fn().mockImplementation(yields({ emittedBy: 'number' }))
-        };
-
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
-          const cardNumberIcon = testContext.element.querySelector('[data-braintree-id="card-number-icon"]');
+        return cardView.initialize().then(() => {
+          const cardNumberIcon = cardElement.querySelector('[data-braintree-id="card-number-icon"]');
 
           expect(cardNumberIcon.classList.contains('braintree-hidden')).toBe(false);
           expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).toBe('#iconCardFront');
@@ -687,14 +675,10 @@ describe('CardView', () => {
       });
 
       it('shows default cvv icon in cvv field when focused', () => {
-        const hostedFieldsInstance = {
-          on: jest.fn().mockImplementation(yields({ emittedBy: 'cvv' }))
-        };
+        eventPayload = { emittedBy: 'cvv' };
 
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
-          const cvvIcon = testContext.element.querySelector('[data-braintree-id="cvv-icon"]');
+        return cardView.initialize().then(() => {
+          const cvvIcon = cardElement.querySelector('[data-braintree-id="cvv-icon"]');
 
           expect(cvvIcon.classList.contains('braintree-hidden')).toBe(false);
           expect(cvvIcon.querySelector('use').getAttribute('xlink:href')).toBe('#iconCVVBack');
@@ -702,61 +686,58 @@ describe('CardView', () => {
       });
 
       it('adds braintree-form__field-group--is-focused', () => {
-        const fakeEvent = {
+        eventPayload = {
           emittedBy: 'number',
           fields: {
             number: { isEmpty: true }
           }
         };
-        const hostedFieldsInstance = {
-          on: function (event, callback) {
-            if (event === 'focus') {
-              callback(fakeEvent);
-            }
-          }
-        };
-        const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
         classList.remove(numberFieldGroup, 'braintree-form__field-group--is-focused');
 
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
+        return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).toBe(true);
         });
       });
     });
 
     describe('onBlurEvent', () => {
+      let eventPayload;
+
       beforeEach(() => {
-        testContext.context._onBlurEvent = CardView.prototype._onBlurEvent;
-        jest.spyOn(window, 'setTimeout').mockImplementation();
+        eventPayload = { emittedBy: 'number' };
+
+        fakeHostedFieldsInstance.on.mockImplementation((eventName, handler) => {
+          if (eventName === 'blur') {
+            handler(eventPayload);
+          }
+        });
       });
 
-      it('removes braintree-form__field-group--is-focused class when blurred',
-        () => {
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: { isEmpty: true }
-            }
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: jest.fn()
-          };
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
+      it('removes braintree-form__field-group--is-focused class when blurred', () => {
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-          classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: { isEmpty: true }
+          }
+        };
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).toBe(false);
-          });
+        classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+
+        return cardView.initialize().then(() => {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).toBe(false);
         });
+      });
 
       it('applies error class if field is not valid', () => {
-        const fakeEvent = {
+        const numberFieldError = cardElement.querySelector('[data-braintree-id="number-field-error"]');
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+
+        eventPayload = {
           emittedBy: 'number',
           fields: {
             number: {
@@ -765,72 +746,50 @@ describe('CardView', () => {
             }
           }
         };
-        const hostedFieldsInstance = {
-          on: function (event, callback) {
-            if (event === 'blur') {
-              callback(fakeEvent);
-            }
-          },
-          setAttribute: jest.fn()
-        };
-        const numberFieldError = testContext.element.querySelector('[data-braintree-id="number-field-error"]');
-        const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
 
         classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
+        return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
           expect(numberFieldError.textContent).toBe('This card number is not valid.');
         });
       });
 
-      it('does apply error class if field is empty when focusing another hosted field',
-        () => {
-          const fakeHostedField = document.createElement('iframe');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                isEmpty: true,
-                isValid: false
-              }
+      it('does apply error class if field is empty when focusing another hosted field', () => {
+        const fakeHostedField = document.createElement('iframe');
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+        const numberFieldError = cardElement.querySelector('[data-braintree-id="number-field-error"]');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: true,
+              isValid: false
             }
-          };
-          const modelOptions = fake.modelOptions();
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: jest.fn()
-          };
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
-          const numberFieldError = testContext.element.querySelector('[data-braintree-id="number-field-error"]');
+          }
+        };
 
-          fakeHostedField.id = 'braintree-hosted-field-foo';
-          document.body.appendChild(fakeHostedField);
-          fakeHostedField.focus();
+        fakeHostedField.id = 'braintree-hosted-field-foo';
+        document.body.appendChild(fakeHostedField);
+        fakeHostedField.focus();
 
-          modelOptions.merchantConfiguration.authorization = fake.clientToken;
-          testContext.context.model = fake.model(modelOptions);
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return testContext.context.model.initialize().then(() => {
-            return CardView.prototype.initialize.call(testContext.context);
-          }).then(() => {
-            expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
-            expect(numberFieldError.textContent).toBe('Please fill out a card number.');
-          });
+        return cardView.initialize().then(() => {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
+          expect(numberFieldError.textContent).toBe('Please fill out a card number.');
         });
+      });
 
       it('sets the empty error when programatically focussing a hosted field (requires a setTimeout)',
         done => {
-          window.setTimeout.mockRestore();
-
           const fakeElement = document.createElement('div');
           const fakeHostedField = document.createElement('iframe');
-          const fakeEvent = {
+          const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+
+          eventPayload = {
             cards: [{ type: 'visa', supported: true }],
             emittedBy: 'number',
             fields: {
@@ -840,28 +799,15 @@ describe('CardView', () => {
               }
             }
           };
-          const modelOptions = fake.modelOptions();
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: jest.fn(),
-            setMessage: jest.fn()
-          };
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
 
           fakeHostedField.id = 'braintree-hosted-field-foo';
           document.body.appendChild(fakeElement);
           document.body.appendChild(fakeHostedField);
           fakeElement.focus();
 
-          modelOptions.merchantConfiguration.authorization = fake.clientToken;
-          testContext.context.model = fake.model(modelOptions);
-
           classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 
-          return testContext.context.model.initialize().then(() => {
-            return CardView.prototype.initialize.call(testContext.context);
-          }).then(() => {
+          cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
 
             fakeHostedField.focus();
@@ -873,700 +819,341 @@ describe('CardView', () => {
           });
         });
 
-      it('does not apply error class if field is empty and not focusing hosted fields',
-        () => {
-          const fakeElement = document.createElement('iframe');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                isEmpty: true,
-                isValid: false
-              }
+      it('does not apply error class if field is empty and not focusing hosted fields', () => {
+        const fakeElement = document.createElement('iframe');
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: true,
+              isValid: false
             }
-          };
-          const modelOptions = fake.modelOptions();
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent))
-          };
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
+          }
+        };
 
-          document.body.appendChild(fakeElement);
-          fakeElement.focus();
+        document.body.appendChild(fakeElement);
+        fakeElement.focus();
 
-          modelOptions.merchantConfiguration.authorization = fake.clientToken;
-          testContext.context.model = fake.model(modelOptions);
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return testContext.context.model.initialize().then(() => {
-            return CardView.prototype.initialize.call(testContext.context);
-          }).then(() => {
-            expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
-          });
+        return cardView.initialize().then(() => {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
         });
+      });
 
-      it('does not apply error class if field is empty and the active element is not an iframe',
-        () => {
-          const fakeElement = document.createElement('div');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                isEmpty: true,
-                isValid: false
-              }
+      it('does not apply error class if field is empty and the active element is not an iframe', () => {
+        const fakeElement = document.createElement('div');
+
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: true,
+              isValid: false
             }
-          };
-          const modelOptions = fake.modelOptions();
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent))
-          };
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
+          }
+        };
 
-          document.body.appendChild(fakeElement);
-          fakeElement.focus();
+        document.body.appendChild(fakeElement);
+        fakeElement.focus();
 
-          modelOptions.merchantConfiguration.authorization = fake.clientToken;
-          testContext.context.model = fake.model(modelOptions);
+        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return testContext.context.model.initialize().then(() => {
-            return CardView.prototype.initialize.call(testContext.context);
-          }).then(() => {
-            expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
-          });
+        return cardView.initialize().then(() => {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
         });
+      });
     });
 
     describe('onCardTypeChange event', () => {
+      let eventPayload;
+
       beforeEach(() => {
-        testContext.context._onCardTypeChangeEvent = CardView.prototype._onCardTypeChangeEvent;
+        eventPayload = { emittedBy: 'number' };
+        fakeHostedFieldsInstance.on.mockImplementation((eventName, handler) => {
+          if (eventName === 'cardTypeChange') {
+            handler(eventPayload);
+          }
+        });
       });
 
-      it('adds the card-type-known class when there is one possible card type',
-        () => {
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
-          const fakeEvent = {
-            cards: [{ type: 'master-card', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
+      it('adds the card-type-known class when there is one possible card type', () => {
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
+        eventPayload = {
+          cards: [{ type: 'master-card', supported: true }],
+          emittedBy: 'number'
+        };
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(true);
-          });
+        return cardView.initialize().then(() => {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(true);
         });
+      });
 
-      it('removes the card-type-known class when there is no possible card type',
-        () => {
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
-          const fakeEvent = {
-            cards: [],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
+      it('removes the card-type-known class when there is no possible card type', () => {
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+        eventPayload = {
+          cards: [],
+          emittedBy: 'number'
+        };
 
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
+        classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(false);
-          });
+        return cardView.initialize().then(() => {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(false);
         });
+      });
 
-      it('removes the card-type-known class when there are many possible card types',
-        () => {
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
-          const fakeEvent = {
-            cards: [{ type: 'master-card', supported: true }, { type: 'foo-pay', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
+      it('removes the card-type-known class when there are many possible card types', () => {
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+        eventPayload = {
+          cards: [{ type: 'master-card', supported: true }, { type: 'foo-pay', supported: true }],
+          emittedBy: 'number'
+        };
 
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
+        classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(false);
-          });
+        return cardView.initialize().then(() => {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(false);
         });
+      });
 
-      it('updates the card number icon to the card type if there is one possible card type',
-        () => {
-          const cardNumberIcon = testContext.element.querySelector('[data-braintree-id="card-number-icon"]');
-          const fakeEvent = {
-            cards: [{ type: 'master-card', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
+      it('updates the card number icon to the card type if there is one possible card type', () => {
+        const cardNumberIcon = cardElement.querySelector('[data-braintree-id="card-number-icon"]');
 
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
+        eventPayload = {
+          cards: [{ type: 'master-card', supported: true }],
+          emittedBy: 'number'
+        };
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).toBe('#icon-master-card');
-          });
+        return cardView.initialize().then(() => {
+          expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).toBe('#icon-master-card');
         });
+      });
 
-      it('updates the card number icon to the generic card if there are many possible card types',
-        () => {
-          const cardNumberIcon = testContext.element.querySelector('[data-braintree-id="card-number-icon"]');
-          const fakeEvent = {
-            cards: [{ type: 'master-card', supported: true }, { type: 'foo-pay', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
+      it('updates the card number icon to the generic card if there are many possible card types', () => {
+        const cardNumberIcon = cardElement.querySelector('[data-braintree-id="card-number-icon"]');
 
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
+        eventPayload = {
+          cards: [{ type: 'master-card', supported: true }, { type: 'foo-pay', supported: true }],
+          emittedBy: 'number'
+        };
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).toBe('#iconCardFront');
-          });
+        return cardView.initialize().then(() => {
+          expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).toBe('#iconCardFront');
         });
+      });
 
-      it('updates the card icon to the generic card if there no card types',
-        () => {
-          const cardNumberIcon = testContext.element.querySelector('[data-braintree-id="card-number-icon"]');
-          const fakeEvent = {
-            cards: [],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
+      it('updates the card icon to the generic card if there no card types', () => {
+        const cardNumberIcon = cardElement.querySelector('[data-braintree-id="card-number-icon"]');
 
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
+        eventPayload = {
+          cards: [],
+          emittedBy: 'number'
+        };
 
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).toBe('#iconCardFront');
-          });
+        return cardView.initialize().then(() => {
+          expect(cardNumberIcon.querySelector('use').getAttribute('xlink:href')).toBe('#iconCardFront');
         });
+      });
 
       it('updates the cvv icon to back icon for non-amex cards', () => {
-        const use = testContext.element.querySelector('[data-braintree-id="cvv-icon"]').querySelector('use');
-        const fakeEvent = {
+        const use = cardElement.querySelector('[data-braintree-id="cvv-icon"]').querySelector('use');
+
+        eventPayload = {
           cards: [{ type: 'visa', supported: true }],
           emittedBy: 'number'
         };
-        const hostedFieldsInstance = {
-          on: jest.fn().mockImplementation(yields(fakeEvent)),
-          setAttribute: function () {}
-        };
 
         use.setAttribute('xlink:href', '#iconCVVFront');
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
+        return cardView.initialize().then(() => {
           expect(use.getAttribute('xlink:href')).toBe('#iconCVVBack');
         });
       });
 
       it('updates the cvv icon to front icon for amex cards', () => {
-        const use = testContext.element.querySelector('[data-braintree-id="cvv-icon"]').querySelector('use');
-        const fakeEvent = {
+        const use = cardElement.querySelector('[data-braintree-id="cvv-icon"]').querySelector('use');
+
+        eventPayload = {
           cards: [{ type: 'american-express', supported: true }],
           emittedBy: 'number'
         };
-        const hostedFieldsInstance = {
-          on: jest.fn().mockImplementation(yields(fakeEvent)),
-          setAttribute: function () {}
-        };
 
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
+        return cardView.initialize().then(() => {
           expect(use.getAttribute('xlink:href')).toBe('#iconCVVFront');
         });
       });
 
-      it('updates the cvv label descriptor to four digits when card type is amex',
-        () => {
-          const cvvLabelDescriptor = testContext.element.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
-          const fakeEvent = {
-            cards: [{ type: 'american-express', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
+      it('updates the cvv label descriptor to four digits when card type is amex', () => {
+        const cvvLabelDescriptor = cardElement.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
 
-          cvvLabelDescriptor.textContent = 'some value';
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(cvvLabelDescriptor.textContent).toBe('(4 digits)');
-          });
-        });
-
-      it('updates the cvv label descriptor to three digits when card type is non-amex',
-        () => {
-          const cvvLabelDescriptor = testContext.element.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
-
-          cvvLabelDescriptor.textContent = 'some value';
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(cvvLabelDescriptor.textContent).toBe('(3 digits)');
-          });
-        });
-
-      it('updates the cvv label descriptor to three digits when multiple card types',
-        () => {
-          const cvvLabelDescriptor = testContext.element.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
-          const fakeEvent = {
-            cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: function () {}
-          };
-
-          cvvLabelDescriptor.textContent = 'some value';
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(cvvLabelDescriptor.textContent).toBe('(3 digits)');
-          });
-        });
-
-      it('updates the cvv field placeholder when card type is amex', () => {
-        const fakeEvent = {
+        eventPayload = {
           cards: [{ type: 'american-express', supported: true }],
           emittedBy: 'number'
         };
-        const hostedFieldsInstance = {
-          on: jest.fn().mockImplementation(yields(fakeEvent)),
-          setAttribute: jest.fn()
+
+        cvvLabelDescriptor.textContent = 'some value';
+
+        return cardView.initialize().then(() => {
+          expect(cvvLabelDescriptor.textContent).toBe('(4 digits)');
+        });
+      });
+
+      it('updates the cvv label descriptor to three digits when card type is non-amex', () => {
+        const cvvLabelDescriptor = cardElement.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number'
         };
 
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
+        cvvLabelDescriptor.textContent = 'some value';
 
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
-          expect(hostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '••••' });
+        return cardView.initialize().then(() => {
+          expect(cvvLabelDescriptor.textContent).toBe('(3 digits)');
+        });
+      });
+
+      it('updates the cvv label descriptor to three digits when multiple card types', () => {
+        const cvvLabelDescriptor = cardElement.querySelector('[data-braintree-id="cvv-field-group"]').querySelector('.braintree-form__descriptor');
+
+        eventPayload = {
+          cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
+          emittedBy: 'number'
+        };
+
+        cvvLabelDescriptor.textContent = 'some value';
+
+        return cardView.initialize().then(() => {
+          expect(cvvLabelDescriptor.textContent).toBe('(3 digits)');
+        });
+      });
+
+      it('updates the cvv field placeholder when card type is amex', () => {
+        eventPayload = {
+          cards: [{ type: 'american-express', supported: true }],
+          emittedBy: 'number'
+        };
+
+        return cardView.initialize().then(() => {
+          expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '••••' });
         });
       });
 
       it('updates the cvv field placeholder when card type is non-amex', () => {
-        const fakeEvent = {
+        eventPayload = {
           cards: [{ type: 'visa', supported: true }],
           emittedBy: 'number'
         };
-        const hostedFieldsInstance = {
-          on: jest.fn().mockImplementation(yields(fakeEvent)),
-          setAttribute: jest.fn()
-        };
 
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
-          expect(hostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '•••' });
+        return cardView.initialize().then(() => {
+          expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '•••' });
         });
       });
 
       it('updates the cvv field placeholder when multiple card types', () => {
-        const fakeEvent = {
+        eventPayload = {
           cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
           emittedBy: 'number'
         };
-        const hostedFieldsInstance = {
-          on: jest.fn().mockImplementation(yields(fakeEvent)),
-          setAttribute: jest.fn()
-        };
 
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
-          expect(hostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '•••' });
+        return cardView.initialize().then(() => {
+          expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '•••' });
         });
       });
 
-      it('does not update the cvv field placeholder when there is no cvv challenge',
-        () => {
-          const fakeEvent = {
-            cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: jest.fn()
-          };
+      it('updates the cvv field placeholder when multiple card types', () => {
+        eventPayload = {
+          cards: [{ type: 'american-express' }, { type: 'visa' }],
+          emittedBy: 'number'
+        };
 
-          testContext.context.model.merchantConfiguration.card = {
-            cvv: {
-              collect: false
-            }
-          };
-
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(hostedFieldsInstance.setAttribute).not.toBeCalled();
-          });
+        return cardView.initialize().then(() => {
+          expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '•••' });
         });
+      });
 
-      it('does not update the cvv field placeholder when it is removed with an override',
-        () => {
-          const fakeEvent = {
-            cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: jest.fn()
-          };
+      it('does not update the cvv field placeholder when there is no cvv challenge', () => {
+        eventPayload = {
+          cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
+          emittedBy: 'number'
+        };
+        cardView.model.merchantConfiguration.card = {
+          cvv: {
+            collect: false
+          }
+        };
 
-          testContext.context.model.merchantConfiguration.card = {
-            overrides: {
-              fields: {
-                cvv: null
+        return cardView.initialize().then(() => {
+          expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+        });
+      });
+
+      it('does not update the cvv field placeholder when it is removed with an override', () => {
+        eventPayload = {
+          cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
+          emittedBy: 'number'
+        };
+        cardView.model.merchantConfiguration.card = {
+          overrides: {
+            fields: {
+              cvv: null
+            }
+          }
+        };
+
+        return cardView.initialize().then(() => {
+          expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+        });
+      });
+
+      it('does not update the cvv field placeholder when using a custom CVV placeholder', () => {
+        eventPayload = {
+          cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
+          emittedBy: 'number'
+        };
+
+        cardView.model.merchantConfiguration.card = {
+          overrides: {
+            fields: {
+              cvv: {
+                placeholder: 'cool custom placeholder'
               }
             }
-          };
+          }
+        };
 
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(hostedFieldsInstance.setAttribute).not.toBeCalled();
-          });
+        return cardView.initialize().then(() => {
+          expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
         });
-
-      it('does not update the cvv field placeholder when using a custom CVV placeholder',
-        () => {
-          const fakeEvent = {
-            cards: [{ type: 'american-express', supported: true }, { type: 'visa', supported: true }],
-            emittedBy: 'number'
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            setAttribute: jest.fn()
-          };
-
-          testContext.context.model.merchantConfiguration.card = {
-            overrides: {
-              fields: {
-                cvv: {
-                  placeholder: 'cool custom placeholder'
-                }
-              }
-            }
-          };
-
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(hostedFieldsInstance.setAttribute).not.toBeCalled();
-          });
-        });
+      });
     });
 
     describe('onValidityChangeEvent', () => {
+      let eventPayload;
+
       beforeEach(() => {
-        testContext.context._onValidityChangeEvent = CardView.prototype._onValidityChangeEvent;
+        eventPayload = { emittedBy: 'number' };
+        fakeHostedFieldsInstance.on.mockImplementation((eventName, handler) => {
+          if (eventName === 'validityChange') {
+            handler(eventPayload);
+          }
+        });
       });
 
-      it('removes the braintree-form__field-group--has-error class if a field is potentially valid',
-        () => {
-          const fakeEvent = {
-            emittedBy: 'number',
-            cards: [{ type: 'visa', supported: true }],
-            fields: {
-              number: {
-                container: document.createElement('div'),
-                isEmpty: false,
-                isValid: false,
-                isPotentiallyValid: true
-              }
-            }
-          };
-          const hostedFieldsInstance = {
-            on: jest.fn().mockImplementation(yields(fakeEvent)),
-            removeAttribute: jest.fn()
-          };
-          const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
+      it('removes the braintree-form__field-group--has-error class if a field is potentially valid', () => {
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
-          });
-        });
-
-      it('adds braintree-form__field--valid class to valid expiration date field',
-        () => {
-          const expirationElement = testContext.element.querySelector('.braintree-form-expiration');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'expirationDate',
-            fields: {
-              expirationDate: {
-                container: expirationElement,
-                isValid: true,
-                isPotentiallyValid: true
-              }
-            }
-          };
-          const hostedFieldsInstance = {
-            on: function (event, callback) {
-              if (event === 'validityChange') {
-                callback(fakeEvent);
-              }
-            },
-            removeAttribute: jest.fn()
-          };
-
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(expirationElement.classList.contains('braintree-form__field--valid')).toBe(true);
-          });
-        });
-
-      it('removes braintree-form__field--valid class to invalid expiration date field',
-        () => {
-          const expirationElement = testContext.element.querySelector('.braintree-form-expiration');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'expirationDate',
-            fields: {
-              expirationDate: {
-                container: expirationElement,
-                isValid: false,
-                isPotentiallyValid: true
-              }
-            }
-          };
-          const hostedFieldsInstance = {
-            on: function (event, callback) {
-              if (event === 'validityChange') {
-                callback(fakeEvent);
-              }
-            },
-            removeAttribute: jest.fn()
-          };
-
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(expirationElement.classList.contains('braintree-form__field--valid')).toBe(false);
-          });
-        });
-
-      it('adds braintree-form__field--valid class to valid number with card type supported',
-        () => {
-          const numberElement = testContext.element.querySelector('.braintree-form-number');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                container: numberElement,
-                isValid: true,
-                isPotentiallyValid: true
-              }
-            }
-          };
-          const hostedFieldsInstance = {
-            on: function (event, callback) {
-              if (event === 'validityChange') {
-                callback(fakeEvent);
-              }
-            },
-            removeAttribute: jest.fn()
-          };
-
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(numberElement.classList.contains('braintree-form__field--valid')).toBe(true);
-          });
-        });
-
-      it('removes braintree-form__field--valid class to valid number without card type supported',
-        () => {
-          const numberElement = testContext.element.querySelector('.braintree-form-number');
-          const fakeEvent = {
-            cards: [{ type: 'foo', supported: false }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                container: numberElement,
-                isValid: false,
-                isPotentiallyValid: true
-              }
-            }
-          };
-          const hostedFieldsInstance = {
-            on: function (event, callback) {
-              if (event === 'validityChange') {
-                callback(fakeEvent);
-              }
-            },
-            removeAttribute: jest.fn()
-          };
-
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(numberElement.classList.contains('braintree-form__field--valid')).toBe(false);
-          });
-        });
-
-      it('removes braintree-form__field--valid class to not valid number with card type supported',
-        () => {
-          const numberElement = testContext.element.querySelector('.braintree-form-number');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                container: numberElement,
-                isValid: false,
-                isPotentiallyValid: true
-              }
-            }
-          };
-          const hostedFieldsInstance = {
-            on: function (event, callback) {
-              if (event === 'validityChange') {
-                callback(fakeEvent);
-              }
-            },
-            removeAttribute: jest.fn()
-          };
-
-          jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
-
-          return CardView.prototype.initialize.call(testContext.context).then(() => {
-            expect(numberElement.classList.contains('braintree-form__field--valid')).toBe(false);
-          });
-        });
-
-      it('calls model.setPaymentMethodRequestable with isRequestable true if form is valid',
-        () => {
-          const numberElement = testContext.element.querySelector('.braintree-form-number');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                container: numberElement,
-                isValid: false,
-                isPotentiallyValid: true
-              }
-            }
-          };
-
-          jest.spyOn(testContext.context, 'hideFieldError').mockImplementation();
-          jest.spyOn(testContext.context.model, 'setPaymentMethodRequestable').mockImplementation();
-          testContext.context._validateForm.mockReturnValue(true);
-
-          CardView.prototype._onValidityChangeEvent.call(testContext.context, fakeEvent);
-
-          expect(testContext.context.model.setPaymentMethodRequestable).toBeCalledTimes(1);
-          expect(testContext.context.model.setPaymentMethodRequestable).toBeCalledWith({
-            isRequestable: true,
-            type: 'CreditCard'
-          });
-        });
-
-      it('calls model.setPaymentMethodRequestable with isRequestable false if form is invalid',
-        () => {
-          const numberElement = testContext.element.querySelector('.braintree-form-number');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                container: numberElement,
-                isValid: false,
-                isPotentiallyValid: true
-              }
-            }
-          };
-
-          jest.spyOn(testContext.context, 'hideFieldError').mockImplementation();
-          jest.spyOn(testContext.context.model, 'setPaymentMethodRequestable').mockImplementation();
-          testContext.context._validateForm.mockReturnValue(false);
-
-          CardView.prototype._onValidityChangeEvent.call(testContext.context, fakeEvent);
-
-          expect(testContext.context.model.setPaymentMethodRequestable).toBeCalledTimes(1);
-          expect(testContext.context.model.setPaymentMethodRequestable).toBeCalledWith({
-            isRequestable: false,
-            type: 'CreditCard'
-          });
-        });
-
-      it('does not call model.setPaymentMethodRequestable if tokenization is in progress',
-        () => {
-          const numberElement = testContext.element.querySelector('.braintree-form-number');
-          const fakeEvent = {
-            cards: [{ type: 'visa', supported: true }],
-            emittedBy: 'number',
-            fields: {
-              number: {
-                container: numberElement,
-                isValid: false,
-                isPotentiallyValid: true
-              }
-            }
-          };
-
-          testContext.context._isTokenizing = true;
-
-          jest.spyOn(testContext.context, 'hideFieldError').mockImplementation();
-          jest.spyOn(testContext.context.model, 'setPaymentMethodRequestable').mockImplementation();
-          testContext.context._validateForm.mockReturnValue(false);
-
-          CardView.prototype._onValidityChangeEvent.call(testContext.context, fakeEvent);
-
-          expect(testContext.context.model.setPaymentMethodRequestable).not.toBeCalled();
-        });
-    });
-
-    describe('onNotEmptyEvent', () => {
-      beforeEach(() => {
-        testContext.context._onNotEmptyEvent = CardView.prototype._onNotEmptyEvent;
-      });
-
-      it('removes the braintree-form__field-group--has-error class', () => {
-        const fakeEvent = {
+        eventPayload = {
           emittedBy: 'number',
           cards: [{ type: 'visa', supported: true }],
           fields: {
@@ -1578,16 +1165,252 @@ describe('CardView', () => {
             }
           }
         };
-        const hostedFieldsInstance = {
-          on: jest.fn().mockImplementation(yields(fakeEvent)),
-          removeAttribute: jest.fn()
-        };
-        const numberFieldGroup = testContext.element.querySelector('[data-braintree-id="number-field-group"]');
 
         classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
-        jest.spyOn(hostedFields, 'create').mockResolvedValue(hostedFieldsInstance);
 
-        return CardView.prototype.initialize.call(testContext.context).then(() => {
+        return cardView.initialize().then(() => {
+          expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
+        });
+      });
+
+      it('adds braintree-form__field--valid class to valid expiration date field', () => {
+        const expirationElement = cardElement.querySelector('.braintree-form-expiration');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'expirationDate',
+          fields: {
+            expirationDate: {
+              container: expirationElement,
+              isValid: true,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        return cardView.initialize().then(() => {
+          expect(expirationElement.classList.contains('braintree-form__field--valid')).toBe(true);
+        });
+      });
+
+      it('removes braintree-form__field--valid class to invalid expiration date field', () => {
+        const expirationElement = cardElement.querySelector('.braintree-form-expiration');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'expirationDate',
+          fields: {
+            expirationDate: {
+              container: expirationElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        return cardView.initialize().then(() => {
+          expect(expirationElement.classList.contains('braintree-form__field--valid')).toBe(false);
+        });
+      });
+
+      it('adds braintree-form__field--valid class to valid number with card type supported', () => {
+        const numberElement = cardElement.querySelector('.braintree-form-number');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: true,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
+            }
+          }
+        });
+
+        return cardView.initialize().then(() => {
+          expect(numberElement.classList.contains('braintree-form__field--valid')).toBe(true);
+        });
+      });
+
+      it('removes braintree-form__field--valid class to valid number without card type supported', () => {
+        const numberElement = cardElement.querySelector('.braintree-form-number');
+
+        eventPayload = {
+          cards: [{ type: 'foo', supported: false }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
+            }
+          }
+        });
+
+        return cardView.initialize().then(() => {
+          expect(numberElement.classList.contains('braintree-form__field--valid')).toBe(false);
+        });
+      });
+
+      it('removes braintree-form__field--valid class to not valid number with card type supported', () => {
+        const numberElement = cardElement.querySelector('.braintree-form-number');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
+            }
+          }
+        });
+
+        return cardView.initialize().then(() => {
+          expect(numberElement.classList.contains('braintree-form__field--valid')).toBe(false);
+        });
+      });
+
+      it('calls model.setPaymentMethodRequestable with isRequestable true if form is valid', () => {
+        const numberElement = cardElement.querySelector('.braintree-form-number');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+        jest.spyOn(cardView, 'hideFieldError').mockImplementation();
+        jest.spyOn(cardView.model, 'setPaymentMethodRequestable').mockImplementation();
+        jest.spyOn(cardView, '_validateForm').mockReturnValue(true);
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model.setPaymentMethodRequestable).toBeCalledTimes(1);
+          expect(cardView.model.setPaymentMethodRequestable).toBeCalledWith({
+            isRequestable: true,
+            type: 'CreditCard'
+          });
+        });
+      });
+
+      it('calls model.setPaymentMethodRequestable with isRequestable false if form is invalid', () => {
+        const numberElement = cardElement.querySelector('.braintree-form-number');
+
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+        jest.spyOn(cardView, 'hideFieldError').mockImplementation();
+        jest.spyOn(cardView.model, 'setPaymentMethodRequestable').mockImplementation();
+        jest.spyOn(cardView, '_validateForm').mockReturnValue(false);
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model.setPaymentMethodRequestable).toBeCalledTimes(1);
+          expect(cardView.model.setPaymentMethodRequestable).toBeCalledWith({
+            isRequestable: false,
+            type: 'CreditCard'
+          });
+        });
+      });
+
+      it('does not call model.setPaymentMethodRequestable if tokenization is in progress', () => {
+        const numberElement = cardElement.querySelector('.braintree-form-number');
+
+        cardView._isTokenizing = true;
+        eventPayload = {
+          cards: [{ type: 'visa', supported: true }],
+          emittedBy: 'number',
+          fields: {
+            number: {
+              container: numberElement,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        jest.spyOn(cardView, 'hideFieldError').mockImplementation();
+        jest.spyOn(cardView.model, 'setPaymentMethodRequestable').mockImplementation();
+        jest.spyOn(cardView, '_validateForm').mockReturnValue(false);
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model.setPaymentMethodRequestable).not.toBeCalled();
+        });
+      });
+    });
+
+    describe('onNotEmptyEvent', () => {
+      let eventPayload;
+
+      beforeEach(() => {
+        eventPayload = { emittedBy: 'number' };
+        fakeHostedFieldsInstance.on.mockImplementation((eventName, handler) => {
+          if (eventName === 'notEmpty') {
+            handler(eventPayload);
+          }
+        });
+      });
+
+      it('removes the braintree-form__field-group--has-error class', () => {
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+
+        eventPayload = {
+          emittedBy: 'number',
+          cards: [{ type: 'visa', supported: true }],
+          fields: {
+            number: {
+              container: document.createElement('div'),
+              isEmpty: false,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
+
+        return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
         });
       });
@@ -1595,8 +1418,10 @@ describe('CardView', () => {
   });
 
   describe('tokenize', () => {
+    let cardView;
+
     beforeEach(() => {
-      fake.hostedFieldsInstance.getState.mockReturnValue({
+      fakeHostedFieldsInstance.getState.mockReturnValue({
         cards: [{ type: 'visa', supported: true }],
         fields: {
           number: {
@@ -1607,42 +1432,20 @@ describe('CardView', () => {
           }
         }
       });
-      fake.hostedFieldsInstance.tokenize.mockResolvedValue({});
-      testContext.model = fake.model();
+      fakeHostedFieldsInstance.tokenize.mockResolvedValue({});
 
-      return testContext.model.initialize().then(() => {
-        testContext.context = {
-          element: testContext.element,
-          _shouldVault: CardView.prototype._shouldVault,
-          saveCardInput: {
-            checked: true
-          },
-          getElementById: BaseView.prototype.getElementById,
-          hostedFieldsInstance: fake.hostedFieldsInstance,
-          fieldErrors: {},
-          model: testContext.model,
-          preventUserAction: BaseView.prototype.preventUserAction,
-          allowUserAction: BaseView.prototype.allowUserAction,
-          _validateForm: CardView.prototype._validateForm,
-          _validateExtraInput: CardView.prototype._validateExtraInput,
-          _sendRequestableEvent: CardView.prototype._sendRequestableEvent,
-          _setupCardholderName: jest.fn(),
-          merchantConfiguration: {
-            vault: {},
-            authorization: fake.configuration().authorization,
-            card: {}
-          },
-          hasCardholderName: false,
-          showFieldError: CardView.prototype.showFieldError,
-          strings: strings
-        };
-        jest.spyOn(transitionHelper, 'onTransitionEnd').mockImplementation(yields());
+      jest.spyOn(transitionHelper, 'onTransitionEnd').mockImplementation(yields());
+
+      return makeCardView().then((view) => {
+        cardView = view;
       });
     });
 
     it('clears the error on the model', () => {
-      jest.spyOn(testContext.model, 'clearError').mockImplementation();
-      testContext.context.hostedFieldsInstance.getState.mockReturnValue({
+      expect.assertions(1);
+
+      jest.spyOn(cardView.model, 'clearError').mockImplementation();
+      fakeHostedFieldsInstance.getState.mockReturnValue({
         cards: [{ type: 'Card', supported: true }],
         fields: {
           number: {
@@ -1654,13 +1457,15 @@ describe('CardView', () => {
         }
       });
 
-      return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-        expect(testContext.model.clearError).toBeCalled();
+      return cardView.tokenize().catch(() => {
+        expect(cardView.model.clearError).toBeCalled();
       });
     });
 
     it('throws an error if there is no valid card type', () => {
-      testContext.context.hostedFieldsInstance.getState.mockReturnValue({
+      expect.assertions(2);
+
+      fakeHostedFieldsInstance.getState.mockReturnValue({
         cards: [{ type: 'Card', supported: true }],
         fields: {
           number: {
@@ -1672,403 +1477,16 @@ describe('CardView', () => {
         }
       });
 
-      return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(err => {
+      return cardView.tokenize().catch(err => {
         expect(err).toBeDefined();
-        expect(fake.hostedFieldsInstance.tokenize).not.toBeCalled();
+        expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
       });
     });
 
-    it('calls callback with error and reports error to DropinModel if form is not valid',
-      () => {
-        testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isValid: true
-            },
-            expirationDate: {
-              isValid: false
-            }
-          }
-        });
+    it('calls callback with error and reports error to DropinModel if form is not valid', () => {
+      expect.assertions(3);
 
-        jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
-
-        return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(err => {
-          expect(fake.hostedFieldsInstance.tokenize).not.toBeCalled();
-          expect(testContext.context.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
-          expect(err.message).toBe('No payment method is available.');
-        });
-      });
-
-    it('calls callback with error when cardholder name is required and the input is empty',
-      () => {
-        testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isValid: true
-            },
-            expirationDate: {
-              isValid: true
-            }
-          }
-        });
-        testContext.context.cardholderNameInput = { value: '' };
-        testContext.context.extraInputs = [{
-          fieldName: 'cardholderName',
-          enabled: true,
-          required: true,
-          validations: [{
-            isValid: function (input) { return input.length > 0; },
-            error: strings.fieldEmptyForCardholderName
-          }]
-        }];
-
-        jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
-
-        return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(err => {
-          expect(fake.hostedFieldsInstance.tokenize).not.toBeCalled();
-          expect(testContext.context.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
-          expect(err.message).toBe('No payment method is available.');
-        });
-      });
-
-    it('does not error if cardholder name is empty, but not required', () => {
-      testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-        cards: [{ type: 'visa', supported: true }],
-        fields: {
-          number: {
-            isValid: true
-          },
-          expirationDate: {
-            isValid: true
-          }
-        }
-      });
-      testContext.context.hasCardholderName = true;
-      testContext.context.model.merchantConfiguration.card = {
-        cardholderName: {
-          required: false
-        }
-      };
-      testContext.context.cardholderNameInput = { value: '' };
-
-      jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
-
-      return CardView.prototype.tokenize.call(testContext.context).then(() => {
-        expect(testContext.context.model.reportError).not.toBeCalled();
-        expect(fake.hostedFieldsInstance.tokenize).toBeCalledTimes(1);
-      });
-    });
-
-    it('does not error if cardholder name is not included', () => {
-      testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-        cards: [{ type: 'visa', supported: true }],
-        fields: {
-          number: {
-            isValid: true
-          },
-          expirationDate: {
-            isValid: true
-          }
-        }
-      });
-      testContext.context.hasCardholderName = false;
-      jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
-
-      return CardView.prototype.tokenize.call(testContext.context).then(() => {
-        expect(testContext.context.model.reportError).not.toBeCalled();
-        expect(fake.hostedFieldsInstance.tokenize).toBeCalledTimes(1);
-      });
-    });
-
-    it('calls callback with error when cardholder name length is over 255 characters',
-      () => {
-        const overLengthValue = Array(256).join('a');
-
-        testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isValid: true
-            },
-            expirationDate: {
-              isValid: true
-            }
-          }
-        });
-        testContext.context.hasCardholderName = true;
-        testContext.context.model.merchantConfiguration.card = {
-          cardholderName: true
-        };
-        testContext.context.cardholderNameInput = {
-          value: overLengthValue
-        };
-        testContext.context.extraInputs = [{
-          fieldName: 'cardholderName',
-          enabled: true,
-          required: true,
-          validations: [{
-            isValid: function (input) { return input.length > 0; },
-            error: strings.fieldEmptyForCardholderName
-          }, {
-            isValid: function (input) { return input.length < 256; },
-            error: strings.fieldTooLongForCardholderName
-          }]
-        }];
-
-        jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
-
-        return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(err => {
-          expect(fake.hostedFieldsInstance.tokenize).not.toBeCalled();
-          expect(testContext.context.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
-          expect(err.message).toBe('No payment method is available.');
-        });
-      });
-
-    it('reports an error to DropinModel when Hosted Fields tokenization returns an error',
-      () => {
-        const fakeError = {
-          code: 'A_REAL_ERROR_CODE'
-        };
-
-        testContext.context.hostedFieldsInstance.tokenize.mockRejectedValue(fakeError);
-        jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
-
-        return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-          expect(testContext.context.model.reportError).toBeCalledWith(fakeError);
-        });
-      });
-
-    it('reports a duplicate card error to DropinModel when tokenization returns an error',
-      () => {
-        const fakeError = { code: 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE' };
-
-        testContext.context.hostedFieldsInstance.tokenize.mockRejectedValue(fakeError);
-        jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
-
-        return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-          expect(testContext.context.model.reportError).toBeCalledWith(fakeError);
-        });
-      });
-
-    it('shows unsupported card field error when attempting to use an unsupported card and reports an error',
-      () => {
-        const numberFieldError = testContext.element.querySelector('[data-braintree-id="number-field-error"]');
-
-        jest.spyOn(testContext.context.model, 'reportError').mockImplementation();
-        testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'foo', supported: false }],
-          fields: {
-            number: {
-              isEmpty: false,
-              isValid: false
-            },
-            expirationDate: {
-              isValid: true
-            }
-          }
-        });
-
-        return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-          expect(numberFieldError.classList.contains('braintree-hidden')).toBe(false);
-          expect(numberFieldError.textContent).toBe('This card type is not supported. Please try another card.');
-          expect(testContext.context.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
-          expect(testContext.context.hostedFieldsInstance.tokenize).not.toBeCalled();
-        });
-      });
-
-    it('shows empty field error when attempting to sumbit an empty field',
-      () => {
-        const numberFieldError = testContext.element.querySelector('[data-braintree-id="number-field-error"]');
-
-        testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isEmpty: true,
-              isValid: false
-            },
-            expirationDate: {
-              isValid: true
-            }
-          }
-        });
-
-        return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-          expect(numberFieldError.classList.contains('braintree-hidden')).toBe(false);
-          expect(numberFieldError.textContent).toBe('Please fill out a card number.');
-          expect(testContext.context.hostedFieldsInstance.tokenize).not.toBeCalled();
-        });
-      });
-
-    it('shows invalid field error when attempting to submit an invalid field',
-      () => {
-        const numberFieldError = testContext.element.querySelector('[data-braintree-id="number-field-error"]');
-
-        testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isValid: false
-            },
-            expirationDate: {
-              isValid: true
-            }
-          }
-        });
-
-        return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-          expect(numberFieldError.classList.contains('braintree-hidden')).toBe(false);
-          expect(numberFieldError.textContent).toBe('This card number is not valid.');
-          expect(testContext.context.hostedFieldsInstance.tokenize).not.toBeCalled();
-        });
-      });
-
-    it('sets the aria-invalid attribute and set message when a field error is shown',
-      () => {
-        testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isValid: false
-            },
-            expirationDate: {
-              isValid: true
-            }
-          }
-        });
-
-        CardView.prototype.showFieldError.call(testContext.context, 'number', 'Example error message');
-
-        expect(testContext.context.hostedFieldsInstance.setAttribute).toBeCalledWith({
-          field: 'number',
-          attribute: 'aria-invalid',
-          value: true
-        });
-        expect(testContext.context.hostedFieldsInstance.setMessage).toBeCalledWith({
-          field: 'number',
-          message: 'Example error message'
-        });
-      });
-
-    it('sets the aria-invalid attribute on an input when a field error is hidden',
-      () => {
-        const input = {
-          id: {
-            indexOf: function () {
-              return 1;
-            }
-          },
-          setAttribute: jest.fn()
-        };
-        const fieldGroup = {
-          querySelector: function () {
-            return input;
-          }
-        };
-
-        testContext.context.getElementById = jest.fn().mockReturnValue(fieldGroup);
-        jest.spyOn(classList, 'add').mockImplementation();
-
-        CardView.prototype.showFieldError.call(testContext.context, 'foo');
-
-        expect(input.setAttribute).toBeCalledWith('aria-invalid', true);
-      });
-
-    it('removes the aria-invalid attribute and message when a field error is hidden',
-      () => {
-        testContext.context.hostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isValid: false
-            },
-            expirationDate: {
-              isValid: true
-            }
-          }
-        });
-
-        CardView.prototype.hideFieldError.call(testContext.context, 'number');
-
-        expect(testContext.context.hostedFieldsInstance.removeAttribute).toBeCalledWith({
-          field: 'number',
-          attribute: 'aria-invalid'
-        });
-        expect(testContext.context.hostedFieldsInstance.setMessage).toBeCalledWith({
-          field: 'number',
-          message: ''
-        });
-      });
-
-    it('removes the aria-invalid attribute on an input when a field error is hidden',
-      () => {
-        const input = {
-          id: {
-            indexOf: function () {
-              return 1;
-            }
-          },
-          removeAttribute: jest.fn()
-        };
-        const fieldGroup = {
-          querySelector: function () {
-            return input;
-          }
-        };
-
-        testContext.context.getElementById = jest.fn().mockReturnValue(fieldGroup);
-        jest.spyOn(classList, 'remove').mockImplementation();
-
-        CardView.prototype.hideFieldError.call(testContext.context, 'foo');
-
-        expect(input.removeAttribute).toBeCalledWith('aria-invalid');
-      });
-
-    it('calls hostedFieldsInstance.tokenize when form is valid', () => {
-      return CardView.prototype.tokenize.call(testContext.context).then(() => {
-        expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledTimes(1);
-      });
-    });
-
-    it('includes `vaulted: true` in tokenization payload if not guest checkout',
-      () => {
-        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
-
-        return CardView.prototype.tokenize.call(testContext.context).then(payload => {
-          expect(payload.vaulted).toBe(true);
-        });
-      });
-
-    it('does not include `vaulted: true` in tokenization payload if save card input is not checked',
-      () => {
-        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
-        testContext.context.saveCardInput.checked = false;
-
-        return CardView.prototype.tokenize.call(testContext.context).then(payload => {
-          expect(payload.vaulted).toBeFalsy();
-        });
-      });
-
-    it('does not include `vaulted: true` in tokenization payload if guest checkout',
-      () => {
-        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = false;
-
-        return CardView.prototype.tokenize.call(testContext.context).then(payload => {
-          expect(payload.vaulted).toBeFalsy();
-        });
-      });
-
-    it('sets isTokenizing to true', () => {
-      CardView.prototype.tokenize.call(testContext.context);
-
-      expect(testContext.context._isTokenizing).toBe(true);
-    });
-
-    it('does not call hostedFieldsInstance.tokenize if form is invalid', () => {
-      testContext.context.hostedFieldsInstance.getState.mockReturnValue({
+      fakeHostedFieldsInstance.getState.mockReturnValue({
         cards: [{ type: 'visa', supported: true }],
         fields: {
           number: {
@@ -2080,137 +1498,544 @@ describe('CardView', () => {
         }
       });
 
-      return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-        expect(testContext.context.hostedFieldsInstance.tokenize).not.toBeCalled();
+      jest.spyOn(cardView.model, 'reportError').mockImplementation();
+
+      return cardView.tokenize().catch(err => {
+        expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+        expect(cardView.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
+        expect(err.message).toBe('No payment method is available.');
       });
     });
 
-    it('vaults on tokenization if auto vaulting is configured', () => {
-      testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+    it('calls callback with error when cardholder name is required and the input is empty', () => {
+      let cardViewWithCardholderName;
 
-      return CardView.prototype.tokenize.call(testContext.context).then(() => {
-        expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: true });
+      expect.assertions(3);
+
+      return makeCardView({
+        cardholderName: {
+          required: true
+        }
+      }).then((view) => {
+        cardViewWithCardholderName = view;
+
+        fakeHostedFieldsInstance.getState.mockReturnValue({
+          cards: [{ type: 'visa', supported: true }],
+          fields: {
+            number: {
+              isValid: true
+            },
+            expirationDate: {
+              isValid: true
+            }
+          }
+        });
+
+        jest.spyOn(cardViewWithCardholderName.model, 'reportError').mockImplementation();
+
+        return cardViewWithCardholderName.tokenize();
+      }).catch(err => {
+        expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+        expect(cardViewWithCardholderName.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
+        expect(err.message).toBe('No payment method is available.');
       });
     });
 
-    it('does not vault on tokenization if auto vaulting is configured globally, but set to not vault locally',
-      () => {
-        testContext.context.merchantConfiguration.vault.autoVault = false;
-        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+    it('does not error if cardholder name is empty, but not required', () => {
+      let cardViewWithCardholderName;
 
-        return CardView.prototype.tokenize.call(testContext.context).then(() => {
-          expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
+      return makeCardView({
+        cardholderName: {
+          required: false
+        }
+      }).then((view) => {
+        cardViewWithCardholderName = view;
+        fakeHostedFieldsInstance.getState.mockReturnValue({
+          cards: [{ type: 'visa', supported: true }],
+          fields: {
+            number: {
+              isValid: true
+            },
+            expirationDate: {
+              isValid: true
+            }
+          }
         });
+
+        jest.spyOn(cardViewWithCardholderName.model, 'reportError').mockImplementation();
+
+        return cardViewWithCardholderName.tokenize();
+      }).then(() => {
+        expect(cardViewWithCardholderName.model.reportError).not.toBeCalled();
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
+      });
+    });
+
+    it('does not error if cardholder name is not included', () => {
+      let cardViewWithoutCardholderName;
+
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa', supported: true }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
       });
 
-    it('vaults on tokenization if auto vaulting is configured globally to not vault, but set to vault locally',
-      () => {
-        testContext.context.merchantConfiguration.vault.autoVault = true;
-        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = false;
+      return makeCardView({
+        cardholderName: false
+      }).then((view) => {
+        cardViewWithoutCardholderName = view;
+        jest.spyOn(cardViewWithoutCardholderName.model, 'reportError').mockImplementation();
 
-        return CardView.prototype.tokenize.call(testContext.context).then(() => {
-          expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: true });
+        return cardViewWithoutCardholderName.tokenize();
+      }).then(() => {
+        expect(cardViewWithoutCardholderName.model.reportError).not.toBeCalled();
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
+      });
+    });
+
+    it('calls callback with error when cardholder name length is over 255 characters', () => {
+      let cardViewWithCardholderName;
+
+      expect.assertions(3);
+
+      return makeCardView({
+        cardholderName: true
+      }).then((view) => {
+        cardViewWithCardholderName = view;
+      }).then(() => {
+        const overLengthValue = Array(257).join('a');
+
+        fakeHostedFieldsInstance.getState.mockReturnValue({
+          cards: [{ type: 'visa', supported: true }],
+          fields: {
+            number: {
+              isValid: true
+            },
+            expirationDate: {
+              isValid: true
+            }
+          }
+        });
+        jest.spyOn(cardViewWithCardholderName.model, 'reportError').mockImplementation();
+
+        cardViewWithCardholderName.cardholderNameInput.value = overLengthValue;
+
+        return cardViewWithCardholderName.tokenize().catch(err => {
+          expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+          expect(cardViewWithCardholderName.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
+          expect(err.message).toBe('No payment method is available.');
         });
       });
+    });
 
-    it('does not vault on tokenization if save card input is not checked',
-      () => {
-        testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = true;
-        testContext.context.saveCardInput.checked = false;
+    it('reports an error to DropinModel when Hosted Fields tokenization returns an error', () => {
+      expect.assertions(1);
 
-        return CardView.prototype.tokenize.call(testContext.context).then(() => {
-          expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
-        });
+      const fakeError = {
+        code: 'A_REAL_ERROR_CODE'
+      };
+
+      fakeHostedFieldsInstance.tokenize.mockRejectedValue(fakeError);
+      jest.spyOn(cardView.model, 'reportError').mockImplementation();
+
+      return cardView.tokenize().catch(() => {
+        expect(cardView.model.reportError).toBeCalledWith(fakeError);
+      });
+    });
+
+    it('reports a duplicate card error to DropinModel when tokenization returns an error', () => {
+      expect.assertions(1);
+
+      const fakeError = { code: 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE' };
+
+      fakeHostedFieldsInstance.tokenize.mockRejectedValue(fakeError);
+      jest.spyOn(cardView.model, 'reportError').mockImplementation();
+
+      return cardView.tokenize().catch(() => {
+        expect(cardView.model.reportError).toBeCalledWith(fakeError);
+      });
+    });
+
+    it('shows unsupported card field error when attempting to use an unsupported card and reports an error', () => {
+      expect.assertions(4);
+
+      const numberFieldError = cardElement.querySelector('[data-braintree-id="number-field-error"]');
+
+      jest.spyOn(cardView.model, 'reportError').mockImplementation();
+
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'foo', supported: false }],
+        fields: {
+          number: {
+            isEmpty: false,
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
       });
 
-    it('does not vault on tokenization if save card input is not checked when autovaulting is set locally',
-      () => {
-        testContext.context.merchantConfiguration.vault.autoVault = true;
-        testContext.context.saveCardInput.checked = false;
-
-        return CardView.prototype.tokenize.call(testContext.context).then(() => {
-          expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
-        });
+      return cardView.tokenize().catch(() => {
+        expect(numberFieldError.classList.contains('braintree-hidden')).toBe(false);
+        expect(numberFieldError.textContent).toBe('This card type is not supported. Please try another card.');
+        expect(cardView.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
+        expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
       });
+    });
+
+    it('shows empty field error when attempting to sumbit an empty field', () => {
+      expect.assertions(3);
+
+      const numberFieldError = cardElement.querySelector('[data-braintree-id="number-field-error"]');
+
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa', supported: true }],
+        fields: {
+          number: {
+            isEmpty: true,
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      return cardView.tokenize().catch(() => {
+        expect(numberFieldError.classList.contains('braintree-hidden')).toBe(false);
+        expect(numberFieldError.textContent).toBe('Please fill out a card number.');
+        expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+      });
+    });
+
+    it('shows invalid field error when attempting to submit an invalid field', () => {
+      expect.assertions(3);
+
+      const numberFieldError = cardElement.querySelector('[data-braintree-id="number-field-error"]');
+
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa', supported: true }],
+        fields: {
+          number: {
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      return cardView.tokenize().catch(() => {
+        expect(numberFieldError.classList.contains('braintree-hidden')).toBe(false);
+        expect(numberFieldError.textContent).toBe('This card number is not valid.');
+        expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+      });
+    });
+
+    it('sets the aria-invalid attribute and set message when a field error is shown', () => {
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa', supported: true }],
+        fields: {
+          number: {
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      cardView.showFieldError('number', 'Example error message');
+
+      expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({
+        field: 'number',
+        attribute: 'aria-invalid',
+        value: true
+      });
+      expect(fakeHostedFieldsInstance.setMessage).toBeCalledWith({
+        field: 'number',
+        message: 'Example error message'
+      });
+    });
+
+    it('sets the aria-invalid attribute on an input when a field error is hidden', () => {
+      const input = {
+        id: {
+          indexOf: function () {
+            return 1;
+          }
+        },
+        setAttribute: jest.fn()
+      };
+      const fieldGroup = {
+        querySelector: function () {
+          return input;
+        }
+      };
+
+      jest.spyOn(cardView, 'getElementById').mockReturnValue(fieldGroup);
+      jest.spyOn(classList, 'add').mockImplementation();
+
+      cardView.showFieldError('foo');
+
+      expect(input.setAttribute).toBeCalledWith('aria-invalid', true);
+    });
+
+    it('removes the aria-invalid attribute and message when a field error is hidden', () => {
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa', supported: true }],
+        fields: {
+          number: {
+            isValid: false
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      cardView.hideFieldError('number');
+
+      expect(fakeHostedFieldsInstance.removeAttribute).toBeCalledWith({
+        field: 'number',
+        attribute: 'aria-invalid'
+      });
+      expect(fakeHostedFieldsInstance.setMessage).toBeCalledWith({
+        field: 'number',
+        message: ''
+      });
+    });
+
+    it('removes the aria-invalid attribute on an input when a field error is hidden', () => {
+      const input = {
+        id: {
+          indexOf: function () {
+            return 1;
+          }
+        },
+        removeAttribute: jest.fn()
+      };
+      const fieldGroup = {
+        querySelector: function () {
+          return input;
+        }
+      };
+
+      jest.spyOn(cardView, 'getElementById').mockReturnValue(fieldGroup);
+      jest.spyOn(classList, 'remove').mockImplementation();
+
+      cardView.hideFieldError('foo');
+
+      expect(input.removeAttribute).toBeCalledWith('aria-invalid');
+    });
+
+    it('calls hostedFieldsInstance.tokenize when form is valid', () => {
+      return cardView.tokenize().then(() => {
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
+      });
+    });
+
+    it('includes `vaulted: true` in tokenization payload if not guest checkout', () => {
+      cardView.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+
+      return cardView.tokenize().then(payload => {
+        expect(payload.vaulted).toBe(true);
+      });
+    });
+
+    it('does not include `vaulted: true` in tokenization payload if save card input is not checked', () => {
+      cardView.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+      cardView.saveCardInput.checked = false;
+
+      return cardView.tokenize().then(payload => {
+        expect(payload.vaulted).toBeFalsy();
+      });
+    });
+
+    it('does not include `vaulted: true` in tokenization payload if guest checkout', () => {
+      cardView.model.vaultManagerConfig.autoVaultPaymentMethods = false;
+
+      return cardView.tokenize().then(payload => {
+        expect(payload.vaulted).toBeFalsy();
+      });
+    });
+
+    it('sets isTokenizing to true', () => {
+      cardView.tokenize().then();
+
+      expect(cardView._isTokenizing).toBe(true);
+    });
+
+    it('does not call hostedFieldsInstance.tokenize if form is invalid', () => {
+      expect.assertions(1);
+
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa', supported: true }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: false
+          }
+        }
+      });
+
+      return cardView.tokenize().catch(() => {
+        expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
+      });
+    });
+
+    it('does not vault on tokenization if auto vaulting is configured globally, but set to not vault locally', () => {
+      cardView.merchantConfiguration.vault.autoVault = false;
+      cardView.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'foo' }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      return cardView.tokenize().then(() => {
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
+      });
+    });
+
+    it('vaults on tokenization if auto vaulting is configured globally to not vault, but set to vault locally', () => {
+      expect.assertions(1);
+
+      cardView.merchantConfiguration.vault.autoVault = true;
+      cardView.model.vaultManagerConfig.autoVaultPaymentMethods = false;
+
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      return cardView.tokenize().then(() => {
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledWith({ vault: true });
+      });
+    });
+
+    it('does not vault on tokenization if save card input is not checked', () => {
+      cardView.saveCardInput.checked = false;
+
+      return cardView.tokenize().then(() => {
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
+      });
+    });
+
+    it('does not vault on tokenization if save card input is not checked when autovaulting is set locally', () => {
+      cardView.model.vaultManagerConfig.autoVaultPaymentMethods = true;
+      cardView.saveCardInput.checked = false;
+
+      return cardView.tokenize().then(() => {
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
+      });
+    });
 
     it('does not vault on tokenization if autovaulting is set to false', () => {
-      testContext.context.model.vaultManagerConfig.autoVaultPaymentMethods = false;
+      cardView.model.vaultManagerConfig.autoVaultPaymentMethods = false;
 
-      return CardView.prototype.tokenize.call(testContext.context).then(() => {
-        expect(testContext.context.hostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
+      return cardView.tokenize().then(() => {
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledWith({ vault: false });
       });
     });
 
     it('clears fields after successful tokenization', () => {
-      testContext.context.hostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
+      fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
 
-      return CardView.prototype.tokenize.call(testContext.context).then(() => {
-        expect(testContext.context.hostedFieldsInstance.clear).toBeCalledWith('number');
-        expect(testContext.context.hostedFieldsInstance.clear).toBeCalledWith('expirationDate');
-        expect(testContext.context.hostedFieldsInstance.clear).not.toBeCalledWith('cvv');
-        expect(testContext.context.hostedFieldsInstance.clear).not.toBeCalledWith('postalCode');
+      return cardView.tokenize().then(() => {
+        expect(fakeHostedFieldsInstance.clear).toBeCalledWith('number');
+        expect(fakeHostedFieldsInstance.clear).toBeCalledWith('expirationDate');
+        expect(fakeHostedFieldsInstance.clear).not.toBeCalledWith('cvv');
+        expect(fakeHostedFieldsInstance.clear).not.toBeCalledWith('postalCode');
       });
     });
 
-    it('clears cardholder name field if it exists after successful tokenization',
-      () => {
-        testContext.context.hostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
-        testContext.context.hasCardholderName = true;
-        testContext.context.cardholderNameInput = {
-          value: 'Some value'
-        };
+    it('clears cardholder name field if it exists after successful tokenization', () => {
+      let cardViewWithCardholderName;
 
-        return CardView.prototype.tokenize.call(testContext.context).then(() => {
-          expect(testContext.context.cardholderNameInput.value).toBe('');
-        });
+      return makeCardView({
+        cardholderName: true
+      }).then((view) => {
+        cardViewWithCardholderName = view;
+        fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
+        cardViewWithCardholderName.cardholderNameInput.value = 'Some value';
+
+        return cardViewWithCardholderName.tokenize();
+      }).then(() => {
+        expect(cardViewWithCardholderName.cardholderNameInput.value).toBe('');
       });
+    });
 
-    it('does not clear fields after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false',
-      () => {
-        testContext.context.merchantConfiguration = {
-          vault: {},
-          clearFieldsAfterTokenization: false
-        };
-        testContext.context.hostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
+    it('does not clear fields after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false', () => {
+      cardView.merchantConfiguration = {
+        vault: {},
+        clearFieldsAfterTokenization: false
+      };
+      fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
 
-        return CardView.prototype.tokenize.call(testContext.context).then(() => {
-          expect(testContext.context.hostedFieldsInstance.clear).not.toBeCalled();
-        });
+      return cardView.tokenize().then(() => {
+        expect(fakeHostedFieldsInstance.clear).not.toBeCalled();
       });
+    });
 
-    it('does not clear cardholder name field after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false',
-      () => {
-        testContext.context.merchantConfiguration = {
-          vault: {},
-          clearFieldsAfterTokenization: false
-        };
-        testContext.context.hasCardholderName = true;
-        testContext.context.cardholderNameInput = {
-          value: 'Some value'
-        };
-        testContext.context.hostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
+    it('does not clear cardholder name field after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false', () => {
+      let cardViewWithCardholderName;
 
-        return CardView.prototype.tokenize.call(testContext.context).then(() => {
-          expect(testContext.context.cardholderNameInput.value).toBe('Some value');
-        });
+      return makeCardView({
+        clearFieldsAfterTokenization: false,
+        cardholderName: true
+      }).then((view) => {
+        cardViewWithCardholderName = view;
+        cardViewWithCardholderName.cardholderNameInput.value = 'Some value';
+        fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
+
+        return cardViewWithCardholderName.tokenize();
+      }).then(() => {
+        expect(cardViewWithCardholderName.cardholderNameInput.value).toBe('Some value');
       });
+    });
 
     it('sets isTokenizing to false on successful tokenization', done => {
-      testContext.context.hostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
+      fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
 
-      CardView.prototype.tokenize.call(testContext.context).then(() => {
+      cardView.tokenize().then(() => {
         setTimeout(() => {
-          expect(testContext.context._isTokenizing).toBe(false);
+          expect(cardView._isTokenizing).toBe(false);
           done();
         }, 300);
       });
     });
 
     it('sets isTokenizing to false on unsuccessful tokenization', () => {
-      testContext.context.hostedFieldsInstance.tokenize.mockRejectedValue(new Error('Error'));
+      expect.assertions(1);
 
-      return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-        expect(testContext.context._isTokenizing).toBe(false);
+      fakeHostedFieldsInstance.tokenize.mockRejectedValue(new Error('Error'));
+
+      return cardView.tokenize().catch(() => {
+        expect(cardView._isTokenizing).toBe(false);
       });
     });
 
@@ -2219,65 +2044,64 @@ describe('CardView', () => {
         const stubPayload = {};
 
         jest.spyOn(classList, 'remove').mockImplementation();
-        testContext.context.hostedFieldsInstance.tokenize.mockResolvedValue(stubPayload);
+        fakeHostedFieldsInstance.tokenize.mockResolvedValue(stubPayload);
 
-        CardView.prototype.tokenize.call(testContext.context).then(() => {
+        cardView.tokenize().then(() => {
           setTimeout(() => {
-            expect(classList.remove).toBeCalledWith(testContext.context.element, 'braintree-sheet--loading');
+            expect(classList.remove).toBeCalledWith(cardElement, 'braintree-sheet--loading');
             done();
           }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
         });
       });
 
     it('removes braintree-sheet--loading class after tokenization fails', () => {
-      jest.spyOn(classList, 'remove').mockImplementation();
-      testContext.context.hostedFieldsInstance.tokenize.mockRejectedValue(new Error('foo'));
+      expect.assertions(1);
 
-      return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-        expect(classList.remove).toBeCalledWith(testContext.context.element, 'braintree-sheet--loading');
+      jest.spyOn(classList, 'remove').mockImplementation();
+      fakeHostedFieldsInstance.tokenize.mockRejectedValue(new Error('foo'));
+
+      return cardView.tokenize().catch(() => {
+        expect(classList.remove).toBeCalledWith(cardElement, 'braintree-sheet--loading');
       });
     });
 
-    it('adds a new payment method when tokenize is successful and transition ends',
-      () => {
-        const stubPayload = {};
+    it('adds a new payment method when tokenize is successful and transition ends', () => {
+      const stubPayload = {};
 
-        testContext.context.hostedFieldsInstance.tokenize.mockResolvedValue(stubPayload);
-        jest.spyOn(testContext.model, 'addPaymentMethod').mockImplementation();
+      fakeHostedFieldsInstance.tokenize.mockResolvedValue(stubPayload);
+      jest.spyOn(cardView.model, 'addPaymentMethod').mockImplementation();
 
-        return CardView.prototype.tokenize.call(testContext.context).then(() => {
-          expect(testContext.model.addPaymentMethod).toBeCalledWith(stubPayload);
-        });
+      return cardView.tokenize().then(() => {
+        expect(cardView.model.addPaymentMethod).toBeCalledWith(stubPayload);
       });
+    });
 
     it('does not update the active payment method when tokenize fails', () => {
-      fake.hostedFieldsInstance.tokenize.mockRejectedValue(new Error('bad happen'));
-      jest.spyOn(testContext.model, 'addPaymentMethod').mockImplementation();
+      expect.assertions(1);
 
-      return CardView.prototype.tokenize.call(testContext.context).then(throwIfResolves).catch(() => {
-        expect(testContext.model.addPaymentMethod).not.toBeCalled();
+      fakeHostedFieldsInstance.tokenize.mockRejectedValue(new Error('bad happen'));
+      jest.spyOn(cardView.model, 'addPaymentMethod').mockImplementation();
+
+      return cardView.tokenize().catch(() => {
+        expect(cardView.model.addPaymentMethod).not.toBeCalled();
       });
     });
   });
 
   describe('field errors', () => {
     beforeEach(() => {
-      testContext.context = {
-        fieldErrors: {
-          hasOwnProperty: jest.fn().mockReturnValue(false)
-        },
-        hostedFieldsInstance: {
-          setAttribute: jest.fn(),
-          removeAttribute: jest.fn(),
-          setMessage: jest.fn()
-        },
-        getElementById: jest.fn().mockReturnValue({})
-      };
-
       jest.spyOn(classList, 'add').mockImplementation();
     });
 
     describe('showFieldError', () => {
+      let cardView;
+
+      beforeEach(() => {
+        return makeCardView().then((view) => {
+          cardView = view;
+        });
+      });
+
       it('sets hosted fields attributes on hosted fields', () => {
         const fakeGroup = document.createElement('div');
         const fakeHostedField = document.createElement('iframe');
@@ -2285,11 +2109,11 @@ describe('CardView', () => {
         fakeHostedField.id = 'braintree-hosted-field-foo';
         fakeGroup.appendChild(fakeHostedField);
 
-        testContext.context.getElementById = jest.fn().mockReturnValue(fakeGroup);
+        jest.spyOn(cardView, 'getElementById').mockReturnValue(fakeGroup);
 
-        CardView.prototype.showFieldError.call(testContext.context, 'foo', 'errorMessage');
+        cardView.showFieldError('foo', 'errorMessage');
 
-        expect(testContext.context.hostedFieldsInstance.setAttribute).toBeCalledWith({
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({
           field: 'foo',
           attribute: 'aria-invalid',
           value: true
@@ -2304,15 +2128,23 @@ describe('CardView', () => {
         fakeInput.id = 'braintree__card-view-input';
         fakeGroup.appendChild(fakeInput);
 
-        testContext.context.getElementById = jest.fn().mockReturnValue(fakeGroup);
+        jest.spyOn(cardView, 'getElementById').mockReturnValue(fakeGroup);
 
-        CardView.prototype.showFieldError.call(testContext.context, 'foo', 'errorMessage');
+        cardView.showFieldError('foo', 'errorMessage');
 
-        expect(testContext.context.hostedFieldsInstance.setAttribute).not.toBeCalled();
+        expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
       });
     });
 
     describe('hideFieldError', () => {
+      let cardView;
+
+      beforeEach(() => {
+        return makeCardView().then((view) => {
+          cardView = view;
+        });
+      });
+
       it('removes hosted fields attributes on hosted fields', () => {
         const fakeGroup = document.createElement('div');
         const fakeHostedField = document.createElement('iframe');
@@ -2320,11 +2152,11 @@ describe('CardView', () => {
         fakeHostedField.id = 'braintree-hosted-field-foo';
         fakeGroup.appendChild(fakeHostedField);
 
-        testContext.context.getElementById = jest.fn().mockReturnValue(fakeGroup);
+        jest.spyOn(cardView, 'getElementById').mockReturnValue(fakeGroup);
 
-        CardView.prototype.hideFieldError.call(testContext.context, 'foo', 'errorMessage');
+        cardView.hideFieldError('foo', 'errorMessage');
 
-        expect(testContext.context.hostedFieldsInstance.removeAttribute).toBeCalledWith({
+        expect(fakeHostedFieldsInstance.removeAttribute).toBeCalledWith({
           field: 'foo',
           attribute: 'aria-invalid'
         });
@@ -2338,58 +2170,58 @@ describe('CardView', () => {
         fakeInput.id = 'braintree__card-view-input';
         fakeGroup.appendChild(fakeInput);
 
-        testContext.context.getElementById = jest.fn().mockReturnValue(fakeGroup);
+        jest.spyOn(cardView, 'getElementById').mockReturnValue(fakeGroup);
 
-        CardView.prototype.hideFieldError.call(testContext.context, 'foo', 'errorMessage');
+        cardView.hideFieldError('foo', 'errorMessage');
 
-        expect(testContext.context.hostedFieldsInstance.removeAttribute).not.toBeCalled();
+        expect(fakeHostedFieldsInstance.removeAttribute).not.toBeCalled();
       });
     });
   });
 
   describe('teardown', () => {
+    let cardView;
+
     beforeEach(() => {
-      testContext.context = {
-        hostedFieldsInstance: {
-          teardown: jest.fn().mockResolvedValue()
-        }
-      };
+      return makeCardView().then((view) => {
+        cardView = view;
+      });
     });
 
     it('tears down hosted fields instance', () => {
-      return CardView.prototype.teardown.call(testContext.context).then(() => {
-        expect(testContext.context.hostedFieldsInstance.teardown).toBeCalledTimes(1);
+      return cardView.teardown().then(() => {
+        expect(fakeHostedFieldsInstance.teardown).toBeCalledTimes(1);
       });
     });
 
     it('passes hosted fields teardown errors to callback', () => {
+      expect.assertions(1);
+
       const error = new Error('hosted fields teardown error');
 
-      testContext.context.hostedFieldsInstance.teardown.mockRejectedValue(error);
+      fakeHostedFieldsInstance.teardown.mockRejectedValue(error);
 
-      return CardView.prototype.teardown.call(testContext.context).then(() => {
-        throw new Error('should not resolve');
-      }).then(throwIfResolves).catch(err => {
+      return cardView.teardown().catch(err => {
         expect(err).toBe(error);
       });
     });
   });
 
   describe('getPaymentMethod', () => {
-    beforeEach(() => {
-      testContext.context = {
-        _validateForm: jest.fn()
-      };
-    });
-
     it('returns undefined if form is invalid', () => {
-      testContext.context._validateForm.mockReturnValue(false);
-      expect(CardView.prototype.getPaymentMethod.call(testContext.context)).toBeUndefined();
+      const view = new CardView({ element: cardElement });
+
+      jest.spyOn(view, '_validateForm').mockReturnValue(false);
+
+      expect(view.getPaymentMethod()).toBeUndefined(); // eslint-disable-line no-undefined
     });
 
     it('returns a card payment method object if form is valid', () => {
-      testContext.context._validateForm.mockReturnValue(true);
-      expect(CardView.prototype.getPaymentMethod.call(testContext.context)).toEqual({
+      const view = new CardView({ element: cardElement });
+
+      jest.spyOn(view, '_validateForm').mockReturnValue(true);
+
+      expect(view.getPaymentMethod()).toEqual({
         type: 'CreditCard'
       });
     });
@@ -2397,7 +2229,7 @@ describe('CardView', () => {
 
   describe('onSelection', () => {
     it('focuses on the number field', () => {
-      const view = new CardView({ element: testContext.element });
+      const view = new CardView({ element: cardElement });
 
       view.hostedFieldsInstance = {
         focus: jest.fn()
@@ -2410,7 +2242,7 @@ describe('CardView', () => {
     });
 
     it('noops if the hosted fields instance is not available', () => {
-      const view = new CardView({ element: testContext.element });
+      const view = new CardView({ element: cardElement });
 
       delete view.hostedFieldsInstance;
 

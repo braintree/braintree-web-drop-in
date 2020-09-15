@@ -2,7 +2,7 @@ require('./helper');
 
 describe('Drop-in#requestPaymentMethod', function () {
   beforeEach(function () {
-    browser.reloadSessionOnRetry();
+    browser.reloadSessionOnRetry(this.currentTest);
   });
 
   describe('callback api', function () {
@@ -15,15 +15,15 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).to.include('Paying with');
+      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with');
 
-      expect(browser.dropin().getHTML()).to.include('Ending in 1111');
+      expect(browser.dropin().getHTML()).toContain('Ending in 1111');
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
-      expect(result.description).to.include('ending in 11');
-      expect(result.details.cardType).to.include('Visa');
+      expect(result.nonce).toBeTruthy();
+      expect(result.description).toContain('ending in 11');
+      expect(result.details.cardType).toContain('Visa');
     });
 
     it('tokenizes PayPal @paypal', function () {
@@ -36,13 +36,13 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).to.include('Paying with PayPal');
+      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with PayPal');
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
-      expect(result.type).to.equal('PayPalAccount');
-      expect(result.details.email).to.include(process.env.PAYPAL_USERNAME);
+      expect(result.nonce).toBeTruthy();
+      expect(result.type).toBe('PayPalAccount');
+      expect(result.details.email).toContain(process.env.PAYPAL_USERNAME);
     });
 
     it('tokenizes PayPal Credit @paypal', function () {
@@ -61,18 +61,18 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.clickOption('paypalCredit');
       browser.openPayPalAndCompleteLogin(function () {
-        expect($('body').getHTML()).to.include('PayPal Credit');
+        expect($('body').getHTML()).toContain('PayPal Credit');
       });
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).to.include('Paying with PayPal');
+      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with PayPal');
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
-      expect(result.type).to.equal('PayPalAccount');
-      expect(result.details.email).to.include(process.env.PAYPAL_USERNAME);
+      expect(result.nonce).toBeTruthy();
+      expect(result.type).toBe('PayPalAccount');
+      expect(result.details.email).toContain(process.env.PAYPAL_USERNAME);
     });
   });
 
@@ -88,15 +88,15 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).to.include('Paying with');
+      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with');
 
-      expect(browser.dropin().getHTML()).to.include('Ending in 1111');
+      expect(browser.dropin().getHTML()).toContain('Ending in 1111');
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
-      expect(result.description).to.include('ending in 11');
-      expect(result.details.cardType).to.include('Visa');
+      expect(result.nonce).toBeTruthy();
+      expect(result.description).toContain('ending in 11');
+      expect(result.details.cardType).toContain('Visa');
     });
 
     it('tokenizes PayPal @paypal', function () {
@@ -107,13 +107,13 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).to.include('Paying with PayPal');
+      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with PayPal');
 
       const result = browser.getResult();
 
-      expect(result.nonce).to.exist; // eslint-disable-line no-unused-expressions
-      expect(result.type).to.equal('PayPalAccount');
-      expect(result.details.email).to.include(process.env.PAYPAL_USERNAME);
+      expect(result.nonce).toBeTruthy();
+      expect(result.type).toBe('PayPalAccount');
+      expect(result.details.email).toContain(process.env.PAYPAL_USERNAME);
     });
   });
 });

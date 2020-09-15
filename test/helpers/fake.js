@@ -60,15 +60,28 @@ fakeBTInstances = {
     getDeviceData: jest.fn().mockResolvedValue('device-data'),
     teardown: function () {}
   },
-  hostedFields: {
-    clear: jest.fn(),
-    getState: jest.fn(),
-    on: jest.fn(),
-    getSupportedCardTypes: jest.fn(),
-    setAttribute: jest.fn(),
-    removeAttribute: jest.fn(),
-    setMessage: jest.fn(),
-    tokenize: jest.fn()
+  hostedFields() {
+    return {
+      clear: jest.fn(),
+      getSupportedCardTypes: jest.fn().mockResolvedValue(['visa']),
+      getState: jest.fn().mockReturnValue({
+        cards: [{ type: 'visa' }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      }),
+      on: jest.fn(),
+      removeAttribute: jest.fn(),
+      setAttribute: jest.fn(),
+      setMessage: jest.fn(),
+      teardown: jest.fn().mockResolvedValue(),
+      tokenize: jest.fn().mockResolvedValue({})
+    };
   },
   paypal: {
     createPayment: function () {},
@@ -97,9 +110,13 @@ function client(conf) {
 }
 
 function model(options) {
+  const defaultOptions = modelOptions();
   let modelInstance;
 
-  options = options || modelOptions();
+  options = options || {};
+  options.merchantConfiguration = Object.assign({}, defaultOptions.merchantConfiguration, options.merchantConfiguration);
+  options = Object.assign({}, defaultOptions, options);
+  options.container = options.container || document.createElement('div');
 
   modelInstance = new DropinModel(options);
 
@@ -125,7 +142,7 @@ module.exports = {
   clientTokenWithCustomerID: clientTokenWithCustomerID,
   configuration: configuration,
   dataCollectorInstance: fakeBTInstances.dataCollector,
-  hostedFieldsInstance: fakeBTInstances.hostedFields,
+  hostedFields: fakeBTInstances.hostedFields,
   paypalInstance: fakeBTInstances.paypal,
   threeDSecureInstance: fakeBTInstances.threeDSecure,
   vaultManagerInstance: fakeBTInstances.vaultManager,

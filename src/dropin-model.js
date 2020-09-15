@@ -41,6 +41,7 @@ var DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID = {
 function DropinModel(options) {
   var parsedAuthorization = parseAuthorization(options.merchantConfiguration.authorization);
 
+  this.rootNode = options.container;
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
   this.environment = parsedAuthorization.environment;
@@ -52,6 +53,11 @@ function DropinModel(options) {
   this.dependencySuccessCount = 0;
   this.failedDependencies = {};
   this._setupComplete = false;
+
+  while (this.rootNode.parentNode) {
+    this.rootNode = this.rootNode.parentNode;
+  }
+  this.isInShadowDom = this.rootNode.toString() === '[object ShadowRoot]';
 
   EventEmitter.call(this);
 }

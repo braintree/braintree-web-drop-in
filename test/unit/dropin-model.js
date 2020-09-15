@@ -23,6 +23,8 @@ describe('DropinModel', () => {
 
     jest.spyOn(vaultManager, 'create').mockResolvedValue(fake.vaultManagerInstance);
     testContext.modelOptions = {
+      container: document.createElement('div'),
+      client: fake.client(testContext.configuration),
       componentID: 'foo123',
       merchantConfiguration: {
         authorization: fake.clientToken,
@@ -63,6 +65,28 @@ describe('DropinModel', () => {
       const model = new DropinModel(testContext.modelOptions);
 
       expect(model.merchantConfiguration).toBe(testContext.modelOptions.merchantConfiguration);
+    });
+
+    it('sets isInShadowDom to false when the container is not in the shadow DOM', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.isInShadowDom).toBe(false);
+    });
+
+    it('sets isInShadowDom to true when the container is in the shadow DOM', () => {
+      const container = document.createElement('div');
+      const insideShadowDOMWrapper = document.createElement('div');
+      const dropinContainer = document.createElement('div');
+      const shadowDom = container.attachShadow({ mode: 'open' });
+
+      insideShadowDOMWrapper.appendChild(dropinContainer);
+      shadowDom.appendChild(insideShadowDOMWrapper);
+
+      testContext.modelOptions.container = dropinContainer;
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.isInShadowDom).toBe(true);
     });
   });
 

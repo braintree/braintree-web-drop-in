@@ -1,6 +1,6 @@
 {
   "rootDir": "./src/",
-  "collectCoverage": true,
+  "//collectCoverage": true,
   "clearMocks": true,
   "coverageDirectory": "<rootDir>/../test/coverage",
   "displayName": "Drop-in",

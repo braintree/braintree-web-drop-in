@@ -8,7 +8,6 @@ const DEFAULT_START_OPTIONS = {
 };
 const PAYPAL_TIMEOUT = 60000; // 60 seconds
 const BASE_URL = `http://bs-local.com:${PORT}`;
-let sessionId = '';
 
 const DEFAULT_HOSTED_FIELDS_VALUES = {
   number: '4111111111111111',
@@ -16,8 +15,6 @@ const DEFAULT_HOSTED_FIELDS_VALUES = {
   cvv: '123',
   postalCode: '12345'
 };
-
-global.expect = require('chai').expect;
 
 browser.addCommand('start', function (options = {}, overrides = {}) {
   const waitTime = overrides.waitTime || 40000;
@@ -53,21 +50,19 @@ browser.addCommand('start', function (options = {}, overrides = {}) {
 
   browser.waitUntil(() => {
     return $('#ready').getHTML(false) === 'ready';
-  }, waitTime, `Expected Drop-in to be ready after ${waitTime / 1000} seconds.`);
-});
-
-browser.addCommand('reloadSessionOnRetry', () => {
-  if (sessionId === browser.sessionId) {
-    browser.reloadSession();
-  } else {
-    sessionId = browser.sessionId;
-  }
+  }, {
+    timeout: waitTime,
+    timeoutMsg: `Expected Drop-in to be ready after ${waitTime / 1000} seconds.`
+  });
 });
 
 browser.addCommand('getResult', function () {
   browser.waitUntil(() => {
     return $('#results').getHTML(false).trim() !== '';
-  }, 3000, 'Expected result to be avaialble within 3 seconds.');
+  }, {
+    timeout: 3000,
+    timeoutMsg: 'Expected result to be avaialble within 3 seconds.'
+  });
 
   const resultHtml = $('#results').getHTML(false).trim();
 
@@ -99,7 +94,10 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
 
   browser.waitUntil(() => {
     return browser.getWindowHandles().length > 1;
-  }, PAYPAL_TIMEOUT, 'expected multiple windows to be available.');
+  }, {
+    timeout: PAYPAL_TIMEOUT,
+    timeoutMsg: 'expected multiple windows to be available.'
+  });
 
   const handles = browser.getWindowHandles();
   const popupHandle = handles.find(h => h !== parentWindow);
@@ -140,38 +138,54 @@ browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
 
       browser.waitForElementToDissapear('.spinner');
     }
-
-    // safari sometimes fails the initial login, so the
-    // login form is shown again with email already filled in
-    // using the iframe system
-    browser.waitUntil(() => {
-      return $('#confirmButtonTop').isDisplayed() || $('#injectedUnifiedLogin iframe').isExisting();
-    }, PAYPAL_TIMEOUT);
-
-    if ($('#injectedUnifiedLogin iframe').isExisting()) {
-      const loginIframe = $('#injectedUnifiedLogin iframe');
-
-      browser.inFrame(loginIframe, () => {
-        $('#password').typeKeys(process.env.PAYPAL_PASSWORD);
-
-        $('#btnLogin').click();
-      });
-    }
-    // end silly safari hack
   }
 
-  $('#confirmButtonTop').waitForDisplayed();
-  browser.waitForElementToDissapear('.spinner');
+  browser.waitForConfirmButtonEnabled();
 
   if (cb) {
     cb();
   }
 
-  $('#confirmButtonTop').click();
+  browser.clickConfirmButton();
 
   browser.switchToWindow(parentWindow);
 
   browser.waitForElementToDissapear('.paypal-checkout-sandbox-iframe');
+});
+
+browser.addCommand('confirmButtonIsEnabled', function () {
+  return ($('#payment-submit-btn').isDisplayed() && $('#payment-submit-btn').isEnabled()) ||
+    ($('#fiSubmitButton').isDisplayed() && $('#fiSubmitButton').isEnabled()) ||
+    ($('#consentButton').isDisplayed() && $('#consentButton').isEnabled()) ||
+    ($('#confirmButtonTop').isDisplayed() && $('#confirmButtonTop').isEnabled());
+});
+
+browser.addCommand('waitForConfirmButtonEnabled', function () {
+  browser.waitUntil(() => {
+    return browser.confirmButtonIsEnabled();
+  }, {
+    timeout: PAYPAL_TIMEOUT
+  });
+});
+
+browser.addCommand('clickConfirmButton', function () {
+  browser.waitForConfirmButtonEnabled();
+
+  // dismisses a banner about accepting cookies
+  // so that the submit button can be clicked
+  if ($('#acceptAllButton').isDisplayed()) {
+    $('#acceptAllButton').click();
+  }
+
+  if ($('#fiSubmitButton').isDisplayed()) {
+    $('#fiSubmitButton').click();
+  } else if ($('#consentButton').isDisplayed()) {
+    $('#consentButton').click();
+  } else if ($('#payment-submit-btn').isDisplayed()) {
+    $('#payment-submit-btn').click();
+  } else if ($('#confirmButtonTop').isDisplayed()) {
+    $('#confirmButtonTop').click();
+  }
 });
 
 browser.addCommand('waitForElementToDissapear', function (selector) {
@@ -179,7 +193,10 @@ browser.addCommand('waitForElementToDissapear', function (selector) {
     const el = $(selector);
 
     return el.isExisting() === false || el.isDisplayed() === false;
-  }, PAYPAL_TIMEOUT, 'expected PayPal spinner to dissapear');
+  }, {
+    timeout: PAYPAL_TIMEOUT,
+    timeoutMsg: 'expected PayPal spinner to dissapear'
+  });
 });
 
 browser.addCommand('clickOption', function (type) {
@@ -231,3 +248,9 @@ browser.addCommand('repeatKeys', function (key, numberOfTimes) {
 browser.addCommand('typeKeys', function (keys) {
   this.addValue(keys);
 }, true);
+
+browser.addCommand('reloadSessionOnRetry', (test) => {
+  if (test._currentRetry > 0) {
+    browser.reloadSession();
+  }
+});
