@@ -25,6 +25,11 @@ var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
+var PASS_THROUGH_EVENTS = [
+  'paymentMethodRequestable',
+  'noPaymentMethodRequestable',
+  'paymentOptionSelected'
+];
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
@@ -375,16 +380,10 @@ Dropin.prototype._initialize = function (callback) {
       }
     });
 
-    self._model.on('paymentMethodRequestable', function (event) {
-      self._emit('paymentMethodRequestable', event);
-    });
-
-    self._model.on('noPaymentMethodRequestable', function () {
-      self._emit('noPaymentMethodRequestable');
-    });
-
-    self._model.on('paymentOptionSelected', function (event) {
-      self._emit('paymentOptionSelected', event);
+    PASS_THROUGH_EVENTS.forEach(function (eventName) {
+      self._model.on(eventName, function (event) {
+        self._emit(eventName, event);
+      });
     });
 
     return self._setUpDependenciesAndViews();
