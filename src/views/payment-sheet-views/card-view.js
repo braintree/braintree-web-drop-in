@@ -13,6 +13,13 @@ var Promise = require('../../lib/promise');
 
 var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
+var PASSTHROUGH_EVENTS = [
+  'empty',
+  // TODO should intercept this event and call tokenize
+  'inputSubmitRequest',
+  'binAvailable'
+];
+
 function CardView() {
   BaseView.apply(this, arguments);
 }
@@ -95,6 +102,12 @@ CardView.prototype.initialize = function () {
     this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
     this.hostedFieldsInstance.on('notEmpty', this._onNotEmptyEvent.bind(this));
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
+
+    PASSTHROUGH_EVENTS.forEach(function (eventName) {
+      this.hostedFieldsInstance.on(eventName, function (event) {
+        this.model._emit('card:' + eventName, event);
+      }.bind(this));
+    }.bind(this));
 
     this.model.asyncDependencyReady();
   }.bind(this)).catch(function (err) {
@@ -523,6 +536,8 @@ CardView.prototype._onBlurEvent = function (event) {
     this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
 
+  this.model._emit('card:blur', event);
+
   setTimeout(function () {
     // when focusing on a field by clicking the label,
     // we need to wait a bit for the iframe to be
@@ -569,16 +584,22 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
       });
     }
   }
+
+  this.model._emit('card:cardTypeChange', event);
 };
 
 CardView.prototype._onFocusEvent = function (event) {
   var fieldGroup = this.getElementById(camelCaseToKebabCase(event.emittedBy) + '-field-group');
 
   classList.add(fieldGroup, 'braintree-form__field-group--is-focused');
+
+  this.model._emit('card:focus', event);
 };
 
 CardView.prototype._onNotEmptyEvent = function (event) {
   this.hideFieldError(event.emittedBy);
+
+  this.model._emit('card:notEmpty', event);
 };
 
 CardView.prototype._onValidityChangeEvent = function (event) {
@@ -598,6 +619,8 @@ CardView.prototype._onValidityChangeEvent = function (event) {
   }
 
   this._sendRequestableEvent();
+
+  this.model._emit('card:validityChange', event);
 };
 
 CardView.prototype.requestPaymentMethod = function () {
