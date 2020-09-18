@@ -25,6 +25,21 @@ var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
 var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
 
+var PASS_THROUGH_EVENTS = [
+  'paymentMethodRequestable',
+  'noPaymentMethodRequestable',
+  'paymentOptionSelected',
+
+  // Card View Events
+  'card:binAvailable',
+  'card:blur',
+  'card:cardTypeChange',
+  'card:empty',
+  'card:focus',
+  'card:inputSubmitRequest',
+  'card:notEmpty',
+  'card:validityChange'
+];
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
@@ -131,9 +146,20 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @param {string} event The name of the event to which you are subscribing.
  * @param {function} handler A callback to handle the event.
  * @description Subscribes a handler function to a named event. `event` should be one of the following:
+ *
  *  * [`paymentMethodRequestable`](#event:paymentMethodRequestable)
  *  * [`noPaymentMethodRequestable`](#event:noPaymentMethodRequestable)
  *  * [`paymentOptionSelected`](#event:paymentOptionSelected)
+ *
+ *  _Card View Specific Events_
+ *  * [`card:binAvailable`](#event:card:binAvailable)
+ *  * [`card:blur`](#event:card:blur)
+ *  * [`card:cardTypeChange`](#event:card:cardTypeChange)
+ *  * [`card:empty`](#event:card:empty)
+ *  * [`card:focus`](#event:card:focus)
+ *  * [`card:inputSubmitRequest`](#event:card:inputSubmitRequest)
+ *  * [`card:notEmpty`](#event:card:notEmpty)
+ *  * [`card:validityChange`](#event:card:validityChange)
  * @returns {void}
  * @example
  * <caption>Dynamically enable or disable your submit button based on whether or not the payment method is requestable</caption>
@@ -206,6 +232,22 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  *     }
  *   });
  * });
+ * @example
+ * <caption>Listen on various events from the card view</caption>
+ * braintree.dropin.create({
+ *   authorization: 'CLIENT_AUTHORIZATION',
+ *   container: '#dropin-container'
+ * }, function (err, dropinInstance) {
+ *   dropinInstance.on('card:focus', function (event) {
+ *     // a card field was focussed
+ *   });
+ *   dropinInstance.on('card:blur', function (event) {
+ *     // a card field was blurred
+ *   });
+ *   dropinInstance.on('card:validityChange', function (event) {
+ *     // the card form went from invalid to valid or valid to invalid
+ *   });
+ * });
  */
 
 /**
@@ -252,6 +294,54 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * This event is emitted when the customer selects a new payment option type (e.g. PayPal, PayPal Credit, credit card). This event is not emitted when the user changes between existing saved payment methods. Only relevant when accepting multiple payment options.
  * @event Dropin#paymentOptionSelected
  * @type {Dropin~paymentOptionSelectedPayload}
+ */
+
+/**
+ * The underlying [hosted fields `binAvailable` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:binAvailable).
+ * @event Dropin#card:binAvailable
+ * @type {Dropin~card:binAvailable}
+ */
+
+/**
+ * The underlying [hosted fields `blur` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:blur).
+ * @event Dropin#card:blur
+ * @type {Dropin~card:blur}
+ */
+
+/**
+ * The underlying [hosted fields `cardTypeChange` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:cardTypeChange).
+ * @event Dropin#card:cardTypeChange
+ * @type {Dropin~card:cardTypeChange}
+ */
+
+/**
+ * The underlying [hosted fields `empty` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:empty).
+ * @event Dropin#card:empty
+ * @type {Dropin~card:empty}
+ */
+
+/**
+ * The underlying [hosted fields `focus` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:focus).
+ * @event Dropin#card:focus
+ * @type {Dropin~card:focus}
+ */
+
+/**
+ * The underlying [hosted fields `inputSubmitRequest` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:inputSubmitRequest).
+ * @event Dropin#card:inputSubmitRequest
+ * @type {Dropin~card:inputSubmitRequest}
+ */
+
+/**
+ * The underlying [hosted fields `notEmpty` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:notEmpty).
+ * @event Dropin#card:notEmpty
+ * @type {Dropin~card:notEmpty}
+ */
+
+/**
+ * The underlying [hosted fields `validityChange` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:validityChange).
+ * @event Dropin#card:validityChange
+ * @type {Dropin~card:validityChange}
  */
 
 /**
@@ -375,16 +465,10 @@ Dropin.prototype._initialize = function (callback) {
       }
     });
 
-    self._model.on('paymentMethodRequestable', function (event) {
-      self._emit('paymentMethodRequestable', event);
-    });
-
-    self._model.on('noPaymentMethodRequestable', function () {
-      self._emit('noPaymentMethodRequestable');
-    });
-
-    self._model.on('paymentOptionSelected', function (event) {
-      self._emit('paymentOptionSelected', event);
+    PASS_THROUGH_EVENTS.forEach(function (eventName) {
+      self._model.on(eventName, function (event) {
+        self._emit(eventName, event);
+      });
     });
 
     return self._setUpDependenciesAndViews();

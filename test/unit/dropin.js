@@ -2422,6 +2422,31 @@ describe('Dropin', () => {
     );
   });
 
+  describe('card events', () => {
+    test.each([
+      'binAvailable',
+      'blur',
+      'cardTypeChange',
+      'empty',
+      'focus',
+      'inputSubmitRequest',
+      'notEmpty',
+      'validityChange'
+    ])('emits card:%s event', (eventName, done) => {
+      const instance = new Dropin(testContext.dropinOptions);
+      const payload = {};
+
+      instance.on(`card:${eventName}`, (emittedPayload) => {
+        expect(emittedPayload).toBe(payload);
+        done();
+      });
+
+      instance._initialize(() => {
+        instance._model._emit(`card:${eventName}`, payload);
+      });
+    });
+  });
+
   describe('payment option selected event', () => {
     test(
       'emits paymentOptionSelected when the model emits paymentOptionSelected',

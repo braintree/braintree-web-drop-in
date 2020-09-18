@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Pass through all underlying hosted fields events
+
 1.24.0
 ------
 
