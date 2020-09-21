@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Pass through all underlying hosted fields events
+- Update braintree-web to v3.66.0
 
 1.24.0
 ------
