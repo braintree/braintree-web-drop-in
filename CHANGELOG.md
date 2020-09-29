@@ -5,6 +5,18 @@ unreleased
 ----------
 - Pass through all underlying hosted fields events
 - Update braintree-web to v3.66.0
+- Add new locales:
+  * `ar_EG`
+  * `cs_CZ`
+  * `el_GR`
+  * `en_IN`
+  * `es_XC`
+  * `fi_FI`
+  * `fr_XC`
+  * `he_IL`
+  * `hu_HU`
+  * `sk_SK`
+  * `zh_XC`
 
 1.24.0
 ------
