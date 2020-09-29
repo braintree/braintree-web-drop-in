@@ -4,7 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Pass through all underlying hosted fields events
-- Update braintree-web to v3.66.0
+- Update braintree-web to v3.67.0
 - Add new locales:
   * `ar_EG`
   * `cs_CZ`
