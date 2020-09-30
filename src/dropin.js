@@ -66,6 +66,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
+ * @property {?boolean} vaulted If present and true, indicates that the payment method refers to a vaulted payment method.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  * @property {?boolean} liabilityShifted If 3D Secure is configured, whether or not liability did shift.
  * @property {?boolean} liabilityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
@@ -75,6 +76,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~paypalPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
+ * @property {?boolean} vaulted If present and true, indicates that the payment method refers to a vaulted payment method.
  * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
@@ -83,6 +85,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~applePayPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the Apple Pay provided card.
+ * @property {?boolean} vaulted If present and true, indicates that the payment method refers to a vaulted payment method.
  * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
  * @property {string} details.cardHolderName The name of the card holder.
  * @property {string} details.dpanLastTwo Last two digits of card number.
@@ -102,6 +105,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~venmoPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the Venmo account.
+ * @property {?boolean} vaulted If present and true, indicates that the payment method refers to a vaulted payment method.
  * @property {string} details.username The Venmo username.
  * @property {string} type The payment method type, always `VenmoAccount` when the method requested is a Venmo account.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
@@ -110,6 +114,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~googlePayPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the Google Pay card.
+ * @property {?boolean} vaulted If present and true, indicates that the payment method refers to a vaulted payment method.
  * @property {string} details.cardType Type of card, ex: Visa, Mastercard.
  * @property {string} details.lastFour The last 4 digits of the card.
  * @property {string} details.lastTwo The last 2 digits of the card.
