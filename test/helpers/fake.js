@@ -110,6 +110,7 @@ function model(options) {
   modelInstance = new DropinModel(options);
 
   jest.spyOn(modelInstance, 'getVaultedPaymentMethods').mockResolvedValue([]);
+  jest.spyOn(modelInstance, '_emit');
 
   return modelInstance;
 }

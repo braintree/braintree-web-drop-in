@@ -863,6 +863,12 @@ describe('CardView', () => {
         });
       });
 
+      test('emits a focus event on the model', () => {
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:focus', eventPayload);
+        });
+      });
+
       test('shows default card icon in number field when focused', () => {
         return cardView.initialize().then(() => {
           const cardNumberIcon = cardElement.querySelector('[data-braintree-id="card-number-icon"]');
@@ -910,6 +916,24 @@ describe('CardView', () => {
           if (eventName === 'blur') {
             handler(eventPayload);
           }
+        });
+      });
+
+      test('emits blur event on model', () => {
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+
+        eventPayload = {
+          cards: [{ type: 'visa' }],
+          emittedBy: 'number',
+          fields: {
+            number: { isEmpty: true }
+          }
+        };
+
+        classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:blur', eventPayload);
         });
       });
 
@@ -1165,6 +1189,17 @@ describe('CardView', () => {
           if (eventName === 'cardTypeChange') {
             handler(eventPayload);
           }
+        });
+      });
+
+      test('emits card type event on model', () => {
+        eventPayload = {
+          cards: [{ type: 'master-card' }],
+          emittedBy: 'number'
+        };
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:cardTypeChange', eventPayload);
         });
       });
 
@@ -1469,6 +1504,25 @@ describe('CardView', () => {
         });
       });
 
+      test('emits validity change event on model', () => {
+        eventPayload = {
+          emittedBy: 'number',
+          cards: [{ type: 'visa' }],
+          fields: {
+            number: {
+              container: document.createElement('div'),
+              isEmpty: false,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:validityChange', eventPayload);
+        });
+      });
+
       test(
         'removes the braintree-form__field-group--has-error class if a field is potentially valid',
         () => {
@@ -1738,6 +1792,25 @@ describe('CardView', () => {
         });
       });
 
+      test('emits not empty event on model', () => {
+        eventPayload = {
+          emittedBy: 'number',
+          cards: [{ type: 'visa' }],
+          fields: {
+            number: {
+              container: document.createElement('div'),
+              isEmpty: false,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:notEmpty', eventPayload);
+        });
+      });
+
       test('removes the braintree-form__field-group--has-error class', () => {
         const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -1758,6 +1831,31 @@ describe('CardView', () => {
 
         return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
+        });
+      });
+    });
+
+    describe('passthrough events', () => {
+      let eventPayload, eventNameToIntercept;
+
+      beforeEach(() => {
+        eventPayload = { emittedBy: 'number' };
+        fakeHostedFieldsInstance.on.mockImplementation((eventName, handler) => {
+          if (eventName === eventNameToIntercept) {
+            handler(eventPayload);
+          }
+        });
+      });
+
+      test.each([
+        'empty',
+        'inputSubmitRequest',
+        'binAvailable'
+      ])('passes along %s event', (eventName) => {
+        eventNameToIntercept = eventName;
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith(`card:${eventName}`, eventPayload);
         });
       });
     });

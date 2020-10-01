@@ -3,6 +3,20 @@ CHANGELOG
 
 unreleased
 ----------
+- Pass through all underlying hosted fields events
+- Update braintree-web to v3.67.0
+- Add new locales:
+  * `ar_EG`
+  * `cs_CZ`
+  * `el_GR`
+  * `en_IN`
+  * `es_XC`
+  * `fi_FI`
+  * `fr_XC`
+  * `he_IL`
+  * `hu_HU`
+  * `sk_SK`
+  * `zh_XC`
 - Provide validation to prevent cardholder name fields from being submitted as card numbers
 - Fix issue where hosted fields would not auto focus on card view selection
 
