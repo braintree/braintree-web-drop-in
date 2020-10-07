@@ -128,10 +128,9 @@ var VERSION = '__VERSION__';
  */
 
 /**
- * @typedef {object} dataCollectorOptions The configuration options for Data Collector. Requires [advanced fraud protection](https://developers.braintreepayments.com/guides/advanced-fraud-tools/client-side/javascript/v3) to be enabled in the Braintree gateway. Contact our [support team](https://developers.braintreepayments.com/forms/contact) to configure your Kount ID. The device data will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
+ * @typedef {object} dataCollectorOptions The configuration options for Data Collector. Requires [advanced fraud protection](https://developers.braintreepayments.com/guides/advanced-fraud-tools/client-side/javascript/v3) to be enabled in the Braintree gateway. If usinig Kount, contact our [support team](https://developers.braintreepayments.com/forms/contact) to configure your Kount ID. The device data will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
  *
- * @param {boolean} [kount] If true, Kount fraud data collection is enabled. Required if `paypal` parameter is not used.
- * @param {boolean} [paypal] If true, PayPal fraud data collection is enabled. Required if `kount` parameter is not used.
+ * @param {boolean} [kount] If true, Kount fraud data collection is enabled.
  */
 
 /**
@@ -260,7 +259,7 @@ var VERSION = '__VERSION__';
  *
  * See [`googlePayCreateOptions`](#~googlePayCreateOptions) for `googlePay` options.
  *
- * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
+ * @param {object|boolean} [options.dataCollector] If `true` is passed, Drop-in will be configured to collect data for use with Advanced Fraud Protection. If collecting data via Kount, instead pass a [`dataCollectorOptions` object](#~dataCollectorOptions) with `kount: true`. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
  * @param {(boolean|object)} [options.threeDSecure] It's recomended that you pass `true` here to enable 3D Secure and pass the configuration options for 3D Secure into {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.See [`threeDSecureOptions`](#~threeDSecureOptions) for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
