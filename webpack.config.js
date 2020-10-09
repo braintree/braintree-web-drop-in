@@ -21,7 +21,7 @@ module.exports = {
     contentBase: [join(__dirname, 'dist', 'gh-pages'), join(__dirname, 'dist')],
     liveReload: false,
     onListening: server => {
-      console.info('Listening on port:', server.listeningApp.address().port);
+      server.log.info('Development server listening.');
     },
     port: 4567,
     writeToDisk: true
