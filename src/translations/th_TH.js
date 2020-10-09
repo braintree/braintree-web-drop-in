@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "ชื่อผู้ถือบัตรจะต้องไม่เกิน 256 อักขระ",
   "fieldEmptyForNumber": "โปรดกรอกหมายเลข",
   "fieldEmptyForPostalCode": "โปรดกรอกรหัสไปรษณีย์",
+  "fieldInvalidForCardholderName": "ชื่อผู้ถือบัตรนี้ไม่ถูกต้องชื่อผู้ถือบัตรนี้ไม่ถูกต้อง",
   "fieldInvalidForCvv": "รหัสความปลอดภัยนี้ไม่ถูกต้อง",
   "fieldInvalidForExpirationDate": "วันที่หมดอายุนี้ไม่ถูกต้อง",
   "fieldInvalidForNumber": "หมายเลขบัตรนี้ไม่ถูกต้อง",

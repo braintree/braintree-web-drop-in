@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Jméno držitele karty musí obsahovat méně než 256 znaků.",
   "fieldEmptyForNumber": "Vyplňte číslo.",
   "fieldEmptyForPostalCode": "Vyplňte PSČ.",
+  "fieldInvalidForCardholderName": "Toto jméno držitele karty není platné.",
   "fieldInvalidForCvv": "Tento bezpečnostní kód není platný.",
   "fieldInvalidForExpirationDate": "Toto datum vypršení platnosti není platné.",
   "fieldInvalidForNumber": "Toto číslo karty není platné.",

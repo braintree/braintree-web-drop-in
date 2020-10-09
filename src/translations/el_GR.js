@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Το όνομα του κατόχου της κάρτας πρέπει να περιέχει λιγότερους από 256 χαρακτήρες.",
   "fieldEmptyForNumber": "Συμπληρώστε έναν αριθμό.",
   "fieldEmptyForPostalCode": "Συμπληρώστε έναν ταχυδρομικό κώδικα.",
+  "fieldInvalidForCardholderName": "Αυτό το όνομα κατόχου κάρτας δεν είναι έγκυρο.",
   "fieldInvalidForCvv": "Αυτός ο κωδικός ασφαλείας δεν είναι έγκυρος.",
   "fieldInvalidForExpirationDate": "Αυτή η ημερομηνία λήξης δεν είναι έγκυρη.",
   "fieldInvalidForNumber": "Αυτός ο αριθμός κάρτας δεν είναι έγκυρος.",

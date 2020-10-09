@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Kortin haltijan nimen on oltava alle 256 merkkiä.",
   "fieldEmptyForNumber": "Täytä numero.",
   "fieldEmptyForPostalCode": "Täytä postinumero.",
+  "fieldInvalidForCardholderName": "Kortinhaltijan nimi ei ole kelvollinen.",
   "fieldInvalidForCvv": "Tämä turvakoodi ei ole kelvollinen.",
   "fieldInvalidForExpirationDate": "Tämä päättymispäivämäärä ei ole kelvollinen.",
   "fieldInvalidForNumber": "Tämä kortin numero ei ole kelvollinen.",

@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "De naam van de kaarthouder moet korter zijn dan 256 tekens.",
   "fieldEmptyForNumber": "Vul een nummer in.",
   "fieldEmptyForPostalCode": "Vul een postcode in.",
+  "fieldInvalidForCardholderName": "Naam kaarthouder is ongeldig.",
   "fieldInvalidForCvv": "Deze CSC is ongeldig.",
   "fieldInvalidForExpirationDate": "Deze vervaldatum is ongeldig.",
   "fieldInvalidForNumber": "Dit creditcardnummer is ongeldig.",

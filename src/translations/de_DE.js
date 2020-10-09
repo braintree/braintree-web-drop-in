@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Der Name des Karteninhabers darf 255 Zeichen nicht übersteigen.",
   "fieldEmptyForNumber": "Geben Sie die Nummer ein.",
   "fieldEmptyForPostalCode": "Geben Sie die PLZ ein.",
+  "fieldInvalidForCardholderName": "Der Name des Karteninhabers ist nicht gültig.",
   "fieldInvalidForCvv": "Die Kartenprüfnummer ist ungültig.",
   "fieldInvalidForExpirationDate": "Das Ablaufdatum ist ungültig.",
   "fieldInvalidForNumber": "Die Kreditkartennummer ist ungültig.",

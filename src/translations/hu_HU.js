@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "A kártyatulajdonos neve nem lehet hosszabb mint 256 karakter.",
   "fieldEmptyForNumber": "Töltse ki a számot.",
   "fieldEmptyForPostalCode": "Töltse ki az irányítószámot.",
+  "fieldInvalidForCardholderName": "Ez a kártyabirtokos neve nem érvényes.",
   "fieldInvalidForCvv": "Ez a biztonsági kód nem érvényes.",
   "fieldInvalidForExpirationDate": "Ez a lejárati dátum nem érvényes.",
   "fieldInvalidForNumber": "Ez a kártyaszám nem érvényes.",

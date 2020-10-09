@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Kortinnehavarens namn måste vara kortare än 256 tecken.",
   "fieldEmptyForNumber": "Fyll i ett nummer.",
   "fieldEmptyForPostalCode": "Fyll i ett postnummer.",
+  "fieldInvalidForCardholderName": "Namnet på kortinnehavaren är ogiltigt.",
   "fieldInvalidForCvv": "Den här säkerhetskoden är inte giltig.",
   "fieldInvalidForExpirationDate": "Det här utgångsdatumet är inte giltigt.",
   "fieldInvalidForNumber": "Det här kortnumret är inte giltigt.",
