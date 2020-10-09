@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "שם בעל הכרטיס יכול להכיל 256 תווים לכל היותר.",
   "fieldEmptyForNumber": "עליך למלא את המספר.",
   "fieldEmptyForPostalCode": "עליך למלא את המיקוד.",
+  "fieldInvalidForCardholderName": "שם בעל הכרטיס אינו חוקי.",
   "fieldInvalidForCvv": "קוד אבטחה זה אינו חוקי.",
   "fieldInvalidForExpirationDate": "תאריך פקיעת התוקף הזה אינו חוקי.",
   "fieldInvalidForNumber": "מספר כרטיס האשראי הזה אינו חוקי.",

@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Cardholder name must have less than 256 characters.",
   "fieldEmptyForNumber": "Please enter a number.",
   "fieldEmptyForPostalCode": "Please enter a PIN code.",
+  "fieldInvalidForCardholderName": "This cardholder name isn't valid.",
   "fieldInvalidForCvv": "This security code isn't valid.",
   "fieldInvalidForExpirationDate": "This expiration date isn't valid.",
   "fieldInvalidForNumber": "This card number isn't valid.",

@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "يجب أن يقل اسم صاحب البطاقة عن 256 حرفاً.",
   "fieldEmptyForNumber": "يرجى إدخال رقم.",
   "fieldEmptyForPostalCode": "يرجى إدخال الرمز البريدي.",
+  "fieldInvalidForCardholderName": "اسم حامل البطاقة غير صحيح.",
   "fieldInvalidForCvv": "رمز الحماية هذا غير صحيح.",
   "fieldInvalidForExpirationDate": "تاريخ انتهاء الصلاحية هذا غير صحيح.",
   "fieldInvalidForNumber": "رقم هذه البطاقة غير صحيح.",
