@@ -30,10 +30,10 @@ DataCollector.prototype.initialize = function () {
   }).then(function (instance) {
     self._instance = instance;
   }).catch(function (err) {
-    // TODO we need a way to bubble up errors
-    // back to the merchant in the case where
-    // something goes wrong when setting up data collector
-    // instead of silently failing
+    // eslint-disable-next-line no-warning-comments
+    // TODO we need a way to bubble up errors back to the merchant in the case
+    //  where something goes wrong when setting up data collector instead of
+    //  silently failing
     analytics.sendEvent('data-collector.setup-failed');
     // log the Data Collector setup error
     // but do not prevent Drop-in from loading

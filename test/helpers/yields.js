@@ -1,4 +1,5 @@
 function baseYields(async, originalFunctionArgs, callbackArgs) {
+  // eslint-disable-next-line no-warning-comments
   // TODO this should probably just be grabbing the last argument instead
   originalFunctionArgs.some(arg => {
     if (typeof arg === 'function') {

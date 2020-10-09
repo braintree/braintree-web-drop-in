@@ -43,9 +43,7 @@ module.exports = {
       {
         test: /\.less$/,
         use: [
-          {
-            loader: MiniCssExtractPlugin.loader
-          },
+          { loader: MiniCssExtractPlugin.loader },
           { loader: 'css-loader' },
           {
             loader: 'postcss-loader',
@@ -57,9 +55,7 @@ module.exports = {
               ]
             }
           },
-          {
-            loader: 'less-loader'
-          }
+          { loader: 'less-loader' }
         ]
       },
       {

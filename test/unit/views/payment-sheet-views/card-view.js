@@ -9,12 +9,10 @@ const fs = require('fs');
 const hostedFields = require('braintree-web/hosted-fields');
 const strings = require('../../../../src/translations/en_US');
 const transitionHelper = require('../../../../src/lib/transition-helper');
-const {
-  yields
-} = require('../../../helpers/yields');
+const { yields } = require('../../../helpers/yields');
 
 const mainHTML = fs.readFileSync(`${__dirname}/../../../../src/html/main.html`, 'utf8');
-const CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+const { CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT } = require('../../../../src/constants');
 
 describe('CardView', () => {
   let container, cardElement, fakeHostedFieldsInstance;
