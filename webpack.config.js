@@ -11,6 +11,11 @@ const FileManagerPlugin = require('filemanager-webpack-plugin');
 const postcssPresetEnv = require('postcss-preset-env');
 const postcssClean = require('postcss-clean');
 const { version } = require('./package');
+const { VERSION: BT_WEB_VERSION } = require('braintree-web');
+
+const versionRegExp = '__VERSION__';
+const jsdocVersionRegExp = '\\{@pkg version\\}';
+const jsdocBTVersionRegExp = '\\{@pkg bt-web-version\\}';
 
 const jsFilename = `web/dropin/${version}/js/dropin.js`;
 const cssFilename = `web/dropin/${version}/css/dropin.css`;
@@ -65,9 +70,13 @@ module.exports = {
       {
         loader: 'string-replace-loader',
         options: {
-          search: '__VERSION__',
-          replace: version
-        }
+          multiple: [
+            { search: versionRegExp, replace: version, flags: 'g' },
+            { search: jsdocVersionRegExp, replace: version, flags: 'g' },
+            { search: jsdocBTVersionRegExp, replace: BT_WEB_VERSION, flags: 'g' }
+          ]
+        },
+        test: /\.(js|html|md)$/
       }
     ]
   },
@@ -121,8 +130,11 @@ module.exports = {
         transform: (content, path) => {
           let htmlContent,
             filePath;
-          let jsContent = content.toString('utf8').replace('__VERSION__', version);
-          const htmlPaths = [...jsContent.matchAll(RegExp('require\\(\'(.+)\\.html\'\\)', 'g'))];
+          let jsContent = content.toString()
+            .replace(new RegExp(versionRegExp, 'g'), version)
+            .replace(new RegExp(jsdocVersionRegExp, 'g'), version)
+            .replace(new RegExp(jsdocBTVersionRegExp, 'g'), BT_WEB_VERSION);
+          const htmlPaths = [...jsContent.matchAll(new RegExp('require\\(\'(.+)\\.html\'\\)', 'g'))];
 
           if (htmlPaths.length > 0) {
             htmlPaths.forEach(foundPath => {
