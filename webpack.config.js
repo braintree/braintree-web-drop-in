@@ -1,7 +1,7 @@
 'use strict';
 
 const { resolve, join, dirname } = require('path');
-const { readFileSync } = require('fs');
+const { readFileSync, promises } = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
@@ -12,6 +12,8 @@ const postcssPresetEnv = require('postcss-preset-env');
 const postcssClean = require('postcss-clean');
 const { version } = require('./package');
 const { VERSION: BT_WEB_VERSION } = require('braintree-web');
+const replaceVersionStrings = require('./scripts/replace-version-strings');
+const fs = promises;
 
 const versionRegExp = '__VERSION__';
 const jsdocVersionRegExp = '\\{@pkg version\\}';
@@ -101,9 +103,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(),
     new JsDocPlugin({
-      conf: './jsdoc/jsdoc.conf.js',
-      cwd: '.',
-      recursive: true
+      conf: './jsdoc/jsdoc.conf.js'
     }),
     new MiniCssExtractPlugin({ moduleFilename: () => cssFilename }),
     new CopyPlugin([
@@ -171,6 +171,29 @@ module.exports = {
     new SymlinkWebpackPlugin([
       { origin: `web/dropin/${version}`, symlink: 'web/dropin/dev' },
       { origin: `gh-pages/docs/${version}`, symlink: 'gh-pages/docs/current' }
-    ])
+    ]),
+    new class {
+      constructor() {
+        this.pluginName = 'FinalStringScrub';
+      }
+
+      apply(compiler) {
+        const logger = compiler.getInfrastructureLogger(this.pluginName);
+
+        compiler.hooks.done.tap(this.pluginName, () => {
+          logger.info('Updating package version.');
+
+          const docsIndexPath = `dist/gh-pages/docs/${version}/index.html`;
+
+          fs.readFile(docsIndexPath, { encoding: 'utf8' })
+            .then((markup) => replaceVersionStrings(markup))
+            .then((markup) => fs.writeFile(docsIndexPath, markup))
+            .then(() => {
+              logger.info('Package version updated.');
+            })
+            .catch((e) => { logger.error(e); });
+        });
+      }
+    }()
   ]
 };

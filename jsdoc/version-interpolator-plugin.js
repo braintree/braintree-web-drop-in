@@ -1,8 +1,9 @@
-var VERSION = require('../package.json').version;
-var BT_WEB_VERSION = require('braintree-web').VERSION;
+'use strict';
+
+const replaceVersionStrings = require('../scripts/replace-version-strings');
 
 exports.handlers = {
-  jsdocCommentFound: function(e) {
-    e.comment = e.comment.replace('{@pkg version}', VERSION).replace('{@pkg bt-web-version}', BT_WEB_VERSION);
+  jsdocCommentFound: (e) => {
+    e.comment = replaceVersionStrings(e.comment);
   }
 };

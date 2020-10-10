@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * @module braintree-web-drop-in
  * @description There are two ways to integrate Drop-in into your page: a script tag integration and a JavaScript integration using [`dropin.create`](#.create).
