@@ -7,7 +7,7 @@
     "build": "webpack",
     "development": "webpack-dev-server",
     "server": "npm run development",
-    "build:gh-pages": "gulp build:gh-pages",
+    "build:gh-pages": "npm run build # legacy command, gh pages is not an independent process",
     "lint": "eslint src test",
     "hint": "hint http://localhost:4567",
     "posttest": "npm run lint",
@@ -34,8 +34,6 @@
     "@wdio/sync": "^6.4.7",
     "ansi-colors": "^4.1.0",
     "brfs": "^2.0.2",
-    "browserify": "^16.5.0",
-    "browserify-versionify": "^1.0.6",
     "chai": "^4.2.0",
     "clean-webpack-plugin": "^3.0.0",
     "connect": "^3.7.0",
@@ -78,7 +76,6 @@
     "through2": "^4.0.2",
     "vinyl": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
-    "watchify": "^3.11.1",
     "webhint-configuration-braintree-sdk": "github:braintree/webhint-configuration-braintree-sdk#semver:0.0.4",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
@@ -92,12 +89,6 @@
     "@braintree/wrap-promise": "2.1.0",
     "braintree-web": "^3.67.0",
     "promise-polyfill": "8.1.3"
-  },
-  "browserify": {
-    "transform": [
-      "brfs",
-      "browserify-versionify"
-    ]
   },
   "browserslist": [
     "last 2 versions",

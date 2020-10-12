@@ -116,7 +116,6 @@ module.exports = {
         transform: content => {
           const pkg = JSON.parse(content);
 
-          delete pkg.browserify;
           delete pkg.private;
           pkg.main = 'index.js';
           pkg.browser = './dist/browser/dropin.js';
