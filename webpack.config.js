@@ -106,54 +106,56 @@ module.exports = {
       conf: './jsdoc/jsdoc.conf.js'
     }),
     new MiniCssExtractPlugin({ moduleFilename: () => cssFilename }),
-    new CopyPlugin([
-      { from: './test/app', to: './gh-pages', globOptions: { dot: true }, transformPath: target => target.replace('test/app', '') },
-      { from: './jsdoc/index.html', to: './gh-pages/docs', flatten: true },
-      { from: './LICENSE', to: './npm' },
-      {
-        from: './package.json',
-        to: './npm',
-        transform: content => {
-          const pkg = JSON.parse(content);
+    new CopyPlugin({
+      patterns: [
+        { from: 'test/app', to: 'gh-pages', globOptions: { dot: true }, transformPath: target => target.replace('test/app', '') },
+        { from: 'jsdoc/index.html', to: 'gh-pages/docs', flatten: true },
+        { from: './LICENSE', to: './npm' },
+        {
+          from: './package.json',
+          to: './npm',
+          transform: content => {
+            const pkg = JSON.parse(content.toString());
 
-          delete pkg.private;
-          pkg.main = 'index.js';
-          pkg.browser = './dist/browser/dropin.js';
+            delete pkg.private;
+            pkg.main = 'index.js';
+            pkg.browser = './dist/browser/dropin.js';
 
-          return JSON.stringify(pkg);
-        }
-      },
-      {
-        from: './src/**/*.js',
-        to: './npm',
-        transform: (content, path) => {
-          let htmlContent,
-            filePath;
-          let jsContent = content.toString()
-            .replace(new RegExp(versionRegExp, 'g'), version)
-            .replace(new RegExp(jsdocVersionRegExp, 'g'), version)
-            .replace(new RegExp(jsdocBTVersionRegExp, 'g'), BT_WEB_VERSION);
-          const htmlPaths = [...jsContent.matchAll(new RegExp('require\\(\'(.+)\\.html\'\\)', 'g'))];
-
-          if (htmlPaths.length > 0) {
-            htmlPaths.forEach(foundPath => {
-              filePath = resolve(dirname(path), `${foundPath[1]}.html`);
-              htmlContent = readFileSync(filePath, 'utf8');
-              htmlContent = htmlContent
-                .replace(/\\([\s\S])|(")/g, '\\$1$2')
-                .replace(/\n/g, '\\n')
-                .replace(/ {2,}/g, ' ')
-                .replace(/> +</g, '><');
-
-              jsContent = jsContent.replace(foundPath[0], `"${htmlContent}"`);
-            });
+            return JSON.stringify(pkg);
           }
-
-          return jsContent;
         },
-        transformPath: target => target.replace('src/', '')
-      }
-    ]),
+        {
+          from: './src/**/*.js',
+          to: './npm',
+          transform: (content, path) => {
+            let htmlContent,
+              filePath;
+            let jsContent = content.toString()
+              .replace(new RegExp(versionRegExp, 'g'), version)
+              .replace(new RegExp(jsdocVersionRegExp, 'g'), version)
+              .replace(new RegExp(jsdocBTVersionRegExp, 'g'), BT_WEB_VERSION);
+            const htmlPaths = [...jsContent.matchAll(new RegExp('require\\(\'(.+)\\.html\'\\)', 'g'))];
+
+            if (htmlPaths.length > 0) {
+              htmlPaths.forEach(foundPath => {
+                filePath = resolve(dirname(path), `${foundPath[1]}.html`);
+                htmlContent = readFileSync(filePath, 'utf8');
+                htmlContent = htmlContent
+                  .replace(/\\([\s\S])|(")/g, '\\$1$2')
+                  .replace(/\n/g, '\\n')
+                  .replace(/ {2,}/g, ' ')
+                  .replace(/> +</g, '><');
+
+                jsContent = jsContent.replace(foundPath[0], `"${htmlContent}"`);
+              });
+            }
+
+            return jsContent;
+          },
+          transformPath: target => target.replace('src/', '')
+        }
+      ]
+    }),
     new FileManagerPlugin({
       onEnd: {
         copy: [
