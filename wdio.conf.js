@@ -1,3 +1,4 @@
+const createHelpers = require('./test/integration/helper');
 const uuid = require('@braintree/uuid');
 const browserstack = require('browserstack-local');
 
@@ -203,6 +204,8 @@ exports.config = {
     /* eslint-enable no-console */
   },
   before(capabilities) {
+    createHelpers();
+
     // Mobile devices/selenium don't support the following APIs yet
     if (!capabilities.real_mobile) {
       browser.maximizeWindow();
