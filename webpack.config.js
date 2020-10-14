@@ -8,16 +8,9 @@ const CopyPlugin = require('copy-webpack-plugin');
 const JsDocPlugin = require('jsdoc-webpack-plugin');
 const SymlinkWebpackPlugin = require('symlink-webpack-plugin');
 const FileManagerPlugin = require('filemanager-webpack-plugin');
-const postcssPresetEnv = require('postcss-preset-env');
-const postcssClean = require('postcss-clean');
 const { version } = require('./package');
-const { VERSION: BT_WEB_VERSION } = require('braintree-web');
 const replaceVersionStrings = require('./scripts/replace-version-strings');
 const fs = promises;
-
-const versionRegExp = '__VERSION__';
-const jsdocVersionRegExp = '\\{@pkg version\\}';
-const jsdocBTVersionRegExp = '\\{@pkg bt-web-version\\}';
 
 const jsFilename = `web/dropin/${version}/js/dropin.js`;
 const cssFilename = `web/dropin/${version}/css/dropin.css`;
@@ -55,11 +48,9 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              ident: 'postcss',
-              plugins: () => [
-                postcssPresetEnv(),
-                postcssClean()
-              ]
+              postcssOptions: {
+                plugins: [['postcss-preset-env', 'postcss-clean']]
+              }
             }
           },
           { loader: 'less-loader' }
@@ -70,15 +61,8 @@ module.exports = {
         loader: 'html-loader'
       },
       {
-        loader: 'string-replace-loader',
-        options: {
-          multiple: [
-            { search: versionRegExp, replace: version, flags: 'g' },
-            { search: jsdocVersionRegExp, replace: version, flags: 'g' },
-            { search: jsdocBTVersionRegExp, replace: BT_WEB_VERSION, flags: 'g' }
-          ]
-        },
-        test: /\.(js|html|md)$/
+        test: /\.(js|html)$/,
+        use: './scripts/replace-version-strings'
       }
     ]
   },
@@ -105,7 +89,7 @@ module.exports = {
     new JsDocPlugin({
       conf: './jsdoc/jsdoc.conf.js'
     }),
-    new MiniCssExtractPlugin({ moduleFilename: () => cssFilename }),
+    new MiniCssExtractPlugin({ filename: cssFilename }),
     new CopyPlugin({
       patterns: [
         { from: 'test/app', to: 'gh-pages', globOptions: { dot: true }, transformPath: target => target.replace('test/app', '') },
@@ -130,10 +114,7 @@ module.exports = {
           transform: (content, path) => {
             let htmlContent,
               filePath;
-            let jsContent = content.toString()
-              .replace(new RegExp(versionRegExp, 'g'), version)
-              .replace(new RegExp(jsdocVersionRegExp, 'g'), version)
-              .replace(new RegExp(jsdocBTVersionRegExp, 'g'), BT_WEB_VERSION);
+            let jsContent = replaceVersionStrings(content.toString());
             const htmlPaths = [...jsContent.matchAll(new RegExp('require\\(\'(.+)\\.html\'\\)', 'g'))];
 
             if (htmlPaths.length > 0) {
@@ -175,7 +156,7 @@ module.exports = {
     ]),
     new class {
       constructor() {
-        this.pluginName = 'FinalStringScrub';
+        this.pluginName = 'final-version-scrub';
       }
 
       apply(compiler) {

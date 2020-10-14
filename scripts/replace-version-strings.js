@@ -4,11 +4,11 @@ const { version } = require('../package.json');
 const { VERSION: BT_WEB_VERSION } = require('braintree-web');
 
 module.exports = function (str) {
-  const versionRegExp = '__VERSION__';
-  const jsdocVersionRegExp = '\\{@pkg version\\}';
-  const jsdocBTVersionRegExp = '\\{@pkg bt-web-version\\}';
+  const versionRegExp = new RegExp('__VERSION__', 'g');
+  const jsdocVersionRegExp = new RegExp('\\{@pkg version\\}', 'g');
+  const jsdocBTVersionRegExp = new RegExp('\\{@pkg bt-web-version\\}', 'g');
 
-  return str.replace(new RegExp(versionRegExp, 'g'), version)
-    .replace(new RegExp(jsdocVersionRegExp, 'g'), version)
-    .replace(new RegExp(jsdocBTVersionRegExp, 'g'), BT_WEB_VERSION);
+  return str.replace(versionRegExp, version)
+    .replace(jsdocVersionRegExp, version)
+    .replace(jsdocBTVersionRegExp, BT_WEB_VERSION);
 };

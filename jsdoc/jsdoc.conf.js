@@ -11,10 +11,10 @@ module.exports = {
   },
   source: {
     include: ['../src'],
-    exclude: ['__mocks__', 'translations']
+    exclude: ['/__mocks__/', '/translations/']
   },
   templates: {
-    referenceTitle: 'Braintree Drop-in Reference'
+    referenceTitle: 'Braintree Drop-in Reference',
   },
   plugins: ['./version-interpolator-plugin', 'plugins/markdown']
 };
