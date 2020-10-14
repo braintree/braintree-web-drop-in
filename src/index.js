@@ -259,7 +259,7 @@ var VERSION = '__VERSION__';
  *
  * See [`googlePayCreateOptions`](#~googlePayCreateOptions) for `googlePay` options.
  *
- * @param {object|boolean} [options.dataCollector] If `true` is passed, Drop-in will be configured to collect data for use with Advanced Fraud Protection. If collecting data via Kount, instead pass a [`dataCollectorOptions` object](#~dataCollectorOptions) with `kount: true`. If Data Collector is configured and fails to load, Drop-in creation will fail.
+ * @param {object|boolean} [options.dataCollector] If `true` is passed, Drop-in will be configured to collect data for use with Advanced Fraud Protection. If collecting data via Kount, pass a [`dataCollectorOptions` object](#~dataCollectorOptions) with `kount: true` instead. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
  * @param {(boolean|object)} [options.threeDSecure] It's recomended that you pass `true` here to enable 3D Secure and pass the configuration options for 3D Secure into {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.See [`threeDSecureOptions`](#~threeDSecureOptions) for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
