@@ -64,7 +64,7 @@
     "postcss-preset-env": "^6.7.0",
     "serve-static": "^1.14.1",
     "string-replace-loader": "^2.3.0",
-    "symlink-webpack-plugin": "github:gesa/symlink-webpack-plugin#e661f2d64590a3cacba42d4f3c8a36f8d6dff1e4",
+    "symlink-webpack-plugin": "^1.0.0",
     "through2": "^4.0.2",
     "vinyl": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
