@@ -1,3 +1,4 @@
+const createHelpers = require('./test/integration/helper');
 const uuid = require('@braintree/uuid');
 const browserstack = require('browserstack-local');
 
@@ -104,14 +105,20 @@ let capabilities = [
     browser: 'firefox',
     'browserstack.console': 'info'
   },
-  {
+];
+
+// TODO check in with PayPal team on this
+// Safari is struggling to close the PayPal popup on CI
+// skip PayPal on Safari for now
+if (!process.env.RUN_PAYPAL_ONLY) {
+  capabilities.push({
     ...desktopCapabilities,
     browserName: 'Desktop Safari',
     browser: 'safari',
     os: 'OS X',
-    os_version: 'Mojave'
-  }
-];
+    os_version: 'Catalina'
+  });
+}
 
 if (ONLY_BROWSERS) {
   capabilities = ONLY_BROWSERS.split(',')
@@ -203,6 +210,8 @@ exports.config = {
     /* eslint-enable no-console */
   },
   before(capabilities) {
+    createHelpers();
+
     // Mobile devices/selenium don't support the following APIs yet
     if (!capabilities.real_mobile) {
       browser.maximizeWindow();

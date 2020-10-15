@@ -1,5 +1,3 @@
-require('./helper');
-
 describe('Drop-in Script Tag Integration', function () {
   beforeEach(function () {
     browser.reloadSessionOnRetry(this.currentTest);
