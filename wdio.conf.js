@@ -110,7 +110,7 @@ let capabilities = [
     browserName: 'Desktop Safari',
     browser: 'safari',
     os: 'OS X',
-    os_version: 'Mojave'
+    os_version: 'Catalina'
   }
 ];
 

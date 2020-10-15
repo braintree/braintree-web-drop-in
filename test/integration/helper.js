@@ -197,7 +197,7 @@ module.exports = function createHelpers() {
       return el.isExisting() === false || el.isDisplayed() === false;
     }, {
       timeout: PAYPAL_TIMEOUT,
-      timeoutMsg: 'expected PayPal spinner to dissapear'
+      timeoutMsg: `expected ${selector} to dissapear`
     });
   });
 
