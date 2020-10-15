@@ -1,5 +1,6 @@
 'use strict';
 
+const replaceVersionStrings = require('../scripts/replace-version-strings');
 const { version } = require('../package.json');
 
 module.exports = {
@@ -15,6 +16,8 @@ module.exports = {
   },
   templates: {
     referenceTitle: 'Braintree Drop-in Reference',
+    postProcess: (text) => replaceVersionStrings(text)
+
   },
   plugins: ['./version-interpolator-plugin', 'plugins/markdown']
 };

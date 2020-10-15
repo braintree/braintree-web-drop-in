@@ -1,7 +1,7 @@
 'use strict';
 
 const { resolve, join, dirname } = require('path');
-const { readFileSync, promises } = require('fs');
+const { readFileSync } = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
@@ -10,7 +10,6 @@ const SymlinkWebpackPlugin = require('symlink-webpack-plugin');
 const FileManagerPlugin = require('filemanager-webpack-plugin');
 const { version } = require('./package');
 const replaceVersionStrings = require('./scripts/replace-version-strings');
-const fs = promises;
 
 const jsFilename = `web/dropin/${version}/js/dropin.js`;
 const cssFilename = `web/dropin/${version}/css/dropin.css`;
@@ -37,8 +36,8 @@ module.exports = {
       {
         enforce: 'post',
         test: /\.js$/,
-        exclude: /node_modules/,
-        use: 'eslint-loader'
+        use: 'eslint-loader',
+        exclude: /node_modules/
       },
       {
         test: /\.less$/,
@@ -58,7 +57,7 @@ module.exports = {
       },
       {
         test: /\.html$/i,
-        loader: 'html-loader'
+        use: 'html-loader'
       },
       {
         test: /\.(js|html)$/,
@@ -153,29 +152,6 @@ module.exports = {
     new SymlinkWebpackPlugin([
       { origin: `web/dropin/${version}`, symlink: 'web/dropin/dev' },
       { origin: `gh-pages/docs/${version}`, symlink: 'gh-pages/docs/current' }
-    ]),
-    new class {
-      constructor() {
-        this.pluginName = 'final-version-scrub';
-      }
-
-      apply(compiler) {
-        const logger = compiler.getInfrastructureLogger(this.pluginName);
-
-        compiler.hooks.done.tap(this.pluginName, () => {
-          logger.info('Updating package version.');
-
-          const docsIndexPath = `dist/gh-pages/docs/${version}/index.html`;
-
-          fs.readFile(docsIndexPath, { encoding: 'utf8' })
-            .then((markup) => replaceVersionStrings(markup))
-            .then((markup) => fs.writeFile(docsIndexPath, markup))
-            .then(() => {
-              logger.info('Package version updated.');
-            })
-            .catch((e) => { logger.error(e); });
-        });
-      }
-    }()
+    ])
   ]
 };
