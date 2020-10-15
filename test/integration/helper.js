@@ -89,20 +89,23 @@ module.exports = function createHelpers() {
     });
   });
 
+  browser.addCommand('getPopupHandle', function (parentWindow) {
+    return browser.getWindowHandles().find(handle => handle !== parentWindow);
+  });
+
   browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
     const parentWindow = browser.getWindowHandle();
 
     $('.braintree-sheet__button--paypal iframe.zoid-visible').click();
 
     browser.waitUntil(() => {
-      return browser.getWindowHandles().length > 1;
+      return browser.getPopupHandle(parentWindow);
     }, {
       timeout: PAYPAL_TIMEOUT,
       timeoutMsg: 'expected multiple windows to be available.'
     });
 
-    const handles = browser.getWindowHandles();
-    const popupHandle = handles.find(h => h !== parentWindow);
+    const popupHandle = browser.getPopupHandle(parentWindow);
 
     browser.switchToWindow(popupHandle);
 
