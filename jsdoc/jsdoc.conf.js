@@ -19,5 +19,5 @@ module.exports = {
     postProcess: (text) => replaceVersionStrings(text)
 
   },
-  plugins: ['./version-interpolator-plugin', 'plugins/markdown']
+  plugins: ['plugins/markdown']
 };
