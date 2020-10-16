@@ -1,3 +1,4 @@
+/* global __dirname: readonly */
 'use strict';
 
 const { resolve, join, dirname } = require('path');
@@ -11,9 +12,6 @@ const FileManagerPlugin = require('filemanager-webpack-plugin');
 const { version } = require('./package');
 const replaceVersionStrings = require('./scripts/replace-version-strings');
 
-const jsFilename = `web/dropin/${version}/js/dropin.js`;
-const cssFilename = `web/dropin/${version}/css/dropin.css`;
-
 module.exports = {
   devServer: {
     allowedHosts: ['.bt.local'],
@@ -26,10 +24,16 @@ module.exports = {
     writeToDisk: true
   },
   devtool: 'inline-source-map',
-  entry: [
-    './src/less/main.less',
-    './src/index.js'
-  ],
+  entry: {
+    dropin: [
+      './src/less/main.less',
+      './src/index.js'
+    ],
+    'dropin.min': [
+      './src/less/main.less',
+      './src/index.js'
+    ]
+  },
   mode: 'development',
   module: {
     rules: [
@@ -80,7 +84,7 @@ module.exports = {
   output: {
     library: 'dropin',
     libraryTarget: 'umd',
-    filename: jsFilename,
+    filename: `web/dropin/${version}/js/[name].js`,
     path: resolve(__dirname, 'dist')
   },
   plugins: [
@@ -88,7 +92,7 @@ module.exports = {
     new JsDocPlugin({
       conf: './jsdoc/jsdoc.conf.js'
     }),
-    new MiniCssExtractPlugin({ filename: cssFilename }),
+    new MiniCssExtractPlugin({ filename: `web/dropin/${version}/css/[name].css` }),
     new CopyPlugin({
       patterns: [
         { from: 'test/app', to: 'gh-pages', globOptions: { dot: true }, transformPath: target => target.replace('test/app', '') },
@@ -139,10 +143,9 @@ module.exports = {
     new FileManagerPlugin({
       onEnd: {
         copy: [
-          { source: './CHANGELOG.md', destination: './dist/npm' },
-          { source: './README.md', destination: './dist/npm' },
-          { source: `./dist/${jsFilename}`, destination: './dist/npm/dist/browser' },
-          { source: `./dist/${cssFilename}`, destination: './dist/npm' }
+          { source: './{CHANGELOG,README}.md', destination: './dist/npm' },
+          { source: `./dist/web/dropin/${version}/js/dropin.js`, destination: './dist/npm/dist/browser' },
+          { source: `./dist/web/dropin/${version}/css/dropin.css`, destination: './dist/npm' }
         ],
         'delete': [
           './dist/npm/**/__mocks__'
