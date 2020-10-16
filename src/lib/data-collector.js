@@ -5,7 +5,6 @@ var assign = require('./assign').assign;
 var constants = require('../constants');
 var analytics = require('./analytics');
 var assets = require('@braintree/asset-loader');
-var Promise = require('./promise');
 
 function DataCollector(config) {
   this._config = assign(config, {

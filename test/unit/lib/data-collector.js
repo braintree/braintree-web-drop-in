@@ -3,7 +3,6 @@ jest.mock('../../../src/lib/analytics');
 const btWebVersion = require('braintree-web/client').VERSION;
 const fake = require('../../helpers/fake');
 const assets = require('@braintree/asset-loader');
-const Promise = require('../../../src/lib/promise');
 const analytics = require('../../../src/lib/analytics');
 const DataCollector = require('../../../src/lib/data-collector');
 

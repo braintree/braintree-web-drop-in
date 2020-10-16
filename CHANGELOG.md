@@ -23,6 +23,7 @@ _Breaking Changes_
     - can opt out of `vaultManager.presentVaultedPaymentMethods`
     - can opt into `vaultManager.allowCustomerToDeletePaymentMethods`
     - `preselectVaultedPaymentMethod` has been moved out of a top level and into `vaultManager`
+* Remove promise polyfilling (ends all IE support)
 
 unreleased
 ----------

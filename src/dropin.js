@@ -16,7 +16,6 @@ var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations').translations;
 var isUtf8 = require('./lib/is-utf-8');
 var uuid = require('@braintree/uuid');
-var Promise = require('./lib/promise');
 var sanitizeHtml = require('./lib/sanitize-html');
 var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
