@@ -20,9 +20,10 @@ env:
   # - TEST="test:hint"
   - TEST="test:publishing"
   - TEST="test:integration:paypal-only" ONLY_BROWSERS=chrome,safari,firefox IS_INTEGRATION_TEST=true
-  - TEST="test:integration:paypal-only" ONLY_BROWSERS=ie IS_INTEGRATION_TEST=true
   - TEST="test:integration:paypal-skipped" ONLY_BROWSERS=chrome,firefox,safari IS_INTEGRATION_TEST=true
-  - TEST="test:integration:paypal-skipped" ONLY_BROWSERS=ie IS_INTEGRATION_TEST=true
+#  TODO: no more testing against IE and edge is evidentally still flaky
+#  - TEST="test:integration:paypal-only" ONLY_BROWSERS=edge IS_INTEGRATION_TEST=true
+#  - TEST="test:integration:paypal-skipped" ONLY_BROWSERS=edge IS_INTEGRATION_TEST=true
   global:
   - secure: K5upcnJ4vYZJFVWM+7W17EBhPWtXP1tpu6c6Y5YQUxqiAg1MEKf+83pFAvXWR2qnPaViRsHua2eNNKZ45VjQ7PyQUl93IhaBS6rT3PxHpNABGRrCvsddWkJu2Ue1FCj4qTEMHAE50Rv1iAsQX4fd2HNsooDXOhkXoRMa3L1NPOdVO8Efq1W7BaUNaB83/XTxIMOZRrov0HEx+lb8Sqx34wENXDJXzKcs1lk5Ir/MUemCPQaHNBiOe2JxrD/2nm+CL35sUlOiSAexqKeH8jvToolKXJvOCm00YSxXOB4s6z1ZtZ7dR65YUEhU1EOdhZOfNFRS9q1VOaHXpJlErGV0yFUQtfeev0Gv57vBI2SOqREczKABLkvM1QQwc8O+QFaJcojZPjVM8w21PQevjtS8dEE/AP+x1nEUz6n13W1dMj7546rInO+ik4hDPtigQNcXNXmlNF1Eax5vVIy84TfKkOmIffQqhDn8+2Eh5HHPqMNYStcrET4K9QCzsNsSB1NWozPCkNai5xzBFTZtOU/e9vmsB8lxfwpS2Atpkbh8WBiZBXCFnaRr/5KBpHdc9kGIcvHIt904indZa3SeqhaIDUaxKCVfkcSuA2Bk0Nl25+oC0JxKlp5THX0mFp/DcnUas//YZ9xvWtEPvnLTN36ZqC3wckYJaSeLJWn/KEvv3RU=
   - secure: WSiLBlO90NJl/AITWjnEePvqbwkd5i+SAdlZ59HYUEzzsCb4ZqVq9xaPJmmRi4GQRG7pTdNVnJNhiwN/8z6hZC4YljTp5tHokjsXhaOe8m9UBoxFsuPgXecFbKMeiw3+OPVjpYKNenynDrS12ho7AArx8LPF2P+2AoVmhuGDaxigmAHYQQleEhwGW93HjJUfCJ724XwuaFzU+r6DHFXNgxFVJPuqClJyn8h2fSu0i4KahHSeiz5w2MFQW4Nn54fAJng6HGlTuWEWmeHe4/gpaofaSr5mWxEIcHz60STHV2ealj8SmMvpYI1BDVEYt3KlLFdgN5EtXkCeFq5D4h2nrVW/3EcDcKHCM60Z7EaaC0HA9QIjwxVDsMRQUS17e0XfPtxHiRxZYb99WxTgHLEqVnXvk2dToIg+Rd9MJMsAtuuJFnuXNvx8L7b0BXxk+NdW32JRIjIzIx7SBsUHNrVLzHinuuyHNOsXxTnJdzRRjQigebXNKeSdAH2/nZBfhaWT+ah22sfJFjhIrvaZE1A7pnxLpa5iNe1Nq08NTOZ5o5z2VBSzD3tRNfkyxcIW4FW610kAHfLFGoyzHuJ3gLYURjoD19zLmRz01UD/qdLVuN+ZBm9GnPZkRzH2rDoRv5kkSqe3x4X/uwgvtHZGvpEA4GJT3visZ1B9ivaJtkYIyko=
