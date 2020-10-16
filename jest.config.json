@@ -16,6 +16,6 @@
     "**/publishing/**/*.js"
   ],
   "transform": {
-    "^.+\\.html$": "<rootDir>/../test/helpers/html-loader.js"
+    "^.+\\.html$": "<rootDir>/../test/helpers/jest-raw-transformer.js"
   }
 }
