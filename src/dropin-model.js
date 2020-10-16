@@ -1,7 +1,6 @@
 'use strict';
 
 var analytics = require('./lib/analytics');
-var assign = require('./lib/assign').assign;
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('@braintree/event-emitter');
 var constants = require('./constants');
@@ -73,12 +72,16 @@ DropinModel.prototype.initialize = function () {
     analytics.sendEvent('started.tokenization-key');
   }
   if (this.hasCustomer) {
-    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID, this.merchantConfiguration.vaultManager);
+    this.vaultManagerConfig = Object.assign(
+      {},
+      DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID,
+      this.merchantConfiguration.vaultManager
+    );
   } else {
     if (this.merchantConfiguration.vaultManager) {
       return Promise.reject(new DropinError('vaultManager cannot be used with tokenization keys.'));
     }
-    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID);
+    this.vaultManagerConfig = Object.assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID);
   }
 
   return vaultManager.create({
