@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix issue where payment method text may be clipped
+
 1.25.0
 ------
 - Pass through all underlying hosted fields events
