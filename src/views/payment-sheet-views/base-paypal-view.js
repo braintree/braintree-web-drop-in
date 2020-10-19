@@ -1,6 +1,5 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
@@ -28,7 +27,7 @@ BasePayPalView.prototype.initialize = function () {
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
   var paypalConfiguration = this.model.merchantConfiguration[paypalType];
 
-  this.paypalConfiguration = assign({}, {
+  this.paypalConfiguration = Object.assign({}, {
     vault: {}
   }, paypalConfiguration);
   this.vaultConfig = this.paypalConfiguration.vault;

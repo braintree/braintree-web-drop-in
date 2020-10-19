@@ -1,6 +1,5 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btApplePay = require('braintree-web/apple-pay');
 var DropinError = require('../../lib/dropin-error');
@@ -21,7 +20,7 @@ ApplePayView.prototype.initialize = function () {
   var self = this;
   var isProduction = this.model.environment === 'production';
 
-  self.applePayConfiguration = assign({}, self.model.merchantConfiguration.applePay);
+  self.applePayConfiguration = Object.assign({}, self.model.merchantConfiguration.applePay);
   self.applePaySessionVersion = self.applePayConfiguration.applePaySessionVersion || DEFAULT_APPLE_PAY_SESSION_VERSION;
 
   delete self.applePayConfiguration.applePaySessionVersion;

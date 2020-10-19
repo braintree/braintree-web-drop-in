@@ -1,6 +1,5 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
 var fs = require('fs');
 var BaseView = require('../base-view');
 var classList = require('@braintree/class-list');
@@ -233,7 +232,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
         return;
       }
 
-      assign(options.fields[field], overrides.fields[field], {
+      Object.assign(options.fields[field], overrides.fields[field], {
         selector: options.fields[field].selector
       });
     });
@@ -255,7 +254,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
       normalizeStyles(overrides.styles[style]);
       options.styles[style] = options.styles[style] || {};
 
-      assign(options.styles[style], overrides.styles[style]);
+      Object.assign(options.styles[style], overrides.styles[style]);
     });
   }
 
@@ -400,13 +399,9 @@ CardView.prototype.tokenize = function () {
 
     return new Promise(function (resolve) {
       transitionCallback = function () {
-        // Wait for braintree-sheet--tokenized class to be added in IE 9
-        // before attempting to remove it
-        setTimeout(function () {
-          self.model.addPaymentMethod(payload);
-          resolve(payload);
-          classList.remove(self.element, 'braintree-sheet--tokenized');
-        }, 0);
+        self.model.addPaymentMethod(payload);
+        resolve(payload);
+        classList.remove(self.element, 'braintree-sheet--tokenized');
       };
 
       transitionHelper.onTransitionEnd(self.element, 'max-height', transitionCallback);

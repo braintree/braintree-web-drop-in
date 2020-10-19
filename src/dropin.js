@@ -1,6 +1,5 @@
 'use strict';
 
-var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
 var classList = require('@braintree/class-list');
 var constants = require('./constants');
@@ -318,11 +317,11 @@ Dropin.prototype._initialize = function (callback) {
   }
 
   // Backfill with `en`
-  self._strings = assign({}, translations.en);
+  self._strings = Object.assign({}, translations.en);
   if (self._merchantConfiguration.locale) {
     localizedStrings = translations[self._merchantConfiguration.locale] || translations[self._merchantConfiguration.locale.split('_')[0]];
     // Fill `strings` with `localizedStrings` that may exist
-    self._strings = assign(self._strings, localizedStrings);
+    self._strings = Object.assign(self._strings, localizedStrings);
   }
 
   if (!isUtf8()) {
@@ -507,7 +506,7 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
 
 Dropin.prototype._setUpDataCollector = function () {
   var self = this;
-  var config = assign({}, self._merchantConfiguration.dataCollector, {authorization: self._authorization});
+  var config = Object.assign({}, self._merchantConfiguration.dataCollector, {authorization: self._authorization});
 
   this._model.asyncDependencyStarting();
   this._dataCollector = new DataCollector(config);
@@ -524,7 +523,7 @@ Dropin.prototype._setUpDataCollector = function () {
 
 Dropin.prototype._setUpThreeDSecure = function () {
   var self = this;
-  var config = assign({}, this._merchantConfiguration.threeDSecure);
+  var config = Object.assign({}, this._merchantConfiguration.threeDSecure);
 
   this._model.asyncDependencyStarting();
 

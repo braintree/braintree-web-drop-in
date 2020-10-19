@@ -1,6 +1,5 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 var BasePayPalView = require('./base-paypal-view');
 
@@ -17,7 +16,7 @@ PayPalView.isEnabled = function (options) {
     return Promise.resolve(false);
   }
 
-  return BasePayPalView.isEnabled(assign({
+  return BasePayPalView.isEnabled(Object.assign({
     viewID: PayPalView.ID
   }, options));
 };

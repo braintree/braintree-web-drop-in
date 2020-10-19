@@ -1,8 +1,6 @@
 /* eslint-disable camelcase */
 'use strict';
 
-var assign = require('../lib/assign').assign;
-
 var fiveCharacterLocales = {
   da_DK: require('./da_DK'),
   de_DE: require('./de_DE'),
@@ -52,6 +50,6 @@ var twoCharacterLocaleAliases = {
 module.exports = {
   twoCharacterLocaleAliases: twoCharacterLocaleAliases,
   fiveCharacterLocales: fiveCharacterLocales,
-  translations: assign({}, twoCharacterLocaleAliases, fiveCharacterLocales)
+  translations: Object.assign({}, twoCharacterLocaleAliases, fiveCharacterLocales)
 };
 /* eslint-enable camelcase */
