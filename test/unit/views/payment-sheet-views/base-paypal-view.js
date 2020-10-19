@@ -7,7 +7,6 @@ jest.mock('../../../../src/lib/analytics');
 const BaseView = require('../../../../src/views/base-view');
 const DropinModel = require('../../../../src/dropin-model');
 const DropinError = require('../../../../src/lib/dropin-error');
-const Promise = require('../../../../src/lib/promise');
 const assets = require('@braintree/asset-loader');
 const fake = require('../../../helpers/fake');
 const fs = require('fs');
