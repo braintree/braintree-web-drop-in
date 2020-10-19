@@ -6,7 +6,6 @@ var DropinError = require('../../lib/dropin-error');
 var constants = require('../../constants');
 var assets = require('@braintree/asset-loader');
 var translations = require('../../translations').fiveCharacterLocales;
-var Promise = require('../../lib/promise');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];

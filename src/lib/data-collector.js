@@ -4,7 +4,6 @@ var braintreeWebVersion = require('braintree-web/client').VERSION;
 var constants = require('../constants');
 var analytics = require('./analytics');
 var assets = require('@braintree/asset-loader');
-var Promise = require('./promise');
 
 function DataCollector(config) {
   this._config = Object.assign(config, {

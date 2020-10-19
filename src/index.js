@@ -107,7 +107,6 @@ var Dropin = require('./dropin');
 var createFromScriptTag = require('./lib/create-from-script-tag');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
-var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
 var VERSION = '__VERSION__';

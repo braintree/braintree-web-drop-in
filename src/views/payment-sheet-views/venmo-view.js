@@ -3,7 +3,6 @@
 var BaseView = require('../base-view');
 var btVenmo = require('braintree-web/venmo');
 var DropinError = require('../../lib/dropin-error');
-var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
 function VenmoView() {
