@@ -4,7 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Fix issue where payment method text may be clipped
-- Add ability to let the Braintree API decide which payment method to show first (typically, the last payment method added to the customer) instead of showing the default payment method first
+- Add ability to let the Braintree API decide which payment method to show first (typically, the last payment method added to the customer) instead of showing the payment method designated as the customer's default in the Braintree control panel
   ```js
   braintree.dropin.create({
     // other config options
