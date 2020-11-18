@@ -1246,6 +1246,21 @@ describe('DropinModel', () => {
       }
     );
 
+    test(
+      'fetches last used payment method instead of default when configured',
+      () => {
+        testContext.model.merchantConfiguration.showDefaultPaymentMethodFirst = false;
+        testContext.model.isGuestCheckout = false;
+        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([]);
+
+        return testContext.model.getVaultedPaymentMethods().then(() => {
+          expect(testContext.vaultManager.fetchPaymentMethods).toBeCalledWith({
+            defaultFirst: false
+          });
+        });
+      }
+    );
+
     test('only resolves supported payment method types', () => {
       testContext.model.isGuestCheckout = false;
       testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{

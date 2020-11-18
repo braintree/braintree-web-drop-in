@@ -267,6 +267,8 @@ var VERSION = '__VERSION__';
  *
  * @param {boolean} [options.preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
  *
+ * @param {boolean} [options.showDefaultPaymentMethodFirst=true] When `true` or left out, the customer's default payment method will be displayed first in the list of vaulted payment methods. When `false`, the Braintree API will determine which payment method to display first, typically the latest payment method added to the customer. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
+ *
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
  * @returns {(void|Promise)} Returns a promise if no callback is provided.
  * @example
