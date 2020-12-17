@@ -13,12 +13,12 @@ const screenResolution = '1920x1080';
 const projectName = 'Braintee Web Drop-in';
 let type;
 
-if (!process.env.TRAVIS_BRANCH) {
-  type = 'Local';
-} else if (process.env.TRAVIS_BRANCH !== 'master') {
-  type = 'Pull Request';
+if (!process.env.GITHUB_REF) {
+  type = "Local";
+} else if (process.env.GITHUB_HEAD_REF) {
+  type = "Pull Request";
 } else {
-  type = 'CI';
+  type = "CI";
 }
 
 const build = `${projectName} - ${type} ${Date.now()}`;
