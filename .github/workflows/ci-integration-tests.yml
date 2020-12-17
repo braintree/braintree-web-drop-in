@@ -24,14 +24,28 @@ jobs:
         uses: "actions/setup-node@v1"
         with:
           node-version: "12.x"
-      - run: npm install
-      - run: rm -rf node_modules/@types/mocha
-      - run: sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
-      - run: npm run development & echo "starting integration app"
-      - run: ONLY_BROWSERS=chrome,safari,firefox npm run test:integration:paypal-skipped
-      - run: ONLY_BROWSERS=chrome,safari,firefox npm run test:integration:paypal-only
-      - run: ONLY_BROWSERS=ie npm run test:integration:paypal-skipped
-      - run: ONLY_BROWSERS=ie npm run test:integration:paypal-only
+      - name: "Demo App Setup"
+        run: |
+          npm install
+          rm -rf node_modules/@types/mocha
+          sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+          npm run development & echo "starting integration app"
+      - name: "Non-PayPal tests on Chrome, Safari and Firefox"
+        env:
+          ONLY_BROWSERS: chrome,safari,firefox
+        run: npm run test:integration:paypal-skipped
+      - name: "PayPal tests on Chrome, Safari and Firefox"
+        env:
+          ONLY_BROWSERS: chrome,safari,firefox
+        run: npm run test:integration:paypal-only
+      - name: "Non-PayPal tests on Internet Explorer"
+        env:
+          ONLY_BROWSERS: ie
+        run: npm run test:integration:paypal-skipped
+      - name: "PayPal tests on Internet Explorer"
+        env:
+          ONLY_BROWSERS: ie
+        run: npm run test:integration:paypal-only
       - name: "BrowserStackLocal Stop"
         uses: "browserstack/github-actions/setup-local@master"
         with:
