@@ -26,7 +26,7 @@ jobs:
           node-version: "12.x"
       - run: npm install
       - run: rm -rf node_modules/@types/mocha
-      - run: sudo echo "127.0.0.1 bs-local.com" >> /etc/hosts
+      - run: sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
       - run: npm run development & echo "starting integration app"
       - run: ONLY_BROWSERS=chrome,safari npm run test:integration:paypal-skipped
       # - run: ONLY_BROWSERS=chrome,safari,firefox npm run test:integration:paypal-skipped
