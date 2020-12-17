@@ -162,7 +162,7 @@ exports.config = {
   logLevel: 'error',
   deprecationWarnings: true,
   bail: 0,
-  baseUrl: process.env.HOST || "localhost",
+  baseUrl: process.env.HOST || "bs-local.com",
   waitforTimeout: 20000,
   connectionRetryTimeout: 90000,
   connectionRetryCount: 1,

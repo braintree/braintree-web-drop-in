@@ -1,5 +1,5 @@
 const PORT = process.env.PORT || '4567';
-const HOST = process.env.HOST || 'localhost';
+const HOST = process.env.HOST || 'bs-local.com';
 const DEFAULT_START_OPTIONS = {
   paypal: null,
   paypalCredit: null,
