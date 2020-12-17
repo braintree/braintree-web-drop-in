@@ -1,0 +1,42 @@
+name: "Integration Tests"
+
+on: [push]
+
+jobs:
+  ubuntu-job:
+    name: "BrowserStack Test on Ubuntu"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        command: ["test:integration:paypal-only", "test:integreation:paypal-skipped"]
+        browsers: ["chrome,safari,firefox", "ie"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: "BrowserStack Env Setup"
+        uses: "browserstack/github-actions/setup-env@master"
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          build-name: BUILD_INFO
+          project-name: REPO_NAME
+      - name: "BrowserStackLocal Setup"
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: start
+          local-identifier: random
+      - name: "Node Setup"
+        uses: "actions/setup-node@v1"
+        with:
+          node-version: "12.x"
+      - run: npm install
+      - run: rm -rf node_modules/@types/mocha
+      - run: npm run development & npm run ${{ matrix.command }}
+      - name: "BrowserStackLocal Stop"
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: stop
+    env:
+      CI: true
+      ONLY_BROWSERS: ${{ matrix.browsers}}
+      PAYPAL_USERNAME: ${{ secrets.PAYPAL_USERNAME }}
+      PAYPAL_PASSWORD: ${{ secrets.PAYPAL_PASSWORD }}
