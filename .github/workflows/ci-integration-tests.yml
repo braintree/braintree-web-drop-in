@@ -3,10 +3,6 @@ name: "Integration Tests"
 on: [push]
 
 jobs:
-  env:
-    PAYPAL_USERNAME: ${{ secrets.PAYPAL_USERNAME }}
-    PAYPAL_PASSWORD: ${{ secrets.PAYPAL_PASSWORD }}
-
   setup:
     name: "Integration Test Setup"
     runs-on: ubuntu-latest
@@ -45,6 +41,8 @@ jobs:
         run: npm run test:integration:paypal-skipped
         env:
           ONLY_BROWSERS: chrome,safari,firefox
+          PAYPAL_USERNAME: ${{ secrets.PAYPAL_USERNAME }}
+          PAYPAL_PASSWORD: ${{ secrets.PAYPAL_PASSWORD }}
 
   # paypal-on-sensible-browsers:
   #   if: always()
