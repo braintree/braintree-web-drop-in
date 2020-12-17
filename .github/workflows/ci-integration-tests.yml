@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   setup:
-    name: "BrowserStack Test on Ubuntu"
+    name: "Integration Test Setup"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -36,6 +36,7 @@ jobs:
     name: "Non-PayPal tests on Chrome, Safari and Firefox"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: "Non-PayPal tests on Chrome, Safari and Firefox"
         run: npm run test:integration:paypal-skipped
         env:
@@ -47,6 +48,7 @@ jobs:
     name: "PayPal tests on Chrome, Safari and Firefox"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: "PayPal tests on Chrome, Safari and Firefox"
         env:
           ONLY_BROWSERS: chrome,safari,firefox
@@ -57,6 +59,7 @@ jobs:
     name: "Non-PayPal tests on Internet Explorer"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: "Non-PayPal tests on Internet Explorer"
         env:
           ONLY_BROWSERS: ie
@@ -68,6 +71,7 @@ jobs:
     name: "PayPal tests on Internet Explorer"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: "PayPal tests on Internet Explorer"
         env:
           ONLY_BROWSERS: ie
@@ -79,6 +83,7 @@ jobs:
     name: "BrowserStackLocal Stop"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: "BrowserStackLocal Stop"
         uses: "browserstack/github-actions/setup-local@master"
         with:
