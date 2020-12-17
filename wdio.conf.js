@@ -15,8 +15,6 @@ let type;
 
 if (!process.env.GITHUB_REF) {
   type = "Local";
-} else if (process.env.GITHUB_HEAD_REF) {
-  type = "Pull Request";
 } else {
   type = "CI";
 }
