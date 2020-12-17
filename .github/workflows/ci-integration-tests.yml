@@ -85,6 +85,8 @@ jobs:
           local-testing: stop
 
   non-paypal-on-ie:
+    if: always()
+    needs: paypal-on-sensible-browsers
     name: "Non-PayPal Tests on Internet Explorer"
     runs-on: ubuntu-latest
     steps:
