@@ -1,4 +1,5 @@
 const PORT = process.env.PORT || '4567';
+const HOST = process.env.HOST || 'bs-local.com';
 const DEFAULT_START_OPTIONS = {
   paypal: null,
   paypalCredit: null,
@@ -7,7 +8,7 @@ const DEFAULT_START_OPTIONS = {
   applePay: null
 };
 const PAYPAL_TIMEOUT = 60000; // 60 seconds
-const BASE_URL = `http://bs-local.com:${PORT}`;
+const BASE_URL = `http://${HOST}:${PORT}`;
 
 const DEFAULT_HOSTED_FIELDS_VALUES = {
   cardholderName: 'First Last',
