@@ -11,6 +11,8 @@ unreleased
     showDefaultPaymentMethodFirst: false
   });
   ```
+- Apple Pay
+  - Fix issue where Apple Pay view was using `canMakePaymentsWithActiveCard` incorrectly
 
 1.25.0
 ------
