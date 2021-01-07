@@ -30,6 +30,7 @@ BasePayPalView.prototype.initialize = function () {
   var self = this;
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
   var paypalConfiguration = this.model.merchantConfiguration[paypalType];
+  var dropinWrapperId = '#braintree--dropin__' + this.model.componentID;
 
   this.paypalConfiguration = assign({}, paypalConfiguration);
 
@@ -89,6 +90,8 @@ BasePayPalView.prototype.initialize = function () {
     } else {
       checkoutJSConfiguration.funding.disallowed.push(global.paypal.FUNDING.CREDIT);
     }
+
+    buttonSelector = dropinWrapperId + ' ' + buttonSelector;
 
     return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
       self.model.asyncDependencyReady();

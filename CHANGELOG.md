@@ -14,6 +14,8 @@ unreleased
   ```
 - Apple Pay
   - Fix issue where Apple Pay view was using `canMakePaymentsWithActiveCard` incorrectly
+- PayPal
+  - Fix issue where PayPal buttons would not render correctly when multiple Drop-in instances were loaded (closes #590)
 
 1.25.0
 ------
