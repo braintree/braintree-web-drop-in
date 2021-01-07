@@ -150,7 +150,10 @@ describe('BasePayPalView', () => {
     test('calls paypal.Button.render', () => {
       return testContext.view.initialize().then(() => {
         expect(testContext.paypal.Button.render).toBeCalledTimes(1);
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-button"]');
+        expect(testContext.paypal.Button.render).toBeCalledWith(
+          expect.any(Object),
+          expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-button"\]/)
+        );
       });
     });
 
@@ -697,7 +700,10 @@ describe('BasePayPalView', () => {
 
       test('uses the PayPal button selector', () => {
         return testContext.view.initialize().then(() => {
-          expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-button"]');
+          expect(testContext.paypal.Button.render).toBeCalledWith(
+            expect.any(Object),
+            expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-button"\]/)
+          );
         });
       });
     });
@@ -766,7 +772,10 @@ describe('BasePayPalView', () => {
         testContext.view._isPayPalCredit = true;
 
         return testContext.view.initialize().then(() => {
-          expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-credit-button"]');
+          expect(testContext.paypal.Button.render).toBeCalledWith(
+            expect.any(Object),
+            expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-credit-button"\]/)
+          );
         });
       });
 
