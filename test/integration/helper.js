@@ -97,7 +97,7 @@ module.exports = function createHelpers() {
   browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
     const parentWindow = browser.getWindowHandle();
 
-    $('.braintree-sheet__button--paypal iframe.zoid-visible').click();
+    $('.braintree-sheet__button--paypal iframe.visible').click();
 
     browser.waitUntil(() => {
       return browser.getPopupHandle(parentWindow);
@@ -210,9 +210,9 @@ module.exports = function createHelpers() {
   });
 
   browser.addCommand('submitPay', function (waitForResult = true) {
-    const button = $('input[type="submit"]');
+    $('input[type="submit"]').waitForEnabled();
 
-    button.click();
+    $('input[type="submit"]').click();
 
     if (waitForResult) {
       // to not resolve submitPay until result is finished

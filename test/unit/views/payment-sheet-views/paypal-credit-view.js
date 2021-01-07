@@ -36,6 +36,26 @@ describe('PayPalCreditView', () => {
       });
     });
 
+    it('resolves false if merchant configured the normal PayPal view to use the vault flow', () => {
+      testContext.options.merchantConfiguration.paypal = {
+        flow: 'vault'
+      };
+
+      return PayPalCreditView.isEnabled(testContext.options).then(result => {
+        expect(result).toBe(false);
+      });
+    });
+
+    it('resolves false if merchant configured the PayPal credit view to use the vault flow', () => {
+      testContext.options.merchantConfiguration.paypalCredit = {
+        flow: 'vault'
+      };
+
+      return PayPalCreditView.isEnabled(testContext.options).then(result => {
+        expect(result).toBe(false);
+      });
+    });
+
     it('resolves false if merchant did not configure paypalCredit', () => {
       delete testContext.options.merchantConfiguration.paypalCredit;
 

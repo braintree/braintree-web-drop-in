@@ -8,8 +8,15 @@ var assets = require('@braintree/asset-loader');
 var translations = require('../../translations').fiveCharacterLocales;
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
-var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
-var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
+var READ_ONLY_CONFIGURATION_OPTIONS = [
+  'commit',
+  'currency',
+  'flow',
+  'intent',
+  'locale',
+  'offerCredit'
+];
+var DEFAULT_INTENT = 'authorize';
 
 var paypalScriptLoadInProgressPromise;
 
@@ -45,61 +52,55 @@ BasePayPalView.prototype.initialize = function () {
   return btPaypal.create({
     authorization: this.model.authorization
   }).then(function (paypalInstance) {
-    var checkoutJSConfiguration;
-    var buttonSelector = '[data-braintree-id="paypal-button"]';
-    var environment = self.model.environment === 'production' ? 'production' : 'sandbox';
-    var locale = self.model.merchantConfiguration.locale;
-
     self.paypalInstance = paypalInstance;
-
     self.paypalConfiguration.offerCredit = Boolean(isCredit);
-    checkoutJSConfiguration = {
-      env: environment,
-      style: self.paypalConfiguration.buttonStyle || {},
-      commit: self.paypalConfiguration.commit,
-      payment: function () {
-        return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
-      },
-      onAuthorize: function (data) {
+
+    return self._loadPayPalSDK();
+  }).then(function () {
+    var button, fundingSource, buttonSelector;
+    var buttonConfig = {
+      onApprove: function (data) {
         var shouldVault = self._shouldVault();
 
         data.vault = shouldVault;
 
-        return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
+        return self.paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
           if (shouldVault) {
             tokenizePayload.vaulted = true;
           }
           self.model.addPaymentMethod(tokenizePayload);
         }).catch(reportError);
       },
+
       onError: reportError
     };
 
-    if (locale && locale in translations) {
-      self.paypalConfiguration.locale = locale;
-      checkoutJSConfiguration.locale = locale;
-    }
-    checkoutJSConfiguration.funding = {
-      disallowed: []
-    };
-
-    Object.keys(global.paypal.FUNDING).forEach(function (key) {
-      if (key === 'PAYPAL' || key === 'CREDIT') {
-        return;
-      }
-      checkoutJSConfiguration.funding.disallowed.push(global.paypal.FUNDING[key]);
-    });
-
+    // TODO this logic should really be handled by the PayPal Credit view
     if (isCredit) {
+      fundingSource = global.paypal.FUNDING.CREDIT;
       buttonSelector = '[data-braintree-id="paypal-credit-button"]';
-      checkoutJSConfiguration.style.label = 'credit';
     } else {
-      checkoutJSConfiguration.funding.disallowed.push(global.paypal.FUNDING.CREDIT);
+      fundingSource = global.paypal.FUNDING.PAYPAL;
+      buttonSelector = '[data-braintree-id="paypal-button"]';
+    }
+
+    buttonConfig.fundingSource = fundingSource;
+
+    if (paypalConfiguration.flow === 'vault') {
+      buttonConfig.createBillingAgreement = self._createPaymentResourceHandler(reportError);
+    } else {
+      buttonConfig.createOrder = self._createPaymentResourceHandler(reportError);
+    }
+
+    button = global.paypal.Buttons(buttonConfig); // eslint-disable-line new-cap
+
+    if (!button.isEligible()) {
+      return Promise.reject(new DropinError('Merchant not eligible for PayPal'));
     }
 
     buttonSelector = dropinWrapperId + ' ' + buttonSelector;
 
-    return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
+    return button.render(buttonSelector).then(function () {
       self.model.asyncDependencyReady();
       setupComplete = true;
       clearTimeout(asyncDependencyTimeoutHandler);
@@ -137,6 +138,54 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
   }
 };
 
+BasePayPalView.prototype._createPaymentResourceHandler = function (reportError) {
+  var self = this;
+
+  return function () {
+    return self.paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
+  };
+};
+
+BasePayPalView.prototype._loadPayPalSDK = function () {
+  var config = this.paypalConfiguration;
+  var locale = this.model.merchantConfiguration.locale;
+
+  if (!paypalScriptLoadInProgressPromise) {
+    paypalScriptLoadInProgressPromise = this.paypalInstance.getClientId().then(function (id) {
+      var src = constants.PAYPAL_SDK_JS_SOURCE + '?client-id=' + id + '&components=buttons';
+      var intent = config.intent;
+
+      function updateSrc(param, value) {
+        if (value) {
+          src += '&' + param + '=' + value;
+        }
+      }
+
+      if (config.flow === 'vault') {
+        updateSrc('vault', 'true');
+      } else {
+        intent = intent || DEFAULT_INTENT;
+      }
+
+      updateSrc('intent', intent);
+      updateSrc('commit', config.commit);
+      updateSrc('currency', config.currency);
+
+      if (locale in translations) {
+        config.locale = locale;
+        updateSrc('locale', locale);
+      }
+
+      return assets.loadScript({
+        src: src,
+        id: constants.PAYPAL_SDK_SCRIPT_ID
+      });
+    });
+  }
+
+  return paypalScriptLoadInProgressPromise;
+};
+
 BasePayPalView.prototype._shouldVault = function () {
   if (this.paypalConfiguration.flow !== 'vault') {
     return false;
@@ -149,34 +198,12 @@ BasePayPalView.prototype._shouldVault = function () {
   return this.model.vaultManagerConfig.autoVaultPaymentMethods;
 };
 
-BasePayPalView.isEnabled = function (options) {
-  var merchantPayPalConfig = options.merchantConfiguration.paypal || options.merchantConfiguration.paypalCredit;
+BasePayPalView.isEnabled = function () {
+  return Promise.resolve(true);
+};
 
-  if (global.paypal && global.paypal.Button) {
-    return Promise.resolve(true);
-  }
-
-  if (paypalScriptLoadInProgressPromise) {
-    return paypalScriptLoadInProgressPromise;
-  }
-
-  paypalScriptLoadInProgressPromise = assets.loadScript({
-    src: constants.CHECKOUT_JS_SOURCE,
-    id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-    dataAttributes: {
-      'log-level': merchantPayPalConfig.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
-    }
-  }).then(function () {
-    return Promise.resolve(true);
-  }).catch(function () {
-    return Promise.resolve(false);
-  }).then(function (result) {
-    paypalScriptLoadInProgressPromise = null;
-
-    return Promise.resolve(result);
-  });
-
-  return paypalScriptLoadInProgressPromise;
+BasePayPalView.resetPayPalScriptPromise = function () {
+  paypalScriptLoadInProgressPromise = null;
 };
 
 module.exports = BasePayPalView;

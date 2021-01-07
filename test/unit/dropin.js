@@ -48,6 +48,7 @@ describe('Dropin', () => {
       }
     };
 
+    jest.spyOn(fake.paypalInstance, 'getClientId').mockResolvedValue('client-id');
     const fakeHostedFieldsInstance = fake.hostedFields();
 
     jest.spyOn(CardView.prototype, 'getPaymentMethod').mockImplementation();
@@ -82,9 +83,10 @@ describe('Dropin', () => {
         FUNDING: {
           PAYPAL: 'paypal'
         },
-        Button: {
+        Buttons: jest.fn().mockReturnValue({
+          isEligible: jest.fn().mockReturnValue(true),
           render: jest.fn().mockResolvedValue()
-        },
+        }),
         setup: jest.fn()
       };
 
