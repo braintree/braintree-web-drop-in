@@ -322,9 +322,13 @@ CardView.prototype.tokenize = function () {
 
     return new Promise(function (resolve) {
       transitionCallback = function () {
-        self.model.addPaymentMethod(payload);
-        resolve(payload);
-        classList.remove(self.element, 'braintree-sheet--tokenized');
+        // Wait for braintree-sheet--tokenized class to be added in IE 9
+        // before attempting to remove it
+        setTimeout(function () {
+          self.model.addPaymentMethod(payload);
+          resolve(payload);
+          classList.remove(self.element, 'braintree-sheet--tokenized');
+        }, 0);
       };
 
       transitionHelper.onTransitionEnd(self.element, 'max-height', transitionCallback);
