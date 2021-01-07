@@ -6,7 +6,7 @@ CHANGELOG
 * PayPal can now override global autovaulting preferences with `paypal.vault.autoVault`
 
 _Breaking Changes_
-* Drop support for IE 9-10
+* Drop support for Internet Explorer
 * Whenever a new payment method is added, all other unvaulted payment methods will be removed from available payment methods
 * Payment methods will no longer automatically be hidden or error on setup if merchant is not enabled for them
 * Credit card view changes
@@ -30,10 +30,51 @@ _Breaking Changes_
     - can opt out of `vaultManager.presentVaultedPaymentMethods`
     - can opt into `vaultManager.allowCustomerToDeletePaymentMethods`
     - `preselectVaultedPaymentMethod` has been moved out of a top level and into `vaultManager`
+* Remove promise polyfilling (ends all IE support)
 
 unreleased
 ----------
-- Update braintree-web to v3.60.0
+- Update braintree-web to v3.70.0
+- Fix issue where payment method text may be clipped
+- Add ability to let the Braintree API decide which payment method to show first (typically, the last payment method added to the customer) instead of showing the payment method designated as the customer's default in the Braintree control panel
+  ```js
+  braintree.dropin.create({
+    // other config options
+    showDefaultPaymentMethodFirst: false
+  });
+  ```
+- Apple Pay
+  - Fix issue where Apple Pay view was using `canMakePaymentsWithActiveCard` incorrectly
+- PayPal
+  - Fix issue where PayPal buttons would not render correctly when multiple Drop-in instances were loaded (closes #590)
+
+1.25.0
+------
+- Pass through all underlying hosted fields events
+- Update braintree-web to v3.68.0
+  * Provide `CLIENT_AUTHORIZATION_INVALID` error when client token has expired or a tokenization key has been deactivated or deleted
+  * Apple Pay
+    - Support Maestro cards
+  * Card
+    - Fix issue where incorrect keyboard would be used for mobile devices that do not support input formatting
+    - Fix issue where autocomplete cannot run multiple times
+    - Add autofill handling for every hosted field
+  * Venmo
+    - Add allowWebviews configuration to isBrowserSupported
+- Add new locales:
+  * `ar_EG`
+  * `cs_CZ`
+  * `el_GR`
+  * `en_IN`
+  * `es_XC`
+  * `fi_FI`
+  * `fr_XC`
+  * `he_IL`
+  * `hu_HU`
+  * `sk_SK`
+  * `zh_XC`
+- Provide validation to prevent cardholder name fields from being submitted as card numbers
+- Fix issue where hosted fields would not auto focus on card view selection
 
 1.24.0
 ------

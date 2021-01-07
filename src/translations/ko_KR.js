@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "카드 소유자 이름은 256자 미만이어야 합니다.",
   "fieldEmptyForNumber": "번호를 입력하세요.",
   "fieldEmptyForPostalCode": "우편번호를 입력하세요.",
+  "fieldInvalidForCardholderName": "이 카드 소유자 이름은 유효하지 않습니다.",
   "fieldInvalidForCvv": "이 보안 코드가 올바르지 않습니다.",
   "fieldInvalidForExpirationDate": "이 만료일이 올바르지 않습니다.",
   "fieldInvalidForNumber": "이 카드 번호가 올바르지 않습니다.",

@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Nama pemegang kartu harus kurang dari 256 karakter.",
   "fieldEmptyForNumber": "Masukkan nomor.",
   "fieldEmptyForPostalCode": "Masukkan kode pos.",
+  "fieldInvalidForCardholderName": "Nama pemilik kartu ini tidak valid.",
   "fieldInvalidForCvv": "Kode keamanan ini tidak valid.",
   "fieldInvalidForExpirationDate": "Tanggal akhir berlaku ini tidak valid.",
   "fieldInvalidForNumber": "Nomor kartu ini tidak valid.",

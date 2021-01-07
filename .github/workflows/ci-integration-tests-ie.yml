@@ -1,0 +1,82 @@
+name: "Integration Tests - Internet Explorer"
+
+on: [push]
+
+env:
+  PAYPAL_USERNAME: ${{ secrets.PAYPAL_USERNAME }}
+  PAYPAL_PASSWORD: ${{ secrets.PAYPAL_PASSWORD }}
+
+jobs:
+  non-paypal-on-ie:
+    name: "Non-PayPal Tests on Internet Explorer"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "BrowserStack Env Setup"
+        uses: "browserstack/github-actions/setup-env@master"
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          build-name: BUILD_INFO
+          project-name: REPO_NAME
+      - name: "BrowserStackLocal Setup"
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: start
+          local-identifier: random
+      - name: "Node Setup"
+        uses: "actions/setup-node@v1"
+        with:
+          node-version: "14.x"
+      - name: "Demo App Setup"
+        run: |
+          npm install
+          rm -rf node_modules/@types/mocha
+          sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+          npm run development & echo "starting integration app"
+      - name: "Non-PayPal tests on Internet Explorer"
+        env:
+          ONLY_BROWSERS: ie
+        run: npm run test:integration:paypal-skipped
+      - name: "BrowserStackLocal Stop"
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: stop
+
+  paypal-on-ie:
+    if: always()
+    needs: non-paypal-on-ie
+    name: "PayPal Tests on Internet Explorer"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "BrowserStack Env Setup"
+        uses: "browserstack/github-actions/setup-env@master"
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          build-name: BUILD_INFO
+          project-name: REPO_NAME
+      - name: "BrowserStackLocal Setup"
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: start
+          local-identifier: random
+      - name: "Node Setup"
+        uses: "actions/setup-node@v1"
+        with:
+          node-version: "12.x"
+      - name: "Demo App Setup"
+        run: |
+          npm install
+          rm -rf node_modules/@types/mocha
+          sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+          npm run development & echo "starting integration app"
+      - name: "PayPal tests on Internet Explorer"
+        env:
+          ONLY_BROWSERS: ie
+        run: npm run test:integration:paypal-only
+      - name: "BrowserStackLocal Stop"
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: stop

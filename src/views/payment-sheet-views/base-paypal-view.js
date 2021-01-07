@@ -1,13 +1,11 @@
 'use strict';
 
-var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btPaypal = require('braintree-web/paypal-checkout');
 var DropinError = require('../../lib/dropin-error');
 var constants = require('../../constants');
 var assets = require('@braintree/asset-loader');
 var translations = require('../../translations').fiveCharacterLocales;
-var Promise = require('../../lib/promise');
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = [
@@ -35,8 +33,9 @@ BasePayPalView.prototype.initialize = function () {
   var self = this;
   var paypalType = isCredit ? 'paypalCredit' : 'paypal';
   var paypalConfiguration = this.model.merchantConfiguration[paypalType];
+  var dropinWrapperId = '#braintree--dropin__' + this.model.componentID;
 
-  this.paypalConfiguration = assign({}, {
+  this.paypalConfiguration = Object.assign({}, {
     vault: {}
   }, paypalConfiguration);
   this.vaultConfig = this.paypalConfiguration.vault;
@@ -98,6 +97,8 @@ BasePayPalView.prototype.initialize = function () {
     if (!button.isEligible()) {
       return Promise.reject(new DropinError('Merchant not eligible for PayPal'));
     }
+
+    buttonSelector = dropinWrapperId + ' ' + buttonSelector;
 
     return button.render(buttonSelector).then(function () {
       self.model.asyncDependencyReady();

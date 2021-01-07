@@ -13,3 +13,4 @@
   globals:
     __dirname: true
     process: true
+    Promise: true # inevitable merge conflict: delete me

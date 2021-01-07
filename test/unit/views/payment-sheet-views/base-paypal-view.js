@@ -258,7 +258,9 @@ describe('BasePayPalView', () => {
           fundingSource: 'paypal'
         }));
         expect(testContext.render).toBeCalledTimes(1);
-        expect(testContext.render).toBeCalledWith('[data-braintree-id="paypal-button"]');
+        expect(testContext.render).toBeCalledWith(
+          expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-button"\]/)
+        );
       });
     });
 
@@ -277,7 +279,9 @@ describe('BasePayPalView', () => {
           fundingSource: 'credit'
         }));
         expect(testContext.render).toBeCalledTimes(1);
-        expect(testContext.render).toBeCalledWith('[data-braintree-id="paypal-credit-button"]');
+        expect(testContext.render).toBeCalledWith(
+          expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-credit-button"\]/)
+        );
       });
     });
 
@@ -716,7 +720,9 @@ describe('BasePayPalView', () => {
 
       it('uses the PayPal button selector', () => {
         return testContext.view.initialize().then(() => {
-          expect(testContext.render).toBeCalledWith('[data-braintree-id="paypal-button"]');
+          expect(testContext.render).toBeCalledWith(
+            expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-button"\]/)
+          );
         });
       });
     });

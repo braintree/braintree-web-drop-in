@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Имя владельца карты должно содержать не более 256 символов.",
   "fieldEmptyForNumber": "Введите номер.",
   "fieldEmptyForPostalCode": "Укажите почтовый индекс.",
+  "fieldInvalidForCardholderName": "Недопустимое имя владельца карты.",
   "fieldInvalidForCvv": "Этот код безопасности недействителен.",
   "fieldInvalidForExpirationDate": "Эта дата окончания срока действия недействительна.",
   "fieldInvalidForNumber": "Этот номер карты недействителен.",

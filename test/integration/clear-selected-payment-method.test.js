@@ -1,5 +1,3 @@
-require('./helper');
-
 describe('Drop-in#clearSelectedPaymentMethod', function () {
   beforeEach(function () {
     browser.reloadSessionOnRetry(this.currentTest);

@@ -1,3 +1,4 @@
+const createHelpers = require('./test/integration/helper');
 const uuid = require('@braintree/uuid');
 const browserstack = require('browserstack-local');
 
@@ -12,12 +13,10 @@ const screenResolution = '1920x1080';
 const projectName = 'Braintee Web Drop-in';
 let type;
 
-if (!process.env.TRAVIS_BRANCH) {
-  type = 'Local';
-} else if (process.env.TRAVIS_BRANCH !== 'master') {
-  type = 'Pull Request';
+if (!process.env.GITHUB_REF) {
+  type = "Local";
 } else {
-  type = 'CI';
+  type = "CI";
 }
 
 const build = `${projectName} - ${type} ${Date.now()}`;
@@ -72,26 +71,8 @@ let capabilities = [
   //    }
   //  }
   //},
-  {
-    ...desktopCapabilities,
-    browser: 'IE',
-    browserName: 'IE 11',
-    browser_version: '11.0',
-    'browserstack.selenium_version' : '3.141.5',
-    // https://stackoverflow.com/a/42340325/7851516
-    'browserstack.bfcache': '0',
-    // don't update this! There's a weird bug in the
-    // 64 bit ie driver that prevents the shift key
-    // from working which means that an email can
-    // never be entered because the "@" key cannot
-    // be entered. This doesn't occur in the 32 bit
-    // version, so we pin to that
-    'browserstack.ie.arch' : 'x32'
-  },
-  // TODO edge has been pretty flaky
-  // disable it for now to make the transition
-  // to browserstack, but look into re-enabling
-  // it once the transition is complete
+  // TODO edge has been pretty flaky—disable it for now to make the transition
+  //  to browserstack, but look into re-enabling it once the transition is complete
   //{
   //  ...desktopCapabilities,
   //  browserName: 'Microsoft Edge',
@@ -104,14 +85,20 @@ let capabilities = [
     browser: 'firefox',
     'browserstack.console': 'info'
   },
-  {
+];
+
+// TODO check in with PayPal team on this
+// Safari is struggling to close the PayPal popup on CI
+// skip PayPal on Safari for now
+if (!process.env.RUN_PAYPAL_ONLY) {
+  capabilities.push({
     ...desktopCapabilities,
     browserName: 'Desktop Safari',
     browser: 'safari',
     os: 'OS X',
-    os_version: 'Mojave'
-  }
-];
+    os_version: 'Catalina'
+  });
+}
 
 if (ONLY_BROWSERS) {
   capabilities = ONLY_BROWSERS.split(',')
@@ -155,7 +142,7 @@ exports.config = {
   logLevel: 'error',
   deprecationWarnings: true,
   bail: 0,
-  baseUrl: process.env.HOST,
+  baseUrl: process.env.HOST || "bs-local.com",
   waitforTimeout: 20000,
   connectionRetryTimeout: 90000,
   connectionRetryCount: 1,
@@ -203,6 +190,8 @@ exports.config = {
     /* eslint-enable no-console */
   },
   before(capabilities) {
+    createHelpers();
+
     // Mobile devices/selenium don't support the following APIs yet
     if (!capabilities.real_mobile) {
       browser.maximizeWindow();

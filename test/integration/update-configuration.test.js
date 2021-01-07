@@ -1,5 +1,3 @@
-require('./helper');
-
 describe('Drop-in#updateConfiguration', function () {
   beforeEach(function () {
     browser.reloadSessionOnRetry(this.currentTest);
@@ -62,12 +60,6 @@ describe('Drop-in#updateConfiguration', function () {
   });
 
   it('removes authorized PayPal account when configuration is updated @paypal', function () {
-    if (browser.name() === 'INTERNET EXPLORER') {
-      this.skip('Fails for unknown reasons on IE');
-
-      return;
-    }
-
     browser.start({
       paypal: 'default',
       showUpdatePayPalMenu: true

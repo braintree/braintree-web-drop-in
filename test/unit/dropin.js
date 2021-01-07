@@ -330,7 +330,7 @@ describe('Dropin', () => {
       });
     });
 
-    test('injects stylesheet into shadow DOM instead of the head', done => {
+    it('injects stylesheet into shadow DOM instead of the head', done => {
       jest.spyOn(assets, 'loadStylesheet');
 
       const container = document.createElement('div');
@@ -1885,7 +1885,7 @@ describe('Dropin', () => {
   });
 
   describe('getAvailablePaymentOptions', () => {
-    test('returns an array of payment options presented to the customer', (done) => {
+    it('returns an array of payment options presented to the customer', (done) => {
       testContext.dropinOptions.merchantConfiguration.paypal = {
         flow: 'vault'
       };
@@ -1903,7 +1903,7 @@ describe('Dropin', () => {
   });
 
   describe('getAvailablePaymentOptions', () => {
-    test('returns an array of payment options presented to the customer', (done) => {
+    it('returns an array of payment options presented to the customer', (done) => {
       testContext.dropinOptions.merchantConfiguration.paypal = {
         flow: 'vault'
       };
@@ -2221,6 +2221,31 @@ describe('Dropin', () => {
 
       instance._initialize(() => {
         instance._model._emit('noPaymentMethodRequestable');
+      });
+    });
+  });
+
+  describe('card events', () => {
+    test.each([
+      'binAvailable',
+      'blur',
+      'cardTypeChange',
+      'empty',
+      'focus',
+      'inputSubmitRequest',
+      'notEmpty',
+      'validityChange'
+    ])('emits card:%s event', (eventName, done) => {
+      const instance = new Dropin(testContext.dropinOptions);
+      const payload = {};
+
+      instance.on(`card:${eventName}`, (emittedPayload) => {
+        expect(emittedPayload).toBe(payload);
+        done();
+      });
+
+      instance._initialize(() => {
+        instance._model._emit(`card:${eventName}`, payload);
       });
     });
   });

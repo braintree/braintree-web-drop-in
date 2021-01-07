@@ -1,5 +1,3 @@
-require('./helper');
-
 describe('Drop-in card', function () {
   beforeEach(function () {
     browser.reloadSessionOnRetry(this.currentTest);
@@ -27,6 +25,9 @@ describe('Drop-in card', function () {
     });
 
     it('does not require cardholder name', function () {
+      this.options.card.cardholderName = {
+        required: false
+      };
       browser.start(this.options);
 
       browser.hostedFieldSendInput('number');
@@ -56,7 +57,7 @@ describe('Drop-in card', function () {
 
       expect($('#pay-button').isEnabled()).toBe(false);
 
-      $('.braintree-form-cardholder-name input').typeKeys('First Last');
+      browser.hostedFieldSendInput('cardholderName');
 
       expect($('#pay-button').isEnabled()).toBe(true);
 
@@ -67,6 +68,7 @@ describe('Drop-in card', function () {
       expect(result.nonce).toBeTruthy();
       expect(result.description).toContain('ending in 11');
       expect(result.details.cardType).toContain('Visa');
+      expect(result.details.cardholderName).toContain('First Last');
     });
   });
 

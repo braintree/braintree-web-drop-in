@@ -1,5 +1,3 @@
-require('./helper');
-
 describe('Drop-in Script Tag Integration', function () {
   beforeEach(function () {
     browser.reloadSessionOnRetry(this.currentTest);
@@ -32,12 +30,6 @@ describe('Drop-in Script Tag Integration', function () {
   });
 
   it('tokenizes PayPal @paypal', function () {
-    if (browser.name() === 'INTERNET EXPLORER') {
-      this.skip('IE 11 has trouble with these tests.');
-
-      return;
-    }
-
     browser.start('/script-tag-integration.html', {
       skipReady: true
     });

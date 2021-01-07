@@ -1,13 +1,11 @@
 'use strict';
 
 var analytics = require('./lib/analytics');
-var assign = require('./lib/assign').assign;
 var DropinError = require('./lib/dropin-error');
 var EventEmitter = require('@braintree/event-emitter');
 var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
-var Promise = require('./lib/promise');
 var parseAuthorization = require('./lib/parse-authorization');
 var paymentSheetViews = require('./views/payment-sheet-views');
 var vaultManager = require('braintree-web/vault-manager');
@@ -73,12 +71,16 @@ DropinModel.prototype.initialize = function () {
     analytics.sendEvent('started.tokenization-key');
   }
   if (this.hasCustomer) {
-    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID, this.merchantConfiguration.vaultManager);
+    this.vaultManagerConfig = Object.assign(
+      {},
+      DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITH_CUSTOMER_ID,
+      this.merchantConfiguration.vaultManager
+    );
   } else {
     if (this.merchantConfiguration.vaultManager) {
       return Promise.reject(new DropinError('vaultManager cannot be used with tokenization keys.'));
     }
-    this.vaultManagerConfig = assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID);
+    this.vaultManagerConfig = Object.assign({}, DEFAULT_VAULT_MANAGER_SETTINGS_FOR_AUTH_WITHOUT_CUSTOMER_ID);
   }
 
   return vaultManager.create({
@@ -345,7 +347,7 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
   }
 
   return self._vaultManager.fetchPaymentMethods({
-    defaultFirst: true
+    defaultFirst: this.merchantConfiguration.showDefaultPaymentMethodFirst !== false
   }).then(function (paymentMethods) {
     return self._getSupportedPaymentMethods(paymentMethods).map(function (paymentMethod) {
       paymentMethod.vaulted = true;
