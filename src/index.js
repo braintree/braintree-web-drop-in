@@ -125,10 +125,9 @@ var VERSION = '__VERSION__';
  */
 
 /**
- * @typedef {object} dataCollectorOptions The configuration options for Data Collector. Requires [advanced fraud protection](https://developers.braintreepayments.com/guides/advanced-fraud-tools/client-side/javascript/v3) to be enabled in the Braintree gateway. Contact our [support team](https://developers.braintreepayments.com/forms/contact) to configure your Kount ID. The device data will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
+ * @typedef {object} dataCollectorOptions The configuration options for Data Collector. Requires [advanced fraud protection](https://developers.braintreepayments.com/guides/advanced-fraud-tools/client-side/javascript/v3) to be enabled in the Braintree gateway. If using Kount, contact our [support team](https://developers.braintreepayments.com/forms/contact) to configure your Kount ID. The device data will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
  *
- * @param {boolean} [kount] If true, Kount fraud data collection is enabled. Required if `paypal` parameter is not used.
- * @param {boolean} [paypal] If true, PayPal fraud data collection is enabled. Required if `kount` parameter is not used.
+ * @param {boolean} [kount] If true, Kount fraud data collection is enabled.
  */
 
 /**
@@ -225,14 +224,23 @@ var VERSION = '__VERSION__';
  * @param {(string|HTMLElement)} options.container A reference to an empty element, such as a `<div>`, where Drop-in will be included on your page or the selector for the empty element. e.g. `#dropin-container`.
  * @param {string} options.selector Deprecated: Now an alias for `options.container`.
  * @param {string} [options.locale=`en_US`] Use this option to change the language, links, and terminology used throughout Drop-in. Supported locales include:
+ * `ar_EG`,
+ * `cs_CZ`,
  * `da_DK`,
  * `de_DE`,
+ * `el_GR`,
  * `en_AU`,
  * `en_GB`,
+ * `en_IN`,
  * `en_US`,
  * `es_ES`,
+ * `es_XC`,
+ * `fi_FI`,
  * `fr_CA`,
  * `fr_FR`,
+ * `fr_XC`,
+ * `he_IL`,
+ * `hu_HU`,
  * `id_ID`,
  * `it_IT`,
  * `ja_JP`,
@@ -243,11 +251,13 @@ var VERSION = '__VERSION__';
  * `pt_BR`,
  * `pt_PT`,
  * `ru_RU`,
+ * `sk_SK`,
  * `sv_SE`,
  * `th_TH`,
  * `zh_CN`,
  * `zh_HK`,
- * `zh_TW`.
+ * `zh_TW`,
+ * `zh_XC`.
  *
  * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
  * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']`. Payment options omitted from this array will not be offered to the customer.
@@ -273,13 +283,15 @@ var VERSION = '__VERSION__';
  *
  * See [`googlePayCreateOptions`](#~googlePayCreateOptions) for `googlePay` options.
  *
- * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
+ * @param {object|boolean} [options.dataCollector] If `true` is passed, Drop-in will be configured to collect data for use with Advanced Fraud Protection. If collecting data via Kount, pass a [`dataCollectorOptions` object](#~dataCollectorOptions) with `kount: true` instead. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
  * @param {(boolean|object)} [options.threeDSecure] It's recommended that you pass `true` here to enable 3D Secure and pass the configuration options for 3D Secure into {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.See [`threeDSecureOptions`](#~threeDSecureOptions) for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
  * @param {object} [options.vaultManager] The configuration options for vault management.
  *
  * See [`vaultManagerCreateOptions`](#~vaultManagerCreateOptions) for `vaultManager` options.
+ *
+ * @param {boolean} [options.showDefaultPaymentMethodFirst=true] When `true` or left out, the customer's default payment method will be displayed first in the list of vaulted payment methods. When `false`, the Braintree API will determine which payment method to display first, typically the latest payment method added to the customer. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
  *
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
  * @returns {(void|Promise)} Returns a promise if no callback is provided.

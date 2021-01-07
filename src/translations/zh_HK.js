@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "持卡人姓名必須少於 256 個字元。",
   "fieldEmptyForNumber": "請填寫號碼。",
   "fieldEmptyForPostalCode": "請填寫郵遞區號。",
+  "fieldInvalidForCardholderName": "持卡人姓名無效。",
   "fieldInvalidForCvv": "此安全代碼無效。",
   "fieldInvalidForExpirationDate": "此到期日無效。",
   "fieldInvalidForNumber": "此卡號無效。",

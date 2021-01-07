@@ -122,6 +122,7 @@ function model(options) {
 
   jest.spyOn(modelInstance, 'getVaultedPaymentMethods').mockResolvedValue([]);
   jest.spyOn(vaultManager, 'create').mockResolvedValue(fakeBTInstances.vaultManager);
+  jest.spyOn(modelInstance, '_emit');
 
   return modelInstance;
 }

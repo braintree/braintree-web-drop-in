@@ -20,6 +20,7 @@ module.exports = {
   fieldEmptyForCardholderName: 'Please fill out a cardholder name.',
   fieldEmptyForNumber: 'Please fill out a card number.',
   fieldEmptyForPostalCode: 'Please fill out a postal code.',
+  fieldInvalidForCardholderName: 'This cardholder name is not valid.',
   fieldInvalidForCvv: 'This security code is not valid.',
   fieldInvalidForExpirationDate: 'This expiration date is not valid.',
   fieldInvalidForNumber: 'This card number is not valid.',

@@ -665,6 +665,12 @@ describe('CardView', () => {
         });
       });
 
+      it('emits a focus event on the model', () => {
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:focus', eventPayload);
+        });
+      });
+
       it('shows default card icon in number field when focused', () => {
         return cardView.initialize().then(() => {
           const cardNumberIcon = cardElement.querySelector('[data-braintree-id="card-number-icon"]');
@@ -712,6 +718,24 @@ describe('CardView', () => {
           if (eventName === 'blur') {
             handler(eventPayload);
           }
+        });
+      });
+
+      it('emits blur event on model', () => {
+        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+
+        eventPayload = {
+          cards: [{ type: 'visa' }],
+          emittedBy: 'number',
+          fields: {
+            number: { isEmpty: true }
+          }
+        };
+
+        classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:blur', eventPayload);
         });
       });
 
@@ -880,6 +904,17 @@ describe('CardView', () => {
           if (eventName === 'cardTypeChange') {
             handler(eventPayload);
           }
+        });
+      });
+
+      it('emits card type event on model', () => {
+        eventPayload = {
+          cards: [{ type: 'master-card' }],
+          emittedBy: 'number'
+        };
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:cardTypeChange', eventPayload);
         });
       });
 
@@ -1150,6 +1185,25 @@ describe('CardView', () => {
         });
       });
 
+      it('emits validity change event on model', () => {
+        eventPayload = {
+          emittedBy: 'number',
+          cards: [{ type: 'visa' }],
+          fields: {
+            number: {
+              container: document.createElement('div'),
+              isEmpty: false,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:validityChange', eventPayload);
+        });
+      });
+
       it('removes the braintree-form__field-group--has-error class if a field is potentially valid', () => {
         const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -1392,6 +1446,25 @@ describe('CardView', () => {
         });
       });
 
+      it('emits not empty event on model', () => {
+        eventPayload = {
+          emittedBy: 'number',
+          cards: [{ type: 'visa' }],
+          fields: {
+            number: {
+              container: document.createElement('div'),
+              isEmpty: false,
+              isValid: false,
+              isPotentiallyValid: true
+            }
+          }
+        };
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith('card:notEmpty', eventPayload);
+        });
+      });
+
       it('removes the braintree-form__field-group--has-error class', () => {
         const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
@@ -1412,6 +1485,31 @@ describe('CardView', () => {
 
         return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
+        });
+      });
+    });
+
+    describe('passthrough events', () => {
+      let eventPayload, eventNameToIntercept;
+
+      beforeEach(() => {
+        eventPayload = { emittedBy: 'number' };
+        fakeHostedFieldsInstance.on.mockImplementation((eventName, handler) => {
+          if (eventName === eventNameToIntercept) {
+            handler(eventPayload);
+          }
+        });
+      });
+
+      it.each([
+        'empty',
+        'inputSubmitRequest',
+        'binAvailable'
+      ])('passes along %s event', (eventName) => {
+        eventNameToIntercept = eventName;
+
+        return cardView.initialize().then(() => {
+          expect(cardView.model._emit).toBeCalledWith(`card:${eventName}`, eventPayload);
         });
       });
     });
@@ -1522,6 +1620,10 @@ describe('CardView', () => {
         fakeHostedFieldsInstance.getState.mockReturnValue({
           cards: [{ type: 'visa', supported: true }],
           fields: {
+            cardholderName: {
+              isEmpty: true,
+              isValid: false
+            },
             number: {
               isValid: true
             },
@@ -1553,6 +1655,10 @@ describe('CardView', () => {
         fakeHostedFieldsInstance.getState.mockReturnValue({
           cards: [{ type: 'visa', supported: true }],
           fields: {
+            cardholderName: {
+              isEmpty: true,
+              isValid: false
+            },
             number: {
               isValid: true
             },
@@ -1568,6 +1674,9 @@ describe('CardView', () => {
       }).then(() => {
         expect(cardViewWithCardholderName.model.reportError).not.toBeCalled();
         expect(fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
+        expect(fakeHostedFieldsInstance.tokenize).toBeCalledWith(expect.objectContaining({
+          fieldsToTokenize: ['number', 'expirationDate']
+        }));
       });
     });
 
@@ -1596,41 +1705,6 @@ describe('CardView', () => {
       }).then(() => {
         expect(cardViewWithoutCardholderName.model.reportError).not.toBeCalled();
         expect(fakeHostedFieldsInstance.tokenize).toBeCalledTimes(1);
-      });
-    });
-
-    it('calls callback with error when cardholder name length is over 255 characters', () => {
-      let cardViewWithCardholderName;
-
-      expect.assertions(3);
-
-      return makeCardView({
-        cardholderName: true
-      }).then((view) => {
-        cardViewWithCardholderName = view;
-      }).then(() => {
-        const overLengthValue = Array(257).join('a');
-
-        fakeHostedFieldsInstance.getState.mockReturnValue({
-          cards: [{ type: 'visa', supported: true }],
-          fields: {
-            number: {
-              isValid: true
-            },
-            expirationDate: {
-              isValid: true
-            }
-          }
-        });
-        jest.spyOn(cardViewWithCardholderName.model, 'reportError').mockImplementation();
-
-        cardViewWithCardholderName.cardholderNameInput.value = overLengthValue;
-
-        return cardViewWithCardholderName.tokenize().catch(err => {
-          expect(fakeHostedFieldsInstance.tokenize).not.toBeCalled();
-          expect(cardViewWithCardholderName.model.reportError).toBeCalledWith('hostedFieldsFieldsInvalidError');
-          expect(err.message).toBe('No payment method is available.');
-        });
       });
     });
 
@@ -1976,16 +2050,30 @@ describe('CardView', () => {
     it('clears cardholder name field if it exists after successful tokenization', () => {
       let cardViewWithCardholderName;
 
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa' }],
+        fields: {
+          cardholderName: {
+            isValid: true
+          },
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
       return makeCardView({
         cardholderName: true
       }).then((view) => {
         cardViewWithCardholderName = view;
         fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
-        cardViewWithCardholderName.cardholderNameInput.value = 'Some value';
 
         return cardViewWithCardholderName.tokenize();
       }).then(() => {
-        expect(cardViewWithCardholderName.cardholderNameInput.value).toBe('');
+        expect(fakeHostedFieldsInstance.clear).toBeCalledWith('cardholderName');
       });
     });
 
@@ -2004,17 +2092,31 @@ describe('CardView', () => {
     it('does not clear cardholder name field after successful tokenization if merchant configuration includes clearFieldsAfterTokenization as false', () => {
       let cardViewWithCardholderName;
 
+      fakeHostedFieldsInstance.getState.mockReturnValue({
+        cards: [{ type: 'visa' }],
+        fields: {
+          cardholderName: {
+            isValid: true
+          },
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
       return makeCardView({
         clearFieldsAfterTokenization: false,
         cardholderName: true
       }).then((view) => {
         cardViewWithCardholderName = view;
-        cardViewWithCardholderName.cardholderNameInput.value = 'Some value';
         fakeHostedFieldsInstance.tokenize.mockResolvedValue({ nonce: 'foo' });
 
         return cardViewWithCardholderName.tokenize();
       }).then(() => {
-        expect(cardViewWithCardholderName.cardholderNameInput.value).toBe('Some value');
+        expect(fakeHostedFieldsInstance.clear).not.toBeCalled();
       });
     });
 
@@ -2228,6 +2330,10 @@ describe('CardView', () => {
   });
 
   describe('onSelection', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
     it('focuses on the number field', () => {
       const view = new CardView({ element: cardElement });
 
@@ -2236,6 +2342,8 @@ describe('CardView', () => {
       };
 
       view.onSelection();
+
+      jest.runAllTimers();
 
       expect(view.hostedFieldsInstance.focus).toBeCalledTimes(1);
       expect(view.hostedFieldsInstance.focus).toBeCalledWith('number');
@@ -2248,6 +2356,8 @@ describe('CardView', () => {
 
       expect(() => {
         view.onSelection();
+
+        jest.runAllTimers();
       }).not.toThrowError();
     });
   });

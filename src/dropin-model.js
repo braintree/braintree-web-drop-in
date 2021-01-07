@@ -347,7 +347,7 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
   }
 
   return self._vaultManager.fetchPaymentMethods({
-    defaultFirst: true
+    defaultFirst: this.merchantConfiguration.showDefaultPaymentMethodFirst !== false
   }).then(function (paymentMethods) {
     return self._getSupportedPaymentMethods(paymentMethods).map(function (paymentMethod) {
       paymentMethod.vaulted = true;

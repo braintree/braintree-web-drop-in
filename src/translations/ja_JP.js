@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "カード保有者の名前は256文字未満にしてください。",
   "fieldEmptyForNumber": "番号を入力してください。",
   "fieldEmptyForPostalCode": "郵便番号を入力してください。",
+  "fieldInvalidForCardholderName": "このカード保有者の名前は無効です。",
   "fieldInvalidForCvv": "このセキュリティコードは無効です。",
   "fieldInvalidForExpirationDate": "この有効期限は無効です。",
   "fieldInvalidForNumber": "このカード番号は無効です。",

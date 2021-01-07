@@ -1,3 +1,4 @@
+const createHelpers = require('./test/integration/helper');
 const uuid = require('@braintree/uuid');
 const browserstack = require('browserstack-local');
 
@@ -12,12 +13,10 @@ const screenResolution = '1920x1080';
 const projectName = 'Braintee Web Drop-in';
 let type;
 
-if (!process.env.TRAVIS_BRANCH) {
-  type = 'Local';
-} else if (process.env.TRAVIS_BRANCH !== 'master') {
-  type = 'Pull Request';
+if (!process.env.GITHUB_REF) {
+  type = "Local";
 } else {
-  type = 'CI';
+  type = "CI";
 }
 
 const build = `${projectName} - ${type} ${Date.now()}`;
@@ -86,14 +85,20 @@ let capabilities = [
     browser: 'firefox',
     'browserstack.console': 'info'
   },
-  {
+];
+
+// TODO check in with PayPal team on this
+// Safari is struggling to close the PayPal popup on CI
+// skip PayPal on Safari for now
+if (!process.env.RUN_PAYPAL_ONLY) {
+  capabilities.push({
     ...desktopCapabilities,
     browserName: 'Desktop Safari',
     browser: 'safari',
     os: 'OS X',
-    os_version: 'Mojave'
-  }
-];
+    os_version: 'Catalina'
+  });
+}
 
 if (ONLY_BROWSERS) {
   capabilities = ONLY_BROWSERS.split(',')
@@ -137,7 +142,7 @@ exports.config = {
   logLevel: 'error',
   deprecationWarnings: true,
   bail: 0,
-  baseUrl: process.env.HOST,
+  baseUrl: process.env.HOST || "bs-local.com",
   waitforTimeout: 20000,
   connectionRetryTimeout: 90000,
   connectionRetryCount: 1,
@@ -185,6 +190,8 @@ exports.config = {
     /* eslint-enable no-console */
   },
   before(capabilities) {
+    createHelpers();
+
     // Mobile devices/selenium don't support the following APIs yet
     if (!capabilities.real_mobile) {
       browser.maximizeWindow();

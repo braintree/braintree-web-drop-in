@@ -1,5 +1,3 @@
-require('./helper');
-
 describe('Drop-in#updateConfiguration', function () {
   beforeEach(function () {
     browser.reloadSessionOnRetry(this.currentTest);
