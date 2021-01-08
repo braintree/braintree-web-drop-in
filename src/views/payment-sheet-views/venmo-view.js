@@ -70,7 +70,7 @@ VenmoView.prototype._isIgnorableError = function (error) {
   // customer cancels the flow in the app
   // we don't emit an error because the customer
   // initiated that action
-  return error.code === 'VENMO_APP_CANCELED';
+  return error.code === 'VENMO_APP_CANCELED' || error.code === 'VENMO_DESKTOP_CANCELED';
 };
 
 VenmoView.isEnabled = function (options) {
