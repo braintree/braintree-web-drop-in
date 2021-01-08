@@ -162,6 +162,24 @@ describe('VenmoView', () => {
     );
 
     test(
+      'does not report app switch error for VENMO_DESKTOP_CANCELLED error',
+      () => {
+        const error = new Error('failure');
+
+        error.code = 'VENMO_DESKTOP_CANCELED';
+
+        testContext.fakeVenmoInstance.hasTokenizationResult.mockReturnValue(true);
+        testContext.fakeVenmoInstance.tokenize.mockRejectedValue(error);
+
+        return testContext.view.initialize().then(() => {
+          expect(testContext.fakeVenmoInstance.tokenize).toBeCalledTimes(1);
+          expect(testContext.model.reportAppSwitchError).not.toBeCalled();
+          expect(testContext.model.reportAppSwitchPayload).not.toBeCalled();
+        });
+      }
+    );
+
+    test(
       'calls asyncDependencyFailed when Venmo component creation fails',
       () => {
         const fakeError = new Error('A_FAKE_ERROR');
