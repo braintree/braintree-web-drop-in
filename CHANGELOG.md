@@ -3,7 +3,7 @@ CHANGELOG
 
 unreleased
 ----------
-- Update braintree-web to v3.72.0
+- Update braintree-web to v3.73.1
 - Google Pay
   - Update Google Pay Icon to match new brand guidelines
 
