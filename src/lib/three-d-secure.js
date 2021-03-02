@@ -5,9 +5,9 @@ var threeDSecure = require('braintree-web/three-d-secure');
 
 var DEFAULT_ACS_WINDOW_SIZE = '03';
 
-function ThreeDSecure(client, merchantConfiguration) {
+function ThreeDSecure(client, model) {
   this._client = client;
-  this._config = merchantConfiguration;
+  this._config = assign({}, model.merchantConfiguration.threeDSecure);
 }
 
 ThreeDSecure.prototype.initialize = function () {

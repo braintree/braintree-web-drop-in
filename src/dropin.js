@@ -612,11 +612,10 @@ Dropin.prototype._setUpDataCollector = function () {
 
 Dropin.prototype._setUpThreeDSecure = function () {
   var self = this;
-  var config = assign({}, this._merchantConfiguration.threeDSecure);
 
   this._model.asyncDependencyStarting();
 
-  this._threeDSecure = new ThreeDSecure(this._client, config);
+  this._threeDSecure = new ThreeDSecure(this._client, this._model);
 
   this._threeDSecure.initialize().then(function () {
     self._model.asyncDependencyReady();

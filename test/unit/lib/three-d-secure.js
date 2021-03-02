@@ -14,6 +14,15 @@ describe('ThreeDSecure', () => {
 
   beforeEach(() => {
     testContext.threeDSecureInstance = fake.threeDSecureInstance;
+    testContext.merchantConfiguration = {
+      threeDSecure: {
+        amount: '10.00'
+      }
+    };
+    testContext.model = fake.model({
+      client: fake.client(),
+      merchantConfiguration: testContext.merchantConfiguration
+    });
     jest.spyOn(testContext.threeDSecureInstance, 'verifyCard').mockImplementation();
     jest.spyOn(testContext.threeDSecureInstance, 'cancelVerifyCard').mockImplementation();
 
@@ -27,9 +36,8 @@ describe('ThreeDSecure', () => {
     });
 
     test('sets up three d secure', () => {
-      const config = {};
       const client = {};
-      const tds = new ThreeDSecure(client, config);
+      const tds = new ThreeDSecure(client, testContext.model);
 
       return tds.initialize().then(() => {
         expect(threeDSecure.create).toBeCalledTimes(1);
@@ -44,12 +52,7 @@ describe('ThreeDSecure', () => {
 
   describe('verify', () => {
     beforeEach(() => {
-      testContext.config = {
-        client: {},
-        amount: '10.00'
-      };
-
-      testContext.tds = new ThreeDSecure({}, testContext.config);
+      testContext.tds = new ThreeDSecure({}, testContext.model);
       testContext.tds._instance = testContext.threeDSecureInstance;
 
       jest.spyOn(document.body, 'appendChild').mockImplementation();
@@ -220,7 +223,7 @@ describe('ThreeDSecure', () => {
 
   describe('teardown', () => {
     beforeEach(() => {
-      testContext.tds = new ThreeDSecure({}, {});
+      testContext.tds = new ThreeDSecure({}, testContext.model);
 
       testContext.tds._instance = testContext.threeDSecureInstance;
       jest.spyOn(testContext.threeDSecureInstance, 'teardown').mockResolvedValue();
@@ -235,7 +238,9 @@ describe('ThreeDSecure', () => {
 
   describe('udpateConfiguration', () => {
     test('updates configuration', () => {
-      const tds = new ThreeDSecure({}, { amount: '10.00', foo: 'bar' });
+      testContext.merchantConfiguration.threeDSecure.foo = 'bar';
+
+      const tds = new ThreeDSecure({}, testContext.model);
 
       tds.updateConfiguration('amount', '23.45');
 
