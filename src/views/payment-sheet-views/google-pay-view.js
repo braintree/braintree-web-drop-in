@@ -43,8 +43,6 @@ GooglePayView.prototype.initialize = function () {
   delete self.googlePayConfiguration.merchantId;
   delete self.googlePayConfiguration.button;
 
-  self.model.asyncDependencyStarting();
-
   return btGooglePay.create({
     client: self.client,
     googlePayVersion: googlePayVersion,
@@ -57,7 +55,7 @@ GooglePayView.prototype.initialize = function () {
 
     buttonContainer.appendChild(self.paymentsClient.createButton(buttonOptions));
 
-    self.model.asyncDependencyReady();
+    self.model.asyncDependencyReady(GooglePayView.ID);
   }).catch(function (err) {
     self.model.asyncDependencyFailed({
       view: self.ID,

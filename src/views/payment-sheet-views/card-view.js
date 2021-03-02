@@ -73,8 +73,6 @@ CardView.prototype.initialize = function () {
     this.saveCardInput.checked = false;
   }
 
-  this.model.asyncDependencyStarting();
-
   return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
     this.hostedFieldsInstance.on('blur', this._onBlurEvent.bind(this));
@@ -89,7 +87,7 @@ CardView.prototype.initialize = function () {
       }.bind(this));
     }.bind(this));
 
-    this.model.asyncDependencyReady();
+    this.model.asyncDependencyReady(CardView.ID);
   }.bind(this)).catch(function (err) {
     this.model.asyncDependencyFailed({
       view: this.ID,

@@ -26,8 +26,6 @@ ApplePayView.prototype.initialize = function () {
 
   delete self.applePayConfiguration.applePaySessionVersion;
 
-  self.model.asyncDependencyStarting();
-
   return btApplePay.create({client: this.client}).then(function (applePayInstance) {
     var buttonDiv = self.getElementById('apple-pay-button');
 
@@ -36,7 +34,7 @@ ApplePayView.prototype.initialize = function () {
     buttonDiv.onclick = self._showPaymentSheet.bind(self);
     buttonDiv.style['-apple-pay-button-style'] = self.model.merchantConfiguration.applePay.buttonStyle || 'black';
 
-    self.model.asyncDependencyReady();
+    self.model.asyncDependencyReady(ApplePayView.ID);
   }).catch(function (err) {
     self.model.asyncDependencyFailed({
       view: self.ID,

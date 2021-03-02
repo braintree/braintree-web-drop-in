@@ -319,21 +319,6 @@ describe('CardView', () => {
       });
     });
 
-    test('starts async dependency', () => {
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
-
-      const view = new CardView({
-        element: cardElement,
-        model: fakeModel,
-        client: fakeClient,
-        strings: strings
-      });
-
-      return view.initialize().then(() => {
-        expect(DropinModel.prototype.asyncDependencyStarting).toBeCalledTimes(1);
-      });
-    });
-
     test(
       'notifies async dependency is ready when Hosted Fields is created',
       () => {
@@ -348,6 +333,7 @@ describe('CardView', () => {
 
         return view.initialize().then(() => {
           expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
+          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledWith('card');
         });
       }
     );

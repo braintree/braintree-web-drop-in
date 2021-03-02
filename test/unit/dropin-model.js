@@ -142,6 +142,38 @@ describe('DropinModel', () => {
   });
 
   describe('initialize', () => {
+    test('emits asyncDependenciesReady event when no dependencies are set to initializing', (done) => {
+      jest.useFakeTimers();
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      jest.spyOn(model, '_emit');
+
+      model.on('asyncDependenciesReady', () => {
+        jest.useRealTimers();
+
+        done();
+      });
+
+      return model.initialize().then(() => {
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        model.asyncDependencyReady('paypal');
+
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        jest.advanceTimersByTime(1000);
+
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        model.asyncDependencyReady('venmo');
+
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        jest.advanceTimersByTime(1000);
+      });
+    });
+
     test('creates a vault manager', () => {
       const model = new DropinModel(testContext.modelOptions);
 
@@ -187,6 +219,7 @@ describe('DropinModel', () => {
         expect(model._paymentMethods).toEqual([
           { type: 'CreditCard', details: { lastTwo: '11' }, vaulted: true }
         ]);
+        expect(model.dependencyStates.paypal).toBe('not-enabled');
       });
     });
 
@@ -602,22 +635,20 @@ describe('DropinModel', () => {
     });
   });
 
-  describe('asyncDependencyStarting', () => {
-    beforeEach(() => {
-      testContext.context = {
-        dependenciesInitializing: 0
-      };
-    });
-
-    test('increments dependenciesInitializing by one', () => {
-      DropinModel.prototype.asyncDependencyStarting.call(testContext.context);
-      expect(testContext.context.dependenciesInitializing).toBe(1);
-    });
-  });
-
   describe('asyncDependencyFailed', () => {
     beforeEach(() => {
       testContext.model = new DropinModel(testContext.modelOptions);
+    });
+
+    test('marks depenedency as failed', () => {
+      const err = new Error('a bad error');
+
+      expect(testContext.model.dependencyStates.venmo).toBe('initializing');
+      testContext.model.asyncDependencyFailed({
+        view: 'venmo',
+        error: err
+      });
+      expect(testContext.model.dependencyStates.venmo).toBe('failed');
     });
 
     test('adds an error to the failedDependencies object', () => {
@@ -656,10 +687,12 @@ describe('DropinModel', () => {
           done();
         });
 
-        model.asyncDependencyStarting();
-        model.asyncDependencyFailed({
-          view: 'id',
-          error: new Error('fake error')
+        model.initialize().then(() => {
+          model.asyncDependencyReady('paypal');
+          model.asyncDependencyFailed({
+            view: 'venmo',
+            error: new Error('fake error')
+          });
         });
       }
     );
@@ -670,14 +703,20 @@ describe('DropinModel', () => {
       testContext.context = { callback: jest.fn() };
     });
 
-    test('decrements dependenciesInitializing by one', () => {
+    test('marks initializing dependency as done', () => {
       const model = new DropinModel(testContext.modelOptions);
 
-      model.dependenciesInitializing = 2;
+      // the modelOptions have a config for paypal and venmo
+      expect(model.dependencyStates.paypal).toBe('initializing');
+      expect(model.dependencyStates.venmo).toBe('initializing');
 
-      model.asyncDependencyReady();
+      model.asyncDependencyReady('paypal');
+      expect(model.dependencyStates.paypal).toBe('done');
+      expect(model.dependencyStates.venmo).toBe('initializing');
 
-      expect(model.dependenciesInitializing).toBe(1);
+      model.asyncDependencyReady('venmo');
+      expect(model.dependencyStates.paypal).toBe('done');
+      expect(model.dependencyStates.venmo).toBe('done');
     });
 
     test(
@@ -688,30 +727,32 @@ describe('DropinModel', () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
 
         model.on('asyncDependenciesReady', () => {
-          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
+          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(2);
           done();
         });
 
-        model.asyncDependencyStarting();
-        model.asyncDependencyReady();
+        model.initialize().then(() => {
+          model.asyncDependencyReady('paypal');
+          model.asyncDependencyReady('venmo');
+        });
       }
     );
 
-    test('emits asyncDependenciesReady event with prior errors', () => {
+    test('emits asyncDependenciesReady event with prior errors', (done) => {
       const model = new DropinModel(testContext.modelOptions);
       const err = new Error('an earlier dependency failed');
 
-      jest.spyOn(model, '_emit');
-
-      model.asyncDependencyStarting();
-      model.asyncDependencyStarting();
-      model.asyncDependencyFailed({
-        view: 'id',
-        error: err
+      model.on('asyncDependenciesReady', () => {
+        done();
       });
-      model.asyncDependencyReady();
 
-      expect(model._emit).toBeCalledWith('asyncDependenciesReady');
+      return model.initialize().then(() => {
+        model.asyncDependencyFailed({
+          view: 'venmo',
+          error: err
+        });
+        model.asyncDependencyReady('paypal');
+      });
     });
   });
 
