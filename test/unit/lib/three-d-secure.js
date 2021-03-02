@@ -29,7 +29,7 @@ describe('ThreeDSecure', () => {
     test('sets up three d secure', () => {
       const config = {};
       const client = {};
-      const tds = new ThreeDSecure(client, config, 'Card Verification');
+      const tds = new ThreeDSecure(client, config);
 
       return tds.initialize().then(() => {
         expect(threeDSecure.create).toBeCalledTimes(1);
@@ -49,7 +49,7 @@ describe('ThreeDSecure', () => {
         amount: '10.00'
       };
 
-      testContext.tds = new ThreeDSecure({}, testContext.config, 'Card Verification');
+      testContext.tds = new ThreeDSecure({}, testContext.config);
       testContext.tds._instance = testContext.threeDSecureInstance;
 
       jest.spyOn(document.body, 'appendChild').mockImplementation();
@@ -220,7 +220,7 @@ describe('ThreeDSecure', () => {
 
   describe('teardown', () => {
     beforeEach(() => {
-      testContext.tds = new ThreeDSecure({}, {}, 'Card Verification');
+      testContext.tds = new ThreeDSecure({}, {});
 
       testContext.tds._instance = testContext.threeDSecureInstance;
       jest.spyOn(testContext.threeDSecureInstance, 'teardown').mockResolvedValue();
@@ -235,7 +235,7 @@ describe('ThreeDSecure', () => {
 
   describe('udpateConfiguration', () => {
     test('updates configuration', () => {
-      const tds = new ThreeDSecure({}, { amount: '10.00', foo: 'bar' }, 'Card Verification');
+      const tds = new ThreeDSecure({}, { amount: '10.00', foo: 'bar' });
 
       tds.updateConfiguration('amount', '23.45');
 
