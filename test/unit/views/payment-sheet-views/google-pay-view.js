@@ -304,6 +304,30 @@ describe('GooglePayView', () => {
       });
     });
 
+    test('does not pass along button configuration to createPaymentDataRequest', async () => {
+      testContext.model.merchantConfiguration.googlePay.button = {
+        buttonType: 'long',
+        buttonColor: 'white'
+      };
+      const view = new GooglePayView(testContext.googlePayViewOptions);
+
+      jest.spyOn(view.model, 'addPaymentMethod').mockImplementation();
+      jest.spyOn(view.model, 'reportError').mockImplementation();
+
+      await view.initialize();
+
+      await view.tokenize();
+
+      expect(testContext.fakeGooglePayInstance.createPaymentDataRequest).toBeCalledTimes(1);
+      expect(testContext.fakeGooglePayInstance.createPaymentDataRequest).toBeCalledWith({
+        transactionInfo: {
+          currencyCode: 'USD',
+          totalPriceStatus: 'FINAL',
+          totalPrice: '100.00'
+        }
+      });
+    });
+
     test('calls loadPaymentData with paymentDataRequest', () => {
       return testContext.view.tokenize().then(() => {
         expect(testContext.FakePaymentClient.prototype.loadPaymentData).toBeCalledTimes(1);
