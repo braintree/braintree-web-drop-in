@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- 3D Secure
+  - Add `3ds:customer-canceled` event (#690)
+  - Add `3ds:authentication-modal-render` event
+  - Add `3ds:authentication-modal-close` event
+
 1.26.1
 ------
 - Update braintree-web to v3.73.1
