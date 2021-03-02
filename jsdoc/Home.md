@@ -146,13 +146,14 @@ Drop-in and the Braintree JS SDK have the same [browser support](http://braintre
 
 If using [PayPal](module-braintree-web-drop-in.html#~paypalCreateOptions), include these additional directives:
 
-|             | Sandbox                                                          | Production                                                       |
-|-------------|------------------------------------------------------------------|------------------------------------------------------------------|
+|             | Sandbox                                                        | Production                                                     |
+|-------------|----------------------------------------------------------------|----------------------------------------------------------------|
+| connect-src | &#42;.paypal.com                                               | &#42;.paypal.com                                               |
 | script-src  | www.paypalobjects.com<br/>&#42;.paypal.com<br/>'unsafe-inline' | www.paypalobjects.com<br/>&#42;.paypal.com<br/>'unsafe-inline' |
-| style-src   | 'unsafe-inline'                                                  | 'unsafe-inline'                                                  |
-| img-src     | checkout.paypal.com                                              | checkout.paypal.com                                              |
-| child-src   | &#42;.paypal.com                                                 | &#42;.paypal.com                                                 |
-| frame-src   | &#42;.paypal.com                                                 | &#42;.paypal.com                                                 |
+| style-src   | 'unsafe-inline'                                                | 'unsafe-inline'                                                |
+| img-src     | &#42;.paypal.com                                               | &#42;.paypal.com                                               |
+| child-src   | &#42;.paypal.com                                               | &#42;.paypal.com                                               |
+| frame-src   | &#42;.paypal.com                                               | &#42;.paypal.com                                               |
 
 ### Google Pay Specific Directives
 
