@@ -25,9 +25,6 @@ GooglePayView.prototype.initialize = function () {
   googlePayVersion = self.googlePayConfiguration.googlePayVersion;
   merchantId = self.googlePayConfiguration.merchantId;
 
-  delete self.googlePayConfiguration.googlePayVersion;
-  delete self.googlePayConfiguration.merchantId;
-
   buttonOptions = assign({
     buttonType: 'short'
   }, self.googlePayConfiguration.button, {
@@ -41,6 +38,10 @@ GooglePayView.prototype.initialize = function () {
       });
     }
   });
+
+  delete self.googlePayConfiguration.googlePayVersion;
+  delete self.googlePayConfiguration.merchantId;
+  delete self.googlePayConfiguration.button;
 
   self.model.asyncDependencyStarting();
 

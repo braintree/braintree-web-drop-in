@@ -3,6 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
+- Google Pay
+  - Fix issue where passing custom button option would caused a developer error in the console (#701)
 - 3D Secure
   - Add `3ds:customer-canceled` event (#690)
   - Add `3ds:authentication-modal-render` event
