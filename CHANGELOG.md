@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Google Pay
+  - Fix issue where passing custom button option would caused a developer error in the console (#701)
+
 1.26.1
 ------
 - Update braintree-web to v3.73.1
