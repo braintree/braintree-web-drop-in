@@ -456,7 +456,7 @@ Dropin.prototype._initialize = function (callback) {
     });
 
     self._model.on('asyncDependenciesReady', function () {
-      if (self._model.dependencySuccessCount >= 1) {
+      if (self._model.hasAtLeastOneAvailablePaymentOption()) {
         analytics.sendEvent(self._client, 'appeared');
         self._disableErroredPaymentMethods();
 

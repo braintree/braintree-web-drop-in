@@ -171,6 +171,12 @@ describe('DropinModel', () => {
         expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
 
         jest.advanceTimersByTime(1000);
+
+        model.asyncDependencyReady('card');
+
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        jest.advanceTimersByTime(1000);
       });
     });
 
@@ -612,6 +618,38 @@ describe('DropinModel', () => {
     });
   });
 
+  describe('hasAtLeastOneAvailablePaymentOption', () => {
+    test('returns false when no payment methods have a setup status of done', async () => {
+      // all dependencies will have a setup status of initializing
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.hasAtLeastOneAvailablePaymentOption()).toBe(false);
+    });
+
+    test('returns true when at least one payment method has a setup status of done', async () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      model.asyncDependencyReady('card');
+
+      expect(model.hasAtLeastOneAvailablePaymentOption()).toBe(true);
+    });
+
+    test('returns false when no payment methods have a setup status of done, even if non-payment methods do', async () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      model.asyncDependencyReady('dataCollector');
+      model.asyncDependencyReady('threeDSecure');
+
+      expect(model.hasAtLeastOneAvailablePaymentOption()).toBe(false);
+    });
+  });
+
   describe('reportAppSwitchPayload', () => {
     test('saves app switch payload to instance', () => {
       const model = new DropinModel(testContext.modelOptions);
@@ -693,6 +731,7 @@ describe('DropinModel', () => {
             view: 'venmo',
             error: new Error('fake error')
           });
+          model.asyncDependencyReady('card');
         });
       }
     );
@@ -713,10 +752,17 @@ describe('DropinModel', () => {
       model.asyncDependencyReady('paypal');
       expect(model.dependencyStates.paypal).toBe('done');
       expect(model.dependencyStates.venmo).toBe('initializing');
+      expect(model.dependencyStates.card).toBe('initializing');
 
       model.asyncDependencyReady('venmo');
       expect(model.dependencyStates.paypal).toBe('done');
       expect(model.dependencyStates.venmo).toBe('done');
+      expect(model.dependencyStates.card).toBe('initializing');
+
+      model.asyncDependencyReady('card');
+      expect(model.dependencyStates.paypal).toBe('done');
+      expect(model.dependencyStates.venmo).toBe('done');
+      expect(model.dependencyStates.card).toBe('done');
     });
 
     test(
@@ -727,13 +773,14 @@ describe('DropinModel', () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
 
         model.on('asyncDependenciesReady', () => {
-          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(2);
+          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(3);
           done();
         });
 
         model.initialize().then(() => {
           model.asyncDependencyReady('paypal');
           model.asyncDependencyReady('venmo');
+          model.asyncDependencyReady('card');
         });
       }
     );
@@ -747,6 +794,7 @@ describe('DropinModel', () => {
       });
 
       return model.initialize().then(() => {
+        model.asyncDependencyReady('card');
         model.asyncDependencyFailed({
           view: 'venmo',
           error: err

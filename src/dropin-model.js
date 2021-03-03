@@ -41,8 +41,12 @@ function DropinModel(options) {
 
     return total;
   }, {});
+  // card is on by default, so we need to set it's state to INITIALIZING
+  // unless the merchant has specifically opted out of using the card form
+  if (options.merchantConfiguration.card !== false) {
+    this.dependencyStates.card = dependencySetupStates.INITIALIZING;
+  }
 
-  this.dependencySuccessCount = 0;
   this.failedDependencies = {};
   this._options = options;
   this._setupComplete = false;
@@ -245,8 +249,23 @@ DropinModel.prototype.reportAppSwitchError = function (sheetId, error) {
   };
 };
 
+DropinModel.prototype.hasAtLeastOneAvailablePaymentOption = function () {
+  var self = this;
+  var i;
+
+  console.log(this.supportedPaymentOptions);
+  console.log(self.dependencyStates);
+
+  for (i = 0; i < this.supportedPaymentOptions.length; i++) {
+    if (self.dependencyStates[this.supportedPaymentOptions[i]] === dependencySetupStates.DONE) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 DropinModel.prototype.asyncDependencyReady = function (key) {
-  this.dependencySuccessCount++;
   this.dependencyStates[key] = dependencySetupStates.DONE;
 };
 
