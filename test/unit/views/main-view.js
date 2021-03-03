@@ -682,7 +682,7 @@ describe('MainView', () => {
           hideSheetError: jest.fn(),
           hideLoadingIndicator: function () {},
           _sendToDefaultView: jest.fn(),
-          _onChangeActivePaymentMethodView: jest.fn(),
+          _onChangeActiveView: jest.fn(),
           model: model,
           client: fake.client(),
           setPrimaryView: jest.fn(),

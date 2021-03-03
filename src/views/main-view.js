@@ -98,7 +98,7 @@ MainView.prototype._initialize = function () {
     }.bind(this));
   }.bind(this));
 
-  this.model.on('changeActiveView', this._onChangeActivePaymentMethodView.bind(this));
+  this.model.on('changeActiveView', this._onChangeActiveView.bind(this));
 
   this.model.on('removeActivePaymentMethod', function () {
     var activePaymentView = this.getView(this.model.getActivePaymentView());
@@ -132,7 +132,7 @@ MainView.prototype._initialize = function () {
   this._sendToDefaultView();
 };
 
-MainView.prototype._onChangeActivePaymentMethodView = function (data) {
+MainView.prototype._onChangeActiveView = function (data) {
   var id = data.newViewId;
   var activePaymentView = this.getView(id);
 
