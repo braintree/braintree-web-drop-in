@@ -332,8 +332,8 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * * `venmo` - The Venmo View
  * * `googlePay` - The Google Pay view
  * * `applePay` - The Apple Pay view
- * * `methods` - The view presenting the avaialble payment methods (already vaulted or tokenized payment methods)
- * * `options` - The view presenting the avaialble payment options (where the customer chooses what payment method option to use). Note, if both the methods view and the options view are presented at the same time, `methods` will be shown as the view id.
+ * * `methods` - The view presenting the available payment methods (already vaulted or tokenized payment methods)
+ * * `options` - The view presenting the available payment options (where the customer chooses what payment method option to use). Note, if both the methods view and the options view are presented at the same time, `methods` will be shown as the view id.
  * * `delete-confirmation` - The view where the customer confirms they would like to delete their saved payment method.
  * @property {string} newViewId The id for the new active view. The possible values are the same as `previousViewId`.
  */
