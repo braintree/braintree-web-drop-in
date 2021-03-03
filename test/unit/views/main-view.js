@@ -826,7 +826,7 @@ describe('MainView', () => {
       );
     });
 
-    describe('for changeActivePaymentView', () => {
+    describe('for changeActiveView', () => {
       beforeEach(() => {
         jest.spyOn(testContext.model, 'setPaymentMethodRequestable').mockImplementation();
         testContext.paymentMethodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
@@ -842,7 +842,9 @@ describe('MainView', () => {
         test(
           'adds braintree-methods--active to the payment methods view element',
           () => {
-            testContext.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
+            testContext.model._emit('changeActiveView', {
+              newViewId: PaymentMethodsView.ID
+            });
             expect(testContext.paymentMethodsContainer.className).toMatch('braintree-methods--active');
           }
         );
@@ -850,18 +852,24 @@ describe('MainView', () => {
         test(
           'removes braintree-sheet--active from the payment sheet element',
           () => {
-            testContext.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
+            testContext.model._emit('changeActiveView', {
+              newViewId: PaymentMethodsView.ID
+            });
             expect(testContext.sheetElement.className).toEqual(expect.not.arrayContaining(['braintree-sheet--active']));
           }
         );
 
         test('does not call model.setPaymentMethodRequestable', () => {
-          testContext.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
+          testContext.model._emit('changeActiveView', {
+            newViewId: PaymentMethodsView.ID
+          });
           expect(testContext.model.setPaymentMethodRequestable).not.toBeCalled();
         });
 
         test('calls onSelection', () => {
-          testContext.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
+          testContext.model._emit('changeActiveView', {
+            newViewId: PaymentMethodsView.ID
+          });
           expect(testContext.mainView._views.methods.onSelection).toBeCalledTimes(1);
         });
       });
@@ -879,7 +887,9 @@ describe('MainView', () => {
           describe('using a ' + ID + ' sheet', () => {
             beforeEach(() => {
               wait.delay.mockResolvedValue();
-              testContext.model._emit('changeActivePaymentView', ID);
+              testContext.model._emit('changeActiveView', {
+                newViewId: ID
+              });
             });
 
             test('adds braintree-sheet--active to the payment sheet', () => {
@@ -1124,7 +1134,7 @@ describe('MainView', () => {
       test('requests payment method from payment methods view', () => {
         const paymentMethodsViews = testContext.mainView.getView(PaymentMethodsView.ID);
 
-        testContext.mainView.model.changeActivePaymentView(PaymentMethodsView.ID);
+        testContext.mainView.model.changeActiveView(PaymentMethodsView.ID);
         jest.spyOn(paymentMethodsViews, 'requestPaymentMethod').mockResolvedValue({});
 
         return testContext.mainView.requestPaymentMethod().then(() => {

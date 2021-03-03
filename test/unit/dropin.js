@@ -2388,38 +2388,26 @@ describe('Dropin', () => {
     });
   });
 
-  describe('payment method requestable events', () => {
-    test(
-      'emits paymentMethodRequestable event when the model emits paymentMethodRequestable',
-      done => {
-        const instance = new Dropin(testContext.dropinOptions);
+  describe('passthrough drop-in events', () => {
+    test.each([
+      'changeActiveView',
+      'paymentMethodRequestable',
+      'noPaymentMethodRequestable',
+      'paymentOptionSelected'
+    ])('emits %s event', (eventName, done) => {
+      const instance = new Dropin(testContext.dropinOptions);
+      const eventPayload = { foo: 'bar' };
 
-        instance.on('paymentMethodRequestable', event => {
-          expect(event.type).toBe('Foo');
+      instance.on(eventName, event => {
+        expect(event).toBe(eventPayload);
 
-          done();
-        });
+        done();
+      });
 
-        instance._initialize(() => {
-          instance._model._emit('paymentMethodRequestable', { type: 'Foo' });
-        });
-      }
-    );
-
-    test(
-      'emits noPaymentMethodRequestable events when the model emits noPaymentMethodRequestable',
-      done => {
-        const instance = new Dropin(testContext.dropinOptions);
-
-        instance.on('noPaymentMethodRequestable', () => {
-          done();
-        });
-
-        instance._initialize(() => {
-          instance._model._emit('noPaymentMethodRequestable');
-        });
-      }
-    );
+      instance._initialize(() => {
+        instance._model._emit(eventName, eventPayload);
+      });
+    });
   });
 
   describe('card events', () => {
@@ -2445,24 +2433,5 @@ describe('Dropin', () => {
         instance._model._emit(`card:${eventName}`, payload);
       });
     });
-  });
-
-  describe('payment option selected event', () => {
-    test(
-      'emits paymentOptionSelected when the model emits paymentOptionSelected',
-      done => {
-        const instance = new Dropin(testContext.dropinOptions);
-
-        instance.on('paymentOptionSelected', event => {
-          expect(event.paymentOption).toBe('Foo');
-
-          done();
-        });
-
-        instance._initialize(() => {
-          instance._model._emit('paymentOptionSelected', { paymentOption: 'Foo' });
-        });
-      }
-    );
   });
 });

@@ -107,9 +107,14 @@ DropinModel.prototype.changeActivePaymentMethod = function (paymentMethod) {
   this._emit('changeActivePaymentMethod', paymentMethod);
 };
 
-DropinModel.prototype.changeActivePaymentView = function (paymentViewID) {
-  this._activePaymentView = paymentViewID;
-  this._emit('changeActivePaymentView', paymentViewID);
+DropinModel.prototype.changeActiveView = function (paymentViewID) {
+  var previousViewId = this._activePaymentViewId;
+
+  this._activePaymentViewId = paymentViewID;
+  this._emit('changeActiveView', {
+    previousViewId: previousViewId,
+    newViewId: paymentViewID
+  });
 };
 
 DropinModel.prototype.removeActivePaymentMethod = function () {
@@ -205,7 +210,7 @@ DropinModel.prototype.getActivePaymentMethod = function () {
 };
 
 DropinModel.prototype.getActivePaymentView = function () {
-  return this._activePaymentView;
+  return this._activePaymentViewId;
 };
 
 DropinModel.prototype.reportAppSwitchPayload = function (payload) {

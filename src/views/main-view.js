@@ -98,7 +98,7 @@ MainView.prototype._initialize = function () {
     }.bind(this));
   }.bind(this));
 
-  this.model.on('changeActivePaymentView', this._onChangeActivePaymentMethodView.bind(this));
+  this.model.on('changeActiveView', this._onChangeActivePaymentMethodView.bind(this));
 
   this.model.on('removeActivePaymentMethod', function () {
     var activePaymentView = this.getView(this.model.getActivePaymentView());
@@ -132,7 +132,8 @@ MainView.prototype._initialize = function () {
   this._sendToDefaultView();
 };
 
-MainView.prototype._onChangeActivePaymentMethodView = function (id) {
+MainView.prototype._onChangeActivePaymentMethodView = function (data) {
+  var id = data.newViewId;
   var activePaymentView = this.getView(id);
 
   if (id === PaymentMethodsView.ID) {
@@ -172,7 +173,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
   }.bind(this));
 
   this.primaryView = this.getView(id);
-  this.model.changeActivePaymentView(id);
+  this.model.changeActiveView(id);
 
   if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
     if (this.model.getPaymentMethods().length > 0 || this.getView(PaymentOptionsView.ID)) {
@@ -239,7 +240,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
     sheetViewID = this.paymentSheetViewIDs[0];
 
     classList.add(this.element, prefixShowClass(sheetViewID));
-    this.model.changeActivePaymentView(sheetViewID);
+    this.model.changeActiveView(sheetViewID);
   } else if (isPaymentSheetView) {
     if (this.model.getPaymentMethods().length === 0) {
       this.setPrimaryView(PaymentOptionsView.ID);

@@ -537,6 +537,33 @@ describe('DropinModel', () => {
     );
   });
 
+  describe('changeActiveView', () => {
+    beforeEach(() => {
+      testContext.model = new DropinModel(testContext.modelOptions);
+    });
+
+    test('sets active payment method view id', () => {
+      testContext.model._activePaymentViewId = 'methods';
+
+      testContext.model.changeActiveView('card');
+
+      expect(testContext.model._activePaymentViewId).toBe('card');
+    });
+
+    test('emits event with new and old ids', () => {
+      jest.spyOn(testContext.model, '_emit');
+
+      testContext.model._activePaymentViewId = 'methods';
+
+      testContext.model.changeActiveView('card');
+
+      expect(testContext.model._emit).toBeCalledWith('changeActiveView', {
+        previousViewId: 'methods',
+        newViewId: 'card'
+      });
+    });
+  });
+
   describe('removeActivePaymentMethod', () => {
     beforeEach(() => {
       testContext.model = new DropinModel(testContext.modelOptions);
