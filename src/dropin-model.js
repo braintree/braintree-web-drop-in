@@ -253,9 +253,6 @@ DropinModel.prototype.hasAtLeastOneAvailablePaymentOption = function () {
   var self = this;
   var i;
 
-  console.log(this.supportedPaymentOptions);
-  console.log(self.dependencyStates);
-
   for (i = 0; i < this.supportedPaymentOptions.length; i++) {
     if (self.dependencyStates[this.supportedPaymentOptions[i]] === dependencySetupStates.DONE) {
       return true;
