@@ -153,6 +153,7 @@ describe('PaymentMethodsView', () => {
         model.getVaultedPaymentMethods.mockResolvedValue([{ foo: 'bar' }, fakePaymentMethod]);
 
         return model.initialize().then(() => {
+          model.asyncDependencyReady('card');
           model.changeActivePaymentMethod({ foo: 'bar' });
 
           paymentMethodsViews = new PaymentMethodsView({

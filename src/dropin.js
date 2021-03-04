@@ -493,7 +493,7 @@ Dropin.prototype._initialize = function (callback) {
     });
 
     self._model.on('asyncDependenciesReady', function () {
-      if (self._model.dependencySuccessCount >= 1) {
+      if (self._model.hasAtLeastOneAvailablePaymentOption()) {
         analytics.sendEvent(self._client, 'appeared');
         self._disableErroredPaymentMethods();
 
@@ -634,11 +634,10 @@ Dropin.prototype._setUpDataCollector = function () {
   var self = this;
   var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
 
-  this._model.asyncDependencyStarting();
   this._dataCollector = new DataCollector(config);
 
   this._dataCollector.initialize().then(function () {
-    self._model.asyncDependencyReady();
+    self._model.asyncDependencyReady('dataCollector');
   }).catch(function (err) {
     self._model.cancelInitialization(new DropinError({
       message: 'Data Collector failed to set up.',
@@ -650,12 +649,10 @@ Dropin.prototype._setUpDataCollector = function () {
 Dropin.prototype._setUpThreeDSecure = function () {
   var self = this;
 
-  this._model.asyncDependencyStarting();
-
   this._threeDSecure = new ThreeDSecure(this._client, this._model);
 
   this._threeDSecure.initialize().then(function () {
-    self._model.asyncDependencyReady();
+    self._model.asyncDependencyReady('threeDSecure');
   }).catch(function (err) {
     self._model.cancelInitialization(new DropinError({
       message: '3D Secure failed to set up.',

@@ -487,17 +487,7 @@ describe('Dropin', () => {
       done => {
         const instance = new Dropin(testContext.dropinOptions);
 
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
-
-        instance._initialize(err => {
-          done(err);
-        });
-
-        delay().then(() => {
-          instance._model.dependencySuccessCount = 1;
-          instance._model._emit('asyncDependenciesReady');
-        });
+        instance._initialize(done);
       }
     );
 
@@ -505,8 +495,6 @@ describe('Dropin', () => {
       const instance = new Dropin(testContext.dropinOptions);
       const error = new Error('error');
 
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
       jest.spyOn(DropinModel.prototype, 'reportError').mockImplementation();
 
       instance._initialize(() => {
@@ -518,13 +506,11 @@ describe('Dropin', () => {
       });
 
       delay().then(() => {
-        instance._model.dependencySuccessCount = 1;
         instance._model.appSwitchError = {
           id: 'view-id',
           error: error
         };
         jest.spyOn(instance._mainView, 'setPrimaryView').mockImplementation();
-        instance._model._emit('asyncDependenciesReady');
       });
     });
 
@@ -532,8 +518,6 @@ describe('Dropin', () => {
       const instance = new Dropin(testContext.dropinOptions);
       const payload = { nonce: 'fake-nonce' };
 
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
       jest.spyOn(DropinModel.prototype, 'addPaymentMethod').mockImplementation();
 
       instance._initialize(() => {
@@ -542,11 +526,7 @@ describe('Dropin', () => {
         done();
       });
 
-      delay().then(() => {
-        instance._model.dependencySuccessCount = 1;
-        instance._model.appSwitchPayload = payload;
-        instance._model._emit('asyncDependenciesReady');
-      });
+      instance._model.appSwitchPayload = payload;
     });
 
     test(
@@ -554,18 +534,10 @@ describe('Dropin', () => {
       done => {
         const instance = new Dropin(testContext.dropinOptions);
 
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
-
         instance._initialize(() => {
           expect(analytics.sendEvent).toBeCalledTimes(1);
           expect(analytics.sendEvent).toBeCalledWith(instance._client, 'appeared');
           done();
-        });
-
-        delay().then(() => {
-          instance._model.dependencySuccessCount = 2;
-          instance._model._emit('asyncDependenciesReady');
         });
       }
     );
@@ -617,8 +589,6 @@ describe('Dropin', () => {
           { type: 'CreditCard', details: { lastTwo: '11' }},
           { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
         ]);
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
 
         instance._initialize(() => {
           expect(analytics.sendEvent).not.toBeCalledWith(instance._client, 'vaulted-card.appear');
@@ -628,13 +598,10 @@ describe('Dropin', () => {
         });
 
         delay().then(() => {
-          instance._model.dependencySuccessCount = 1;
           instance._model.appSwitchPayload = {
             nonce: 'a-nonce'
           };
           jest.spyOn(instance._mainView, 'setPrimaryView').mockImplementation();
-
-          instance._model._emit('asyncDependenciesReady');
         });
       }
     );
@@ -648,8 +615,6 @@ describe('Dropin', () => {
           { type: 'CreditCard', details: { lastTwo: '11' }},
           { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
         ]);
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-        jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
 
         instance._initialize(() => {
           expect(analytics.sendEvent).not.toBeCalledWith(instance._client, 'vaulted-card.appear');
@@ -659,14 +624,11 @@ describe('Dropin', () => {
         });
 
         delay().then(() => {
-          instance._model.dependencySuccessCount = 1;
           instance._model.appSwitchError = {
             ID: 'view',
             error: new Error('error')
           };
           jest.spyOn(instance._mainView, 'setPrimaryView').mockImplementation();
-
-          instance._model._emit('asyncDependenciesReady');
         });
       }
     );
@@ -812,32 +774,48 @@ describe('Dropin', () => {
   describe('loads data collector', () => {
     beforeEach(() => {
       testContext.dropinOptions.merchantConfiguration.dataCollector = { kount: true };
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
       jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
-      jest.spyOn(Dropin.prototype, '_setUpDataCollector').mockImplementation();
+      jest.spyOn(DataCollector.prototype, 'initialize').mockResolvedValue();
     });
 
-    test(
-      'does not load Data Collector if Data Collector is not enabled',
-      done => {
-        let instance;
+    test('does not load Data Collector if Data Collector is not enabled', done => {
+      let instance;
 
-        delete testContext.dropinOptions.merchantConfiguration.dataCollector;
-        instance = new Dropin(testContext.dropinOptions);
+      delete testContext.dropinOptions.merchantConfiguration.dataCollector;
+      instance = new Dropin(testContext.dropinOptions);
 
-        instance._initialize(() => {
-          expect(instance._setUpDataCollector).not.toBeCalled();
+      instance._initialize(() => {
+        expect(DataCollector.prototype.initialize).not.toBeCalled();
+        expect(DropinModel.prototype.asyncDependencyReady).not.toBeCalledWith('dataCollector');
 
-          done();
-        });
-      }
-    );
+        done();
+      });
+    });
 
     test('does load Data Collector if Data Collector is enabled', done => {
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
-        expect(instance._setUpDataCollector).toBeCalled();
+        expect(DataCollector.prototype.initialize).toBeCalledTimes(1);
+        expect(DropinModel.prototype.asyncDependencyReady).toBeCalledWith('dataCollector');
+
+        done();
+      });
+    });
+
+    test('cancels initialization when Data Collection creation fails', done => {
+      const error = new Error('failed.');
+
+      jest.spyOn(DropinModel.prototype, 'cancelInitialization');
+
+      DataCollector.prototype.initialize.mockRejectedValue(error);
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        expect(DataCollector.prototype.initialize).toBeCalledTimes(1);
+        expect(DropinModel.prototype.asyncDependencyReady).not.toBeCalledWith('dataCollector');
+        expect(DropinModel.prototype.cancelInitialization).toBeCalledTimes(1);
 
         done();
       });
@@ -847,9 +825,8 @@ describe('Dropin', () => {
   describe('loads 3D Secure', () => {
     beforeEach(() => {
       testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
       jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
-      jest.spyOn(Dropin.prototype, '_setUpThreeDSecure');
+      jest.spyOn(ThreeDSecure.prototype, 'initialize').mockResolvedValue();
     });
 
     test('does not load 3D Secure if 3D Secure is not enabled', done => {
@@ -859,7 +836,8 @@ describe('Dropin', () => {
       instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
-        expect(instance._setUpThreeDSecure).not.toBeCalled();
+        expect(ThreeDSecure.prototype.initialize).not.toBeCalled();
+        expect(DropinModel.prototype.asyncDependencyReady).not.toBeCalledWith('threeDSecure');
 
         done();
       });
@@ -869,113 +847,11 @@ describe('Dropin', () => {
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
-        expect(instance._setUpThreeDSecure).toBeCalled();
+        expect(ThreeDSecure.prototype.initialize).toBeCalled();
+        expect(DropinModel.prototype.asyncDependencyReady).toBeCalledWith('threeDSecure');
 
         done();
       });
-    });
-  });
-
-  describe('_setUpDataCollector', () => {
-    beforeEach(() => {
-      testContext.model = fake.model({
-        componentID: 'foo',
-        client: testContext.client,
-        merchantConfiguration: {
-          container: '#foo',
-          authorization: fake.tokenizationKey
-        },
-        paymentMethods: ['card']
-      });
-      jest.spyOn(DataCollector.prototype, 'initialize').mockResolvedValue();
-    });
-
-    test('sets up datacollector', () => {
-      Dropin.prototype._setUpDataCollector.call({
-        _client: testContext.client,
-        _model: testContext.model,
-        _strings: {},
-        _merchantConfiguration: {
-          dataCollector: {
-            kount: true
-          }
-        }
-      });
-
-      expect(DataCollector.prototype.initialize).toBeCalledTimes(1);
-    });
-
-    test(
-      'fails initialization when Data Collection creation fails',
-      done => {
-        const error = new Error('failed.');
-
-        jest.spyOn(DropinModel.prototype, 'cancelInitialization');
-
-        DataCollector.prototype.initialize.mockRejectedValue(error);
-
-        Dropin.prototype._setUpDataCollector.call({
-          _client: testContext.client,
-          _model: testContext.model,
-          _merchantConfiguration: {
-            threeDSecure: {
-              foo: 'bar'
-            }
-          }
-        });
-
-        expect(DataCollector.prototype.initialize).toBeCalledTimes(1);
-        setTimeout(() => {
-          expect(DropinModel.prototype.cancelInitialization).toBeCalled();
-          done();
-        }, 1000);
-      }
-    );
-
-    test('starts an async dependency', () => {
-      function noop() {}
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
-
-      Dropin.prototype._setUpDataCollector.call({
-        _client: testContext.client,
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        },
-        _model: testContext.model
-      }, noop);
-
-      expect(DropinModel.prototype.asyncDependencyStarting).toBeCalledTimes(1);
-    });
-  });
-
-  describe('_setUpThreeDSecure', () => {
-    beforeEach(() => {
-      testContext.model = fake.model({
-        componentID: 'foo',
-        client: testContext.client,
-        merchantConfiguration: {
-          container: '#foo',
-          authorization: fake.tokenizationKey
-        },
-        paymentMethods: ['card']
-      });
-      jest.spyOn(ThreeDSecure.prototype, 'initialize').mockResolvedValue();
-    });
-
-    test('sets up 3ds', () => {
-      Dropin.prototype._setUpThreeDSecure.call({
-        _client: testContext.client,
-        _model: testContext.model,
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        }
-      });
-
-      expect(ThreeDSecure.prototype.initialize).toBeCalledTimes(1);
     });
 
     test('fails initialization when 3DS creation fails', done => {
@@ -985,38 +861,13 @@ describe('Dropin', () => {
 
       ThreeDSecure.prototype.initialize.mockRejectedValue(error);
 
-      Dropin.prototype._setUpThreeDSecure.call({
-        _client: testContext.client,
-        _model: testContext.model,
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        }
-      });
+      const instance = new Dropin(testContext.dropinOptions);
 
-      expect(ThreeDSecure.prototype.initialize).toBeCalledTimes(1);
-      setTimeout(() => {
+      instance._initialize(() => {
+        expect(ThreeDSecure.prototype.initialize).toBeCalledTimes(1);
         expect(DropinModel.prototype.cancelInitialization).toBeCalled();
         done();
-      }, 1000);
-    });
-
-    test('starts an async dependency', () => {
-      function noop() {}
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
-
-      Dropin.prototype._setUpThreeDSecure.call({
-        _client: testContext.client,
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        },
-        _model: testContext.model
-      }, noop);
-
-      expect(DropinModel.prototype.asyncDependencyStarting).toBeCalledTimes(1);
+      });
     });
   });
 

@@ -80,19 +80,24 @@ describe('BasePayPalView', () => {
       testContext.view = new BasePayPalView(testContext.paypalViewOptions);
     });
 
-    test('starts async dependency', () => {
-      jest.spyOn(testContext.view.model, 'asyncDependencyStarting').mockImplementation();
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
-      });
-    });
-
-    test('notifies async dependency', () => {
+    test('notifies async dependency ready for paypal', () => {
       jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
 
       return testContext.view.initialize().then(() => {
         expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledWith('paypal');
+      });
+    });
+
+    test('notifies async dependency ready for paypalCredit', () => {
+      jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
+
+      testContext.view.model.merchantConfiguration.paypalCredit = testContext.view.model.merchantConfiguration.paypal;
+      testContext.view._isPayPalCredit = true;
+
+      return testContext.view.initialize().then(() => {
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledWith('paypalCredit');
       });
     });
 
@@ -133,19 +138,6 @@ describe('BasePayPalView', () => {
         });
       }
     );
-
-    test('calls asyncDependencyStarting when initializing', () => {
-      const fakeError = {
-        code: 'A_REAL_ERROR_CODE'
-      };
-
-      PayPalCheckout.create.mockRejectedValue(fakeError);
-
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      testContext.view.initialize();
-
-      expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
-    });
 
     test('calls paypal.Button.render', () => {
       return testContext.view.initialize().then(() => {

@@ -19,8 +19,6 @@ VenmoView.prototype.initialize = function () {
   var self = this;
   var venmoConfiguration = assign({}, self.model.merchantConfiguration.venmo, {client: this.client});
 
-  self.model.asyncDependencyStarting();
-
   return btVenmo.create(venmoConfiguration).then(function (venmoInstance) {
     self.venmoInstance = venmoInstance;
 
@@ -57,7 +55,7 @@ VenmoView.prototype.initialize = function () {
       });
     });
 
-    self.model.asyncDependencyReady();
+    self.model.asyncDependencyReady(VenmoView.ID);
   }).catch(function (err) {
     self.model.asyncDependencyFailed({
       view: self.ID,

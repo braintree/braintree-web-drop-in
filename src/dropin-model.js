@@ -6,6 +6,7 @@ var EventEmitter = require('@braintree/event-emitter');
 var constants = require('./constants');
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
+var dependencySetupStates = constants.dependencySetupStates;
 var isGuestCheckout = require('./lib/is-guest-checkout');
 var Promise = require('./lib/promise');
 var paymentSheetViews = require('./views/payment-sheet-views');
@@ -24,16 +25,28 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
+var ASYNC_DEPENDENCIES = DEFAULT_PAYMENT_OPTION_PRIORITY.concat(['threeDSecure', 'dataCollector']);
+var DEPENDENCY_READY_CHECK_INTERVAL = 200;
 
 function DropinModel(options) {
   this.rootNode = options.container;
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
-
   this.isGuestCheckout = isGuestCheckout(options.client);
 
-  this.dependenciesInitializing = 0;
-  this.dependencySuccessCount = 0;
+  this.dependencyStates = ASYNC_DEPENDENCIES.reduce(function (total, dependencyKey) {
+    if (dependencyKey in options.merchantConfiguration) {
+      total[dependencyKey] = dependencySetupStates.INITIALIZING;
+    }
+
+    return total;
+  }, {});
+  // card is on by default, so we need to set it's state to INITIALIZING
+  // unless the merchant has specifically opted out of using the card form
+  if (options.merchantConfiguration.card !== false) {
+    this.dependencyStates.card = dependencySetupStates.INITIALIZING;
+  }
+
   this.failedDependencies = {};
   this._options = options;
   this._setupComplete = false;
@@ -50,13 +63,30 @@ EventEmitter.createChild(DropinModel);
 
 DropinModel.prototype.initialize = function () {
   var self = this;
+  var dependencyReadyInterval = setInterval(function () {
+    var ready = true;
+
+    Object.keys(self.dependencyStates).forEach(function (dep) {
+      if (self.dependencyStates[dep] === dependencySetupStates.INITIALIZING) {
+        ready = false;
+      }
+    });
+
+    if (!ready) {
+      return;
+    }
+
+    clearInterval(dependencyReadyInterval);
+
+    self._emit('asyncDependenciesReady');
+  }, DEPENDENCY_READY_CHECK_INTERVAL);
 
   return vaultManager.create({
     client: self._options.client
   }).then(function (vaultManagerInstance) {
     self._vaultManager = vaultManagerInstance;
 
-    return getSupportedPaymentOptions(self._options);
+    return self._getSupportedPaymentOptions(self._options);
   }).then(function (paymentOptions) {
     self.supportedPaymentOptions = paymentOptions;
 
@@ -224,14 +254,21 @@ DropinModel.prototype.reportAppSwitchError = function (sheetId, error) {
   };
 };
 
-DropinModel.prototype.asyncDependencyStarting = function () {
-  this.dependenciesInitializing++;
+DropinModel.prototype.hasAtLeastOneAvailablePaymentOption = function () {
+  var self = this;
+  var i;
+
+  for (i = 0; i < this.supportedPaymentOptions.length; i++) {
+    if (self.dependencyStates[this.supportedPaymentOptions[i]] === dependencySetupStates.DONE) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
-DropinModel.prototype.asyncDependencyReady = function () {
-  this.dependencySuccessCount++;
-  this.dependenciesInitializing--;
-  this._checkAsyncDependencyFinished();
+DropinModel.prototype.asyncDependencyReady = function (key) {
+  this.dependencyStates[key] = dependencySetupStates.DONE;
 };
 
 DropinModel.prototype.asyncDependencyFailed = function (options) {
@@ -239,14 +276,7 @@ DropinModel.prototype.asyncDependencyFailed = function (options) {
     return;
   }
   this.failedDependencies[options.view] = options.error;
-  this.dependenciesInitializing--;
-  this._checkAsyncDependencyFinished();
-};
-
-DropinModel.prototype._checkAsyncDependencyFinished = function () {
-  if (this.dependenciesInitializing === 0) {
-    this._emit('asyncDependenciesReady');
-  }
+  this.dependencyStates[options.view] = dependencySetupStates.FAILED;
 };
 
 DropinModel.prototype.cancelInitialization = function (error) {
@@ -334,7 +364,8 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
   });
 };
 
-function getSupportedPaymentOptions(options) {
+DropinModel.prototype._getSupportedPaymentOptions = function (options) {
+  var self = this;
   var paymentOptionPriority = options.merchantConfiguration.paymentOptionPriority || DEFAULT_PAYMENT_OPTION_PRIORITY;
   var promises;
 
@@ -346,7 +377,13 @@ function getSupportedPaymentOptions(options) {
   paymentOptionPriority = paymentOptionPriority.filter(function (item, pos) { return paymentOptionPriority.indexOf(item) === pos; });
 
   promises = paymentOptionPriority.map(function (paymentOption) {
-    return getPaymentOption(paymentOption, options);
+    return getPaymentOption(paymentOption, options).then(function (result) {
+      if (!result.success) {
+        self.dependencyStates[result.id] = dependencySetupStates.NOT_ENABLED;
+      }
+
+      return result;
+    });
   });
 
   return Promise.all(promises).then(function (result) {
@@ -360,7 +397,7 @@ function getSupportedPaymentOptions(options) {
 
     return result.map(function (item) { return item.id; });
   });
-}
+};
 
 function getPaymentOption(paymentOption, options) {
   return isPaymentOptionEnabled(paymentOption, options).then(function (success) {

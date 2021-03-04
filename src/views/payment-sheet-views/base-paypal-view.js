@@ -34,7 +34,6 @@ BasePayPalView.prototype.initialize = function () {
 
   this.paypalConfiguration = assign({}, paypalConfiguration);
 
-  this.model.asyncDependencyStarting();
   asyncDependencyTimeoutHandler = setTimeout(function () {
     self.model.asyncDependencyFailed({
       view: self.ID,
@@ -94,7 +93,7 @@ BasePayPalView.prototype.initialize = function () {
     buttonSelector = dropinWrapperId + ' ' + buttonSelector;
 
     return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
-      self.model.asyncDependencyReady();
+      self.model.asyncDependencyReady(paypalType);
       setupComplete = true;
       clearTimeout(asyncDependencyTimeoutHandler);
     });
