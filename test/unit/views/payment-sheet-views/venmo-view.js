@@ -61,19 +61,12 @@ describe('VenmoView', () => {
       testContext.view = new VenmoView(testContext.venmoViewOptions);
     });
 
-    test('starts async dependency', () => {
-      jest.spyOn(testContext.view.model, 'asyncDependencyStarting').mockImplementation();
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
-      });
-    });
-
     test('notifies async dependency', () => {
       jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
 
       return testContext.view.initialize().then(() => {
         expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledWith('venmo');
       });
     });
 

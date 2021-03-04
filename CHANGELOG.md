@@ -3,6 +3,8 @@ CHANGELOG
 
 unreleased
 ----------
+- Fix issue where Drop-in may error or not set up completely due to dependency setup race condition (#700)
+- Fix issue where Drop-in may report it is ready even though no payment options are actually available
 - Google Pay
   - Fix issue where passing custom button option would caused a developer error in the console (#701)
 

@@ -44,6 +44,12 @@ module.exports = {
     unionpay: 'UnionPay',
     maestro: 'Maestro'
   },
+  dependencySetupStates: {
+    DONE: 'done',
+    FAILED: 'failed',
+    INITIALIZING: 'initializing',
+    NOT_ENABLED: 'not-enabled'
+  },
   errors: {
     NO_PAYMENT_METHOD_ERROR: 'No payment method is available.',
     DEVELOPER_MISCONFIGURATION_MESSAGE: 'Developer Error: Something went wrong. Check the console for details.'
