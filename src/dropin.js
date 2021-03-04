@@ -38,7 +38,12 @@ var PASS_THROUGH_EVENTS = [
   'card:focus',
   'card:inputSubmitRequest',
   'card:notEmpty',
-  'card:validityChange'
+  'card:validityChange',
+
+  // 3DS Events
+  '3ds:customer-canceled',
+  '3ds:authentication-modal-render',
+  '3ds:authentication-modal-close'
 ];
 var UPDATABLE_CONFIGURATION_OPTIONS = [
   paymentOptionIDs.paypal,
@@ -165,6 +170,11 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  *  * [`card:inputSubmitRequest`](#event:card:inputSubmitRequest)
  *  * [`card:notEmpty`](#event:card:notEmpty)
  *  * [`card:validityChange`](#event:card:validityChange)
+ *
+ *  _3DS Specific Events_
+ *  * [`3ds:customer-canceled`](#event:3ds:customer-canceled)
+ *  * [`3ds:authentication-modal-render`](#event:3ds:authentication-modal-render)
+ *  * [`3ds:authentication-modal-close`](#event:3ds:authentication-modal-close)
  * @returns {void}
  * @example
  * <caption>Dynamically enable or disable your submit button based on whether or not the payment method is requestable</caption>
@@ -347,6 +357,24 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * The underlying [hosted fields `validityChange` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/HostedFields.html#event:validityChange).
  * @event Dropin#card:validityChange
  * @type {Dropin~card:validityChange}
+ */
+
+/**
+ * The underlying [3D Secure `customer-canceled` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/ThreeDSecure.html#event:customer-canceled).
+ * @event Dropin#3ds:customer-canceled
+ * @type {Dropin~3ds:customer-canceled}
+ */
+
+/**
+ * The underlying [3D Secure `authentication-modal-render` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/ThreeDSecure.html#event:authentication-modal-render).
+ * @event Dropin#3ds:authentication-modal-render
+ * @type {Dropin~3ds:authentication-modal-render}
+ */
+
+/**
+ * The underlying [3D Secure `authentication-modal-close` event](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/ThreeDSecure.html#event:authentication-modal-close).
+ * @event Dropin#3ds:authentication-modal-close
+ * @type {Dropin~3ds:authentication-modal-close}
  */
 
 /**

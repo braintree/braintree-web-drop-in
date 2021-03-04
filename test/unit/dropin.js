@@ -2298,6 +2298,26 @@ describe('Dropin', () => {
     });
   });
 
+  describe('3ds events', () => {
+    test.each([
+      'customer-canceled',
+      'authentication-modal-render',
+      'authentication-modal-close'
+    ])('emits 3ds:%s event', (eventName, done) => {
+      const instance = new Dropin(testContext.dropinOptions);
+      const payload = {};
+
+      instance.on(`3ds:${eventName}`, (emittedPayload) => {
+        expect(emittedPayload).toBe(payload);
+        done();
+      });
+
+      instance._initialize(() => {
+        instance._model._emit(`3ds:${eventName}`, payload);
+      });
+    });
+  });
+
   describe('payment option selected event', () => {
     test(
       'emits paymentOptionSelected when the model emits paymentOptionSelected',

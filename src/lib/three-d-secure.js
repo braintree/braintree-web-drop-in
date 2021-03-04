@@ -4,9 +4,15 @@ var assign = require('./assign').assign;
 var threeDSecure = require('braintree-web/three-d-secure');
 
 var DEFAULT_ACS_WINDOW_SIZE = '03';
+var PASSTHROUGH_EVENTS = [
+  'customer-canceled',
+  'authentication-modal-render',
+  'authentication-modal-close'
+];
 
 function ThreeDSecure(client, model) {
   this._client = client;
+  this._model = model;
   this._config = assign({}, model.merchantConfiguration.threeDSecure);
 }
 
@@ -18,6 +24,12 @@ ThreeDSecure.prototype.initialize = function () {
     version: 2
   }).then(function (instance) {
     self._instance = instance;
+
+    PASSTHROUGH_EVENTS.forEach(function (eventName) {
+      self._instance.on(eventName, function (event) {
+        self._model._emit('3ds:' + eventName, event);
+      });
+    });
   });
 };
 

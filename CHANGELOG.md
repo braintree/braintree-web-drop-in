@@ -7,6 +7,10 @@ unreleased
 - Fix issue where Drop-in may report it is ready even though no payment options are actually available
 - Google Pay
   - Fix issue where passing custom button option would caused a developer error in the console (#701)
+- 3D Secure
+  - Add `3ds:customer-canceled` event (#690)
+  - Add `3ds:authentication-modal-render` event
+  - Add `3ds:authentication-modal-close` event
 
 1.26.1
 ------
