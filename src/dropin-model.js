@@ -66,7 +66,7 @@ DropinModel.prototype.initialize = function () {
   var dependencyReadyInterval = setInterval(function () {
     var ready = true;
 
-    ASYNC_DEPENDENCIES.forEach(function (dep) {
+    Object.keys(self.dependencyStates).forEach(function (dep) {
       if (self.dependencyStates[dep] === dependencySetupStates.INITIALIZING) {
         ready = false;
       }
