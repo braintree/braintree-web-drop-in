@@ -86,7 +86,8 @@ fakeBTInstances = {
   threeDSecure: {
     verifyCard: function () {},
     cancelVerifyCard: function () {},
-    teardown: function () {}
+    teardown: function () {},
+    on: function () {}
   }
 };
 

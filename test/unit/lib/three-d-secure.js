@@ -25,6 +25,7 @@ describe('ThreeDSecure', () => {
     });
     jest.spyOn(testContext.threeDSecureInstance, 'verifyCard').mockImplementation();
     jest.spyOn(testContext.threeDSecureInstance, 'cancelVerifyCard').mockImplementation();
+    jest.spyOn(testContext.threeDSecureInstance, 'on').mockImplementation();
 
     jest.spyOn(classList, 'add').mockImplementation();
     jest.spyOn(classList, 'remove').mockImplementation();
@@ -46,6 +47,22 @@ describe('ThreeDSecure', () => {
           version: 2
         });
         expect(tds._instance).toBe(testContext.threeDSecureInstance);
+      });
+    });
+
+    test('adds event listeners for 3ds specific events', () => {
+      const client = {};
+      const tds = new ThreeDSecure(client, testContext.model);
+
+      testContext.threeDSecureInstance.on.mockImplementation((eventName, cb) => {
+        cb({ someEvent: 'foo' });
+      });
+
+      return tds.initialize().then(() => {
+        expect(testContext.model._emit).toBeCalledTimes(3);
+        expect(testContext.model._emit).toBeCalledWith('3ds:customer-canceled', { someEvent: 'foo' });
+        expect(testContext.model._emit).toBeCalledWith('3ds:authentication-modal-render', { someEvent: 'foo' });
+        expect(testContext.model._emit).toBeCalledWith('3ds:authentication-modal-close', { someEvent: 'foo' });
       });
     });
   });
