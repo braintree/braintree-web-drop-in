@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.27.0
+------
 - Update braintree-web to v3.74.0
 - Fix issue where Drop-in may error or not set up completely due to dependency setup race condition (#700)
 - Fix issue where Drop-in may report it is ready even though no payment options are actually available
