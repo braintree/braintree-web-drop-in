@@ -62,18 +62,13 @@ function DropinModel(options) {
 EventEmitter.createChild(DropinModel);
 
 DropinModel.prototype.initialize = function () {
+  var dep;
   var self = this;
   var dependencyReadyInterval = setInterval(function () {
-    var ready = true;
-
-    Object.keys(self.dependencyStates).forEach(function (dep) {
+    for (dep in self.dependencyStates) {
       if (self.dependencyStates[dep] === dependencySetupStates.INITIALIZING) {
-        ready = false;
+        return;
       }
-    });
-
-    if (!ready) {
-      return;
     }
 
     clearInterval(dependencyReadyInterval);
