@@ -831,6 +831,13 @@ Dropin.prototype._handleAppSwitch = function () {
  * });
  */
 Dropin.prototype.requestPaymentMethod = function (options) {
+  // NEXT_MAJOR_VERSION
+  // what should happen when this method is called while a payment
+  // method is already being requested? Should it error? Should
+  // they both resolve with the payload from the original request?
+  // this is only important because when doing 3ds, multiple
+  // requests in quick succession can get you into a state
+  // where it errors because the 3ds verification is called twice
   var self = this;
 
   options = options || {};
