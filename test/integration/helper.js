@@ -52,22 +52,24 @@ module.exports = function createHelpers() {
     }
 
     browser.waitUntil(() => {
-      return $('#ready').getHTML(false) === 'ready';
+      return $('#ready').isExisting();
     }, {
       timeout: waitTime,
       timeoutMsg: `Expected Drop-in to be ready after ${waitTime / 1000} seconds.`
     });
+
+    browser.waitForElementToDissapear('.braintree-loader__container');
   });
 
   browser.addCommand('getResult', function () {
     browser.waitUntil(() => {
-      return $('#results').getHTML(false).trim() !== '';
+      return $('#results').getText().trim() !== '';
     }, {
       timeout: 3000,
       timeoutMsg: 'Expected result to be avaialble within 3 seconds.'
     });
 
-    const resultHtml = $('#results').getHTML(false).trim();
+    const resultHtml = $('#results').getText().trim();
 
     return JSON.parse(resultHtml);
   });
@@ -77,16 +79,21 @@ module.exports = function createHelpers() {
   });
 
   browser.addCommand('hostedFieldSendInput', function (key, value) {
-    const field = $(`iframe[id="braintree-hosted-field-${key}"]`);
+    const field = `iframe[id="braintree-hosted-field-${key}"]`;
 
-    field.click();
+    $(field).waitForExist();
+    $(field).click();
 
     if (!value) {
       value = DEFAULT_HOSTED_FIELDS_VALUES[key];
     }
 
     browser.inFrame(field, () => {
-      $(`.${key}`).typeKeys(value);
+      const selector = `.${key}`;
+
+      $(selector).waitForExist();
+
+      $(selector).addValue(value);
     });
   });
 
@@ -97,6 +104,7 @@ module.exports = function createHelpers() {
   browser.addCommand('openPayPalAndCompleteLogin', function (cb) {
     const parentWindow = browser.getWindowHandle();
 
+    $('.braintree-sheet__button--paypal iframe.zoid-visible').waitForExist();
     $('.braintree-sheet__button--paypal iframe.zoid-visible').click();
 
     browser.waitUntil(() => {
@@ -110,17 +118,22 @@ module.exports = function createHelpers() {
 
     browser.switchToWindow(popupHandle);
 
-    if ($('#injectedUnifiedLogin iframe').isExisting()) {
-      const loginIframe = $('#injectedUnifiedLogin iframe');
+    browser.waitForElementToDissapear('.spinner');
 
-      browser.inFrame(loginIframe, () => {
-        $('#email').typeKeys(process.env.PAYPAL_USERNAME);
-        $('#password').typeKeys(process.env.PAYPAL_PASSWORD);
+    // in the case where an email cannot be found,
+    // this indicates that the user is already logged in
+    // from a previous test sharing the same browser session
+    // (this makes our tests faster to not need to reload the
+    // browser session on every PayPal test)
+    if ($('#injectedUnifiedLogin iframe').isExisting()) {
+      browser.inFrame('#injectedUnifiedLogin iframe', () => {
+        browser.typeKeys('#email', process.env.PAYPAL_USERNAME);
+        browser.typeKeys('#password', process.env.PAYPAL_PASSWORD);
 
         $('#btnLogin').click();
       });
-    } else {
-      $('#email').typeKeys(process.env.PAYPAL_USERNAME);
+    } else if ($('#email').isExisting()) {
+      browser.typeKeys('#email', process.env.PAYPAL_USERNAME);
 
       if ($('#splitEmail').isExisting()) {
         $('#btnNext').click();
@@ -130,7 +143,7 @@ module.exports = function createHelpers() {
 
       $('#password').waitForDisplayed();
 
-      $('#password').typeKeys(process.env.PAYPAL_PASSWORD);
+      browser.typeKeys('#password', process.env.PAYPAL_PASSWORD);
 
       $('#btnLogin').click();
 
@@ -154,6 +167,11 @@ module.exports = function createHelpers() {
 
     browser.clickConfirmButton();
 
+    browser.waitUntil(() => {
+      return browser.getWindowHandles().length === 1;
+    }, {
+      timeout: PAYPAL_TIMEOUT
+    });
     browser.switchToWindow(parentWindow);
 
     browser.waitForElementToDissapear('.paypal-checkout-sandbox-iframe');
@@ -182,6 +200,8 @@ module.exports = function createHelpers() {
     if ($('#acceptAllButton').isDisplayed()) {
       $('#acceptAllButton').click();
     }
+
+    browser.waitForConfirmButtonEnabled();
 
     if ($('#fiSubmitButton').isDisplayed()) {
       $('#fiSubmitButton').click();
@@ -221,11 +241,7 @@ module.exports = function createHelpers() {
   });
 
   browser.addCommand('inFrame', function (iframe, cb) {
-    if (browser.name() === 'MICROSOFTEDGE') {
-      iframe = iframe.getProperty('name');
-    }
-
-    browser.switchToFrame(iframe);
+    browser.switchToFrame($(iframe));
 
     cb();
 
@@ -251,9 +267,11 @@ module.exports = function createHelpers() {
     }
   }, true);
 
-  browser.addCommand('typeKeys', function (keys) {
-    this.addValue(keys);
-  }, true);
+  browser.addCommand('typeKeys', function (selectorString, keys) {
+    browser.execute(function (value, selector) {
+      document.querySelector(selector).value = value;
+    }, keys, selectorString);
+  });
 
   browser.addCommand('reloadSessionOnRetry', (test) => {
     if (test._currentRetry > 0) {

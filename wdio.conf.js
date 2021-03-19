@@ -21,87 +21,47 @@ if (!process.env.GITHUB_REF) {
 
 const build = `${projectName} - ${type} ${Date.now()}`;
 
-const defaultCapabilities = {
-  project: projectName,
-  build,
-  'browserstack.debug': true,
-  'browserstack.local': true,
-  'browserstack.networkLogs': true,
-  'browserstack.localIdentifier': localIdentifier
-};
-
 const desktopCapabilities = {
-  ...defaultCapabilities,
-  os: 'windows',
-  os_version: '10',
-  resolution: screenResolution
-};
-
-const mobileCapabilities = {
-  ...defaultCapabilities,
-  real_mobile: true,
-  'browserstack.appium_version': '1.14.0'
+  'bstack:options' : {
+    os : 'Windows',
+    osVersion : '10',
+    local : 'true',
+    debug : 'true',
+    seleniumVersion : '3.14.0',
+    localIdentifier,
+  },
+  browserVersion: 'latest',
+  acceptInsecureCerts: true
 };
 
 let capabilities = [
   {
     ...desktopCapabilities,
-    browserName: 'Google Chrome',
-    browser: 'chrome',
-    'browserstack.console': 'info'
+    browserName: 'Chrome',
   },
-  // TODO mobile browsers are having trouble with browser.keys
-  //{
-  //  ...mobileCapabilities,
-  //  browserName: 'iPhone XS Safari',
-  //  device: 'iPhone XS',
-  //  os_version: '13'
-  //},
-  //{
-  //  ...mobileCapabilities,
-  //  browserName: 'Google Pixel 3 Chrome',
-  //  device: 'Google Pixel 3',
-  //  os_version: '9.0',
-  //  chromeOptions: {
-  //    prefs: {
-  //      // disable chrome's annoying password manager, may be unnec
-  //      'profile.password_manager_enabled': false,
-  //      credentials_enable_service: false,
-  //      password_manager_enabled: false
-  //    }
-  //  }
-  //},
   {
     ...desktopCapabilities,
-    browser: 'IE',
-    browserName: 'IE 11',
-    browser_version: '11.0',
-    'browserstack.selenium_version' : '3.141.5',
-    // https://stackoverflow.com/a/42340325/7851516
-    'browserstack.bfcache': '0',
-    // don't update this! There's a weird bug in the
-    // 64 bit ie driver that prevents the shift key
-    // from working which means that an email can
-    // never be entered because the "@" key cannot
-    // be entered. This doesn't occur in the 32 bit
-    // version, so we pin to that
-    'browserstack.ie.arch' : 'x32'
+    browserName: 'IE',
+    browserVersion: '11.0',
+    'bstack:options': {
+      ...desktopCapabilities['bstack:options'],
+      seleniumVersion: '3.141.5',
+      bfcache: '0',
+      ie : {
+      // don't update this! There's a weird bug in the
+      // 64 bit ie driver that prevents the shift key
+      // from working which means that an email can
+      // never be entered because the "@" key cannot
+      // be entered. This doesn't occur in the 32 bit
+      // version, so we pin to that
+        arch : 'x32',
+        driver : '3.141.5',
+      }
+    }
   },
-  // TODO edge has been pretty flaky
-  // disable it for now to make the transition
-  // to browserstack, but look into re-enabling
-  // it once the transition is complete
-  //{
-  //  ...desktopCapabilities,
-  //  browserName: 'Microsoft Edge',
-  //  browser: 'edge',
-  //  browser_version: '18.0'
-  //},
   {
     ...desktopCapabilities,
     browserName: 'Firefox',
-    browser: 'firefox',
-    'browserstack.console': 'info'
   },
 ];
 
@@ -111,16 +71,19 @@ let capabilities = [
 if (!process.env.RUN_PAYPAL_ONLY) {
   capabilities.push({
     ...desktopCapabilities,
-    browserName: 'Desktop Safari',
-    browser: 'safari',
-    os: 'OS X',
-    os_version: 'Catalina'
+    browserName: 'Safari',
+    browserVersion: '14.0',
+    'bstack:options': {
+      ...desktopCapabilities['bstack:options'],
+      os: 'OS X',
+      osVersion: 'Big Sur'
+    }
   });
 }
 
 if (ONLY_BROWSERS) {
   capabilities = ONLY_BROWSERS.split(',')
-    .map(browser => capabilities.find(config => config.browser.toLowerCase() === browser.toLowerCase()))
+    .map(browser => capabilities.find(config => config.browserName.toLowerCase() === browser.toLowerCase()))
     .filter(b => b); // in case an invalid value is passed and no corresponding capability is available
 
   if (capabilities.length === 0) {
@@ -160,7 +123,6 @@ exports.config = {
   logLevel: 'error',
   deprecationWarnings: true,
   bail: 0,
-  baseUrl: process.env.HOST || "bs-local.com",
   waitforTimeout: 20000,
   connectionRetryTimeout: 90000,
   connectionRetryCount: 1,
@@ -193,10 +155,7 @@ exports.config = {
             'Testing in the following browsers:',
             capabilities
               .map(
-                browser =>
-                  browser.real_mobile
-                    ? `${browser.device}@${browser.os_version}`
-                    : `${browser.browser}@${browser.browser_version}`
+                browser => `${browser.browserName}@${browser.browserVersion}`
               )
               .join(', ')
           );
@@ -210,14 +169,10 @@ exports.config = {
   before(capabilities) {
     createHelpers();
 
-    // Mobile devices/selenium don't support the following APIs yet
-    if (!capabilities.real_mobile) {
-      browser.maximizeWindow();
-      browser.setTimeout({
-        pageLoad: 10000,
-        script: 5 * 60 * 1000
-      });
-    }
+    browser.setTimeout({
+      pageLoad: 10000,
+      script: 5 * 60 * 1000
+    });
   },
   onComplete() {
     exports.bs_local.stop(() => {});
