@@ -3,7 +3,7 @@ CHANGELOG
 
 unreleased
 ------
-- Update braintree-web to v3.76.0
+- Update braintree-web to v3.76.1
 
 1.27.0
 ------
