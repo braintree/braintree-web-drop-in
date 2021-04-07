@@ -3,7 +3,9 @@ CHANGELOG
 
 unreleased
 ------
-- Update braintree-web to v3.76.1
+- Update braintree-web to v3.76.2
+- Fix issue where card view would not render in a shadow DOM within a shadow DOM
+- Fix issue where Venmo would setup in Firefox for iOS with `allowNewBrowserTab: false` set
 
 1.27.0
 ------
