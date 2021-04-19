@@ -91,6 +91,12 @@ PaymentMethodView.prototype.disableEditMode = function () {
   classList.remove(this.element, 'braintree-method--disabled');
 };
 
+PaymentMethodView.prototype.teardown = function () {
+  if (this.element.parentNode) {
+    this.element.parentNode.removeChild(this.element);
+  }
+};
+
 PaymentMethodView.prototype._choosePaymentMethod = function () {
   if (this.model.isInEditMode()) {
     return;

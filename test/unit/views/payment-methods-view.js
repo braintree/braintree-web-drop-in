@@ -3,6 +3,7 @@ const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
 const PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
 const PaymentMethodsView = require('../../../src/views/payment-methods-view');
+const PaymentMethodView = require('../../../src/views/payment-method-view');
 const DropinError = require('../../../src/lib/dropin-error');
 const classList = require('@braintree/class-list');
 const fake = require('../../helpers/fake');
@@ -228,8 +229,10 @@ describe('PaymentMethodsView', () => {
     });
 
     test(
-      'does not remove other payment methods in non-guest checkout',
+      'does not tear down other payment methods in non-guest checkout',
       () => {
+        jest.spyOn(PaymentMethodView.prototype, 'teardown');
+
         let model, paymentMethodsViews;
         const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
         const modelOptions = fake.modelOptions();
@@ -259,11 +262,14 @@ describe('PaymentMethodsView', () => {
 
           expect(paymentMethodsViews.views.length).toBe(2);
           expect(methodsContainer.childElementCount).toBe(2);
+          expect(PaymentMethodView.prototype.teardown).not.toBeCalled();
         });
       }
     );
 
-    test('removes other payment methods in guest checkout', () => {
+    test('tears down other payment methods in guest checkout', () => {
+      jest.spyOn(PaymentMethodView.prototype, 'teardown');
+
       let model, paymentMethodsViews;
       const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
       const modelOptions = fake.modelOptions();
@@ -287,6 +293,7 @@ describe('PaymentMethodsView', () => {
 
         expect(paymentMethodsViews.views.length).toBe(1);
         expect(methodsContainer.childElementCount).toBe(1);
+        expect(PaymentMethodView.prototype.teardown).toBeCalledTimes(1);
       });
     });
 
@@ -394,7 +401,8 @@ describe('PaymentMethodsView', () => {
         });
         testContext.paymentMethodsViews.views.push({
           paymentMethod: testContext.fakePaymentMethod,
-          element: testContext.element
+          element: testContext.element,
+          teardown: jest.fn()
         });
         testContext.paymentMethodsViews.container = {
           removeChild: jest.fn()
@@ -413,11 +421,12 @@ describe('PaymentMethodsView', () => {
       expect(testContext.paymentMethodsViews.views[0]).toBeFalsy();
     });
 
-    test('removes specified payment method div from DOM', () => {
+    test('tears down specified payment method', () => {
+      const teardown = testContext.paymentMethodsViews.views[0].teardown;
+
       testContext.paymentMethodsViews._removePaymentMethod(testContext.fakePaymentMethod);
 
-      expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledTimes(1);
-      expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledWith(testContext.element);
+      expect(teardown).toBeCalledTimes(1);
     });
 
     test('ignores payment methods that are not the exact object', () => {
@@ -641,12 +650,12 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test('removes all payment method views from container', () => {
-      jest.spyOn(testContext.paymentMethodsViews.container, 'removeChild').mockImplementation();
+    test('tears down all payment method views', () => {
+      jest.spyOn(PaymentMethodView.prototype, 'teardown').mockImplementation();
 
       testContext.paymentMethodsViews.refreshPaymentMethods();
 
-      expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledTimes(3);
+      expect(PaymentMethodView.prototype.teardown).toBeCalledTimes(3);
     });
 
     test(

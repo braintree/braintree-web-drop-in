@@ -335,4 +335,26 @@ describe('PaymentMethodView', () => {
       }
     );
   });
+
+  describe('teardown', () => {
+    test('removes element from the container', () => {
+      const paymentMethod = {
+        type: 'Foo',
+        nonce: 'nonce'
+      };
+      const view = new PaymentMethodView({
+        model: {},
+        strings: strings,
+        paymentMethod: paymentMethod
+      });
+
+      document.body.appendChild(view.element);
+      jest.spyOn(document.body, 'removeChild');
+
+      view.teardown();
+
+      expect(document.body.removeChild).toBeCalledTimes(1);
+      expect(document.body.removeChild).toBeCalledWith(view.element);
+    });
+  });
 });
