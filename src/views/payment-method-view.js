@@ -27,6 +27,7 @@ PaymentMethodView.prototype._initialize = function () {
   this.element = document.createElement('div');
   this.element.className = 'braintree-method';
   this.element.setAttribute('tabindex', '0');
+  this.element.setAttribute('role', 'button');
 
   addSelectionEventHandler(this.element, this._choosePaymentMethod.bind(this));
 
