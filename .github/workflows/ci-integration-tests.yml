@@ -49,7 +49,7 @@ jobs:
   paypal-on-firefox:
     if: always()
     needs: non-paypal-on-sensible-browsers
-    name: "PayPal Tests on Chrome, Firefox and Safari"
+    name: "PayPal Tests on Firefox"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
