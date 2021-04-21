@@ -123,4 +123,17 @@ describe('DeleteConfirmationView', () => {
       }
     );
   });
+
+  describe('onSelection', () => {
+    test('focuses the yes button', async () => {
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        cb();
+      });
+      const focusSpy = jest.spyOn(testContext.view.getElementById('delete-confirmation__yes'), 'focus');
+
+      testContext.view.onSelection();
+
+      expect(focusSpy).toBeCalledTimes(1);
+    });
+  });
 });

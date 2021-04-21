@@ -7,6 +7,7 @@ unreleased
 - Update browser-detection to v1.11.1
 - Fix issue where card view would not render in a shadow DOM within a shadow DOM
 - Fix issue where Venmo would setup in Firefox for iOS with `allowNewBrowserTab: false` set
+- Improve keyboard navigation
 
 1.27.0
 ------

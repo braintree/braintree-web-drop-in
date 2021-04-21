@@ -2,7 +2,10 @@ const analytics = require('../../../src/lib/analytics');
 const BaseView = require('../../../src/views/base-view');
 const fake = require('../../helpers/fake');
 const PaymentMethodView = require('../../../src/views/payment-method-view');
+const addSelectionEventHandler = require('../../../src/lib/add-selection-event-handler');
 const strings = require('../../../src/translations/en_US');
+
+jest.mock('../../../src/lib/add-selection-event-handler');
 
 describe('PaymentMethodView', () => {
   let config;
@@ -141,6 +144,36 @@ describe('PaymentMethodView', () => {
         expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).toBe(false);
       }
     );
+
+    test('calls model.confirmPaymentMethodDeletion when selection event occurs when in edit mode', () => {
+      config.model = {
+        isInEditMode: jest.fn().mockReturnValue(true),
+        confirmPaymentMethodDeletion: jest.fn()
+      };
+      // eslint-disable-next-line no-unused-vars
+      const view = new PaymentMethodView(config);
+      const handler = addSelectionEventHandler.mock.calls[0][1];
+
+      handler();
+
+      expect(config.model.confirmPaymentMethodDeletion).toBeCalledTimes(1);
+      expect(config.model.confirmPaymentMethodDeletion).toBeCalledWith(config.paymentMethod);
+    });
+
+    test('calls model.changeActivePaymentMethod when selection occurs when not in edit mode', () => {
+      config.model = {
+        isInEditMode: jest.fn().mockReturnValue(false),
+        changeActivePaymentMethod: jest.fn()
+      };
+      // eslint-disable-next-line no-unused-vars
+      const view = new PaymentMethodView(config);
+      const handler = addSelectionEventHandler.mock.calls[0][1];
+
+      handler();
+
+      expect(config.model.changeActivePaymentMethod).toBeCalledTimes(1);
+      expect(config.model.changeActivePaymentMethod).toBeCalledWith(config.paymentMethod);
+    });
   });
 
   describe('setActive', () => {
@@ -284,55 +317,25 @@ describe('PaymentMethodView', () => {
     );
   });
 
-  describe('edit mode', () => {
-    test(
-      'does not call model.changeActivePaymentMethod in click handler when in edit mode',
-      () => {
-        const model = fake.model();
-        const view = new PaymentMethodView({
-          model: model,
-          strings: strings,
-          paymentMethod: {
-            type: 'Foo',
-            nonce: 'nonce'
-          }
-        });
+  describe('teardown', () => {
+    test('removes element from the container', () => {
+      const paymentMethod = {
+        type: 'Foo',
+        nonce: 'nonce'
+      };
+      const view = new PaymentMethodView({
+        model: {},
+        strings: strings,
+        paymentMethod: paymentMethod
+      });
 
-        jest.spyOn(model, 'changeActivePaymentMethod').mockImplementation();
-        jest.spyOn(model, 'isInEditMode').mockReturnValue(true);
+      document.body.appendChild(view.element);
+      jest.spyOn(document.body, 'removeChild');
 
-        view._choosePaymentMethod();
+      view.teardown();
 
-        expect(view.model.changeActivePaymentMethod).not.toBeCalled();
-
-        model.isInEditMode.mockReturnValue(false);
-        view._choosePaymentMethod();
-
-        expect(view.model.changeActivePaymentMethod).toBeCalledTimes(1);
-      }
-    );
-
-    test(
-      'calls model.confirmPaymentMethodDeletion when delete icon is clicked',
-      () => {
-        const fakeModel = {
-          confirmPaymentMethodDeletion: jest.fn()
-        };
-        const paymentMethod = {
-          type: 'Foo',
-          nonce: 'nonce'
-        };
-        const view = new PaymentMethodView({
-          model: fakeModel,
-          strings: strings,
-          paymentMethod: paymentMethod
-        });
-
-        view._selectDelete();
-
-        expect(fakeModel.confirmPaymentMethodDeletion).toBeCalledTimes(1);
-        expect(fakeModel.confirmPaymentMethodDeletion).toBeCalledWith(paymentMethod);
-      }
-    );
+      expect(document.body.removeChild).toBeCalledTimes(1);
+      expect(document.body.removeChild).toBeCalledWith(view.element);
+    });
   });
 });

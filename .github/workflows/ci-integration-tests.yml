@@ -46,10 +46,10 @@ jobs:
         with:
           local-testing: stop
 
-  paypal-on-sensible-browsers:
+  paypal-on-firefox:
     if: always()
     needs: non-paypal-on-sensible-browsers
-    name: "PayPal Tests on Chrome, Firefox and Safari"
+    name: "PayPal Tests on Firefox"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -75,11 +75,88 @@ jobs:
           rm -rf node_modules/@types/mocha
           sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
           npm run development & echo "starting integration app"
-      - name: "PayPal tests on Chrome, Safari and Firefox"
+      - name: "PayPal tests on Firefox"
         env:
-          ONLY_BROWSERS: chrome,safari,firefox
+          ONLY_BROWSERS: firefox
         run: npm run test:integration:paypal-only
       - name: "BrowserStackLocal Stop"
         uses: "browserstack/github-actions/setup-local@master"
         with:
           local-testing: stop
+
+  paypal-on-chrome:
+    if: always()
+    needs: paypal-on-firefox
+    name: "PayPal Tests on Chrome"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "BrowserStack Env Setup"
+        uses: "browserstack/github-actions/setup-env@master"
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          build-name: BUILD_INFO
+          project-name: REPO_NAME
+      - name: "BrowserStackLocal Setup"
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: start
+          local-identifier: random
+      - name: "Node Setup"
+        uses: "actions/setup-node@v1"
+        with:
+          node-version: "12.x"
+      - name: "Demo App Setup"
+        run: |
+          npm install
+          rm -rf node_modules/@types/mocha
+          sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+          npm run development & echo "starting integration app"
+      - name: "PayPal tests on Chrome"
+        env:
+          ONLY_BROWSERS: chrome
+        run: npm run test:integration:paypal-only
+      - name: "BrowserStackLocal Stop"
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: stop
+
+  # safari is struggling to open the PayPal popup for some reason
+  # paypal-on-safari:
+  #   if: always()
+  #   needs: paypal-on-chrome
+  #   name: "PayPal Tests on Safari"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: "BrowserStack Env Setup"
+  #       uses: "browserstack/github-actions/setup-env@master"
+  #       with:
+  #         username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+  #         access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+  #         build-name: BUILD_INFO
+  #         project-name: REPO_NAME
+  #     - name: "BrowserStackLocal Setup"
+  #       uses: "browserstack/github-actions/setup-local@master"
+  #       with:
+  #         local-testing: start
+  #         local-identifier: random
+  #     - name: "Node Setup"
+  #       uses: "actions/setup-node@v1"
+  #       with:
+  #         node-version: "12.x"
+  #     - name: "Demo App Setup"
+  #       run: |
+  #         npm install
+  #         rm -rf node_modules/@types/mocha
+  #         sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+  #         npm run development & echo "starting integration app"
+  #     - name: "PayPal tests on Safari"
+  #       env:
+  #         ONLY_BROWSERS: safari
+  #       run: npm run test:integration:paypal-only
+  #     - name: "BrowserStackLocal Stop"
+  #       uses: "browserstack/github-actions/setup-local@master"
+  #       with:
+  #         local-testing: stop

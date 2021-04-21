@@ -58,4 +58,10 @@ DeleteConfirmationView.prototype.applyPaymentMethod = function (paymentMethod) {
   this._messageBox.innerText = messageText;
 };
 
+DeleteConfirmationView.prototype.onSelection = function () {
+  window.requestAnimationFrame(function () {
+    this._yesButton.focus();
+  }.bind(this));
+};
+
 module.exports = DeleteConfirmationView;

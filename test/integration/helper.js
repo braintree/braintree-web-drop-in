@@ -177,16 +177,34 @@ module.exports = function createHelpers() {
     browser.waitForElementToDissapear('.paypal-checkout-sandbox-iframe');
   });
 
-  browser.addCommand('confirmButtonIsEnabled', function () {
-    return ($('#payment-submit-btn').isDisplayed() && $('#payment-submit-btn').isEnabled()) ||
-      ($('#fiSubmitButton').isDisplayed() && $('#fiSubmitButton').isEnabled()) ||
-      ($('#consentButton').isDisplayed() && $('#consentButton').isEnabled()) ||
-      ($('#confirmButtonTop').isDisplayed() && $('#confirmButtonTop').isEnabled());
+  browser.addCommand('getPayPalConfirmButtonSelector', function () {
+    browser.waitUntil(() => {
+      return $('#fiSubmitButton').isDisplayed() ||
+        $('#consentButton').isDisplayed() ||
+        $('#payment-submit-btn').isDisplayed() ||
+        $('#confirmButtonTop').isDisplayed();
+    }, {
+      timeout: PAYPAL_TIMEOUT
+    });
+
+    if ($('#fiSubmitButton').isDisplayed()) {
+      return '#fiSubmitButton';
+    } else if ($('#consentButton').isDisplayed()) {
+      return '#consentButton';
+    } else if ($('#payment-submit-btn').isDisplayed()) {
+      return '#payment-submit-btn';
+    } else if ($('#confirmButtonTop').isDisplayed()) {
+      return '#confirmButtonTop';
+    }
+
+    throw new Error('Could not find confirm payment button');
   });
 
   browser.addCommand('waitForConfirmButtonEnabled', function () {
     browser.waitUntil(() => {
-      return browser.confirmButtonIsEnabled();
+      const selector = browser.getPayPalConfirmButtonSelector();
+
+      return $(selector).isEnabled();
     }, {
       timeout: PAYPAL_TIMEOUT
     });
@@ -203,15 +221,10 @@ module.exports = function createHelpers() {
 
     browser.waitForConfirmButtonEnabled();
 
-    if ($('#fiSubmitButton').isDisplayed()) {
-      $('#fiSubmitButton').click();
-    } else if ($('#consentButton').isDisplayed()) {
-      $('#consentButton').click();
-    } else if ($('#payment-submit-btn').isDisplayed()) {
-      $('#payment-submit-btn').click();
-    } else if ($('#confirmButtonTop').isDisplayed()) {
-      $('#confirmButtonTop').click();
-    }
+    const selector = browser.getPayPalConfirmButtonSelector();
+
+    $(selector).scrollIntoView();
+    $(selector).click();
   });
 
   browser.addCommand('waitForElementToDissapear', function (selector) {
