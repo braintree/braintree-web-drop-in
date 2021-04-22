@@ -2,7 +2,6 @@
 
 var btClient = require('braintree-web/client');
 var constants = require('../constants');
-var Promise = require('./promise');
 var braintreeClientVersion = require('braintree-web/client').VERSION;
 var VERSION = '__VERSION__';
 

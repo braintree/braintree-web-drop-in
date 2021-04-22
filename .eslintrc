@@ -9,7 +9,7 @@
   },
   "env": {
     "es6": true,
-    "browser": true,
+    "browser": true
   },
   "rules": {
     "object-curly-spacing": [

@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Makslengden for kortinnehaverens navn er 256 tegn.",
   "fieldEmptyForNumber": "Oppgi et nummer.",
   "fieldEmptyForPostalCode": "Oppgi et postnummer.",
+  "fieldInvalidForCardholderName": "Denne kortinnehaverens navn er ikke gyldig.",
   "fieldInvalidForCvv": "Denne sikkerhetskoden er ikke gyldig.",
   "fieldInvalidForExpirationDate": "Denne utløpsdatoen er ikke gyldig.",
   "fieldInvalidForNumber": "Dette kortnummeret er ikke gyldig.",

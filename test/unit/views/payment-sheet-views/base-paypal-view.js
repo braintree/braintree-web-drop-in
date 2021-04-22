@@ -8,7 +8,6 @@ jest.mock('../../../../src/lib/analytics');
 const BaseView = require('../../../../src/views/base-view');
 const DropinModel = require('../../../../src/dropin-model');
 const DropinError = require('../../../../src/lib/dropin-error');
-const Promise = require('../../../../src/lib/promise');
 const assets = require('@braintree/asset-loader');
 const fake = require('../../../helpers/fake');
 const fs = require('fs');
@@ -145,7 +144,10 @@ describe('BasePayPalView', () => {
     it('calls paypal.Button.render', () => {
       return testContext.view.initialize().then(() => {
         expect(testContext.paypal.Button.render).toBeCalledTimes(1);
-        expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-button"]');
+        expect(testContext.paypal.Button.render).toBeCalledWith(
+          expect.any(Object),
+          expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-button"\]/)
+        );
       });
     });
 
@@ -759,7 +761,10 @@ describe('BasePayPalView', () => {
 
       it('uses the PayPal button selector', () => {
         return testContext.view.initialize().then(() => {
-          expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-button"]');
+          expect(testContext.paypal.Button.render).toBeCalledWith(
+            expect.any(Object),
+            expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-button"\]/)
+          );
         });
       });
     });
@@ -822,7 +827,10 @@ describe('BasePayPalView', () => {
         testContext.view._isPayPalCredit = true;
 
         return testContext.view.initialize().then(() => {
-          expect(testContext.paypal.Button.render).toBeCalledWith(expect.any(Object), '[data-braintree-id="paypal-credit-button"]');
+          expect(testContext.paypal.Button.render).toBeCalledWith(
+            expect.any(Object),
+            expect.stringMatching(/#braintree--dropin__.*\[data-braintree-id="paypal-credit-button"\]/)
+          );
         });
       });
 

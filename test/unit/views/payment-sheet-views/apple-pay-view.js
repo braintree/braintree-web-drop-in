@@ -30,7 +30,6 @@ describe('ApplePayView', () => {
       global.ApplePaySession = jest.fn().mockReturnValue(testContext.fakeApplePaySession);
       global.ApplePaySession.canMakePayments = jest.fn().mockReturnValue(true);
       global.ApplePaySession.supportsVersion = jest.fn().mockReturnValue(true);
-      global.ApplePaySession.canMakePaymentsWithActiveCard = jest.fn().mockResolvedValue(true);
       global.ApplePaySession.STATUS_FAILURE = 'failure';
       global.ApplePaySession.STATUS_SUCCESS = 'success';
       testContext.div.innerHTML = mainHTML;
@@ -133,47 +132,6 @@ describe('ApplePayView', () => {
         expect(error.message).toBe(fakeError.message);
       });
     });
-
-    it('calls canMakePaymentsWithActiveCard with merchantIdentifier when active payment view is changed to Apple Pay', () => {
-      return testContext.view.initialize().then(() => {
-        testContext.view.model.changeActivePaymentView(testContext.view.ID);
-
-        expect(global.ApplePaySession.canMakePaymentsWithActiveCard).toBeCalledTimes(1);
-        expect(global.ApplePaySession.canMakePaymentsWithActiveCard).toBeCalledWith(testContext.fakeApplePayInstance.merchantIdentifier);
-      });
-    });
-
-    it('reports error when canMakePaymentsWithActiveCard returns false in production mode',
-      done => {
-        testContext.model.environment = 'production';
-
-        global.ApplePaySession.canMakePaymentsWithActiveCard = jest.fn().mockResolvedValue(false);
-
-        testContext.view.initialize().then(() => {
-          testContext.view.model.reportError = err => {
-            expect(err).toBe('applePayActiveCardError');
-            done();
-          };
-          testContext.view.model.changeActivePaymentView(testContext.view.ID);
-        });
-      });
-
-    it('reports developer error when canMakePaymentsWithActiveCard returns false in sandbox mode',
-      done => {
-        testContext.model.environment = 'sandbox';
-
-        jest.spyOn(console, 'error').mockImplementation();
-        global.ApplePaySession.canMakePaymentsWithActiveCard = jest.fn().mockResolvedValue(false);
-
-        testContext.view.initialize().then(() => {
-          testContext.view.model.reportError = err => {
-            expect(err).toBe('developerError');
-            expect(console.error).toBeCalledWith('Could not find an active card. This may be because you\'re using a production iCloud account in a sandbox Apple Pay Session. Log in to a Sandbox iCloud account to test this flow, and add a card to your wallet. For additional assistance, visit  https://help.braintreepayments.com');
-            done();
-          };
-          testContext.view.model.changeActivePaymentView(testContext.view.ID);
-        });
-      });
 
     it('defaults the Apple Pay button style to black', () => {
       return testContext.view.initialize().then(() => {

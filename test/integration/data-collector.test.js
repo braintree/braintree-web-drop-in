@@ -1,5 +1,3 @@
-require('./helper');
-
 describe('Drop-in with Data Collector', function () {
   beforeEach(function () {
     browser.reloadSessionOnRetry(this.currentTest);

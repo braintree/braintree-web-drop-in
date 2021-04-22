@@ -1,6 +1,5 @@
 'use strict';
 
-var assign = require('./assign').assign;
 var threeDSecure = require('braintree-web/three-d-secure');
 
 var DEFAULT_ACS_WINDOW_SIZE = '03';
@@ -22,14 +21,12 @@ ThreeDSecure.prototype.initialize = function () {
 };
 
 ThreeDSecure.prototype.verify = function (payload, merchantProvidedData) {
-  var verifyOptions = assign({
+  var verifyOptions = Object.assign({
     amount: this._config.amount
   }, merchantProvidedData, {
     nonce: payload.nonce,
     bin: payload.details.bin,
-    // eslint-disable-next-line no-warning-comments
-    // TODO in the future, we will allow merchants to pass in a custom
-    //  onLookupComplete hook
+    // TODO in the future, we will allow merchants to pass in a custom onLookupComplete hook
     onLookupComplete: function (data, next) {
       next();
     }

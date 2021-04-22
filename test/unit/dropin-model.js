@@ -1268,6 +1268,21 @@ describe('DropinModel', () => {
       });
     });
 
+    it(
+      'fetches last used payment method instead of default when configured',
+      () => {
+        testContext.model.merchantConfiguration.showDefaultPaymentMethodFirst = false;
+        testContext.model.isGuestCheckout = false;
+        fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([]);
+
+        return testContext.model.getVaultedPaymentMethods().then(() => {
+          expect(fake.vaultManagerInstance.fetchPaymentMethods).toBeCalledWith({
+            defaultFirst: false
+          });
+        });
+      }
+    );
+
     it('only resolves supported payment method types', () => {
       fake.vaultManagerInstance.fetchPaymentMethods.mockResolvedValue([{
         nonce: '1-nonce',

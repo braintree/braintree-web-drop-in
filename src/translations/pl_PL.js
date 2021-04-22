@@ -20,6 +20,7 @@ module.exports = {
   "fieldTooLongForCardholderName": "Imię i nazwisko posiadacza karty musi mieć mniej niż 256 znaków.",
   "fieldEmptyForNumber": "Podaj numer.",
   "fieldEmptyForPostalCode": "Podaj kod pocztowy.",
+  "fieldInvalidForCardholderName": "To imię i nazwisko posiadacza karty jest nieprawidłowe.",
   "fieldInvalidForCvv": "Podany kod bezpieczeństwa jest nieprawidłowy.",
   "fieldInvalidForExpirationDate": "Podana data ważności jest nieprawidłowa.",
   "fieldInvalidForNumber": "Podany numer karty jest nieprawidłowy.",
