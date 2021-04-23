@@ -1,16 +1,24 @@
----
-  extends: braintree/client
-
-  rules:
-    valid-jsdoc:
-      - 2
-      - prefer:
-          return: returns
-        requireReturn: true
-        requireParamDescription: true
-        requireReturnDescription: true
-
-  globals:
-    __dirname: true
-    process: true
-    Promise: true # inevitable merge conflict: delete me
+{
+  "extends": [
+    "braintree/client",
+    "braintree/es6"
+  ],
+  "parserOptions": {
+    "sourceType": "script",
+    "ecmaVersion": 2018
+  },
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "rules": {
+    "object-curly-spacing": [
+      "error",
+      "always",
+      {
+        "arraysInObjects": false,
+        "objectsInObjects": false
+      }
+    ]
+  }
+}

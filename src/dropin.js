@@ -7,7 +7,6 @@ var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('@braintree/event-emitter');
 var assets = require('@braintree/asset-loader');
-var fs = require('fs');
 var MainView = require('./views/main-view');
 var paymentMethodsViewID = require('./views/payment-methods-view').ID;
 var paymentOptionsViewID = require('./views/payment-options-view').ID;
@@ -20,8 +19,8 @@ var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
-var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
-var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
+var mainHTML = require('./html/main.html');
+var svgHTML = require('./html/svgs.html');
 
 var ASSETS_URL = 'https://assets.braintreegateway.com';
 var PASS_THROUGH_EVENTS = [
@@ -594,7 +593,7 @@ Dropin.prototype.clearSelectedPaymentMethod = function () {
 
 Dropin.prototype._setUpDataCollector = function () {
   var self = this;
-  var config = Object.assign({}, self._merchantConfiguration.dataCollector, {authorization: self._authorization});
+  var config = Object.assign({}, self._merchantConfiguration.dataCollector, { authorization: self._authorization });
 
   this._model.asyncDependencyStarting();
   this._dataCollector = new DataCollector(config);
@@ -870,7 +869,7 @@ Dropin.prototype._injectStylesheet = function () {
 
   if (document.getElementById(constants.STYLESHEET_ID)) { return; }
 
-  loadStylesheetOptions.href = ASSETS_URL + '/web/dropin/' + VERSION + '/css/dropin@DOT_MIN.css';
+  loadStylesheetOptions.href = ASSETS_URL + '/web/dropin/' + VERSION + '/css/dropin.css';
 
   if (this._model.isInShadowDom) {
     // if Drop-in is in the shadow DOM, put the

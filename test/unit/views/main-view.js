@@ -21,7 +21,7 @@ const strings = require('../../../src/translations/en_US');
 const { yields } = require('../../helpers/yields');
 
 const templateHTML = fs.readFileSync(`${__dirname}/../../../src/html/main.html`, 'utf8');
-const CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+const { CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT } = require('../../../src/constants');
 
 describe('MainView', () => {
   let testContext;

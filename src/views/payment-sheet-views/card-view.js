@@ -1,6 +1,5 @@
 'use strict';
 
-var fs = require('fs');
 var BaseView = require('../base-view');
 var classList = require('@braintree/class-list');
 var constants = require('../../constants');
@@ -9,7 +8,7 @@ var hostedFields = require('braintree-web/hosted-fields');
 var isUtf8 = require('../../lib/is-utf-8');
 var transitionHelper = require('../../lib/transition-helper');
 
-var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
+var cardIconHTML = require('../../html/card-icons.html');
 
 var PASSTHROUGH_EVENTS = [
   'empty',
@@ -72,8 +71,9 @@ CardView.prototype.initialize = function () {
 
   this.model.asyncDependencyStarting();
 
-  // TODO we need some way to check if the merchant is actually enabled to process
-  // credit cards and then disable the card view if they are not
+  // eslint-disable-next-line no-warning-comments
+  // TODO we need some way to check if the merchant is actually enabled to
+  //  process credit cards and then disable the card view if they are not
   return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
     this._showSupportedCardIcons();

@@ -2,8 +2,9 @@ jest.mock('../../../../src/lib/analytics');
 
 /* eslint-disable no-new */
 
+// eslint-disable-next-line no-warning-comments
 // TODO should we assert on some analytics?
-// const analytics = require('../../../../src/lib/analytics');
+//  const analytics = require('../../../../src/lib/analytics');
 const BaseView = require('../../../../src/views/base-view');
 const DropinModel = require('../../../../src/dropin-model');
 const DropinError = require('../../../../src/lib/dropin-error');

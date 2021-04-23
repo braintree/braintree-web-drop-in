@@ -85,33 +85,29 @@ describe('PaymentOptionsView', () => {
 
     });
 
-    Object.keys(paymentOptionAttributes).forEach(optionName => {
-      const option = paymentOptionAttributes[optionName];
-
-      it(`adds a ${option.paymentOptionID} option`, () => {
-        const paymentOptionsView = new PaymentOptionsView({
-          element: testContext.element,
-          mainView: {},
-          model: modelThatSupports([option.paymentOptionID]),
-          strings: strings
-        });
-        const label = paymentOptionsView.container.querySelector('.braintree-option__label');
-        const icon = paymentOptionsView.container.querySelector('use');
-        const iconContainer = icon.parentElement;
-        const optionElement = paymentOptionsView.elements[option.paymentOptionID];
-
-        expect(label.getAttribute('aria-label')).toBe(option.optionLabel);
-        expect(label.innerHTML).toMatch(option.optionTitle);
-        expect(icon.getAttribute('xlink:href')).toBe(option.icon);
-        expect(optionElement.div).toBeDefined();
-        expect(optionElement.clickHandler).toBeInstanceOf(Function);
-
-        if (option.className) {
-          expect(iconContainer.classList.contains(option.className)).toBe(true);
-        } else {
-          expect(iconContainer.classList.contains('braintree-option__logo@CLASSNAME')).toBe(false);
-        }
+    it.each(Object.entries(paymentOptionAttributes))('adds a %s option', (name, option) => {
+      const paymentOptionsView = new PaymentOptionsView({
+        element: testContext.element,
+        mainView: {},
+        model: modelThatSupports([option.paymentOptionID]),
+        strings: strings
       });
+      const label = paymentOptionsView.container.querySelector('.braintree-option__label');
+      const icon = paymentOptionsView.container.querySelector('use');
+      const iconContainer = icon.parentElement;
+      const optionElement = paymentOptionsView.elements[option.paymentOptionID];
+
+      expect(label.getAttribute('aria-label')).toBe(option.optionLabel);
+      expect(label.innerHTML).toMatch(option.optionTitle);
+      expect(icon.getAttribute('xlink:href')).toBe(option.icon);
+      expect(optionElement.div).toBeDefined();
+      expect(optionElement.clickHandler).toBeInstanceOf(Function);
+
+      if (option.className) {
+        expect(iconContainer.classList.contains(option.className)).toBe(true);
+      } else {
+        expect(iconContainer.classList.contains('braintree-option__logo@CLASSNAME')).toBe(false);
+      }
     });
 
     it('sets the primary view to the payment option when clicked', () => {
@@ -162,23 +158,19 @@ describe('PaymentOptionsView', () => {
       };
     });
 
-    Object.keys(paymentOptionAttributes).forEach(optionName => {
-      const option = paymentOptionAttributes[optionName];
+    it.each(Object.entries(paymentOptionAttributes))('when the %s option is selected', (name, option) => {
+      let optionElement, paymentOptionsView;
+      const model = modelThatSupports([option.paymentOptionID]);
+      const viewConfiguration = testContext.viewConfiguration;
+      const eventName = `selected.${option.paymentOptionID}`;
 
-      it(`when the ${option.paymentOptionID} option is selected`, () => {
-        let optionElement, paymentOptionsView;
-        const model = modelThatSupports([option.paymentOptionID]);
-        const viewConfiguration = testContext.viewConfiguration;
-        const eventName = `selected.${option.paymentOptionID}`;
+      viewConfiguration.model = model;
+      paymentOptionsView = new PaymentOptionsView(viewConfiguration);
+      optionElement = paymentOptionsView.container.querySelector('.braintree-option');
 
-        viewConfiguration.model = model;
-        paymentOptionsView = new PaymentOptionsView(viewConfiguration);
-        optionElement = paymentOptionsView.container.querySelector('.braintree-option');
+      optionElement.click();
 
-        optionElement.click();
-
-        expect(analytics.sendEvent).toBeCalledWith(eventName);
-      });
+      expect(analytics.sendEvent).toBeCalledWith(eventName);
     });
   });
 });

@@ -8,31 +8,23 @@ const locales = fs.readdirSync('./src/translations').filter(fileName => {
     return false;
   }
 
-  if (fileName === 'index.js' || fileName === 'en_US.js') {
-    return false;
-  }
-
-  return true;
+  return !(fileName === 'index.js' || fileName === 'en_US.js');
 }).map(fileName => fileName.substring(0, fileName.length - 3)); // remove .js ending
 
 describe('translations', () => {
-  locales.forEach(key => {
-    it(`${key} locale has a key for each english translation`, () => {
-      const translation = require(`../../src/translations/${key}`);
-      const translationKeys = Object.keys(translation);
+  it.each(locales)('%s locale has a key for each english translation', key => {
+    const translation = require(`../../src/translations/${key}`);
+    const translationKeys = Object.keys(translation);
 
-      englishTranslationKeys.forEach(translationKey => {
-        expect(typeof translation[translationKey]).toBe('string');
-      });
-
-      expect(translationKeys.length).toBe(englishTranslationKeys.length);
+    englishTranslationKeys.forEach(translationKey => {
+      expect(typeof translation[translationKey]).toBe('string');
     });
+
+    expect(translationKeys.length).toBe(englishTranslationKeys.length);
   });
 
-  it('each 2 character alias corresponds to a translation object', () => {
-    Object.keys(translations.twoCharacterLocaleAliases).forEach(key => {
-      expect(translations.twoCharacterLocaleAliases[key]).toBeInstanceOf(Object);
-    });
+  it.each(Object.keys(translations.twoCharacterLocaleAliases))('alias %s corresponds to a translation object', key => {
+    expect(translations.twoCharacterLocaleAliases[key]).toBeInstanceOf(Object);
   });
 
   it('fiveCharacterLocales do not clobber twoCharacterLocalAliases', () => {

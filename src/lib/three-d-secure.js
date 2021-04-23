@@ -26,8 +26,7 @@ ThreeDSecure.prototype.verify = function (payload, merchantProvidedData) {
   }, merchantProvidedData, {
     nonce: payload.nonce,
     bin: payload.details.bin,
-    // TODO in the future, we will allow merchants to pass in a custom
-    //  onLookupComplete hook
+    // TODO in the future, we will allow merchants to pass in a custom onLookupComplete hook
     onLookupComplete: function (data, next) {
       next();
     }
