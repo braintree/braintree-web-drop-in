@@ -35,7 +35,7 @@ function DropinModel(options) {
   this.isGuestCheckout = isGuestCheckout(options.client);
 
   this.dependencyStates = ASYNC_DEPENDENCIES.reduce(function (total, dependencyKey) {
-    if (dependencyKey in options.merchantConfiguration) {
+    if (options.merchantConfiguration[dependencyKey]) {
       total[dependencyKey] = dependencySetupStates.INITIALIZING;
     }
 
