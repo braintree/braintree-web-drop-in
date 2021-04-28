@@ -93,6 +93,23 @@ describe('DropinModel', () => {
       expect(model.isInShadowDom).toBe(true);
     });
 
+    test('does not set payment methods as initializing when merchant configuration has falsy values', () => {
+      // eslint-disable-next-line no-undefined
+      testContext.modelOptions.merchantConfiguration.venmo = undefined;
+      testContext.modelOptions.merchantConfiguration.paypalCredit = false;
+      testContext.modelOptions.merchantConfiguration.applePay = '';
+      testContext.modelOptions.merchantConfiguration.googlePay = 0;
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.paypalCredit).toBeFalsy();
+      expect(model.dependencyStates.venmo).toBeFalsy();
+      expect(model.dependencyStates.applePay).toBeFalsy();
+      expect(model.dependencyStates.googlePay).toBeFalsy();
+      expect(model.dependencyStates.card).toBe('initializing');
+      expect(model.dependencyStates.paypal).toBe('initializing');
+    });
+
     describe('isGuestCheckout', () => {
       test('is true when given a tokenization key', () => {
         let model;
