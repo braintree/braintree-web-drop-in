@@ -8,6 +8,7 @@ unreleased
 - Fix issue where card view would not render in a shadow DOM within a shadow DOM
 - Fix issue where Venmo would setup in Firefox for iOS with `allowNewBrowserTab: false` set
 - Improve keyboard navigation
+- Fix issue where scrollbar appears for saved payment methods (#724)
 - Fix bug in initialization process where loading spinner would never resolve (#716)
 
 1.27.0
