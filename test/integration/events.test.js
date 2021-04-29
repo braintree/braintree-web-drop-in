@@ -1,5 +1,10 @@
 describe('Drop-in events', function () {
   beforeEach(function () {
+    if (browser.name() === 'INTERNET EXPLORER') {
+      this.skip('IE 11 takes so long to enter card details due to a bug in the IE driver that these tests time out too often');
+
+      return;
+    }
     browser.reloadSessionOnRetry(this.currentTest);
   });
 

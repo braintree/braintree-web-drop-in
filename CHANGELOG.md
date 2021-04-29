@@ -2,10 +2,21 @@ CHANGELOG
 =========
 
 unreleased
-----------
+------
+- Update braintree-web to v3.76.2
+- Update browser-detection to v1.11.1
+- Fix issue where card view would not render in a shadow DOM within a shadow DOM
+- Fix issue where Venmo would setup in Firefox for iOS with `allowNewBrowserTab: false` set
+- Improve keyboard navigation
+- Fix issue where scrollbar appears for saved payment methods (#724)
+- Fix bug in initialization process where loading spinner would never resolve (#716)
+- Add `changeActiveView` event to track when the Drop-in updates the active view presented to the customer
+
+1.27.0
+------
+- Update braintree-web to v3.74.0
 - Fix issue where Drop-in may error or not set up completely due to dependency setup race condition (#700)
 - Fix issue where Drop-in may report it is ready even though no payment options are actually available
-- Add `changeActiveView` event to track when the Drop-in updates the active view presented to the customer
 - Google Pay
   - Fix issue where passing custom button option would caused a developer error in the console (#701)
 - 3D Secure

@@ -1,6 +1,7 @@
 
 const Dropin = require('../../src/dropin');
 const DropinModel = require('../../src/dropin-model');
+const MainView = require('../../src/views/main-view');
 const EventEmitter = require('@braintree/event-emitter');
 const assets = require('@braintree/asset-loader');
 const analytics = require('../../src/lib/analytics');
@@ -2240,6 +2241,17 @@ describe('Dropin', () => {
   });
 
   describe('passthrough drop-in events', () => {
+    beforeEach(() => {
+      // the payload for the changeActiveView event is not quite
+      // accurate and it ends up throwing an error during the other
+      // tests for the events, so we stub the method that recieves
+      // the changeActiveView event to prevent that from causing
+      // our tests to fail. Is this a bit of a smell? yes, do
+      // I have the bandwidth to figure out a better way? no.
+      // sorry future Blade.
+      jest.spyOn(MainView.prototype, '_onChangeActiveView').mockImplementation();
+    });
+
     test.each([
       'changeActiveView',
       'paymentMethodRequestable',
