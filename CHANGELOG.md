@@ -11,6 +11,7 @@ unreleased
 - Fix issue where scrollbar appears for saved payment methods (#724)
 - Fix bug in initialization process where loading spinner would never resolve (#716)
 - Add `changeActiveView` event to track when the Drop-in updates the active view presented to the customer
+- Add option to not vault PayPal accounts with `paypal.vault.vaultPayPal = false` or `paypalCredit.vault.vaultPayPal = false`
 
 1.27.0
 ------

@@ -69,6 +69,10 @@ CardView.prototype.initialize = function () {
     classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
   }
 
+  // NEXT_MAJOR_VERSION change out this vaultCard property
+  // to something more generic, such as vaultOnTokenization so
+  // all the vault objects can have the same shape (instead
+  // of being specific to cards here)
   if (this.merchantConfiguration.vault.vaultCard === false) {
     this.saveCardInput.checked = false;
   }
