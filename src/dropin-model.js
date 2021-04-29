@@ -234,7 +234,7 @@ DropinModel.prototype.getActivePaymentMethod = function () {
   return this._activePaymentMethod;
 };
 
-DropinModel.prototype.getActivePaymentView = function () {
+DropinModel.prototype.getActivePaymentViewId = function () {
   return this._activePaymentViewId;
 };
 

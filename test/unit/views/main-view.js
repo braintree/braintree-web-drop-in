@@ -395,7 +395,7 @@ describe('MainView', () => {
 
         mainView.setPrimaryView(View.ID);
 
-        expect(mainView.model.getActivePaymentView()).toBe(View.ID);
+        expect(mainView.model.getActivePaymentViewId()).toBe(View.ID);
       });
     });
 
@@ -815,7 +815,7 @@ describe('MainView', () => {
 
           testContext.mainView.addView(optionsView);
 
-          jest.spyOn(testContext.model, 'getActivePaymentView').mockReturnValue('options');
+          jest.spyOn(testContext.model, 'getActivePaymentViewId').mockReturnValue('options');
           testContext.model._emit('removeActivePaymentMethod');
 
           setTimeout(() => {
@@ -974,7 +974,7 @@ describe('MainView', () => {
       });
 
       test('sets the payment option as the active payment view', () => {
-        expect(testContext.mainView.model.getActivePaymentView()).toBe(CardView.ID);
+        expect(testContext.mainView.model.getActivePaymentViewId()).toBe(CardView.ID);
       });
 
       test('exposes the payment sheet view', () => {
@@ -1023,7 +1023,7 @@ describe('MainView', () => {
         test('sets the PaymentMethodsView as the primary view', () => {
           expect(testContext.mainView.setPrimaryView).toBeCalledWith(PaymentMethodsView.ID, expect.anything());
           expect(testContext.wrapper.className).toMatch('braintree-show-' + PaymentMethodsView.ID);
-          expect(testContext.mainView.model.getActivePaymentView()).toBe(PaymentMethodsView.ID);
+          expect(testContext.mainView.model.getActivePaymentViewId()).toBe(PaymentMethodsView.ID);
         });
 
         test('exposes the PaymentOptionsView', () => {

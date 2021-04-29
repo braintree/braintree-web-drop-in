@@ -101,7 +101,7 @@ MainView.prototype._initialize = function () {
   this.model.on('changeActiveView', this._onChangeActiveView.bind(this));
 
   this.model.on('removeActivePaymentMethod', function () {
-    var activePaymentView = this.getView(this.model.getActivePaymentView());
+    var activePaymentView = this.getView(this.model.getActivePaymentViewId());
 
     if (activePaymentView && typeof activePaymentView.removeActivePaymentMethod === 'function') {
       activePaymentView.removeActivePaymentMethod();
@@ -205,7 +205,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
 };
 
 MainView.prototype.requestPaymentMethod = function () {
-  var activePaymentView = this.getView(this.model.getActivePaymentView());
+  var activePaymentView = this.getView(this.model.getActivePaymentViewId());
 
   return activePaymentView.requestPaymentMethod().then(function (payload) {
     analytics.sendEvent(this.client, 'request-payment-method.' + analyticsKinds[payload.type]);
