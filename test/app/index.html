@@ -249,6 +249,9 @@
           payButton.removeAttribute('disabled');
         }
 
+        instance.on('changeActiveView', function (event) {
+          console.log('change active view', event);
+        });
         instance.on('paymentMethodRequestable', function (event) {
           if (event.paymentMethodIsSelected) {
             clearButton.className = '';

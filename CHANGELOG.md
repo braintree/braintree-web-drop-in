@@ -10,6 +10,7 @@ unreleased
 - Improve keyboard navigation
 - Fix issue where scrollbar appears for saved payment methods (#724)
 - Fix bug in initialization process where loading spinner would never resolve (#716)
+- Add `changeActiveView` event to track when the Drop-in updates the active view presented to the customer
 
 1.27.0
 ------

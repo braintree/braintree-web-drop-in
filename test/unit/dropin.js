@@ -1,6 +1,7 @@
 
 const Dropin = require('../../src/dropin');
 const DropinModel = require('../../src/dropin-model');
+const MainView = require('../../src/views/main-view');
 const EventEmitter = require('@braintree/event-emitter');
 const assets = require('@braintree/asset-loader');
 const analytics = require('../../src/lib/analytics');
@@ -2239,38 +2240,37 @@ describe('Dropin', () => {
     });
   });
 
-  describe('payment method requestable events', () => {
-    test(
-      'emits paymentMethodRequestable event when the model emits paymentMethodRequestable',
-      done => {
-        const instance = new Dropin(testContext.dropinOptions);
+  describe('passthrough drop-in events', () => {
+    beforeEach(() => {
+      // the payload for the changeActiveView event is not quite
+      // accurate and it ends up throwing an error during the other
+      // tests for the events, so we stub the method that recieves
+      // the changeActiveView event to prevent that from causing
+      // our tests to fail. Is this a bit of a smell? yes, do
+      // I have the bandwidth to figure out a better way? no.
+      // sorry future Blade.
+      jest.spyOn(MainView.prototype, '_onChangeActiveView').mockImplementation();
+    });
 
-        instance.on('paymentMethodRequestable', event => {
-          expect(event.type).toBe('Foo');
+    test.each([
+      'changeActiveView',
+      'paymentMethodRequestable',
+      'noPaymentMethodRequestable',
+      'paymentOptionSelected'
+    ])('emits %s event', (eventName, done) => {
+      const instance = new Dropin(testContext.dropinOptions);
+      const eventPayload = { foo: 'bar' };
 
-          done();
-        });
+      instance.on(eventName, event => {
+        expect(event).toBe(eventPayload);
 
-        instance._initialize(() => {
-          instance._model._emit('paymentMethodRequestable', { type: 'Foo' });
-        });
-      }
-    );
+        done();
+      });
 
-    test(
-      'emits noPaymentMethodRequestable events when the model emits noPaymentMethodRequestable',
-      done => {
-        const instance = new Dropin(testContext.dropinOptions);
-
-        instance.on('noPaymentMethodRequestable', () => {
-          done();
-        });
-
-        instance._initialize(() => {
-          instance._model._emit('noPaymentMethodRequestable');
-        });
-      }
-    );
+      instance._initialize(() => {
+        instance._model._emit(eventName, eventPayload);
+      });
+    });
   });
 
   describe('card events', () => {
