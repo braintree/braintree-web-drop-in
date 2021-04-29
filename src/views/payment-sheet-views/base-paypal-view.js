@@ -58,8 +58,18 @@ BasePayPalView.prototype.initialize = function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
       },
       onAuthorize: function (data) {
+        // NEXT_MAJOR_VERSION change out this vaultPayPal property
+        // to something more generic, such as vaultOnTokenization so
+        // all the vault objects can have the same shape (instead
+        // of being specific to PayPal accounts here)
+        var shouldNotVault = self.paypalConfiguration.vault && self.paypalConfiguration.vault.vaultPayPal === false;
+
+        if (shouldNotVault) {
+          data.vault = false;
+        }
+
         return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
-          if (self.paypalConfiguration.flow === 'vault' && !self.model.isGuestCheckout) {
+          if (!shouldNotVault && self.paypalConfiguration.flow === 'vault' && !self.model.isGuestCheckout) {
             tokenizePayload.vaulted = true;
           }
           self.model.addPaymentMethod(tokenizePayload);

@@ -479,8 +479,7 @@ describe('BasePayPalView', () => {
         const paypalInstance = testContext.paypalInstance;
         const model = testContext.model;
         const fakePayload = {
-          foo: 'bar',
-          vaulted: true
+          foo: 'bar'
         };
 
         model.isGuestCheckout = false;
@@ -504,7 +503,10 @@ describe('BasePayPalView', () => {
 
           setTimeout(() => {
             expect(model.addPaymentMethod).toBeCalledTimes(1);
-            expect(model.addPaymentMethod).toBeCalledWith(fakePayload);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar',
+              vaulted: true
+            });
 
             done();
           }, 1);
@@ -584,6 +586,56 @@ describe('BasePayPalView', () => {
 
             done();
           }, 100);
+        });
+      }
+    );
+
+    test(
+      'does not add `vaulted: true` to the tokenization payload if flow is vault and is not guest checkout, but the merchant opts out of vaulting on the client',
+      done => {
+        const paypalInstance = testContext.paypalInstance;
+        const model = testContext.model;
+
+        model.merchantConfiguration.paypal.vault = {
+          vaultPayPal: false
+        };
+        model.isGuestCheckout = false;
+
+        paypalInstance.tokenizePayment.mockResolvedValue({
+          foo: 'bar'
+        });
+        paypalInstance.paypalConfiguration = {
+          flow: 'vault',
+          vault: {
+            vaultPayPal: false
+          }
+        };
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        testContext.view.initialize().then(() => {
+          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const tokenizeOptions = {
+            foo: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            foo: 'bar',
+            vault: false
+          });
+
+          setTimeout(() => {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar'
+            });
+
+            done();
+          }, 1);
         });
       }
     );

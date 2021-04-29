@@ -146,6 +146,8 @@ var VERSION = '__VERSION__';
  * @param {string} [currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {object} [buttonStyle] The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles) are available.
  * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
+ * @param {object} [vault] Configuration for vaulting PayPal accounts. Only applies when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id).
+ * @param {boolean} [vault.vaultPayPal=true] Whether or not to vault the PayPal account upon tokenization.
  */
 
 /** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
