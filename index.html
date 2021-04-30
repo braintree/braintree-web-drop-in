@@ -94,7 +94,6 @@
 </div>
 
 <pre id="results"></pre>
-<div id="ready"></div>
 
 <footer>
   <p><a href="docs">View the Reference Documentation</a></p>
@@ -158,7 +157,9 @@
   var createButton = document.querySelector('#create-button');
   var teardownButton = document.querySelector('#teardown-button');
   var clearButton = document.querySelector('#clear-button');
-  var ready = document.querySelector('#ready');
+  var ready = document.createElement("div");
+
+  ready.id = "ready";
 
   function getDropinConfig () {
     var query = window.location.search.substring(1);
@@ -234,6 +235,8 @@
     error.textContent = '';
 
     braintree.dropin.create(config, function (err, instance) {
+      document.body.appendChild(ready);
+
       if (err) {
         ready.textContent = 'error';
         error.textContent = err.message;
@@ -246,6 +249,9 @@
           payButton.removeAttribute('disabled');
         }
 
+        instance.on('changeActiveView', function (event) {
+          console.log('change active view', event);
+        });
         instance.on('paymentMethodRequestable', function (event) {
           if (event.paymentMethodIsSelected) {
             clearButton.className = '';
