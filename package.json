@@ -39,7 +39,7 @@
     "chai": "^4.3.4",
     "connect": "^3.7.0",
     "del": "^6.0.0",
-    "dotenv": "^9.0.1",
+    "dotenv": "^9.0.2",
     "es6-shim": "^0.35.6",
     "eslint": "^7.26.0",
     "eslint-config-braintree": "^4.0.0",
