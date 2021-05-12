@@ -146,7 +146,6 @@ var VERSION = '__VERSION__';
  * @param {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
  */
 
-
 /** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
  * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
