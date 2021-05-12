@@ -18,11 +18,16 @@ function ThreeDSecure(client, model) {
 
 ThreeDSecure.prototype.initialize = function () {
   var self = this;
-
-  return threeDSecure.create({
+  var options = {
     client: this._client,
     version: 2
-  }).then(function (instance) {
+  };
+
+  if (this._config.cardinalSDKConfig) {
+    options.cardinalSDKConfig = this._config.cardinalSDKConfig;
+  }
+
+  return threeDSecure.create(options).then(function (instance) {
     self._instance = instance;
 
     PASSTHROUGH_EVENTS.forEach(function (eventName) {

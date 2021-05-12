@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Add `threeDSecure.cardinalSDKConfig` option to `dropin.create`
+
 1.28.0
 ------
 - Update braintree-web to v3.76.3

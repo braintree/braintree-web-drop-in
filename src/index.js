@@ -134,10 +134,18 @@ var VERSION = '__VERSION__';
  */
 
 /**
- * @typedef {object} threeDSecureOptions _Deprecated_ If the `threeDSecureOptions` passed into the create call is an object, you may set the `amount` to verify with 3D Secure. However, it's recomended that you pass `true` instead of a configuration object and do all 3D Secure configuration in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.
+ * @typedef {object} threeDSecureOptions If the `threeDSecureOptions` passed into the create call is an object, you may set the `amount` to verify with 3D Secure. However, it's recomended that you pass `true` instead of a configuration object and do all 3D Secure configuration in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.
  *
  * @param {string} amount The amount to verify with 3D Secure.
  */
+
+/**
+ * @typedef {object} threeDSecureOptions Configuration options to pass when creating the 3D Secure module used in Drop-in.
+ *
+ * @param {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_three-d-secure.html#.create) for all options.
+ * @param {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
+ */
+
 
 /** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
@@ -263,7 +271,7 @@ var VERSION = '__VERSION__';
  *
  * @param {object|boolean} [options.dataCollector] If `true` is passed, Drop-in will be configured to collect data for use with Advanced Fraud Protection. If collecting data via Kount, pass a [`dataCollectorOptions` object](#~dataCollectorOptions) with `kount: true` instead. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
- * @param {(boolean|object)} [options.threeDSecure] It's recomended that you pass `true` here to enable 3D Secure and pass the configuration options for 3D Secure into {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.See [`threeDSecureOptions`](#~threeDSecureOptions) for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
+ * @param {(boolean|object)} [options.threeDSecure] When `true` is passed, the 3D Secure module will be created with a default configuration. See [`threeDSecureOptions`](#~threeDSecureOptions) for additional create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
  * @param {boolean} [options.vaultManager=false] Whether or not to allow a customer to delete saved payment methods when used with a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id). *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system. This feature is not supported in Internet Explorer 9.
  *

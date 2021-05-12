@@ -65,6 +65,25 @@ describe('ThreeDSecure', () => {
         expect(testContext.model._emit).toBeCalledWith('3ds:authentication-modal-close', { someEvent: 'foo' });
       });
     });
+
+    test('adds cardinalSDKConfig object to the threeDSecure.create call', () => {
+      const client = {};
+
+      testContext.model.merchantConfiguration.threeDSecure = {
+        cardinalSDKConfig: { logging: { level: 'verbose' }}
+      };
+      const tds = new ThreeDSecure(client, testContext.model);
+
+      return tds.initialize().then(() => {
+        expect(threeDSecure.create).toBeCalledTimes(1);
+        expect(threeDSecure.create).toBeCalledWith({
+          client: client,
+          version: 2,
+          cardinalSDKConfig: { logging: { level: 'verbose' }}
+        });
+        expect(tds._instance).toBe(testContext.threeDSecureInstance);
+      });
+    });
   });
 
   describe('verify', () => {
