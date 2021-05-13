@@ -134,13 +134,7 @@ var VERSION = '__VERSION__';
  */
 
 /**
- * @typedef {object} threeDSecureOptions If the `threeDSecureOptions` passed into the create call is an object, you may set the `amount` to verify with 3D Secure. However, it's recomended that you pass `true` instead of a configuration object and do all 3D Secure configuration in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.
- *
- * @param {string} amount The amount to verify with 3D Secure.
- */
-
-/**
- * @typedef {object} threeDSecureOptions Configuration options to pass when creating the 3D Secure module used in Drop-in.
+ * @typedef {object} threeDSecureOptions Configuration options to pass when creating the 3D Secure module used in Drop-in. `amount` for 3D Secure verification can be passed here, but it's recomended that it and all other 3D Secure verification options be passed to the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead. Any `cardinalSDKConfig` options must be passed here when creating Drop-in.
  *
  * @param {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_three-d-secure.html#.create) for all options.
  * @param {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
