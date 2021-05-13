@@ -893,9 +893,16 @@ Dropin.prototype.requestPaymentMethod = function (options) {
 
         return payload;
       }).catch(function (err) {
-        self._mainView.hideLoadingIndicator();
+        self.clearSelectedPaymentMethod();
 
-        return Promise.reject(err);
+        return self._model.refreshPaymentMethods().then(function () {
+          self._mainView.hideLoadingIndicator();
+
+          return Promise.reject(new DropinError({
+            message: 'Something went wrong during 3D Secure authentication. Please try again.',
+            braintreeWebError: err
+          }));
+        });
       });
     }
 

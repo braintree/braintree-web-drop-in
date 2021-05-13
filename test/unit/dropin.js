@@ -1313,6 +1313,81 @@ describe('Dropin', () => {
         });
       });
     });
+
+    test('rejects when 3D Secure authentication fails', (done) => {
+      const fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+
+      testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+        instance._threeDSecure = {
+          verify: jest.fn().mockRejectedValue(new Error('some 3ds error'))
+        };
+
+        instance.requestPaymentMethod((err) => {
+          expect(err.message).toBe('Something went wrong during 3D Secure authentication. Please try again.');
+          expect(err._braintreeWebError.message).toBe('some 3ds error');
+
+          done();
+        });
+      });
+    });
+
+    test('removes consumed credit card payment method when 3D Secure authentication fails', (done) => {
+      const fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+
+      testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        jest.spyOn(instance, 'clearSelectedPaymentMethod').mockImplementation();
+        jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+        instance._threeDSecure = {
+          verify: jest.fn().mockRejectedValue(new Error('some 3ds error'))
+        };
+
+        instance.requestPaymentMethod(() => {
+          expect(instance.clearSelectedPaymentMethod).toBeCalledTimes(1);
+
+          done();
+        });
+      });
+    });
+
+    test('refreshes vaulted payment methods when 3D Secure authentication fails', (done) => {
+      const fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+
+      testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        jest.spyOn(instance._model, 'refreshPaymentMethods').mockResolvedValue();
+        jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+        instance._threeDSecure = {
+          verify: jest.fn().mockRejectedValue(new Error('some 3ds error'))
+        };
+
+        instance.requestPaymentMethod(() => {
+          expect(instance._model.refreshPaymentMethods).toBeCalledTimes(1);
+
+          done();
+        });
+      });
+    });
   });
 
   describe('isPaymentMethodRequestable', () => {
