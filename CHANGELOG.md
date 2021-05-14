@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.29.0
+------
 - Update braintree-web to v3.76.4
 - Add `threeDSecure.cardinalSDKConfig` option to `dropin.create`
 - Fix issue where Drop-in would not clear out a tokenized credit card after 3D Secure authentication fails (#694)
