@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+UNRELEASED
+----------
+- Fix issue where cursor didn't change for Apple Pay on hover (#737)
+
 1.29.0
 ------
 - Update braintree-web to v3.76.4
