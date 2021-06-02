@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+Unreleased
+------
+- Fix issue where Drop-in couldn't load if `paymentOptionPriority` is set (#739)
+
 1.29.0
 ------
 - Update braintree-web to v3.76.4

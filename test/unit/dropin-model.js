@@ -110,6 +110,56 @@ describe('DropinModel', () => {
       expect(model.dependencyStates.paypal).toBe('initializing');
     });
 
+    it('does not set card as initializing when merchant configuration has falsy value', () => {
+      testContext.modelOptions.merchantConfiguration.card = false;
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.card).toBeFalsy();
+    });
+
+    it('does not set card as initializing when it is not specified in the merchant configuration and not in the payment option priority', () => {
+      testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'paypalCredit', 'googlePay', 'applePay', 'venmo'];
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.card).toBeFalsy();
+    });
+
+    it('does not set payment option as initializing when n and not in the payment option priority', () => {
+      testContext.modelOptions.merchantConfiguration.card = true;
+      testContext.modelOptions.merchantConfiguration.venmo = true;
+      testContext.modelOptions.merchantConfiguration.paypal = true;
+      testContext.modelOptions.merchantConfiguration.googlePay = true;
+      testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'venmo'];
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.card).toBeFalsy();
+      expect(model.dependencyStates.googlePay).toBeFalsy();
+      expect(model.dependencyStates.paypal).toBeTruthy();
+      expect(model.dependencyStates.venmo).toBeTruthy();
+    });
+
+    it('does set data collector and 3DS as initializing when a payment option priority is configured', () => {
+      testContext.modelOptions.merchantConfiguration.card = true;
+      testContext.modelOptions.merchantConfiguration.venmo = true;
+      testContext.modelOptions.merchantConfiguration.paypal = true;
+      testContext.modelOptions.merchantConfiguration.googlePay = true;
+      testContext.modelOptions.merchantConfiguration.dataCollector = true;
+      testContext.modelOptions.merchantConfiguration.threeDSecure = true;
+      testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'venmo'];
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.card).toBeFalsy();
+      expect(model.dependencyStates.googlePay).toBeFalsy();
+      expect(model.dependencyStates.paypal).toBeTruthy();
+      expect(model.dependencyStates.venmo).toBeTruthy();
+      expect(model.dependencyStates.dataCollector).toBeTruthy();
+      expect(model.dependencyStates.threeDSecure).toBeTruthy();
+    });
+
     describe('isGuestCheckout', () => {
       test('is true when given a tokenization key', () => {
         let model;
@@ -360,6 +410,23 @@ describe('DropinModel', () => {
       testContext.configuration.gatewayConfiguration.paypalEnabled = true;
       testContext.modelOptions.merchantConfiguration.paypal = true;
       testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'paypal', 'card'];
+
+      model = new DropinModel(testContext.modelOptions);
+
+      return model.initialize().then(() => {
+        expect(model.supportedPaymentOptions).toEqual(['paypal', 'card']);
+      });
+    });
+
+    test('ignores configured payment methods that are not present in a custom paymentOptionPriority array', () => {
+      let model;
+
+      testContext.configuration.gatewayConfiguration.paypalEnabled = true;
+      testContext.modelOptions.merchantConfiguration.paypal = true;
+      testContext.modelOptions.merchantConfiguration.venmo = true;
+      testContext.modelOptions.merchantConfiguration.applePay = true;
+      testContext.modelOptions.merchantConfiguration.googlePay = true;
+      testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'card'];
 
       model = new DropinModel(testContext.modelOptions);
 
