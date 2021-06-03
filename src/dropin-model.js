@@ -25,7 +25,8 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var ASYNC_DEPENDENCIES = DEFAULT_PAYMENT_OPTION_PRIORITY.concat(['threeDSecure', 'dataCollector']);
+var NON_PAYMENT_OPTION_DEPENDENCIES = ['threeDSecure', 'dataCollector'];
+var ASYNC_DEPENDENCIES = DEFAULT_PAYMENT_OPTION_PRIORITY.concat(NON_PAYMENT_OPTION_DEPENDENCIES);
 var DEPENDENCY_READY_CHECK_INTERVAL = 200;
 
 function DropinModel(options) {
@@ -33,19 +34,13 @@ function DropinModel(options) {
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
   this.isGuestCheckout = isGuestCheckout(options.client);
-
   this.dependencyStates = ASYNC_DEPENDENCIES.reduce(function (total, dependencyKey) {
-    if (options.merchantConfiguration[dependencyKey]) {
+    if (this._shouldIncludeDependency(dependencyKey)) {
       total[dependencyKey] = dependencySetupStates.INITIALIZING;
     }
 
     return total;
-  }, {});
-  // card is on by default, so we need to set it's state to INITIALIZING
-  // unless the merchant has specifically opted out of using the card form
-  if (options.merchantConfiguration.card !== false) {
-    this.dependencyStates.card = dependencySetupStates.INITIALIZING;
-  }
+  }.bind(this), {});
 
   this.failedDependencies = {};
   this._options = options;
@@ -174,6 +169,40 @@ DropinModel.prototype.isInEditMode = function () {
 DropinModel.prototype.confirmPaymentMethodDeletion = function (paymentMethod) {
   this._paymentMethodWaitingToBeDeleted = paymentMethod;
   this._emit('confirmPaymentMethodDeletion', paymentMethod);
+};
+
+DropinModel.prototype._shouldIncludeDependency = function (key) {
+  if (key === 'card') {
+    // card is turned on by default unless the merchant explicitly
+    // passes a value of `false` or omits it from a custom
+    // `paymentOptionPriority` array
+    if (this.merchantConfiguration.card === false) {
+      return false;
+    }
+  } else if (!this.merchantConfiguration[key]) {
+    // if the merchant does not have the non-card dependency
+    // configured, do not include the dependency
+    return false;
+  }
+
+  if (NON_PAYMENT_OPTION_DEPENDENCIES.indexOf(key) > -1) {
+    console.log(key);
+    console.log('it got here');
+    // if the dependency is not a payment option (3DS, data collector)
+    // include it since the merchant configured Drop-in for it
+
+    return true;
+  }
+
+  if (this.merchantConfiguration.paymentOptionPriority) {
+    // if the merchant passed a custom `paymentOptionPriority` array,
+    // only include the dependency if it was configured _and_
+    // included in the array
+    return this.merchantConfiguration.paymentOptionPriority.indexOf(key) > -1;
+  }
+
+  // otherwise, include it if it is a valid payment option
+  return DEFAULT_PAYMENT_OPTION_PRIORITY.indexOf(key) > -1;
 };
 
 DropinModel.prototype._shouldEmitRequestableEvent = function (options) {

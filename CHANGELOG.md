@@ -4,6 +4,7 @@ CHANGELOG
 UNRELEASED
 ----------
 - Fix issue where cursor didn't change for Apple Pay on hover (#737)
+- Fix issue where Drop-in couldn't load if `paymentOptionPriority` is set (#739)
 
 1.29.0
 ------
