@@ -3,6 +3,7 @@ CHANGELOG
 
 UNRELEASED
 ----------
+- Update braintree-web to v3.77.0
 - Fix issue where cursor didn't change for Apple Pay on hover (#737)
 - Fix issue where Drop-in couldn't load if `paymentOptionPriority` is set (#739)
 
