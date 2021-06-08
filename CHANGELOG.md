@@ -1,9 +1,12 @@
 CHANGELOG
 =========
 
-UNRELEASED
-----------
+1.30.0
+------
 - Update braintree-web to v3.78.0
+  - Apple Pay: Support Elo cards
+  - Google Pay: Support Elo cards
+  - Venmo: Add `paymentMethodUsage` and `displayName` parameter to Venmo create options
 - Update browser-detection to v1.12.0
 - Fix issue where cursor didn't change for Apple Pay on hover (#737)
 - Fix issue where Drop-in couldn't load if `paymentOptionPriority` is set (#739)
