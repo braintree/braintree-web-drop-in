@@ -26,6 +26,7 @@ describe('ApplePayView', () => {
       testContext.div = document.createElement('div');
 
       testContext.fakeApplePaySession = {
+        abort: jest.fn(),
         begin: jest.fn(),
         completeMerchantValidation: jest.fn(),
         completePayment: jest.fn()
@@ -197,6 +198,22 @@ describe('ApplePayView', () => {
         expect(testContext.fakeApplePaySession.begin).toBeCalledTimes(1);
       });
 
+      test('only creates one ApplePaySession at a time', async () => {
+        testContext.view.applePayInstance.createPaymentRequest = jest.fn().mockReturnValue(testContext.fakePaymentRequest);
+
+        button.onclick();
+        button.onclick();
+        button.onclick();
+        button.onclick();
+        button.onclick();
+        button.onclick();
+        button.onclick();
+
+        await new Promise((resolve) => setTimeout(resolve, 1));
+
+        expect(testContext.fakeApplePaySession.begin).toBeCalledTimes(1);
+      });
+
       describe('session.onvalidatemerchant', () => {
         test('performs merchant validation', () => {
           const stubEvent = { validationURL: 'fake' };
@@ -242,6 +259,28 @@ describe('ApplePayView', () => {
             testContext.fakeApplePaySession.onvalidatemerchant({ validationURL: 'fake' });
           }
         );
+
+        test(
+          'can start a new session after validation fails',
+          async () => {
+            const fakeError = new Error('fail.');
+
+            jest.spyOn(testContext.view.model, 'reportError').mockImplementation();
+            testContext.fakeApplePayInstance.performValidation.mockRejectedValue(fakeError);
+
+            button.onclick();
+
+            testContext.fakeApplePaySession.onvalidatemerchant({ validationURL: 'fake' });
+
+            expect(testContext.fakeApplePaySession.begin).toBeCalledTimes(1);
+
+            await new Promise((resolve) => setTimeout(resolve, 1));
+
+            button.onclick();
+
+            expect(testContext.fakeApplePaySession.begin).toBeCalledTimes(2);
+          }
+        );
       });
 
       describe('session.onpaymentauthorized', () => {
@@ -264,9 +303,7 @@ describe('ApplePayView', () => {
               testContext.fakeApplePaySession.completePayment = status => {
                 expect(status).toBe(global.ApplePaySession.STATUS_SUCCESS);
 
-                setTimeout(() => {
-                  done();
-                }, 200);
+                done();
               };
 
               button.onclick();
@@ -294,6 +331,26 @@ describe('ApplePayView', () => {
               payment: { token: 'foo' }
             });
           });
+
+          test(
+            'can start a new session after success',
+            async () => {
+              testContext.fakeApplePayInstance.tokenize.mockResolvedValue({ foo: 'bar' });
+
+              button.onclick();
+
+              testContext.fakeApplePaySession.onpaymentauthorized({
+                payment: { token: 'foo' }
+              });
+
+              expect(testContext.fakeApplePaySession.begin).toBeCalledTimes(1);
+
+              await new Promise((resolve) => setTimeout(resolve, 1));
+
+              button.onclick();
+              expect(testContext.fakeApplePaySession.begin).toBeCalledTimes(2);
+            }
+          );
 
           test(
             'provides shipping and billing contact in payment method when present in ApplePayPayment',
@@ -342,6 +399,29 @@ describe('ApplePayView', () => {
               testContext.fakeApplePaySession.onpaymentauthorized({
                 payment: { token: 'foo' }
               });
+            }
+          );
+
+          test(
+            'can start a new session',
+            async () => {
+              const fakeError = new Error('fail.');
+
+              jest.spyOn(testContext.view.model, 'reportError').mockImplementation();
+              testContext.fakeApplePayInstance.tokenize.mockRejectedValue(fakeError);
+
+              button.onclick();
+
+              testContext.fakeApplePaySession.onpaymentauthorized({
+                payment: { token: 'foo' }
+              });
+
+              expect(testContext.fakeApplePaySession.begin).toBeCalledTimes(1);
+
+              await new Promise((resolve) => setTimeout(resolve, 1));
+
+              button.onclick();
+              expect(testContext.fakeApplePaySession.begin).toBeCalledTimes(2);
             }
           );
         });
