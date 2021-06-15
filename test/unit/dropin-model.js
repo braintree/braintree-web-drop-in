@@ -218,11 +218,10 @@ describe('DropinModel', () => {
 
       model.on('asyncDependenciesReady', () => {
         jest.useRealTimers();
-
         done();
       });
 
-      return model.initialize().then(() => {
+      model.initialize().then(() => {
         expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
 
         model.asyncDependencyReady('paypal');
@@ -904,7 +903,7 @@ describe('DropinModel', () => {
         done();
       });
 
-      return model.initialize().then(() => {
+      model.initialize().then(() => {
         model.asyncDependencyReady('card');
         model.asyncDependencyFailed({
           view: 'venmo',

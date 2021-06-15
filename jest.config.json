@@ -2,6 +2,7 @@
   "rootDir": "./src/",
   "collectCoverage": true,
   "clearMocks": true,
+  "testEnvironment": "jsdom",
   "coverageDirectory": "<rootDir>/../test/coverage",
   "displayName": "Drop-in",
   "restoreMocks": true,
