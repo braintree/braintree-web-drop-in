@@ -186,8 +186,6 @@ DropinModel.prototype._shouldIncludeDependency = function (key) {
   }
 
   if (NON_PAYMENT_OPTION_DEPENDENCIES.indexOf(key) > -1) {
-    console.log(key);
-    console.log('it got here');
     // if the dependency is not a payment option (3DS, data collector)
     // include it since the merchant configured Drop-in for it
 
