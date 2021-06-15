@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Update braintree-web to v3.78.1
+- Fix issue where Apple Pay button would not disable when session begins
 
 1.30.0
 ------
