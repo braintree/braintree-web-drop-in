@@ -403,7 +403,7 @@ describe('ApplePayView', () => {
           );
 
           test(
-            'can start a new session',
+            'can start a new session after a tokenization error',
             async () => {
               const fakeError = new Error('fail.');
 
