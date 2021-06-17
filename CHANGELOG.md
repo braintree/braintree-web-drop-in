@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.30.1
+------
 - Update braintree-web to v3.78.2
   - Fix where card form could navigate with tab button in Desktop Safari
   - Fix where card form could navigate with arrow buttons in iOS Safari (#662)
