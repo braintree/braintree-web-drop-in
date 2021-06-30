@@ -39,6 +39,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
 
   div.className = 'braintree-option braintree-option__' + paymentOptionID;
   div.setAttribute('tabindex', '0');
+  div.setAttribute('role', 'button');
 
   switch (paymentOptionID) {
     case paymentOptionIDs.applePay:
