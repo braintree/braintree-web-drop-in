@@ -5,6 +5,9 @@ Unreleased
 ----------
 - Update roles on payment option buttons so that screen readers can read them as buttons
 - Update braintree-web to v3.79.1
+  - Fix issue where card form could not tab forward in iOS Safari 14.5+ (tabbing backward is still broken)
+  - Add support for `cardAdd` param in 3D Secure
+  - Support Maestro cards in Google Pay
 
 1.30.1
 ------
