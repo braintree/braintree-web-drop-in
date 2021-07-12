@@ -73,7 +73,7 @@
     "@braintree/event-emitter": "0.4.1",
     "@braintree/uuid": "0.1.0",
     "@braintree/wrap-promise": "2.1.0",
-    "braintree-web": "3.79.0",
+    "braintree-web": "3.79.1",
     "promise-polyfill": "8.2.0"
   },
   "browserify": {
