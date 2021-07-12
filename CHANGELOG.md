@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-Unreleased
+1.31.0
 ----------
 - Update roles on payment option buttons so that screen readers can read them as buttons
 - Update braintree-web to v3.79.1
