@@ -426,6 +426,26 @@ describe('ApplePayView', () => {
           );
         });
       });
+
+      describe('session.oncancel', () => {
+        test('can start a new session after cancel', () => {
+          expect(testContext.fakeApplePayInstance.createPaymentRequest).toBeCalledTimes(0);
+
+          button.onclick();
+
+          expect(testContext.fakeApplePayInstance.createPaymentRequest).toBeCalledTimes(1);
+
+          button.onclick();
+
+          expect(testContext.fakeApplePayInstance.createPaymentRequest).toBeCalledTimes(1);
+
+          testContext.fakeApplePaySession.oncancel();
+
+          button.onclick();
+
+          expect(testContext.fakeApplePayInstance.createPaymentRequest).toBeCalledTimes(2);
+        });
+      });
     });
   });
 
