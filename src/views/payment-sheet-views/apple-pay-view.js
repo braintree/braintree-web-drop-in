@@ -84,6 +84,10 @@ ApplePayView.prototype._showPaymentSheet = function () {
     });
   };
 
+  session.oncancel = function () {
+    self._sessionInProgress = false;
+  };
+
   session.begin();
 
   return false;
