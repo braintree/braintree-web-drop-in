@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.31.1
+------
 - Fix issue where Apple Pay would stop working after a cancellation
 
 1.31.0
