@@ -998,7 +998,9 @@
 .braintree-loaded [data-braintree-id='methods'],
 .braintree-loaded [data-braintree-id='options'],
 .braintree-loaded [data-braintree-id='sheet-container'] {
-  max-height: 1000px; // Must set specific value here in order to have animation
+  // NEXT_MAJOR_VERSION drop this when IE support is no longer required
+  max-height: 2000px; // IE11 doesn't support fit-content, so we need a backup value here
+  max-height: fit-content; // Must set value here in order to have animation
   opacity: 1;
   transition: max-height 250ms @curve-easeOutBack, opacity 300ms linear 100ms;
   min-height: 0;

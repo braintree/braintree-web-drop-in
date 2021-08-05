@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+unreleased
+----------
+- Fix issue where a methods container for a cusotmer with 15+ payment methods would obscure the "Choose Another Way to Pay" button
+
 1.31.1
 ------
 - Fix issue where Apple Pay would stop working after a cancellation
