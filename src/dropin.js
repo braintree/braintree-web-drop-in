@@ -11,7 +11,6 @@ var assets = require('@braintree/asset-loader');
 var fs = require('fs');
 var MainView = require('./views/main-view');
 var paymentMethodsViewID = require('./views/payment-methods-view').ID;
-var paymentOptionsViewID = require('./views/payment-options-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations').translations;
 var isUtf8 = require('./lib/is-utf-8');
@@ -717,22 +716,17 @@ Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
 };
 
 Dropin.prototype._navigateToInitialView = function () {
-  var hasNoSavedPaymentMethods, hasOnlyOneSupportedPaymentOption;
   var isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
 
-  if (isOnMethodsView) {
-    hasNoSavedPaymentMethods = this._model.getPaymentMethods().length === 0;
-
-    if (hasNoSavedPaymentMethods) {
-      hasOnlyOneSupportedPaymentOption = this._model.supportedPaymentOptions.length === 1;
-
-      if (hasOnlyOneSupportedPaymentOption) {
-        this._mainView.setPrimaryView(this._model.supportedPaymentOptions[0]);
-      } else {
-        this._mainView.setPrimaryView(paymentOptionsViewID);
-      }
-    }
+  if (!isOnMethodsView) {
+    return;
   }
+
+  if (this._model.hasPaymentMethods()) {
+    return;
+  }
+
+  this._mainView.setPrimaryView(this._model.getInitialViewId());
 };
 
 Dropin.prototype._supportsPaymentOption = function (paymentOption) {

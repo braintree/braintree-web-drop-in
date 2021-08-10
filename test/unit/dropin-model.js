@@ -760,6 +760,59 @@ describe('DropinModel', () => {
     });
   });
 
+  describe('hasPaymentMethods', () => {
+    test('returns true when there is at least one payment method', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      jest.spyOn(model, 'getPaymentMethods').mockReturnValue([{
+        type: 'PayPalAccount',
+        nonce: 'fake-paypal-nonce'
+      }]);
+      expect(model.hasPaymentMethods()).toBe(true);
+    });
+
+    test('returns false when there are no payment methods', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      jest.spyOn(model, 'getPaymentMethods').mockReturnValue([]);
+      expect(model.hasPaymentMethods()).toBe(false);
+    });
+  });
+
+  describe('getInitialViewId', () => {
+    test('returns options id when there are more than 1 supported payment options', async () => {
+      VenmoView.isEnabled.mockResolvedValue(true);
+      CardView.isEnabled.mockResolvedValue(true);
+
+      ApplePayView.isEnabled.mockResolvedValue(false);
+      GooglePayView.isEnabled.mockResolvedValue(false);
+      PayPalView.isEnabled.mockResolvedValue(false);
+      PayPalCreditView.isEnabled.mockResolvedValue(false);
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.getInitialViewId()).toBe('options');
+    });
+
+    test('returns the id for the only payment option when there is just 1 supported payment option', async () => {
+      VenmoView.isEnabled.mockResolvedValue(true);
+
+      CardView.isEnabled.mockResolvedValue(false);
+      ApplePayView.isEnabled.mockResolvedValue(false);
+      GooglePayView.isEnabled.mockResolvedValue(false);
+      PayPalView.isEnabled.mockResolvedValue(false);
+      PayPalCreditView.isEnabled.mockResolvedValue(false);
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.getInitialViewId()).toBe('venmo');
+    });
+  });
+
   describe('reportAppSwitchPayload', () => {
     test('saves app switch payload to instance', () => {
       const model = new DropinModel(testContext.modelOptions);
