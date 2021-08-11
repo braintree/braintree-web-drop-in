@@ -2750,11 +2750,13 @@ describe('CardView', () => {
     });
 
     test('focuses on the number field', () => {
-      const view = new CardView({ element: cardElement });
+      const view = new CardView({
+        model: fake.model(),
+        client: fake.client(),
+        element: cardElement
+      });
 
-      view.hostedFieldsInstance = {
-        focus: jest.fn()
-      };
+      view.hostedFieldsInstance = fake.hostedFields();
 
       view.onSelection();
 
@@ -2762,6 +2764,58 @@ describe('CardView', () => {
 
       expect(view.hostedFieldsInstance.focus).toBeCalledTimes(1);
       expect(view.hostedFieldsInstance.focus).toBeCalledWith('number');
+    });
+
+    test('setPaymentMethodRequestable is called on selection', () => {
+      const model = fake.model();
+      const view = new CardView({
+        model,
+        client: fake.client(),
+        element: cardElement
+      });
+      const hf = fake.hostedFields();
+
+      view.hostedFieldsInstance = hf;
+      hf.getState.mockReturnValue({
+        cards: [{ type: 'visa' }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      jest.spyOn(model, 'setPaymentMethodRequestable').mockImplementation();
+
+      view.onSelection();
+
+      expect(model.setPaymentMethodRequestable).toBeCalledWith({
+        isRequestable: true,
+        type: 'CreditCard'
+      });
+
+      model.setPaymentMethodRequestable.mockClear();
+      hf.getState.mockReturnValue({
+        cards: [{ type: 'visa' }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: false
+          }
+        }
+      });
+
+      view.onSelection();
+
+      expect(model.setPaymentMethodRequestable).toBeCalledWith({
+        isRequestable: false,
+        type: 'CreditCard'
+      });
     });
 
     test('noops if the hosted fields instance is not available', () => {
