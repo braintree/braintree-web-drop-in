@@ -553,6 +553,8 @@ CardView.prototype.onSelection = function () {
       this.hostedFieldsInstance.focus('number');
     }
   }.bind(this), 50);
+
+  this._sendRequestableEvent();
 };
 
 CardView.prototype._hideUnsupportedCardIcons = function () {

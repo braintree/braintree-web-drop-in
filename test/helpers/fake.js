@@ -60,6 +60,7 @@ fakeBTInstances = {
   hostedFields() {
     return {
       clear: jest.fn(),
+      focus: jest.fn(),
       getState: jest.fn().mockReturnValue({
         cards: [{ type: 'visa' }],
         fields: {
