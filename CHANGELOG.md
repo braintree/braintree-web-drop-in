@@ -4,6 +4,7 @@ CHANGELOG
 unreleased
 ----------
 - Fix issue where a methods container for a cusotmer with 15+ payment methods would obscure the "Choose Another Way to Pay" button
+- Fix issue where Drop-in could get in an unusable state when `clearSelectedPaymentMethod` was called directly after `requestPaymentMethod`
 - Update braintree-web to v3.80.0
 
 1.31.1

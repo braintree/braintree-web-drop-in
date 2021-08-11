@@ -11,6 +11,7 @@ var isGuestCheckout = require('./lib/is-guest-checkout');
 var Promise = require('./lib/promise');
 var paymentSheetViews = require('./views/payment-sheet-views');
 var vaultManager = require('braintree-web/vault-manager');
+var paymentOptionsViewID = require('./views/payment-options-view').ID;
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
   paymentMethodTypes.applePay,
@@ -259,6 +260,18 @@ DropinModel.prototype.getPaymentMethods = function () {
 
 DropinModel.prototype.getActivePaymentMethod = function () {
   return this._activePaymentMethod;
+};
+
+DropinModel.prototype.hasPaymentMethods = function () {
+  return this.getPaymentMethods().length > 0;
+};
+
+DropinModel.prototype.getInitialViewId = function () {
+  if (this.supportedPaymentOptions.length > 1) {
+    return paymentOptionsViewID;
+  }
+
+  return this.supportedPaymentOptions[0];
 };
 
 DropinModel.prototype.getActivePaymentViewId = function () {

@@ -54,6 +54,7 @@ describe('Dropin', () => {
     jest.spyOn(hostedFields, 'create').mockResolvedValue(fake.hostedFields());
     jest.spyOn(paypalCheckout, 'create').mockResolvedValue(fake.paypalInstance);
     jest.spyOn(threeDSecure, 'create').mockResolvedValue(fake.threeDSecureInstance);
+    jest.spyOn(DropinModel.prototype, 'hasPaymentMethods').mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -1395,7 +1396,9 @@ describe('Dropin', () => {
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._model = {
-        isPaymentMethodRequestable: jest.fn().mockReturnValue('foo')
+        isPaymentMethodRequestable: jest.fn().mockReturnValue('foo'),
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       expect(instance.isPaymentMethodRequestable()).toBe('foo');
@@ -1450,7 +1453,9 @@ describe('Dropin', () => {
         }
       };
       instance._model = {
-        getPaymentMethods: jest.fn().mockReturnValue([])
+        getPaymentMethods: jest.fn().mockReturnValue([]),
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       instance.updateConfiguration('paypal', 'foo', 'bar');
@@ -1480,7 +1485,9 @@ describe('Dropin', () => {
         }
       };
       instance._model = {
-        getPaymentMethods: jest.fn().mockReturnValue([])
+        getPaymentMethods: jest.fn().mockReturnValue([]),
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       instance.updateConfiguration('paypalCredit', 'foo', 'bar');
@@ -1510,7 +1517,9 @@ describe('Dropin', () => {
         }
       };
       instance._model = {
-        getPaymentMethods: jest.fn().mockReturnValue([])
+        getPaymentMethods: jest.fn().mockReturnValue([]),
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       instance.updateConfiguration('applePay', 'foo', 'bar');
@@ -1540,7 +1549,9 @@ describe('Dropin', () => {
         }
       };
       instance._model = {
-        getPaymentMethods: jest.fn().mockReturnValue([])
+        getPaymentMethods: jest.fn().mockReturnValue([]),
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       instance.updateConfiguration('googlePay', 'foo', 'bar');
@@ -1606,7 +1617,9 @@ describe('Dropin', () => {
             { nonce: '4', type: 'PayPalAccount', vaulted: true },
             { nonce: '5', type: 'PayPalAccount' }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1650,7 +1663,9 @@ describe('Dropin', () => {
             { nonce: '2', type: 'CreditCard', vaulted: true },
             { nonce: '3', type: 'PayPalAccount', vaulted: true }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1695,7 +1710,9 @@ describe('Dropin', () => {
             { nonce: '4', type: 'ApplePayCard', vaulted: true },
             { nonce: '5', type: 'ApplePayCard' }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1739,7 +1756,9 @@ describe('Dropin', () => {
             { nonce: '2', type: 'CreditCard', vaulted: true },
             { nonce: '3', type: 'ApplePayCard', vaulted: true }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1784,7 +1803,9 @@ describe('Dropin', () => {
             { nonce: '4', type: 'AndroidPayCard', vaulted: true },
             { nonce: '5', type: 'AndroidPayCard' }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1828,7 +1849,9 @@ describe('Dropin', () => {
             { nonce: '2', type: 'CreditCard', vaulted: true },
             { nonce: '3', type: 'AndroidPayCard', vaulted: true }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1846,7 +1869,7 @@ describe('Dropin', () => {
     );
 
     test(
-      'sets primary view to options if on the methods view and there are no saved payment methods and supportedPaymentOptions is greater than 1',
+      'sets primary view to initial view if on the methods view and there are no saved payment methods and supportedPaymentOptions is greater than 1',
       () => {
         const instance = new Dropin(testContext.dropinOptions);
         const getViewStub = jest.fn();
@@ -1869,7 +1892,9 @@ describe('Dropin', () => {
         instance._model = {
           getPaymentMethods: jest.fn().mockReturnValue([]),
           supportedPaymentOptions: ['paypal', 'card'],
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1884,48 +1909,6 @@ describe('Dropin', () => {
 
         expect(instance._mainView.setPrimaryView).toBeCalledTimes(1);
         expect(instance._mainView.setPrimaryView).toBeCalledWith('options');
-      }
-    );
-
-    test(
-      'sets primary view to available payment option view if on the methods view and there are not saved payment methods and only one payment option is available',
-      () => {
-        const instance = new Dropin(testContext.dropinOptions);
-        const getViewStub = jest.fn();
-        const fakePayPalView = {
-          updateConfiguration: jest.fn()
-        };
-        const fakeMethodsView = {
-          getPaymentMethod: jest.fn().mockReturnValue({
-            type: 'PayPalAccount'
-          })
-        };
-
-        instance._mainView = {
-          getView: getViewStub,
-          primaryView: {
-            ID: 'methods'
-          },
-          setPrimaryView: jest.fn()
-        };
-        instance._model = {
-          getPaymentMethods: jest.fn().mockReturnValue([]),
-          supportedPaymentOptions: ['paypal'],
-          removePaymentMethod: jest.fn()
-        };
-
-        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
-          if (arg === 'paypal') {
-            return fakePayPalView;
-          } else if (arg === 'methods') {
-            return fakeMethodsView;
-          }
-        });
-
-        instance.updateConfiguration('paypal', 'foo', 'bar');
-
-        expect(instance._mainView.setPrimaryView).toBeCalledTimes(1);
-        expect(instance._mainView.setPrimaryView).toBeCalledWith('paypal');
       }
     );
 
@@ -1952,7 +1935,9 @@ describe('Dropin', () => {
         };
         instance._model = {
           getPaymentMethods: jest.fn().mockReturnValue([]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1994,7 +1979,9 @@ describe('Dropin', () => {
           getPaymentMethods: jest.fn().mockReturnValue([
             { nonce: '1', type: 'CreditCard' }
           ]),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2058,7 +2045,9 @@ describe('Dropin', () => {
         ]),
         refreshPaymentMethods: jest.fn().mockResolvedValue(),
         removeActivePaymentMethod: jest.fn(),
-        removePaymentMethod: jest.fn()
+        removePaymentMethod: jest.fn(),
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2099,7 +2088,9 @@ describe('Dropin', () => {
             { nonce: '3', type: 'PayPalAccount', vaulted: true }
           ]),
           removeActivePaymentMethod: jest.fn(),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2115,48 +2106,7 @@ describe('Dropin', () => {
     );
 
     test(
-      'sets primary view to options if on the methods view and there are no saved payment methods and supportedPaymentOptions is greater than 1',
-      () => {
-        const instance = new Dropin(testContext.dropinOptions);
-        const getViewStub = jest.fn();
-        const fakeMethodsView = {
-          getPaymentMethod: jest.fn().mockReturnValue({
-            type: 'PayPalAccount'
-          })
-        };
-
-        instance._mainView = {
-          getView: getViewStub,
-          showLoadingIndicator: jest.fn(),
-          hideLoadingIndicator: jest.fn(),
-          primaryView: {
-            ID: 'methods'
-          },
-          setPrimaryView: jest.fn()
-        };
-        instance._model = {
-          refreshPaymentMethods: jest.fn().mockResolvedValue(),
-          getPaymentMethods: jest.fn().mockReturnValue([]),
-          removeActivePaymentMethod: jest.fn(),
-          supportedPaymentOptions: ['paypal', 'card'],
-          removePaymentMethod: jest.fn()
-        };
-
-        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
-          if (arg === 'methods') {
-            return fakeMethodsView;
-          }
-        });
-
-        instance.clearSelectedPaymentMethod();
-
-        expect(instance._mainView.setPrimaryView).toBeCalledTimes(1);
-        expect(instance._mainView.setPrimaryView).toBeCalledWith('options');
-      }
-    );
-
-    test(
-      'sets primary view to available payment option view if on the methods view and there are not saved payment methods and only one payment option is available',
+      'sets primary view to the initial view if on the methods view and there are no saved payment methods and only one payment option is available',
       () => {
         const instance = new Dropin(testContext.dropinOptions);
         const getViewStub = jest.fn();
@@ -2180,7 +2130,9 @@ describe('Dropin', () => {
           getPaymentMethods: jest.fn().mockReturnValue([]),
           removeActivePaymentMethod: jest.fn(),
           supportedPaymentOptions: ['paypal'],
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue('paypal')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2220,7 +2172,9 @@ describe('Dropin', () => {
           refreshPaymentMethods: jest.fn().mockResolvedValue(),
           getPaymentMethods: jest.fn().mockReturnValue([]),
           removeActivePaymentMethod: jest.fn(),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue('paypal')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2261,7 +2215,9 @@ describe('Dropin', () => {
             { nonce: '1', type: 'CreditCard' }
           ]),
           removeActivePaymentMethod: jest.fn(),
-          removePaymentMethod: jest.fn()
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('paypal')
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2300,7 +2256,9 @@ describe('Dropin', () => {
           { nonce: '1', type: 'CreditCard' }
         ]),
         removeActivePaymentMethod: jest.fn(),
-        removePaymentMethod: jest.fn()
+        removePaymentMethod: jest.fn(),
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
