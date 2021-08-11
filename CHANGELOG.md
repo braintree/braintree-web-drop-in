@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-unreleased
-----------
+1.31.2
+------
 - Fix issue where a methods container for a cusotmer with 15+ payment methods would obscure the "Choose Another Way to Pay" button
 - Fix issue where Drop-in could get in an unusable state when `clearSelectedPaymentMethod` was called directly after `requestPaymentMethod`
 - Fix issue where an already filled out card form would not trigger `paymentMethodRequestable` event (#761)
