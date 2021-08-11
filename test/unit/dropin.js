@@ -2106,7 +2106,7 @@ describe('Dropin', () => {
     );
 
     test(
-      'sets primary view to the intial view if on the methods view and there are not saved payment methods and only one payment option is available',
+      'sets primary view to the initial view if on the methods view and there are no saved payment methods and only one payment option is available',
       () => {
         const instance = new Dropin(testContext.dropinOptions);
         const getViewStub = jest.fn();
