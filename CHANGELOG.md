@@ -3,7 +3,7 @@ CHANGELOG
 
 Unreleased
 ----------
-- Update braintree-web to v3.81.0
+- Update braintree-web to v3.81.1
 
 1.31.2
 ------
