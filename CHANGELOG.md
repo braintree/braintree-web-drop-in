@@ -3,6 +3,7 @@ CHANGELOG
 
 Unreleased
 ----------
+- Update @braintree/browser-detection to v1.12.1
 - Update braintree-web to v3.81.1
 
 1.31.2
