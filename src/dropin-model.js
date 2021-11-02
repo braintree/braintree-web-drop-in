@@ -180,6 +180,10 @@ DropinModel.prototype._shouldIncludeDependency = function (key) {
     if (this.merchantConfiguration.card === false) {
       return false;
     }
+    // If merchant explicty passes a value of `true`, do not pass through the value
+    if (this.merchantConfiguration.card === true) {
+      delete this.merchantConfiguration.card;
+    }
   } else if (!this.merchantConfiguration[key]) {
     // if the merchant does not have the non-card dependency
     // configured, do not include the dependency

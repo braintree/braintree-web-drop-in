@@ -1,5 +1,8 @@
 CHANGELOG
 =========
+1.32.1
+----------
+- Fix issue where passing `true` to card as Merchant Configuration stops creation
 
 1.32.0
 ----------
