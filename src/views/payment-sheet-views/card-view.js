@@ -33,7 +33,14 @@ CardView.prototype.initialize = function () {
   var cardholderNameGroup = this.getElementById('cardholder-name-field-group');
   var cardIcons = this.getElementById('card-view-icons');
 
-  this.merchantConfiguration = this.model.merchantConfiguration.card || {};
+  // If merchant explicty passes a value of `true` for card configuration,
+  // we need to treat it as if no card configuration was passed, and provide
+  // the default configuration
+  if (this.model.merchantConfiguration.card && this.model.merchantConfiguration.card !== true) {
+    this.merchantConfiguration = this.model.merchantConfiguration.card;
+  } else {
+    this.merchantConfiguration = {};
+  }
   this.merchantConfiguration.vault = this.merchantConfiguration.vault || {};
   this.hasCardholderName = Boolean(this.merchantConfiguration.cardholderName);
   this.cardholderNameRequired = this.hasCardholderName && this.merchantConfiguration.cardholderName.required === true;

@@ -71,6 +71,56 @@ describe('CardView', () => {
       return fakeModel.initialize();
     });
 
+    test('defaults merchant configuration when not configured with a card configuration', () => {
+      delete fakeModel.merchantConfiguration.card;
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(view.merchantConfiguration).toEqual({
+          vault: {}
+        });
+      });
+    });
+
+    test('defaults merchant configuration card configuration is `true`', () => {
+      fakeModel.merchantConfiguration.card = true;
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(view.merchantConfiguration).toEqual({
+          vault: {}
+        });
+      });
+    });
+
+    test('uses passed in merchant configuration for card', () => {
+      fakeModel.merchantConfiguration.card = {
+        vault: { vaultCard: true }
+      };
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(view.merchantConfiguration).toEqual({
+          vault: { vaultCard: true }
+        });
+      });
+    });
+
     test('has cvv if supplied in challenges', () => {
       fakeClient.getConfiguration.mockReturnValue({
         gatewayConfiguration: {

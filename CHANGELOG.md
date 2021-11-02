@@ -1,5 +1,8 @@
 CHANGELOG
 =========
+UNRELEASED
+----------
+- Fix issue where passing `true` to card results in an error (#775)
 
 1.32.0
 ----------
