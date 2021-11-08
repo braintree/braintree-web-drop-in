@@ -1,13 +1,13 @@
 CHANGELOG
 =========
-UNRELEASED
-----------
+1.32.1
+------
 - Fix issue where passing `true` to card results in an error (#775)
 - Update promise-polyfill to v8.2.1
 - Update braintree-web to v3.83.0
 
 1.32.0
-----------
+------
 - Update @braintree/browser-detection to v1.12.1
 - Update braintree-web to v3.82.0
 
