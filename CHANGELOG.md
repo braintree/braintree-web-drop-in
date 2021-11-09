@@ -3,6 +3,7 @@ CHANGELOG
 1.32.1
 ------
 - Fix issue where passing `true` to card results in an error (#775)
+- Fix SVG inline styles causing CSP errors (#770)
 - Update promise-polyfill to v8.2.1
 - Update braintree-web to v3.83.0
 

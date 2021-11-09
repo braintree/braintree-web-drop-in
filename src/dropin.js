@@ -429,6 +429,7 @@ function Dropin(options) {
   this._client = options.client;
   this._componentID = uuid();
   this._dropinWrapper = document.createElement('div');
+  this._dropinSVGWrapper = document.createElement('div');
   this._dropinWrapper.id = 'braintree--dropin__' + this._componentID;
   this._dropinWrapper.setAttribute('data-braintree-id', 'wrapper');
   this._dropinWrapper.style.display = 'none';
@@ -500,7 +501,10 @@ Dropin.prototype._initialize = function (callback) {
     return result.replace(RegExp('{{' + stringKey + '}}', 'g'), stringValue);
   }, mainHTML);
 
-  self._dropinWrapper.innerHTML = svgHTML + localizedHTML;
+  self._dropinSVGWrapper.innerHTML = svgHTML;
+  self._dropinSVGWrapper.style.display = 'none';
+  self._dropinWrapper.innerHTML = localizedHTML;
+  container.appendChild(self._dropinSVGWrapper);
   container.appendChild(self._dropinWrapper);
 
   self._model = new DropinModel({
