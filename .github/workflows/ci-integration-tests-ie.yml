@@ -30,7 +30,6 @@ jobs:
           node-version: "14.x"
       - name: "Demo App Setup"
         run: |
-          npm install -g npm@8
           npm install
           rm -rf node_modules/@types/mocha
           sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
@@ -69,7 +68,6 @@ jobs:
           node-version: "14.x"
       - name: "Demo App Setup"
         run: |
-          npm install -g npm@8
           npm install
           rm -rf node_modules/@types/mocha
           sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
