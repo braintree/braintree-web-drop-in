@@ -174,7 +174,7 @@ If using the [3D Secure component](module-braintree-web_three-d-secure.html) wit
 |             | Sandbox                           | Production                    |
 |-------------|-----------------------------------|-------------------------------|
 | script-src  | songbirdstag.cardinalcommerce.com | songbird.cardinalcommerce.com |
-| frame-src   | &#42;.cardinalcommerce.com        | frame-src *                   |
+| frame-src   | &#42;                             | &#42;                         |
 | connect-src | &#42;.cardinalcommerce.com        | &#42;.cardinalcommerce.com    |
 
 3D Secure 2 utilizes an iframe implementation that requires the use of the issuing bank's full ACS URL. In contrast to 3D Secure 1, the 3D Secure 2 core framework does not allow masked URLs or redirects. Given that the list of possible ACS URLs changes regularly and varies between issuers and ACS providers, there is not a strict CSP configuration available for 3D Secure 2.
