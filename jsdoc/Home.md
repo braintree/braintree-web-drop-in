@@ -169,7 +169,7 @@ The `style-src` directive is required so that the styles for the Google Pay butt
 
 ### 3D Secure Specific Directives
 
-If using [3D Secure component](module-braintree-web-drop-in.html#~threeDSecureOptions), include these additional directives:
+If using [3D Secure](module-braintree-web-drop-in.html#~threeDSecureOptions), include these additional directives:
 
 |             | Sandbox                           | Production                    |
 |-------------|-----------------------------------|-------------------------------|
