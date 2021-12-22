@@ -3,6 +3,8 @@
 ## unreleased
 
   - Update braintree-web to v3.84.0
+  - Update broken create PayPal sandbox references to updated URL
+  - Update broken PayPal Checkout browser support references to update URL
 
 ## 1.32.1
 
