@@ -24,7 +24,7 @@
 
 Drop-in is a pre-made payments UI for desktop and mobile browsers to be used with cards, PayPal, and PayPal Credit. It can be used as a one-time guest checkout or to offer saved payment methods with a client token created using a [customer ID](https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id).
 
-Test out our [demo app](/braintree-web-drop-in) with one of our [test card numbers](https://developers.braintreepayments.com/reference/general/testing/#no-credit-card-errors) or a [sandbox PayPal account](https://developer.paypal.com/docs/classic/lifecycle/sb_create-accounts/).
+Test out our [demo app](/braintree-web-drop-in) with one of our [test card numbers](https://developers.braintreepayments.com/reference/general/testing/#no-credit-card-errors) or a [sandbox PayPal account](https://developer.paypal.com/developer/accounts/).
 
 If you have any feedback or questions, create a [GitHub issue](https://github.com/braintree/braintree-web-drop-in/issues) or [contact Braintree support](https://developers.braintreepayments.com/forms/contact).
 
