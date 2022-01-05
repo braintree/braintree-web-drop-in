@@ -13,6 +13,12 @@ var Promise = require('../../lib/promise');
 
 var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
+var cardsThatUseGenericCardLogo = [
+  'elo',
+  'hiper',
+  'hipercard'
+];
+
 var PASSTHROUGH_EVENTS = [
   'empty',
   // TODO should intercept this event and call tokenize
@@ -474,19 +480,10 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
   var cvvDescriptor = this.strings.cvvThreeDigitLabelSubheading;
   var cvvPlaceholder = addBullets(3);
   var numberFieldGroup = this.getElementById('number-field-group');
-  var altCardTypes = [
-    'elo',
-    'hiper',
-    'hipercard'
-  ];
 
   if (event.cards.length === 1) {
     cardType = event.cards[0].type;
-    if (altCardTypes.includes(cardType)) {
-      cardNumberHrefLink = '#iconCardFront'
-    } else {
-      cardNumberHrefLink = '#icon-' + cardType;
-    };
+    cardNumberHrefLink = '#icon-' + cardType;
     if (cardType === 'american-express') {
       cvvHrefLink = '#iconCVVFront';
       cvvDescriptor = this.strings.cvvFourDigitLabelSubheading;
@@ -575,17 +572,12 @@ CardView.prototype.onSelection = function () {
 
 CardView.prototype._hideUnsupportedCardIcons = function () {
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
-  var cardsUsingGenericLogo = [
-    'Elo',
-    'Hiper',
-    'Hipercard'
-  ];
 
   Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
     var cardIcon;
     var configurationCardType = constants.configurationCardTypes[paymentMethodCardType];
 
-    if (cardsUsingGenericLogo.indexOf(configurationCardType) === -1) {
+    if (cardsThatUseGenericCardLogo.indexOf(configurationCardType) === 1) {
       if (supportedCardTypes.indexOf(configurationCardType) === -1) {
         cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');
         classList.add(cardIcon, 'braintree-hidden');
