@@ -577,7 +577,10 @@ CardView.prototype._hideUnsupportedCardIcons = function () {
     var cardIcon;
     var configurationCardType = constants.configurationCardTypes[paymentMethodCardType];
 
-    if (cardsThatUseGenericCardLogo.indexOf(configurationCardType) === 1) {
+    // We perform a check here to see if the merchant is configured for
+    // any of the cards that use the generic logo to avoid the generic
+    // logo from beind displayed in the card sheet header
+    if (cardsThatUseGenericCardLogo.indexOf(configurationCardType) > -1) {
       if (supportedCardTypes.indexOf(configurationCardType) === -1) {
         cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');
         classList.add(cardIcon, 'braintree-hidden');
