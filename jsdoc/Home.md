@@ -181,7 +181,7 @@ If using [3D Secure](module-braintree-web-drop-in.html#~threeDSecureOptions), in
 
 Additionally, 3D Secure 2 includes a data collection flow called "3DS Method" or "Method URL Collection", which also utilizes the ACS URL directly. This process increases authentication success significantly and is considered mandatory by Visa. Blocking this process through a CSP can potentially result in authentication failures and increased friction within the checkout experience.
 
-If maintaining a CSP in an integration that uses 3D Secure 2, merchants can consider setting `frame-src *` to whitelist all potential ACS URLs that could be utilized during the 3D Secure authentication process.
+If maintaining a CSP in an integration that uses 3D Secure, merchants must set `frame-src *` to allowlist all potential ACS URLs that could be utilized during the 3D Secure authentication process.
 
 ### Data Collector Specific Directives
 
