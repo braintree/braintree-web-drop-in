@@ -580,11 +580,9 @@ CardView.prototype._hideUnsupportedCardIcons = function () {
     // We perform a check here to see if the merchant is configured for
     // any of the cards that use the generic logo to avoid the generic
     // logo from beind displayed in the card sheet header
-    if (cardsThatUseGenericCardLogo.indexOf(configurationCardType) > -1) {
-      if (supportedCardTypes.indexOf(configurationCardType) === -1) {
-        cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');
-        classList.add(cardIcon, 'braintree-hidden');
-      }
+    if (cardsThatUseGenericCardLogo.indexOf(configurationCardType) > -1 || supportedCardTypes.indexOf(configurationCardType) === -1) {
+      cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');
+      classList.add(cardIcon, 'braintree-hidden');
     }
   }.bind(this));
 };
