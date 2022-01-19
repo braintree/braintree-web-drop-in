@@ -23,6 +23,26 @@
         <use xlink:href="#icon-jcb"></use>
     </svg>
 </div>
+<!--Elo, Hiper, and Hipercard currently use the generic logo.
+Adding these here so that if we get these icons in the future
+we can simply update their SVGs and remove the logic
+that checks for cards using the generic logo in
+_hideUnsupportedCardIcons on line 583 in card-view.js-->
+<div data-braintree-id="elo-card-icon" class="braintree-sheet__card-icon">
+    <svg width="40" height="24">
+        <use xlink:href="#icon-elo"></use>
+    </svg>
+</div>
+<div data-braintree-id="hiper-card-icon" class="braintree-sheet__card-icon">
+    <svg width="40" height="24">
+        <use xlink:href="#icon-hiper"></use>
+    </svg>
+</div>
+<div data-braintree-id="hipercard-card-icon" class="braintree-sheet__card-icon">
+    <svg width="40" height="24">
+        <use xlink:href="#icon-hipercard"></use>
+    </svg>
+</div>
 <!-- Remove braintree-hidden class when supportedCardType accurately indicates Diners Club support -->
 <div data-braintree-id="diners-club-card-icon" class="braintree-sheet__card-icon braintree-hidden">
     <svg width="40" height="24">
