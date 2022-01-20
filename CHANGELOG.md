@@ -3,6 +3,7 @@
 ## unreleased
 
   - Update braintree-web to v3.85.1
+  - Add support for UnionPay
 
 ## 1.32.1
 
