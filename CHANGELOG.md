@@ -2,7 +2,7 @@
 
 ## unreleased
 
-  - Update braintree-web to v3.85.1
+  - Update braintree-web to v3.85.2
   - Add support for Elo, Hiper, and Hipercard
 
 ## 1.32.1
