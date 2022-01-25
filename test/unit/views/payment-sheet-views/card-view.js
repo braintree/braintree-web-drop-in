@@ -489,7 +489,16 @@ describe('CardView', () => {
     );
 
     test('shows supported card icons', () => {
-      const supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa'];
+      const supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa', 'unionpay'];
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: ['cvv'],
+          creditCards: {
+            supportedCardTypes: ['American Express', 'Discover', 'JCB', 'MasterCard', 'Visa', 'UnionPay']
+          }
+        }
+      });
 
       const view = new CardView({
         element: cardElement,
