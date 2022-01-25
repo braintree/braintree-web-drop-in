@@ -489,7 +489,16 @@ describe('CardView', () => {
     );
 
     test('shows supported card icons', () => {
-      const supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa'];
+      const supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa', 'unionpay'];
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: ['cvv'],
+          creditCards: {
+            supportedCardTypes: ['American Express', 'Discover', 'JCB', 'MasterCard', 'Visa', 'UnionPay']
+          }
+        }
+      });
 
       const view = new CardView({
         element: cardElement,
@@ -523,32 +532,6 @@ describe('CardView', () => {
 
           expect(cardIcon.classList.contains('braintree-hidden')).toBe(true);
         });
-      });
-    });
-
-    test('does not show UnionPay icon even if it is supported', () => {
-      let unionPayCardIcon;
-
-      fakeClient.getConfiguration.mockReturnValue({
-        gatewayConfiguration: {
-          challenges: [],
-          creditCards: {
-            supportedCardTypes: ['UnionPay']
-          }
-        }
-      });
-
-      const view = new CardView({
-        element: cardElement,
-        model: fakeModel,
-        client: fakeClient,
-        strings: strings
-      });
-
-      return view.initialize().then(() => {
-        unionPayCardIcon = cardElement.querySelector('[data-braintree-id="unionpay-card-icon"]');
-
-        expect(unionPayCardIcon.classList.contains('braintree-hidden')).toBe(true);
       });
     });
 
