@@ -10,6 +10,11 @@
         requireParamDescription: true
         requireReturnDescription: true
 
+  overrides:
+    - files: "src/translations/*"
+      rules:
+        key-spacing: 0
+
   globals:
     __dirname: true
     process: true

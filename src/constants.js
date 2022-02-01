@@ -32,7 +32,10 @@ module.exports = {
     Discover: 'discover',
     JCB: 'jcb',
     UnionPay: 'unionpay',
-    Maestro: 'maestro'
+    Maestro: 'maestro',
+    Elo: 'elo',
+    Hiper: 'hiper',
+    Hipercard: 'hipercard'
   },
   configurationCardTypes: {
     visa: 'Visa',
@@ -42,7 +45,10 @@ module.exports = {
     discover: 'Discover',
     jcb: 'JCB',
     unionpay: 'UnionPay',
-    maestro: 'Maestro'
+    maestro: 'Maestro',
+    elo: 'Elo',
+    hiper: 'Hiper',
+    hipercard: 'Hipercard'
   },
   dependencySetupStates: {
     DONE: 'done',

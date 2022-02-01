@@ -535,6 +535,84 @@ describe('CardView', () => {
       });
     });
 
+    test('does not show Elo icon even if it is supported', () => {
+      let eloCardIcon;
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: ['Elo']
+          }
+        }
+      });
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        eloCardIcon = cardElement.querySelector('[data-braintree-id="elo-card-icon"]');
+
+        expect(eloCardIcon.classList.contains('braintree-hidden')).toBe(true);
+      });
+    });
+
+    test('does not show Hiper icon even if it is supported', () => {
+      let hiperIcon;
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: ['Hiper']
+          }
+        }
+      });
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        hiperIcon = cardElement.querySelector('[data-braintree-id="hiper-card-icon"]');
+
+        expect(hiperIcon.classList.contains('braintree-hidden')).toBe(true);
+      });
+    });
+
+    test('does not show Hipercard icon even if it is supported', () => {
+      let hipercardIcon;
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: ['Hipercard']
+          }
+        }
+      });
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        hipercardIcon = cardElement.querySelector('[data-braintree-id="hipercard-card-icon"]');
+
+        expect(hipercardIcon.classList.contains('braintree-hidden')).toBe(true);
+      });
+    });
+
     test('sets field placeholders', () => {
       let hostedFieldsConfiguredFields;
 
