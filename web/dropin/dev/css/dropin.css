@@ -5,6 +5,9 @@
   display: block !important;
   position: relative;
 }
+[data-braintree-id="svgs"] {
+  display: none !important;
+}
 .braintree-dropin__disabled {
   position: absolute;
   top: 0;
