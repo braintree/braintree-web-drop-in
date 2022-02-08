@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+  - Clarify `options.showDefaultPaymentMethodFirst` functionality in JSDoc
+
 ## 1.33.0
 
   - Update braintree-web to v3.85.2
