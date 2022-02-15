@@ -22,11 +22,11 @@
 <a id="overview"></a>
 ## Overview
 
-Drop-in is a pre-made payments UI for desktop and mobile browsers to be used with cards, PayPal, and PayPal Credit. It can be used as a one-time guest checkout or to offer saved payment methods with a client token created using a [customer ID](https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id).
+Drop-in is a pre-made payments UI for desktop and mobile browsers to be used with cards, PayPal, and PayPal Credit. It can be used as a one-time guest checkout or to offer saved payment methods with a client token created using a [customer ID](https://developer.paypal.com/braintree/docs/guides/drop-in/customization#display-a-saved-payment-method).
 
-Test out our [demo app](/braintree-web-drop-in) with one of our [test card numbers](https://developers.braintreepayments.com/reference/general/testing/#no-credit-card-errors) or a [sandbox PayPal account](https://developer.paypal.com/developer/accounts/).
+Test out our [demo app](/braintree-web-drop-in) with one of our [test card numbers](https://developer.paypal.com/braintree/docs/reference/general/testing#valid-card-numbers) or a [sandbox PayPal account](https://developer.paypal.com/developer/accounts/).
 
-If you have any feedback or questions, create a [GitHub issue](https://github.com/braintree/braintree-web-drop-in/issues) or [contact Braintree support](https://developers.braintreepayments.com/forms/contact).
+If you have any feedback or questions, create a [GitHub issue](https://github.com/braintree/braintree-web-drop-in/issues) or [contact Braintree support](https://developer.paypal.com/braintree/help).
 
 <a id="setup"></a>
 ## Setup
@@ -56,7 +56,7 @@ dropin.create({ /* options */ }, callback);
 <a id="usage"></a>
 ## Usage
 
-Drop-in provides a payment method object containing the [payment method nonce](https://developers.braintreepayments.com/start/overview#payment-method-nonce) to send to your server. To get this object, use the `requestPaymentMethod` function.
+Drop-in provides a payment method object containing the [payment method nonce](https://developer.paypal.com/braintree/docs/start/hello-client#send-payment-method-nonce-to-server) to send to your server. To get this object, use the `requestPaymentMethod` function.
 
 If you are using a [script tag integration](module-braintree-web-drop-in.html), a hidden `payment_method_nonce` input will be added to the form with the nonce value. The following instructions specify usage of a JavaScript integration.
 
@@ -73,25 +73,25 @@ Use [events](Dropin.html#on) to know when the card form could be considered vali
 ### Accepting PayPal
 For PayPal and PayPal Credit, users will click the PayPal button and continue through the PayPal authentication flow. After successful completion, the PayPal account will be visible in the UI and that payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
-More details about PayPal and PayPal Credit can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/paypal/overview/javascript/v3).
+More details about PayPal and PayPal Credit can be found in the Braintree [developer docs](https://developer.paypal.com/braintree/docs/guides/paypal/overview/javascript/v3).
 
 <a id="accepting-venmo"></a>
 ### Accepting Venmo
 For Venmo, users will click the Venmo button on their mobile device, which will open up the Venmo app to authenticate the purchase and then return back to the webpage. After successful completion, the Venmo account will be visible in the UI and that payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
-More details about Venmo can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/venmo/overview).
+More details about Venmo can be found in the Braintree [developer docs](https://developer.paypal.com/braintree/docs/guides/venmo/overview).
 
 <a id="accepting-apple-pay"></a>
 ### Accepting Apple Pay
 For Apple Pay, users will click the Apple Pay button. After successful completion, the payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
-More details about Apple Pay can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/apple-pay/overview).
+More details about Apple Pay can be found in the Braintree [developer docs](https://developer.paypal.com/braintree/docs/guides/apple-pay/overview).
 
 <a id="accepting-google-pay"></a>
 ### Accepting Google Pay
 For Google Pay, users will click the Google Pay button. After successful completion, the payment method can be requested. Use [events](Dropin.html#on) to know when the authentication flow has been completed and the payment method can be requested.
 
-More details about Google Pay can be found in the Braintree [developer docs](https://developers.braintreepayments.com/guides/google-pay/overview).
+More details about Google Pay can be found in the Braintree [developer docs](https://developer.paypal.com/braintree/docs/guides/google-pay/overview).
 
 <a id="localization"></a>
 ### Localization
@@ -190,5 +190,5 @@ If using Kount with [Data Collector](module-braintree-web-drop-in.html#~dataColl
 <a id="additional-resources"></a>
 ## Additional resources
 
-- [Braintree Drop-in Payment UI guide](https://developers.braintreepayments.com/guides/drop-in/javascript/v3)
+- [Braintree Drop-in Payment UI guide](https://developer.paypal.com/braintree/docs/guides/drop-in/overview)
 - [`braintree-web-drop-in` GitHub repo](https://github.com/braintree/braintree-web-drop-in)
