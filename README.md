@@ -7,7 +7,7 @@
 
 A pre-made payments UI for accepting cards and alternative payments in the browser built using version 3 of the [Braintree JS client SDK](https://github.com/braintree/braintree-web).
 
-If you have any feedback or questions, create an [issue](https://github.com/braintree/braintree-web-drop-in/issues) or [contact Braintree support](https://developers.braintreepayments.com/forms/contact).
+If you have any feedback or questions, create an [issue](https://github.com/braintree/braintree-web-drop-in/issues) or [contact Braintree support](https://developer.paypal.com/braintree/help).
 
 ## What's new
 
@@ -72,7 +72,7 @@ Drop-in is supported in all browsers supported by the [Braintree JavaScript Clie
 
 The design of Drop-in is intentionally opinionated, and while we aimed to make the design work in many scenarios, the design of your website may conflict with the default design of Drop-in.
 
-For minor UI customizations, [review our documentation](https://developers.braintreepayments.com/guides/drop-in/customization/javascript/v3#customize-your-ui).
+For minor UI customizations, [review our documentation](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#customize-your-ui).
 
 For more substantial changes, you may [fork](https://help.github.com/articles/fork-a-repo/) Drop-in, make your desired changes and build the assets by running `npm run build`. By default, Drop-in uses a hosted version of the built stylesheet. To override this behavior and use a custom stylesheet instead, simply add `<link>` tag to your page with the id `braintree-dropin-stylesheet`.
 
