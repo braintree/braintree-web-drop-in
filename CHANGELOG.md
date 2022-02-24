@@ -1,5 +1,8 @@
 # CHANGELOG
 
+# Unreleased
+  - Fix issue where Drop-In fields escape Drop-In container when errors are present on multiple inputs
+
 ## 1.33.0
 
   - Update braintree-web to v3.85.2
