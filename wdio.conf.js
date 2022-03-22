@@ -62,6 +62,12 @@ let capabilities = [
   {
     ...desktopCapabilities,
     browserName: 'Firefox',
+    // TODO remove this version override
+    // In v97+, the PayPal window never launches
+    // to unblock current PRs from being merged,
+    // we're pinning to v96.0, but this should
+    // be investigated and resolved ASAP
+    browserVersion: '96.0',
   },
 ];
 

@@ -356,8 +356,10 @@ var VERSION = '__VERSION__';
  *   applePay: {
  *     displayName: 'Merchant Name',
  *     paymentRequest: {
-   *     label: 'Localized Name',
- *       total: '10.00'
+ *       total: {
+ *         label: 'Localized Name',
+ *         amount: '10.00'
+ *       }
  *     }
  *   },
  *   paypal: {
