@@ -43,6 +43,12 @@ function DropinModel(options) {
     return total;
   }.bind(this), {});
 
+  // Define vaultedPaypalAccountsDisabled arrays:
+  this.vaultedPaymentMethodTypesThatShouldBeHidden = [].concat(VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN);
+  if (options.merchantConfiguration.vaultedPaypalAccountsDisabled === true) {
+    this.vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethodTypes.paypal);
+  }
+
   this.failedDependencies = {};
   this._options = options;
   this._setupComplete = false;
@@ -384,10 +390,11 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
 };
 
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
+  var self = this;
   var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
     var paymentMethodType = paymentMethodTypes[key];
 
-    if (canShowVaultedPaymentMethodType(paymentMethodType)) {
+    if (canShowVaultedPaymentMethodType(paymentMethodType, self.vaultedPaymentMethodTypesThatShouldBeHidden)) {
       array.push(paymentMethodType);
     }
 
@@ -461,8 +468,8 @@ function isPaymentOptionEnabled(paymentOption, options) {
   });
 }
 
-function canShowVaultedPaymentMethodType(paymentMethodType) {
-  return paymentMethodType && VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN.indexOf(paymentMethodType) === -1;
+function canShowVaultedPaymentMethodType(paymentMethodType, vaultedPaymentMethodTypesThatShouldBeHidden) {
+  return paymentMethodType && vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethodType) === -1;
 }
 
 module.exports = DropinModel;
