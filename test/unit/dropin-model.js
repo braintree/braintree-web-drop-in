@@ -1591,5 +1591,60 @@ describe('DropinModel', () => {
         });
       }
     );
+
+    describe.only('vaultedPaypalAccountsDisabled options', function () {
+      test.each([
+        { vaultedPaypalAccountsDisabled: true,
+          expected: [{
+            nonce: '1-nonce',
+            type: 'CreditCard',
+            vaulted: true
+          }]},
+        { vaultedPaypalAccountsDisabled: false,
+          expected: [{
+            nonce: '1-nonce',
+            type: 'CreditCard',
+            vaulted: true
+          }, {
+            nonce: '2-nonce',
+            type: 'PayPalAccount',
+            vaulted: true
+          }]},
+        // eslint-disable-next-line no-undefined
+        { vaultedPaypalAccountsDisabled: undefined,
+          expected: [{
+            nonce: '1-nonce',
+            type: 'CreditCard',
+            vaulted: true
+          }, {
+            nonce: '2-nonce',
+            type: 'PayPalAccount',
+            vaulted: true
+          }]}
+      ])('when vaultedPaypalAccountsDisabled set to $vaultedPaypalAccountsDisabled', async ({ vaultedPaypalAccountsDisabled, expected }) => {
+        const modelOptions = { ...testContext.modelOptions };
+
+        modelOptions.merchantConfiguration = { ...testContext.modelOptions.merchantConfiguration };
+        modelOptions.merchantConfiguration.vaultedPaypalAccountsDisabled = vaultedPaypalAccountsDisabled;
+
+        testContext.model = new DropinModel(modelOptions);
+
+        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
+          nonce: '1-nonce',
+          type: 'CreditCard'
+        }, {
+          nonce: '2-nonce',
+          type: 'PayPalAccount'
+
+        }]);
+
+        await testContext.model.initialize();
+        testContext.model.isGuestCheckout = false;
+
+        return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
+          expect(paymentMethods).toEqual(expected);
+        });
+      });
+    });
   });
 });
