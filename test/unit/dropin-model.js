@@ -1592,7 +1592,7 @@ describe('DropinModel', () => {
       }
     );
 
-    describe.only('vaultedPaypalAccountsDisabled options', function () {
+    describe('vaultedPaypalAccountsDisabled options', function () {
       test.each([
         { vaultedPaypalAccountsDisabled: true,
           expected: [{
