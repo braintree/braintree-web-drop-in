@@ -2,7 +2,7 @@
 
 module.exports = {
   "payingWith" : "Paying with {{paymentSource}}",
-  "chooseAnotherWayToPay" : "Please choose another way to pay",
+  "chooseAnotherWayToPay" : "Choose another way to pay",
   "chooseAWayToPay" : "Choose a way to pay",
   "otherWaysToPay" : "Other ways to pay",
   "edit" : "Edit",
