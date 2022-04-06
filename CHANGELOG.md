@@ -3,6 +3,8 @@
 ## unreleased
 
   - Fix issue where Hipercard icon was not hidden (#812, thanks @tamtamchik)
+  - Update braintree-web to v3.85.3
+  - Update promise-polyfill to v8.2.3
 
 ## 1.33.0
 
