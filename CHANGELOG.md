@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## unreleased
+
+  - Fix issue where Hipercard icon was not hidden (#812, thanks @tamtamchik)
+
 ## 1.33.0
 
   - Update braintree-web to v3.85.2
