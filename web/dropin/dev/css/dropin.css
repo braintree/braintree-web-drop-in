@@ -296,7 +296,8 @@
   border-radius: 4px;
   display: none;
   margin: 0 auto;
-  max-height: 500px;
+  max-height: 600px;
+  max-height: fit-content;
   transition: transform 300ms, opacity 300ms, max-height 300ms ease;
   width: 100%;
 }
