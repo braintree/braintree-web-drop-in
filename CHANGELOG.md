@@ -1,7 +1,10 @@
 # CHANGELOG
 
-# Unreleased
+## unreleased
   - Fix issue where Drop-In fields escape Drop-In container when errors are present on multiple inputs
+  - Fix issue where Hipercard icon was not hidden (#812, thanks @tamtamchik)
+  - Update braintree-web to v3.85.3
+  - Update promise-polyfill to v8.2.3
 
 ## 1.33.0
 
