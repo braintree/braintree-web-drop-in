@@ -31,6 +31,9 @@ var ASYNC_DEPENDENCIES = DEFAULT_PAYMENT_OPTION_PRIORITY.concat(NON_PAYMENT_OPTI
 var DEPENDENCY_READY_CHECK_INTERVAL = 200;
 
 function DropinModel(options) {
+  var vaultedPaymentMethodTypesThatShouldBeHidden = options.merchantConfiguration.vaultedPaymentMethodTypesThatShouldBeHidden;
+  var self = this;
+
   this.rootNode = options.container;
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
@@ -43,10 +46,26 @@ function DropinModel(options) {
     return total;
   }.bind(this), {});
 
-  // Define vaultedPaypalAccountsDisabled arrays:
-  this.vaultedPaymentMethodTypesThatShouldBeHidden = [].concat(VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN);
-  if (options.merchantConfiguration.vaultedPaypalAccountsDisabled === true) {
-    this.vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethodTypes.paypal);
+  if (Array.isArray(vaultedPaymentMethodTypesThatShouldBeHidden)) {
+    this.vaultedPaymentMethodTypesThatShouldBeHidden = [];
+    // Values is not unique (e.g PayPalAccount)
+    Object.values(paymentMethodTypes).filter(function (value, index, _self) {
+      return _self.indexOf(value) === index;
+    }).forEach(
+      function (paymentMethod) {
+        if (vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethod) !== -1) {
+          self.vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethod);
+        }
+      }
+    );
+    // Add the default values:
+    VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN.forEach(function (paymentMethod) {
+      if (self.vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethod) === -1) {
+        self.vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethod);
+      }
+    });
+  } else {
+    this.vaultedPaymentMethodTypesThatShouldBeHidden = [].concat(VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN);
   }
 
   this.failedDependencies = {};

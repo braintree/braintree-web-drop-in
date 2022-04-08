@@ -1592,40 +1592,22 @@ describe('DropinModel', () => {
       }
     );
 
-    describe('vaultedPaypalAccountsDisabled options', function () {
+    describe('vaultedPaymentMethodTypesThatShouldBeHidden options', function () {
       test.each([
-        { vaultedPaypalAccountsDisabled: true,
-          expected: [{
-            nonce: '1-nonce',
-            type: 'CreditCard',
-            vaulted: true
-          }]},
-        { vaultedPaypalAccountsDisabled: false,
-          expected: [{
-            nonce: '1-nonce',
-            type: 'CreditCard',
-            vaulted: true
-          }, {
-            nonce: '2-nonce',
-            type: 'PayPalAccount',
-            vaulted: true
-          }]},
+        { vaultedPaymentMethodTypesThatShouldBeHidden: [],
+          expected: ['ApplePayCard', 'AndroidPayCard', 'VenmoAccount']},
+        { vaultedPaymentMethodTypesThatShouldBeHidden: ['PayPalAccount'],
+          expected: ['PayPalAccount', 'ApplePayCard', 'AndroidPayCard', 'VenmoAccount']},
+        { vaultedPaymentMethodTypesThatShouldBeHidden: ['Unknown', 'AndroidPayCard', 'CreditCard'],
+          expected: ['CreditCard', 'AndroidPayCard', 'ApplePayCard', 'VenmoAccount']},
         // eslint-disable-next-line no-undefined
         { vaultedPaypalAccountsDisabled: undefined,
-          expected: [{
-            nonce: '1-nonce',
-            type: 'CreditCard',
-            vaulted: true
-          }, {
-            nonce: '2-nonce',
-            type: 'PayPalAccount',
-            vaulted: true
-          }]}
-      ])('when vaultedPaypalAccountsDisabled set to $vaultedPaypalAccountsDisabled', async ({ vaultedPaypalAccountsDisabled, expected }) => {
+          expected: ['ApplePayCard', 'AndroidPayCard', 'VenmoAccount']}
+      ])('when vaultedPaypalAccountsDisabled set to $vaultedPaypalAccountsDisabled', async ({ vaultedPaymentMethodTypesThatShouldBeHidden, expected }) => {
         const modelOptions = { ...testContext.modelOptions };
 
         modelOptions.merchantConfiguration = { ...testContext.modelOptions.merchantConfiguration };
-        modelOptions.merchantConfiguration.vaultedPaypalAccountsDisabled = vaultedPaypalAccountsDisabled;
+        modelOptions.merchantConfiguration.vaultedPaymentMethodTypesThatShouldBeHidden = vaultedPaymentMethodTypesThatShouldBeHidden;
 
         testContext.model = new DropinModel(modelOptions);
 
@@ -1641,9 +1623,7 @@ describe('DropinModel', () => {
         await testContext.model.initialize();
         testContext.model.isGuestCheckout = false;
 
-        return testContext.model.getVaultedPaymentMethods().then(paymentMethods => {
-          expect(paymentMethods).toEqual(expected);
-        });
+        expect(testContext.model.vaultedPaymentMethodTypesThatShouldBeHidden).toEqual(expected);
       });
     });
   });
