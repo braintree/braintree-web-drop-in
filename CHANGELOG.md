@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## unreleased
+
+  - Add `vaultedPaymentMethodTypesThatShouldBeHidden` option to `dropin.create`
+
 ## 1.33.1
   - Fix issue where Drop-In fields escape Drop-In container when errors are present on multiple inputs
   - Fix issue where Hipercard icon was not hidden (#812, thanks @tamtamchik)
