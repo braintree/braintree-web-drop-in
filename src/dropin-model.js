@@ -13,7 +13,10 @@ var paymentSheetViews = require('./views/payment-sheet-views');
 var vaultManager = require('braintree-web/vault-manager');
 var paymentOptionsViewID = require('./views/payment-options-view').ID;
 
-var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
+// these vaulted payment methods can only be used for existing subscription
+// any new transactions or subscriptons should prompt the customer to
+// authorize them again before using them
+var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN = [
   paymentMethodTypes.applePay,
   paymentMethodTypes.googlePay,
   paymentMethodTypes.venmo
@@ -31,9 +34,6 @@ var ASYNC_DEPENDENCIES = DEFAULT_PAYMENT_OPTION_PRIORITY.concat(NON_PAYMENT_OPTI
 var DEPENDENCY_READY_CHECK_INTERVAL = 200;
 
 function DropinModel(options) {
-  var vaultedPaymentMethodTypesThatShouldBeHidden = options.merchantConfiguration.vaultedPaymentMethodTypesThatShouldBeHidden;
-  var self = this;
-
   this.rootNode = options.container;
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
@@ -45,28 +45,10 @@ function DropinModel(options) {
 
     return total;
   }.bind(this), {});
-
-  if (Array.isArray(vaultedPaymentMethodTypesThatShouldBeHidden)) {
-    this.vaultedPaymentMethodTypesThatShouldBeHidden = [];
-    // Values is not unique (e.g PayPalAccount)
-    Object.values(paymentMethodTypes).filter(function (value, index, _self) {
-      return _self.indexOf(value) === index;
-    }).forEach(
-      function (paymentMethod) {
-        if (vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethod) !== -1) {
-          self.vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethod);
-        }
-      }
+  this.vaultedPaymentMethodTypesThatShouldBeHidden =
+    constructHiddenPaymentMethodTypes(
+      options.merchantConfiguration.vaultedPaymentMethodTypesThatShouldBeHidden
     );
-    // Add the default values:
-    VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN.forEach(function (paymentMethod) {
-      if (self.vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethod) === -1) {
-        self.vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethod);
-      }
-    });
-  } else {
-    this.vaultedPaymentMethodTypesThatShouldBeHidden = [].concat(VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN);
-  }
 
   this.failedDependencies = {};
   this._options = options;
@@ -410,15 +392,24 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
 
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
   var self = this;
-  var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
+  var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (
+    array,
+    key
+  ) {
     var paymentMethodType = paymentMethodTypes[key];
 
-    if (canShowVaultedPaymentMethodType(paymentMethodType, self.vaultedPaymentMethodTypesThatShouldBeHidden)) {
+    if (
+      canShowVaultedPaymentMethodType(
+        paymentMethodType,
+        self.vaultedPaymentMethodTypesThatShouldBeHidden
+      )
+    ) {
       array.push(paymentMethodType);
     }
 
     return array;
-  }, []);
+  },
+  []);
 
   return paymentMethods.filter(function (paymentMethod) {
     return supportedPaymentMethods.indexOf(paymentMethod.type) > -1;
@@ -487,8 +478,44 @@ function isPaymentOptionEnabled(paymentOption, options) {
   });
 }
 
-function canShowVaultedPaymentMethodType(paymentMethodType, vaultedPaymentMethodTypesThatShouldBeHidden) {
-  return paymentMethodType && vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethodType) === -1;
+function canShowVaultedPaymentMethodType(
+  paymentMethodType,
+  vaultedPaymentMethodTypesThatShouldBeHidden
+) {
+  return (
+    paymentMethodType &&
+    vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethodType) ===
+      -1
+  );
+}
+
+function constructHiddenPaymentMethodTypes(paymentMethods) {
+  var vaultedPaymentMethodTypesThatShouldBeHidden = [].concat(
+    VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN
+  );
+
+  if (Array.isArray(paymentMethods)) {
+    paymentMethods.forEach(function (paymentMethod) {
+      var paymentMethodId = paymentMethodTypes[paymentMethod];
+
+      if (!paymentMethodId) {
+        // don't add it if it is an unknown payment method
+        return;
+      }
+
+      if (
+        vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethodId) >
+        -1
+      ) {
+        // don't add the same payment method type a second time
+        return;
+      }
+
+      vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethodId);
+    });
+  }
+
+  return vaultedPaymentMethodTypesThatShouldBeHidden;
 }
 
 module.exports = DropinModel;
