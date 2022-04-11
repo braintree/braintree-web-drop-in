@@ -1591,5 +1591,40 @@ describe('DropinModel', () => {
         });
       }
     );
+
+    describe('vaultedPaymentMethodTypesThatShouldBeHidden options', function () {
+      test.each([
+        { vaultedPaymentMethodTypesThatShouldBeHidden: [],
+          expected: ['ApplePayCard', 'AndroidPayCard', 'VenmoAccount']},
+        { vaultedPaymentMethodTypesThatShouldBeHidden: ['PayPalAccount'],
+          expected: ['PayPalAccount', 'ApplePayCard', 'AndroidPayCard', 'VenmoAccount']},
+        { vaultedPaymentMethodTypesThatShouldBeHidden: ['Unknown', 'AndroidPayCard', 'CreditCard'],
+          expected: ['CreditCard', 'AndroidPayCard', 'ApplePayCard', 'VenmoAccount']},
+        // eslint-disable-next-line no-undefined
+        { vaultedPaypalAccountsDisabled: undefined,
+          expected: ['ApplePayCard', 'AndroidPayCard', 'VenmoAccount']}
+      ])('when vaultedPaypalAccountsDisabled set to $vaultedPaypalAccountsDisabled', async ({ vaultedPaymentMethodTypesThatShouldBeHidden, expected }) => {
+        const modelOptions = { ...testContext.modelOptions };
+
+        modelOptions.merchantConfiguration = { ...testContext.modelOptions.merchantConfiguration };
+        modelOptions.merchantConfiguration.vaultedPaymentMethodTypesThatShouldBeHidden = vaultedPaymentMethodTypesThatShouldBeHidden;
+
+        testContext.model = new DropinModel(modelOptions);
+
+        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([{
+          nonce: '1-nonce',
+          type: 'CreditCard'
+        }, {
+          nonce: '2-nonce',
+          type: 'PayPalAccount'
+
+        }]);
+
+        await testContext.model.initialize();
+        testContext.model.isGuestCheckout = false;
+
+        expect(testContext.model.vaultedPaymentMethodTypesThatShouldBeHidden).toEqual(expected);
+      });
+    });
   });
 });
