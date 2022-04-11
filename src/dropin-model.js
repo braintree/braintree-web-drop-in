@@ -45,9 +45,9 @@ function DropinModel(options) {
 
     return total;
   }.bind(this), {});
-  this.vaultedPaymentMethodTypesThatShouldBeHidden =
+  this.hiddenVaultedPaymentMethodTypes =
     constructHiddenPaymentMethodTypes(
-      options.merchantConfiguration.vaultedPaymentMethodTypesThatShouldBeHidden
+      options.merchantConfiguration.hiddenVaultedPaymentMethodTypes
     );
 
   this.failedDependencies = {};
@@ -401,7 +401,7 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
     if (
       canShowVaultedPaymentMethodType(
         paymentMethodType,
-        self.vaultedPaymentMethodTypesThatShouldBeHidden
+        self.hiddenVaultedPaymentMethodTypes
       )
     ) {
       array.push(paymentMethodType);
@@ -480,17 +480,17 @@ function isPaymentOptionEnabled(paymentOption, options) {
 
 function canShowVaultedPaymentMethodType(
   paymentMethodType,
-  vaultedPaymentMethodTypesThatShouldBeHidden
+  hiddenVaultedPaymentMethodTypes
 ) {
   return (
     paymentMethodType &&
-    vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethodType) ===
+    hiddenVaultedPaymentMethodTypes.indexOf(paymentMethodType) ===
       -1
   );
 }
 
 function constructHiddenPaymentMethodTypes(paymentMethods) {
-  var vaultedPaymentMethodTypesThatShouldBeHidden = [].concat(
+  var hiddenVaultedPaymentMethodTypes = [].concat(
     VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN
   );
 
@@ -504,18 +504,18 @@ function constructHiddenPaymentMethodTypes(paymentMethods) {
       }
 
       if (
-        vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethodId) >
+        hiddenVaultedPaymentMethodTypes.indexOf(paymentMethodId) >
         -1
       ) {
         // don't add the same payment method type a second time
         return;
       }
 
-      vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethodId);
+      hiddenVaultedPaymentMethodTypes.push(paymentMethodId);
     });
   }
 
-  return vaultedPaymentMethodTypesThatShouldBeHidden;
+  return hiddenVaultedPaymentMethodTypes;
 }
 
 module.exports = DropinModel;
