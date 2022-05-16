@@ -37,7 +37,9 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
     analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
   }.bind(this);
 
-  div.className = 'braintree-option braintree-option__' + paymentOptionID;
+  // #RCA
+  const bc_classes = "form-checklist-item optimizedCheckout-form-checklist-item"
+  div.className = `${bc_classes} braintree-option braintree-option__${paymentOptionID}`;
   div.setAttribute('tabindex', '0');
   div.setAttribute('role', 'button');
 

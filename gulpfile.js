@@ -110,11 +110,11 @@ function buildCss() {
 
 buildCss.displayName = 'build:css';
 
-function linkLatest(done) {
-  fs.symlink(VERSION, 'dist/web/dropin/dev', done);
-}
+// function linkLatest(done) {
+//   fs.symlink(VERSION, 'dist/web/dropin/dev', done);
+// }
 
-linkLatest.displayName = 'build:link-latest';
+// linkLatest.displayName = 'build:link-latest';
 
 function npmStats() {
   return src([
@@ -175,12 +175,12 @@ function build() {
   return series(
     clean,
     parallel(
-      jsNotMin, jsMin, buildCss,
-      ghPagesBuild()
+      jsNotMin, jsMin, buildCss
+      // ghPagesBuild()
     ),
     parallel(npmCss, npmStats, npmPackage, npmSrc, npmBrowser),
-    cleanUpVersions,
-    linkLatest
+    cleanUpVersions
+    // linkLatest
   );
 }
 
@@ -193,112 +193,112 @@ function cleanUpVersions() {
 
 cleanUpVersions.displayName = 'build:update-versions';
 
-function jsdoc(options, done) {
-  var args = ['jsdoc'];
-  var command = 'bash';
-  var commandOption = '-c';
-  var platform = process.platform;
-  var configPath = path.join(GH_PAGES_PATH, 'config.json');
+// function jsdoc(options, done) {
+//   var args = ['jsdoc'];
+//   var command = 'bash';
+//   var commandOption = '-c';
+//   var platform = process.platform;
+//   var configPath = path.join(GH_PAGES_PATH, 'config.json');
+//
+//   fs.writeFileSync(configPath, JSON.stringify(options), 'utf-8');
+//
+//   if (platform !== 'darwin' && platform.indexOf('win') >= 0) {
+//     command = 'cmd';
+//     commandOption = '/c';
+//   }
+//
+//   args.push('-c', configPath, 'src');
+//
+//   spawn(command, [commandOption, args.join(' ')], {
+//     stdio: ['ignore', 1, 2]
+//   }).on('exit', function (code) {
+//     fs.unlinkSync(configPath);
+//     if (code === 0) {
+//       done();
+//     } else {
+//       done(code);
+//     }
+//   });
+// }
 
-  fs.writeFileSync(configPath, JSON.stringify(options), 'utf-8');
+// function ghPagesBuild() {
+//   return series(demoAppApple, demoApp, generateJsdoc, parallel(jsdocStatics, linkJsdoc));
+// }
 
-  if (platform !== 'darwin' && platform.indexOf('win') >= 0) {
-    command = 'cmd';
-    commandOption = '/c';
-  }
+// function generateJsdoc(done) {
+//   jsdoc({
+//     opts: {
+//       destination: config.dist.jsdoc + VERSION,
+//       recurse: true,
+//       readme: config.jsdoc.readme,
+//       template: 'node_modules/jsdoc-template'
+//     },
+//     templates: {
+//       referenceTitle: 'Braintree Drop-in Reference'
+//     },
+//     plugins: ['./jsdoc/version-interpolator-plugin', 'plugins/markdown']
+//   }, done);
+// }
 
-  args.push('-c', configPath, 'src');
+// function jsdocStatics() {
+//   return src('jsdoc/index.html').pipe(dest(config.dist.jsdoc));
+// }
 
-  spawn(command, [commandOption, args.join(' ')], {
-    stdio: ['ignore', 1, 2]
-  }).on('exit', function (code) {
-    fs.unlinkSync(configPath);
-    if (code === 0) {
-      done();
-    } else {
-      done(code);
-    }
-  });
-}
+// function linkJsdoc(done) {
+//   var link = config.dist.jsdoc + 'current';
+//
+//   if (fs.existsSync(link)) {
+//     del.sync(link);
+//   }
+//
+//   fs.symlink(VERSION, link, done);
+// }
 
-function ghPagesBuild() {
-  return series(demoAppApple, demoApp, generateJsdoc, parallel(jsdocStatics, linkJsdoc));
-}
+// generateJsdoc.displayName = 'jsdoc:generate';
+// jsdocStatics.displayName = 'jsdoc:statics';
+// linkJsdoc.displayName = 'jsdoc:link-current';
 
-function generateJsdoc(done) {
-  jsdoc({
-    opts: {
-      destination: config.dist.jsdoc + VERSION,
-      recurse: true,
-      readme: config.jsdoc.readme,
-      template: 'node_modules/jsdoc-template'
-    },
-    templates: {
-      referenceTitle: 'Braintree Drop-in Reference'
-    },
-    plugins: ['./jsdoc/version-interpolator-plugin', 'plugins/markdown']
-  }, done);
-}
-
-function jsdocStatics() {
-  return src('jsdoc/index.html').pipe(dest(config.dist.jsdoc));
-}
-
-function linkJsdoc(done) {
-  var link = config.dist.jsdoc + 'current';
-
-  if (fs.existsSync(link)) {
-    del.sync(link);
-  }
-
-  fs.symlink(VERSION, link, done);
-}
-
-generateJsdoc.displayName = 'jsdoc:generate';
-jsdocStatics.displayName = 'jsdoc:statics';
-linkJsdoc.displayName = 'jsdoc:link-current';
-
-function demoAppApple() {
-  var wellknown = GH_PAGES_PATH + '/.well-known/';
-
-  mkdirp.sync(wellknown);
-
-  return src([
-    './test/app/.well-known/*'
-  ]).pipe(dest(wellknown));
-}
-
-function demoApp() {
-  return src([
-    config.src.demoApp
-  ]).pipe(dest(GH_PAGES_PATH));
-}
-
-demoAppApple.displayName = 'build:demoapp:apple-domain-association';
-demoApp.displayName = 'build:demoapp';
-
-function ghPagesServer() {
-  connect()
-    .use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
-    .use(serveStatic(path.join(__dirname, config.server.assetsPath)))
-    .listen(config.server.port, function () {
-      log(c.magenta('Demo app and JSDocs'), 'started at', c.yellow('http://localhost:' + config.server.port));
-    });
-}
-
-ghPagesServer.displayName = 'server';
-
+// function demoAppApple() {
+//   var wellknown = GH_PAGES_PATH + '/.well-known/';
+//
+//   mkdirp.sync(wellknown);
+//
+//   return src([
+//     './test/app/.well-known/*'
+//   ]).pipe(dest(wellknown));
+// }
+//
+// function demoApp() {
+//   return src([
+//     config.src.demoApp
+//   ]).pipe(dest(GH_PAGES_PATH));
+// }
+//
+// demoAppApple.displayName = 'build:demoapp:apple-domain-association';
+// demoApp.displayName = 'build:demoapp';
+//
+// function ghPagesServer() {
+//   connect()
+//     .use(serveStatic(path.join(__dirname, config.server.ghPagesPath)))
+//     .use(serveStatic(path.join(__dirname, config.server.assetsPath)))
+//     .listen(config.server.port, function () {
+//       log(c.magenta('Demo app and JSDocs'), 'started at', c.yellow('http://localhost:' + config.server.port));
+//     });
+// }
+//
+// ghPagesServer.displayName = 'server';
+//
 function triggerWatchers() {
   watch([config.src.js.watch, config.src.html.watch], parallel(jsNotMin, jsMin));
   watch([config.src.css.watch], buildCss);
-  watch([config.src.js.watch, config.jsdoc.watch], ghPagesBuild());
-  watch([config.src.demoApp], demoApp);
+  // watch([config.src.js.watch, config.jsdoc.watch], ghPagesBuild());
+  // watch([config.src.demoApp], demoApp);
 }
 
 triggerWatchers.displayName = 'watch';
 
 exports.build = build();
-exports.server = ghPagesServer;
-exports.ghPages = ghPagesBuild();
-exports.ghPages.displayName = 'build:gh-pages';
-exports.development = parallel(build(), triggerWatchers, ghPagesServer);
+// exports.server = ghPagesServer;
+// exports.ghPages = ghPagesBuild();
+// exports.ghPages.displayName = 'build:gh-pages';
+exports.development = parallel(build(), triggerWatchers); // ghPagesServer);

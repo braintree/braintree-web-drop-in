@@ -1,4 +1,3 @@
-dist/
 node_modules/
 coverage/
 *.log
@@ -9,3 +8,4 @@ coverage/
 sauce_connect.ready
 
 hint-report/
+/.idea

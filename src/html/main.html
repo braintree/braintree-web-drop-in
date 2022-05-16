@@ -1,254 +1,315 @@
+<!-- TODO [ZYoung @ 2022-05-15] Style methods other than card -->
 <div class="braintree-dropin">
-  <div data-braintree-id="methods-label" class="braintree-heading">&nbsp;</div>
-  <div data-braintree-id="methods-edit" class="braintree-hidden braintree-heading" role="button" tabindex="0">{{edit}}</div>
-  <div data-braintree-id="choose-a-way-to-pay" class="braintree-heading">{{chooseAWayToPay}}</div>
-  <div class="braintree-placeholder">&nbsp;</div>
-
-  <div data-braintree-id="upper-container" class="braintree-upper-container">
-    <div data-braintree-id="loading-container" class="braintree-loader__container">
-      <div data-braintree-id="loading-indicator" class="braintree-loader__indicator">
-        <svg width="14" height="16" class="braintree-loader__lock">
-          <use xlink:href="#iconLockLoader"></use>
-        </svg>
-      </div>
+    <div data-braintree-id="methods-label" class="braintree-heading">&nbsp;</div>
+    <div data-braintree-id="methods-edit"
+         class="braintree-hidden braintree-heading"
+         role="button"
+         tabindex="0">{{edit}}
     </div>
+    <div data-braintree-id="choose-a-way-to-pay">{{chooseAWayToPay}}</div>
+    <div class="braintree-placeholder">&nbsp;</div>
 
-    <div data-braintree-id="delete-confirmation" class="braintree-delete-confirmation braintree-sheet">
-      <div data-braintree-id="delete-confirmation__message"></div>
-      <div class="braintree-delete-confirmation__button-container">
-        <div tabindex="0" role="button" data-braintree-id="delete-confirmation__no" class="braintree-delete-confirmation__button">{{deleteCancelButton}}</div>
-        <div tabindex="0" role="button" data-braintree-id="delete-confirmation__yes" class="braintree-delete-confirmation__button">{{deleteConfirmationButton}}</div>
-      </div>
-    </div>
+    <div data-braintree-id="upper-container" class="braintree-upper-container">
+        <div data-braintree-id="loading-container" class="braintree-loader__container">
+            <div data-braintree-id="loading-indicator" class="braintree-loader__indicator">
+                <svg width="14" height="16" class="braintree-loader__lock">
+                    <use xlink:href="#iconLockLoader"></use>
+                </svg>
+            </div>
+        </div>
 
-    <div data-braintree-id="methods" class="braintree-methods braintree-methods-initial">
-      <div data-braintree-id="methods-container"></div>
-    </div>
+        <div data-braintree-id="delete-confirmation"
+             class="braintree-delete-confirmation braintree-sheet">
+            <div data-braintree-id="delete-confirmation__message"></div>
+            <div class="braintree-delete-confirmation__button-container">
+                <div tabindex="0"
+                     role="button"
+                     data-braintree-id="delete-confirmation__no"
+                     class="braintree-delete-confirmation__button">{{deleteCancelButton}}
+                </div>
+                <div tabindex="0"
+                     role="button"
+                     data-braintree-id="delete-confirmation__yes"
+                     class="braintree-delete-confirmation__button">{{deleteConfirmationButton}}
+                </div>
+            </div>
+        </div>
 
-    <div data-braintree-id="options" class="braintree-test-class braintree-options braintree-options-initial">
-      <div data-braintree-id="payment-options-container" class="braintree-options-list"></div>
-    </div>
+        <div data-braintree-id="methods" class="braintree-methods braintree-methods-initial">
+            <div data-braintree-id="methods-container"></div>
+        </div>
 
-    <div data-braintree-id="sheet-container" class="braintree-sheet__container">
-      <div data-braintree-id="paypal" class="braintree-paypal braintree-sheet">
-        <div data-braintree-id="paypal-sheet-header" class="braintree-sheet__header">
-          <div class="braintree-sheet__header-label">
-            <div class="braintree-sheet__logo--header">
-              <svg width="40" height="24">
-                <use xlink:href="#logoPayPal"></use>
-              </svg>
+        <div data-braintree-id="options"
+             class="braintree-test-class braintree-options braintree-options-initial">
+            <div data-braintree-id="payment-options-container" class="braintree-options-list"></div>
+        </div>
+
+        <div data-braintree-id="sheet-container" class="braintree-sheet__container">
+            <div data-braintree-id="paypal" class="braintree-paypal braintree-sheet">
+                <div data-braintree-id="paypal-sheet-header" class="braintree-sheet__header">
+                    <div class="braintree-sheet__header-label">
+                        <div class="braintree-sheet__logo--header">
+                            <svg width="40" height="24">
+                                <use xlink:href="#logoPayPal"></use>
+                            </svg>
+                        </div>
+                        <div class="braintree-sheet__label">{{PayPal}}</div>
+                    </div>
+                </div>
+                <div class="braintree-sheet__content braintree-sheet__content--button">
+                    <div data-braintree-id="paypal-button"
+                         class="braintree-sheet__button--paypal"></div>
+                </div>
             </div>
-            <div class="braintree-sheet__label">{{PayPal}}</div>
-          </div>
-        </div>
-        <div class="braintree-sheet__content braintree-sheet__content--button">
-          <div data-braintree-id="paypal-button" class="braintree-sheet__button--paypal"></div>
-        </div>
-      </div>
-      <div data-braintree-id="paypalCredit" class="braintree-paypalCredit braintree-sheet">
-        <div data-braintree-id="paypal-credit-sheet-header" class="braintree-sheet__header">
-          <div class="braintree-sheet__header-label">
-            <div class="braintree-sheet__logo--header">
-              <svg width="40" height="24">
-                <use xlink:href="#logoPayPalCredit"></use>
-              </svg>
+            <div data-braintree-id="paypalCredit" class="braintree-paypalCredit braintree-sheet">
+                <div data-braintree-id="paypal-credit-sheet-header" class="braintree-sheet__header">
+                    <div class="braintree-sheet__header-label">
+                        <div class="braintree-sheet__logo--header">
+                            <svg width="40" height="24">
+                                <use xlink:href="#logoPayPalCredit"></use>
+                            </svg>
+                        </div>
+                        <div class="braintree-sheet__label">{{PayPal Credit}}</div>
+                    </div>
+                </div>
+                <div class="braintree-sheet__content braintree-sheet__content--button">
+                    <div data-braintree-id="paypal-credit-button"
+                         class="braintree-sheet__button--paypal"></div>
+                </div>
             </div>
-            <div class="braintree-sheet__label">{{PayPal Credit}}</div>
-          </div>
-        </div>
-        <div class="braintree-sheet__content braintree-sheet__content--button">
-          <div data-braintree-id="paypal-credit-button" class="braintree-sheet__button--paypal"></div>
-        </div>
-      </div>
-      <div data-braintree-id="applePay" class="braintree-applePay braintree-sheet">
-        <div data-braintree-id="apple-pay-sheet-header" class="braintree-sheet__header">
-          <div class="braintree-sheet__header-label">
-            <div class="braintree-sheet__logo--header">
-              <svg height="24" width="40">
-              <use xlink:href="#logoApplePay"></use>
-              </svg>
+            <div data-braintree-id="applePay" class="braintree-applePay braintree-sheet">
+                <div data-braintree-id="apple-pay-sheet-header" class="braintree-sheet__header">
+                    <div class="braintree-sheet__header-label">
+                        <div class="braintree-sheet__logo--header">
+                            <svg height="24" width="40">
+                                <use xlink:href="#logoApplePay"></use>
+                            </svg>
+                        </div>
+                        <div class="braintree-sheet__label">{{Apple Pay}}</div>
+                    </div>
+                </div>
+                <div class="braintree-sheet__content braintree-sheet__content--button">
+                    <div data-braintree-id="apple-pay-button"
+                         class="braintree-sheet__button--apple-pay apple-pay-button"></div>
+                </div>
             </div>
-            <div class="braintree-sheet__label">{{Apple Pay}}</div>
-          </div>
-        </div>
-        <div class="braintree-sheet__content braintree-sheet__content--button">
-          <div data-braintree-id="apple-pay-button" class="braintree-sheet__button--apple-pay apple-pay-button"></div>
-        </div>
-      </div>
-      <div data-braintree-id="googlePay" class="braintree-googlePay braintree-sheet">
-        <div data-braintree-id="google-pay-sheet-header" class="braintree-sheet__header">
-          <div class="braintree-sheet__header-label">
-            <div class="braintree-sheet__logo--header">
-              <svg height="24" width="40">
-              <use xlink:href="#logoGooglePay"></use>
-              </svg>
+            <div data-braintree-id="googlePay" class="braintree-googlePay braintree-sheet">
+                <div data-braintree-id="google-pay-sheet-header" class="braintree-sheet__header">
+                    <div class="braintree-sheet__header-label">
+                        <div class="braintree-sheet__logo--header">
+                            <svg height="24" width="40">
+                                <use xlink:href="#logoGooglePay"></use>
+                            </svg>
+                        </div>
+                        <div class="braintree-sheet__label">{{Google Pay}}</div>
+                    </div>
+                </div>
+                <div class="braintree-sheet__content braintree-sheet__content--button">
+                    <div data-braintree-id="google-pay-button"></div>
+                </div>
             </div>
-            <div class="braintree-sheet__label">{{Google Pay}}</div>
-          </div>
-        </div>
-        <div class="braintree-sheet__content braintree-sheet__content--button">
-          <div data-braintree-id="google-pay-button"></div>
-        </div>
-      </div>
-      <div data-braintree-id="venmo" class="braintree-venmo braintree-sheet">
-        <div data-braintree-id="venmo-sheet-header" class="braintree-sheet__header">
-          <div class="braintree-sheet__header-label">
-            <div class="braintree-sheet__logo--header">
-              <svg height="24" width="40">
-              <use xlink:href="#logoVenmo"></use>
-              </svg>
+            <div data-braintree-id="venmo" class="braintree-venmo braintree-sheet">
+                <div data-braintree-id="venmo-sheet-header" class="braintree-sheet__header">
+                    <div class="braintree-sheet__header-label">
+                        <div class="braintree-sheet__logo--header">
+                            <svg height="24" width="40">
+                                <use xlink:href="#logoVenmo"></use>
+                            </svg>
+                        </div>
+                        <div class="braintree-sheet__label">{{Venmo}}</div>
+                    </div>
+                </div>
+                <div class="braintree-sheet__content braintree-sheet__content--button">
+                    <svg data-braintree-id="venmo-button" class="braintree-sheet__button--venmo">
+                        <use xlink:href="#buttonVenmo"></use>
+                    </svg>
+                </div>
             </div>
-            <div class="braintree-sheet__label">{{Venmo}}</div>
-          </div>
-        </div>
-        <div class="braintree-sheet__content braintree-sheet__content--button">
-          <svg data-braintree-id="venmo-button" class="braintree-sheet__button--venmo">
-            <use xlink:href="#buttonVenmo"></use>
-          </svg>
-        </div>
-      </div>
-      <div data-braintree-id="card" class="braintree-card braintree-form braintree-sheet">
-        <div data-braintree-id="card-sheet-header" class="braintree-sheet__header">
-          <div class="braintree-sheet__header-label">
-            <div class="braintree-sheet__logo--header">
-              <svg width="40" height="24" class="braintree-icon--bordered">
-                <use xlink:href="#iconCardFront"></use>
-              </svg>
+            <div data-braintree-id="card"
+                 class="optimizedCheckout-form-checklist-item--selected braintree-card braintree-form braintree-sheet">
+                <div class="form-checklist-header form-checklist-header--selected">
+                    <div class="form-field"><input name="paymentProviderRadio"
+                                                   class="form-checklist-checkbox optimizedCheckout-form-checklist-checkbox"
+                                                   id="radio-braintree"
+                                                   type="radio"
+                                                   value="braintree"
+                                                   checked=""><label for="radio-braintree"
+                                                                     class="form-label optimizedCheckout-form-label"><span
+                            class="paymentProviderHeader-name"
+                            data-test="payment-method-name">{{payWithCard}}</span>
+                        <div data-braintree-id="card-sheet-header" class="braintree-sheet__header paymentProviderHeader-cc" style="border-bottom-width: 0;">
+                            <div data-braintree-id="card-view-icons" class="braintree-sheet__icons"></div>
+                        </div>
+                    </label></div>
+                </div>
+                <div class="braintree-sheet__content braintree-sheet__content--form">
+                    <div class="braintree-form__flexible-fields">
+                        <div data-braintree-id="number-field-group"
+                             class="braintree-form__field-group">
+                            <label>
+                                <div class="form-label optimizedCheckout-form-label">
+                                    {{cardNumberLabel}}
+                                </div>
+                                <div class="braintree-form__field">
+                                    <div class="braintree-form-number braintree-form__hosted-field form-input optimizedCheckout-form-input"></div>
+                                    <div class="braintree-form__icon-container">
+                                        <div data-braintree-id="card-number-icon"
+                                             class="braintree-form__icon braintree-form__field-secondary-icon">
+                                            <svg width="40"
+                                                 height="24"
+                                                 class="braintree-icon--bordered">
+                                                <use data-braintree-id="card-number-icon-svg"
+                                                     xlink:href="#iconCardFront"></use>
+                                            </svg>
+                                        </div>
+                                        <div class="braintree-form__icon braintree-form__field-error-icon">
+                                            <svg width="24" height="24">
+                                                <use xlink:href="#iconError"></use>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                            <div data-braintree-id="number-field-error"
+                                 class="braintree-form__field-error"></div>
+                        </div>
+                        <div data-braintree-id="expiration-date-field-group"
+                             class="braintree-form__field-group">
+                            <label>
+                                <div class="form-label optimizedCheckout-form-label">
+                                    {{expirationDateLabel}}
+                                    <span class="braintree-form__descriptor">{{expirationDateLabelSubheading}}</span>
+                                </div>
+                                <div class="braintree-form__field">
+                                    <div class="braintree-form__hosted-field braintree-form-expiration form-input optimizedCheckout-form-input"></div>
+                                    <div class="braintree-form__icon-container">
+                                        <div class="braintree-form__icon braintree-form__field-error-icon">
+                                            <svg width="24" height="24">
+                                                <use xlink:href="#iconError"></use>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                            <div data-braintree-id="expiration-date-field-error"
+                                 class="braintree-form__field-error"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="braintree-form__flexible-fields">
+                        <div data-braintree-id="cardholder-name-field-group"
+                             class="braintree-form__field-group">
+                            <label for="braintree__card-view-input__cardholder-name">
+                                <div class="form-label optimizedCheckout-form-label">
+                                    {{cardholderNameLabel}}
+                                </div>
+                                <div class="braintree-form__field">
+                                    <div class="braintree-form-cardholder-name braintree-form__hosted-field form-input optimizedCheckout-form-input"></div>
+                                    <div class="braintree-form__icon-container">
+                                        <div class="braintree-form__icon braintree-form__field-error-icon">
+                                            <svg width="24" height="24">
+                                                <use xlink:href="#iconError"></use>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                            <div data-braintree-id="cardholder-name-field-error"
+                                 class="braintree-form__field-error"></div>
+                        </div>
+
+
+                        <div data-braintree-id="cvv-field-group"
+                             class="braintree-form__field-group">
+                            <label>
+                                <div class="form-label optimizedCheckout-form-label">{{cvvLabel}}
+                                    <span data-braintree-id="cvv-label-descriptor"
+                                          class="braintree-form__descriptor">{{cvvThreeDigitLabelSubheading}}</span>
+                                </div>
+                                <div class="braintree-form__field">
+                                    <div class="braintree-form__hosted-field braintree-form-cvv form-input optimizedCheckout-form-input"></div>
+                                    <div class="braintree-form__icon-container">
+                                        <div data-braintree-id="cvv-icon"
+                                             class="braintree-form__icon braintree-form__field-secondary-icon">
+                                            <svg width="40"
+                                                 height="24"
+                                                 class="braintree-icon--bordered">
+                                                <use data-braintree-id="cvv-icon-svg"
+                                                     xlink:href="#iconCVVBack"></use>
+                                            </svg>
+                                        </div>
+                                        <div class="braintree-form__icon braintree-form__field-error-icon">
+                                            <svg width="24" height="24">
+                                                <use xlink:href="#iconError"></use>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                            <div data-braintree-id="cvv-field-error"
+                                 class="braintree-form__field-error"></div>
+                        </div>
+
+                        <div data-braintree-id="postal-code-field-group"
+                             class="braintree-form__field-group">
+                            <label>
+                                <div class="form-label optimizedCheckout-form-label">
+                                    {{postalCodeLabel}}
+                                </div>
+                                <div class="braintree-form__field">
+                                    <div class="braintree-form__hosted-field braintree-form-postal-code form-input optimizedCheckout-form-input"></div>
+                                    <div class="braintree-form__icon-container">
+                                        <div class="braintree-form__icon braintree-form__field-error-icon">
+                                            <svg width="24" height="24">
+                                                <use xlink:href="#iconError"></use>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                            <div data-braintree-id="postal-code-field-error"
+                                 class="braintree-form__field-error"></div>
+                        </div>
+                    </div>
+
+                    <div data-braintree-id="save-card-field-group"
+                         class="braintree-form__field-group braintree-hidden">
+                        <label>
+                            <div class="braintree-form__field braintree-form__checkbox">
+                                <input type="checkbox"
+                                       data-braintree-id="save-card-input"
+                                       checked />
+                            </div>
+                            <div class="form-label optimizedCheckout-form-label">{{saveCardLabel}}
+                            </div>
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div class="braintree-sheet__text">{{payWithCard}}</div>
-          </div>
-          <div data-braintree-id="card-view-icons" class="braintree-sheet__icons"></div>
-        </div>
-        <div class="braintree-sheet__content braintree-sheet__content--form">
-          <div data-braintree-id="cardholder-name-field-group" class="braintree-form__field-group">
-            <label for="braintree__card-view-input__cardholder-name">
-              <div class="braintree-form__label">{{cardholderNameLabel}}</div>
-              <div class="braintree-form__field">
-                <div class="braintree-form-cardholder-name braintree-form__hosted-field"></div>
-                <div class="braintree-form__icon-container">
-                  <div class="braintree-form__icon braintree-form__field-error-icon">
+
+            <div data-braintree-id="sheet-error" class="braintree-sheet__error">
+                <div class="braintree-form__icon braintree-sheet__error-icon">
                     <svg width="24" height="24">
-                      <use xlink:href="#iconError"></use>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </label>
-            <div data-braintree-id="cardholder-name-field-error" class="braintree-form__field-error"></div>
-          </div>
-          <div data-braintree-id="number-field-group" class="braintree-form__field-group">
-            <label>
-              <div class="braintree-form__label">{{cardNumberLabel}}</div>
-              <div class="braintree-form__field">
-                <div class="braintree-form-number braintree-form__hosted-field"></div>
-                <div class="braintree-form__icon-container">
-                  <div data-braintree-id="card-number-icon" class="braintree-form__icon braintree-form__field-secondary-icon">
-                    <svg width="40" height="24" class="braintree-icon--bordered">
-                    <use data-braintree-id="card-number-icon-svg" xlink:href="#iconCardFront"></use>
-                    </svg>
-                  </div>
-                  <div class="braintree-form__icon braintree-form__field-error-icon">
-                    <svg width="24" height="24">
-                      <use xlink:href="#iconError"></use>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </label>
-            <div data-braintree-id="number-field-error" class="braintree-form__field-error"></div>
-          </div>
-
-          <div class="braintree-form__flexible-fields">
-            <div data-braintree-id="expiration-date-field-group" class="braintree-form__field-group">
-              <label>
-                <div class="braintree-form__label">{{expirationDateLabel}}
-                  <span class="braintree-form__descriptor">{{expirationDateLabelSubheading}}</span>
-                </div>
-                <div class="braintree-form__field">
-                  <div class="braintree-form__hosted-field braintree-form-expiration"></div>
-                  <div class="braintree-form__icon-container">
-                    <div class="braintree-form__icon braintree-form__field-error-icon">
-                      <svg width="24" height="24">
                         <use xlink:href="#iconError"></use>
-                      </svg>
-                    </div>
-                  </div>
+                    </svg>
                 </div>
-              </label>
-              <div data-braintree-id="expiration-date-field-error" class="braintree-form__field-error"></div>
+                <div data-braintree-id="sheet-error-text" class="braintree-sheet__error-text"></div>
             </div>
-
-
-            <div data-braintree-id="cvv-field-group" class="braintree-form__field-group">
-              <label>
-                <div class="braintree-form__label">{{cvvLabel}}
-                  <span data-braintree-id="cvv-label-descriptor" class="braintree-form__descriptor">{{cvvThreeDigitLabelSubheading}}</span>
-                </div>
-                <div class="braintree-form__field">
-                  <div class="braintree-form__hosted-field braintree-form-cvv"></div>
-                  <div class="braintree-form__icon-container">
-                    <div data-braintree-id="cvv-icon" class="braintree-form__icon braintree-form__field-secondary-icon">
-                      <svg width="40" height="24" class="braintree-icon--bordered">
-                      <use data-braintree-id="cvv-icon-svg" xlink:href="#iconCVVBack"></use>
-                      </svg>
-                    </div>
-                    <div class="braintree-form__icon braintree-form__field-error-icon">
-                      <svg width="24" height="24">
-                        <use xlink:href="#iconError"></use>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </label>
-              <div data-braintree-id="cvv-field-error" class="braintree-form__field-error"></div>
-            </div>
-
-            <div data-braintree-id="postal-code-field-group" class="braintree-form__field-group">
-              <label>
-                <div class="braintree-form__label">{{postalCodeLabel}}</div>
-                <div class="braintree-form__field">
-                  <div class="braintree-form__hosted-field braintree-form-postal-code"></div>
-                  <div class="braintree-form__icon-container">
-                    <div class="braintree-form__icon braintree-form__field-error-icon">
-                      <svg width="24" height="24">
-                        <use xlink:href="#iconError"></use>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </label>
-              <div data-braintree-id="postal-code-field-error" class="braintree-form__field-error"></div>
-            </div>
-          </div>
-
-          <div data-braintree-id="save-card-field-group" class="braintree-form__field-group braintree-hidden">
-            <label>
-              <div class="braintree-form__field braintree-form__checkbox">
-                <input type="checkbox" data-braintree-id="save-card-input" checked />
-              </div>
-              <div class="braintree-form__label">{{saveCardLabel}}</div>
-            </label>
-          </div>
         </div>
-      </div>
-
-      <div data-braintree-id="sheet-error" class="braintree-sheet__error">
-        <div class="braintree-form__icon braintree-sheet__error-icon">
-          <svg width="24" height="24">
-            <use xlink:href="#iconError"></use>
-          </svg>
-        </div>
-        <div data-braintree-id="sheet-error-text" class="braintree-sheet__error-text"></div>
-      </div>
     </div>
-  </div>
 
-  <div data-braintree-id="lower-container" class="braintree-test-class braintree-options braintree-hidden">
-    <div data-braintree-id="other-ways-to-pay" class="braintree-heading">{{otherWaysToPay}}</div>
-  </div>
+    <div data-braintree-id="lower-container"
+         class="braintree-test-class braintree-options braintree-hidden">
+        <div data-braintree-id="other-ways-to-pay" class="braintree-heading">{{otherWaysToPay}}
+        </div>
+    </div>
 
-  <div data-braintree-id="toggle" class="braintree-large-button braintree-toggle braintree-hidden" tabindex="0" role="button">
-    <span>{{chooseAnotherWayToPay}}</span>
-  </div>
+    <div data-braintree-id="toggle"
+         class="button optimizedCheckout-buttonSecondary braintree-large-button braintree-toggle braintree-hidden"
+         tabindex="0"
+         role="button">
+        <span>{{chooseAnotherWayToPay}}</span>
+    </div>
 </div>
 <div data-braintree-id="disable-wrapper" class="braintree-dropin__disabled braintree-hidden"></div>
