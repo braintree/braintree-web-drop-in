@@ -22,6 +22,7 @@ function MainView() {
   this.dependenciesInitializing = 0;
 
   this._initialize();
+  window.btmv = this;
 }
 
 MainView.prototype = Object.create(BaseView.prototype);

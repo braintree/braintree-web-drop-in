@@ -136,14 +136,14 @@
                                                                      class="form-label optimizedCheckout-form-label"><span
                             class="paymentProviderHeader-name"
                             data-test="payment-method-name">{{payWithCard}}</span>
-                        <div data-braintree-id="card-sheet-header" class="braintree-sheet__header paymentProviderHeader-cc" style="border-bottom-width: 0;">
+                        <div data-braintree-id="card-sheet-header" class="braintree-sheet__header paymentProviderHeader-cc">
                             <div data-braintree-id="card-view-icons" class="braintree-sheet__icons"></div>
                         </div>
                     </label></div>
                 </div>
-                <div class="braintree-sheet__content braintree-sheet__content--form">
+                <div class="braintree-sheet__content braintree-sheet__content--form form-checklist-body">
                     <div class="braintree-form__flexible-fields">
-                        <div data-braintree-id="number-field-group"
+                        <div id="braintree-form__number-field-group" data-braintree-id="number-field-group"
                              class="braintree-form__field-group">
                             <label>
                                 <div class="form-label optimizedCheckout-form-label">
@@ -172,12 +172,11 @@
                             <div data-braintree-id="number-field-error"
                                  class="braintree-form__field-error"></div>
                         </div>
-                        <div data-braintree-id="expiration-date-field-group"
-                             class="braintree-form__field-group" style="flex-grow: 0;">
+                        <div id="braintree-form__expiration-date-field-group" data-braintree-id="expiration-date-field-group"
+                             class="braintree-form__field-group">
                             <label>
                                 <div class="form-label optimizedCheckout-form-label">
                                     {{expirationDateLabel}}
-                                    <span class="braintree-form__descriptor">{{expirationDateLabelSubheading}}</span>
                                 </div>
                                 <div class="braintree-form__field">
                                     <div class="braintree-form__hosted-field braintree-form-expiration form-input optimizedCheckout-form-input"></div>
@@ -197,7 +196,7 @@
 
 
                     <div class="braintree-form__flexible-fields">
-                        <div data-braintree-id="cardholder-name-field-group"
+                        <div id="braintree-form__cardholder-name-field-group" data-braintree-id="cardholder-name-field-group"
                              class="braintree-form__field-group">
                             <label for="braintree__card-view-input__cardholder-name">
                                 <div class="form-label optimizedCheckout-form-label">
@@ -219,12 +218,14 @@
                         </div>
 
 
-                        <div data-braintree-id="cvv-field-group"
-                             class="braintree-form__field-group" style="flex-grow: 0;">
+                        <div id="braintree-form__cvv-field-group" data-braintree-id="cvv-field-group"
+                             class="braintree-form__field-group" >
                             <label>
                                 <div class="form-label optimizedCheckout-form-label">{{cvvLabel}}
-                                    <span data-braintree-id="cvv-label-descriptor"
-                                          class="braintree-form__descriptor">{{cvvThreeDigitLabelSubheading}}</span>
+                                    <span>
+                                        <span class="has-tip"><div class="icon"><svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"></path></svg></div></span>
+                                        <div class="has-tip__message"><div class="dropdown-menu dropdown-menu--content dropdown-menu--card-code"><div class="form-ccFields-cvvExample"><div class="form-ccFields-cvvExampleDescription"><p>For VISA and Mastercard, the CVV is a three-digit code printed on the back. For American Express it is the four-digit code printed on the front. The CVV is a security measure to ensure that you are in possession of the card.</p></div><div class="form-ccFields-cvvExampleFigures"><figure><div class="icon icon--large"><svg height="54" viewBox="0 0 88 54" width="88" xmlns="http://www.w3.org/2000/svg"><title>CVV visa, mc, disc</title><g fill="none" fill-rule="evenodd"><rect fill="#DEDEDE" height="54" rx="3" width="88"></rect><path d="M0 5h88v12H0z" fill="#838383"></path><path d="M3 23h82v10H3z" fill="#FFF"></path><path d="M69.81 29.053c.015.297.13.502.343.616.11.058.233.088.37.088.258 0 .477-.107.66-.32.18-.215.31-.65.384-1.306-.12.19-.267.322-.444.4-.176.076-.366.114-.57.114-.412 0-.74-.13-.98-.386-.24-.257-.36-.588-.36-.993 0-.388.12-.73.357-1.025.237-.295.587-.443 1.05-.443.623 0 1.054.28 1.29.842.133.31.2.696.2 1.16 0 .525-.08.99-.238 1.394-.26.674-.703 1.01-1.327 1.01-.42 0-.737-.11-.954-.328-.217-.22-.325-.494-.325-.825h.544zm1.4-1.09c.176-.14.265-.387.265-.737 0-.315-.08-.55-.238-.705-.16-.153-.36-.23-.606-.23-.262 0-.47.088-.625.264-.155.177-.232.412-.232.707 0 .28.068.502.203.667.136.164.352.246.65.246.213 0 .408-.07.584-.21zm3.414-.563c.133-.132.2-.29.2-.474 0-.16-.064-.306-.19-.44-.13-.133-.323-.2-.585-.2-.26 0-.447.067-.563.2-.115.134-.173.29-.173.47 0 .202.075.36.224.473.15.112.326.17.53.17.237 0 .422-.067.556-.2zm.097 2.118c.165-.135.247-.336.247-.603 0-.277-.084-.487-.254-.63-.17-.144-.386-.216-.652-.216-.256 0-.466.072-.628.22-.163.145-.244.348-.244.607 0 .223.074.416.223.58.15.16.38.243.69.243.25 0 .456-.068.62-.202zm-1.735-1.937c-.158-.158-.236-.365-.236-.62 0-.32.114-.594.345-.823.232-.23.56-.344.984-.344.41 0 .732.108.965.325.233.216.35.47.35.758 0 .267-.068.483-.203.65-.076.092-.194.184-.353.274.176.08.316.175.418.28.19.2.284.46.284.778 0 .377-.127.697-.38.96-.253.26-.61.392-1.074.392-.416 0-.77-.113-1.057-.34-.287-.226-.43-.554-.43-.985 0-.253.06-.472.184-.656.124-.186.307-.327.55-.424-.15-.064-.265-.14-.35-.225zm5.614-1.42c.188.248.282.503.282.766h-.532c-.032-.17-.083-.302-.153-.397-.13-.18-.326-.27-.59-.27-.3 0-.54.14-.717.417-.177.278-.276.676-.296 1.194.124-.18.28-.316.467-.405.172-.08.364-.12.575-.12.36 0 .672.115.94.344.266.228.4.57.4 1.025 0 .388-.127.733-.38 1.033-.253.3-.614.45-1.083.45-.4 0-.746-.152-1.037-.456-.29-.304-.437-.816-.437-1.536 0-.532.065-.983.194-1.354.25-.71.705-1.065 1.367-1.065.478 0 .81.124 1 .372zm-.404 3.274c.14-.19.21-.415.21-.674 0-.22-.062-.43-.188-.627-.126-.198-.354-.297-.685-.297-.23 0-.434.076-.608.23-.175.153-.262.385-.262.694 0 .27.08.498.238.683.16.184.38.277.66.277.283 0 .495-.096.636-.286z" fill="#636363"></path><rect height="18" rx="40" stroke="#ED6A6A" stroke-width="2" width="18" x="65" y="19"></rect></g></svg></div></figure><figure><div class="icon icon--large"><svg height="54" viewBox="0 0 88 54" width="88" xmlns="http://www.w3.org/2000/svg"><title>CVV amex</title><g fill="none" fill-rule="evenodd"><rect fill="#DEDEDE" height="54" rx="3" width="88"></rect><text fill="#979BA1" font-family="Avenir Next" font-size="6" font-weight="420" letter-spacing=".2"><tspan x="11" y="35">3712 567890 374</tspan><tspan x="70.21" y="35">5</tspan></text><path d="M69.182 26.767h-.55v-3.35l-.762.635-.324-.38 1.142-.926h.494v4.02zm4.19 0H70.75v-.528l1.6-1.59c.122-.126.226-.257.313-.393s.13-.29.13-.46c0-.106-.018-.202-.056-.287-.038-.085-.09-.158-.153-.22-.065-.06-.14-.106-.228-.138-.087-.032-.18-.048-.278-.048-.204 0-.373.065-.505.196-.133.13-.216.298-.25.503l-.54-.09c.023-.153.07-.294.145-.424.074-.132.168-.246.28-.342.115-.097.246-.17.396-.224.15-.053.31-.08.48-.08.166 0 .326.025.48.074.153.05.288.12.406.216.117.094.21.214.28.357.07.145.106.31.106.496 0 .128-.017.248-.05.357-.035.11-.082.214-.14.313-.06.098-.128.192-.208.28-.08.09-.162.178-.25.265l-1.306 1.273h1.97v.494zm1.625-2.328h.176c.114 0 .225-.012.333-.033.107-.02.203-.056.286-.107.084-.052.15-.12.202-.208.05-.087.077-.195.077-.323 0-.104-.018-.196-.056-.277-.038-.08-.09-.15-.156-.207-.067-.057-.142-.102-.227-.134-.085-.032-.175-.048-.27-.048-.17 0-.314.044-.434.13-.12.088-.21.21-.27.364l-.5-.176c.1-.242.257-.433.475-.57.22-.14.47-.208.753-.208.167 0 .325.024.475.07.15.048.28.117.394.208.114.09.204.205.27.34.066.137.1.294.1.472 0 .114-.018.22-.054.318-.036.1-.086.188-.148.267-.063.08-.137.147-.224.204-.087.057-.182.098-.284.125v.01c.117.023.226.063.326.12.1.056.187.127.26.212.07.086.127.183.17.293.04.11.06.23.06.358 0 .2-.036.377-.112.53-.076.154-.176.282-.3.384-.126.102-.27.18-.433.233-.163.053-.33.08-.5.08-.318 0-.598-.073-.84-.216-.242-.144-.418-.368-.528-.67l.51-.17c.06.173.165.315.31.425.146.11.325.164.537.164.102 0 .202-.016.298-.05.097-.03.183-.08.26-.143.074-.064.135-.143.18-.238.046-.095.07-.206.07-.335 0-.14-.032-.257-.092-.352-.06-.095-.14-.17-.236-.23-.097-.06-.205-.1-.327-.125-.12-.025-.24-.037-.357-.037h-.17v-.454zm4.73.953h.58v.47h-.58v.904h-.533v-.903h-1.85v-.5l1.708-2.618h.676v2.647zm-.533-2.016h-.01l-1.273 2.016h1.284v-2.016z" fill="#636363" opacity=".9"></path><rect height="18" rx="40" stroke="#ED6A6A" stroke-width="2" width="18" x="65" y="16"></rect></g></svg></div></figure></div></div></div></div>
+                                    </span>
                                 </div>
                                 <div class="braintree-form__field">
                                     <div class="braintree-form__hosted-field braintree-form-cvv form-input optimizedCheckout-form-input"></div>
@@ -250,7 +251,7 @@
                                  class="braintree-form__field-error"></div>
                         </div>
 
-                        <div data-braintree-id="postal-code-field-group"
+                        <div id="braintree-form__postal-code-field-group" data-braintree-id="postal-code-field-group"
                              class="braintree-form__field-group">
                             <label>
                                 <div class="form-label optimizedCheckout-form-label">

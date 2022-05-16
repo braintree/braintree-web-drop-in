@@ -38,74 +38,74 @@ var watch = gulp.watch;
 var task = gulp.task;
 
 var config = {
-  namespace: 'braintree',
-  src: {
-    js: {
-      main: './src/index.js',
-      watch: 'src/**/*.js',
-      output: 'dropin.js',
-      min: 'dropin.min.js'
+    namespace: 'braintree',
+    src: {
+        js: {
+            main: './src/index.js',
+            watch: 'src/**/*.js',
+            output: 'dropin.js',
+            min: 'dropin.min.js'
+        },
+        css: {
+            main: './src/less/main.less',
+            watch: 'src/less/*.less',
+            output: 'dropin.css',
+            min: 'dropin.min.css'
+        },
+        html: {
+            watch: 'src/html/**/*.html'
+        },
+        demoApp: './test/app/*'
     },
-    css: {
-      main: './src/less/main.less',
-      watch: 'src/less/*.less',
-      output: 'dropin.css',
-      min: 'dropin.min.css'
+    jsdoc: {
+        watch: 'jsdoc/*',
+        readme: 'jsdoc/Home.md'
     },
-    html: {
-      watch: 'src/html/**/*.html'
+    dist: {
+        js: DIST_PATH + '/js',
+        css: DIST_PATH + '/css',
+        jsdoc: GH_PAGES_PATH + '/docs/'
     },
-    demoApp: './test/app/*'
-  },
-  jsdoc: {
-    watch: 'jsdoc/*',
-    readme: 'jsdoc/Home.md'
-  },
-  dist: {
-    js: DIST_PATH + '/js',
-    css: DIST_PATH + '/css',
-    jsdoc: GH_PAGES_PATH + '/docs/'
-  },
-  server: {
-    assetsPath: 'dist',
-    ghPagesPath: GH_PAGES_PATH,
-    port: process.env.PORT || 4567
-  }
+    server: {
+        assetsPath: 'dist',
+        ghPagesPath: GH_PAGES_PATH,
+        port: process.env.PORT || 4567
+    }
 };
 
 function jsNotMin() {
-  return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
-    .bundle()
-    .pipe(source(config.src.js.output))
-    .pipe(replace('@DOT_MIN', ''))
-    .pipe(streamify(size()))
-    .pipe(dest(config.dist.js));
+    return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
+        .bundle()
+        .pipe(source(config.src.js.output))
+        .pipe(replace('@DOT_MIN', ''))
+        .pipe(streamify(size()))
+        .pipe(dest(config.dist.js));
 }
 
 function jsMin() {
-  return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
-    .bundle()
-    .pipe(source(config.src.js.output))
-    .pipe(replace('@DOT_MIN', '.min'))
-    .pipe(streamify(uglify()))
-    .pipe(streamify(size()))
-    .pipe(rename(config.src.js.min))
-    .pipe(dest(config.dist.js));
+    return browserify(config.src.js.main, {standalone: 'braintree.dropin'})
+        .bundle()
+        .pipe(source(config.src.js.output))
+        .pipe(replace('@DOT_MIN', '.min'))
+        .pipe(streamify(uglify()))
+        .pipe(streamify(size()))
+        .pipe(rename(config.src.js.min))
+        .pipe(dest(config.dist.js));
 }
 
 jsNotMin.displayName = 'build:js:notmin';
 jsMin.displayName = 'build:js:min';
 
 function buildCss() {
-  var lessOptions = {};
+    var lessOptions = {};
 
-  return src(config.src.css.main)
-    .pipe(less(lessOptions))
-    .pipe(rename(config.src.css.output))
-    .pipe(dest(config.dist.css))
-    .pipe(cleanCSS())
-    .pipe(rename(config.src.css.min))
-    .pipe(dest(config.dist.css));
+    return src(config.src.css.main)
+        .pipe(less(lessOptions))
+        .pipe(rename(config.src.css.output))
+        .pipe(dest(config.dist.css))
+        .pipe(cleanCSS())
+        .pipe(rename(config.src.css.min))
+        .pipe(dest(config.dist.css));
 }
 
 buildCss.displayName = 'build:css';
@@ -117,48 +117,48 @@ buildCss.displayName = 'build:css';
 // linkLatest.displayName = 'build:link-latest';
 
 function npmStats() {
-  return src([
-    './CHANGELOG.md',
-    './LICENSE',
-    './README.md'
-  ]).pipe(dest(NPM_PATH));
+    return src([
+        './CHANGELOG.md',
+        './LICENSE',
+        './README.md'
+    ]).pipe(dest(NPM_PATH));
 }
 
 function npmCss() {
-  return src(path.join(config.dist.css, 'dropin.css'))
-    .pipe(dest(NPM_PATH));
+    return src(path.join(config.dist.css, 'dropin.css'))
+        .pipe(dest(NPM_PATH));
 }
 
 function npmPackage(done) {
-  var pkg = Object.assign({}, require('./package.json'));
+    var pkg = Object.assign({}, require('./package.json'));
 
-  delete pkg.browserify;
-  delete pkg.private;
-  pkg.main = 'index.js';
-  pkg.browser = './dist/browser/dropin.js';
+    delete pkg.browserify;
+    delete pkg.private;
+    pkg.main = 'index.js';
+    pkg.browser = './dist/browser/dropin.js';
 
-  mkdirp.sync(NPM_PATH);
+    mkdirp.sync(NPM_PATH);
 
-  fs.writeFile(path.join(NPM_PATH, 'package.json'), JSON.stringify(pkg, null, 2), done);
+    fs.writeFile(path.join(NPM_PATH, 'package.json'), JSON.stringify(pkg, null, 2), done);
 }
 
 function npmSrc() {
-  return src('src/**/*.js')
-    .pipe(replace('@DOT_MIN', ''))
-    .pipe(replace('__VERSION__', VERSION))
-    .pipe(brfs())
-    .pipe(dest(NPM_PATH));
+    return src('src/**/*.js')
+        .pipe(replace('@DOT_MIN', ''))
+        .pipe(replace('__VERSION__', VERSION))
+        .pipe(brfs())
+        .pipe(dest(NPM_PATH));
 }
 
 function npmBrowser() {
-  var browserPath = NPM_PATH + '/dist/browser/';
+    var browserPath = NPM_PATH + '/dist/browser/';
 
-  mkdirp.sync(browserPath);
+    mkdirp.sync(browserPath);
 
-  return src(path.join(
-    'dist/web/dropin', VERSION, 'js/dropin.js'
-  ))
-    .pipe(dest(browserPath));
+    return src(path.join(
+        'dist/web/dropin', VERSION, 'js/dropin.js'
+    ))
+        .pipe(dest(browserPath));
 }
 
 npmStats.displayName = 'build:npm:statics';
@@ -168,27 +168,28 @@ npmSrc.displayName = 'build:npm:src';
 npmBrowser.displayName = 'build:npm:browser';
 
 function clean() {
-  return del(['./dist']);
+    // return del(['./dist']);
+    return new Promise((r) => r())
 }
 
 function build() {
-  return series(
-    clean,
-    parallel(
-      jsNotMin, jsMin, buildCss
-      // ghPagesBuild()
-    ),
-    parallel(npmCss, npmStats, npmPackage, npmSrc, npmBrowser),
-    cleanUpVersions
-    // linkLatest
-  );
+    return series(
+        clean,
+        parallel(
+            jsNotMin, jsMin, buildCss
+            // ghPagesBuild()
+        ),
+        parallel(npmCss, npmStats, npmPackage, npmSrc, npmBrowser),
+        cleanUpVersions
+        // linkLatest
+    );
 }
 
 function cleanUpVersions() {
-  return src('dist/**/*.{js,html}')
-    .pipe(replace('{@pkg version}', VERSION))
-    .pipe(replace('{@pkg bt-web-version}', BT_WEB_VERSION))
-    .pipe(dest('dist'));
+    return src('dist/**/*.{js,html}')
+        .pipe(replace('{@pkg version}', VERSION))
+        .pipe(replace('{@pkg bt-web-version}', BT_WEB_VERSION))
+        .pipe(dest('dist'));
 }
 
 cleanUpVersions.displayName = 'build:update-versions';
@@ -289,10 +290,10 @@ cleanUpVersions.displayName = 'build:update-versions';
 // ghPagesServer.displayName = 'server';
 //
 function triggerWatchers() {
-  watch([config.src.js.watch, config.src.html.watch], parallel(jsNotMin, jsMin));
-  watch([config.src.css.watch], buildCss);
-  // watch([config.src.js.watch, config.jsdoc.watch], ghPagesBuild());
-  // watch([config.src.demoApp], demoApp);
+    watch([config.src.js.watch, config.src.html.watch], parallel(jsNotMin, jsMin));
+    watch([config.src.css.watch], buildCss);
+    // watch([config.src.js.watch, config.jsdoc.watch], ghPagesBuild());
+    // watch([config.src.demoApp], demoApp);
 }
 
 triggerWatchers.displayName = 'watch';
