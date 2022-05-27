@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## UNRELEASED
+
+## 1.33.2
   - Update VISA icon (SVG)
 
 ## 1.33.1
