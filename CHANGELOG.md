@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## UNRELEASED
+  - Fix test app accessibility errors
 
 ## 1.33.2
   - Update VISA icon (SVG)
