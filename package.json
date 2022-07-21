@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "@braintree/asset-loader": "0.4.4",
-    "@braintree/browser-detection": "^1.14.0",
+    "@braintree/browser-detection": "1.14.0",
     "@braintree/class-list": "0.2.0",
     "@braintree/event-emitter": "0.4.1",
     "@braintree/uuid": "0.1.0",
