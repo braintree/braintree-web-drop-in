@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## UNRELEASED
+## 1.33.3
   - Update braintree-web to v3.85.5
   - Fix test app accessibility errors
 
