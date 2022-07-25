@@ -68,12 +68,12 @@
   },
   "dependencies": {
     "@braintree/asset-loader": "0.4.4",
-    "@braintree/browser-detection": "1.12.1",
+    "@braintree/browser-detection": "1.14.0",
     "@braintree/class-list": "0.2.0",
     "@braintree/event-emitter": "0.4.1",
     "@braintree/uuid": "0.1.0",
     "@braintree/wrap-promise": "2.1.0",
-    "braintree-web": "3.85.3",
+    "braintree-web": "3.85.5",
     "promise-polyfill": "8.2.3"
   },
   "browserify": {
