@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-  - Update braintree-web to v3.88.2
+  - Update braintree-web to v3.88.3
 
 ## 1.33.4
 
