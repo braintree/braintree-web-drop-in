@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.33.6
+
+  - Update braintree-web to v3.88.4
+
 ## 1.33.5
 
   - Update braintree-web to v3.88.3
