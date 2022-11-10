@@ -447,11 +447,15 @@ CardView.prototype._onBlurEvent = function (event) {
 
   classList.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
+  if (field.isPotentiallyValid) {
+    this.hideFieldError(event.emittedBy);
+  }
+
   if (this._shouldApplyFieldEmptyError(event.emittedBy, field)) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
-  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
+  } else if (event.emittedBy === 'number' && event.cards[0] && !this._isCardTypeSupported(event.cards[0].type)) {
     this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
 
