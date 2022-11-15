@@ -1,6 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable quote-props */
-/* global __dirname: readonly */
 'use strict';
 
 const { readFileSync } = require('fs');
@@ -32,7 +29,6 @@ module.exports = {
     filename: `web/dropin/${version}/js/[name].js`,
     path: resolve(__dirname, 'dist'),
   },
-  // eslint-disable-next-line no-undefined
   devtool: isEnvProduction ? undefined : 'inline-source-map',
   entry: {
     dropin: ['./src/less/main.less', './src/index.js'],
@@ -95,7 +91,6 @@ module.exports = {
               loader: 'babel-loader',
             },
           },
-          // eslint-disable-next-line object-curly-spacing
           { test: /\.[cm]?js$/, parser: { requireEnsure: false } },
           {
             test: /\.html$/i,
@@ -140,14 +135,11 @@ module.exports = {
           mangle: {
             safari10: true,
           },
-          // eslint-disable-next-line camelcase
           keep_classnames: isEnvProduction,
-          // eslint-disable-next-line camelcase
           keep_fnames: isEnvProduction,
           output: {
             ecma: 5,
             comments: false,
-            // eslint-disable-next-line camelcase
             ascii_only: true,
           },
         },
@@ -265,7 +257,6 @@ module.exports = {
 
       const port = devServer.server.address().port;
 
-      // eslint-disable-next-line no-console
       console.log('Development server listening:', port);
     },
     port: 4567,
