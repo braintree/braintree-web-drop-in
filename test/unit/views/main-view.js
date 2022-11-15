@@ -232,11 +232,13 @@ describe('MainView', () => {
         expect(analytics.sendEvent).not.toBeCalledWith('vaulted-card.preselect');
       });
 
-      it('sets the PaymentMethodsView as the primary view', done => {
+      test('sets the PaymentMethodsView as the primary view', done => {
+        jest.spyOn(MainView.prototype, 'setPrimaryView').mockImplementation();
+
         const mainView = new MainView(testContext.mainViewOptions);
 
         setTimeout(() => {
-          expect(mainView.primaryView.ID).toBe(PaymentMethodsView.ID);
+          expect(mainView.setPrimaryView).toBeCalledWith(PaymentMethodsView.ID);
           done();
         }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
       });
@@ -313,6 +315,8 @@ describe('MainView', () => {
 
       wrapper.innerHTML = templateHTML;
 
+      jest.spyOn(model, 'hasPaymentMethods').mockReturnValue(true);
+
       return model.initialize().then(() => {
         model.supportedPaymentOptions = ['card', 'paypal', 'paypalCredit', 'applePay', 'googlePay', 'venmo'];
 
@@ -362,7 +366,7 @@ describe('MainView', () => {
 
         mainView.setPrimaryView(viewID);
 
-        expect(mainView.primaryView).toBe(mainView.getView(viewID));
+        expect(mainView.model.getActivePaymentViewId()).toBe(View.ID);
       });
 
       it('changes the active payment option', () => {
@@ -592,7 +596,7 @@ describe('MainView', () => {
           hideSheetError: jest.fn(),
           hideLoadingIndicator: function () {},
           _sendToDefaultView: jest.fn(),
-          _onChangeActivePaymentMethodView: jest.fn(),
+          _onChangeActiveView: jest.fn(),
           model: model,
           setPrimaryView: jest.fn(),
           showSheetError: jest.fn(),
@@ -702,16 +706,35 @@ describe('MainView', () => {
     });
 
     describe('for changeActivePaymentMethod', () => {
-      it('sets the PaymentMethodsView as the primary view', done => {
+      beforeEach(() => {
+        jest.spyOn(wait, 'delay').mockResolvedValue();
+      });
+
+      test('sets the PaymentMethodsView as the primary view when it has payment methods', async () => {
         testContext.mainView.paymentMethodsViews.activeMethodView = { setActive: function () {} };
+        jest.spyOn(testContext.mainView.model, 'hasPaymentMethods').mockReturnValue(true);
         jest.spyOn(testContext.mainView, 'setPrimaryView').mockImplementation();
 
         testContext.model._emit('changeActivePaymentMethod', {});
 
-        setTimeout(() => {
-          expect(testContext.mainView.setPrimaryView).toBeCalled();
-          done();
-        }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
+        // let the delay mock resolve
+        await Promise.resolve();
+
+        expect(testContext.mainView.setPrimaryView).toBeCalledWith('methods');
+      });
+
+      test('sets the initial view as the primary view when there are no payment methods', async () => {
+        testContext.mainView.paymentMethodsViews.activeMethodView = { setActive: function () {} };
+        jest.spyOn(testContext.mainView, 'setPrimaryView').mockImplementation();
+        jest.spyOn(testContext.mainView.model, 'hasPaymentMethods').mockReturnValue(false);
+        jest.spyOn(testContext.mainView.model, 'getInitialViewId').mockReturnValue('options');
+
+        testContext.model._emit('changeActivePaymentMethod', {});
+
+        // let the delay mock resolve
+        await Promise.resolve();
+
+        expect(testContext.mainView.setPrimaryView).toBeCalledWith('options');
       });
     });
 
@@ -721,8 +744,8 @@ describe('MainView', () => {
 
         testContext.mainView.addView(optionsView);
 
-        jest.spyOn(testContext.model, 'getActivePaymentView').mockReturnValue('options');
-        testContext.model._emit('removeActivePaymentMethod');
+          jest.spyOn(testContext.model, 'getActivePaymentViewId').mockReturnValue('options');
+          testContext.model._emit('removeActivePaymentMethod');
 
         setTimeout(() => {
           expect(optionsView.removeActivePaymentMethod).toBeCalledTimes(1);
@@ -731,7 +754,7 @@ describe('MainView', () => {
       });
     });
 
-    describe('for changeActivePaymentView', () => {
+    describe('for changeActiveView', () => {
       beforeEach(() => {
         jest.spyOn(testContext.model, 'setPaymentMethodRequestable').mockImplementation();
         testContext.paymentMethodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
@@ -744,23 +767,37 @@ describe('MainView', () => {
           classList.add(testContext.sheetElement, 'braintree-sheet--active');
         });
 
-        it('adds braintree-methods--active to the payment methods view element', () => {
-          testContext.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
-          expect(testContext.paymentMethodsContainer.className).toMatch('braintree-methods--active');
-        });
+        test(
+          'adds braintree-methods--active to the payment methods view element',
+          () => {
+            testContext.model._emit('changeActiveView', {
+              newViewId: PaymentMethodsView.ID
+            });
+            expect(testContext.paymentMethodsContainer.className).toMatch('braintree-methods--active');
+          }
+        );
 
-        it('removes braintree-sheet--active from the payment sheet element', () => {
-          testContext.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
-          expect(testContext.sheetElement.className).toEqual(expect.not.arrayContaining(['braintree-sheet--active']));
-        });
+        test(
+          'removes braintree-sheet--active from the payment sheet element',
+          () => {
+            testContext.model._emit('changeActiveView', {
+              newViewId: PaymentMethodsView.ID
+            });
+            expect(testContext.sheetElement.className).toEqual(expect.not.arrayContaining(['braintree-sheet--active']));
+          }
+        );
 
-        it('does not call model.setPaymentMethodRequestable', () => {
-          testContext.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
+        test('does not call model.setPaymentMethodRequestable', () => {
+          testContext.model._emit('changeActiveView', {
+            newViewId: PaymentMethodsView.ID
+          });
           expect(testContext.model.setPaymentMethodRequestable).not.toBeCalled();
         });
 
-        it('calls onSelection', () => {
-          testContext.model._emit('changeActivePaymentView', PaymentMethodsView.ID);
+        test('calls onSelection', () => {
+          testContext.model._emit('changeActiveView', {
+            newViewId: PaymentMethodsView.ID
+          });
           expect(testContext.mainView._views.methods.onSelection).toBeCalledTimes(1);
         });
       });
@@ -780,9 +817,13 @@ describe('MainView', () => {
             testContext.model._emit('changeActivePaymentView', ID);
           });
 
-          it('adds braintree-sheet--active to the payment sheet', () => {
-            expect(testContext.sheetElement.className).toMatch('braintree-sheet--active');
-          });
+          describe('using a ' + ID + ' sheet', () => {
+            beforeEach(() => {
+              wait.delay.mockResolvedValue();
+              testContext.model._emit('changeActiveView', {
+                newViewId: ID
+              });
+            });
 
           it('removes braintree-methods--active from the payment methods view', () => {
             expect(testContext.paymentMethodsContainer.className).toEqual(expect.not.arrayContaining(['braintree-methods--active']));
@@ -853,8 +894,8 @@ describe('MainView', () => {
         testContext.mainView.toggle.click();
       });
 
-      it('sets the payment option as the active payment view', () => {
-        expect(testContext.mainView.model.getActivePaymentView()).toBe(CardView.ID);
+      test('sets the payment option as the active payment view', () => {
+        expect(testContext.mainView.model.getActivePaymentViewId()).toBe(CardView.ID);
       });
 
       it('exposes the payment sheet view', () => {
@@ -871,13 +912,14 @@ describe('MainView', () => {
         it('sets the PaymentOptionsView as the primary view', () => {
           const mainView = new MainView(testContext.mainViewOptions);
 
-          jest.spyOn(mainView, 'setPrimaryView');
           mainView.setPrimaryView(CardView.ID);
+
+          jest.spyOn(mainView, 'setPrimaryView').mockImplementation();
+
           mainView.toggle.click();
 
           return wait.delay(1).then(() => {
             expect(mainView.setPrimaryView).toBeCalledWith(PaymentOptionsView.ID);
-            expect(testContext.wrapper.className).toMatch(`braintree-show-${PaymentOptionsView.ID}`);
           });
         });
       });
@@ -891,9 +933,10 @@ describe('MainView', () => {
             testContext.mainViewOptions.model.supportedPaymentOptions = ['card', 'paypal'];
             testContext.mainView = new MainView(testContext.mainViewOptions);
 
-            jest.spyOn(testContext.mainView, 'setPrimaryView');
-
             testContext.mainView.setPrimaryView(CardView.ID);
+
+            jest.spyOn(testContext.mainView, 'setPrimaryView').mockImplementation();
+
             testContext.mainView.toggle.click();
 
             return wait.delay(1);
@@ -902,12 +945,10 @@ describe('MainView', () => {
 
         it('sets the PaymentMethodsView as the primary view', () => {
           expect(testContext.mainView.setPrimaryView).toBeCalledWith(PaymentMethodsView.ID, expect.anything());
-          expect(testContext.wrapper.className).toMatch(`braintree-show-${PaymentMethodsView.ID}`);
-          expect(testContext.mainView.model.getActivePaymentView()).toBe(PaymentMethodsView.ID);
         });
 
-        it('exposes the PaymentOptionsView', () => {
-          expect(testContext.wrapper.className).toMatch(`braintree-show-${PaymentOptionsView.ID}`);
+        test('exposes the PaymentOptionsView as the secondary view', () => {
+          expect(testContext.mainView.setPrimaryView).toBeCalledWith(PaymentMethodsView.ID, PaymentOptionsView.ID);
         });
 
         it('hides the toggle', () => {
@@ -1012,7 +1053,7 @@ describe('MainView', () => {
       it('requests payment method from payment methods view', () => {
         const paymentMethodsViews = testContext.mainView.getView(PaymentMethodsView.ID);
 
-        testContext.mainView.model.changeActivePaymentView(PaymentMethodsView.ID);
+        testContext.mainView.model.changeActiveView(PaymentMethodsView.ID);
         jest.spyOn(paymentMethodsViews, 'requestPaymentMethod').mockResolvedValue({});
 
         return testContext.mainView.requestPaymentMethod().then(() => {
@@ -1143,6 +1184,7 @@ describe('MainView', () => {
           strings: strings
         };
         testContext.mainView = new MainView(testContext.mainViewOptions);
+        jest.spyOn(testContext.mainView, 'setPrimaryView').mockImplementation();
       });
     });
 

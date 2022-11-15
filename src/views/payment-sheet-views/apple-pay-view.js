@@ -24,20 +24,15 @@ ApplePayView.prototype.initialize = function () {
 
   delete self.applePayConfiguration.applePaySessionVersion;
 
-  self.model.asyncDependencyStarting();
-
-  return btApplePay.create({
-    authorization: this.model.authorization,
-    useDeferredClient: true
-  }).then(function (applePayInstance) {
-    var buttonDiv = self.getElementById('apple-pay-button');
+  return btApplePay.create({client: this.client}).then(function (applePayInstance) {
+    self.buttonDiv = self.getElementById('apple-pay-button');
 
     self.applePayInstance = applePayInstance;
 
-    buttonDiv.onclick = self._showPaymentSheet.bind(self);
-    buttonDiv.style['-apple-pay-button-style'] = self.model.merchantConfiguration.applePay.buttonStyle || 'black';
+    self.buttonDiv.onclick = self._showPaymentSheet.bind(self);
+    self.buttonDiv.style['-apple-pay-button-style'] = self.model.merchantConfiguration.applePay.buttonStyle || 'black';
 
-    self.model.asyncDependencyReady();
+    self.model.asyncDependencyReady(ApplePayView.ID);
   }).catch(function (err) {
     self.model.asyncDependencyFailed({
       view: self.ID,
@@ -48,8 +43,16 @@ ApplePayView.prototype.initialize = function () {
 
 ApplePayView.prototype._showPaymentSheet = function () {
   var self = this;
-  var request = self.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
-  var session = new global.ApplePaySession(self.applePaySessionVersion, request);
+  var request, session;
+
+  if (this._sessionInProgress) {
+    return false;
+  }
+
+  this._sessionInProgress = true;
+
+  request = this.applePayInstance.createPaymentRequest(this.applePayConfiguration.paymentRequest);
+  session = new global.ApplePaySession(self.applePaySessionVersion, request);
 
   session.onvalidatemerchant = function (event) {
     self.applePayInstance.performValidation({
@@ -59,6 +62,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
       session.completeMerchantValidation(validationData);
     }).catch(function (validationErr) {
       self.model.reportError(validationErr);
+      self._sessionInProgress = false;
       session.abort();
     });
   };
@@ -67,13 +71,19 @@ ApplePayView.prototype._showPaymentSheet = function () {
     self.applePayInstance.tokenize({
       token: event.payment.token
     }).then(function (payload) {
+      self._sessionInProgress = false;
       session.completePayment(global.ApplePaySession.STATUS_SUCCESS);
       payload.rawPaymentData = event.payment;
       self.model.addPaymentMethod(payload);
     }).catch(function (tokenizeErr) {
       self.model.reportError(tokenizeErr);
+      self._sessionInProgress = false;
       session.completePayment(global.ApplePaySession.STATUS_FAILURE);
     });
+  };
+
+  session.oncancel = function () {
+    self._sessionInProgress = false;
   };
 
   session.begin();

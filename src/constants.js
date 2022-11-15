@@ -36,15 +36,29 @@ module.exports = {
     Discover: 'discover',
     JCB: 'jcb',
     UnionPay: 'unionpay',
-    Maestro: 'maestro'
+    Maestro: 'maestro',
+    Elo: 'elo',
+    Hiper: 'hiper',
+    Hipercard: 'hipercard'
   },
   configurationCardTypes: {
-    Visa: 'visa',
-    Mastercard: 'mastercard',
-    'American Express': 'american-express',
-    Discover: 'discover',
-    JCB: 'jcb',
-    Maestro: 'maestro'
+    visa: 'Visa',
+    'master-card': 'MasterCard',
+    'american-express': 'American Express',
+    'diners-club': 'Discover',
+    discover: 'Discover',
+    jcb: 'JCB',
+    unionpay: 'UnionPay',
+    maestro: 'Maestro',
+    elo: 'Elo',
+    hiper: 'Hiper',
+    hipercard: 'Hipercard'
+  },
+  dependencySetupStates: {
+    DONE: 'done',
+    FAILED: 'failed',
+    INITIALIZING: 'initializing',
+    NOT_ENABLED: 'not-enabled'
   },
   errors: {
     NO_PAYMENT_METHOD_ERROR: 'No payment method is available.',

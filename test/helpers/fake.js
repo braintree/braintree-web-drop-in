@@ -63,7 +63,7 @@ fakeBTInstances = {
   hostedFields() {
     return {
       clear: jest.fn(),
-      getSupportedCardTypes: jest.fn().mockResolvedValue(['visa']),
+      focus: jest.fn(),
       getState: jest.fn().mockReturnValue({
         cards: [{ type: 'visa' }],
         fields: {
@@ -90,11 +90,8 @@ fakeBTInstances = {
   threeDSecure: {
     verifyCard: function () {},
     cancelVerifyCard: function () {},
-    teardown: function () {}
-  },
-  vaultManager: {
-    fetchPaymentMethods: jest.fn(),
-    deletePaymentMethod: jest.fn()
+    teardown: function () {},
+    on: function () {}
   }
 };
 

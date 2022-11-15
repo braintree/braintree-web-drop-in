@@ -57,7 +57,9 @@ describe('Drop-in card', function () {
 
       expect($('#pay-button').isEnabled()).toBe(false);
 
-      browser.hostedFieldSendInput('cardholderName');
+      // IE takes a long time to type anything, so we just
+      // give a one character name here to prevent a timeout
+      browser.hostedFieldSendInput('cardholderName', 'n');
 
       expect($('#pay-button').isEnabled()).toBe(true);
 
@@ -68,7 +70,7 @@ describe('Drop-in card', function () {
       expect(result.nonce).toBeTruthy();
       expect(result.description).toContain('ending in 11');
       expect(result.details.cardType).toContain('Visa');
-      expect(result.details.cardholderName).toContain('First Last');
+      expect(result.details.cardholderName).toContain('n');
     });
   });
 

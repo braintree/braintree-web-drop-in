@@ -33,6 +33,10 @@
   position: relative;
 }
 
+[data-braintree-id="svgs"] {
+  display: none !important;
+}
+
 .braintree-dropin__disabled {
   position: absolute;
   top: 0;
@@ -332,6 +336,7 @@
     .apple-pay-button {
         display: inline-block;
         -webkit-appearance: -apple-pay-button;
+        cursor: pointer;
     }
 }
 @supports not (-webkit-appearance: -apple-pay-button) {
@@ -346,6 +351,7 @@
         min-width: 200px;
         min-height: 32px;
         max-height: 64px;
+        cursor: pointer;
     }
     .apple-pay-button-black {
         background-image: -webkit-named-image(apple-pay-logo-white);
@@ -371,7 +377,9 @@
   border-radius: @radius-default;
   display: none;
   margin: 0 auto;
-  max-height: 500px;
+  // NEXT_MAJOR_VERSION drop this when IE support is no longer required
+  max-height: 600px; // IE11 doesn't support fit-content, so we need a backup value here
+  max-height: fit-content;
   transition: transform 300ms, opacity 300ms, max-height 300ms ease;
   width: 100%;
 }
@@ -757,7 +765,7 @@
     margin-left: 20px;
     text-align: left;
     text-overflow: ellipsis;
-    overflow-x: hidden;
+    overflow: hidden;
 
     .braintree-method__label--small {
       font-size: 13px;
@@ -996,7 +1004,9 @@
 .braintree-loaded [data-braintree-id='methods'],
 .braintree-loaded [data-braintree-id='options'],
 .braintree-loaded [data-braintree-id='sheet-container'] {
-  max-height: 1000px; // Must set specific value here in order to have animation
+  // NEXT_MAJOR_VERSION drop this when IE support is no longer required
+  max-height: 2000px; // IE11 doesn't support fit-content, so we need a backup value here
+  max-height: fit-content; // Must set value here in order to have animation
   opacity: 1;
   transition: max-height 250ms @curve-easeOutBack, opacity 300ms linear 100ms;
   min-height: 0;

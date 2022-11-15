@@ -72,7 +72,66 @@ describe('CardView', () => {
       return fakeModel.initialize();
     });
 
-    it('has cvv by default', async () => {
+    test('defaults merchant configuration when not configured with a card configuration', () => {
+      delete fakeModel.merchantConfiguration.card;
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(view.merchantConfiguration).toEqual({
+          vault: {}
+        });
+      });
+    });
+
+    test('defaults merchant configuration card configuration is `true`', () => {
+      fakeModel.merchantConfiguration.card = true;
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(view.merchantConfiguration).toEqual({
+          vault: {}
+        });
+      });
+    });
+
+    test('uses passed in merchant configuration for card', () => {
+      fakeModel.merchantConfiguration.card = {
+        vault: { vaultCard: true }
+      };
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(view.merchantConfiguration).toEqual({
+          vault: { vaultCard: true }
+        });
+      });
+    });
+
+    test('has cvv if supplied in challenges', () => {
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: ['cvv'],
+          creditCards: {
+            supportedCardTypes: []
+          }
+        }
+      });
+
       const view = new CardView({
         element: cardElement,
         model: fakeModel,
@@ -234,22 +293,9 @@ describe('CardView', () => {
       });
     });
 
-    it('starts async dependency', () => {
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
-
-      const view = new CardView({
-        element: cardElement,
-        model: fakeModel,
-        strings: strings
-      });
-
-      return view.initialize().then(() => {
-        expect(DropinModel.prototype.asyncDependencyStarting).toBeCalledTimes(1);
-      });
-    });
-
-    it('notifies async dependency is ready when Hosted Fields is created',
-      async () => {
+    test(
+      'notifies async dependency is ready when Hosted Fields is created',
+      () => {
         jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
 
         const view = new CardView({
@@ -260,6 +306,7 @@ describe('CardView', () => {
 
         return view.initialize().then(() => {
           expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
+          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledWith('card');
         });
       });
 
@@ -322,8 +369,20 @@ describe('CardView', () => {
           view: 'card',
           error: fakeError
         });
+      }
+    );
+
+    test('shows supported card icons', () => {
+      const supportedCardTypes = ['american-express', 'discover', 'jcb', 'master-card', 'visa', 'unionpay'];
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: ['cvv'],
+          creditCards: {
+            supportedCardTypes: ['American Express', 'Discover', 'JCB', 'MasterCard', 'Visa', 'UnionPay']
+          }
+        }
       });
-    });
 
     it.each(['maestro', 'diners-club', 'unionpay', 'discover'])('hides unsupported %s icon', brand => {
       const view = new CardView({
@@ -360,10 +419,69 @@ describe('CardView', () => {
       });
     });
 
-    it('does not show UnionPay icon even if it is supported', () => {
-      fakeHostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([
-        'UnionPay'
-      ]);
+    test('does not show Elo icon even if it is supported', () => {
+      let eloCardIcon;
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: ['Elo']
+          }
+        }
+      });
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        eloCardIcon = cardElement.querySelector('[data-braintree-id="elo-card-icon"]');
+
+        expect(eloCardIcon.classList.contains('braintree-hidden')).toBe(true);
+      });
+    });
+
+    test('does not show Hiper icon even if it is supported', () => {
+      let hiperIcon;
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: ['Hiper']
+          }
+        }
+      });
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        hiperIcon = cardElement.querySelector('[data-braintree-id="hiper-card-icon"]');
+
+        expect(hiperIcon.classList.contains('braintree-hidden')).toBe(true);
+      });
+    });
+
+    test('does not show Hipercard icon even if it is supported', () => {
+      let hipercardIcon;
+
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: ['Hipercard']
+          }
+        }
+      });
 
       const view = new CardView({
         element: cardElement,
@@ -372,9 +490,9 @@ describe('CardView', () => {
       });
 
       return view.initialize().then(() => {
-        const unionPayCardIcon = cardElement.querySelector('[data-braintree-id="unionpay-card-icon"]');
+        hipercardIcon = cardElement.querySelector('[data-braintree-id="hipercard-card-icon"]');
 
-        expect(unionPayCardIcon.classList.contains('braintree-hidden')).toBe(true);
+        expect(hipercardIcon.classList.contains('braintree-hidden')).toBe(true);
       });
     });
 
@@ -781,10 +899,52 @@ describe('CardView', () => {
         });
       });
 
-      it('does apply error class if field is empty when focusing another hosted field', () => {
-        const fakeHostedField = document.createElement('iframe');
-        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
-        const numberFieldError = cardElement.querySelector('[data-braintree-id="number-field-error"]');
+      test('removes field errors if field is potentially valid', () => {
+        eventPayload = {
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: false,
+              isPotentiallyValid: true,
+              isValid: false
+            }
+          }
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).toBeCalledTimes(1);
+        });
+      });
+
+      test(
+        'does apply error class if field is empty when focusing another hosted field',
+        () => {
+          const fakeHostedField = document.createElement('iframe');
+          const modelOptions = fake.modelOptions();
+          const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+          const numberFieldError = cardElement.querySelector('[data-braintree-id="number-field-error"]');
+
+          eventPayload = {
+            cards: [{ type: 'visa' }],
+            emittedBy: 'number',
+            fields: {
+              number: {
+                isEmpty: true,
+                isValid: false
+              }
+            }
+          };
 
         eventPayload = {
           cards: [{ type: 'visa', supported: true }],
@@ -920,8 +1080,77 @@ describe('CardView', () => {
         });
       });
 
-      it('adds the card-type-known class when there is one possible card type', () => {
-        const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
+      test('hides field errors when card type changes and card type is supported', () => {
+        eventPayload = {
+          cards: [{ type: 'master-card' }],
+          emittedBy: 'number'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).toBeCalledTimes(1);
+          expect(cardView.hideFieldError).toBeCalledWith('number');
+        });
+      });
+
+      test('does not hide field errors when card type changes and card type is not supported', () => {
+        eventPayload = {
+          cards: [{ type: 'Maestro' }],
+          emittedBy: 'number'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).not.toBeCalled();
+        });
+      });
+
+      test('does not hide field errors when card did not emit card change event', () => {
+        eventPayload = {
+          cards: [{ type: 'MasterCard' }],
+          emittedBy: 'cvv'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).not.toBeCalled();
+        });
+      });
+
+      test(
+        'adds the card-type-known class when there is one possible card type',
+        () => {
+          const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
         eventPayload = {
           cards: [{ type: 'master-card', supported: true }],
@@ -2336,12 +2565,14 @@ describe('CardView', () => {
       jest.useFakeTimers();
     });
 
-    it('focuses on the number field', () => {
-      const view = new CardView({ element: cardElement });
+    test('focuses on the number field', () => {
+      const view = new CardView({
+        model: fake.model(),
+        client: fake.client(),
+        element: cardElement
+      });
 
-      view.hostedFieldsInstance = {
-        focus: jest.fn()
-      };
+      view.hostedFieldsInstance = fake.hostedFields();
 
       view.onSelection();
 
@@ -2351,7 +2582,59 @@ describe('CardView', () => {
       expect(view.hostedFieldsInstance.focus).toBeCalledWith('number');
     });
 
-    it('noops if the hosted fields instance is not available', () => {
+    test('setPaymentMethodRequestable is called on selection', () => {
+      const model = fake.model();
+      const view = new CardView({
+        model,
+        client: fake.client(),
+        element: cardElement
+      });
+      const hf = fake.hostedFields();
+
+      view.hostedFieldsInstance = hf;
+      hf.getState.mockReturnValue({
+        cards: [{ type: 'visa' }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: true
+          }
+        }
+      });
+
+      jest.spyOn(model, 'setPaymentMethodRequestable').mockImplementation();
+
+      view.onSelection();
+
+      expect(model.setPaymentMethodRequestable).toBeCalledWith({
+        isRequestable: true,
+        type: 'CreditCard'
+      });
+
+      model.setPaymentMethodRequestable.mockClear();
+      hf.getState.mockReturnValue({
+        cards: [{ type: 'visa' }],
+        fields: {
+          number: {
+            isValid: true
+          },
+          expirationDate: {
+            isValid: false
+          }
+        }
+      });
+
+      view.onSelection();
+
+      expect(model.setPaymentMethodRequestable).toBeCalledWith({
+        isRequestable: false,
+        type: 'CreditCard'
+      });
+    });
+
+    test('noops if the hosted fields instance is not available', () => {
       const view = new CardView({ element: cardElement });
 
       delete view.hostedFieldsInstance;

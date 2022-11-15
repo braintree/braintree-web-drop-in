@@ -10,8 +10,18 @@ describe('ThreeDSecure', () => {
   beforeEach(() => {
     testContext = {};
     testContext.threeDSecureInstance = fake.threeDSecureInstance;
+    testContext.merchantConfiguration = {
+      threeDSecure: {
+        amount: '10.00'
+      }
+    };
+    testContext.model = fake.model({
+      client: fake.client(),
+      merchantConfiguration: testContext.merchantConfiguration
+    });
     jest.spyOn(testContext.threeDSecureInstance, 'verifyCard').mockImplementation();
     jest.spyOn(testContext.threeDSecureInstance, 'cancelVerifyCard').mockImplementation();
+    jest.spyOn(testContext.threeDSecureInstance, 'on').mockImplementation();
 
     jest.spyOn(classList, 'add').mockImplementation();
     jest.spyOn(classList, 'remove').mockImplementation();
@@ -22,10 +32,9 @@ describe('ThreeDSecure', () => {
       jest.spyOn(threeDSecure, 'create').mockResolvedValue(testContext.threeDSecureInstance);
     });
 
-    it('sets up three d secure', () => {
-      const config = {};
-      const auth = 'fake-auth';
-      const tds = new ThreeDSecure(auth, config, 'Card Verification');
+    test('sets up three d secure', () => {
+      const client = {};
+      const tds = new ThreeDSecure(client, testContext.model);
 
       return tds.initialize().then(() => {
         expect(threeDSecure.create).toBeCalledTimes(1);
@@ -36,16 +45,46 @@ describe('ThreeDSecure', () => {
         expect(tds._instance).toBe(testContext.threeDSecureInstance);
       });
     });
+
+    test('adds event listeners for 3ds specific events', () => {
+      const client = {};
+      const tds = new ThreeDSecure(client, testContext.model);
+
+      testContext.threeDSecureInstance.on.mockImplementation((eventName, cb) => {
+        cb({ someEvent: 'foo' });
+      });
+
+      return tds.initialize().then(() => {
+        expect(testContext.model._emit).toBeCalledTimes(3);
+        expect(testContext.model._emit).toBeCalledWith('3ds:customer-canceled', { someEvent: 'foo' });
+        expect(testContext.model._emit).toBeCalledWith('3ds:authentication-modal-render', { someEvent: 'foo' });
+        expect(testContext.model._emit).toBeCalledWith('3ds:authentication-modal-close', { someEvent: 'foo' });
+      });
+    });
+
+    test('adds cardinalSDKConfig object to the threeDSecure.create call', () => {
+      const client = {};
+
+      testContext.model.merchantConfiguration.threeDSecure = {
+        cardinalSDKConfig: { logging: { level: 'verbose' }}
+      };
+      const tds = new ThreeDSecure(client, testContext.model);
+
+      return tds.initialize().then(() => {
+        expect(threeDSecure.create).toBeCalledTimes(1);
+        expect(threeDSecure.create).toBeCalledWith({
+          client: client,
+          version: 2,
+          cardinalSDKConfig: { logging: { level: 'verbose' }}
+        });
+        expect(tds._instance).toBe(testContext.threeDSecureInstance);
+      });
+    });
   });
 
   describe('verify', () => {
     beforeEach(() => {
-      testContext.config = {
-        authorization: 'fake-auth',
-        amount: '10.00'
-      };
-
-      testContext.tds = new ThreeDSecure({}, testContext.config, 'Card Verification');
+      testContext.tds = new ThreeDSecure({}, testContext.model);
       testContext.tds._instance = testContext.threeDSecureInstance;
 
       jest.spyOn(document.body, 'appendChild').mockImplementation();
@@ -212,7 +251,7 @@ describe('ThreeDSecure', () => {
 
   describe('teardown', () => {
     beforeEach(() => {
-      testContext.tds = new ThreeDSecure({}, {}, 'Card Verification');
+      testContext.tds = new ThreeDSecure({}, testContext.model);
 
       testContext.tds._instance = testContext.threeDSecureInstance;
       jest.spyOn(testContext.threeDSecureInstance, 'teardown').mockResolvedValue();
@@ -225,8 +264,10 @@ describe('ThreeDSecure', () => {
   });
 
   describe('udpateConfiguration', () => {
-    it('updates configuration', () => {
-      const tds = new ThreeDSecure({}, { amount: '10.00', foo: 'bar' }, 'Card Verification');
+    test('updates configuration', () => {
+      testContext.merchantConfiguration.threeDSecure.foo = 'bar';
+
+      const tds = new ThreeDSecure({}, testContext.model);
 
       tds.updateConfiguration('amount', '23.45');
 

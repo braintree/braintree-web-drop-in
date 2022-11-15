@@ -102,9 +102,10 @@ PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
     strings: this.strings
   });
 
-  this.model.removeUnvaultedPaymentMethods(function (pm) {
-    return pm.nonce !== paymentMethod.nonce;
-  });
+  if (this.model.isGuestCheckout && this.container.firstChild) {
+    this.views[0].teardown();
+    this.views.pop();
+  }
 
   if (this.container.firstChild) {
     this.container.insertBefore(paymentMethodView.element, this.container.firstChild);
@@ -120,7 +121,7 @@ PaymentMethodsView.prototype._removePaymentMethod = function (paymentMethod) {
 
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
-      this.container.removeChild(this.views[i].element);
+      this.views[i].teardown();
       this._headingLabel.innerHTML = '&nbsp;';
       this.views.splice(i, 1);
       break;
@@ -160,8 +161,8 @@ PaymentMethodsView.prototype.refreshPaymentMethods = function () {
   var paymentMethods = this.model.getPaymentMethods();
 
   this.views.forEach(function (view) {
-    this.container.removeChild(view.element);
-  }.bind(this));
+    view.teardown();
+  });
 
   this.views = [];
 

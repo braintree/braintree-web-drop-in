@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.25.0",
+  "version": "1.33.7",
   "main": "src/index.js",
   "private": true,
   "scripts": {
@@ -11,7 +11,6 @@
     "hint": "hint http://localhost:4567",
     "posttest": "npm run lint",
     "test": "jest",
-    "test:hint": "npm-run-all -n -s build -pr server hint",
     "test:integration": "wdio wdio.conf.js",
     "test:integration:paypal-only": "RUN_PAYPAL_ONLY=true npm run test:integration",
     "test:integration:paypal-skipped": "SKIP_PAYPAL=true npm run test:integration",

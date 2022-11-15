@@ -90,9 +90,76 @@ describe('DropinModel', () => {
     });
   });
 
-  describe('confirmDropinReady', () => {
-    it('sets _setupComplete to true', () => {
+    test('does not set payment methods as initializing when merchant configuration has falsy values', () => {
+      // eslint-disable-next-line no-undefined
+      testContext.modelOptions.merchantConfiguration.venmo = undefined;
+      testContext.modelOptions.merchantConfiguration.paypalCredit = false;
+      testContext.modelOptions.merchantConfiguration.applePay = '';
+      testContext.modelOptions.merchantConfiguration.googlePay = 0;
+
       const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.paypalCredit).toBeFalsy();
+      expect(model.dependencyStates.venmo).toBeFalsy();
+      expect(model.dependencyStates.applePay).toBeFalsy();
+      expect(model.dependencyStates.googlePay).toBeFalsy();
+      expect(model.dependencyStates.card).toBe('initializing');
+      expect(model.dependencyStates.paypal).toBe('initializing');
+    });
+
+    it('does not set card as initializing when merchant configuration has falsy value', () => {
+      testContext.modelOptions.merchantConfiguration.card = false;
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.card).toBeFalsy();
+    });
+
+    it('does not set card as initializing when it is not specified in the merchant configuration and not in the payment option priority', () => {
+      testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'paypalCredit', 'googlePay', 'applePay', 'venmo'];
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.card).toBeFalsy();
+    });
+
+    it('does not set payment option as initializing when n and not in the payment option priority', () => {
+      testContext.modelOptions.merchantConfiguration.card = true;
+      testContext.modelOptions.merchantConfiguration.venmo = true;
+      testContext.modelOptions.merchantConfiguration.paypal = true;
+      testContext.modelOptions.merchantConfiguration.googlePay = true;
+      testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'venmo'];
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.card).toBeFalsy();
+      expect(model.dependencyStates.googlePay).toBeFalsy();
+      expect(model.dependencyStates.paypal).toBeTruthy();
+      expect(model.dependencyStates.venmo).toBeTruthy();
+    });
+
+    it('does set data collector and 3DS as initializing when a payment option priority is configured', () => {
+      testContext.modelOptions.merchantConfiguration.card = true;
+      testContext.modelOptions.merchantConfiguration.venmo = true;
+      testContext.modelOptions.merchantConfiguration.paypal = true;
+      testContext.modelOptions.merchantConfiguration.googlePay = true;
+      testContext.modelOptions.merchantConfiguration.dataCollector = true;
+      testContext.modelOptions.merchantConfiguration.threeDSecure = true;
+      testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'venmo'];
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model.dependencyStates.card).toBeFalsy();
+      expect(model.dependencyStates.googlePay).toBeFalsy();
+      expect(model.dependencyStates.paypal).toBeTruthy();
+      expect(model.dependencyStates.venmo).toBeTruthy();
+      expect(model.dependencyStates.dataCollector).toBeTruthy();
+      expect(model.dependencyStates.threeDSecure).toBeTruthy();
+    });
+
+    describe('isGuestCheckout', () => {
+      test('is true when given a tokenization key', () => {
+        let model;
 
       expect(model._setupComplete).toBe(false);
 
@@ -193,24 +260,45 @@ describe('DropinModel', () => {
       });
     });
 
-    it('provides vault manager defaults when only some options are provided', async () => {
-      testContext.modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-      testContext.modelOptions.merchantConfiguration.vaultManager = {
-        autoVaultPaymentMethods: false
-      };
+  describe('initialize', () => {
+    test('emits asyncDependenciesReady event when no dependencies are set to initializing', (done) => {
+      jest.useFakeTimers();
+
       const model = new DropinModel(testContext.modelOptions);
 
-      await model.initialize();
+      jest.spyOn(model, '_emit');
 
-      expect(model.vaultManagerConfig).toEqual({
-        autoVaultPaymentMethods: false,
-        presentVaultedPaymentMethods: true,
-        preselectVaultedPaymentMethod: true,
-        allowCustomerToDeletePaymentMethods: false
+      model.on('asyncDependenciesReady', () => {
+        jest.useRealTimers();
+        done();
+      });
+
+      model.initialize().then(() => {
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        model.asyncDependencyReady('paypal');
+
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        jest.advanceTimersByTime(1000);
+
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        model.asyncDependencyReady('venmo');
+
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        jest.advanceTimersByTime(1000);
+
+        model.asyncDependencyReady('card');
+
+        expect(model._emit).not.toBeCalledWith('asyncDependenciesReady');
+
+        jest.advanceTimersByTime(1000);
       });
     });
 
-    it('creates a vault manager', () => {
+    test('creates a vault manager', () => {
       const model = new DropinModel(testContext.modelOptions);
 
       return model.initialize().then(() => {
@@ -261,6 +349,7 @@ describe('DropinModel', () => {
         expect(model._paymentMethods).toEqual([
           { type: 'CreditCard', details: { lastTwo: '11' }, vaulted: true }
         ]);
+        expect(model.dependencyStates.paypal).toBe('not-enabled');
       });
     });
 
@@ -378,8 +467,27 @@ describe('DropinModel', () => {
       });
     });
 
-    it('calls isEnabled on payment method view to determine if payment method is available', () => {
-      const model = new DropinModel(testContext.modelOptions);
+    test('ignores configured payment methods that are not present in a custom paymentOptionPriority array', () => {
+      let model;
+
+      testContext.configuration.gatewayConfiguration.paypalEnabled = true;
+      testContext.modelOptions.merchantConfiguration.paypal = true;
+      testContext.modelOptions.merchantConfiguration.venmo = true;
+      testContext.modelOptions.merchantConfiguration.applePay = true;
+      testContext.modelOptions.merchantConfiguration.googlePay = true;
+      testContext.modelOptions.merchantConfiguration.paymentOptionPriority = ['paypal', 'card'];
+
+      model = new DropinModel(testContext.modelOptions);
+
+      return model.initialize().then(() => {
+        expect(model.supportedPaymentOptions).toEqual(['paypal', 'card']);
+      });
+    });
+
+    test(
+      'calls isEnabled on payment method view to determine if payment method is available',
+      () => {
+        const model = new DropinModel(testContext.modelOptions);
 
       return model.initialize().then(() => {
         expect(ApplePayView.isEnabled).toBeCalledTimes(1);
@@ -628,6 +736,33 @@ describe('DropinModel', () => {
     });
   });
 
+  describe('changeActiveView', () => {
+    beforeEach(() => {
+      testContext.model = new DropinModel(testContext.modelOptions);
+    });
+
+    test('sets active payment method view id', () => {
+      testContext.model._activePaymentViewId = 'methods';
+
+      testContext.model.changeActiveView('card');
+
+      expect(testContext.model._activePaymentViewId).toBe('card');
+    });
+
+    test('emits event with new and old ids', () => {
+      jest.spyOn(testContext.model, '_emit');
+
+      testContext.model._activePaymentViewId = 'methods';
+
+      testContext.model.changeActiveView('card');
+
+      expect(testContext.model._emit).toBeCalledWith('changeActiveView', {
+        previousViewId: 'methods',
+        newViewId: 'card'
+      });
+    });
+  });
+
   describe('removeActivePaymentMethod', () => {
     beforeEach(() => {
       testContext.model = new DropinModel(testContext.modelOptions);
@@ -670,6 +805,91 @@ describe('DropinModel', () => {
     });
   });
 
+  describe('hasAtLeastOneAvailablePaymentOption', () => {
+    test('returns false when no payment methods have a setup status of done', async () => {
+      // all dependencies will have a setup status of initializing
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.hasAtLeastOneAvailablePaymentOption()).toBe(false);
+    });
+
+    test('returns true when at least one payment method has a setup status of done', async () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      model.asyncDependencyReady('card');
+
+      expect(model.hasAtLeastOneAvailablePaymentOption()).toBe(true);
+    });
+
+    test('returns false when no payment methods have a setup status of done, even if non-payment methods do', async () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      model.asyncDependencyReady('dataCollector');
+      model.asyncDependencyReady('threeDSecure');
+
+      expect(model.hasAtLeastOneAvailablePaymentOption()).toBe(false);
+    });
+  });
+
+  describe('hasPaymentMethods', () => {
+    test('returns true when there is at least one payment method', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      jest.spyOn(model, 'getPaymentMethods').mockReturnValue([{
+        type: 'PayPalAccount',
+        nonce: 'fake-paypal-nonce'
+      }]);
+      expect(model.hasPaymentMethods()).toBe(true);
+    });
+
+    test('returns false when there are no payment methods', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      jest.spyOn(model, 'getPaymentMethods').mockReturnValue([]);
+      expect(model.hasPaymentMethods()).toBe(false);
+    });
+  });
+
+  describe('getInitialViewId', () => {
+    test('returns options id when there are more than 1 supported payment options', async () => {
+      VenmoView.isEnabled.mockResolvedValue(true);
+      CardView.isEnabled.mockResolvedValue(true);
+
+      ApplePayView.isEnabled.mockResolvedValue(false);
+      GooglePayView.isEnabled.mockResolvedValue(false);
+      PayPalView.isEnabled.mockResolvedValue(false);
+      PayPalCreditView.isEnabled.mockResolvedValue(false);
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.getInitialViewId()).toBe('options');
+    });
+
+    test('returns the id for the only payment option when there is just 1 supported payment option', async () => {
+      VenmoView.isEnabled.mockResolvedValue(true);
+
+      CardView.isEnabled.mockResolvedValue(false);
+      ApplePayView.isEnabled.mockResolvedValue(false);
+      GooglePayView.isEnabled.mockResolvedValue(false);
+      PayPalView.isEnabled.mockResolvedValue(false);
+      PayPalCreditView.isEnabled.mockResolvedValue(false);
+
+      const model = new DropinModel(testContext.modelOptions);
+
+      await model.initialize();
+
+      expect(model.getInitialViewId()).toBe('venmo');
+    });
+  });
+
   describe('reportAppSwitchPayload', () => {
     it('saves app switch payload to instance', () => {
       const model = new DropinModel(testContext.modelOptions);
@@ -693,22 +913,20 @@ describe('DropinModel', () => {
     });
   });
 
-  describe('asyncDependencyStarting', () => {
-    beforeEach(() => {
-      testContext.context = {
-        dependenciesInitializing: 0
-      };
-    });
-
-    it('increments dependenciesInitializing by one', () => {
-      DropinModel.prototype.asyncDependencyStarting.call(testContext.context);
-      expect(testContext.context.dependenciesInitializing).toBe(1);
-    });
-  });
-
   describe('asyncDependencyFailed', () => {
     beforeEach(() => {
       testContext.model = new DropinModel(testContext.modelOptions);
+    });
+
+    test('marks depenedency as failed', () => {
+      const err = new Error('a bad error');
+
+      expect(testContext.model.dependencyStates.venmo).toBe('initializing');
+      testContext.model.asyncDependencyFailed({
+        view: 'venmo',
+        error: err
+      });
+      expect(testContext.model.dependencyStates.venmo).toBe('failed');
     });
 
     it('adds an error to the failedDependencies object', () => {
@@ -745,12 +963,16 @@ describe('DropinModel', () => {
         done();
       });
 
-      model.asyncDependencyStarting();
-      model.asyncDependencyFailed({
-        view: 'id',
-        error: new Error('fake error')
-      });
-    });
+        model.initialize().then(() => {
+          model.asyncDependencyReady('paypal');
+          model.asyncDependencyFailed({
+            view: 'venmo',
+            error: new Error('fake error')
+          });
+          model.asyncDependencyReady('card');
+        });
+      }
+    );
   });
 
   describe('asyncDependencyReady', () => {
@@ -758,14 +980,27 @@ describe('DropinModel', () => {
       testContext.context = { callback: jest.fn() };
     });
 
-    it('decrements dependenciesInitializing by one', () => {
+    test('marks initializing dependency as done', () => {
       const model = new DropinModel(testContext.modelOptions);
 
-      model.dependenciesInitializing = 2;
+      // the modelOptions have a config for paypal and venmo
+      expect(model.dependencyStates.paypal).toBe('initializing');
+      expect(model.dependencyStates.venmo).toBe('initializing');
 
-      model.asyncDependencyReady();
+      model.asyncDependencyReady('paypal');
+      expect(model.dependencyStates.paypal).toBe('done');
+      expect(model.dependencyStates.venmo).toBe('initializing');
+      expect(model.dependencyStates.card).toBe('initializing');
 
-      expect(model.dependenciesInitializing).toBe(1);
+      model.asyncDependencyReady('venmo');
+      expect(model.dependencyStates.paypal).toBe('done');
+      expect(model.dependencyStates.venmo).toBe('done');
+      expect(model.dependencyStates.card).toBe('initializing');
+
+      model.asyncDependencyReady('card');
+      expect(model.dependencyStates.paypal).toBe('done');
+      expect(model.dependencyStates.venmo).toBe('done');
+      expect(model.dependencyStates.card).toBe('done');
     });
 
     it('emits asyncDependenciesReady event when there are no dependencies initializing', done => {
@@ -773,30 +1008,35 @@ describe('DropinModel', () => {
 
       jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
 
-      model.on('asyncDependenciesReady', () => {
-        expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(1);
-        done();
-      });
+        model.on('asyncDependenciesReady', () => {
+          expect(DropinModel.prototype.asyncDependencyReady).toBeCalledTimes(3);
+          done();
+        });
 
-      model.asyncDependencyStarting();
-      model.asyncDependencyReady();
-    });
+        model.initialize().then(() => {
+          model.asyncDependencyReady('paypal');
+          model.asyncDependencyReady('venmo');
+          model.asyncDependencyReady('card');
+        });
+      }
+    );
 
-    it('emits asyncDependenciesReady event with prior errors', () => {
+    test('emits asyncDependenciesReady event with prior errors', (done) => {
       const model = new DropinModel(testContext.modelOptions);
       const err = new Error('an earlier dependency failed');
 
-      jest.spyOn(model, '_emit');
-
-      model.asyncDependencyStarting();
-      model.asyncDependencyStarting();
-      model.asyncDependencyFailed({
-        view: 'id',
-        error: err
+      model.on('asyncDependenciesReady', () => {
+        done();
       });
-      model.asyncDependencyReady();
 
-      expect(model._emit).toBeCalledWith('asyncDependenciesReady');
+      model.initialize().then(() => {
+        model.asyncDependencyReady('card');
+        model.asyncDependencyFailed({
+          view: 'venmo',
+          error: err
+        });
+        model.asyncDependencyReady('paypal');
+      });
     });
   });
 

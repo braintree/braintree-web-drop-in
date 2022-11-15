@@ -26,8 +26,15 @@ PaymentMethodView.prototype._initialize = function () {
   this.element = document.createElement('div');
   this.element.className = 'braintree-method';
   this.element.setAttribute('tabindex', '0');
+  this.element.setAttribute('role', 'button');
 
-  addSelectionEventHandler(this.element, this._choosePaymentMethod.bind(this));
+  addSelectionEventHandler(this.element, function () {
+    if (this.model.isInEditMode()) {
+      this._selectDelete();
+    } else {
+      this._choosePaymentMethod();
+    }
+  }.bind(this));
 
   switch (this.paymentMethod.type) {
     case paymentMethodTypes.applePay:
@@ -67,7 +74,6 @@ PaymentMethodView.prototype._initialize = function () {
 
   this.element.innerHTML = html;
   this.checkMark = this.element.querySelector('.braintree-method__check-container');
-  addSelectionEventHandler(this.element.querySelector('.braintree-method__delete-container'), this._selectDelete.bind(this));
 };
 
 PaymentMethodView.prototype.setActive = function (isActive) {
@@ -89,10 +95,13 @@ PaymentMethodView.prototype.disableEditMode = function () {
   classList.remove(this.element, 'braintree-method--disabled');
 };
 
-PaymentMethodView.prototype._choosePaymentMethod = function () {
-  if (this.model.isInEditMode()) {
-    return;
+PaymentMethodView.prototype.teardown = function () {
+  if (this.element.parentNode) {
+    this.element.parentNode.removeChild(this.element);
   }
+};
+
+PaymentMethodView.prototype._choosePaymentMethod = function () {
   if (this.paymentMethod.vaulted) {
     analytics.sendEvent('vaulted-' + constants.analyticsKinds[this.paymentMethod.type] + '.select');
   }

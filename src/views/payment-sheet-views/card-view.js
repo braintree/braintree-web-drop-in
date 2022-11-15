@@ -30,7 +30,14 @@ CardView.prototype.initialize = function () {
   var cardholderNameGroup = this.getElementById('cardholder-name-field-group');
   var cardIcons = this.getElementById('card-view-icons');
 
-  this.merchantConfiguration = this.model.merchantConfiguration.card || {};
+  // If merchant explicty passes a value of `true` for card configuration,
+  // we need to treat it as if no card configuration was passed, and provide
+  // the default configuration
+  if (this.model.merchantConfiguration.card && this.model.merchantConfiguration.card !== true) {
+    this.merchantConfiguration = this.model.merchantConfiguration.card;
+  } else {
+    this.merchantConfiguration = {};
+  }
   this.merchantConfiguration.vault = this.merchantConfiguration.vault || {};
   this.hasCardholderName = Boolean(this.merchantConfiguration.cardholderName);
   this.cardholderNameRequired = this.hasCardholderName && this.merchantConfiguration.cardholderName.required === true;
@@ -65,15 +72,14 @@ CardView.prototype.initialize = function () {
     classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
   }
 
-  if (this.merchantConfiguration.vault.autoVault === false) {
+  // NEXT_MAJOR_VERSION change out this vaultCard property
+  // to something more generic, such as vaultOnTokenization so
+  // all the vault objects can have the same shape (instead
+  // of being specific to cards here)
+  if (this.merchantConfiguration.vault.vaultCard === false) {
     this.saveCardInput.checked = false;
   }
 
-  this.model.asyncDependencyStarting();
-
-  // eslint-disable-next-line no-warning-comments
-  // TODO we need some way to check if the merchant is actually enabled to
-  //  process credit cards and then disable the card view if they are not
   return hostedFields.create(hfOptions).then(function (hostedFieldsInstance) {
     this.hostedFieldsInstance = hostedFieldsInstance;
     this._showSupportedCardIcons();
@@ -89,7 +95,7 @@ CardView.prototype.initialize = function () {
       }.bind(this));
     }.bind(this));
 
-    this.model.asyncDependencyReady();
+    this.model.asyncDependencyReady(CardView.ID);
   }.bind(this)).catch(function (err) {
     this.model.asyncDependencyFailed({
       view: this.ID,
@@ -437,14 +443,16 @@ CardView.prototype._onBlurEvent = function (event) {
 
   classList.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
+  if (field.isPotentiallyValid) {
+    this.hideFieldError(event.emittedBy);
+  }
+
   if (this._shouldApplyFieldEmptyError(event.emittedBy, field)) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
-    if (event.emittedBy === 'number' && event.cards && event.cards[0] && !event.cards[0].supported) {
-      this.showFieldError('number', this.strings.unsupportedCardTypeError);
-    } else {
-      this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
-    }
+    this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
+  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0])) {
+    this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
 
   this.model._emit('card:blur', event);
@@ -481,6 +489,13 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
     classList.remove(numberFieldGroup, 'braintree-form__field-group--card-type-known');
   }
 
+  // if the number field emitted the card change event fires
+  // and the card type is supported, we need to clear out the errors
+  // field in case that there was a "card type is unsupported" error
+  if (event.emittedBy === 'number' && this._isCardTypeSupported(event.cards[0])) {
+    this.hideFieldError(event.emittedBy);
+  }
+
   this.cardNumberIconSvg.setAttribute('xlink:href', cardNumberHrefLink);
 
   if (this.hasCVV) {
@@ -515,7 +530,12 @@ CardView.prototype._onNotEmptyEvent = function (event) {
 
 CardView.prototype._onValidityChangeEvent = function (event) {
   var field = event.fields[event.emittedBy];
-  var isValid = field.isValid;
+
+  if (event.emittedBy === 'number' && event.cards[0]) {
+    isValid = field.isValid && this._isCardTypeSupported(event.cards[0]);
+  } else {
+    isValid = field.isValid;
+  }
 
   classList.toggle(field.container, 'braintree-form__field--valid', isValid);
 
@@ -546,15 +566,17 @@ CardView.prototype.onSelection = function () {
       this.hostedFieldsInstance.focus('number');
     }
   }.bind(this), 50);
+
+  this._sendRequestableEvent();
 };
 
 CardView.prototype._showSupportedCardIcons = function () {
   var self = this;
 
-  this.hostedFieldsInstance.getSupportedCardTypes().then(function (supportedCardTypes) {
-    Object.keys(constants.configurationCardTypes).forEach(function (paymentMethodCardType) {
-      var cardIcon;
-      var configurationKey = constants.configurationCardTypes[paymentMethodCardType];
+CardView.prototype._isCardTypeSupported = function (card) {
+  var cardType = card && card.type;
+  var configurationCardType = constants.configurationCardTypes[cardType];
+  var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
       if (supportedCardTypes.indexOf(paymentMethodCardType) > -1) {
         cardIcon = self.getElementById(configurationKey + '-card-icon');

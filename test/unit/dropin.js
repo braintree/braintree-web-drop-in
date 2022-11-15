@@ -2,6 +2,10 @@
 
 jest.mock('../../src/lib/analytics');
 
+const Dropin = require('../../src/dropin');
+const DropinModel = require('../../src/dropin-model');
+const MainView = require('../../src/views/main-view');
+const EventEmitter = require('@braintree/event-emitter');
 const assets = require('@braintree/asset-loader');
 const hostedFields = require('braintree-web/hosted-fields');
 const paypalCheckout = require('braintree-web/paypal-checkout');
@@ -54,8 +58,7 @@ describe('Dropin', () => {
     jest.spyOn(hostedFields, 'create').mockResolvedValue(fakeHostedFieldsInstance);
     jest.spyOn(paypalCheckout, 'create').mockResolvedValue(fake.paypalInstance);
     jest.spyOn(threeDSecure, 'create').mockResolvedValue(fake.threeDSecureInstance);
-
-    fakeHostedFieldsInstance.getSupportedCardTypes.mockResolvedValue([]);
+    jest.spyOn(DropinModel.prototype, 'hasPaymentMethods').mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -434,25 +437,14 @@ describe('Dropin', () => {
     it('calls the create callback when async dependencies are ready', done => {
       const instance = new Dropin(testContext.dropinOptions);
 
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
-
-      instance._initialize(err => {
-        done(err);
-      });
-
-      delay().then(() => {
-        instance._model.dependencySuccessCount = 1;
-        instance._model._emit('asyncDependenciesReady');
-      });
-    });
+        instance._initialize(done);
+      }
+    );
 
     it('returns to app switch view that reported an error', done => {
       const instance = new Dropin(testContext.dropinOptions);
       const error = new Error('error');
 
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
       jest.spyOn(DropinModel.prototype, 'reportError').mockImplementation();
 
       instance._initialize(() => {
@@ -464,13 +456,11 @@ describe('Dropin', () => {
       });
 
       delay().then(() => {
-        instance._model.dependencySuccessCount = 1;
         instance._model.appSwitchError = {
           id: 'view-id',
           error: error
         };
         jest.spyOn(instance._mainView, 'setPrimaryView').mockImplementation();
-        instance._model._emit('asyncDependenciesReady');
       });
     });
 
@@ -478,8 +468,6 @@ describe('Dropin', () => {
       const instance = new Dropin(testContext.dropinOptions);
       const payload = { nonce: 'fake-nonce' };
 
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
       jest.spyOn(DropinModel.prototype, 'addPaymentMethod').mockImplementation();
 
       instance._initialize(() => {
@@ -488,29 +476,19 @@ describe('Dropin', () => {
         done();
       });
 
-      delay().then(() => {
-        instance._model.dependencySuccessCount = 1;
-        instance._model.appSwitchPayload = payload;
-        instance._model._emit('asyncDependenciesReady');
-      });
+      instance._model.appSwitchPayload = payload;
     });
 
     it('sends web.dropin.appeared event when async dependencies are ready', done => {
       const instance = new Dropin(testContext.dropinOptions);
 
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
-
-      instance._initialize(() => {
-        expect(analytics.sendEvent).toBeCalledWith('appeared');
-        done();
-      });
-
-      delay().then(() => {
-        instance._model.dependencySuccessCount = 2;
-        instance._model._emit('asyncDependenciesReady');
-      });
-    });
+        instance._initialize(() => {
+          expect(analytics.sendEvent).toBeCalledTimes(1);
+          expect(analytics.sendEvent).toBeCalledWith(instance._client, 'appeared');
+          done();
+        });
+      }
+    );
 
     it('sends vaulted payment method appeared events for each vaulted payment method', done => {
       const instance = new Dropin(testContext.dropinOptions);
@@ -547,12 +525,10 @@ describe('Dropin', () => {
     it('does not send payment method analytic event when app switch payload present', done => {
       const instance = new Dropin(testContext.dropinOptions);
 
-      jest.spyOn(DropinModel.prototype, 'getVaultedPaymentMethods').mockResolvedValue([
-        { type: 'CreditCard', details: { lastTwo: '11' }},
-        { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
-      ]);
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
+        jest.spyOn(DropinModel.prototype, 'getVaultedPaymentMethods').mockResolvedValue([
+          { type: 'CreditCard', details: { lastTwo: '11' }},
+          { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
+        ]);
 
       instance._initialize(() => {
         expect(analytics.sendEvent).not.toBeCalledWith('vaulted-card.appear');
@@ -561,26 +537,22 @@ describe('Dropin', () => {
         done();
       });
 
-      delay().then(() => {
-        instance._model.dependencySuccessCount = 1;
-        instance._model.appSwitchPayload = {
-          nonce: 'a-nonce'
-        };
-        jest.spyOn(instance._mainView, 'setPrimaryView').mockImplementation();
-
-        instance._model._emit('asyncDependenciesReady');
-      });
-    });
+        delay().then(() => {
+          instance._model.appSwitchPayload = {
+            nonce: 'a-nonce'
+          };
+          jest.spyOn(instance._mainView, 'setPrimaryView').mockImplementation();
+        });
+      }
+    );
 
     it('does not send payment method analytic event when app switch error present', done => {
       const instance = new Dropin(testContext.dropinOptions);
 
-      jest.spyOn(DropinModel.prototype, 'getVaultedPaymentMethods').mockResolvedValue([
-        { type: 'CreditCard', details: { lastTwo: '11' }},
-        { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
-      ]);
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyReady').mockImplementation();
+        jest.spyOn(DropinModel.prototype, 'getVaultedPaymentMethods').mockResolvedValue([
+          { type: 'CreditCard', details: { lastTwo: '11' }},
+          { type: 'PayPalAccount', details: { email: 'wow@example.com' }}
+        ]);
 
       instance._initialize(() => {
         expect(analytics.sendEvent).not.toBeCalledWith('vaulted-card.appear');
@@ -589,17 +561,15 @@ describe('Dropin', () => {
         done();
       });
 
-      delay().then(() => {
-        instance._model.dependencySuccessCount = 1;
-        instance._model.appSwitchError = {
-          ID: 'view',
-          error: new Error('error')
-        };
-        jest.spyOn(instance._mainView, 'setPrimaryView').mockImplementation();
-
-        instance._model._emit('asyncDependenciesReady');
-      });
-    });
+        delay().then(() => {
+          instance._model.appSwitchError = {
+            ID: 'view',
+            error: new Error('error')
+          };
+          jest.spyOn(instance._mainView, 'setPrimaryView').mockImplementation();
+        });
+      }
+    );
 
     it('does not send web.vaulted-card.appear analytic event when no vaulted cards appear', done => {
       const instance = new Dropin(testContext.dropinOptions);
@@ -724,19 +694,19 @@ describe('Dropin', () => {
   describe('loads data collector', () => {
     beforeEach(() => {
       testContext.dropinOptions.merchantConfiguration.dataCollector = { kount: true };
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
       jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
-      jest.spyOn(Dropin.prototype, '_setUpDataCollector').mockImplementation();
+      jest.spyOn(DataCollector.prototype, 'initialize').mockResolvedValue();
     });
 
-    it('does not load Data Collector if Data Collector is not enabled', done => {
+    test('does not load Data Collector if Data Collector is not enabled', done => {
       let instance;
 
       delete testContext.dropinOptions.merchantConfiguration.dataCollector;
       instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
-        expect(instance._setUpDataCollector).not.toBeCalled();
+        expect(DataCollector.prototype.initialize).not.toBeCalled();
+        expect(DropinModel.prototype.asyncDependencyReady).not.toBeCalledWith('dataCollector');
 
         done();
       });
@@ -746,7 +716,26 @@ describe('Dropin', () => {
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
-        expect(instance._setUpDataCollector).toBeCalled();
+        expect(DataCollector.prototype.initialize).toBeCalledTimes(1);
+        expect(DropinModel.prototype.asyncDependencyReady).toBeCalledWith('dataCollector');
+
+        done();
+      });
+    });
+
+    test('cancels initialization when Data Collection creation fails', done => {
+      const error = new Error('failed.');
+
+      jest.spyOn(DropinModel.prototype, 'cancelInitialization');
+
+      DataCollector.prototype.initialize.mockRejectedValue(error);
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        expect(DataCollector.prototype.initialize).toBeCalledTimes(1);
+        expect(DropinModel.prototype.asyncDependencyReady).not.toBeCalledWith('dataCollector');
+        expect(DropinModel.prototype.cancelInitialization).toBeCalledTimes(1);
 
         done();
       });
@@ -756,9 +745,8 @@ describe('Dropin', () => {
   describe('loads 3D Secure', () => {
     beforeEach(() => {
       testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
       jest.spyOn(DropinModel.prototype, 'asyncDependencyReady');
-      jest.spyOn(Dropin.prototype, '_setUpThreeDSecure');
+      jest.spyOn(ThreeDSecure.prototype, 'initialize').mockResolvedValue();
     });
 
     it('does not load 3D Secure if 3D Secure is not enabled', done => {
@@ -768,7 +756,8 @@ describe('Dropin', () => {
       instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
-        expect(instance._setUpThreeDSecure).not.toBeCalled();
+        expect(ThreeDSecure.prototype.initialize).not.toBeCalled();
+        expect(DropinModel.prototype.asyncDependencyReady).not.toBeCalledWith('threeDSecure');
 
         done();
       });
@@ -778,108 +767,11 @@ describe('Dropin', () => {
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._initialize(() => {
-        expect(instance._setUpThreeDSecure).toBeCalled();
+        expect(ThreeDSecure.prototype.initialize).toBeCalled();
+        expect(DropinModel.prototype.asyncDependencyReady).toBeCalledWith('threeDSecure');
 
         done();
       });
-    });
-  });
-
-  describe('_setUpDataCollector', () => {
-    beforeEach(() => {
-      testContext.model = fake.model({
-        componentID: 'foo',
-        merchantConfiguration: {
-          container: '#foo',
-          authorization: fake.tokenizationKey
-        },
-        paymentMethods: ['card']
-      });
-      jest.spyOn(DataCollector.prototype, 'initialize').mockResolvedValue();
-    });
-
-    it('sets up datacollector', () => {
-      Dropin.prototype._setUpDataCollector.call({
-        _authorization: 'fake-auth',
-        _model: testContext.model,
-        _strings: {},
-        _merchantConfiguration: {
-          dataCollector: {
-            kount: true
-          }
-        }
-      });
-
-      expect(DataCollector.prototype.initialize).toBeCalledTimes(1);
-    });
-
-    it('fails initialization when Data Collection creation fails', done => {
-      const error = new Error('failed.');
-
-      jest.spyOn(DropinModel.prototype, 'cancelInitialization');
-
-      DataCollector.prototype.initialize.mockRejectedValue(error);
-
-      Dropin.prototype._setUpDataCollector.call({
-        _authorization: 'fake-auth',
-        _model: testContext.model,
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        }
-      });
-
-      expect(DataCollector.prototype.initialize).toBeCalledTimes(1);
-      setTimeout(() => {
-        expect(DropinModel.prototype.cancelInitialization).toBeCalled();
-        done();
-      }, 1000);
-    });
-
-    it('starts an async dependency', () => {
-      function noop() {}
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
-
-      Dropin.prototype._setUpDataCollector.call({
-        _authorization: 'fake-auth',
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        },
-        _model: testContext.model
-      }, noop);
-
-      expect(DropinModel.prototype.asyncDependencyStarting).toBeCalledTimes(1);
-    });
-  });
-
-  describe('_setUpThreeDSecure', () => {
-    beforeEach(() => {
-      testContext.model = fake.model({
-        componentID: 'foo',
-        merchantConfiguration: {
-          container: '#foo',
-          authorization: fake.tokenizationKey
-        },
-        paymentMethods: ['card']
-      });
-      jest.spyOn(ThreeDSecure.prototype, 'initialize').mockResolvedValue();
-    });
-
-    it('sets up 3ds', () => {
-      Dropin.prototype._setUpThreeDSecure.call({
-        _authorization: 'fake-auth',
-        _model: testContext.model,
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        }
-      });
-
-      expect(ThreeDSecure.prototype.initialize).toBeCalledTimes(1);
     });
 
     it('fails initialization when 3DS creation fails', done => {
@@ -889,38 +781,13 @@ describe('Dropin', () => {
 
       ThreeDSecure.prototype.initialize.mockRejectedValue(error);
 
-      Dropin.prototype._setUpThreeDSecure.call({
-        _authorization: 'fake-auth',
-        _model: testContext.model,
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        }
-      });
+      const instance = new Dropin(testContext.dropinOptions);
 
-      expect(ThreeDSecure.prototype.initialize).toBeCalledTimes(1);
-      setTimeout(() => {
+      instance._initialize(() => {
+        expect(ThreeDSecure.prototype.initialize).toBeCalledTimes(1);
         expect(DropinModel.prototype.cancelInitialization).toBeCalled();
         done();
-      }, 1000);
-    });
-
-    it('starts an async dependency', () => {
-      function noop() {}
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting');
-
-      Dropin.prototype._setUpThreeDSecure.call({
-        _authorization: 'fake-auth',
-        _merchantConfiguration: {
-          threeDSecure: {
-            foo: 'bar'
-          }
-        },
-        _model: testContext.model
-      }, noop);
-
-      expect(DropinModel.prototype.asyncDependencyStarting).toBeCalledTimes(1);
+      });
     });
   });
 
@@ -1346,6 +1213,81 @@ describe('Dropin', () => {
         });
       });
     });
+
+    test('rejects when 3D Secure authentication fails', (done) => {
+      const fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+
+      testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+        instance._threeDSecure = {
+          verify: jest.fn().mockRejectedValue(new Error('some 3ds error'))
+        };
+
+        instance.requestPaymentMethod((err) => {
+          expect(err.message).toBe('Something went wrong during 3D Secure authentication. Please try again.');
+          expect(err._braintreeWebError.message).toBe('some 3ds error');
+
+          done();
+        });
+      });
+    });
+
+    test('removes consumed credit card payment method when 3D Secure authentication fails', (done) => {
+      const fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+
+      testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        jest.spyOn(instance, 'clearSelectedPaymentMethod').mockImplementation();
+        jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+        instance._threeDSecure = {
+          verify: jest.fn().mockRejectedValue(new Error('some 3ds error'))
+        };
+
+        instance.requestPaymentMethod(() => {
+          expect(instance.clearSelectedPaymentMethod).toBeCalledTimes(1);
+
+          done();
+        });
+      });
+    });
+
+    test('refreshes vaulted payment methods when 3D Secure authentication fails', (done) => {
+      const fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+
+      testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      const instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        jest.spyOn(instance._model, 'refreshPaymentMethods').mockResolvedValue();
+        jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+        instance._threeDSecure = {
+          verify: jest.fn().mockRejectedValue(new Error('some 3ds error'))
+        };
+
+        instance.requestPaymentMethod(() => {
+          expect(instance._model.refreshPaymentMethods).toBeCalledTimes(1);
+
+          done();
+        });
+      });
+    });
   });
 
   describe('isPaymentMethodRequestable', () => {
@@ -1353,7 +1295,9 @@ describe('Dropin', () => {
       const instance = new Dropin(testContext.dropinOptions);
 
       instance._model = {
-        isPaymentMethodRequestable: jest.fn().mockReturnValue('foo')
+        isPaymentMethodRequestable: jest.fn().mockReturnValue('foo'),
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       expect(instance.isPaymentMethodRequestable()).toBe('foo');
@@ -1409,7 +1353,8 @@ describe('Dropin', () => {
       };
       instance._model = {
         getPaymentMethods: jest.fn().mockReturnValue([]),
-        removeUnvaultedPaymentMethods: jest.fn()
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       instance.updateConfiguration('paypal', 'foo', 'bar');
@@ -1440,7 +1385,8 @@ describe('Dropin', () => {
       };
       instance._model = {
         getPaymentMethods: jest.fn().mockReturnValue([]),
-        removeUnvaultedPaymentMethods: jest.fn()
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       instance.updateConfiguration('paypalCredit', 'foo', 'bar');
@@ -1471,7 +1417,8 @@ describe('Dropin', () => {
       };
       instance._model = {
         getPaymentMethods: jest.fn().mockReturnValue([]),
-        removeUnvaultedPaymentMethods: jest.fn()
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       instance.updateConfiguration('applePay', 'foo', 'bar');
@@ -1502,7 +1449,8 @@ describe('Dropin', () => {
       };
       instance._model = {
         getPaymentMethods: jest.fn().mockReturnValue([]),
-        removeUnvaultedPaymentMethods: jest.fn()
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       instance.updateConfiguration('googlePay', 'foo', 'bar');
@@ -1529,13 +1477,411 @@ describe('Dropin', () => {
       expect(instance._mainView.getView).not.toBeCalled();
     });
 
-    it('does not update if property is threeDSecure, but there is no threeDSecure instance', () => {
-      const instance = new Dropin(testContext.dropinOptions);
+    test(
+      'does not update if property is threeDSecure, but there is no threeDSecure instance',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
 
-      expect(() => {
-        instance.updateConfiguration('threeDSecure', 'amount', '15.00');
-      }).not.toThrowError();
-    });
+        expect(() => {
+          instance.updateConfiguration('threeDSecure', 'amount', '15.00');
+        }).not.toThrowError();
+      }
+    );
+
+    test(
+      'removes saved paypal payment methods if they are not vaulted',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakePayPalView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'PayPalAccount'
+          })
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'view'
+          }
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'PayPalAccount', vaulted: true },
+            { nonce: '2', type: 'CreditCard', vaulted: true },
+            { nonce: '3', type: 'PayPalAccount' },
+            { nonce: '4', type: 'PayPalAccount', vaulted: true },
+            { nonce: '5', type: 'PayPalAccount' }
+          ]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'paypal') {
+            return fakePayPalView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('paypal', 'foo', 'bar');
+
+        expect(instance._model.getPaymentMethods).toBeCalledTimes(1);
+        expect(instance._model.removePaymentMethod).toBeCalledTimes(2);
+        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '3', type: 'PayPalAccount' });
+        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '5', type: 'PayPalAccount' });
+      }
+    );
+
+    test(
+      'does not call removePaymentMethod if no non-vaulted paypal accounts are avaialble',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakePayPalView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue(null)
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'view'
+          }
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'PayPalAccount', vaulted: true },
+            { nonce: '2', type: 'CreditCard', vaulted: true },
+            { nonce: '3', type: 'PayPalAccount', vaulted: true }
+          ]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'paypal') {
+            return fakePayPalView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('paypal', 'foo', 'bar');
+
+        expect(instance._model.removePaymentMethod).not.toBeCalled();
+      }
+    );
+
+    test(
+      'removes saved applePay payment methods if they are not vaulted',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakeApplePayView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'ApplePayCard'
+          })
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'view'
+          }
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'ApplePayCard', vaulted: true },
+            { nonce: '2', type: 'CreditCard', vaulted: true },
+            { nonce: '3', type: 'ApplePayCard' },
+            { nonce: '4', type: 'ApplePayCard', vaulted: true },
+            { nonce: '5', type: 'ApplePayCard' }
+          ]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'applePay') {
+            return fakeApplePayView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('applePay', 'foo', 'bar');
+
+        expect(instance._model.getPaymentMethods).toBeCalledTimes(1);
+        expect(instance._model.removePaymentMethod).toBeCalledTimes(2);
+        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '3', type: 'ApplePayCard' });
+        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '5', type: 'ApplePayCard' });
+      }
+    );
+
+    test(
+      'does not call removePaymentMethod if no non-vaulted applePay accounts are avaialble',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakeApplePayView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue(null)
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'view'
+          }
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'ApplePayCard', vaulted: true },
+            { nonce: '2', type: 'CreditCard', vaulted: true },
+            { nonce: '3', type: 'ApplePayCard', vaulted: true }
+          ]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'applePay') {
+            return fakeApplePayView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('applePay', 'foo', 'bar');
+
+        expect(instance._model.removePaymentMethod).not.toBeCalled();
+      }
+    );
+
+    test(
+      'removes saved googlePay payment methods if they are not vaulted',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakeGooglePayView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'AndroidPayCard'
+          })
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'view'
+          }
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'AndroidPayCard', vaulted: true },
+            { nonce: '2', type: 'CreditCard', vaulted: true },
+            { nonce: '3', type: 'AndroidPayCard' },
+            { nonce: '4', type: 'AndroidPayCard', vaulted: true },
+            { nonce: '5', type: 'AndroidPayCard' }
+          ]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'googlePay') {
+            return fakeGooglePayView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('googlePay', 'foo', 'bar');
+
+        expect(instance._model.getPaymentMethods).toBeCalledTimes(1);
+        expect(instance._model.removePaymentMethod).toBeCalledTimes(2);
+        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '3', type: 'AndroidPayCard' });
+        expect(instance._model.removePaymentMethod).toBeCalledWith({ nonce: '5', type: 'AndroidPayCard' });
+      }
+    );
+
+    test(
+      'does not call removePaymentMethod if no non-vaulted googlePay accounts are avaialble',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakeGooglePayView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue(null)
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'view'
+          }
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'AndroidPayCard', vaulted: true },
+            { nonce: '2', type: 'CreditCard', vaulted: true },
+            { nonce: '3', type: 'AndroidPayCard', vaulted: true }
+          ]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'googlePay') {
+            return fakeGooglePayView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('googlePay', 'foo', 'bar');
+
+        expect(instance._model.removePaymentMethod).not.toBeCalled();
+      }
+    );
+
+    test(
+      'sets primary view to initial view if on the methods view and there are no saved payment methods and supportedPaymentOptions is greater than 1',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakePayPalView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'PayPalAccount'
+          })
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'methods'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([]),
+          supportedPaymentOptions: ['paypal', 'card'],
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'paypal') {
+            return fakePayPalView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('paypal', 'foo', 'bar');
+
+        expect(instance._mainView.setPrimaryView).toBeCalledTimes(1);
+        expect(instance._mainView.setPrimaryView).toBeCalledWith('options');
+      }
+    );
+
+    test(
+      'does not set primary view if current primary view is not methods',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakePayPalView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'PayPalAccount'
+          })
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'any-id-but-methods'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'paypal') {
+            return fakePayPalView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('paypal', 'foo', 'bar');
+
+        expect(instance._mainView.setPrimaryView).not.toBeCalled();
+      }
+    );
+
+    test(
+      'does not set primary view if there are saved payment methods',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakePayPalView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'PayPalAccount'
+          })
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'methods'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'CreditCard' }
+          ]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
 
     it('removes only saved paypal payment methods if they are not vaulted', () => {
       const instance = new Dropin(testContext.dropinOptions);
@@ -1625,8 +1971,11 @@ describe('Dropin', () => {
           { nonce: '4', type: 'ApplePayCard', vaulted: true },
           { nonce: '5', type: 'ApplePayCard' }
         ]),
+        refreshPaymentMethods: jest.fn().mockResolvedValue(),
+        removeActivePaymentMethod: jest.fn(),
         removePaymentMethod: jest.fn(),
-        removeUnvaultedPaymentMethods: jest.fn()
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       getViewStub.mockImplementation(arg => {
@@ -1643,9 +1992,26 @@ describe('Dropin', () => {
 
       const filter = instance._model.removeUnvaultedPaymentMethods.mock.calls[0][0];
 
-      expect(filter({
-        type: 'ApplePayCard'
-      })).toBe(true);
+        instance._mainView = {
+          getView: getViewStub,
+          showLoadingIndicator: jest.fn(),
+          hideLoadingIndicator: jest.fn(),
+          primaryView: {
+            ID: 'view'
+          }
+        };
+        instance._model = {
+          refreshPaymentMethods: jest.fn().mockResolvedValue(),
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'PayPalAccount', vaulted: true },
+            { nonce: '2', type: 'CreditCard', vaulted: true },
+            { nonce: '3', type: 'PayPalAccount', vaulted: true }
+          ]),
+          removeActivePaymentMethod: jest.fn(),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('options')
+        };
 
       expect(filter({
         type: 'CreditCard'
@@ -1691,49 +2057,35 @@ describe('Dropin', () => {
         removeUnvaultedPaymentMethods: jest.fn()
       };
 
-      getViewStub.mockImplementation(arg => {
-        if (arg === 'googlePay') {
-          return fakeGooglePayView;
-        } else if (arg === 'methods') {
-          return fakeMethodsView;
-        }
-      });
+    test(
+      'sets primary view to the initial view if on the methods view and there are no saved payment methods and only one payment option is available',
+      () => {
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'PayPalAccount'
+          })
+        };
 
-      instance.updateConfiguration('googlePay', 'foo', 'bar');
-
-      expect(instance._model.removeUnvaultedPaymentMethods).toBeCalledTimes(1);
-
-      const filter = instance._model.removeUnvaultedPaymentMethods.mock.calls[0][0];
-
-      expect(filter({
-        type: 'AndroidPayCard'
-      })).toBe(true);
-
-      expect(filter({
-        type: 'CreditCard'
-      })).toBe(false);
-      expect(filter({
-        type: 'PayPalAccount'
-      })).toBe(false);
-      expect(filter({
-        type: 'ApplePayCard'
-      })).toBe(false);
-      expect(filter({
-        type: 'VenmoAccount'
-      })).toBe(false);
-    });
-
-    it('sets primary view to options if on the methods view and there are no saved payment methods and supportedPaymentOptions is greater than 1', () => {
-      const instance = new Dropin(testContext.dropinOptions);
-      const getViewStub = jest.fn();
-      const fakePayPalView = {
-        updateConfiguration: jest.fn()
-      };
-      const fakeMethodsView = {
-        getPaymentMethod: jest.fn().mockReturnValue({
-          type: 'PayPalAccount'
-        })
-      };
+        instance._mainView = {
+          getView: getViewStub,
+          showLoadingIndicator: jest.fn(),
+          hideLoadingIndicator: jest.fn(),
+          primaryView: {
+            ID: 'methods'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          refreshPaymentMethods: jest.fn().mockResolvedValue(),
+          getPaymentMethods: jest.fn().mockReturnValue([]),
+          removeActivePaymentMethod: jest.fn(),
+          supportedPaymentOptions: ['paypal'],
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue('paypal')
+        };
 
       instance._mainView = {
         getView: getViewStub,
@@ -1763,17 +2115,23 @@ describe('Dropin', () => {
       expect(instance._mainView.setPrimaryView).toBeCalledWith('options');
     });
 
-    it('sets primary view to available payment option view if on the methods view and there are not saved payment methods and only one payment option is available', () => {
-      const instance = new Dropin(testContext.dropinOptions);
-      const getViewStub = jest.fn();
-      const fakePayPalView = {
-        updateConfiguration: jest.fn()
-      };
-      const fakeMethodsView = {
-        getPaymentMethod: jest.fn().mockReturnValue({
-          type: 'PayPalAccount'
-        })
-      };
+        instance._mainView = {
+          getView: getViewStub,
+          showLoadingIndicator: jest.fn(),
+          hideLoadingIndicator: jest.fn(),
+          primaryView: {
+            ID: 'any-id-but-methods'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          refreshPaymentMethods: jest.fn().mockResolvedValue(),
+          getPaymentMethods: jest.fn().mockReturnValue([]),
+          removeActivePaymentMethod: jest.fn(),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue('paypal')
+        };
 
       instance._mainView = {
         getView: getViewStub,
@@ -1803,17 +2161,25 @@ describe('Dropin', () => {
       expect(instance._mainView.setPrimaryView).toBeCalledWith('paypal');
     });
 
-    it('does not set primary view if current primary view is not methods', () => {
-      const instance = new Dropin(testContext.dropinOptions);
-      const getViewStub = jest.fn();
-      const fakePayPalView = {
-        updateConfiguration: jest.fn()
-      };
-      const fakeMethodsView = {
-        getPaymentMethod: jest.fn().mockReturnValue({
-          type: 'PayPalAccount'
-        })
-      };
+        instance._mainView = {
+          getView: getViewStub,
+          showLoadingIndicator: jest.fn(),
+          hideLoadingIndicator: jest.fn(),
+          primaryView: {
+            ID: 'methods'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          refreshPaymentMethods: jest.fn().mockResolvedValue(),
+          getPaymentMethods: jest.fn().mockReturnValue([
+            { nonce: '1', type: 'CreditCard' }
+          ]),
+          removeActivePaymentMethod: jest.fn(),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(true),
+          getInitialViewId: jest.fn().mockReturnValue('paypal')
+        };
 
       instance._mainView = {
         getView: getViewStub,
@@ -2180,7 +2546,8 @@ describe('Dropin', () => {
         ]),
         removeActivePaymentMethod: jest.fn(),
         removePaymentMethod: jest.fn(),
-        removeUnvaultedPaymentMethods: jest.fn()
+        hasPaymentMethods: jest.fn().mockReturnValue(true),
+        getInitialViewId: jest.fn().mockReturnValue('options')
       };
 
       getViewStub.mockImplementation(arg => {
@@ -2195,30 +2562,35 @@ describe('Dropin', () => {
     });
   });
 
-  describe('payment method requestable events', () => {
-    it('emits paymentMethodRequestable event when the model emits paymentMethodRequestable', done => {
-      const instance = new Dropin(testContext.dropinOptions);
-
-      instance.on('paymentMethodRequestable', event => {
-        expect(event.type).toBe('Foo');
-
-        done();
-      });
-
-      instance._initialize(() => {
-        instance._model._emit('paymentMethodRequestable', { type: 'Foo' });
-      });
+  describe('passthrough drop-in events', () => {
+    beforeEach(() => {
+      // the payload for the changeActiveView event is not quite
+      // accurate and it ends up throwing an error during the other
+      // tests for the events, so we stub the method that recieves
+      // the changeActiveView event to prevent that from causing
+      // our tests to fail. Is this a bit of a smell? yes, do
+      // I have the bandwidth to figure out a better way? no.
+      // sorry future Blade.
+      jest.spyOn(MainView.prototype, '_onChangeActiveView').mockImplementation();
     });
 
-    it('emits noPaymentMethodRequestable events when the model emits noPaymentMethodRequestable', done => {
+    test.each([
+      'changeActiveView',
+      'paymentMethodRequestable',
+      'noPaymentMethodRequestable',
+      'paymentOptionSelected'
+    ])('emits %s event', (eventName, done) => {
       const instance = new Dropin(testContext.dropinOptions);
+      const eventPayload = { foo: 'bar' };
 
-      instance.on('noPaymentMethodRequestable', () => {
+      instance.on(eventName, event => {
+        expect(event).toBe(eventPayload);
+
         done();
       });
 
       instance._initialize(() => {
-        instance._model._emit('noPaymentMethodRequestable');
+        instance._model._emit(eventName, eventPayload);
       });
     });
   });
@@ -2244,6 +2616,26 @@ describe('Dropin', () => {
 
       instance._initialize(() => {
         instance._model._emit(`card:${eventName}`, payload);
+      });
+    });
+  });
+
+  describe('3ds events', () => {
+    test.each([
+      'customer-canceled',
+      'authentication-modal-render',
+      'authentication-modal-close'
+    ])('emits 3ds:%s event', (eventName, done) => {
+      const instance = new Dropin(testContext.dropinOptions);
+      const payload = {};
+
+      instance.on(`3ds:${eventName}`, (emittedPayload) => {
+        expect(emittedPayload).toBe(payload);
+        done();
+      });
+
+      instance._initialize(() => {
+        instance._model._emit(`3ds:${eventName}`, payload);
       });
     });
   });

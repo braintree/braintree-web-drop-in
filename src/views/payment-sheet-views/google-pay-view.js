@@ -23,10 +23,7 @@ GooglePayView.prototype.initialize = function () {
   googlePayVersion = self.googlePayConfiguration.googlePayVersion;
   merchantId = self.googlePayConfiguration.merchantId;
 
-  delete self.googlePayConfiguration.googlePayVersion;
-  delete self.googlePayConfiguration.merchantId;
-
-  buttonOptions = Object.assign({
+  buttonOptions = assign({
     buttonType: 'short'
   }, self.googlePayConfiguration.button, {
     onClick: function (event) {
@@ -40,7 +37,9 @@ GooglePayView.prototype.initialize = function () {
     }
   });
 
-  self.model.asyncDependencyStarting();
+  delete self.googlePayConfiguration.googlePayVersion;
+  delete self.googlePayConfiguration.merchantId;
+  delete self.googlePayConfiguration.button;
 
   return btGooglePay.create({
     authorization: this.model.authorization,
@@ -55,7 +54,7 @@ GooglePayView.prototype.initialize = function () {
 
     buttonContainer.appendChild(self.paymentsClient.createButton(buttonOptions));
 
-    self.model.asyncDependencyReady();
+    self.model.asyncDependencyReady(GooglePayView.ID);
   }).catch(function (err) {
     self.model.asyncDependencyFailed({
       view: self.ID,

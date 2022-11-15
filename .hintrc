@@ -1,6 +1,0 @@
-{
-  "extends": ["braintree-sdk"],
-  "hints": {
-    "compat-api/css": "warning"
-  }
-}

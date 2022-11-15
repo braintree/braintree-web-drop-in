@@ -13,9 +13,9 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with');
+      expect($('[data-braintree-id="methods-label"]').getText()).toContain('Paying with');
 
-      expect(browser.dropin().getHTML()).toContain('Ending in 1111');
+      expect(browser.dropin().getText()).toContain('Ending in 1111');
 
       const result = browser.getResult();
 
@@ -34,7 +34,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with PayPal');
+      expect($('[data-braintree-id="methods-label"]').getText()).toContain('Paying with PayPal');
 
       const result = browser.getResult();
 
@@ -54,12 +54,12 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.clickOption('paypalCredit');
       browser.openPayPalAndCompleteLogin(function () {
-        expect($('body').getHTML()).toContain('PayPal Credit');
+        expect($('img[alt="PayPal Credit"]').isExisting()).toBe(true);
       });
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with PayPal');
+      expect($('[data-braintree-id="methods-label"]').getText()).toContain('Paying with PayPal');
 
       const result = browser.getResult();
 
@@ -81,9 +81,9 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with');
+      expect($('[data-braintree-id="methods-label"]').getText()).toContain('Paying with');
 
-      expect(browser.dropin().getHTML()).toContain('Ending in 1111');
+      expect(browser.dropin().getText()).toContain('Ending in 1111');
 
       const result = browser.getResult();
 
@@ -100,7 +100,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.submitPay();
 
-      expect($('[data-braintree-id="methods-label"]').getHTML()).toContain('Paying with PayPal');
+      expect($('[data-braintree-id="methods-label"]').getText()).toContain('Paying with PayPal');
 
       const result = browser.getResult();
 

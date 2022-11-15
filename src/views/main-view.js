@@ -88,14 +88,23 @@ MainView.prototype._initialize = function () {
 
   this.model.on('changeActivePaymentMethod', function () {
     wait.delay(CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT).then(function () {
-      this.setPrimaryView(PaymentMethodsView.ID);
+      var id = PaymentMethodsView.ID;
+
+      // if Drop-in gets into the state where it's told to go to the methods
+      // view, but there are no saved payment methods, it should instead
+      // redirect to the view it started on
+      if (!this.model.hasPaymentMethods()) {
+        id = this.model.getInitialViewId();
+      }
+
+      this.setPrimaryView(id);
     }.bind(this));
   }.bind(this));
 
-  this.model.on('changeActivePaymentView', this._onChangeActivePaymentMethodView.bind(this));
+  this.model.on('changeActiveView', this._onChangeActiveView.bind(this));
 
   this.model.on('removeActivePaymentMethod', function () {
-    var activePaymentView = this.getView(this.model.getActivePaymentView());
+    var activePaymentView = this.getView(this.model.getActivePaymentViewId());
 
     if (activePaymentView && typeof activePaymentView.removeActivePaymentMethod === 'function') {
       activePaymentView.removeActivePaymentMethod();
@@ -125,7 +134,8 @@ MainView.prototype._initialize = function () {
   this._sendToDefaultView();
 };
 
-MainView.prototype._onChangeActivePaymentMethodView = function (id) {
+MainView.prototype._onChangeActiveView = function (data) {
+  var id = data.newViewId;
   var activePaymentView = this.getView(id);
 
   if (id === PaymentMethodsView.ID) {
@@ -165,7 +175,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
   }.bind(this));
 
   this.primaryView = this.getView(id);
-  this.model.changeActivePaymentView(id);
+  this.model.changeActiveView(id);
 
   if (this.paymentSheetViewIDs.indexOf(id) !== -1) {
     if (this.model.getPaymentMethods().length > 0 || this.getView(PaymentOptionsView.ID)) {
@@ -193,7 +203,7 @@ MainView.prototype.setPrimaryView = function (id, secondaryViewId) {
 };
 
 MainView.prototype.requestPaymentMethod = function () {
-  var activePaymentView = this.getView(this.model.getActivePaymentView());
+  var activePaymentView = this.getView(this.model.getActivePaymentViewId());
 
   return activePaymentView.requestPaymentMethod().then(function (payload) {
     analytics.sendEvent('request-payment-method.' + analyticsKinds[payload.type]);
@@ -228,7 +238,7 @@ MainView.prototype.toggleAdditionalOptions = function () {
     sheetViewID = this.paymentSheetViewIDs[0];
 
     classList.add(this.element, prefixShowClass(sheetViewID));
-    this.model.changeActivePaymentView(sheetViewID);
+    this.model.changeActiveView(sheetViewID);
   } else if (isPaymentSheetView) {
     if (this.model.getPaymentMethods().length === 0) {
       this.setPrimaryView(PaymentOptionsView.ID);

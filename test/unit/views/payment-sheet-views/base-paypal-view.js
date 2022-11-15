@@ -77,19 +77,24 @@ describe('BasePayPalView', () => {
       testContext.view = new BasePayPalView(testContext.paypalViewOptions);
     });
 
-    it('starts async dependency', () => {
-      jest.spyOn(testContext.view.model, 'asyncDependencyStarting').mockImplementation();
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
-      });
-    });
-
-    it('notifies async dependency', () => {
+    test('notifies async dependency ready for paypal', () => {
       jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
 
       return testContext.view.initialize().then(() => {
         expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledWith('paypal');
+      });
+    });
+
+    test('notifies async dependency ready for paypalCredit', () => {
+      jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
+
+      testContext.view.model.merchantConfiguration.paypalCredit = testContext.view.model.merchantConfiguration.paypal;
+      testContext.view._isPayPalCredit = true;
+
+      return testContext.view.initialize().then(() => {
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledWith('paypalCredit');
       });
     });
 
@@ -128,20 +133,7 @@ describe('BasePayPalView', () => {
       });
     });
 
-    it('calls asyncDependencyStarting when initializing', () => {
-      const fakeError = {
-        code: 'A_REAL_ERROR_CODE'
-      };
-
-      PayPalCheckout.create.mockRejectedValue(fakeError);
-
-      jest.spyOn(DropinModel.prototype, 'asyncDependencyStarting').mockImplementation();
-      testContext.view.initialize();
-
-      expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
-    });
-
-    it('calls paypal.Button.render', () => {
+    test('calls paypal.Button.render', () => {
       return testContext.view.initialize().then(() => {
         expect(testContext.paypal.Button.render).toBeCalledTimes(1);
         expect(testContext.paypal.Button.render).toBeCalledWith(
@@ -662,7 +654,57 @@ describe('BasePayPalView', () => {
         });
       });
 
-    it('reports errors from tokenizePayment', done => {
+    test(
+      'does not add `vaulted: true` to the tokenization payload if flow is vault and is not guest checkout, but the merchant opts out of vaulting on the client',
+      done => {
+        const paypalInstance = testContext.paypalInstance;
+        const model = testContext.model;
+
+        model.merchantConfiguration.paypal.vault = {
+          vaultPayPal: false
+        };
+        model.isGuestCheckout = false;
+
+        paypalInstance.tokenizePayment.mockResolvedValue({
+          foo: 'bar'
+        });
+        paypalInstance.paypalConfiguration = {
+          flow: 'vault',
+          vault: {
+            vaultPayPal: false
+          }
+        };
+        jest.spyOn(model, 'addPaymentMethod').mockImplementation();
+
+        testContext.paypal.Button.render.mockResolvedValue();
+
+        testContext.view.initialize().then(() => {
+          const onAuthFunction = testContext.paypal.Button.render.mock.calls[0][0].onAuthorize;
+          const tokenizeOptions = {
+            foo: 'bar'
+          };
+
+          onAuthFunction(tokenizeOptions);
+
+          expect(paypalInstance.tokenizePayment).toBeCalledTimes(1);
+          expect(paypalInstance.tokenizePayment).toBeCalledWith({
+            foo: 'bar',
+            vault: false
+          });
+
+          setTimeout(() => {
+            expect(model.addPaymentMethod).toBeCalledTimes(1);
+            expect(model.addPaymentMethod).toBeCalledWith({
+              foo: 'bar'
+            });
+
+            done();
+          }, 1);
+        });
+      }
+    );
+
+    test('reports errors from tokenizePayment', done => {
       const paypalInstance = testContext.paypalInstance;
       const model = testContext.model;
       const error = new Error('tokenize error');

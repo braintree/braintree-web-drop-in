@@ -56,19 +56,12 @@ describe('VenmoView', () => {
       testContext.view = new VenmoView(testContext.venmoViewOptions);
     });
 
-    it('starts async dependency', () => {
-      jest.spyOn(testContext.view.model, 'asyncDependencyStarting').mockImplementation();
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
-      });
-    });
-
-    it('notifies async dependency', () => {
+    test('notifies async dependency', () => {
       jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
 
       return testContext.view.initialize().then(() => {
         expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledWith('venmo');
       });
     });
 
@@ -139,8 +132,28 @@ describe('VenmoView', () => {
       });
     });
 
-    it('calls asyncDependencyFailed when Venmo component creation fails', () => {
-      const fakeError = new Error('A_FAKE_ERROR');
+    test(
+      'does not report app switch error for VENMO_DESKTOP_CANCELLED error',
+      () => {
+        const error = new Error('failure');
+
+        error.code = 'VENMO_DESKTOP_CANCELED';
+
+        testContext.fakeVenmoInstance.hasTokenizationResult.mockReturnValue(true);
+        testContext.fakeVenmoInstance.tokenize.mockRejectedValue(error);
+
+        return testContext.view.initialize().then(() => {
+          expect(testContext.fakeVenmoInstance.tokenize).toBeCalledTimes(1);
+          expect(testContext.model.reportAppSwitchError).not.toBeCalled();
+          expect(testContext.model.reportAppSwitchPayload).not.toBeCalled();
+        });
+      }
+    );
+
+    test(
+      'calls asyncDependencyFailed when Venmo component creation fails',
+      () => {
+        const fakeError = new Error('A_FAKE_ERROR');
 
       jest.spyOn(testContext.view.model, 'asyncDependencyFailed').mockImplementation();
       btVenmo.create.mockRejectedValue(fakeError);

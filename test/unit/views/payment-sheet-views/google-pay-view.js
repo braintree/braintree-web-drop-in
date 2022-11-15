@@ -102,19 +102,12 @@ describe('GooglePayView', () => {
       testContext.view = new GooglePayView(testContext.googlePayViewOptions);
     });
 
-    it('starts async dependency', () => {
-      jest.spyOn(testContext.view.model, 'asyncDependencyStarting').mockImplementation();
-
-      return testContext.view.initialize().then(() => {
-        expect(testContext.view.model.asyncDependencyStarting).toBeCalledTimes(1);
-      });
-    });
-
-    it('notifies async dependency', () => {
+    test('notifies async dependency', () => {
       jest.spyOn(testContext.view.model, 'asyncDependencyReady').mockImplementation();
 
       return testContext.view.initialize().then(() => {
         expect(testContext.view.model.asyncDependencyReady).toBeCalledTimes(1);
+        expect(testContext.view.model.asyncDependencyReady).toBeCalledWith('googlePay');
       });
     });
 
@@ -275,7 +268,31 @@ describe('GooglePayView', () => {
       });
     });
 
-    it('calls loadPaymentData with paymentDataRequest', () => {
+    test('does not pass along button configuration to createPaymentDataRequest', async () => {
+      testContext.model.merchantConfiguration.googlePay.button = {
+        buttonType: 'long',
+        buttonColor: 'white'
+      };
+      const view = new GooglePayView(testContext.googlePayViewOptions);
+
+      jest.spyOn(view.model, 'addPaymentMethod').mockImplementation();
+      jest.spyOn(view.model, 'reportError').mockImplementation();
+
+      await view.initialize();
+
+      await view.tokenize();
+
+      expect(testContext.fakeGooglePayInstance.createPaymentDataRequest).toBeCalledTimes(1);
+      expect(testContext.fakeGooglePayInstance.createPaymentDataRequest).toBeCalledWith({
+        transactionInfo: {
+          currencyCode: 'USD',
+          totalPriceStatus: 'FINAL',
+          totalPrice: '100.00'
+        }
+      });
+    });
+
+    test('calls loadPaymentData with paymentDataRequest', () => {
       return testContext.view.tokenize().then(() => {
         expect(testContext.FakePaymentClient.prototype.loadPaymentData).toBeCalledTimes(1);
         expect(testContext.FakePaymentClient.prototype.loadPaymentData).toBeCalledWith({

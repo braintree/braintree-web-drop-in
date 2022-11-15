@@ -1,66 +1,46 @@
-jest.mock('../../../src/lib/analytics');
-
-const fs = require('fs');
-const BaseView = require('../../../src/views/base-view');
-const PaymentMethodView = require('../../../src/views/payment-method-view');
 const analytics = require('../../../src/lib/analytics');
+const BaseView = require('../../../src/views/base-view');
 const fake = require('../../helpers/fake');
+const PaymentMethodView = require('../../../src/views/payment-method-view');
+const addSelectionEventHandler = require('../../../src/lib/add-selection-event-handler');
 const strings = require('../../../src/translations/en_US');
 
-const paymentMethodHTML = fs.readFileSync(`${__dirname}/../../../src/html/payment-method.html`, 'utf8');
+jest.mock('../../../src/lib/add-selection-event-handler');
 
 describe('PaymentMethodView', () => {
-  let testContext;
+  let config;
 
   beforeEach(() => {
-    testContext = {};
-    testContext.div = document.createElement('div');
-    testContext.div.innerHTML = paymentMethodHTML;
-    document.body.appendChild(testContext.div);
+    config = {
+      strings,
+      paymentMethod: {
+        type: 'foo',
+        nonce: 'fake-nonce'
+      }
+    };
   });
 
   describe('Constructor', () => {
-    beforeEach(() => {
-      jest.spyOn(PaymentMethodView.prototype, '_initialize').mockImplementation();
+    test('inherits from BaseView', () => {
+      expect(new PaymentMethodView(config)).toBeInstanceOf(BaseView);
     });
 
-    it('inherits from BaseView', () => {
-      expect(new PaymentMethodView({})).toBeInstanceOf(BaseView);
-    });
+    test(
+      'sets the inner HTML correctly when the paymentMethod is a credit card',
+      () => {
+        config.paymentMethod = {
+          type: 'CreditCard',
+          details: {
+            cardType: 'Visa',
+            lastFour: '1111'
+          }
+        };
 
-    it('calls _initialize', () => {
-      new PaymentMethodView({}); // eslint-disable-line no-new
+        const view = new PaymentMethodView(config);
 
-      expect(PaymentMethodView.prototype._initialize).toBeCalledTimes(1);
-    });
-  });
-
-  describe('_initialize', () => {
-    beforeEach(() => {
-      testContext.context = {
-        strings: strings,
-        _selectDelete: jest.fn(),
-        _choosePaymentMethod: jest.fn()
-      };
-    });
-
-    it('sets the inner HTML correctly when the paymentMethod is a credit card', () => {
-      let iconElement, iconContainer, labelElement;
-      const paymentMethod = {
-        type: 'CreditCard',
-        details: {
-          cardType: 'Visa',
-          lastFour: '1111'
-        }
-      };
-
-      testContext.context.paymentMethod = paymentMethod;
-
-      PaymentMethodView.prototype._initialize.call(testContext.context);
-
-      iconElement = testContext.context.element.querySelector('.braintree-method__logo use');
-      iconContainer = testContext.context.element.querySelector('.braintree-method__logo svg');
-      labelElement = testContext.context.element.querySelector('.braintree-method__label');
+        const iconElement = view.element.querySelector('.braintree-method__logo use');
+        const iconContainer = view.element.querySelector('.braintree-method__logo svg');
+        const labelElement = view.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).toBe('#icon-visa');
       expect(labelElement.textContent).toMatch('Ending in 1111');
@@ -68,22 +48,21 @@ describe('PaymentMethodView', () => {
       expect(iconContainer.classList.contains('braintree-icon--bordered')).toBe(true);
     });
 
-    it('sets the inner HTML correctly when the paymentMethod is a PayPal account', () => {
-      let iconElement, iconContainer, labelElement;
-      const paymentMethod = {
-        type: 'PayPalAccount',
-        details: {
-          email: 'test@example.com'
-        }
-      };
+    test(
+      'sets the inner HTML correctly when the paymentMethod is a PayPal account',
+      () => {
+        config.paymentMethod = {
+          type: 'PayPalAccount',
+          details: {
+            email: 'test@example.com'
+          }
+        };
 
-      testContext.context.paymentMethod = paymentMethod;
+        const view = new PaymentMethodView(config);
 
-      PaymentMethodView.prototype._initialize.call(testContext.context);
-
-      iconElement = testContext.context.element.querySelector('.braintree-method__logo use');
-      iconContainer = testContext.context.element.querySelector('.braintree-method__logo svg');
-      labelElement = testContext.context.element.querySelector('.braintree-method__label');
+        const iconElement = view.element.querySelector('.braintree-method__logo use');
+        const iconContainer = view.element.querySelector('.braintree-method__logo svg');
+        const labelElement = view.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).toBe('#logoPayPal');
       expect(labelElement.textContent).toMatch('test@example.com');
@@ -91,24 +70,23 @@ describe('PaymentMethodView', () => {
       expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).toBe(false);
     });
 
-    it('sets the inner HTML correctly when the paymentMethod is Google Pay', () => {
-      let iconElement, iconContainer, labelElement;
-      const paymentMethod = {
-        type: 'AndroidPayCard',
-        details: {
-          cardType: 'Visa',
-          dpanLastTwo: '92',
-          paymentInstrumentName: 'Visa 0492'
-        }
-      };
+    test(
+      'sets the inner HTML correctly when the paymentMethod is Google Pay',
+      () => {
+        config.paymentMethod = {
+          type: 'AndroidPayCard',
+          details: {
+            cardType: 'Visa',
+            dpanLastTwo: '92',
+            paymentInstrumentName: 'Visa 0492'
+          }
+        };
 
-      testContext.context.paymentMethod = paymentMethod;
+        const view = new PaymentMethodView(config);
 
-      PaymentMethodView.prototype._initialize.call(testContext.context);
-
-      iconElement = testContext.context.element.querySelector('.braintree-method__logo use');
-      iconContainer = testContext.context.element.querySelector('.braintree-method__logo svg');
-      labelElement = testContext.context.element.querySelector('.braintree-method__label');
+        const iconElement = view.element.querySelector('.braintree-method__logo use');
+        const iconContainer = view.element.querySelector('.braintree-method__logo svg');
+        const labelElement = view.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).toBe('#logoGooglePay');
       expect(labelElement.textContent).toMatch('Google Pay');
@@ -116,24 +94,23 @@ describe('PaymentMethodView', () => {
       expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).toBe(false);
     });
 
-    it('sets the inner HTML correctly when the paymentMethod is Apple Pay', () => {
-      let iconElement, iconContainer, labelElement;
-      const paymentMethod = {
-        type: 'ApplePayCard',
-        details: {
-          cardType: 'Visa',
-          dpanLastTwo: '92',
-          paymentInstrumentName: 'Visa 0492'
-        }
-      };
+    test(
+      'sets the inner HTML correctly when the paymentMethod is Apple Pay',
+      () => {
+        config.paymentMethod = {
+          type: 'ApplePayCard',
+          details: {
+            cardType: 'Visa',
+            dpanLastTwo: '92',
+            paymentInstrumentName: 'Visa 0492'
+          }
+        };
 
-      testContext.context.paymentMethod = paymentMethod;
+        const view = new PaymentMethodView(config);
 
-      PaymentMethodView.prototype._initialize.call(testContext.context);
-
-      iconElement = testContext.context.element.querySelector('.braintree-method__logo use');
-      iconContainer = testContext.context.element.querySelector('.braintree-method__logo svg');
-      labelElement = testContext.context.element.querySelector('.braintree-method__label');
+        const iconElement = view.element.querySelector('.braintree-method__logo use');
+        const iconContainer = view.element.querySelector('.braintree-method__logo svg');
+        const labelElement = view.element.querySelector('.braintree-method__label');
 
       expect(iconElement.getAttribute('xlink:href')).toBe('#logoApplePay');
       expect(labelElement.textContent).toMatch('Apple Pay');
@@ -141,81 +118,124 @@ describe('PaymentMethodView', () => {
       expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).toBe(false);
     });
 
-    it('sets the inner HTML correctly when the paymentMethod is Venmo', () => {
-      let iconElement, iconContainer, labelElement;
-      const paymentMethod = {
-        type: 'VenmoAccount',
-        details: {
-          username: '@name'
-        }
+    test(
+      'sets the inner HTML correctly when the paymentMethod is Venmo',
+      () => {
+        config.paymentMethod = {
+          type: 'VenmoAccount',
+          details: {
+            username: '@name'
+          }
+        };
+
+        const view = new PaymentMethodView(config);
+
+        const iconElement = view.element.querySelector('.braintree-method__logo use');
+        const iconContainer = view.element.querySelector('.braintree-method__logo svg');
+        const labelElement = view.element.querySelector('.braintree-method__label');
+
+        expect(iconElement.getAttribute('xlink:href')).toBe('#logoVenmo');
+        expect(labelElement.textContent).toMatch('@name');
+        expect(labelElement.querySelector('.braintree-method__label--small').textContent).toBe('Venmo');
+        expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).toBe(false);
+      }
+    );
+
+    test('calls model.confirmPaymentMethodDeletion when selection event occurs when in edit mode', () => {
+      config.model = {
+        isInEditMode: jest.fn().mockReturnValue(true),
+        confirmPaymentMethodDeletion: jest.fn()
       };
+      // eslint-disable-next-line no-unused-vars
+      const view = new PaymentMethodView(config);
+      const handler = addSelectionEventHandler.mock.calls[0][1];
 
-      testContext.context.paymentMethod = paymentMethod;
+      handler();
 
-      PaymentMethodView.prototype._initialize.call(testContext.context);
+      expect(config.model.confirmPaymentMethodDeletion).toBeCalledTimes(1);
+      expect(config.model.confirmPaymentMethodDeletion).toBeCalledWith(config.paymentMethod);
+    });
 
-      iconElement = testContext.context.element.querySelector('.braintree-method__logo use');
-      iconContainer = testContext.context.element.querySelector('.braintree-method__logo svg');
-      labelElement = testContext.context.element.querySelector('.braintree-method__label');
+    test('calls model.changeActivePaymentMethod when selection occurs when not in edit mode', () => {
+      config.model = {
+        isInEditMode: jest.fn().mockReturnValue(false),
+        changeActivePaymentMethod: jest.fn()
+      };
+      // eslint-disable-next-line no-unused-vars
+      const view = new PaymentMethodView(config);
+      const handler = addSelectionEventHandler.mock.calls[0][1];
 
-      expect(iconElement.getAttribute('xlink:href')).toBe('#logoVenmo');
-      expect(labelElement.textContent).toMatch('@name');
-      expect(labelElement.querySelector('.braintree-method__label--small').textContent).toBe('Venmo');
-      expect(iconContainer.classList.contains('braintree-method__logo@CLASSNAME')).toBe(false);
+      handler();
+
+      expect(config.model.changeActivePaymentMethod).toBeCalledTimes(1);
+      expect(config.model.changeActivePaymentMethod).toBeCalledWith(config.paymentMethod);
     });
   });
 
   describe('setActive', () => {
     beforeEach(() => {
-      testContext.context = { element: document.createElement('div') };
       jest.useFakeTimers();
     });
 
-    it('adds braintree-method--active if setting active payment method', () => {
-      testContext.context.element.className = '';
+    test('adds braintree-method--active if setting active payment method', () => {
+      const view = new PaymentMethodView(config);
 
-      PaymentMethodView.prototype.setActive.call(testContext.context, true);
+      view.element.className = '';
+
+      view.setActive(true);
       jest.advanceTimersByTime(1001);
 
-      expect(testContext.context.element.classList.contains('braintree-method--active')).toBe(true);
+      expect(view.element.classList.contains('braintree-method--active')).toBe(true);
     });
 
-    it('doesn\'t change the class if braintree-method--active is already there', () => {
-      testContext.context.element.className = 'braintree-method--active';
+    test("doesn't change the class if braintree-method--active is already there", () => {
+      const view = new PaymentMethodView(config);
 
-      PaymentMethodView.prototype.setActive.call(testContext.context, true);
+      view.element.className = 'braintree-method--active';
+
+      view.setActive(true);
+
       jest.advanceTimersByTime(1001);
 
-      expect(testContext.context.element.classList.contains('braintree-method--active')).toBe(true);
+      expect(view.element.classList.contains('braintree-method--active')).toBe(true);
     });
 
-    it('removes braintree-method--active if setting active payment method', () => {
-      testContext.context.element.className = 'braintree-method--active';
+    test('removes braintree-method--active if setting active payment method', () => {
+      const view = new PaymentMethodView(config);
 
-      PaymentMethodView.prototype.setActive.call(testContext.context, false);
+      view.element.className = 'braintree-method--active';
+
+      view.setActive(false);
       jest.advanceTimersByTime(1001);
 
-      expect(testContext.context.element.classList.contains('braintree-method--active')).toBe(false);
+      expect(view.element.classList.contains('braintree-method--active')).toBe(false);
     });
 
-    it('doesn\'t remove the class if it wasn\'t there', () => {
-      testContext.context.element.className = '';
+    test("doesn't remove the class if it wasn't there", () => {
+      const view = new PaymentMethodView(config);
 
-      PaymentMethodView.prototype.setActive.call(testContext.context, false);
+      view.element.className = '';
+
+      view.setActive(false);
       jest.advanceTimersByTime(1001);
 
-      expect(testContext.context.element.classList.contains('braintree-method--active')).toBe(false);
+      expect(view.element.classList.contains('braintree-method--active')).toBe(false);
     });
   });
 
   describe('selecting payment methods', () => {
+    let client, model;
+
     beforeEach(() => {
-      testContext.model = fake.model();
+      client = fake.client();
+      model = fake.model();
+      jest.spyOn(analytics, 'sendEvent').mockImplementation();
     });
 
     it('sends an analytic event when a vaulted card is selected', () => {
       const view = new PaymentMethodView({
-        model: testContext.model,
+        client: client,
+        model: model,
         strings: strings,
         paymentMethod: {
           type: 'CreditCard',
@@ -229,101 +249,90 @@ describe('PaymentMethodView', () => {
 
       view._choosePaymentMethod();
 
-      expect(analytics.sendEvent).toBeCalledWith('vaulted-card.select');
+      expect(analytics.sendEvent).toBeCalledWith(client, 'vaulted-card.select');
     });
 
-    it('sends an analytic event when a vaulted paypal payment method is selected', () => {
-      const view = new PaymentMethodView({
-        model: testContext.model,
-        strings: strings,
-        paymentMethod: {
-          type: 'PayPalAccount',
-          vaulted: true,
-          details: {
-            email: 'test@example.com'
+    test(
+      'sends an analytic event when a vaulted paypal payment method is selected',
+      () => {
+        const view = new PaymentMethodView({
+          client: client,
+          model: model,
+          strings: strings,
+          paymentMethod: {
+            type: 'PayPalAccount',
+            vaulted: true,
+            details: {
+              email: 'test@example.com'
+            }
+          }
+        });
+
+        view._choosePaymentMethod();
+
+        expect(analytics.sendEvent).toBeCalledWith(client, 'vaulted-paypal.select');
+      }
+    );
+
+    test(
+      'does not send an analytic event when no payment is selected',
+      () => {
+        const view = new PaymentMethodView({
+          client: client,
+          model: model,
+          strings: strings,
+          paymentMethod: {}
+        });
+
+        view._choosePaymentMethod();
+
+        expect(analytics.sendEvent).not.toBeCalledWith(client, 'vaulted-card.select');
+      }
+    );
+
+    test(
+      'does not send an analytic event when a non-vaulted PayPal payment method is selected',
+      () => {
+        const view = new PaymentMethodView({
+          client: client,
+          model: model,
+          strings: strings,
+          paymentMethod: {
+            type: 'PayPalAccount',
+            vaulted: false,
+            details: {
+              email: 'test@example.com'
+            }
           }
         }
       });
 
       view._choosePaymentMethod();
 
-      expect(analytics.sendEvent).toBeCalledWith('vaulted-paypal.select');
-    });
-
-    it('does not send an analytic event when no payment is selected', () => {
-      const view = new PaymentMethodView({
-        model: testContext.model,
-        strings: strings,
-        paymentMethod: {}
-      });
-
-      view._choosePaymentMethod();
-
-      expect(analytics.sendEvent).not.toBeCalled();
-    });
-
-    it('does not send an analytic event when a non-vaulted PayPal payment method is selected', () => {
-      const view = new PaymentMethodView({
-        model: testContext.model,
-        strings: strings,
-        paymentMethod: {
-          type: 'PayPalAccount',
-          vaulted: false,
-          details: {
-            email: 'test@example.com'
-          }
-        }
-      });
-
-      view._choosePaymentMethod();
-
-      expect(analytics.sendEvent).not.toBeCalled();
-    });
+        expect(analytics.sendEvent).not.toBeCalledWith(client, 'vaulted-paypal.select');
+      }
+    );
   });
 
-  describe('edit mode', () => {
-    it('does not call model.changeActivePaymentMethod in click handler when in edit mode', () => {
-      const model = fake.model();
-      const view = new PaymentMethodView({
-        model: model,
-        strings: strings,
-        paymentMethod: {
-          type: 'Foo',
-          nonce: 'nonce'
-        }
-      });
-
-      jest.spyOn(model, 'changeActivePaymentMethod').mockImplementation();
-      jest.spyOn(model, 'isInEditMode').mockReturnValue(true);
-
-      view._choosePaymentMethod();
-
-      expect(view.model.changeActivePaymentMethod).not.toBeCalled();
-
-      model.isInEditMode.mockReturnValue(false);
-      view._choosePaymentMethod();
-
-      expect(view.model.changeActivePaymentMethod).toBeCalledTimes(1);
-    });
-
-    it('calls model.confirmPaymentMethodDeletion when delete icon is clicked', () => {
-      const fakeModel = {
-        confirmPaymentMethodDeletion: jest.fn()
-      };
+  describe('teardown', () => {
+    test('removes element from the container', () => {
       const paymentMethod = {
         type: 'Foo',
         nonce: 'nonce'
       };
       const view = new PaymentMethodView({
-        model: fakeModel,
+        model: {},
         strings: strings,
         paymentMethod: paymentMethod
       });
 
-      view._selectDelete();
+      document.body.appendChild(view.element);
+      jest.spyOn(document.body, 'removeChild');
 
-      expect(fakeModel.confirmPaymentMethodDeletion).toBeCalledTimes(1);
-      expect(fakeModel.confirmPaymentMethodDeletion).toBeCalledWith(paymentMethod);
+      view.teardown();
+
+      expect(document.body.removeChild).toBeCalledTimes(1);
+      expect(document.body.removeChild).toBeCalledWith(view.element);
     });
   });
 });

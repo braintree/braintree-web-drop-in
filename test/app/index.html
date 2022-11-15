@@ -69,7 +69,7 @@
 <body>
 <h1>Braintree Drop-in demo</h1>
 
-<p>You can create a <a href="https://developer.paypal.com/docs/classic/lifecycle/sb_about-accounts/#creating-sandbox-test-accounts" target="_blank" rel="nofollow noreferrer noopener">PayPal Sandbox account</a> to test the PayPal flow.</p>
+<p>You can create a <a href="https://developer.paypal.com/developer/accounts/" target="_blank" rel="nofollow noreferrer noopener">PayPal Sandbox account</a> to test the PayPal flow.</p>
 
 <pre id="error"></pre>
 
@@ -88,13 +88,12 @@
   <p>Update PayPal Configuration<p/>
 
   <div>
-    <input type="radio" name="flow" onclick="setFlow('vault')" id="paypal-config-vault" checked><label for="vault"> Use Vault flow</label><br>
-    <input type="radio" name="flow" onclick="setFlow('checkout')" id="paypal-config-checkout"><label for="checkout"> Use Checkout flow</label>
+    <input type="radio" name="flow" onclick="setFlow('vault')" id="paypal-config-vault" checked><label for="paypal-config-vault"> Use Vault flow</label><br>
+    <input type="radio" name="flow" onclick="setFlow('checkout')" id="paypal-config-checkout"><label for="paypal-config-checkout"> Use Checkout flow</label>
   </div>
 </div>
 
 <pre id="results"></pre>
-<div id="ready"></div>
 
 <footer>
   <p><a href="docs">View the Reference Documentation</a></p>
@@ -137,7 +136,11 @@
         totalPriceStatus: 'FINAL',
         totalPrice: '19.99'
       }
-    }
+    },
+    venmo: {
+      allowDesktop: true
+    },
+    vaultManager: true
   };
   var dropinInstance;
   var requestPaymentMethodOptions = {};
@@ -148,7 +151,9 @@
   var createButton = document.querySelector('#create-button');
   var teardownButton = document.querySelector('#teardown-button');
   var clearButton = document.querySelector('#clear-button');
-  var ready = document.querySelector('#ready');
+  var ready = document.createElement("div");
+
+  ready.id = "ready";
 
   function getDropinConfig () {
     var query = window.location.search.substring(1);
@@ -223,7 +228,9 @@
     results.textContent = '';
     error.textContent = '';
 
-    dropin.create(config, function (err, instance) {
+    braintree.dropin.create(config, function (err, instance) {
+      document.body.appendChild(ready);
+
       if (err) {
         ready.textContent = 'error';
         error.textContent = err.message;
@@ -236,6 +243,9 @@
           payButton.removeAttribute('disabled');
         }
 
+        instance.on('changeActiveView', function (event) {
+          console.log('change active view', event);
+        });
         instance.on('paymentMethodRequestable', function (event) {
           if (event.paymentMethodIsSelected) {
             clearButton.className = '';

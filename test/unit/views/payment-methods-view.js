@@ -4,6 +4,9 @@ const fs = require('fs');
 const classList = require('@braintree/class-list');
 const BaseView = require('../../../src/views/base-view');
 const CardView = require('../../../src/views/payment-sheet-views/card-view');
+const PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
+const PaymentMethodsView = require('../../../src/views/payment-methods-view');
+const PaymentMethodView = require('../../../src/views/payment-method-view');
 const DropinError = require('../../../src/lib/dropin-error');
 const PaymentMethodsView = require('../../../src/views/payment-methods-view');
 const PayPalView = require('../../../src/views/payment-sheet-views/paypal-view');
@@ -135,17 +138,9 @@ describe('PaymentMethodsView', () => {
 
       model.getVaultedPaymentMethods.mockResolvedValue([{ foo: 'bar' }, fakePaymentMethod]);
 
-      return model.initialize().then(() => {
-        model.changeActivePaymentMethod({ foo: 'bar' });
-
-        paymentMethodsViews = new PaymentMethodsView({
-          element: testContext.element,
-          model: model,
-          merchantConfiguration: {
-            authorization: fake.clientTokenWithCustomerID
-          },
-          strings: strings
-        });
+        return model.initialize().then(() => {
+          model.asyncDependencyReady('card');
+          model.changeActivePaymentMethod({ foo: 'bar' });
 
         paymentMethodsViews._addPaymentMethod(fakePaymentMethod);
 
@@ -203,24 +198,19 @@ describe('PaymentMethodsView', () => {
       };
     });
 
-    it('does not remove other payment methods in non-guest checkout', () => {
-      let model, paymentMethodsViews;
-      const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
-      const modelOptions = fake.modelOptions();
+    test(
+      'does not tear down other payment methods in non-guest checkout',
+      () => {
+        jest.spyOn(PaymentMethodView.prototype, 'teardown');
 
-      modelOptions.merchantConfiguration.authorization = fake.clientTokenWithCustomerID;
-      model = fake.model(modelOptions);
+        let model, paymentMethodsViews;
+        const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
+        const modelOptions = fake.modelOptions();
 
-      model.getVaultedPaymentMethods.mockResolvedValue([testContext.fakePaymentMethod]);
-
-      return model.initialize().then(() => {
-        paymentMethodsViews = new PaymentMethodsView({
-          element: testContext.element,
-          model: model,
-          merchantConfiguration: {
-            authorization: fake.clientTokenWithCustomerID
-          },
-          strings: strings
+        modelOptions.client.getConfiguration.mockReturnValue({
+          authorization: fake.clientTokenWithCustomerID,
+          authorizationType: 'CLIENT_TOKEN',
+          gatewayConfiguration: fake.configuration().gatewayConfiguration
         });
 
         model.addPaymentMethod({ foo: 'bar' });
@@ -236,26 +226,14 @@ describe('PaymentMethodsView', () => {
 
       jest.spyOn(model, 'removeUnvaultedPaymentMethods').mockImplementation();
 
-      return model.initialize().then(() => {
-        new PaymentMethodsView({ // eslint-disable-line no-new
-          element: testContext.element,
-          model: model,
-          merchantConfiguration: {
-            authorization: fake.clientToken
-          },
-          strings: strings
+          expect(paymentMethodsViews.views.length).toBe(2);
+          expect(methodsContainer.childElementCount).toBe(2);
+          expect(PaymentMethodView.prototype.teardown).not.toBeCalled();
         });
 
-        model.addPaymentMethod({ nonce: 'fake-nonce' });
-        const removeUnvaultedPaymentMethodsFilter = model.removeUnvaultedPaymentMethods.mock.calls[0][0];
+    test('tears down other payment methods in guest checkout', () => {
+      jest.spyOn(PaymentMethodView.prototype, 'teardown');
 
-        expect(model.removeUnvaultedPaymentMethods).toBeCalledTimes(1);
-        expect(removeUnvaultedPaymentMethodsFilter({ nonce: 'other-nonce' })).toBe(true);
-        expect(removeUnvaultedPaymentMethodsFilter({ nonce: 'fake-nonce' })).toBe(false);
-      });
-    });
-
-    it('does not try to remove a payment method if none exists in guest checkout', () => {
       let model, paymentMethodsViews;
       const methodsContainer = testContext.element.querySelector('[data-braintree-id="methods-container"]');
       const modelOptions = fake.modelOptions();
@@ -277,6 +255,7 @@ describe('PaymentMethodsView', () => {
 
         expect(paymentMethodsViews.views.length).toBe(1);
         expect(methodsContainer.childElementCount).toBe(1);
+        expect(PaymentMethodView.prototype.teardown).toBeCalledTimes(1);
       });
     });
   });
@@ -353,7 +332,8 @@ describe('PaymentMethodsView', () => {
         });
         testContext.paymentMethodsViews.views.push({
           paymentMethod: testContext.fakePaymentMethod,
-          element: testContext.element
+          element: testContext.element,
+          teardown: jest.fn()
         });
         testContext.paymentMethodsViews.container = {
           removeChild: jest.fn()
@@ -372,11 +352,12 @@ describe('PaymentMethodsView', () => {
       expect(testContext.paymentMethodsViews.views[0]).toBeFalsy();
     });
 
-    it('removes specified payment method div from DOM', () => {
+    test('tears down specified payment method', () => {
+      const teardown = testContext.paymentMethodsViews.views[0].teardown;
+
       testContext.paymentMethodsViews._removePaymentMethod(testContext.fakePaymentMethod);
 
-      expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledTimes(1);
-      expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledWith(testContext.element);
+      expect(teardown).toBeCalledTimes(1);
     });
 
     it('ignores payment methods that are not the exact object', () => {
@@ -585,12 +566,12 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    it('removes all payment method views from container', () => {
-      jest.spyOn(testContext.paymentMethodsViews.container, 'removeChild').mockImplementation();
+    test('tears down all payment method views', () => {
+      jest.spyOn(PaymentMethodView.prototype, 'teardown').mockImplementation();
 
       testContext.paymentMethodsViews.refreshPaymentMethods();
 
-      expect(testContext.paymentMethodsViews.container.removeChild).toBeCalledTimes(3);
+      expect(PaymentMethodView.prototype.teardown).toBeCalledTimes(3);
     });
 
     it('calls addPaymentMethod for each payment method on the model', () => {

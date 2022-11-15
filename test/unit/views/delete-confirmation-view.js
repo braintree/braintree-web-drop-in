@@ -115,4 +115,17 @@ describe('DeleteConfirmationView', () => {
       expect(testContext.view._messageBox.innerText).toBe('Are you sure you want to delete this payment method?');
     });
   });
+
+  describe('onSelection', () => {
+    test('focuses the yes button', async () => {
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        cb();
+      });
+      const focusSpy = jest.spyOn(testContext.view.getElementById('delete-confirmation__yes'), 'focus');
+
+      testContext.view.onSelection();
+
+      expect(focusSpy).toBeCalledTimes(1);
+    });
+  });
 });

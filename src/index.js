@@ -4,7 +4,7 @@
  * @module braintree-web-drop-in
  * @description There are two ways to integrate Drop-in into your page: a script tag integration and a JavaScript integration using [`dropin.create`](#.create).
  *
- * The script tag integration is the fastest way to integrate. All you need to do is add the Drop-in script inside your form element where you want Drop-in to appear and include a `data-braintree-dropin-authorization` property with your [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or [client token](https://developers.braintreepayments.com/guides/authorization/client-token).
+ * The script tag integration is the fastest way to integrate. All you need to do is add the Drop-in script inside your form element where you want Drop-in to appear and include a `data-braintree-dropin-authorization` property with your [tokenization key](https://developer.paypal.com/braintree/docs/guides/authorization/tokenization-key/javascript/v3) or [client token](https://developer.paypal.com/braintree/docs/guides/authorization/client-token).
  *
  * When your form is submitted, Drop-in will intercept the form submission and attempt to tokenize the payment method. If the tokenization is successful, it will insert the payment method nonce into a hidden input with the name `payment_method_nonce` and then submit your form. If the tokenization is unsuccessful, a relevant error will be shown in the UI.
  *
@@ -118,34 +118,35 @@ var VERSION = '__VERSION__';
  * @param {(boolean|object)} [cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
  * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
  * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
- * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developers.braintreepayments.com/guides/drop-in/customization/javascript/v3#customize-your-ui).
+ * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#customize-your-ui).
  * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a successful tokenization.
- * @param {object} [vault] Configuration for vaulting credit cards. Only applies when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id).
- * @param {boolean} [vault.allowAutoVaultOverride=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
- * @param {boolean} [vault.autoVault=true] Whether or not to vault the card upon tokenization. When set to `false` with `allowVaultCardOverride` set to `false`, then cards will not be vaulted. Can be used to opt in or opt of the global [`vaultManager` settings](#~vaultManagerCreateOptions) for autovaulting cards.
+ * @param {object} [vault] Configuration for vaulting credit cards. Only applies when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id).
+ * @param {boolean} [vault.allowVaultCardOverride=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
+ * @param {boolean} [vault.vaultCard=true] Whether or not to vault the card upon tokenization. When set to `false` with `allowVaultCardOverride` set to `false`, then cards will not be vaulted.
  */
 
 /**
- * @typedef {object} dataCollectorOptions The configuration options for Data Collector. Requires [advanced fraud protection](https://developers.braintreepayments.com/guides/advanced-fraud-tools/client-side/javascript/v3) to be enabled in the Braintree gateway. If using Kount, contact our [support team](https://developers.braintreepayments.com/forms/contact) to configure your Kount ID. The device data will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
+ * @typedef {object} dataCollectorOptions The configuration options for Data Collector. Requires [advanced fraud protection](https://developer.paypal.com/braintree/docs/guides/premium-fraud-management-tools/client-side/javascript/v3) to be enabled in the Braintree gateway. If using Kount, contact our [support team](https://developer.paypal.com/braintree/help) to configure your Kount ID. The device data will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
  *
  * @param {boolean} [kount] If true, Kount fraud data collection is enabled.
  */
 
 /**
- * @typedef {object} threeDSecureOptions _Deprecated_ If the `threeDSecureOptions` passed into the create call is an object, you may set the `amount` to verify with 3D Secure. However, it's recomended that you pass `true` instead of a configuration object and do all 3D Secure configuration in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.
+ * @typedef {object} threeDSecureOptions Configuration options to pass when creating the 3D Secure module used in Drop-in. `amount` for 3D Secure verification can be passed here, but it's recomended that it and all other 3D Secure verification options be passed to the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead. Any `cardinalSDKConfig` options must be passed here when creating Drop-in.
  *
- * @param {string} amount The amount to verify with 3D Secure.
+ * @param {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_three-d-secure.html#.create) for all options.
+ * @param {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
  */
 
 /** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
- * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developers.braintreepayments.com/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developers.braintreepayments.com/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
+ * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developer.paypal.com/braintree/docs/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developer.paypal.com/braintree/docs/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
  * @param {(string|number)} [amount] The amount of the transaction. Required when using the Checkout flow.
  * @param {string} [currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
  * @param {object} [buttonStyle] The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles) are available.
  * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
- * @param {object} [vault] Options for how vaulting should be handled with PayPal accounts.
- * @param {boolean} [vault.autoVault] Can be used to opt in or opt of the global [`vaultManager` settings](#~vaultManagerCreateOptions) for autovaulting.
+ * @param {object} [vault] Configuration for vaulting PayPal accounts. Only applies when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id).
+ * @param {boolean} [vault.vaultPayPal=true] Whether or not to vault the PayPal account upon tokenization.
  */
 
 /** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
@@ -221,7 +222,7 @@ var VERSION = '__VERSION__';
  * @function create
  * @description This function is the entry point for `braintree.dropin`. It is used for creating {@link Dropin} instances.
  * @param {object} options Object containing all {@link Dropin} options:
- * @param {string} options.authorization A [tokenization key](https://developers.braintreepayments.com/guides/authorization/tokenization-key/javascript/v3) or a [client token](https://developers.braintreepayments.com/guides/authorization/client-token). If authorization is a client token created with a [customer ID](https://developers.braintreepayments.com/guides/drop-in/javascript/v3#customer-id), Drop-in will render saved payment methods and automatically store any newly-added payment methods in their Vault record.
+ * @param {string} options.authorization A [tokenization key](https://developer.paypal.com/braintree/docs/guides/authorization/tokenization-key/javascript/v3) or a [client token](https://developer.paypal.com/braintree/docs/guides/authorization/client-token). If authorization is a client token created with a [customer ID](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#display-a-saved-payment-method), Drop-in will render saved payment methods and automatically store any newly-added payment methods in their Vault record.
  * @param {(string|HTMLElement)} options.container A reference to an empty element, such as a `<div>`, where Drop-in will be included on your page or the selector for the empty element. e.g. `#dropin-container`.
  * @param {string} options.selector Deprecated: Now an alias for `options.container`.
  * @param {string} [options.locale=`en_US`] Use this option to change the language, links, and terminology used throughout Drop-in. Supported locales include:
@@ -260,39 +261,43 @@ var VERSION = '__VERSION__';
  * `zh_TW`,
  * `zh_XC`.
  *
- * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/master/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
+ * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/main/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
  * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']`. Payment options omitted from this array will not be offered to the customer.
  *
  * @param {(boolean|object)} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards, pass `false` for the value.
- * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing).
+ * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#linked-paypal-testing).
  *
  * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
- * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developers.braintreepayments.com/guides/paypal/testing-go-live/#go-live).
+ * PayPal is not [supported in Internet Explorer versions lower than 11](https://developer.paypal.com/docs/archive/checkout/reference/faq/#link-whichbrowsersdoespaypalcheckoutsupport).
  *
- * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developers.braintreepayments.com/guides/paypal/paypal-credit/javascript/v3).
+ * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live).
+ *
+ * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developer.paypal.com/braintree/docs/guides/paypal/paypal-credit/javascript/v3).
+ *
+ * PayPal Credit is not [supported in Internet Explorer versions lower than 11](https://developer.paypal.com/docs/archive/checkout/reference/faq/#link-whichbrowsersdoespaypalcheckoutsupport).
  *
  * @param {(object|boolean)} [options.venmo] The configuration options for Pay with Venmo. To include a Venmo option in your Drop-in integration, include the `venmo` parameter and [follow the documentation for setting up Venmo in the Braintree control panel](https://articles.braintreepayments.com/guides/payment-methods/venmo#setup). If a user's browser does not support Venmo, the Venmo option will not be rendered.
  *
  * See [`venmoCreateOptions`](#~venmoCreateOptions) for `venmo` options.
  *
- * @param {object} [options.applePay] The configuration options for Apple Pay. To include an Apple Pay option in your Drop-in integration, include the `applePay` parameter and [enable Apple Pay in the Braintree Control Panel](https://developers.braintreepayments.com/guides/apple-pay/configuration/javascript/v3). If a user's browser does not support Apple Pay, the Apple Pay option will not be rendered. See [Apple's documentation](https://support.apple.com/en-us/HT201469) for browser and device support.
+ * @param {object} [options.applePay] The configuration options for Apple Pay. To include an Apple Pay option in your Drop-in integration, include the `applePay` parameter and [enable Apple Pay in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/apple-pay/configuration/javascript/v3). If a user's browser does not support Apple Pay, the Apple Pay option will not be rendered. See [Apple's documentation](https://support.apple.com/en-us/HT201469) for browser and device support.
  *
  * See [`applePayCreateOptions`](#~applePayCreateOptions) for `applePay` options.
  *
- * @param {object} [options.googlePay] The configuration options for Google Pay. To include a Google Pay option in your Drop-in integration, include the `googlePay` parameter and [enable Google Pay in the Braintree Control Panel](https://developers.braintreepayments.com/guides/google-pay/configuration/javascript/v3). If a user's browser does not support Google Pay, the Google Pay option will not be rendered. See [Google's documentation](https://developers.google.com/pay/api/web/test-and-deploy) for browser and device support.
+ * @param {object} [options.googlePay] The configuration options for Google Pay. To include a Google Pay option in your Drop-in integration, include the `googlePay` parameter and [enable Google Pay in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/google-pay/configuration/javascript/v3). If a user's browser does not support Google Pay, the Google Pay option will not be rendered. See [Google's documentation](https://developers.google.com/pay/api/web/test-and-deploy) for browser and device support.
  *
  * See [`googlePayCreateOptions`](#~googlePayCreateOptions) for `googlePay` options.
  *
  * @param {object|boolean} [options.dataCollector] If `true` is passed, Drop-in will be configured to collect data for use with Advanced Fraud Protection. If collecting data via Kount, pass a [`dataCollectorOptions` object](#~dataCollectorOptions) with `kount: true` instead. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
- * @param {(boolean|object)} [options.threeDSecure] It's recommended that you pass `true` here to enable 3D Secure and pass the configuration options for 3D Secure into {@link Dropin#requestPaymentMethod|requestPaymentMethod options}.See [`threeDSecureOptions`](#~threeDSecureOptions) for the deprecated create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
+ * @param {(boolean|object)} [options.threeDSecure] When `true` is passed, the 3D Secure module will be created with a default configuration. See [`threeDSecureOptions`](#~threeDSecureOptions) for additional create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
- * @param {object} [options.vaultManager] The configuration options for vault management.
+ * @param {boolean} [options.vaultManager=false] Whether or not to allow a customer to delete saved payment methods when used with a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id). *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system. This feature is not supported in Internet Explorer 9.
  *
- * See [`vaultManagerCreateOptions`](#~vaultManagerCreateOptions) for `vaultManager` options.
+ * @param {boolean} [options.preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id) and a customer with saved payment methods.
  *
- * @param {boolean} [options.showDefaultPaymentMethodFirst=true] When `true` or left out, the customer's default payment method will be displayed first in the list of vaulted payment methods. When `false`, the Braintree API will determine which payment method to display first, typically the latest payment method added to the customer. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
+ * @param {boolean} [options.showDefaultPaymentMethodFirst=true] When `true` or left out, the customer's default payment method will be displayed first in the list of vaulted payment methods. When `false`, the order of the displayed payment methods is not guaranteed. Only applicable when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id) and a customer with saved payment methods.
  *
  * @param {function} [callback] The second argument, `data`, is the {@link Dropin} instance. Returns a promise if no callback is provided.
  * @returns {(void|Promise)} Returns a promise if no callback is provided.
@@ -378,8 +383,10 @@ var VERSION = '__VERSION__';
  *   applePay: {
  *     displayName: 'Merchant Name',
  *     paymentRequest: {
-   *     label: 'Localized Name',
- *       total: '10.00'
+ *       total: {
+ *         label: 'Localized Name',
+ *         amount: '10.00'
+ *       }
  *     }
  *   },
  *   paypal: {

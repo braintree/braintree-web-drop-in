@@ -19,8 +19,6 @@ VenmoView.prototype.initialize = function () {
     authorization: this.model.authorization
   });
 
-  self.model.asyncDependencyStarting();
-
   return btVenmo.create(venmoConfiguration).then(function (venmoInstance) {
     self.venmoInstance = venmoInstance;
 
@@ -57,7 +55,7 @@ VenmoView.prototype.initialize = function () {
       });
     });
 
-    self.model.asyncDependencyReady();
+    self.model.asyncDependencyReady(VenmoView.ID);
   }).catch(function (err) {
     self.model.asyncDependencyFailed({
       view: self.ID,
@@ -70,7 +68,7 @@ VenmoView.prototype._isIgnorableError = function (error) {
   // customer cancels the flow in the app
   // we don't emit an error because the customer
   // initiated that action
-  return error.code === 'VENMO_APP_CANCELED';
+  return error.code === 'VENMO_APP_CANCELED' || error.code === 'VENMO_DESKTOP_CANCELED';
 };
 
 VenmoView.isEnabled = function (options) {
