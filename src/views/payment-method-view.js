@@ -4,10 +4,9 @@ var analytics = require('../lib/analytics');
 var BaseView = require('./base-view');
 var classList = require('@braintree/class-list');
 var constants = require('../constants');
-var fs = require('fs');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
-var paymentMethodHTML = fs.readFileSync(__dirname + '/../html/payment-method.html', 'utf8');
+var paymentMethodHTML = require('../html/payment-option.html');
 
 function PaymentMethodView() {
   BaseView.apply(this, arguments);
