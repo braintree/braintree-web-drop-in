@@ -7,11 +7,10 @@
   "displayName": "Drop-in",
   "restoreMocks": true,
   "//": "In the future, tests should live in the same directory as the files they are testing",
-  "roots": [
-    "<rootDir>",
-    "<rootDir>/../test/"
-  ],
-  "testMatch": [
-    "**/unit/**/*.js"
-  ]
+  "roots": ["<rootDir>", "<rootDir>/../test/"],
+  "testMatch": ["**/unit/**/*.js"],
+  "transform": {
+    "^.+\\.html$": "<rootDir>/../test/helpers/jest-raw-transformer.js"
+  },
+  "verbose": true
 }

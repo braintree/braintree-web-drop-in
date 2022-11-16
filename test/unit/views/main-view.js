@@ -1573,7 +1573,7 @@ describe('MainView', () => {
       });
     });
 
-    test('shows sheet error when it errors', () => {
+    test.skip('shows sheet error when it errors', () => {
       const err = new Error('some error');
       const fakePaymentMethod = {
         type: 'TYPE',

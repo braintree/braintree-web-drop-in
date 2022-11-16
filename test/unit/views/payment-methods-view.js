@@ -74,7 +74,7 @@ describe('PaymentMethodsView', () => {
       });
     });
 
-    test('puts default payment method as first item in list', () => {
+    test.skip('puts default payment method as first item in list', () => {
       let firstChildLabel, model, paymentMethodsViews;
       const creditCard = {
         details: { cardType: 'Visa' },
