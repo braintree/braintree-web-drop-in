@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack build --mode production --node-env production",
     "dev": "webpack serve --mode development --node-env development",
+    "development": "npm run dev",
     "build:gh-pages": "npm run build",
     "lint": "eslint src test",
     "pretest": "npm run lint",
