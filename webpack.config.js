@@ -260,6 +260,7 @@ module.exports = {
 
       console.log('Development server listening:', port);
     },
+    open: true,
     port: 4567,
     devMiddleware: {
       writeToDisk: true,
