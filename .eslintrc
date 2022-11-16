@@ -11,14 +11,8 @@
   },
   "rules": {
     "comma-dangle": 0,
-    "object-curly-spacing": [
-      "error",
-      "always",
-      {
-        "arraysInObjects": false,
-        "objectsInObjects": false
-      }
-    ]
+    "no-warning-comments": 0,
+    "key-spacing": 0
   },
   "ignorePatterns": ["babel.config.js", "wdio.conf.js", "webpack.config.js"]
 }
