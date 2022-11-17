@@ -109,10 +109,6 @@ module.exports = {
               esModule: false,
             },
           },
-          {
-            test: /\.(js|html)$/,
-            use: './scripts/replace-version-strings',
-          },
         ],
       },
     ],
@@ -255,7 +251,7 @@ module.exports = {
     plugins: [],
   },
   devServer: {
-    allowedHosts: ['.bt.local'],
+    allowedHosts: ['.bt.local', 'bs-local.com'],
     static: [
       { directory: join(__dirname, 'dist', 'gh-pages') },
       { directory: join(__dirname, 'dist') },
