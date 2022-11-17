@@ -6,7 +6,7 @@ var classList = require('@braintree/class-list');
 var constants = require('../constants');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
-var paymentMethodHTML = require('../html/payment-option.html');
+var paymentMethodHTML = require('../html/payment-method.html');
 
 function PaymentMethodView() {
   BaseView.apply(this, arguments);
