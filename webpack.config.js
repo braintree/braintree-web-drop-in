@@ -64,7 +64,7 @@ module.exports = {
             options: {
               multiple: [
                 { search: '__VERSION__', replace: version },
-                { search: '@DOT_MIN', replace: isEnvProduction ? '' : '.min' },
+                { search: '@DOT_MIN', replace: isEnvProduction ? '.min' : '' },
               ],
             },
           },
