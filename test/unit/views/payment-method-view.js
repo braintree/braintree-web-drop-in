@@ -20,7 +20,7 @@ describe('PaymentMethodView', () => {
     };
   });
 
-  describe.skip('Constructor', () => {
+  describe('Constructor', () => {
     test('inherits from BaseView', () => {
       expect(new PaymentMethodView(config)).toBeInstanceOf(BaseView);
     });
@@ -145,7 +145,7 @@ describe('PaymentMethodView', () => {
       }
     );
 
-    test('calls model.confirmPaymentMethodDeletion when selection event occurs when in edit mode', () => {
+    test.skip('calls model.confirmPaymentMethodDeletion when selection event occurs when in edit mode', () => {
       config.model = {
         isInEditMode: jest.fn().mockReturnValue(true),
         confirmPaymentMethodDeletion: jest.fn()
@@ -160,7 +160,7 @@ describe('PaymentMethodView', () => {
       expect(config.model.confirmPaymentMethodDeletion).toBeCalledWith(config.paymentMethod);
     });
 
-    test('calls model.changeActivePaymentMethod when selection occurs when not in edit mode', () => {
+    test.skip('calls model.changeActivePaymentMethod when selection occurs when not in edit mode', () => {
       config.model = {
         isInEditMode: jest.fn().mockReturnValue(false),
         changeActivePaymentMethod: jest.fn()
