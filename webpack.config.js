@@ -59,6 +59,16 @@ module.exports = {
             ],
           },
           {
+            test: /\.js$/,
+            loader: 'string-replace-loader',
+            options: {
+              multiple: [
+                { search: '__VERSION__', replace: version },
+                { search: '@DOT_MIN', replace: isEnvProduction ? '' : '.min' },
+              ],
+            },
+          },
+          {
             test: /\.svg$/,
             use: [
               {
