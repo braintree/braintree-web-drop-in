@@ -34,9 +34,6 @@ var ASYNC_DEPENDENCIES = DEFAULT_PAYMENT_OPTION_PRIORITY.concat(NON_PAYMENT_OPTI
 var DEPENDENCY_READY_CHECK_INTERVAL = 200;
 
 function DropinModel(options) {
-  var hiddenVaultedPaymentMethodTypes = options.merchantConfiguration.hiddenVaultedPaymentMethodTypes;
-  var self = this;
-
   this.rootNode = options.container;
   this.componentID = options.componentID;
   this.merchantConfiguration = options.merchantConfiguration;
@@ -48,32 +45,10 @@ function DropinModel(options) {
 
     return total;
   }.bind(this), {});
-  this.hiddenVaultedPaymentMethodTypes =
+  this.vaultedPaymentMethodTypesThatShouldBeHidden =
     constructHiddenPaymentMethodTypes(
-      options.merchantConfiguration.hiddenVaultedPaymentMethodTypes
+      options.merchantConfiguration.vaultedPaymentMethodTypesThatShouldBeHidden
     );
-
-  if (Array.isArray(hiddenVaultedPaymentMethodTypes)) {
-    this.hiddenVaultedPaymentMethodTypes = [];
-    // Values is not unique (e.g PayPalAccount)
-    Object.values(paymentMethodTypes).filter(function (value, index, _self) {
-      return _self.indexOf(value) === index;
-    }).forEach(
-      function (paymentMethod) {
-        if (hiddenVaultedPaymentMethodTypes.indexOf(paymentMethod) !== -1) {
-          self.hiddenVaultedPaymentMethodTypes.push(paymentMethod);
-        }
-      }
-    );
-    // Add the default values:
-    VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN.forEach(function (paymentMethod) {
-      if (self.hiddenVaultedPaymentMethodTypes.indexOf(paymentMethod) === -1) {
-        self.hiddenVaultedPaymentMethodTypes.push(paymentMethod);
-      }
-    });
-  } else {
-    this.hiddenVaultedPaymentMethodTypes = [].concat(VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN);
-  }
 
   this.failedDependencies = {};
   this._options = options;
@@ -425,7 +400,9 @@ DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
 
     if (
       canShowVaultedPaymentMethodType(
-        paymentMethodType, self.hiddenVaultedPaymentMethodTypes)
+        paymentMethodType,
+        self.vaultedPaymentMethodTypesThatShouldBeHidden
+      )
     ) {
       array.push(paymentMethodType);
     }
@@ -502,17 +479,18 @@ function isPaymentOptionEnabled(paymentOption, options) {
 }
 
 function canShowVaultedPaymentMethodType(
-  paymentMethodType, hiddenVaultedPaymentMethodTypes
+  paymentMethodType,
+  vaultedPaymentMethodTypesThatShouldBeHidden
 ) {
   return (
     paymentMethodType &&
-    hiddenVaultedPaymentMethodTypes.indexOf(paymentMethodType) ===
+    vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethodType) ===
       -1
   );
 }
 
 function constructHiddenPaymentMethodTypes(paymentMethods) {
-  var hiddenVaultedPaymentMethodTypes = [].concat(
+  var vaultedPaymentMethodTypesThatShouldBeHidden = [].concat(
     VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN
   );
 
@@ -526,18 +504,18 @@ function constructHiddenPaymentMethodTypes(paymentMethods) {
       }
 
       if (
-        hiddenVaultedPaymentMethodTypes.indexOf(paymentMethodId) >
+        vaultedPaymentMethodTypesThatShouldBeHidden.indexOf(paymentMethodId) >
         -1
       ) {
         // don't add the same payment method type a second time
         return;
       }
 
-      hiddenVaultedPaymentMethodTypes.push(paymentMethodId);
+      vaultedPaymentMethodTypesThatShouldBeHidden.push(paymentMethodId);
     });
   }
 
-  return hiddenVaultedPaymentMethodTypes;
+  return vaultedPaymentMethodTypesThatShouldBeHidden;
 }
 
 module.exports = DropinModel;

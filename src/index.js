@@ -236,14 +236,13 @@ var VERSION = '__VERSION__';
  *
  * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/main/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
  * @param {string[]} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']`. Payment options omitted from this array will not be offered to the customer.
- * @param {string[]} [options.hiddenVaultedPaymentMethodTypes] Use this option to hide certain types of vaulted payment methods from being displayed to the customer. Apple Pay, Google Pay and Venmo are always hidden (as those payment methods are only available as vaulted payment methods for existing subscriptions, new transactions or subscriptions must be newly authorized). Available options:
+ * @param {string[]} [options.vaultedPaymentMethodTypesThatShouldBeHidden] Use this option to hide certain types of vaulted payment methods from being displayed to the customer. Apple Pay, Google Pay and Venmo are always hidden (as those payment methods are only availabe as vaulted payment methods for existing subscriptions, new transactions or subscriptions must be newly authorized). Available options:
  * * `'card'`
  * * `'paypal'`
  * * `'paypalCredit'` (same as PayPal)
  *
  * @param {(boolean|object)} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards, pass `false` for the value.
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#linked-paypal-testing).
- * @param {boolean} [options.hiddenVaultedPaymentMethodTypes] It accepts an array of paymentMethodTypes (e.g CreditCard, PayPalAccount) and specify any vaulted payment method type that want to block. Important: ApplePayCard, VenmoAccount, AndroidPayCard are always blocked.
  *
  * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *

@@ -1592,14 +1592,14 @@ describe('DropinModel', () => {
       }
     );
 
-    describe('hiddenVaultedPaymentMethodTypes options', function () {
+    describe('vaultedPaymentMethodTypesThatShouldBeHidden options', function () {
       test.each([
         {
-          hiddenVaultedPaymentMethodTypes: [],
+          vaultedPaymentMethodTypesThatShouldBeHidden: [],
           expected: ['AndroidPayCard', 'ApplePayCard', 'VenmoAccount']
         },
         {
-          hiddenVaultedPaymentMethodTypes: ['paypal'],
+          vaultedPaymentMethodTypesThatShouldBeHidden: ['paypal'],
           expected: [
             'AndroidPayCard',
             'ApplePayCard',
@@ -1608,7 +1608,7 @@ describe('DropinModel', () => {
           ]
         },
         {
-          hiddenVaultedPaymentMethodTypes: [
+          vaultedPaymentMethodTypesThatShouldBeHidden: [
             'unknown',
             'googlePay',
             'card'
@@ -1626,15 +1626,15 @@ describe('DropinModel', () => {
           expected: ['AndroidPayCard', 'ApplePayCard', 'VenmoAccount']
         }
       ])(
-        'when hiddenVaultedPaymentMethodTypes is set to $vaultedPaypalAccountsDisabled',
-        async ({ hiddenVaultedPaymentMethodTypes, expected }) => {
+        'when vaultedPaymentMethodTypesThatShouldBeHidden is set to $vaultedPaypalAccountsDisabled',
+        async ({ vaultedPaymentMethodTypesThatShouldBeHidden, expected }) => {
           const modelOptions = { ...testContext.modelOptions };
 
           modelOptions.merchantConfiguration = {
             ...testContext.modelOptions.merchantConfiguration
           };
-          modelOptions.merchantConfiguration.hiddenVaultedPaymentMethodTypes =
-            hiddenVaultedPaymentMethodTypes;
+          modelOptions.merchantConfiguration.vaultedPaymentMethodTypesThatShouldBeHidden =
+            vaultedPaymentMethodTypesThatShouldBeHidden;
 
           testContext.model = new DropinModel(modelOptions);
 
@@ -1653,7 +1653,7 @@ describe('DropinModel', () => {
           testContext.model.isGuestCheckout = false;
 
           expect(
-            testContext.model.hiddenVaultedPaymentMethodTypes.sort()
+            testContext.model.vaultedPaymentMethodTypesThatShouldBeHidden.sort()
           ).toEqual(expected);
         }
       );
