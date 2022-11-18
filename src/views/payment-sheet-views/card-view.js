@@ -447,11 +447,15 @@ CardView.prototype._onBlurEvent = function (event) {
 
   classList.remove(fieldGroup, 'braintree-form__field-group--is-focused');
 
+  if (field.isPotentiallyValid) {
+    this.hideFieldError(event.emittedBy);
+  }
+
   if (this._shouldApplyFieldEmptyError(event.emittedBy, field)) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
-  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
+  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0])) {
     this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
 
@@ -487,6 +491,13 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
     classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
   } else {
     classList.remove(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+  }
+
+  // if the number field emitted the card change event fires
+  // and the card type is supported, we need to clear out the errors
+  // field in case that there was a "card type is unsupported" error
+  if (event.emittedBy === 'number' && this._isCardTypeSupported(event.cards[0])) {
+    this.hideFieldError(event.emittedBy);
   }
 
   this.cardNumberIconSvg.setAttribute('xlink:href', cardNumberHrefLink);
@@ -526,7 +537,7 @@ CardView.prototype._onValidityChangeEvent = function (event) {
   var field = event.fields[event.emittedBy];
 
   if (event.emittedBy === 'number' && event.cards[0]) {
-    isValid = field.isValid && this._isCardTypeSupported(event.cards[0].type);
+    isValid = field.isValid && this._isCardTypeSupported(event.cards[0]);
   } else {
     isValid = field.isValid;
   }
@@ -578,7 +589,8 @@ CardView.prototype._hideUnsupportedCardIcons = function () {
   }.bind(this));
 };
 
-CardView.prototype._isCardTypeSupported = function (cardType) {
+CardView.prototype._isCardTypeSupported = function (card) {
+  var cardType = card && card.type;
   var configurationCardType = constants.configurationCardTypes[cardType];
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 

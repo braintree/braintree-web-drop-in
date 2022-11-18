@@ -59,7 +59,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.clickOption('paypalCredit');
       browser.openPayPalAndCompleteLogin(function () {
-        expect($('.fsPanel.CREDIT').isExisting()).toBe(true);
+        expect($('img[alt="PayPal Credit"]').isExisting()).toBe(true);
       });
 
       browser.submitPay();

@@ -1,12 +1,36 @@
 # CHANGELOG
 
-## unreleased
+## 1.33.7
 
-  - Add `hiddenVaultedPaymentMethodTypes` option to `dropin.create`
+  - Better handling of card validation cases to ensure new values are re-evaluated.
+
+## 1.33.6
+
+  - Update braintree-web to v3.88.4
+
+## 1.33.5
+
+  - Update braintree-web to v3.88.3
+
+## 1.33.4
+
+  - Update braintree-web to v3.86.0
+
+## 1.33.3
+
+  - Update braintree-web to v3.85.5
+  - Fix test app accessibility errors
+
+## 1.33.2
+
+  - Update VISA icon (SVG)
 
 ## 1.33.1
-  - Fix issue where Drop-In fields escape Drop-In container when errors are present on multiple inputs
-  - Fix issue where Hipercard icon was not hidden (#812, thanks @tamtamchik)
+
+  - Fix issue where Drop-In fields escape Drop-In container when errors
+    are present on multiple inputs
+  - Fix issue where Hipercard icon was not hidden (\#812, thanks
+    @tamtamchik)
   - Update braintree-web to v3.85.3
   - Update promise-polyfill to v8.2.3
 

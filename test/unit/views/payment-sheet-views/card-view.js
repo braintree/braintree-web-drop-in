@@ -1086,6 +1086,34 @@ describe('CardView', () => {
         });
       });
 
+      test('removes field errors if field is potentially valid', () => {
+        eventPayload = {
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: false,
+              isPotentiallyValid: true,
+              isValid: false
+            }
+          }
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).toBeCalledTimes(1);
+        });
+      });
+
       test(
         'does apply error class if field is empty when focusing another hosted field',
         () => {
@@ -1297,6 +1325,73 @@ describe('CardView', () => {
 
         return cardView.initialize().then(() => {
           expect(cardView.model._emit).toBeCalledWith('card:cardTypeChange', eventPayload);
+        });
+      });
+
+      test('hides field errors when card type changes and card type is supported', () => {
+        eventPayload = {
+          cards: [{ type: 'master-card' }],
+          emittedBy: 'number'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).toBeCalledTimes(1);
+          expect(cardView.hideFieldError).toBeCalledWith('number');
+        });
+      });
+
+      test('does not hide field errors when card type changes and card type is not supported', () => {
+        eventPayload = {
+          cards: [{ type: 'Maestro' }],
+          emittedBy: 'number'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).not.toBeCalled();
+        });
+      });
+
+      test('does not hide field errors when card did not emit card change event', () => {
+        eventPayload = {
+          cards: [{ type: 'MasterCard' }],
+          emittedBy: 'cvv'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).not.toBeCalled();
         });
       });
 
