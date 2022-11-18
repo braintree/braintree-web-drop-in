@@ -2,7 +2,7 @@
 
 ## unreleased
 
-  - Add `vaultedPaymentMethodTypesThatShouldBeHidden` option to `dropin.create`
+  - Add `hiddenVaultedPaymentMethodTypes` option to `dropin.create`
 
 ## 1.33.1
   - Fix issue where Drop-In fields escape Drop-In container when errors are present on multiple inputs
