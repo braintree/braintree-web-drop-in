@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## unreleased
+
+- Add `hiddenVaultedPaymentMethodTypes` option to `dropin.create`
+
 ## 1.33.7
 
   - Better handling of card validation cases to ensure new values are re-evaluated.
