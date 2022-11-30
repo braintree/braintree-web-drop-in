@@ -2,7 +2,7 @@
 
 ## unreleased
 
-- Add `hiddenVaultedPaymentMethodTypes` option to `dropin.create`
+  - Add `hiddenVaultedPaymentMethodTypes` option to `dropin.create`
 
 ## 1.33.7
 
