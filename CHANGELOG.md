@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+  - Update braintree-web to v3.90.0
+
 ## 1.33.7
 
   - Better handling of card validation cases to ensure new values are re-evaluated.
