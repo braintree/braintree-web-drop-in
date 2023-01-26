@@ -15,7 +15,7 @@ var paymentOptionsViewID = require('./views/payment-options-view').ID;
 
 // these vaulted payment methods can only be used for existing subscription
 // any new transactions or subscriptons should prompt the customer to
-// authorize them again before using them
+// authorize them again before using them and thus should always be hidden.
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN = [
   paymentMethodTypes.applePay,
   paymentMethodTypes.googlePay,
