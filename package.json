@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.33.7",
+  "version": "1.34.0",
   "main": "src/index.js",
   "private": true,
   "scripts": {
@@ -70,7 +70,7 @@
     "@braintree/event-emitter": "0.4.1",
     "@braintree/uuid": "0.1.0",
     "@braintree/wrap-promise": "2.1.0",
-    "braintree-web": "3.88.3",
+    "braintree-web": "3.90.0",
     "promise-polyfill": "8.2.3"
   },
   "browserify": {
