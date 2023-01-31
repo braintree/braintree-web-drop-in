@@ -1621,7 +1621,7 @@ describe('DropinModel', () => {
         return testContext.model;
       }
 
-      test("when is an empty array, then 'model.hiddenVaultedPaymentMethodTypes' contains default values", () => {
+      test("when an empty array, then 'model.hiddenVaultedPaymentMethodTypes' contains default values", () => {
         initModel([]);
         expect(
           testContext.model.hiddenVaultedPaymentMethodTypes.sort()
@@ -1634,7 +1634,7 @@ describe('DropinModel', () => {
           testContext.model.hiddenVaultedPaymentMethodTypes.sort()
         ).toEqual(['AndroidPayCard', 'ApplePayCard', 'VenmoAccount']);
       });
-      test("when is an array with 'paypal', then 'model.hiddenVaultedPaymentMethodTypes' contains default values and 'PayPalAccount' value", () => {
+      test("when an array with 'paypal', then 'model.hiddenVaultedPaymentMethodTypes' contains default values and 'PayPalAccount' value", () => {
         initModel(['paypal']);
         expect(
           testContext.model.hiddenVaultedPaymentMethodTypes.sort()
@@ -1643,7 +1643,7 @@ describe('DropinModel', () => {
           'PayPalAccount',
           'VenmoAccount']);
       });
-      test("when is an array with 'card', then 'model.hiddenVaultedPaymentMethodTypes' contains default values and 'CreditCard' value", () => {
+      test("when an array with 'card', then 'model.hiddenVaultedPaymentMethodTypes' contains default values and 'CreditCard' value", () => {
         initModel(['card']);
         expect(
           testContext.model.hiddenVaultedPaymentMethodTypes.sort()
