@@ -1593,70 +1593,65 @@ describe('DropinModel', () => {
     );
 
     describe('hiddenVaultedPaymentMethodTypes options', function () {
-      test.each([
-        {
-          hiddenVaultedPaymentMethodTypes: [],
-          expected: ['AndroidPayCard', 'ApplePayCard', 'VenmoAccount']
-        },
-        {
-          hiddenVaultedPaymentMethodTypes: ['paypal'],
-          expected: [
-            'AndroidPayCard',
-            'ApplePayCard',
-            'PayPalAccount',
-            'VenmoAccount'
-          ]
-        },
-        {
-          hiddenVaultedPaymentMethodTypes: [
-            'unknown',
-            'googlePay',
-            'card'
-          ],
-          expected: [
-            'AndroidPayCard',
-            'ApplePayCard',
-            'CreditCard',
-            'VenmoAccount'
-          ]
-        },
-        {
-          // eslint-disable-next-line no-undefined
-          vaultedPaypalAccountsDisabled: undefined,
-          expected: ['AndroidPayCard', 'ApplePayCard', 'VenmoAccount']
-        }
-      ])(
-        'when hiddenVaultedPaymentMethodTypes is set to $vaultedPaypalAccountsDisabled',
-        async ({ hiddenVaultedPaymentMethodTypes, expected }) => {
-          const modelOptions = { ...testContext.modelOptions };
+      async function initModel(hiddenVaultedPaymentMethodTypes) {
+        const modelOptions = { ...testContext.modelOptions };
 
-          modelOptions.merchantConfiguration = {
-            ...testContext.modelOptions.merchantConfiguration
-          };
-          modelOptions.merchantConfiguration.hiddenVaultedPaymentMethodTypes =
-            hiddenVaultedPaymentMethodTypes;
+        modelOptions.merchantConfiguration = {
+          ...testContext.modelOptions.merchantConfiguration
+        };
+        modelOptions.merchantConfiguration.hiddenVaultedPaymentMethodTypes =
+          hiddenVaultedPaymentMethodTypes;
 
-          testContext.model = new DropinModel(modelOptions);
+        testContext.model = new DropinModel(modelOptions);
 
-          testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
-            {
-              nonce: '1-nonce',
-              type: 'CreditCard'
-            },
-            {
-              nonce: '2-nonce',
-              type: 'PayPalAccount'
-            }
-          ]);
+        testContext.vaultManager.fetchPaymentMethods.mockResolvedValue([
+          {
+            nonce: '1-nonce',
+            type: 'CreditCard'
+          },
+          {
+            nonce: '2-nonce',
+            type: 'PayPalAccount'
+          }
+        ]);
 
-          await testContext.model.initialize();
-          testContext.model.isGuestCheckout = false;
+        await testContext.model.initialize();
+        testContext.model.isGuestCheckout = false;
 
-          expect(
-            testContext.model.hiddenVaultedPaymentMethodTypes.sort()
-          ).toEqual(expected);
-        }
-      );
+        return testContext.model;
+      }
+
+      test("when is an empty array, then 'model.hiddenVaultedPaymentMethodTypes' contains default values", () => {
+        initModel([]);
+        expect(
+          testContext.model.hiddenVaultedPaymentMethodTypes.sort()
+        ).toEqual(['AndroidPayCard', 'ApplePayCard', 'VenmoAccount']);
+      });
+      test("when undefined, then 'model.hiddenVaultedPaymentMethodTypes' contains default values", () => {
+        // eslint-disable-next-line no-undefined
+        initModel(undefined);
+        expect(
+          testContext.model.hiddenVaultedPaymentMethodTypes.sort()
+        ).toEqual(['AndroidPayCard', 'ApplePayCard', 'VenmoAccount']);
+      });
+      test("when is an array with 'paypal', then 'model.hiddenVaultedPaymentMethodTypes' contains default values and 'PayPalAccount' value", () => {
+        initModel(['paypal']);
+        expect(
+          testContext.model.hiddenVaultedPaymentMethodTypes.sort()
+        ).toEqual(['AndroidPayCard',
+          'ApplePayCard',
+          'PayPalAccount',
+          'VenmoAccount']);
+      });
+      test("when is an array with 'card', then 'model.hiddenVaultedPaymentMethodTypes' contains default values and 'CreditCard' value", () => {
+        initModel(['card']);
+        expect(
+          testContext.model.hiddenVaultedPaymentMethodTypes.sort()
+        ).toEqual(['AndroidPayCard',
+          'ApplePayCard',
+          'CreditCard',
+          'VenmoAccount']);
+      });
     });
   });
 });
