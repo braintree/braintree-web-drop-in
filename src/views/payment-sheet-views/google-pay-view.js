@@ -109,7 +109,8 @@ GooglePayView.isEnabled = function (options) {
     if (!(global.google && global.google.payments && global.google.payments.api && global.google.payments.api.PaymentsClient)) {
       return assets.loadScript({
         id: constants.GOOGLE_PAYMENT_SCRIPT_ID,
-        src: constants.GOOGLE_PAYMENT_SOURCE
+        src: constants.GOOGLE_PAYMENT_SOURCE,
+        crossorigin: 'anonymous'
       });
     }
 

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.34.0-dirty
+
+- Loads the data-collector, PayPal Checkout and Google Pay scripts with a `crossorigin='anonymous'` option, to expose errors in those scripts to crash reporting tools
+
 ## 1.34.0
 
   - Update braintree-web to v3.90.0

@@ -23,7 +23,8 @@ DataCollector.prototype.initialize = function () {
 
     return assets.loadScript({
       src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
-      id: constants.DATA_COLLECTOR_SCRIPT_ID
+      id: constants.DATA_COLLECTOR_SCRIPT_ID,
+      crossorigin: 'anonymous'
     });
   }).then(function () {
     return global.braintree.dataCollector.create(self._config);
