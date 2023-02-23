@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## 1.34.0-dirty
+## unreleased
 
-- Loads the data-collector, PayPal Checkout and Google Pay scripts with a `crossorigin='anonymous'` option, to expose errors in those scripts to crash reporting tools
+  - Add `hiddenVaultedPaymentMethodTypes` option to `dropin.create`
+  - Loads the data-collector, PayPal Checkout and Google Pay scripts with a `crossorigin='anonymous'` option, to expose errors in those scripts to crash reporting tools
 
 ## 1.34.0
 
