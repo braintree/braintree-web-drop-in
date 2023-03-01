@@ -1309,7 +1309,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.34.0`.
+   * @description The current version of the SDK, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -2109,7 +2109,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.34.0`.
+   * @description The current version of the SDK, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -4006,7 +4006,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.34.0`.
+   * @description The current version of the SDK, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -6168,7 +6168,7 @@ module.exports = {
   supportsInputFormatting: supportsInputFormatting,
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.34.0`.
+   * @description The current version of the SDK, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -8585,7 +8585,7 @@ module.exports = {
   create: wrapPromise(create),
   isSupported: isSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.34.0`.
+   * @description The current version of the SDK, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -12986,7 +12986,7 @@ function getFramework(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.34.0`.
+   * @description The current version of the SDK, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -13267,7 +13267,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.34.0`.
+   * @description The current version of the SDK, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -14095,7 +14095,7 @@ module.exports = {
   create: wrapPromise(create),
   isBrowserSupported: isBrowserSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.34.0`.
+   * @description The current version of the SDK, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -17701,7 +17701,10 @@ var paymentSheetViews = require('./views/payment-sheet-views');
 var vaultManager = require('braintree-web/vault-manager');
 var paymentOptionsViewID = require('./views/payment-options-view').ID;
 
-var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
+// these vaulted payment methods can only be used for existing subscription
+// any new transactions or subscriptons should prompt the customer to
+// authorize them again before using them and thus should always be hidden.
+var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN = [
   paymentMethodTypes.applePay,
   paymentMethodTypes.googlePay,
   paymentMethodTypes.venmo
@@ -17730,6 +17733,10 @@ function DropinModel(options) {
 
     return total;
   }.bind(this), {});
+  this.hiddenVaultedPaymentMethodTypes =
+    constructHiddenPaymentMethodTypes(
+      options.merchantConfiguration.hiddenVaultedPaymentMethodTypes
+    );
 
   this.failedDependencies = {};
   this._options = options;
@@ -18072,15 +18079,25 @@ DropinModel.prototype.getVaultedPaymentMethods = function () {
 };
 
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
-  var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
+  var self = this;
+  var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (
+    array,
+    key
+  ) {
     var paymentMethodType = paymentMethodTypes[key];
 
-    if (canShowVaultedPaymentMethodType(paymentMethodType)) {
+    if (
+      canShowVaultedPaymentMethodType(
+        paymentMethodType,
+        self.hiddenVaultedPaymentMethodTypes
+      )
+    ) {
       array.push(paymentMethodType);
     }
 
     return array;
-  }, []);
+  },
+  []);
 
   return paymentMethods.filter(function (paymentMethod) {
     return supportedPaymentMethods.indexOf(paymentMethod.type) > -1;
@@ -18149,8 +18166,44 @@ function isPaymentOptionEnabled(paymentOption, options) {
   });
 }
 
-function canShowVaultedPaymentMethodType(paymentMethodType) {
-  return paymentMethodType && VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN.indexOf(paymentMethodType) === -1;
+function canShowVaultedPaymentMethodType(
+  paymentMethodType,
+  hiddenVaultedPaymentMethodTypes
+) {
+  return (
+    paymentMethodType &&
+    hiddenVaultedPaymentMethodTypes.indexOf(paymentMethodType) ===
+      -1
+  );
+}
+
+function constructHiddenPaymentMethodTypes(paymentMethods) {
+  var hiddenVaultedPaymentMethodTypes = [].concat(
+    VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN
+  );
+
+  if (Array.isArray(paymentMethods)) {
+    paymentMethods.forEach(function (paymentMethod) {
+      var paymentMethodId = paymentMethodTypes[paymentMethod];
+
+      if (!paymentMethodId) {
+        // don't add it if it is an unknown payment method
+        return;
+      }
+
+      if (
+        hiddenVaultedPaymentMethodTypes.indexOf(paymentMethodId) >
+        -1
+      ) {
+        // don't add the same payment method type a second time
+        return;
+      }
+
+      hiddenVaultedPaymentMethodTypes.push(paymentMethodId);
+    });
+  }
+
+  return hiddenVaultedPaymentMethodTypes;
 }
 
 module.exports = DropinModel;
@@ -18217,7 +18270,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.googlePay
 ];
 var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = '1.34.0';
+var VERSION = '1.35.0';
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -18225,7 +18278,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the card.
- * @property {object} details Additional account details. See a full list of details in the [Hosted Fields client reference](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#~tokenizePayload).
+ * @property {object} details Additional account details. See a full list of details in the [Hosted Fields client reference](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#~tokenizePayload).
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
@@ -18233,14 +18286,14 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  * @property {?boolean} liabilityShifted If 3D Secure is configured, whether or not liability did shift.
  * @property {?boolean} liabilityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
- * @property {?object} threeDSecureInfo If 3D Secure is configured, the `threeDSecureInfo` documented in the [Three D Secure client reference](http://braintree.github.io/braintree-web/3.90.0/ThreeDSecure.html#~verifyPayload)
+ * @property {?object} threeDSecureInfo If 3D Secure is configured, the `threeDSecureInfo` documented in the [Three D Secure client reference](http://braintree.github.io/braintree-web/3.91.0/ThreeDSecure.html#~verifyPayload)
  */
 
 /**
  * @typedef {object} Dropin~paypalPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
  * @property {?boolean} vaulted If present and true, indicates that the payment method refers to a vaulted payment method.
- * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/3.90.0/PayPalCheckout.html#~tokenizePayload).
+ * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/3.91.0/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
@@ -18506,67 +18559,67 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  */
 
 /**
- * The underlying [hosted fields `binAvailable` event](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#event:binAvailable).
+ * The underlying [hosted fields `binAvailable` event](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#event:binAvailable).
  * @event Dropin#card:binAvailable
  * @type {Dropin~card:binAvailable}
  */
 
 /**
- * The underlying [hosted fields `blur` event](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#event:blur).
+ * The underlying [hosted fields `blur` event](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#event:blur).
  * @event Dropin#card:blur
  * @type {Dropin~card:blur}
  */
 
 /**
- * The underlying [hosted fields `cardTypeChange` event](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#event:cardTypeChange).
+ * The underlying [hosted fields `cardTypeChange` event](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#event:cardTypeChange).
  * @event Dropin#card:cardTypeChange
  * @type {Dropin~card:cardTypeChange}
  */
 
 /**
- * The underlying [hosted fields `empty` event](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#event:empty).
+ * The underlying [hosted fields `empty` event](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#event:empty).
  * @event Dropin#card:empty
  * @type {Dropin~card:empty}
  */
 
 /**
- * The underlying [hosted fields `focus` event](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#event:focus).
+ * The underlying [hosted fields `focus` event](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#event:focus).
  * @event Dropin#card:focus
  * @type {Dropin~card:focus}
  */
 
 /**
- * The underlying [hosted fields `inputSubmitRequest` event](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#event:inputSubmitRequest).
+ * The underlying [hosted fields `inputSubmitRequest` event](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#event:inputSubmitRequest).
  * @event Dropin#card:inputSubmitRequest
  * @type {Dropin~card:inputSubmitRequest}
  */
 
 /**
- * The underlying [hosted fields `notEmpty` event](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#event:notEmpty).
+ * The underlying [hosted fields `notEmpty` event](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#event:notEmpty).
  * @event Dropin#card:notEmpty
  * @type {Dropin~card:notEmpty}
  */
 
 /**
- * The underlying [hosted fields `validityChange` event](http://braintree.github.io/braintree-web/3.90.0/HostedFields.html#event:validityChange).
+ * The underlying [hosted fields `validityChange` event](http://braintree.github.io/braintree-web/3.91.0/HostedFields.html#event:validityChange).
  * @event Dropin#card:validityChange
  * @type {Dropin~card:validityChange}
  */
 
 /**
- * The underlying [3D Secure `customer-canceled` event](http://braintree.github.io/braintree-web/3.90.0/ThreeDSecure.html#event:customer-canceled).
+ * The underlying [3D Secure `customer-canceled` event](http://braintree.github.io/braintree-web/3.91.0/ThreeDSecure.html#event:customer-canceled).
  * @event Dropin#3ds:customer-canceled
  * @type {Dropin~3ds:customer-canceled}
  */
 
 /**
- * The underlying [3D Secure `authentication-modal-render` event](http://braintree.github.io/braintree-web/3.90.0/ThreeDSecure.html#event:authentication-modal-render).
+ * The underlying [3D Secure `authentication-modal-render` event](http://braintree.github.io/braintree-web/3.91.0/ThreeDSecure.html#event:authentication-modal-render).
  * @event Dropin#3ds:authentication-modal-render
  * @type {Dropin~3ds:authentication-modal-render}
  */
 
 /**
- * The underlying [3D Secure `authentication-modal-close` event](http://braintree.github.io/braintree-web/3.90.0/ThreeDSecure.html#event:authentication-modal-close).
+ * The underlying [3D Secure `authentication-modal-close` event](http://braintree.github.io/braintree-web/3.91.0/ThreeDSecure.html#event:authentication-modal-close).
  * @event Dropin#3ds:authentication-modal-close
  * @type {Dropin~3ds:authentication-modal-close}
  */
@@ -18952,7 +19005,7 @@ Dropin.prototype._handleAppSwitch = function () {
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
  * @param {object} [options] All options for requesting a payment method.
- * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/3.90.0/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. When 3DS is enabled, both credit cards and non-network tokenized Google Pay cards will perform verfication. The recommended fields for achieving a 3DS v2 verification are:
+ * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/3.91.0/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. When 3DS is enabled, both credit cards and non-network tokenized Google Pay cards will perform verfication. The recommended fields for achieving a 3DS v2 verification are:
  * * `email`
  * * `mobilePhoneNumber`
  * * `billingAddress`
@@ -19269,7 +19322,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.34.0/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.35.0/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *       ></script>
  *       <input type="submit" value="Purchase"></input>
@@ -19287,7 +19340,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.34.0/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.35.0/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *        data-paypal.flow="checkout"
  *        data-paypal.amount="10.00"
@@ -19302,7 +19355,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Specifying a locale and payment option priority</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.34.0/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.35.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-locale="de_DE"
  *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
@@ -19317,7 +19370,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including an optional cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.34.0/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.35.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="false"
  *   ></script>
@@ -19327,7 +19380,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including a required cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.34.0/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.35.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="true"
  *   ></script>
@@ -19344,15 +19397,15 @@ var DropinError = require('./lib/dropin-error');
 var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = '1.34.0';
+var VERSION = '1.35.0';
 
 /**
- * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/3.90.0/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
+ * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/3.91.0/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
  *
  * @param {(boolean|object)} [cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
  * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
- * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/3.90.0/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/3.90.0/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
- * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/3.90.0/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#customize-your-ui).
+ * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/3.91.0/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/3.91.0/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
+ * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/3.91.0/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#customize-your-ui).
  * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a successful tokenization.
  * @param {object} [vault] Configuration for vaulting credit cards. Only applies when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id).
  * @param {boolean} [vault.allowVaultCardOverride=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
@@ -19368,11 +19421,11 @@ var VERSION = '1.34.0';
 /**
  * @typedef {object} threeDSecureOptions Configuration options to pass when creating the 3D Secure module used in Drop-in. `amount` for 3D Secure verification can be passed here, but it's recomended that it and all other 3D Secure verification options be passed to the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead. Any `cardinalSDKConfig` options must be passed here when creating Drop-in.
  *
- * @param {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/3.90.0/module-braintree-web_three-d-secure.html#.create) for all options.
+ * @param {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/3.91.0/module-braintree-web_three-d-secure.html#.create) for all options.
  * @param {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
  */
 
-/** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.90.0/PayPalCheckout.html#createPayment).
+/** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.91.0/PayPalCheckout.html#createPayment).
  *
  * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developer.paypal.com/braintree/docs/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developer.paypal.com/braintree/docs/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
  * @param {(string|number)} [amount] The amount of the transaction. Required when using the Checkout flow.
@@ -19467,18 +19520,22 @@ var VERSION = '1.34.0';
  * `zh_XC`.
  *
  * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/main/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
- * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']`. Payment options omitted from this array will not be offered to the customer.
+ * @param {string[]} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']`. Payment options omitted from this array will not be offered to the customer.
+ * @param {string[]} [options.hiddenVaultedPaymentMethodTypes] Use this option to hide certain types of vaulted payment methods from being displayed to the customer. Apple Pay, Google Pay and Venmo are always hidden (as those payment methods are only availabe as vaulted payment methods for existing subscriptions, new transactions or subscriptions must be newly authorized). Available options:
+ * * `'card'`
+ * * `'paypal'`
+ * * `'paypalCredit'` (same as PayPal)
  *
  * @param {(boolean|object)} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards, pass `false` for the value.
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#linked-paypal-testing).
  *
- * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.90.0/PayPalCheckout.html#createPayment).
+ * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.91.0/PayPalCheckout.html#createPayment).
  *
  * PayPal is not [supported in Internet Explorer versions lower than 11](https://developer.paypal.com/docs/archive/checkout/reference/faq/#link-whichbrowsersdoespaypalcheckoutsupport).
  *
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live).
  *
- * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.90.0/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developer.paypal.com/braintree/docs/guides/paypal/paypal-credit/javascript/v3).
+ * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.91.0/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developer.paypal.com/braintree/docs/guides/paypal/paypal-credit/javascript/v3).
  *
  * PayPal Credit is not [supported in Internet Explorer versions lower than 11](https://developer.paypal.com/docs/archive/checkout/reference/faq/#link-whichbrowsersdoespaypalcheckoutsupport).
  *
@@ -19518,7 +19575,7 @@ var VERSION = '1.34.0';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.34.0/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.35.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -19557,7 +19614,7 @@ var VERSION = '1.34.0';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.34.0/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.35.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -19637,7 +19694,7 @@ var VERSION = '1.34.0';
  *       <input type="hidden" id="nonce" name="payment_method_nonce"></input>
  *     </form>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.34.0/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.35.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var form = document.querySelector('#payment-form');
@@ -19855,7 +19912,7 @@ createFromScriptTag(create, typeof document !== 'undefined' && document.querySel
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of Drop-in, i.e. `1.34.0`.
+   * @description The current version of Drop-in, i.e. `1.35.0`.
    * @type {string}
    */
   VERSION: VERSION
