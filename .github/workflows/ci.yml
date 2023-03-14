@@ -75,7 +75,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout 🛎
+      - name: Checkout 🛎
         uses: actions/checkout@v3
 
       - name: Setup Node ⬢
@@ -107,8 +107,8 @@ jobs:
     concurrency: browserstack_lock
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout 🛎
-      uses: actions/checkout@v3
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
 
       - name: Setup Node ⬢
         uses: actions/setup-node@v3
@@ -166,8 +166,8 @@ jobs:
     name: PayPal Tests on Firefox 🔥
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout 🛎
-      uses: actions/checkout@v3
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
 
       - name: Setup Node ⬢
         uses: actions/setup-node@v3
@@ -225,8 +225,8 @@ jobs:
     name: PayPal Tests on Chrome 🚔
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout 🛎
-      uses: actions/checkout@v3
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
 
       - name: Setup Node ⬢
         uses: actions/setup-node@v3
