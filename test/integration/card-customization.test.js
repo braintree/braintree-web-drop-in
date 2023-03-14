@@ -33,6 +33,7 @@ describe('Drop-in card', function () {
       browser.hostedFieldSendInput('number');
       browser.hostedFieldSendInput('expirationDate');
       browser.hostedFieldSendInput('cvv');
+      browser.hostedFieldSendInput('postalCode');
 
       expect($('#pay-button').isEnabled()).toBe(true);
 
@@ -54,6 +55,7 @@ describe('Drop-in card', function () {
       browser.hostedFieldSendInput('number');
       browser.hostedFieldSendInput('expirationDate');
       browser.hostedFieldSendInput('cvv');
+      browser.hostedFieldSendInput('postalCode');
 
       expect($('#pay-button').isEnabled()).toBe(false);
 
@@ -166,6 +168,7 @@ describe('Drop-in card', function () {
       browser.hostedFieldSendInput('number');
       browser.hostedFieldSendInput('expirationDate');
       browser.hostedFieldSendInput('cvv');
+      browser.hostedFieldSendInput('postalCode');
 
       browser.submitPay();
 
@@ -186,6 +189,7 @@ describe('Drop-in card', function () {
       browser.hostedFieldSendInput('number');
       browser.hostedFieldSendInput('expirationDate');
       browser.hostedFieldSendInput('cvv');
+      browser.hostedFieldSendInput('postalCode');
 
       browser.submitPay();
 
