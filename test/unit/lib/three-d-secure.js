@@ -1,7 +1,6 @@
 
 const fake = require('../../helpers/fake');
 const threeDSecure = require('braintree-web/three-d-secure');
-const classList = require('@braintree/class-list');
 const ThreeDSecure = require('../../../src/lib/three-d-secure');
 const throwIfResolves = require('../../helpers/throw-if-resolves');
 
@@ -26,9 +25,6 @@ describe('ThreeDSecure', () => {
     jest.spyOn(testContext.threeDSecureInstance, 'verifyCard').mockImplementation();
     jest.spyOn(testContext.threeDSecureInstance, 'cancelVerifyCard').mockImplementation();
     jest.spyOn(testContext.threeDSecureInstance, 'on').mockImplementation();
-
-    jest.spyOn(classList, 'add').mockImplementation();
-    jest.spyOn(classList, 'remove').mockImplementation();
   });
 
   describe('initialize', () => {

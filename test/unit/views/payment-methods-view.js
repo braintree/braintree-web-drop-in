@@ -5,7 +5,6 @@ const PayPalView = require('../../../src/views/payment-sheet-views/paypal-view')
 const PaymentMethodsView = require('../../../src/views/payment-methods-view');
 const PaymentMethodView = require('../../../src/views/payment-method-view');
 const DropinError = require('../../../src/lib/dropin-error');
-const classList = require('@braintree/class-list');
 const fake = require('../../helpers/fake');
 const throwIfResolves = require('../../helpers/throw-if-resolves');
 const fs = require('fs');
@@ -348,7 +347,6 @@ describe('PaymentMethodsView', () => {
         };
 
         testContext.paymentMethodsViews.activeMethodView = testContext.activeMethodView;
-        jest.spyOn(classList, 'add').mockImplementation();
       });
     });
 
@@ -370,8 +368,7 @@ describe('PaymentMethodsView', () => {
       () => {
         testContext.paymentMethodsViews.removeActivePaymentMethod();
 
-        expect(classList.add).toBeCalledTimes(1);
-        expect(classList.add).toBeCalledWith(expect.anything(), 'braintree-no-payment-method-selected');
+        expect(testContext.paymentMethodsViews._headingLabel.classList.contains('braintree-no-payment-method-selected')).toBe(true);
       }
     );
   });

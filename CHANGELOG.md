@@ -2,6 +2,7 @@
 
 ## Unreleased
   - Drop dependency on `promise-polyfill`
+  - Drop dependency on @braintree/class-list
 
 ## 1.36.1
   - Update braintree-web to 3.92.1

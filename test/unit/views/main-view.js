@@ -9,7 +9,6 @@ const PaymentMethodsView = require('../../../src/views/payment-methods-view');
 const Promise = require('../../../src/lib/promise');
 const wait = require('../../../src/lib/wait');
 const analytics = require('../../../src/lib/analytics');
-const classList = require('@braintree/class-list');
 const fake = require('../../helpers/fake');
 const fs = require('fs');
 const hostedFields = require('braintree-web/hosted-fields');
@@ -656,7 +655,7 @@ describe('MainView', () => {
     test(
       'removes the braintree-sheet--has-error class from dropin container',
       () => {
-        classList.add(testContext.context.dropinContainer, 'braintree-sheet--has-error');
+        testContext.context.dropinContainer.classList.add('braintree-sheet--has-error');
 
         MainView.prototype.hideSheetError.call(testContext.context);
 
@@ -858,8 +857,8 @@ describe('MainView', () => {
 
       describe('when the PaymentMethodsView is active', () => {
         beforeEach(() => {
-          classList.remove(testContext.paymentMethodsContainer, 'braintree-methods--active');
-          classList.add(testContext.sheetElement, 'braintree-sheet--active');
+          testContext.paymentMethodsContainer.classList.remove('braintree-methods--active');
+          testContext.sheetElement.classList.add('braintree-sheet--active');
         });
 
         test(
@@ -900,8 +899,8 @@ describe('MainView', () => {
       describe('when a payment sheet is active', () => {
         beforeEach(() => {
           jest.spyOn(wait, 'delay');
-          classList.add(testContext.paymentMethodsContainer, 'braintree-methods--active');
-          classList.remove(testContext.sheetElement, 'braintree-sheet--active');
+          testContext.paymentMethodsContainer.classList.add('braintree-methods--active');
+          testContext.sheetElement.classList.remove('braintree-sheet--active');
         });
 
         [CardView, PayPalView].forEach(PaymentSheetView => {
@@ -1248,31 +1247,29 @@ describe('MainView', () => {
 
   describe('preventUserAction', () => {
     test('displays disable wrapper', () => {
-      const wrapper = {};
+      const wrapper = document.createElement('div');
       const context = {
         disableWrapper: wrapper
       };
 
-      jest.spyOn(classList, 'remove').mockImplementation();
+      wrapper.classList.add('braintree-hidden');
 
       MainView.prototype.preventUserAction.call(context);
 
-      expect(classList.remove).toBeCalledWith(wrapper, 'braintree-hidden');
+      expect(wrapper.classList.contains('braintree-hidden')).toBe(false);
     });
   });
 
   describe('allowUserAction', () => {
     test('hides disable wrapper', () => {
-      const wrapper = {};
+      const wrapper = document.createElement('div');
       const context = {
         disableWrapper: wrapper
       };
 
-      jest.spyOn(classList, 'add').mockImplementation();
-
       MainView.prototype.allowUserAction.call(context);
 
-      expect(classList.add).toBeCalledWith(wrapper, 'braintree-hidden');
+      expect(wrapper.classList.contains('braintree-hidden')).toBe(true);
     });
   });
 
