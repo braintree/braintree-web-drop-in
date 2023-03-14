@@ -12,6 +12,7 @@ describe('Drop-in events', function () {
     browser.hostedFieldSendInput('number');
     browser.hostedFieldSendInput('expirationDate');
     browser.hostedFieldSendInput('cvv');
+    browser.hostedFieldSendInput('postalCode');
 
     expect($('#pay-button').isEnabled()).toBe(true);
 

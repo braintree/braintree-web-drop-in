@@ -19,6 +19,7 @@ describe('Drop-in Script Tag Integration', function () {
     browser.hostedFieldSendInput('number');
     browser.hostedFieldSendInput('expirationDate');
     browser.hostedFieldSendInput('cvv');
+    browser.hostedFieldSendInput('postalCode');
 
     browser.submitPay(false);
 
