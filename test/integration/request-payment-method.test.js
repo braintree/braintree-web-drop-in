@@ -45,13 +45,8 @@ describe('Drop-in#requestPaymentMethod', function () {
     });
 
     it('tokenizes PayPal Credit @paypal', function () {
-      switch (browser.name()) {
-        case 'SAFARI':
-        case 'INTERNET EXPLORER':
-          this.skip(`${browser.name()} broken for the credit flow. It makes the user apply for PP credit :( :( :(`);
-
-          return;
-        default:
+      if (browser.name() === 'SAFARI') {
+        this.skip(`${browser.name()} broken for the credit flow. It makes the user apply for PP credit :( :( :(`);
       }
 
       browser.start({
