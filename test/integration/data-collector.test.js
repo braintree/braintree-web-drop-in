@@ -13,6 +13,7 @@ describe('Drop-in with Data Collector', function () {
     browser.hostedFieldSendInput('number');
     browser.hostedFieldSendInput('expirationDate');
     browser.hostedFieldSendInput('cvv');
+    browser.hostedFieldSendInput('postalCode');
 
     browser.submitPay();
 
