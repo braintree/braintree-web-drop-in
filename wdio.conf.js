@@ -8,7 +8,6 @@ require('dotenv').config();
 
 const ONLY_BROWSERS = process.env.ONLY_BROWSERS;
 const localIdentifier = uuid();
-const screenResolution = '1920x1080';
 
 const projectName = 'Braintee Web Drop-in';
 let type;
@@ -38,26 +37,6 @@ let capabilities = [
   {
     ...desktopCapabilities,
     browserName: 'Chrome',
-  },
-  {
-    ...desktopCapabilities,
-    browserName: 'IE',
-    browserVersion: '11.0',
-    'bstack:options': {
-      ...desktopCapabilities['bstack:options'],
-      seleniumVersion: '3.141.5',
-      bfcache: '0',
-      ie : {
-      // don't update this! There's a weird bug in the
-      // 64 bit ie driver that prevents the shift key
-      // from working which means that an email can
-      // never be entered because the "@" key cannot
-      // be entered. This doesn't occur in the 32 bit
-      // version, so we pin to that
-        arch : 'x32',
-        driver : '3.141.5',
-      }
-    }
   },
   {
     ...desktopCapabilities,

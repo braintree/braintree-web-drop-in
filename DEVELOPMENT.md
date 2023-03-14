@@ -328,7 +328,7 @@ npm test
 
 ## Integration tests
 
-We use [Browserstack](https://www.browserstack.com) to automate end to end testing on Google Chrome, Safari, Firefox and Internet Explorer 11.
+We use [Browserstack](https://www.browserstack.com) to automate end to end testing on Google Chrome, Safari, and Firefox.
 
 First, [sign up for a free open source Browserstack account](https://www.browserstack.com/open-source?ref=pricing) and a and [PayPal Sandbox](https://developer.paypal.com/developer/accounts/).
 
@@ -402,9 +402,6 @@ To run tests in only one browser, prefix the test command with an `ONLY_BROWSERS
 # run only in chrome browser
 ONLY_BROWSERS=chrome npm run test:integration
 
-# run only in internet explorer 11 browser
-ONLY_BROWSERS=ie npm run test:integration
-
 # run only in safari browser
 ONLY_BROWSERS=safari npm run test:integration
 
@@ -415,8 +412,8 @@ ONLY_BROWSERS=firefox npm run test:integration
 To run tests in certain browsers, prefix the test command with an `ONLY_BROWSERS` env variable, with each browser comma separated:
 
 ```sh
-# run only in internet explorer 11 and chrome browsers
-ONLY_BROWSERS=ie,chrome npm run test:integration
+# run only in firefox and chrome browsers
+ONLY_BROWSERS=firefox,chrome npm run test:integration
 ```
 
 ## Translations
