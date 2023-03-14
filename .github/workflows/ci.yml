@@ -44,7 +44,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout 🛎
+      - name: Checkout 🛎
         uses: actions/checkout@v3
 
       - name: Setup Node ⬢
