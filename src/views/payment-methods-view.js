@@ -5,7 +5,6 @@ var PaymentMethodView = require('./payment-method-view');
 var DropinError = require('../lib/dropin-error');
 var classList = require('@braintree/class-list');
 var errors = require('../constants').errors;
-var Promise = require('../lib/promise');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {

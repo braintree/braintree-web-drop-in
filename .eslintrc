@@ -16,5 +16,6 @@
         key-spacing: 0
 
   globals:
-    __dirname: true
-    process: true
+    __dirname: "readonly"
+    process: "readonly"
+    Promise: "readonly"
