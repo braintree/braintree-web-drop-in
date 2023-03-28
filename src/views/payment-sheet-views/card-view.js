@@ -126,7 +126,8 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     fields: {
       cardholderName: {
         container: this._getFieldContainer('cardholder-name'),
-        placeholder: this.strings.cardholderNamePlaceholder
+        placeholder: this.strings.cardholderNamePlaceholder,
+        type: 'text'
       },
       number: {
         container: this._getFieldContainer('number'),
