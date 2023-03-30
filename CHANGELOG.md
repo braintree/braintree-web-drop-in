@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+  - Update braintree-web to 3.92.1
+
 ## 1.36.0
   - Update braintree-web to v3.92.0
 
