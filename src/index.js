@@ -140,7 +140,7 @@ var VERSION = '__VERSION__';
  * @property {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
  */
 
-/** 
+/**
  * @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
  * @property {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developer.paypal.com/braintree/docs/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developer.paypal.com/braintree/docs/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
@@ -152,7 +152,7 @@ var VERSION = '__VERSION__';
  * @property {boolean} [vault.vaultPayPal=true] Whether or not to vault the PayPal account upon tokenization.
  */
 
-/** 
+/**
  * @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
  *
  * @property {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
@@ -161,7 +161,7 @@ var VERSION = '__VERSION__';
  * @property {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
  */
 
-/** 
+/**
  * @typedef {object} googlePayCreateOptions The configuration options for Google Pay. Additional options from the few listed here are available, many have default values applied based on the settings found in the Braintree Gateway. For more information, see [Google's Documentation](https://developers.google.com/pay/api/web/object-reference#request-objects).
  *
  * @property {string} merchantId The ID provided by Google for processing transactions in production. Not necessary for testing in sandbox.
@@ -188,7 +188,7 @@ var VERSION = '__VERSION__';
  * @see {@link https://developers.google.com/pay/api/web/reference/object#ButtonOptions ButtonOptions}
  */
 
-/** 
+/**
  * @typedef {(object|boolean)} venmoCreateOptions The configuration options for Venmo. If `true` is passed instead of a configuration object, the default settings listed will be used.
  *
  * @property {boolean} [allowNewBrowserTab=true] If false, it restricts supported browsers to those that can app switch to the Venmo app without opening a new tab.
