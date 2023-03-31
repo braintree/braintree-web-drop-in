@@ -117,54 +117,57 @@ var VERSION = '__VERSION__';
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
  *
- * @param {(boolean|object)} [cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
- * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
- * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
- * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#customize-your-ui).
- * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a successful tokenization.
- * @param {object} [vault] Configuration for vaulting credit cards. Only applies when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id).
- * @param {boolean} [vault.allowVaultCardOverride=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
- * @param {boolean} [vault.vaultCard=true] Whether or not to vault the card upon tokenization. When set to `false` with `allowVaultCardOverride` set to `false`, then cards will not be vaulted.
+ * @property {(boolean|object)} [cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
+ * @property {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
+ * @property {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
+ * @property {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#customize-your-ui).
+ * @property {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a successful tokenization.
+ * @property {object} [vault] Configuration for vaulting credit cards. Only applies when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id).
+ * @property {boolean} [vault.allowVaultCardOverride=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
+ * @property {boolean} [vault.vaultCard=true] Whether or not to vault the card upon tokenization. When set to `false` with `allowVaultCardOverride` set to `false`, then cards will not be vaulted.
  */
 
 /**
  * @typedef {object} dataCollectorOptions The configuration options for Data Collector. Requires [advanced fraud protection](https://developer.paypal.com/braintree/docs/guides/premium-fraud-management-tools/client-side/javascript/v3) to be enabled in the Braintree gateway. If using Kount, contact our [support team](https://developer.paypal.com/braintree/help) to configure your Kount ID. The device data will be included on the {@link Dropin#requestPaymentMethod|requestPaymentMethod payload}.
  *
- * @param {boolean} [kount] If true, Kount fraud data collection is enabled.
+ * @property {boolean} [kount] If true, Kount fraud data collection is enabled.
  */
 
 /**
  * @typedef {object} threeDSecureOptions Configuration options to pass when creating the 3D Secure module used in Drop-in. `amount` for 3D Secure verification can be passed here, but it's recomended that it and all other 3D Secure verification options be passed to the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead. Any `cardinalSDKConfig` options must be passed here when creating Drop-in.
  *
- * @param {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_three-d-secure.html#.create) for all options.
- * @param {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
+ * @property {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_three-d-secure.html#.create) for all options.
+ * @property {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
  */
 
-/** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
+/** 
+ * @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
- * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developer.paypal.com/braintree/docs/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developer.paypal.com/braintree/docs/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
- * @param {(string|number)} [amount] The amount of the transaction. Required when using the Checkout flow.
- * @param {string} [currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
- * @param {object} [buttonStyle] The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles) are available.
- * @param {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
- * @param {object} [vault] Configuration for vaulting PayPal accounts. Only applies when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id).
- * @param {boolean} [vault.vaultPayPal=true] Whether or not to vault the PayPal account upon tokenization.
+ * @property {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developer.paypal.com/braintree/docs/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developer.paypal.com/braintree/docs/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
+ * @property {(string|number)} [amount] The amount of the transaction. Required when using the Checkout flow.
+ * @property {string} [currency] The currency code of the amount, such as `USD`. Required when using the Checkout flow.
+ * @property {object} [buttonStyle] The style object to apply to the PayPal button. Button customization includes color, shape, size, and label. The options [found here](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/customize-button/#button-styles) are available.
+ * @property {boolean} [commit] The user action to show on the PayPal review page. If true, a `Pay Now` button will be shown. If false, a `Continue` button will be shown.
+ * @property {object} [vault] Configuration for vaulting PayPal accounts. Only applies when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id).
+ * @property {boolean} [vault.vaultPayPal=true] Whether or not to vault the PayPal account upon tokenization.
  */
 
-/** @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
+/** 
+ * @typedef {object} applePayCreateOptions The configuration options for Apple Pay.
  *
- * @param {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
- * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a utf-8 string that is a maximum of 128 characters. The system may display this name to the user.
- * @param {number} [applePaySessionVersion=2] The [version of the `ApplePaySession`](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history) to use. It's recommended to use the lowest version that contains all the features you need for your checkout to maximize compatibility.
- * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
+ * @property {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
+ * @property {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a utf-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @property {number} [applePaySessionVersion=2] The [version of the `ApplePaySession`](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history) to use. It's recommended to use the lowest version that contains all the features you need for your checkout to maximize compatibility.
+ * @property {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
  */
 
-/** @typedef {object} googlePayCreateOptions The configuration options for Google Pay. Additional options from the few listed here are available, many have default values applied based on the settings found in the Braintree Gateway. For more information, see [Google's Documentation](https://developers.google.com/pay/api/web/object-reference#request-objects).
+/** 
+ * @typedef {object} googlePayCreateOptions The configuration options for Google Pay. Additional options from the few listed here are available, many have default values applied based on the settings found in the Braintree Gateway. For more information, see [Google's Documentation](https://developers.google.com/pay/api/web/object-reference#request-objects).
  *
- * @param {string} merchantId The ID provided by Google for processing transactions in production. Not necessary for testing in sandbox.
- * @param {string} [googlePayVersion=1] The version of the Google Pay API to use. Defaults to 1, but 2 can be passed in.
- * @param {external:GooglePayTransactionInfo} transactionInfo The transaction details necessary for processing the payment.
- * @param {external:GooglePayButtonOptions} [button] The button options for configuring the look of the Google Pay button. The `onClick` property cannot be overwritten.
+ * @property {string} merchantId The ID provided by Google for processing transactions in production. Not necessary for testing in sandbox.
+ * @property {string} [googlePayVersion=1] The version of the Google Pay API to use. Defaults to 1, but 2 can be passed in.
+ * @property {external:GooglePayTransactionInfo} transactionInfo The transaction details necessary for processing the payment.
+ * @property {external:GooglePayButtonOptions} [button] The button options for configuring the look of the Google Pay button. The `onClick` property cannot be overwritten.
  */
 
 /**
@@ -185,9 +188,10 @@ var VERSION = '__VERSION__';
  * @see {@link https://developers.google.com/pay/api/web/reference/object#ButtonOptions ButtonOptions}
  */
 
-/** @typedef {(object|boolean)} venmoCreateOptions The configuration options for Venmo. If `true` is passed instead of a configuration object, the default settings listed will be used.
+/** 
+ * @typedef {(object|boolean)} venmoCreateOptions The configuration options for Venmo. If `true` is passed instead of a configuration object, the default settings listed will be used.
  *
- * @param {boolean} [allowNewBrowserTab=true] If false, it restricts supported browsers to those that can app switch to the Venmo app without opening a new tab.
+ * @property {boolean} [allowNewBrowserTab=true] If false, it restricts supported browsers to those that can app switch to the Venmo app without opening a new tab.
  */
 
 /**
