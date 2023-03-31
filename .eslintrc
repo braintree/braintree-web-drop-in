@@ -1,20 +1,18 @@
----
-  extends: braintree/client
-
-  rules:
-    valid-jsdoc:
-      - 2
-      - prefer:
-          return: returns
-        requireReturn: true
-        requireParamDescription: true
-        requireReturnDescription: true
-
-  overrides:
-    - files: "src/translations/*"
-      rules:
-        key-spacing: 0
-
-  globals:
-    __dirname: true
-    process: true
+{
+  "extends": ["braintree/client", "braintree/es6"],
+  "parserOptions": {
+    "sourceType": "script",
+    "ecmaVersion": 2018
+  },
+  "env": {
+    "node": true,
+    "es6": true,
+    "browser": true
+  },
+  "rules": {
+    "comma-dangle": 0,
+    "no-warning-comments": 0,
+    "key-spacing": 0
+  },
+  "ignorePatterns": ["babel.config.js", "wdio.conf.js", "webpack.config.js"]
+}

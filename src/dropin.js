@@ -8,7 +8,6 @@ var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
 var EventEmitter = require('@braintree/event-emitter');
 var assets = require('@braintree/asset-loader');
-var fs = require('fs');
 var MainView = require('./views/main-view');
 var paymentMethodsViewID = require('./views/payment-methods-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
@@ -21,8 +20,8 @@ var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
-var mainHTML = fs.readFileSync(__dirname + '/html/main.html', 'utf8');
-var svgHTML = fs.readFileSync(__dirname + '/html/svgs.html', 'utf8');
+var mainHTML = require('./html/main.html');
+var svgHTML = require('./html/svgs.html');
 
 var PASS_THROUGH_EVENTS = [
   'changeActiveView',
