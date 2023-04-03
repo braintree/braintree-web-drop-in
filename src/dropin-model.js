@@ -8,7 +8,6 @@ var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var dependencySetupStates = constants.dependencySetupStates;
 var isGuestCheckout = require('./lib/is-guest-checkout');
-var Promise = require('./lib/promise');
 var paymentSheetViews = require('./views/payment-sheet-views');
 var vaultManager = require('braintree-web/vault-manager');
 var paymentOptionsViewID = require('./views/payment-options-view').ID;

@@ -1,7 +1,5 @@
 'use strict';
 
-var Promise = require('./promise');
-
 function delay(time) {
   time = time || 0;
 

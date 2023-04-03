@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+  - Drop dependency on `promise-polyfill`
+
 ## 1.36.1
   - Update braintree-web to 3.92.1
 

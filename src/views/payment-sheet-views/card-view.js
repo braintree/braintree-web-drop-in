@@ -9,7 +9,6 @@ var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
 var isUtf8 = require('../../lib/is-utf-8');
 var transitionHelper = require('../../lib/transition-helper');
-var Promise = require('../../lib/promise');
 
 var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
