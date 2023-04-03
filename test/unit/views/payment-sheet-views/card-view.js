@@ -1,7 +1,6 @@
 
 const BaseView = require('../../../../src/views/base-view');
 const CardView = require('../../../../src/views/payment-sheet-views/card-view');
-const classList = require('@braintree/class-list');
 const DropinModel = require('../../../../src/dropin-model');
 const fake = require('../../../helpers/fake');
 const fs = require('fs');
@@ -995,7 +994,7 @@ describe('CardView', () => {
         };
         const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
-        classList.remove(numberFieldGroup, 'braintree-form__field-group--is-focused');
+        numberFieldGroup.classList.remove('braintree-form__field-group--is-focused');
 
         return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).toBe(true);
@@ -1027,7 +1026,7 @@ describe('CardView', () => {
           }
         };
 
-        classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+        numberFieldGroup.classList.add('braintree-form__field-group--is-focused');
 
         return cardView.initialize().then(() => {
           expect(cardView.model._emit).toBeCalledWith('card:blur', eventPayload);
@@ -1047,7 +1046,7 @@ describe('CardView', () => {
             }
           };
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+          numberFieldGroup.classList.add('braintree-form__field-group--is-focused');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).toBe(false);
@@ -1078,7 +1077,7 @@ describe('CardView', () => {
           }
         });
 
-        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
         return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
@@ -1152,7 +1151,7 @@ describe('CardView', () => {
 
           cardView.model = fake.model(modelOptions);
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
@@ -1200,7 +1199,7 @@ describe('CardView', () => {
 
           cardView.model = fake.model(modelOptions);
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
           cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -1251,7 +1250,7 @@ describe('CardView', () => {
 
           cardView.model = fake.model(modelOptions);
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -1296,7 +1295,7 @@ describe('CardView', () => {
 
           cardView.model = fake.model(modelOptions);
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -1421,7 +1420,7 @@ describe('CardView', () => {
             emittedBy: 'number'
           };
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+          numberFieldGroup.classList.add('braintree-form__field-group--card-type-known');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(false);
@@ -1439,7 +1438,7 @@ describe('CardView', () => {
             emittedBy: 'number'
           };
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+          numberFieldGroup.classList.add('braintree-form__field-group--card-type-known');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(false);
@@ -1733,7 +1732,7 @@ describe('CardView', () => {
             }
           };
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.add('braintree-form__field-group--has-error');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -2019,7 +2018,7 @@ describe('CardView', () => {
           }
         };
 
-        classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
+        numberFieldGroup.classList.add('braintree-form__field-group--has-error');
 
         return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -2408,22 +2407,13 @@ describe('CardView', () => {
     test(
       'sets the aria-invalid attribute on an input when a field error is hidden',
       () => {
-        const input = {
-          id: {
-            indexOf: function () {
-              return 1;
-            }
-          },
-          setAttribute: jest.fn()
-        };
-        const fieldGroup = {
-          querySelector: function () {
-            return input;
-          }
-        };
+        const input = document.createElement('input');
+        const fieldGroup = document.createElement('div');
 
+        fieldGroup.appendChild(input);
+
+        jest.spyOn(input, 'setAttribute').mockImplementation();
         jest.spyOn(cardView, 'getElementById').mockReturnValue(fieldGroup);
-        jest.spyOn(classList, 'add').mockImplementation();
 
         cardView.showFieldError('foo');
 
@@ -2462,22 +2452,13 @@ describe('CardView', () => {
     test(
       'removes the aria-invalid attribute on an input when a field error is hidden',
       () => {
-        const input = {
-          id: {
-            indexOf: function () {
-              return 1;
-            }
-          },
-          removeAttribute: jest.fn()
-        };
-        const fieldGroup = {
-          querySelector: function () {
-            return input;
-          }
-        };
+        const input = document.createElement('input');
+        const fieldGroup = document.createElement('div');
 
+        fieldGroup.appendChild(input);
+
+        jest.spyOn(input, 'removeAttribute').mockImplementation();
         jest.spyOn(cardView, 'getElementById').mockReturnValue(fieldGroup);
-        jest.spyOn(classList, 'remove').mockImplementation();
 
         cardView.hideFieldError('foo');
 
@@ -2750,12 +2731,11 @@ describe('CardView', () => {
       done => {
         const stubPayload = {};
 
-        jest.spyOn(classList, 'remove').mockImplementation();
         fakeHostedFieldsInstance.tokenize.mockResolvedValue(stubPayload);
 
         cardView.tokenize().then(() => {
           setTimeout(() => {
-            expect(classList.remove).toBeCalledWith(cardElement, 'braintree-sheet--loading');
+            expect(cardElement.classList.contains('braintree-sheet--loading')).toBe(false);
             done();
           }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
         });
@@ -2767,11 +2747,10 @@ describe('CardView', () => {
       () => {
         expect.assertions(1);
 
-        jest.spyOn(classList, 'remove').mockImplementation();
         fakeHostedFieldsInstance.tokenize.mockRejectedValue(new Error('foo'));
 
         return cardView.tokenize().catch(() => {
-          expect(classList.remove).toBeCalledWith(cardElement, 'braintree-sheet--loading');
+          expect(cardElement.classList.contains('braintree-sheet--loading')).toBe(false);
         });
       }
     );
@@ -2806,10 +2785,6 @@ describe('CardView', () => {
   });
 
   describe('field errors', () => {
-    beforeEach(() => {
-      jest.spyOn(classList, 'add').mockImplementation();
-    });
-
     describe('showFieldError', () => {
       let cardView;
 

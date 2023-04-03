@@ -2,7 +2,6 @@
 
 var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
-var classList = require('@braintree/class-list');
 var constants = require('./constants');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
@@ -749,7 +748,7 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
     var error = this._model.failedDependencies[paymentMethodId];
     var errorMessageDiv = div.querySelector('.braintree-option__disabled-message');
 
-    classList.add(div, 'braintree-disabled');
+    div.classList.add('braintree-disabled');
     div.removeEventListener('click', clickHandler);
     errorMessageDiv.innerHTML = constants.errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
     console.error(error); // eslint-disable-line no-console

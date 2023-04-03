@@ -1,7 +1,6 @@
 
 const BaseView = require('../../../src/views/base-view');
 const constants = require('../../../src/constants');
-const classList = require('@braintree/class-list');
 const Promise = require('../../../src/lib/promise');
 
 describe('BaseView', () => {
@@ -94,7 +93,6 @@ describe('BaseView', () => {
 
   describe('preventUserAction', () => {
     beforeEach(() => {
-      jest.spyOn(classList, 'add').mockImplementation();
       testContext.element = global.document.createElement('div');
       testContext.model = {
         preventUserAction: jest.fn()
@@ -109,18 +107,7 @@ describe('BaseView', () => {
 
       view.preventUserAction();
 
-      expect(classList.add).toBeCalledTimes(1);
-      expect(classList.add).toBeCalledWith(testContext.element, 'braintree-sheet--loading');
-    });
-
-    test('ignores adding class if no element is provided', () => {
-      const view = new BaseView({
-        model: testContext.model
-      });
-
-      view.preventUserAction();
-
-      expect(classList.add).not.toBeCalled();
+      expect(testContext.element.classList.contains('braintree-sheet--loading')).toBe(true);
     });
 
     test('calls preventUserAction on model', () => {
@@ -136,33 +123,23 @@ describe('BaseView', () => {
 
   describe('allowUserAction', () => {
     beforeEach(() => {
-      jest.spyOn(classList, 'remove').mockImplementation();
       testContext.element = global.document.createElement('div');
       testContext.model = {
         allowUserAction: jest.fn()
       };
     });
 
-    test('adds a loading class to view element', () => {
+    test('removes a loading class from view element', () => {
       const view = new BaseView({
         element: testContext.element,
         model: testContext.model
       });
 
-      view.allowUserAction();
-
-      expect(classList.remove).toBeCalledTimes(1);
-      expect(classList.remove).toBeCalledWith(testContext.element, 'braintree-sheet--loading');
-    });
-
-    test('ignores adding class if no element is provided', () => {
-      const view = new BaseView({
-        model: testContext.model
-      });
+      testContext.element.classList.add('braintree-sheet--loading');
 
       view.allowUserAction();
 
-      expect(classList.remove).not.toBeCalled();
+      expect(testContext.element.classList.contains('braintree-sheet--loading')).toBe(false);
     });
 
     test('calls allowUserAction on model', () => {
