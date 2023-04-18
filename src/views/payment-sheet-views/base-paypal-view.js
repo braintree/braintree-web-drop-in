@@ -155,6 +155,7 @@ BasePayPalView.isEnabled = function (options) {
     return paypalScriptLoadInProgressPromise;
   }
 
+  // console.timeLog("paypal loading")
   paypalScriptLoadInProgressPromise = assets.loadScript({
     src: constants.CHECKOUT_JS_SOURCE,
     id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
@@ -162,6 +163,8 @@ BasePayPalView.isEnabled = function (options) {
       'log-level': merchantPayPalConfig.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
     }
   }).then(function () {
+    // console.timeEnd("paypal loading")
+
     return Promise.resolve(true);
   }).catch(function () {
     return Promise.resolve(false);

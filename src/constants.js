@@ -3,6 +3,7 @@
 module.exports = {
   paymentOptionIDs: {
     card: 'card',
+    axo: 'axo',
     paypal: 'paypal',
     paypalCredit: 'paypalCredit',
     applePay: 'applePay',
@@ -11,6 +12,7 @@ module.exports = {
   },
   paymentMethodTypes: {
     card: 'CreditCard',
+    axo: 'axo',
     paypal: 'PayPalAccount',
     paypalCredit: 'PayPalAccount',
     applePay: 'ApplePayCard',
@@ -19,6 +21,7 @@ module.exports = {
   },
   analyticsKinds: {
     CreditCard: 'card',
+    AXO: 'axo',
     PayPalAccount: 'paypal',
     ApplePayCard: 'applepay',
     VenmoAccount: 'venmo',

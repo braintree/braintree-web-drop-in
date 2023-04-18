@@ -50,6 +50,13 @@ PaymentMethodView.prototype._initialize = function () {
         .replace(/@TITLE/g, endingInText)
         .replace(/@SUBTITLE/g, this.strings[this.paymentMethod.details.cardType]);
       break;
+    case paymentMethodTypes.axo:
+      console.log("payment method views...AXO!");
+      html = html.replace(/@ICON/g, 'logoGooglePay')
+        .replace(/@CLASSNAME/g, '')
+        .replace(/@TITLE/g, 'AXO')
+        .replace(/@SUBTITLE/g, 'Accelerated Checkout');
+      break;
     case paymentMethodTypes.googlePay:
       html = html.replace(/@ICON/g, 'logoGooglePay')
         .replace(/@CLASSNAME/g, '')

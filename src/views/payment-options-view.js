@@ -46,6 +46,11 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
       paymentSource = this.strings['Apple Pay'];
       html = html.replace(/@ICON/g, 'logoApplePay');
       break;
+    case paymentOptionIDs.axo:
+      paymentSource = 'axo';
+      html = html.replace(/@ICON/g, 'iconCardFront');
+      html = html.replace(/@CLASSNAME/g, 'braintree-icon--bordered');
+      break;
     case paymentOptionIDs.card:
       paymentSource = this.strings.Card;
       html = html.replace(/@ICON/g, 'iconCardFront');

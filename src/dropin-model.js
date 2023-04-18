@@ -22,6 +22,7 @@ var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN = [
 ];
 var DEFAULT_PAYMENT_OPTION_PRIORITY = [
   paymentOptionIDs.card,
+  paymentOptionIDs.axo,
   paymentOptionIDs.paypal,
   paymentOptionIDs.paypalCredit,
   paymentOptionIDs.venmo,
@@ -465,7 +466,7 @@ function isPaymentOptionEnabled(paymentOption, options) {
   if (!SheetView) {
     return Promise.reject(new DropinError('paymentOptionPriority: Invalid payment option specified.'));
   }
-
+  
   return SheetView.isEnabled({
     client: options.client,
     merchantConfiguration: options.merchantConfiguration

@@ -97,8 +97,8 @@ var DEFAULT_PAYMENT_OPTION_PRIORITY = [
 If a customer's vaulted payment methods cannot be used on the client (i.e., ApplePay, GooglePay, Venmo), you must also add the payment method to the `VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN` array. For instance:
 
 ```javascript
-var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
-  paymentMethodTypes.ApplePayCard,
+var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_ALWAYS_BE_HIDDEN = [
+  paymentMethodTypes.applePay,
   paymentMethodTypes.FooPayAccount
 ];
 ```

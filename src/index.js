@@ -565,6 +565,8 @@ var VERSION = '__VERSION__';
  */
 
 function create(options) {
+  // console.time("axo loading")
+  // console.time("paypal loading")
   if (!options.authorization) {
     return Promise.reject(new DropinError('options.authorization is required.'));
   }

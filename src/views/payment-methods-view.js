@@ -8,6 +8,7 @@ var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
   CreditCard: 'Card',
+  AXO: 'Card',
   PayPalAccount: 'PayPal',
   ApplePayCard: 'Apple Pay',
   AndroidPayCard: 'Google Pay',
@@ -68,6 +69,7 @@ PaymentMethodsView.prototype._getPaymentMethodString = function () {
   }
 
   stringKey = PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING[this.activeMethodView.paymentMethod.type];
+  console.log(`paymentMethodsView--stringKey`, stringKey);
   paymentMethodTypeString = this.strings[stringKey];
 
   return this.strings.payingWith.replace('{{paymentSource}}', paymentMethodTypeString);
