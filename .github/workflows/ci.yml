@@ -106,6 +106,7 @@ jobs:
     needs: setup
     concurrency: browserstack_lock
     runs-on: ubuntu-latest
+    secrets: inherit
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@v3
@@ -165,6 +166,7 @@ jobs:
     concurrency: browserstack_lock
     name: PayPal Tests on Firefox 🔥
     runs-on: ubuntu-latest
+    secrets: inherit
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@v3
@@ -224,6 +226,7 @@ jobs:
     concurrency: browserstack_lock
     name: PayPal Tests on Chrome 🚔
     runs-on: ubuntu-latest
+    secrets: inherit
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@v3
@@ -284,6 +287,8 @@ jobs:
   #   concurrency: browserstack_lock
   #   name: PayPal Tests on Safari 🐯
   #   runs-on: ubuntu-latest
+  #   secrets: inherit
+
   #   steps:
   #    - name: Checkout 🛎
   #     uses: actions/checkout@v3
