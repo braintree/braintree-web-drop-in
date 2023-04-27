@@ -26,7 +26,7 @@
  * For more control and customization, use [`dropin.create` instead](#.create).
  *
  * See our [demo app](../../script-tag-integration.html) for an example of using our script tag integration.
- *
+ * Look, a change
  * @example
  * <caption>A full example accepting only cards</caption>
  * <!DOCTYPE html>
