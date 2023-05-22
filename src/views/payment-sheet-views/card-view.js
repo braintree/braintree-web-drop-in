@@ -29,7 +29,6 @@ CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 CardView.prototype.initialize = function () {
   var cvvFieldGroup, postalCodeFieldGroup, hfOptions;
   var cardholderNameGroup = this.getElementById('cardholder-name-field-group');
-  var cardIcons = this.getElementById('card-view-icons');
 
   // If merchant explicty passes a value of `true` for card configuration,
   // we need to treat it as if no card configuration was passed, and provide
@@ -44,7 +43,7 @@ CardView.prototype.initialize = function () {
   this.cardholderNameRequired = this.hasCardholderName && this.merchantConfiguration.cardholderName.required === true;
   hfOptions = this._generateHostedFieldsOptions();
 
-  cardIcons.innerHTML = cardIconHTML;
+  this._renderCardIcons();
   this._hideUnsupportedCardIcons();
 
   this.hasCVV = hfOptions.fields.cvv;
@@ -111,6 +110,33 @@ CardView.prototype._sendRequestableEvent = function () {
       isRequestable: this._validateForm(),
       type: constants.paymentMethodTypes.card
     });
+  }
+};
+
+CardView.prototype._renderCardIcons = function () {
+  var overrides = this.merchantConfiguration.overrides;
+  var cardIcons = this.getElementById('card-view-icons');
+  var supportCardBrands;
+
+  cardIcons.innerHTML = cardIconHTML;
+
+  try {
+    supportCardBrands = overrides.fields.number.supportedCardBrands;
+
+    if (supportCardBrands) {
+      Object.keys(supportCardBrands).forEach(function (cardBrand) {
+        var value = supportCardBrands[cardBrand];
+        var selector, iconDiv;
+
+        if (value === false) {
+          selector = 'div[data-braintree-id="' + constants.cardTypeIcons[cardBrand] + '-card-icon"]';
+          iconDiv = document.querySelector(selector);
+          hideCardIcon(iconDiv);
+        }
+      });
+    }
+  } catch (error) {
+    return;
   }
 };
 
@@ -613,6 +639,12 @@ CardView.prototype._shouldApplyFieldEmptyError = function (fieldId, field) {
 
   return isCardViewElement();
 };
+
+function hideCardIcon(icon) {
+  if (icon) {
+    icon.classList.add('braintree-hidden');
+  }
+}
 
 function isCardViewElement() {
   var activeId = document.activeElement && document.activeElement.id;
