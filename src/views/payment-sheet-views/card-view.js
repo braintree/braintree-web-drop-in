@@ -116,16 +116,16 @@ CardView.prototype._sendRequestableEvent = function () {
 CardView.prototype._renderCardIcons = function () {
   var overrides = this.merchantConfiguration.overrides;
   var cardIcons = this.getElementById('card-view-icons');
-  var supportCardBrands;
+  var supportedCardBrands;
 
   cardIcons.innerHTML = cardIconHTML;
 
   try {
-    supportCardBrands = overrides.fields.number.supportedCardBrands;
+    supportedCardBrands = overrides.fields.number.supportedCardBrands;
 
-    if (supportCardBrands) {
-      Object.keys(supportCardBrands).forEach(function (cardBrand) {
-        var value = supportCardBrands[cardBrand];
+    if (supportedCardBrands) {
+      Object.keys(supportedCardBrands).forEach(function (cardBrand) {
+        var value = supportedCardBrands[cardBrand];
         var selector, iconDiv;
 
         if (value === false) {
