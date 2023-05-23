@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+  - No longer showing card icons for overridden card types.
+
 ## 1.37.0
   - Drop dependency on `promise-polyfill`
   - Drop dependency on @braintree/class-list
