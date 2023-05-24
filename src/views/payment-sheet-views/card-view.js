@@ -116,27 +116,21 @@ CardView.prototype._sendRequestableEvent = function () {
 CardView.prototype._renderCardIcons = function () {
   var overrides = this.merchantConfiguration.overrides;
   var cardIcons = this.getElementById('card-view-icons');
-  var supportedCardBrands;
+  var supportedCardBrands = overrides && overrides.fields && overrides.fields.number && overrides.fields.number.supportedCardBrands;
 
   cardIcons.innerHTML = cardIconHTML;
 
-  try {
-    supportedCardBrands = overrides.fields.number.supportedCardBrands;
+  if (supportedCardBrands) {
+    Object.keys(supportedCardBrands).forEach(function (cardBrand) {
+      var value = supportedCardBrands[cardBrand];
+      var selector, iconDiv;
 
-    if (supportedCardBrands) {
-      Object.keys(supportedCardBrands).forEach(function (cardBrand) {
-        var value = supportedCardBrands[cardBrand];
-        var selector, iconDiv;
-
-        if (value === false) {
-          selector = 'div[data-braintree-id="' + constants.cardTypeIcons[cardBrand] + '-card-icon"]';
-          iconDiv = document.querySelector(selector);
-          hideCardIcon(iconDiv);
-        }
-      });
-    }
-  } catch (error) {
-    return;
+      if (value === false) {
+        selector = 'div[data-braintree-id="' + constants.cardTypeIcons[cardBrand] + '-card-icon"]';
+        iconDiv = document.querySelector(selector);
+        hideCardIcon(iconDiv);
+      }
+    });
   }
 };
 
