@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+  - Fix issue where supportedCardBrands overrides were incorrectly showing images for hidden card brands
+
 ## 1.37.0
   - Drop dependency on `promise-polyfill`
   - Drop dependency on @braintree/class-list

@@ -13,6 +13,7 @@ const {
 
 const mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 const CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+const constants = require('../../../../src/constants');
 
 describe('CardView', () => {
   let fakeClient, fakeHostedFieldsInstance, cardElement, container;
@@ -506,7 +507,10 @@ describe('CardView', () => {
         strings: strings
       });
 
+      jest.spyOn(view, '_renderCardIcons');
+
       return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
         supportedCardTypes.forEach(cardType => {
           const cardIcon = cardElement.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
@@ -531,6 +535,87 @@ describe('CardView', () => {
 
           expect(cardIcon.classList.contains('braintree-hidden')).toBe(true);
         });
+      });
+    });
+
+    test('hides card icons if they are overriden', () => {
+      fakeModel.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              supportedCardBrands: {
+                'american-express': false,
+                jcb: false
+              }
+            }
+          }
+        }
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      jest.spyOn(view, '_renderCardIcons');
+
+      return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
+        const amexIcon = cardElement.querySelector('[data-braintree-id="' + constants.cardTypeIcons['american-express'] + '-card-icon"]');
+        const jcbIcon = cardElement.querySelector('[data-braintree-id="' + constants.cardTypeIcons.jcb + '-card-icon"]');
+
+        expect(amexIcon.classList.contains('braintree-hidden')).toBe(true);
+        expect(jcbIcon.classList.contains('braintree-hidden')).toBe(true);
+      });
+    });
+
+    test('does not error if overridden icons is empty', () => {
+      fakeModel.merchantConfiguration.card = {
+        overrides: {}
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      jest.spyOn(view, '_renderCardIcons');
+
+      return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
+        expect(view._renderCardIcons).toReturn();
+      });
+    });
+
+    test('does not error if merchant passes in an unknown card vendor to card overrides', () => {
+      fakeModel.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              supportedCardBrands: {
+                'unknown-card-vendor': false
+              }
+            }
+          }
+        }
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      jest.spyOn(view, '_renderCardIcons');
+
+      return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
+        expect(view._renderCardIcons).toReturn();
       });
     });
 
