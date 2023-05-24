@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## Unreleased
-  - No longer showing card icons for overridden card types.
+  - Fix issue where supportedCardBrands overrides were incorrectly showing images for hidden card brands
 
 ## 1.37.0
   - Drop dependency on `promise-polyfill`
