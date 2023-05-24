@@ -571,6 +571,54 @@ describe('CardView', () => {
       });
     });
 
+    test('does not error if overridden icons is empty', () => {
+      fakeModel.merchantConfiguration.card = {
+        overrides: {}
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      jest.spyOn(view, '_renderCardIcons');
+
+      return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
+        expect(view._renderCardIcons).toReturn();
+      });
+    });
+
+    test('does not error if merchant passes in an unknown card vendor to card overrides', () => {
+      fakeModel.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              supportedCardBrands: {
+                'unknown-card-vendor': false
+              }
+            }
+          }
+        }
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      jest.spyOn(view, '_renderCardIcons');
+
+      return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
+        expect(view._renderCardIcons).toReturn();
+      });
+    });
+
     test('does not show Elo icon even if it is supported', () => {
       let eloCardIcon;
 
