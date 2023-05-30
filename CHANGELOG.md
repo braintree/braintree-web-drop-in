@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.38.0
   - Fix issue where supportedCardBrands overrides were incorrectly showing images for hidden card brands
 
 ## 1.37.0
