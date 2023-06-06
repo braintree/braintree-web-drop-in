@@ -2252,7 +2252,7 @@ describe('Dropin', () => {
           showLoadingIndicator: jest.fn(),
           hideLoadingIndicator: jest.fn(),
           primaryView: {
-            ID: 'any-id-but-paypal'
+            ID: 'any-id-but-card'
           },
           setPrimaryView: jest.fn()
         };
