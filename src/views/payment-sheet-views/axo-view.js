@@ -1,6 +1,8 @@
 var BaseView = require('../base-view');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 var assets = require("@braintree/asset-loader")
+var loadAXO = require("@paypalcord/axo-asset-loader-spike").loadAxo
+console.log('meeeeep. heres da loder: ', loadAXO)
 
 function AXOView() {
   BaseView.apply(this, arguments)
@@ -19,17 +21,23 @@ AXOView.prototype.initialize = function() {
   // "this.model.asyncDependencyFailed" if the load fails.
   // console.timeLog("axo loading")
   return Promise.resolve().then(function () {
-    return assets.loadScript({
-      src: "https://localhost:8081/bundle/index.js"
-    }).then(() => {
-      console.log("script loaded to page");
-      // console.timeEnd("axo loading")
+    return loadAXO("staging").then(() => {
+      console.log('script loaded')
       return
     }).catch((err) => {
-        console.log(`err loading to page`, err);
-        return err
-      })
+      console.log('There was an error: ', err)
     })
+    // return assets.loadScript({
+    //   src: "https://cdn-3a711a7e10ec6.static.engineering.dev.paypalinc.com/axo/axo.min.js"
+    // }).then(() => {
+    //   console.log("script loaded to page");
+    //   // console.timeEnd("axo loading")
+    //   return
+    // }).catch((err) => {
+    //     console.log(`err loading to page`, err);
+    //     return err
+      })
+    // })
   //   return Promise.resolve(axo).then(() => {
   //     console.timeEnd("axo loading")
   // })
