@@ -9,7 +9,6 @@ var EventEmitter = require('@braintree/event-emitter');
 var assets = require('@braintree/asset-loader');
 var fs = require('fs');
 var MainView = require('./views/main-view');
-var paymentMethodsViewID = require('./views/payment-methods-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations').translations;
 var isUtf8 = require('./lib/is-utf-8');
@@ -714,9 +713,10 @@ Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
 };
 
 Dropin.prototype._navigateToInitialView = function () {
-  var isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
+  var initViewId = this._model.getInitialViewId();
+  var isOnInitView = this._mainView.primaryView.ID === initViewId;
 
-  if (!isOnMethodsView) {
+  if (isOnInitView) {
     return;
   }
 
@@ -724,7 +724,7 @@ Dropin.prototype._navigateToInitialView = function () {
     return;
   }
 
-  this._mainView.setPrimaryView(this._model.getInitialViewId());
+  this._mainView.setPrimaryView(initViewId);
 };
 
 Dropin.prototype._supportsPaymentOption = function (paymentOption) {
