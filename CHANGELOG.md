@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## Unreleased
- - Fix issue where `clearSelectedPaymentMethod` does not navigate back to the initial view unless we are in the methods view
+ - Fix issue where `clearSelectedPaymentMethod` does not navigate back to the initial view unless we are in the methods view (issue [#883](https://github.com/braintree/braintree-web-drop-in/issues/883))
 
 ## 1.38.0
   - Fix issue where supportedCardBrands overrides were incorrectly showing images for hidden card brands
