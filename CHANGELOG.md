@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+ - Added alert role to error message divs beneath card inputs
+
 ## 1.38.0
   - Fix issue where supportedCardBrands overrides were incorrectly showing images for hidden card brands
 
