@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+  - Update braintree-web to v3.96.0
+
 ## 1.38.1
  - Fix issue where `clearSelectedPaymentMethod` does not navigate back to the initial view unless we are in the methods view (issue [#883](https://github.com/braintree/braintree-web-drop-in/issues/883))
  - Add alert role to error message divs beneath card inputs. (Issue [#845](https://github.com/braintree/braintree-web-drop-in/issues/845))
