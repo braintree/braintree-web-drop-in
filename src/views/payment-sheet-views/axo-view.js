@@ -1,7 +1,8 @@
+const analytics = require('braintree-web/lib/analytics');
 var BaseView = require('../base-view');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
-var assets = require("@braintree/asset-loader")
-var loadAXO = require("@paypalcord/axo-asset-loader-spike").loadAxo
+// var assets = require("@braintree/asset-loader")
+var loadAXO = require("@paypalcorp/axo-asset-loader").loadAxo
 console.log('meeeeep. heres da loder: ', loadAXO)
 
 function AXOView() {
@@ -22,9 +23,11 @@ AXOView.prototype.initialize = function() {
   // console.timeLog("axo loading")
   return Promise.resolve().then(function () {
     return loadAXO("staging").then(() => {
+      analytics.sendEvent(clientInstance, 'axo.script.loaded')
       console.log('script loaded')
       return
     }).catch((err) => {
+      analytics.sendEvent(clientInstance, 'axo.script.failed')
       console.log('There was an error: ', err)
     })
     // return assets.loadScript({
