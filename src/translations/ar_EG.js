@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "تاريخ انتهاء الصلاحية غير صحيح.",
   "fieldInvalidForNumber" : "رقم البطاقة غير صحيح.",
   "fieldInvalidForPostalCode" : "الرمز البريدي غير صحيح.",
+  "noticeOfCollection" : "عندما أدفع ببطاقتي، فأنا أوافق على \"بيان الخصوصية لدى PayPal\".",
   "genericError" : "حدث خطأ ما من جانبنا.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "هذه البطاقة الائتمانية محفوظة كطريقة دفع حالياً.",
   "hostedFieldsFailedTokenizationError" : "يرجى مراجعة معلوماتك وإعادة المحاولة.",

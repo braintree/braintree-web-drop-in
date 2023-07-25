@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Недопустимая дата истечения срока действия.",
   "fieldInvalidForNumber" : "Недопустимый номер карты.",
   "fieldInvalidForPostalCode" : "Недопустимый почтовый индекс.",
+  "noticeOfCollection" : "Выполняя оплату с помощью карты, я соглашаюсь с условиями Положения о конфиденциальности PayPal.",
   "genericError" : "Возникла проблема с нашей стороны.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Данная кредитная карта уже существует как сохраненный способ оплаты.",
   "hostedFieldsFailedTokenizationError" : "Проверьте правильность ввода данных и повторите попытку.",

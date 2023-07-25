@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Päättymispäivämäärä ei ole kelvollinen.",
   "fieldInvalidForNumber" : "Kortin numero ei ole kelvollinen.",
   "fieldInvalidForPostalCode" : "Postinumero ei ole kelvollinen.",
+  "noticeOfCollection" : "Maksamalla kortillani hyväksyn PayPal tietosuojaselosteen.",
   "genericError" : "Jokin meni pieleen tässä päässä.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Tämä luottokortti on jo tallennettu maksutavaksi.",
   "hostedFieldsFailedTokenizationError" : "Tarkista tiedot ja yritä uudelleen.",

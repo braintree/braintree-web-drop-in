@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "此到期日無效。",
   "fieldInvalidForNumber" : "此卡號無效。",
   "fieldInvalidForPostalCode" : "此郵遞區號無效。",
+  "noticeOfCollection" : "使用我的卡片付款，即表示我同意「PayPal 隱私權聲明」。",
   "genericError" : "我們的系統發生問題。",
   "hostedFieldsTokenizationFailOnDuplicateError" : "此信用卡已經是儲存的付款方式。",
   "hostedFieldsFailedTokenizationError" : "請檢查你的資料並重試。",

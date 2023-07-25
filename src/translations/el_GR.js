@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Αυτή η ημερομηνία λήξης δεν είναι έγκυρη.",
   "fieldInvalidForNumber" : "Αυτός ο αριθμός κάρτας δεν είναι έγκυρος.",
   "fieldInvalidForPostalCode" : "Αυτός ο ταχυδρομικός κώδικας δεν είναι έγκυρος.",
+  "noticeOfCollection" : "Πληρώνοντας με την κάρτα μου, αποδέχομαι τη Δήλωση απορρήτου της PayPal.",
   "genericError" : "Προέκυψε πρόβλημα στο σύστημά μας.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Αυτή η πιστωτική κάρτα υπάρχει ήδη ως αποθηκευμένη μέθοδος πληρωμής.",
   "hostedFieldsFailedTokenizationError" : "Ελέγξτε τα στοιχεία σας και δοκιμάστε ξανά.",

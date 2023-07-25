@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Deze vervaldatum is ongeldig.",
   "fieldInvalidForNumber" : "Dit kaartnummer is ongeldig.",
   "fieldInvalidForPostalCode" : "Deze postcode is ongeldig.",
+  "noticeOfCollection" : "Door met mijn kaart te betalen, ga ik akkoord met de PayPal Privacyverklaring.",
   "genericError" : "Er is aan onze kant iets fout gegaan.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Deze creditcard bestaat al als opgeslagen betaalmethode.",
   "hostedFieldsFailedTokenizationError" : "Controleer je gegevens en probeer het opnieuw.",

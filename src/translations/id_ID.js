@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Tanggal kedaluwarsa ini tidak valid.",
   "fieldInvalidForNumber" : "Nomor kartu ini tidak valid.",
   "fieldInvalidForPostalCode" : "Kode pos ini tidak valid.",
+  "noticeOfCollection" : "Dengan membayar menggunakan kartu, saya menyetujui Pernyataan Privasi PayPal.",
   "genericError" : "Ada yang salah pada sistem kami.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Kartu kredit ini telah ada sebelumnya sebagai metode pembayaran tersimpan.",
   "hostedFieldsFailedTokenizationError" : "Mohon periksa informasi Anda dan coba lagi.",

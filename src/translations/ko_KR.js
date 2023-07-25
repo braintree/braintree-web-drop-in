@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "이 만료일은 유효하지 않습니다.",
   "fieldInvalidForNumber" : "이 카드 번호는 유효하지 않습니다.",
   "fieldInvalidForPostalCode" : "이 우편번호는 유효하지 않습니다.",
+  "noticeOfCollection" : "자신의 카드로 결제함으로써 사용자는 PayPal 개인정보 취급방침에 동의합니다.",
   "genericError" : "저희 쪽에 문제가 발생했습니다.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "이 신용카드는 이미 저장된 결제수단으로 설정되어 있습니다.",
   "hostedFieldsFailedTokenizationError" : "정보를 확인하고 다시 시도해 주세요.",
