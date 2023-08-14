@@ -319,4 +319,17 @@ describe('VenmoView', () => {
       });
     });
   });
+
+  describe('requestPaymentMethod', () => {
+    test('always rejects', () => {
+      const view = new VenmoView(testContext.venmoViewOptions);
+
+      return view.requestPaymentMethod().then(() => {
+        throw new Error('should not resolve');
+      }).catch(err => {
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe('No payment method is available.');
+      });
+    });
+  });
 });

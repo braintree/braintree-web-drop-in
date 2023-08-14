@@ -67,7 +67,7 @@ VenmoView.prototype.requestPaymentMethod = function () {
   this.model.reportError('venmoButtonMustBeUsed');
 
   return BaseView.prototype.requestPaymentMethod.call(this);
-}
+};
 
 VenmoView.prototype._isIgnorableError = function (error) {
   // customer cancels the flow in the app
