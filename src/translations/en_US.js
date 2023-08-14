@@ -26,6 +26,7 @@ module.exports = {
   fieldInvalidForNumber: 'This card number is not valid.',
   fieldInvalidForPostalCode: 'This postal code is not valid.',
   fieldTooLongForCardholderName: 'Cardholder name must be less than 256 characters.',
+  noticeOfCollection : 'By paying with my card, I agree to the PayPal Privacy Statement.',
   genericError: 'Something went wrong on our end.',
   hostedFieldsTokenizationFailOnDuplicateError: 'This credit card already exists as a saved payment method.',
   hostedFieldsFailedTokenizationError: 'Please check your information and try again.',
