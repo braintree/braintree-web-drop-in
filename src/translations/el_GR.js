@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "Σφάλμα δικτύου. Δοκιμάστε ξανά.",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Η επαλήθευση της πιστωτικής κάρτας απέτυχε. Ελέγξτε τα στοιχεία σας και δοκιμάστε ξανά.",
   "paypalButtonMustBeUsed" : "Χρησιμοποιήστε το κουμπί PayPal για να συνεχίσετε με την πληρωμή.",
+  "venmoButtonMustBeUsed": "Χρησιμοποιήστε το κουμπί Venmo για να συνεχίσετε με την πληρωμή σας.",
   "paypalAccountTokenizationFailedError" : "Προέκυψε κάποιο πρόβλημα με την προσθήκη του λογαριασμού PayPal. Δοκιμάστε ξανά.",
   "paypalFlowFailedError" : "Προέκυψε κάποιο πρόβλημα με τη σύνδεση στην PayPal. Δοκιμάστε ξανά.",
   "paypalTokenizationRequestActiveError" : "Η εξουσιοδότηση πληρωμής μέσω PayPal βρίσκεται ήδη σε εξέλιξη.",

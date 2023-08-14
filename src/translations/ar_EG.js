@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "خطأ في الشبكة. يرجى المحاولة مجدداً.",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "فشلت مصادقة بطاقة الائتمان. يرجى مراجعة معلوماتك وإعادة المحاولة.",
   "paypalButtonMustBeUsed" : "استخدم زر PayPal لاستئناف الدفع.",
+  "venmoButtonMustBeUsed": "استخدِم زر Venmo لمتابعة إجراء دفعتك",
   "paypalAccountTokenizationFailedError" : "وقع خطأ أثناء إضافة حساب PayPal. يرجى إعادة المحاولة.",
   "paypalFlowFailedError" : "وقع خطأ أثناء الاتصال بـ PayPal. يرجى إعادة المحاولة.",
   "paypalTokenizationRequestActiveError" : "تفويض الدفع عبر PayPal قيد التنفيذ.",

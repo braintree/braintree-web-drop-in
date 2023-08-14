@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "Došlo k chybě sítě. Zkuste to znovu.",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Ověření kreditní karty se nezdařilo. Zkontrolujte zadané informace a zkuste to znovu.",
   "paypalButtonMustBeUsed" : "Chcete-li přejít k platbě, použijte tlačítko PayPal.",
+  "venmoButtonMustBeUsed": "Chcete-li pokračovat v placení, použijte tlačítko Venmo.",
   "paypalAccountTokenizationFailedError" : "Při přidávání účtu PayPal došlo k chybě. Zkuste to znovu.",
   "paypalFlowFailedError" : "Při připojování ke službě PayPal došlo k chybě. Zkuste to znovu.",
   "paypalTokenizationRequestActiveError" : "Autorizace platby přes PayPal již probíhá.",

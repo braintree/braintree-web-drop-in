@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "Errore di rete. Riprova.",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Verifica della carta di credito non riuscita. Controlla i tuoi dati e riprova.",
   "paypalButtonMustBeUsed" : "Usa il pulsante PayPal per continuare con il pagamento.",
+  "venmoButtonMustBeUsed": "Usa il pulsante Venmo per continuare il pagamento.",
   "paypalAccountTokenizationFailedError" : "Si è verificato un errore durante l'aggiunta del conto PayPal. Riprova.",
   "paypalFlowFailedError" : "Si è verificato un errore durante la connessione a PayPal. Riprova.",
   "paypalTokenizationRequestActiveError" : "Autorizzazione di pagamento PayPal già in corso.",

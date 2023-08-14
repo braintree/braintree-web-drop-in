@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "Nettverksfeil. Prøv på nytt.",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Kontroll av betalingskort mislyktes. Kontroller informasjonen, og prøv på nytt.",
   "paypalButtonMustBeUsed" : "Bruk PayPal-knappen for å fortsette med betalingen.",
+  "venmoButtonMustBeUsed": "Bruk Venmo-knappen for å fortsette med betalingen.",
   "paypalAccountTokenizationFailedError" : "Kan ikke legge til PayPal-kontoen. Prøv på nytt.",
   "paypalFlowFailedError" : "Kan ikke koble til PayPal. Prøv på nytt.",
   "paypalTokenizationRequestActiveError" : "PayPals prosess for betalingsgodkjenning har allerede startet.",

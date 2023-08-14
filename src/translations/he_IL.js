@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "שגיאת רשת. עליך לנסות שוב.",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "אימות כרטיס האשראי נכשל. עליך לבדוק את הפרטים שלך ולנסות שוב.",
   "paypalButtonMustBeUsed" : "להשתמש בלחצן PayPal כדי להמשיך בביצוע התשלום שלך.",
+  "venmoButtonMustBeUsed": "השתמשו בלחצן Venmo כדי להמשיך בתשלום שלכם.",
   "paypalAccountTokenizationFailedError" : "משהו השתבש בעת הוספת חשבון PayPal. עליך לנסות שוב.",
   "paypalFlowFailedError" : "משהו השתבש בהתחברות ל-PayPal. עליך לנסות שוב.",
   "paypalTokenizationRequestActiveError" : "אישור התשלום של PayPal כבר מתבצע.",

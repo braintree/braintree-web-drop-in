@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "网络错误。请重试。",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "信用卡验证失败。请检查您的信息，然后重试。",
   "paypalButtonMustBeUsed" : "使用PayPal按钮继续付款。",
+  "venmoButtonMustBeUsed": "使用Venmo按钮继续付款。",
   "paypalAccountTokenizationFailedError" : "添加PayPal账户时遇到了一些问题。请重试。",
   "paypalFlowFailedError" : "连接到PayPal遇到了一些问题。请重试。",
   "paypalTokenizationRequestActiveError" : "PayPal付款授权已在处理中。",

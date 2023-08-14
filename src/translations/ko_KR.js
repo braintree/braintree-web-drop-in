@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "네트워크 오류입니다. 다시 시도해 주세요.",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "신용카드 인증에 실패했습니다. 정보를 확인하고 다시 시도해 주세요.",
   "paypalButtonMustBeUsed" : "PayPal 버튼을 사용하여 결제를 계속 진행하세요.",
+  "venmoButtonMustBeUsed": "결제를 계속하려면 Venmo 버튼을 사용하세요.",
   "paypalAccountTokenizationFailedError" : "PayPal 계정을 추가하는 중에 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalFlowFailedError" : "PayPal에 연결하는 데 문제가 발생했습니다. 다시 시도해 주세요.",
   "paypalTokenizationRequestActiveError" : "PayPal 결제 승인이 이미 진행 중입니다.",

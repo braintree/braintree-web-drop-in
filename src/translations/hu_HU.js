@@ -33,6 +33,7 @@ module.exports = {
   "hostedFieldsTokenizationNetworkErrorError" : "Hálózati hiba. Próbálja újra.",
   "hostedFieldsTokenizationCvvVerificationFailedError" : "A hitelkártya hitelesítése sikertelen. Ellenőrizze az adatait, majd próbálja újra.",
   "paypalButtonMustBeUsed" : "A fizetés folytatásához használja a PayPal-gombot.",
+  "venmoButtonMustBeUsed": "Használja a Venmo-gombot a fizetés folytatásához.",
   "paypalAccountTokenizationFailedError" : "Hiba történt a PayPal-számla hozzáadása közben. Próbálja újra.",
   "paypalFlowFailedError" : "Hiba történt a PayPalhoz való kapcsolódás közben. Próbálja újra.",
   "paypalTokenizationRequestActiveError" : "A PayPal-fizetés engedélyezése már folyamatban van.",
