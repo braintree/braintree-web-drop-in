@@ -2,6 +2,7 @@
 
 ## Unreleased
   - Add CA compliance notice of collection
+  - Venmo: add error message prompting the customer to click the Venmo button when `requestPaymentMethod` is called. (closes \#882)
 
 ## 1.39.1
   - Update braintree-web to v3.96.1
