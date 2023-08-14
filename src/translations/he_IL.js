@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "תאריך פקיעת התוקף אינו חוקי.",
   "fieldInvalidForNumber" : "מספר כרטיס האשראי אינו חוקי.",
   "fieldInvalidForPostalCode" : "המיקוד אינו חוקי.",
+  "noticeOfCollection" : "בכך שאני משלם/ת באמצעות כרטיס האשראי שלי, אני מסכים/ה להצהרת הפרטיות של PayPal.",
   "genericError" : "נראה שמשהו השתבש בצד שלנו.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "כרטיס אשראי זה כבר שמור כשיטת תשלום.",
   "hostedFieldsFailedTokenizationError" : "עליך לבדוק את הפרטים שלך ולנסות שוב.",

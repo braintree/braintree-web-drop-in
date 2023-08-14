@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "この有効期限は無効です。",
   "fieldInvalidForNumber" : "このカード番号は無効です。",
   "fieldInvalidForPostalCode" : "この郵便番号は無効です。",
+  "noticeOfCollection" : "カードで支払うことにより、PayPalプライバシーステートメントに同意したものとみなされます。",
   "genericError" : "弊社側で問題が発生しました。",
   "hostedFieldsTokenizationFailOnDuplicateError" : "このクレジットカードは、保存済みの支払方法としてすでに存在します。",
   "hostedFieldsFailedTokenizationError" : "情報を確認してもう一度お試しください。",

@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Tento dátum skončenia platnosti je neplatný.",
   "fieldInvalidForNumber" : "Toto číslo karty je neplatné.",
   "fieldInvalidForPostalCode" : "Toto PSČ je neplatné.",
+  "noticeOfCollection" : "Zaplatením kartou vyjadrujem súhlas s Vyhlásením spoločnosti PayPal o ochrane osobných údajov.",
   "genericError" : "Vyskytla sa chyba na našej strane.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Táto kreditná karta už existuje ako uložený spôsob platby.",
   "hostedFieldsFailedTokenizationError" : "Skontrolujte údaje a skúste to znova.",

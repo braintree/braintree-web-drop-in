@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Dieses Ablaufdatum ist ungültig.",
   "fieldInvalidForNumber" : "Diese Kartennummer ist ungültig.",
   "fieldInvalidForPostalCode" : "Diese Postleitzahl ist ungültig.",
+  "noticeOfCollection" : "Indem ich mit meiner Karte bezahle, stimme ich der PayPal-Datenschutzerklärung zu.",
   "genericError" : "Bei uns ist ein Fehler aufgetreten.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Diese Kreditkarte ist bereits als gespeicherte Zahlungsquelle vorhanden.",
   "hostedFieldsFailedTokenizationError" : "Bitte prüfen Sie die Informationen und versuchen Sie es erneut.",

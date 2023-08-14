@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Ez a lejárati dátum érvénytelen.",
   "fieldInvalidForNumber" : "Ez a kártyaszám nem érvényes.",
   "fieldInvalidForPostalCode" : "Ez az irányítószám nem érvényes.",
+  "noticeOfCollection" : "A kártyámmal történő fizetés révén elfogadom a PayPal Adatvédelmi nyilatkozatát.",
   "genericError" : "Hiba történt a mi oldalunkon.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Ez a hitelkártya már szerepel mentett fizetési módként.",
   "hostedFieldsFailedTokenizationError" : "Ellenőrizze az adatait, majd próbálja újra.",

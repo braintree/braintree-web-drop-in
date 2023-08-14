@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Denne utløpsdatoen er ikke gyldig.",
   "fieldInvalidForNumber" : "Dette kortnummeret er ikke gyldig.",
   "fieldInvalidForPostalCode" : "Dette postnummeret er ikke gyldig.",
+  "noticeOfCollection" : "Ved å betale med kortet godtar jeg PayPals personvernerklæring.",
   "genericError" : "Noe gikk galt hos oss.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Dette betalingskortet finnes allerede som en lagret betalingsmetode.",
   "hostedFieldsFailedTokenizationError" : "Kontroller informasjonen, og prøv på nytt.",

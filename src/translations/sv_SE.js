@@ -25,6 +25,7 @@ module.exports = {
   "fieldInvalidForExpirationDate" : "Utgångsdatumet är ogiltigt.",
   "fieldInvalidForNumber" : "Det här kortnumret är ogiltigt.",
   "fieldInvalidForPostalCode" : "Postnumret är ogiltigt.",
+  "noticeOfCollection" : "Genom att betala med mitt kort godkänner jag PayPals sekretessmeddelande.",
   "genericError" : "Ett fel uppstod.",
   "hostedFieldsTokenizationFailOnDuplicateError" : "Det här kreditkortet finns redan som en sparad betalningsmetod.",
   "hostedFieldsFailedTokenizationError" : "Kontrollera uppgifterna och försök igen.",
