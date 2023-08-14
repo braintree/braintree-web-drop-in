@@ -3,6 +3,9 @@
 ## Unreleased
   - Add CA compliance notice of collection
 
+## 1.39.1
+  - Update braintree-web to v3.96.1
+
 ## 1.39.0
   - Update braintree-web to v3.96.0
 
