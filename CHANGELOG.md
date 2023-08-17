@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## UNRELEASED
+  - Fix issue where the Drop-In would sometimes not load
+
 ## 1.40.1
   - Update braintree-web to 3.97.1
 
