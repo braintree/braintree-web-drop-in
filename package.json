@@ -1,6 +1,6 @@
 {
   "name": "braintree-web-drop-in",
-  "version": "1.40.1",
+  "version": "1.40.2",
   "main": "src/index.js",
   "private": true,
   "scripts": {
