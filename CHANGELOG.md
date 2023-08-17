@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.40.2
+  - Fix issue where some assets for the Drop-In would not load from the CDN
+
 ## 1.40.1
   - Update braintree-web to 3.97.1
 
