@@ -735,6 +735,10 @@ describe('CardView', () => {
         }
       });
 
+      fakeModel.merchantConfiguration.card = {
+        cardholderName: true
+      };
+
       const view = new CardView({
         element: cardElement,
         model: fakeModel,
@@ -748,6 +752,31 @@ describe('CardView', () => {
         expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'expirationDate', attribute: 'aria-required', value: true });
         expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'postalCode', attribute: 'aria-required', value: true });
         expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cardholderName', attribute: 'aria-required', value: true });
+      });
+    });
+
+    test.only('does not set aria-required attribute on hosted field if it is not rendered', () => {
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: []
+          }
+        }
+      });
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalled();
+        expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'cvv', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'postalCode', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'cardholderName', attribute: 'aria-required', value: true });
       });
     });
 
