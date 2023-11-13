@@ -88,6 +88,11 @@ CardView.prototype.initialize = function () {
     this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
     this.hostedFieldsInstance.on('notEmpty', this._onNotEmptyEvent.bind(this));
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
+    ['number', 'expirationDate', 'cvv', 'postalCode', 'cardholderName'].forEach(function (hostedField) {
+      this.hostedFieldsInstance.setAttribute({
+        field: hostedField, attribute: 'aria-required', value: true
+      });
+    }.bind(this));
 
     PASSTHROUGH_EVENTS.forEach(function (eventName) {
       this.hostedFieldsInstance.on(eventName, function (event) {

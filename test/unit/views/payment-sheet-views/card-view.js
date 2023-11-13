@@ -718,11 +718,36 @@ describe('CardView', () => {
 
       return view.initialize().then(() => {
         hostedFieldsConfiguredFields = hostedFields.create.mock.calls[0][0].fields;
-
         expect(hostedFieldsConfiguredFields.number.placeholder).toBe('•••• •••• •••• ••••');
         expect(hostedFieldsConfiguredFields.expirationDate.placeholder).toBe(strings.expirationDatePlaceholder);
         expect(hostedFieldsConfiguredFields.cvv.placeholder).toBe('•••');
         expect(hostedFieldsConfiguredFields.postalCode.placeholder).toBeFalsy();
+      });
+    });
+
+    test.only('sets aria-required attribute on hosted fields', () => {
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: ['cvv', 'postal_code'],
+          creditCards: {
+            supportedCardTypes: []
+          }
+        }
+      });
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'number', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'expirationDate', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'postalCode', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cardholderName', attribute: 'aria-required', value: true });
       });
     });
 
@@ -1717,7 +1742,7 @@ describe('CardView', () => {
           });
 
           return cardView.initialize().then(() => {
-            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '•••' });
           });
         }
       );
@@ -1738,7 +1763,7 @@ describe('CardView', () => {
           };
 
           return cardView.initialize().then(() => {
-            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ attribute: 'placeholder', field: 'cvv', value: '•••' });
           });
         }
       );
@@ -1762,7 +1787,8 @@ describe('CardView', () => {
           };
 
           return cardView.initialize().then(() => {
-            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+            expect(fakeHostedFieldsInstance.setAttribute).toBeCalled();
+            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'cvv' });
           });
         }
       );
@@ -2911,7 +2937,11 @@ describe('CardView', () => {
 
           cardView.showFieldError('foo', 'errorMessage');
 
-          expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+          expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({
+            field: 'foo',
+            attribute: 'aria-invalid',
+            value: true
+          });
         }
       );
     });
