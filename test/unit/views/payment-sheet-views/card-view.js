@@ -726,7 +726,7 @@ describe('CardView', () => {
       });
     });
 
-    test.only('sets aria-required attribute on hosted fields', () => {
+    test('sets aria-required attribute on hosted fields', () => {
       fakeClient.getConfiguration.mockReturnValue({
         gatewayConfiguration: {
           challenges: ['cvv', 'postal_code'],
