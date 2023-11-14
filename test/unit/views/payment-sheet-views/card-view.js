@@ -718,6 +718,7 @@ describe('CardView', () => {
 
       return view.initialize().then(() => {
         hostedFieldsConfiguredFields = hostedFields.create.mock.calls[0][0].fields;
+
         expect(hostedFieldsConfiguredFields.number.placeholder).toBe('•••• •••• •••• ••••');
         expect(hostedFieldsConfiguredFields.expirationDate.placeholder).toBe(strings.expirationDatePlaceholder);
         expect(hostedFieldsConfiguredFields.cvv.placeholder).toBe('•••');
@@ -755,7 +756,7 @@ describe('CardView', () => {
       });
     });
 
-    test.only('does not set aria-required attribute on hosted field if it is not rendered', () => {
+    test('does not set aria-required attribute on hosted field if it is not rendered', () => {
       fakeClient.getConfiguration.mockReturnValue({
         gatewayConfiguration: {
           challenges: [],
