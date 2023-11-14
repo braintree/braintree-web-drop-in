@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+  - Accessibility improvements
+    - Add `aria-hidden` attribute to generic card icon
+    - Add `aria-required` attribute to Hosted Fields
+
 ## 1.40.2
   - Fix issue where some assets for the Drop-In would not load from the CDN
 
