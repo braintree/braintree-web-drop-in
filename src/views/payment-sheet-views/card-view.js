@@ -18,6 +18,14 @@ var PASSTHROUGH_EVENTS = [
   'binAvailable'
 ];
 
+var HOSTED_FIELDS = [
+  'number',
+  'expirationDate',
+  'cvv',
+  'postalCode',
+  'cardholderName'
+];
+
 function CardView() {
   BaseView.apply(this, arguments);
 }
@@ -57,16 +65,25 @@ CardView.prototype.initialize = function () {
 
   if (!this.hasCardholderName) {
     cardholderNameGroup.parentNode.removeChild(cardholderNameGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'cardholderName';
+    });
   }
 
   if (!this.hasCVV) {
     cvvFieldGroup = this.getElementById('cvv-field-group');
     cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'cvv';
+    });
   }
 
   if (!hfOptions.fields.postalCode) {
     postalCodeFieldGroup = this.getElementById('postal-code-field-group');
     postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'postalCode';
+    });
   }
 
   if (!this.model.isGuestCheckout && this.merchantConfiguration.vault.allowVaultCardOverride === true) {
@@ -88,6 +105,11 @@ CardView.prototype.initialize = function () {
     this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
     this.hostedFieldsInstance.on('notEmpty', this._onNotEmptyEvent.bind(this));
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
+    HOSTED_FIELDS.forEach(function (hostedField) {
+      this.hostedFieldsInstance.setAttribute({
+        field: hostedField, attribute: 'aria-required', value: true
+      });
+    }.bind(this));
 
     PASSTHROUGH_EVENTS.forEach(function (eventName) {
       this.hostedFieldsInstance.on(eventName, function (event) {
