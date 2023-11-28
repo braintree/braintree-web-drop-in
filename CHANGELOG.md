@@ -6,6 +6,7 @@
     - Add `aria-required` attribute to Hosted Fields
   - Update browser-detection to v1.17.1
   - Update Google Pay CSP Directives
+  - Updated Apple Pay logo to scale correctly
 
 ## 1.40.2
   - Fix issue where some assets for the Drop-In would not load from the CDN
