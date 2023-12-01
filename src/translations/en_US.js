@@ -35,7 +35,7 @@ module.exports = {
   hostedFieldsFieldsInvalidError: 'Please check your information and try again.',
   paypalButtonMustBeUsed: 'Use the PayPal button to continue with your payment.',
   venmoButtonMustBeUsed: 'Use the Venmo button to continue with your payment.',
-  applePayButtonMustBeUsed: 'Use the ApplePay button to continue with your payment.',
+  applePayButtonMustBeUsed: 'Use the Apple Pay button to continue with your payment.',
   paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
   paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
   paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
