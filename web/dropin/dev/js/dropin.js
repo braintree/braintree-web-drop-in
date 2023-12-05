@@ -20,7 +20,7 @@ var PromiseGlobal =
 typeof Promise !== "undefined" ? Promise : promise_polyfill_1.default;
 exports.PromiseGlobal = PromiseGlobal;
 
-},{"promise-polyfill":197}],3:[function(require,module,exports){
+},{"promise-polyfill":184}],3:[function(require,module,exports){
 "use strict";
 var promise_1 = require("./lib/promise");
 var scriptPromiseCache = {};
@@ -122,7 +122,7 @@ module.exports = function isChrome(ua) {
         !isSilk(ua));
 };
 
-},{"./is-duckduckgo":9,"./is-edge":10,"./is-opera":14,"./is-samsung":15,"./is-silk":16}],9:[function(require,module,exports){
+},{"./is-duckduckgo":9,"./is-edge":10,"./is-opera":21,"./is-samsung":22,"./is-silk":23}],9:[function(require,module,exports){
 "use strict";
 module.exports = function isDuckDuckGo(ua) {
     ua = ua || window.navigator.userAgent;
@@ -138,26 +138,115 @@ module.exports = function isEdge(ua) {
 
 },{}],11:[function(require,module,exports){
 "use strict";
+module.exports = function isFirefox(ua) {
+    ua = ua || window.navigator.userAgent;
+    return /Firefox/i.test(ua);
+};
+
+},{}],12:[function(require,module,exports){
+"use strict";
 module.exports = function isIe10(ua) {
     ua = ua || window.navigator.userAgent;
     return ua.indexOf("MSIE 10") !== -1;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 module.exports = function isIe9(ua) {
     ua = ua || window.navigator.userAgent;
     return ua.indexOf("MSIE 9") !== -1;
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
-module.exports = function isIos(ua) {
+module.exports = function isIosFirefox(ua) {
     ua = ua || window.navigator.userAgent;
-    return /iPhone|iPod|iPad/i.test(ua);
+    return /FxiOS/i.test(ua);
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
+"use strict";
+var isIos = require("./is-ios");
+function isGoogleSearchApp(ua) {
+    return /\bGSA\b/.test(ua);
+}
+module.exports = function isIosGoogleSearchApp(ua) {
+    ua = ua || window.navigator.userAgent;
+    return isIos(ua) && isGoogleSearchApp(ua);
+};
+
+},{"./is-ios":19}],16:[function(require,module,exports){
+"use strict";
+var isIos = require("./is-ios");
+var isIosFirefox = require("./is-ios-firefox");
+var webkitRegexp = /webkit/i;
+function isWebkit(ua) {
+    return webkitRegexp.test(ua);
+}
+function isIosChrome(ua) {
+    return ua.indexOf("CriOS") > -1;
+}
+function isFacebook(ua) {
+    return ua.indexOf("FBAN") > -1;
+}
+module.exports = function isIosSafari(ua) {
+    ua = ua || window.navigator.userAgent;
+    return (isIos(ua) &&
+        isWebkit(ua) &&
+        !isIosChrome(ua) &&
+        !isIosFirefox(ua) &&
+        !isFacebook(ua));
+};
+
+},{"./is-ios":19,"./is-ios-firefox":14}],17:[function(require,module,exports){
+"use strict";
+var isIos = require("./is-ios");
+var isIosGoogleSearchApp = require("./is-ios-google-search-app");
+module.exports = function isIosWebview(ua) {
+    ua = ua || window.navigator.userAgent;
+    if (isIos(ua)) {
+        // The Google Search iOS app is technically a webview and doesn't support popups.
+        if (isIosGoogleSearchApp(ua)) {
+            return true;
+        }
+        // Historically, a webview could be identified by the presence of AppleWebKit and _no_ presence of Safari after.
+        return /.+AppleWebKit(?!.*Safari)/i.test(ua);
+    }
+    return false;
+};
+
+},{"./is-ios":19,"./is-ios-google-search-app":15}],18:[function(require,module,exports){
+"use strict";
+var isIosWebview = require("./is-ios-webview");
+module.exports = function isIosWKWebview(ua, statusBarVisible) {
+    statusBarVisible =
+        typeof statusBarVisible !== "undefined"
+            ? statusBarVisible
+            : window.statusbar.visible;
+    return isIosWebview(ua) && statusBarVisible;
+};
+
+},{"./is-ios-webview":17}],19:[function(require,module,exports){
+"use strict";
+var isIpadOS = require("./is-ipados");
+module.exports = function isIos(ua, checkIpadOS, document) {
+    if (checkIpadOS === void 0) { checkIpadOS = true; }
+    ua = ua || window.navigator.userAgent;
+    var iOsTest = /iPhone|iPod|iPad/i.test(ua);
+    return checkIpadOS ? iOsTest || isIpadOS(ua, document) : iOsTest;
+};
+
+},{"./is-ipados":20}],20:[function(require,module,exports){
+"use strict";
+module.exports = function isIpadOS(ua, document) {
+    ua = ua || window.navigator.userAgent;
+    document = document || window.document;
+    // "ontouchend" is used to determine if a browser is on an iPad, otherwise
+    // user-agents for iPadOS behave/identify as a desktop browser
+    return /Mac|iPad/i.test(ua) && "ontouchend" in document;
+};
+
+},{}],21:[function(require,module,exports){
 "use strict";
 module.exports = function isOpera(ua) {
     ua = ua || window.navigator.userAgent;
@@ -166,39 +255,100 @@ module.exports = function isOpera(ua) {
         ua.indexOf("OPT/") !== -1);
 };
 
-},{}],15:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 module.exports = function isSamsungBrowser(ua) {
     ua = ua || window.navigator.userAgent;
     return /SamsungBrowser/i.test(ua);
 };
 
-},{}],16:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 module.exports = function isSilk(ua) {
     ua = ua || window.navigator.userAgent;
     return ua.indexOf("Silk/") !== -1;
 };
 
-},{}],17:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
+"use strict";
+var MINIMUM_SUPPORTED_CHROME_IOS_VERSION = 48;
+var isAndroid = require("./is-android");
+var isIosFirefox = require("./is-ios-firefox");
+var isIosWebview = require("./is-ios-webview");
+var isChrome = require("./is-chrome");
+var isSamsungBrowser = require("./is-samsung");
+var isDuckDuckGo = require("./is-duckduckgo");
+function isUnsupportedIosChrome(ua) {
+    ua = ua || window.navigator.userAgent;
+    var match = ua.match(/CriOS\/(\d+)\./);
+    if (!match) {
+        return false;
+    }
+    var version = parseInt(match[1], 10);
+    return version < MINIMUM_SUPPORTED_CHROME_IOS_VERSION;
+}
+function isOperaMini(ua) {
+    ua = ua || window.navigator.userAgent;
+    return ua.indexOf("Opera Mini") > -1;
+}
+function isAndroidWebview(ua) {
+    var androidWebviewRegExp = /Version\/[\d.]+/i;
+    ua = ua || window.navigator.userAgent;
+    if (isAndroid(ua)) {
+        return (androidWebviewRegExp.test(ua) && !isOperaMini(ua) && !isDuckDuckGo(ua));
+    }
+    return false;
+}
+function isOldSamsungBrowserOrSamsungWebview(ua) {
+    return !isChrome(ua) && !isSamsungBrowser(ua) && /samsung/i.test(ua);
+}
+module.exports = function supportsPopups(ua) {
+    ua = ua || window.navigator.userAgent;
+    return !(isIosWebview(ua) ||
+        isIosFirefox(ua) ||
+        isAndroidWebview(ua) ||
+        isOperaMini(ua) ||
+        isUnsupportedIosChrome(ua) ||
+        isOldSamsungBrowserOrSamsungWebview(ua));
+};
+
+},{"./is-android":6,"./is-chrome":8,"./is-duckduckgo":9,"./is-ios-firefox":14,"./is-ios-webview":17,"./is-samsung":22}],25:[function(require,module,exports){
 module.exports = require("./dist/is-android");
 
-},{"./dist/is-android":6}],18:[function(require,module,exports){
+},{"./dist/is-android":6}],26:[function(require,module,exports){
 module.exports = require("./dist/is-chrome-os");
 
-},{"./dist/is-chrome-os":7}],19:[function(require,module,exports){
+},{"./dist/is-chrome-os":7}],27:[function(require,module,exports){
 module.exports = require("./dist/is-chrome");
 
-},{"./dist/is-chrome":8}],20:[function(require,module,exports){
+},{"./dist/is-chrome":8}],28:[function(require,module,exports){
+module.exports = require("./dist/is-firefox");
+
+},{"./dist/is-firefox":11}],29:[function(require,module,exports){
 module.exports = require("./dist/is-ie10");
 
-},{"./dist/is-ie10":11}],21:[function(require,module,exports){
+},{"./dist/is-ie10":12}],30:[function(require,module,exports){
 module.exports = require("./dist/is-ie9");
 
-},{"./dist/is-ie9":12}],22:[function(require,module,exports){
+},{"./dist/is-ie9":13}],31:[function(require,module,exports){
+module.exports = require("./dist/is-ios-safari");
+
+},{"./dist/is-ios-safari":16}],32:[function(require,module,exports){
+module.exports = require("./dist/is-ios-webview");
+
+},{"./dist/is-ios-webview":17}],33:[function(require,module,exports){
+module.exports = require("./dist/is-ios-wkwebview");
+
+},{"./dist/is-ios-wkwebview":18}],34:[function(require,module,exports){
 module.exports = require("./dist/is-ios");
 
-},{"./dist/is-ios":13}],23:[function(require,module,exports){
+},{"./dist/is-ios":19}],35:[function(require,module,exports){
+module.exports = require("./dist/is-samsung");
+
+},{"./dist/is-samsung":22}],36:[function(require,module,exports){
+module.exports = require("./dist/supports-popups");
+
+},{"./dist/supports-popups":24}],37:[function(require,module,exports){
 "use strict";
 var EventEmitter = /** @class */ (function () {
     function EventEmitter() {
@@ -249,7 +399,7 @@ var EventEmitter = /** @class */ (function () {
 }());
 module.exports = EventEmitter;
 
-},{}],24:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 "use strict";
 var GlobalPromise = (typeof Promise !== "undefined"
     ? Promise // eslint-disable-line no-undef
@@ -383,7 +533,7 @@ var ExtendedPromise = /** @class */ (function () {
 }());
 module.exports = ExtendedPromise;
 
-},{}],25:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 "use strict";
 var set_attributes_1 = require("./lib/set-attributes");
 var default_attributes_1 = require("./lib/default-attributes");
@@ -403,7 +553,7 @@ module.exports = function createFrame(options) {
     return iframe;
 };
 
-},{"./lib/assign":26,"./lib/default-attributes":27,"./lib/set-attributes":28}],26:[function(require,module,exports){
+},{"./lib/assign":40,"./lib/default-attributes":41,"./lib/set-attributes":42}],40:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.assign = void 0;
@@ -426,7 +576,7 @@ target) {
 }
 exports.assign = assign;
 
-},{}],27:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.defaultAttributes = void 0;
@@ -437,7 +587,7 @@ exports.defaultAttributes = {
     scrolling: "no",
 };
 
-},{}],28:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setAttributes = void 0;
@@ -458,7 +608,7 @@ attributes) {
 }
 exports.setAttributes = setAttributes;
 
-},{}],29:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 function uuid() {
@@ -472,7 +622,7 @@ function uuid() {
 
 module.exports = uuid;
 
-},{}],30:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function deferred(fn) {
@@ -496,7 +646,7 @@ function deferred(fn) {
 }
 exports.deferred = deferred;
 
-},{}],31:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function once(fn) {
@@ -514,7 +664,7 @@ function once(fn) {
 }
 exports.once = once;
 
-},{}],32:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable consistent-return */
@@ -526,7 +676,7 @@ function promiseOrCallback(promise, callback) {
 }
 exports.promiseOrCallback = promiseOrCallback;
 
-},{}],33:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 var deferred_1 = require("./lib/deferred");
 var once_1 = require("./lib/once");
@@ -576,7 +726,7 @@ wrapPromise.wrapPrototype = function (target, options) {
 };
 module.exports = wrapPromise;
 
-},{"./lib/deferred":30,"./lib/once":31,"./lib/promise-or-callback":32}],34:[function(require,module,exports){
+},{"./lib/deferred":44,"./lib/once":45,"./lib/promise-or-callback":46}],48:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("../lib/braintree-error");
@@ -763,7 +913,7 @@ ApplePay.prototype._createPaymentRequestSynchronously = function (
  * @public
  * @param {object} options Options
  * @param {string} options.validationURL The validationURL from an `ApplePayValidateMerchantEvent`.
- * @param {string} options.displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {string} options.displayName The canonical name for your store. Use a non-localized name. This parameter should be a UTF-8 string that is a maximum of 64 characters. The system may display this name to the user.
  * @param {callback} [callback] The second argument, <code>data</code>, is the Apple Pay merchant session object. If no callback is provided, `performValidation` returns a promise.
  * Pass the merchant session to your Apple Pay session's `completeMerchantValidation` method.
  * @returns {(Promise|void)} Returns a promise if no callback is provided.
@@ -974,7 +1124,7 @@ ApplePay.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(ApplePay);
 
-},{"../lib/analytics":72,"../lib/braintree-error":77,"../lib/convert-methods-to-error":79,"../lib/methods":107,"./errors":35,"@braintree/wrap-promise":33}],35:[function(require,module,exports){
+},{"../lib/analytics":86,"../lib/braintree-error":91,"../lib/convert-methods-to-error":93,"../lib/methods":121,"./errors":49,"@braintree/wrap-promise":47}],49:[function(require,module,exports){
 "use strict";
 
 /**
@@ -1034,7 +1184,7 @@ module.exports = {
   },
 };
 
-},{"../lib/braintree-error":77}],36:[function(require,module,exports){
+},{"../lib/braintree-error":91}],50:[function(require,module,exports){
 "use strict";
 
 /**
@@ -1049,7 +1199,7 @@ var basicComponentVerification = require("../lib/basic-component-verification");
 var createAssetsUrl = require("../lib/create-assets-url");
 var createDeferredClient = require("../lib/create-deferred-client");
 var errors = require("./errors");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var wrapPromise = require("@braintree/wrap-promise");
 
 /**
@@ -1111,13 +1261,13 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.40.2`.
+   * @description The current version of the SDK, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION,
 };
 
-},{"../lib/analytics":72,"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/create-assets-url":81,"../lib/create-deferred-client":83,"./apple-pay":34,"./errors":35,"@braintree/wrap-promise":33}],37:[function(require,module,exports){
+},{"../lib/analytics":86,"../lib/basic-component-verification":89,"../lib/braintree-error":91,"../lib/create-assets-url":95,"../lib/create-deferred-client":97,"./apple-pay":48,"./errors":49,"@braintree/wrap-promise":47}],51:[function(require,module,exports){
 "use strict";
 
 var BRAINTREE_VERSION = require("./constants").BRAINTREE_VERSION;
@@ -1619,14 +1769,14 @@ function getAuthorizationHeadersForGraphQL(configuration) {
 
 module.exports = Client;
 
-},{"../lib/add-metadata":71,"../lib/analytics":72,"../lib/assets":73,"../lib/assign":74,"../lib/braintree-error":77,"../lib/constants":78,"../lib/convert-methods-to-error":79,"../lib/convert-to-braintree-error":80,"../lib/create-authorization-data":82,"../lib/deferred":84,"../lib/is-verified-domain":105,"../lib/methods":107,"../lib/once":108,"./constants":38,"./errors":39,"./get-configuration":40,"./request":51,"./request/graphql":49,"@braintree/wrap-promise":33}],38:[function(require,module,exports){
+},{"../lib/add-metadata":85,"../lib/analytics":86,"../lib/assets":87,"../lib/assign":88,"../lib/braintree-error":91,"../lib/constants":92,"../lib/convert-methods-to-error":93,"../lib/convert-to-braintree-error":94,"../lib/create-authorization-data":96,"../lib/deferred":98,"../lib/is-verified-domain":119,"../lib/methods":121,"../lib/once":122,"./constants":52,"./errors":53,"./get-configuration":54,"./request":65,"./request/graphql":63,"@braintree/wrap-promise":47}],52:[function(require,module,exports){
 "use strict";
 
 module.exports = {
   BRAINTREE_VERSION: "2018-05-10",
 };
 
-},{}],39:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 "use strict";
 
 /**
@@ -1721,7 +1871,7 @@ module.exports = {
   },
 };
 
-},{"../lib/braintree-error":77}],40:[function(require,module,exports){
+},{"../lib/braintree-error":91}],54:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("../lib/braintree-error");
@@ -1842,12 +1992,12 @@ module.exports = {
   getConfiguration: wrapPromise(getConfiguration),
 };
 
-},{"../lib/braintree-error":77,"../lib/constants":78,"../lib/is-date-string-before-or-on":103,"./constants":38,"./errors":39,"./request":51,"./request/graphql":49,"@braintree/uuid":29,"@braintree/wrap-promise":33}],41:[function(require,module,exports){
+},{"../lib/braintree-error":91,"../lib/constants":92,"../lib/is-date-string-before-or-on":117,"./constants":52,"./errors":53,"./request":65,"./request/graphql":63,"@braintree/uuid":43,"@braintree/wrap-promise":47}],55:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("../lib/braintree-error");
 var Client = require("./client");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var wrapPromise = require("@braintree/wrap-promise");
 var sharedErrors = require("../lib/errors");
 
@@ -1898,13 +2048,13 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.40.2`.
+   * @description The current version of the SDK, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION,
 };
 
-},{"../lib/braintree-error":77,"../lib/errors":87,"./client":37,"@braintree/wrap-promise":33}],42:[function(require,module,exports){
+},{"../lib/braintree-error":91,"../lib/errors":101,"./client":51,"@braintree/wrap-promise":47}],56:[function(require,module,exports){
 "use strict";
 
 var querystring = require("../../lib/querystring");
@@ -2075,7 +2225,7 @@ module.exports = {
   request: request,
 };
 
-},{"../../lib/assign":74,"../../lib/querystring":109,"./default-request":43,"./graphql/request":50,"./parse-body":52,"./prep-body":53,"./xhr":54}],43:[function(require,module,exports){
+},{"../../lib/assign":88,"../../lib/querystring":123,"./default-request":57,"./graphql/request":64,"./parse-body":66,"./prep-body":67,"./xhr":68}],57:[function(require,module,exports){
 "use strict";
 
 function DefaultRequest(options) {
@@ -2111,7 +2261,7 @@ DefaultRequest.prototype.determineStatus = function (status) {
 
 module.exports = DefaultRequest;
 
-},{}],44:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 "use strict";
 
 var errorResponseAdapter = require("./error");
@@ -2339,7 +2489,7 @@ function mapCardTypes(cardTypes, cardTypeTransformMap) {
 
 module.exports = configurationResponseAdapter;
 
-},{"../../../../lib/assign":74,"./error":46}],45:[function(require,module,exports){
+},{"../../../../lib/assign":88,"./error":60}],59:[function(require,module,exports){
 "use strict";
 
 var errorResponseAdapter = require("./error");
@@ -2450,7 +2600,7 @@ function adaptTokenizeCreditCardResponseBody(body) {
 
 module.exports = creditCardTokenizationResponseAdapter;
 
-},{"./error":46}],46:[function(require,module,exports){
+},{"./error":60}],60:[function(require,module,exports){
 "use strict";
 
 function errorResponseAdapter(responseBody) {
@@ -2549,7 +2699,7 @@ function getLegacyMessage(errors) {
 
 module.exports = errorResponseAdapter;
 
-},{}],47:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 
 var CONFIGURATION_QUERY =
@@ -2640,7 +2790,7 @@ function configuration() {
 
 module.exports = configuration;
 
-},{}],48:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 var assign = require("../../../../lib/assign").assign;
@@ -2771,7 +2921,7 @@ function creditCardTokenization(body) {
 
 module.exports = creditCardTokenization;
 
-},{"../../../../lib/assign":74}],49:[function(require,module,exports){
+},{"../../../../lib/assign":88}],63:[function(require,module,exports){
 "use strict";
 
 var features = {
@@ -2836,7 +2986,7 @@ function containsDisallowedlistedKeys(body) {
 
 module.exports = GraphQL;
 
-},{}],50:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 "use strict";
 
 var BRAINTREE_VERSION = require("../../constants").BRAINTREE_VERSION;
@@ -2983,7 +3133,7 @@ function formatBodyKeys(originalBody) {
 
 module.exports = GraphQLRequest;
 
-},{"../../../lib/assign":74,"../../../lib/snake-case-to-camel-case":111,"../../constants":38,"./adapters/configuration":44,"./adapters/credit-card-tokenization":45,"./generators/configuration":47,"./generators/credit-card-tokenization":48}],51:[function(require,module,exports){
+},{"../../../lib/assign":88,"../../../lib/snake-case-to-camel-case":125,"../../constants":52,"./adapters/configuration":58,"./adapters/credit-card-tokenization":59,"./generators/configuration":61,"./generators/credit-card-tokenization":62}],65:[function(require,module,exports){
 "use strict";
 
 var once = require("../../lib/once");
@@ -2998,7 +3148,7 @@ module.exports = function (options, cb) {
   AJAXDriver.request(options, cb);
 };
 
-},{"../../lib/once":108,"./ajax-driver":42}],52:[function(require,module,exports){
+},{"../../lib/once":122,"./ajax-driver":56}],66:[function(require,module,exports){
 "use strict";
 
 module.exports = function (body) {
@@ -3011,7 +3161,7 @@ module.exports = function (body) {
   return body;
 };
 
-},{}],53:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 
 module.exports = function (method, body) {
@@ -3026,7 +3176,7 @@ module.exports = function (method, body) {
   return body;
 };
 
-},{}],54:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 "use strict";
 
 var isXHRAvailable =
@@ -3045,7 +3195,7 @@ module.exports = {
   getRequestObject: getRequestObject,
 };
 
-},{}],55:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 "use strict";
 
 /**
@@ -3081,7 +3231,7 @@ module.exports = {
   },
 };
 
-},{"../lib/braintree-error":77}],56:[function(require,module,exports){
+},{"../lib/braintree-error":91}],70:[function(require,module,exports){
 "use strict";
 
 var analytics = require("../lib/analytics");
@@ -3467,7 +3617,7 @@ function applyDefaultsToPaymentMethodConfiguration(
 
 module.exports = wrapPromise.wrapPrototype(GooglePayment);
 
-},{"../lib/analytics":72,"../lib/assign":74,"../lib/braintree-error":77,"../lib/convert-methods-to-error":79,"../lib/find":89,"../lib/generate-google-pay-configuration":101,"../lib/methods":107,"./errors":55,"@braintree/wrap-promise":33}],57:[function(require,module,exports){
+},{"../lib/analytics":86,"../lib/assign":88,"../lib/braintree-error":91,"../lib/convert-methods-to-error":93,"../lib/find":103,"../lib/generate-google-pay-configuration":115,"../lib/methods":121,"./errors":69,"@braintree/wrap-promise":47}],71:[function(require,module,exports){
 "use strict";
 /**
  * @module braintree-web/google-payment
@@ -3480,7 +3630,7 @@ var createAssetsUrl = require("../lib/create-assets-url");
 var createDeferredClient = require("../lib/create-deferred-client");
 var basicComponentVerification = require("../lib/basic-component-verification");
 var wrapPromise = require("@braintree/wrap-promise");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var errors = require("./errors");
 
 /**
@@ -3646,13 +3796,13 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.40.2`.
+   * @description The current version of the SDK, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION,
 };
 
-},{"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/create-assets-url":81,"../lib/create-deferred-client":83,"./errors":55,"./google-payment":56,"@braintree/wrap-promise":33}],58:[function(require,module,exports){
+},{"../lib/basic-component-verification":89,"../lib/braintree-error":91,"../lib/create-assets-url":95,"../lib/create-deferred-client":97,"./errors":69,"./google-payment":70,"@braintree/wrap-promise":47}],72:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("../../lib/braintree-error");
@@ -3697,7 +3847,7 @@ function _isValid(attribute, value) {
 
 module.exports = attributeValidationError;
 
-},{"../../lib/braintree-error":77,"../shared/constants":66,"../shared/errors":67}],59:[function(require,module,exports){
+},{"../../lib/braintree-error":91,"../shared/constants":80,"../shared/errors":81}],73:[function(require,module,exports){
 "use strict";
 
 var constants = require("../shared/constants");
@@ -3715,7 +3865,7 @@ module.exports = function composeUrl(assetsUrl, componentId, isDebug) {
   );
 };
 
-},{"../../lib/use-min":112,"../shared/constants":66}],60:[function(require,module,exports){
+},{"../../lib/use-min":126,"../shared/constants":80}],74:[function(require,module,exports){
 "use strict";
 
 var directions = require("../shared/constants").navigationDirections;
@@ -3849,7 +3999,7 @@ module.exports = {
   },
 };
 
-},{"../shared/browser-detection":65,"../shared/constants":66,"../shared/find-parent-tags":68,"../shared/focus-intercept":69}],61:[function(require,module,exports){
+},{"../shared/browser-detection":79,"../shared/constants":80,"../shared/find-parent-tags":82,"../shared/focus-intercept":83}],75:[function(require,module,exports){
 "use strict";
 
 var allowedStyles = require("../shared/constants").allowedStyles;
@@ -3885,7 +4035,7 @@ module.exports = function getStylesFromClass(cssClass) {
   return styles;
 };
 
-},{"../shared/constants":66}],62:[function(require,module,exports){
+},{"../shared/constants":80}],76:[function(require,module,exports){
 "use strict";
 
 var assign = require("../../lib/assign").assign;
@@ -5395,7 +5545,7 @@ function formatMerchantConfigurationForIframes(config) {
 
 module.exports = wrapPromise.wrapPrototype(HostedFields);
 
-},{"../../lib/analytics":72,"../../lib/assign":74,"../../lib/braintree-error":77,"../../lib/constants":78,"../../lib/convert-methods-to-error":79,"../../lib/create-assets-url":81,"../../lib/create-deferred-client":83,"../../lib/destructor":85,"../../lib/errors":87,"../../lib/find-root-node":88,"../../lib/is-verified-domain":105,"../../lib/methods":107,"../../lib/shadow":110,"../shared/browser-detection":65,"../shared/constants":66,"../shared/errors":67,"../shared/find-parent-tags":68,"../shared/focus-intercept":69,"../shared/get-card-types":70,"./attribute-validation-error":58,"./compose-url":59,"./focus-change":60,"./get-styles-from-class":61,"./inject-frame":63,"@braintree/event-emitter":23,"@braintree/iframer":25,"@braintree/uuid":29,"@braintree/wrap-promise":33,"framebus":180}],63:[function(require,module,exports){
+},{"../../lib/analytics":86,"../../lib/assign":88,"../../lib/braintree-error":91,"../../lib/constants":92,"../../lib/convert-methods-to-error":93,"../../lib/create-assets-url":95,"../../lib/create-deferred-client":97,"../../lib/destructor":99,"../../lib/errors":101,"../../lib/find-root-node":102,"../../lib/is-verified-domain":119,"../../lib/methods":121,"../../lib/shadow":124,"../shared/browser-detection":79,"../shared/constants":80,"../shared/errors":81,"../shared/find-parent-tags":82,"../shared/focus-intercept":83,"../shared/get-card-types":84,"./attribute-validation-error":72,"./compose-url":73,"./focus-change":74,"./get-styles-from-class":75,"./inject-frame":77,"@braintree/event-emitter":37,"@braintree/iframer":39,"@braintree/uuid":43,"@braintree/wrap-promise":47,"framebus":167}],77:[function(require,module,exports){
 "use strict";
 
 var focusIntercept = require("../shared/focus-intercept");
@@ -5430,7 +5580,7 @@ module.exports = function injectFrame(id, frame, container, focusHandler) {
   return [frame, clearboth];
 };
 
-},{"../shared/constants":66,"../shared/focus-intercept":69}],64:[function(require,module,exports){
+},{"../shared/constants":80,"../shared/focus-intercept":83}],78:[function(require,module,exports){
 "use strict";
 /** @module braintree-web/hosted-fields */
 
@@ -5440,7 +5590,7 @@ var errors = require("./shared/errors");
 var supportsInputFormatting = require("restricted-input/supports-input-formatting");
 var wrapPromise = require("@braintree/wrap-promise");
 var BraintreeError = require("../lib/braintree-error");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -5789,13 +5939,13 @@ module.exports = {
   supportsInputFormatting: supportsInputFormatting,
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.40.2`.
+   * @description The current version of the SDK, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION,
 };
 
-},{"../lib/basic-component-verification":75,"../lib/braintree-error":77,"./external/hosted-fields":62,"./shared/errors":67,"@braintree/wrap-promise":33,"restricted-input/supports-input-formatting":200}],65:[function(require,module,exports){
+},{"../lib/basic-component-verification":89,"../lib/braintree-error":91,"./external/hosted-fields":76,"./shared/errors":81,"@braintree/wrap-promise":47,"restricted-input/supports-input-formatting":187}],79:[function(require,module,exports){
 "use strict";
 
 var isAndroid = require("@braintree/browser-detection/is-android");
@@ -5821,12 +5971,12 @@ module.exports = {
   hasSoftwareKeyboard: hasSoftwareKeyboard,
 };
 
-},{"@braintree/browser-detection/is-android":131,"@braintree/browser-detection/is-chrome":133,"@braintree/browser-detection/is-chrome-os":132,"@braintree/browser-detection/is-firefox":134,"@braintree/browser-detection/is-ios":138,"@braintree/browser-detection/is-ios-webview":136}],66:[function(require,module,exports){
+},{"@braintree/browser-detection/is-android":25,"@braintree/browser-detection/is-chrome":27,"@braintree/browser-detection/is-chrome-os":26,"@braintree/browser-detection/is-firefox":28,"@braintree/browser-detection/is-ios":34,"@braintree/browser-detection/is-ios-webview":32}],80:[function(require,module,exports){
 "use strict";
 
 var enumerate = require("../../lib/enumerate");
 var errors = require("./errors");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 
 var constants = {
   VERSION: VERSION,
@@ -5989,7 +6139,7 @@ constants.events = enumerate(
 
 module.exports = constants;
 
-},{"../../lib/enumerate":86,"./errors":67}],67:[function(require,module,exports){
+},{"../../lib/enumerate":100,"./errors":81}],81:[function(require,module,exports){
 "use strict";
 
 /**
@@ -6103,7 +6253,7 @@ module.exports = {
   },
 };
 
-},{"../../lib/braintree-error":77}],68:[function(require,module,exports){
+},{"../../lib/braintree-error":91}],82:[function(require,module,exports){
 "use strict";
 
 function findParentTags(element, tag) {
@@ -6123,7 +6273,7 @@ function findParentTags(element, tag) {
 
 module.exports = findParentTags;
 
-},{}],69:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 "use strict";
 
 var browserDetection = require("./browser-detection");
@@ -6232,7 +6382,7 @@ var focusIntercept = {
 
 module.exports = focusIntercept;
 
-},{"./browser-detection":65,"./constants":66}],70:[function(require,module,exports){
+},{"./browser-detection":79,"./constants":80}],84:[function(require,module,exports){
 "use strict";
 
 var creditCardType = require("credit-card-type");
@@ -6253,7 +6403,7 @@ module.exports = function (number) {
   return results;
 };
 
-},{"credit-card-type":172}],71:[function(require,module,exports){
+},{"credit-card-type":159}],85:[function(require,module,exports){
 "use strict";
 
 var createAuthorizationData = require("./create-authorization-data");
@@ -6287,7 +6437,7 @@ function addMetadata(configuration, data) {
 
 module.exports = addMetadata;
 
-},{"./constants":78,"./create-authorization-data":82,"./json-clone":106}],72:[function(require,module,exports){
+},{"./constants":92,"./create-authorization-data":96,"./json-clone":120}],86:[function(require,module,exports){
 "use strict";
 
 var constants = require("./constants");
@@ -6341,7 +6491,7 @@ module.exports = {
   sendEvent: sendAnalyticsEvent,
 };
 
-},{"./add-metadata":71,"./constants":78}],73:[function(require,module,exports){
+},{"./add-metadata":85,"./constants":92}],87:[function(require,module,exports){
 "use strict";
 
 var loadScript = require("@braintree/asset-loader/load-script");
@@ -6350,7 +6500,7 @@ module.exports = {
   loadScript: loadScript,
 };
 
-},{"@braintree/asset-loader/load-script":5}],74:[function(require,module,exports){
+},{"@braintree/asset-loader/load-script":5}],88:[function(require,module,exports){
 "use strict";
 
 var assignNormalized =
@@ -6376,12 +6526,12 @@ module.exports = {
   _assign: assignPolyfill,
 };
 
-},{}],75:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("./braintree-error");
 var sharedErrors = require("./errors");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 
 function basicComponentVerification(options) {
   var client, authorization, name;
@@ -6437,7 +6587,7 @@ module.exports = {
   verify: basicComponentVerification,
 };
 
-},{"./braintree-error":77,"./errors":87}],76:[function(require,module,exports){
+},{"./braintree-error":91,"./errors":101}],90:[function(require,module,exports){
 "use strict";
 
 var once = require("./once");
@@ -6483,7 +6633,7 @@ module.exports = function (functions, cb) {
   }
 };
 
-},{"./once":108}],77:[function(require,module,exports){
+},{"./once":122}],91:[function(require,module,exports){
 "use strict";
 
 var enumerate = require("./enumerate");
@@ -6572,10 +6722,10 @@ BraintreeError.findRootError = function (err) {
 
 module.exports = BraintreeError;
 
-},{"./enumerate":86}],78:[function(require,module,exports){
+},{"./enumerate":100}],92:[function(require,module,exports){
 "use strict";
 
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var PLATFORM = "web";
 
 var CLIENT_API_URLS = {
@@ -6611,7 +6761,7 @@ module.exports = {
   BRAINTREE_LIBRARY_VERSION: "braintree/" + PLATFORM + "/" + VERSION,
 };
 
-},{}],79:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("./braintree-error");
@@ -6629,7 +6779,7 @@ module.exports = function (instance, methodNames) {
   });
 };
 
-},{"./braintree-error":77,"./errors":87}],80:[function(require,module,exports){
+},{"./braintree-error":91,"./errors":101}],94:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("./braintree-error");
@@ -6651,7 +6801,7 @@ function convertToBraintreeError(originalErr, btErrorObject) {
 
 module.exports = convertToBraintreeError;
 
-},{"./braintree-error":77}],81:[function(require,module,exports){
+},{"./braintree-error":91}],95:[function(require,module,exports){
 "use strict";
 
 var ASSETS_URLS = require("./constants").ASSETS_URLS;
@@ -6665,7 +6815,7 @@ module.exports = {
   create: createAssetsUrl,
 };
 
-},{"./constants":78}],82:[function(require,module,exports){
+},{"./constants":92}],96:[function(require,module,exports){
 "use strict";
 
 var atob = require("../lib/vendor/polyfill").atob;
@@ -6716,14 +6866,14 @@ function createAuthorizationData(authorization) {
 
 module.exports = createAuthorizationData;
 
-},{"../lib/constants":78,"../lib/vendor/polyfill":113}],83:[function(require,module,exports){
+},{"../lib/constants":92,"../lib/vendor/polyfill":127}],97:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("./braintree-error");
 var assets = require("./assets");
 var sharedErrors = require("./errors");
 
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 
 function createDeferredClient(options) {
   var promise = Promise.resolve();
@@ -6780,7 +6930,7 @@ module.exports = {
   create: createDeferredClient,
 };
 
-},{"./assets":73,"./braintree-error":77,"./errors":87}],84:[function(require,module,exports){
+},{"./assets":87,"./braintree-error":91,"./errors":101}],98:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -6794,7 +6944,7 @@ module.exports = function (fn) {
   };
 };
 
-},{}],85:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 "use strict";
 
 var batchExecuteFunctions = require("./batch-execute-functions");
@@ -6835,7 +6985,7 @@ Destructor.prototype.teardown = function (callback) {
 
 module.exports = Destructor;
 
-},{"./batch-execute-functions":76}],86:[function(require,module,exports){
+},{"./batch-execute-functions":90}],100:[function(require,module,exports){
 "use strict";
 
 function enumerate(values, prefix) {
@@ -6850,7 +7000,7 @@ function enumerate(values, prefix) {
 
 module.exports = enumerate;
 
-},{}],87:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 "use strict";
 
 /**
@@ -6900,7 +7050,7 @@ module.exports = {
   },
 };
 
-},{"./braintree-error":77}],88:[function(require,module,exports){
+},{"./braintree-error":91}],102:[function(require,module,exports){
 "use strict";
 
 module.exports = function findRootNode(element) {
@@ -6911,7 +7061,7 @@ module.exports = function findRootNode(element) {
   return element;
 };
 
-},{}],89:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 "use strict";
 
 module.exports = function (array, key, value) {
@@ -6926,7 +7076,7 @@ module.exports = function (array, key, value) {
   return null;
 };
 
-},{}],90:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 "use strict";
 
 var Popup = require("./strategies/popup");
@@ -7168,7 +7318,7 @@ FrameService.prototype._getFrameForEnvironment = function (options) {
 
 module.exports = FrameService;
 
-},{"../../braintree-error":77,"../../constants":78,"../shared/browser-detection":97,"../shared/constants":98,"../shared/errors":99,"../shared/events":100,"./../../assign":74,"./strategies/modal":92,"./strategies/popup":95,"./strategies/popup-bridge":93,"@braintree/iframer":25,"@braintree/uuid":29,"framebus":180}],91:[function(require,module,exports){
+},{"../../braintree-error":91,"../../constants":92,"../shared/browser-detection":111,"../shared/constants":112,"../shared/errors":113,"../shared/events":114,"./../../assign":88,"./strategies/modal":106,"./strategies/popup":109,"./strategies/popup-bridge":107,"@braintree/iframer":39,"@braintree/uuid":43,"framebus":167}],105:[function(require,module,exports){
 "use strict";
 
 var FrameService = require("./frame-service");
@@ -7204,7 +7354,7 @@ module.exports = {
   },
 };
 
-},{"./frame-service":90}],92:[function(require,module,exports){
+},{"./frame-service":104}],106:[function(require,module,exports){
 "use strict";
 
 var iFramer = require("@braintree/iframer");
@@ -7326,7 +7476,7 @@ Modal.prototype._lockScrolling = function () {
 
 module.exports = Modal;
 
-},{"../../../assign":74,"../../shared/browser-detection":97,"@braintree/iframer":25}],93:[function(require,module,exports){
+},{"../../../assign":88,"../../shared/browser-detection":111,"@braintree/iframer":39}],107:[function(require,module,exports){
 "use strict";
 
 var BraintreeError = require("../../../braintree-error");
@@ -7382,7 +7532,7 @@ PopupBridge.prototype.redirect = function (redirectUrl) {
 
 module.exports = PopupBridge;
 
-},{"../../../braintree-error":77,"../../shared/errors":99}],94:[function(require,module,exports){
+},{"../../../braintree-error":91,"../../shared/errors":113}],108:[function(require,module,exports){
 "use strict";
 
 var constants = require("../../../shared/constants");
@@ -7411,7 +7561,7 @@ module.exports = function composePopupOptions(options) {
   ].join(",");
 };
 
-},{"../../../shared/constants":98,"./position":96}],95:[function(require,module,exports){
+},{"../../../shared/constants":112,"./position":110}],109:[function(require,module,exports){
 "use strict";
 
 var composeOptions = require("./compose-options");
@@ -7454,7 +7604,7 @@ Popup.prototype.redirect = function (redirectUrl) {
 
 module.exports = Popup;
 
-},{"./compose-options":94}],96:[function(require,module,exports){
+},{"./compose-options":108}],110:[function(require,module,exports){
 "use strict";
 
 function top(height) {
@@ -7482,7 +7632,7 @@ module.exports = {
   center: center,
 };
 
-},{}],97:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -7491,7 +7641,7 @@ module.exports = {
   supportsPopups: require("@braintree/browser-detection/supports-popups"),
 };
 
-},{"@braintree/browser-detection/is-ios":138,"@braintree/browser-detection/is-ios-wkwebview":137,"@braintree/browser-detection/supports-popups":140}],98:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ios":34,"@braintree/browser-detection/is-ios-wkwebview":33,"@braintree/browser-detection/supports-popups":36}],112:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -7504,7 +7654,7 @@ module.exports = {
   POPUP_CLOSE_TIMEOUT: 100,
 };
 
-},{}],99:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 "use strict";
 
 /**
@@ -7530,7 +7680,7 @@ module.exports = {
   },
 };
 
-},{"../../braintree-error":77}],100:[function(require,module,exports){
+},{"../../braintree-error":91}],114:[function(require,module,exports){
 "use strict";
 
 var enumerate = require("../../enumerate");
@@ -7540,10 +7690,10 @@ module.exports = enumerate(
   "frameService:"
 );
 
-},{"../../enumerate":86}],101:[function(require,module,exports){
+},{"../../enumerate":100}],115:[function(require,module,exports){
 "use strict";
 
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var assign = require("./assign").assign;
 
 function generateTokenizationParameters(configuration, overrides) {
@@ -7671,7 +7821,7 @@ module.exports = function (configuration, googlePayVersion, googleMerchantId) {
   return data;
 };
 
-},{"./assign":74}],102:[function(require,module,exports){
+},{"./assign":88}],116:[function(require,module,exports){
 "use strict";
 
 module.exports = function inIframe(win) {
@@ -7684,7 +7834,7 @@ module.exports = function inIframe(win) {
   }
 };
 
-},{}],103:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 "use strict";
 
 function convertDateStringToDate(dateString) {
@@ -7701,7 +7851,7 @@ function isDateStringBeforeOrOn(firstDate, secondDate) {
 
 module.exports = isDateStringBeforeOrOn;
 
-},{}],104:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 "use strict";
 
 function isHTTPS(protocol) {
@@ -7714,7 +7864,7 @@ module.exports = {
   isHTTPS: isHTTPS,
 };
 
-},{}],105:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 "use strict";
 
 var parser;
@@ -7747,14 +7897,14 @@ function isVerifiedDomain(url) {
 
 module.exports = isVerifiedDomain;
 
-},{}],106:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 "use strict";
 
 module.exports = function (value) {
   return JSON.parse(JSON.stringify(value));
 };
 
-},{}],107:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 "use strict";
 
 module.exports = function (obj) {
@@ -7763,7 +7913,7 @@ module.exports = function (obj) {
   });
 };
 
-},{}],108:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 "use strict";
 
 function once(fn) {
@@ -7779,7 +7929,7 @@ function once(fn) {
 
 module.exports = once;
 
-},{}],109:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 "use strict";
 
 function _notEmpty(obj) {
@@ -7886,7 +8036,7 @@ module.exports = {
   hasQueryParams: hasQueryParams,
 };
 
-},{}],110:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 "use strict";
 
 var uuid = require("@braintree/uuid");
@@ -7948,7 +8098,7 @@ module.exports = {
   transformToSlot: transformToSlot,
 };
 
-},{"./find-root-node":88,"@braintree/uuid":29}],111:[function(require,module,exports){
+},{"./find-root-node":102,"@braintree/uuid":43}],125:[function(require,module,exports){
 "use strict";
 
 module.exports = function (snakeString) {
@@ -7961,7 +8111,7 @@ module.exports = function (snakeString) {
   });
 };
 
-},{}],112:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 "use strict";
 
 function useMin(isDebug) {
@@ -7970,7 +8120,7 @@ function useMin(isDebug) {
 
 module.exports = useMin;
 
-},{}],113:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 "use strict";
 
 // NEXT_MAJOR_VERSION old versions of IE don't have atob, in the
@@ -8018,188 +8168,7 @@ module.exports = {
   _atob: atobPolyfill,
 };
 
-},{}],114:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"dup":6}],115:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],116:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"./is-duckduckgo":117,"./is-edge":118,"./is-opera":127,"./is-samsung":128,"./is-silk":129,"dup":8}],117:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],118:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"dup":10}],119:[function(require,module,exports){
-"use strict";
-module.exports = function isFirefox(ua) {
-    ua = ua || window.navigator.userAgent;
-    return /Firefox/i.test(ua);
-};
-
-},{}],120:[function(require,module,exports){
-"use strict";
-module.exports = function isIosFirefox(ua) {
-    ua = ua || window.navigator.userAgent;
-    return /FxiOS/i.test(ua);
-};
-
-},{}],121:[function(require,module,exports){
-"use strict";
-var isIos = require("./is-ios");
-function isGoogleSearchApp(ua) {
-    return /\bGSA\b/.test(ua);
-}
-module.exports = function isIosGoogleSearchApp(ua) {
-    ua = ua || window.navigator.userAgent;
-    return isIos(ua) && isGoogleSearchApp(ua);
-};
-
-},{"./is-ios":125}],122:[function(require,module,exports){
-"use strict";
-var isIos = require("./is-ios");
-var isIosFirefox = require("./is-ios-firefox");
-var webkitRegexp = /webkit/i;
-function isWebkit(ua) {
-    return webkitRegexp.test(ua);
-}
-function isIosChrome(ua) {
-    return ua.indexOf("CriOS") > -1;
-}
-function isFacebook(ua) {
-    return ua.indexOf("FBAN") > -1;
-}
-module.exports = function isIosSafari(ua) {
-    ua = ua || window.navigator.userAgent;
-    return (isIos(ua) &&
-        isWebkit(ua) &&
-        !isIosChrome(ua) &&
-        !isIosFirefox(ua) &&
-        !isFacebook(ua));
-};
-
-},{"./is-ios":125,"./is-ios-firefox":120}],123:[function(require,module,exports){
-"use strict";
-var isIos = require("./is-ios");
-var isIosGoogleSearchApp = require("./is-ios-google-search-app");
-module.exports = function isIosWebview(ua) {
-    ua = ua || window.navigator.userAgent;
-    if (isIos(ua)) {
-        // The Google Search iOS app is technically a webview and doesn't support popups.
-        if (isIosGoogleSearchApp(ua)) {
-            return true;
-        }
-        // Historically, a webview could be identified by the presence of AppleWebKit and _no_ presence of Safari after.
-        return /.+AppleWebKit(?!.*Safari)/i.test(ua);
-    }
-    return false;
-};
-
-},{"./is-ios":125,"./is-ios-google-search-app":121}],124:[function(require,module,exports){
-"use strict";
-var isIosWebview = require("./is-ios-webview");
-module.exports = function isIosWKWebview(ua, statusBarVisible) {
-    statusBarVisible =
-        typeof statusBarVisible !== "undefined"
-            ? statusBarVisible
-            : window.statusbar.visible;
-    return isIosWebview(ua) && statusBarVisible;
-};
-
-},{"./is-ios-webview":123}],125:[function(require,module,exports){
-"use strict";
-var isIpadOS = require("./is-ipados");
-module.exports = function isIos(ua, checkIpadOS, document) {
-    if (checkIpadOS === void 0) { checkIpadOS = true; }
-    ua = ua || window.navigator.userAgent;
-    var iOsTest = /iPhone|iPod|iPad/i.test(ua);
-    return checkIpadOS ? iOsTest || isIpadOS(ua, document) : iOsTest;
-};
-
-},{"./is-ipados":126}],126:[function(require,module,exports){
-"use strict";
-module.exports = function isIpadOS(ua, document) {
-    ua = ua || window.navigator.userAgent;
-    document = document || window.document;
-    // "ontouchend" is used to determine if a browser is on an iPad, otherwise
-    // user-agents for iPadOS behave/identify as a desktop browser
-    return /Mac|iPad/i.test(ua) && "ontouchend" in document;
-};
-
-},{}],127:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],128:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],129:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],130:[function(require,module,exports){
-"use strict";
-var MINIMUM_SUPPORTED_CHROME_IOS_VERSION = 48;
-var isAndroid = require("./is-android");
-var isIosFirefox = require("./is-ios-firefox");
-var isIosWebview = require("./is-ios-webview");
-var isChrome = require("./is-chrome");
-var isSamsungBrowser = require("./is-samsung");
-var isDuckDuckGo = require("./is-duckduckgo");
-function isUnsupportedIosChrome(ua) {
-    ua = ua || window.navigator.userAgent;
-    var match = ua.match(/CriOS\/(\d+)\./);
-    if (!match) {
-        return false;
-    }
-    var version = parseInt(match[1], 10);
-    return version < MINIMUM_SUPPORTED_CHROME_IOS_VERSION;
-}
-function isOperaMini(ua) {
-    ua = ua || window.navigator.userAgent;
-    return ua.indexOf("Opera Mini") > -1;
-}
-function isAndroidWebview(ua) {
-    var androidWebviewRegExp = /Version\/[\d.]+/i;
-    ua = ua || window.navigator.userAgent;
-    if (isAndroid(ua)) {
-        return (androidWebviewRegExp.test(ua) && !isOperaMini(ua) && !isDuckDuckGo(ua));
-    }
-    return false;
-}
-function isOldSamsungBrowserOrSamsungWebview(ua) {
-    return !isChrome(ua) && !isSamsungBrowser(ua) && /samsung/i.test(ua);
-}
-module.exports = function supportsPopups(ua) {
-    ua = ua || window.navigator.userAgent;
-    return !(isIosWebview(ua) ||
-        isIosFirefox(ua) ||
-        isAndroidWebview(ua) ||
-        isOperaMini(ua) ||
-        isUnsupportedIosChrome(ua) ||
-        isOldSamsungBrowserOrSamsungWebview(ua));
-};
-
-},{"./is-android":114,"./is-chrome":116,"./is-duckduckgo":117,"./is-ios-firefox":120,"./is-ios-webview":123,"./is-samsung":128}],131:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"./dist/is-android":114,"dup":17}],132:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"./dist/is-chrome-os":115,"dup":18}],133:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"./dist/is-chrome":116,"dup":19}],134:[function(require,module,exports){
-module.exports = require("./dist/is-firefox");
-
-},{"./dist/is-firefox":119}],135:[function(require,module,exports){
-module.exports = require("./dist/is-ios-safari");
-
-},{"./dist/is-ios-safari":122}],136:[function(require,module,exports){
-module.exports = require("./dist/is-ios-webview");
-
-},{"./dist/is-ios-webview":123}],137:[function(require,module,exports){
-module.exports = require("./dist/is-ios-wkwebview");
-
-},{"./dist/is-ios-wkwebview":124}],138:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"./dist/is-ios":125,"dup":22}],139:[function(require,module,exports){
-module.exports = require("./dist/is-samsung");
-
-},{"./dist/is-samsung":128}],140:[function(require,module,exports){
-module.exports = require("./dist/supports-popups");
-
-},{"./dist/supports-popups":130}],141:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 "use strict";
 
 /**
@@ -8306,7 +8275,7 @@ module.exports = {
   },
 };
 
-},{"../lib/braintree-error":77}],142:[function(require,module,exports){
+},{"../lib/braintree-error":91}],129:[function(require,module,exports){
 "use strict";
 /**
  * @module braintree-web/paypal-checkout
@@ -8316,7 +8285,7 @@ module.exports = {
 var basicComponentVerification = require("../lib/basic-component-verification");
 var wrapPromise = require("@braintree/wrap-promise");
 var PayPalCheckout = require("./paypal-checkout");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 
 /**
  * @static
@@ -8374,13 +8343,13 @@ module.exports = {
   create: wrapPromise(create),
   isSupported: isSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.40.2`.
+   * @description The current version of the SDK, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION,
 };
 
-},{"../lib/basic-component-verification":75,"./paypal-checkout":143,"@braintree/wrap-promise":33}],143:[function(require,module,exports){
+},{"../lib/basic-component-verification":89,"./paypal-checkout":130,"@braintree/wrap-promise":47}],130:[function(require,module,exports){
 "use strict";
 
 var analytics = require("../lib/analytics");
@@ -8399,7 +8368,7 @@ var methods = require("../lib/methods");
 var useMin = require("../lib/use-min");
 var convertMethodsToError = require("../lib/convert-methods-to-error");
 var querystring = require("../lib/querystring");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var INTEGRATION_TIMEOUT_MS = require("../lib/constants").INTEGRATION_TIMEOUT_MS;
 
 var REQUIRED_PARAMS_FOR_START_VAULT_INITIATED_CHECKOUT = [
@@ -8953,7 +8922,7 @@ PayPalCheckout.prototype._createPaymentResource = function (options, config) {
  * @public
  * @param {object} options All options for the PayPalCheckout component.
  * @param {string} options.paymentId This should be PayPal `paymentId`.
- * @param {(string|number)} [options.amount] The amount of the transaction, including the amount of the selected shipping option.
+ * @param {(string|number)} options.amount The amount of the transaction, including the amount of the selected shipping option, and all `line_items`.
  * * Supports up to 2 decimal digits.
  * @param {string} options.currency The currency code of the amount, such as 'USD'. Required when using the Checkout flow.
  * @param {shippingOption[]} [options.shippingOptions] List of {@link PayPalCheckout~shippingOption|shipping options} offered by the payee or merchant to the payer to ship or pick up their items.
@@ -9988,7 +9957,7 @@ PayPalCheckout.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(PayPalCheckout);
 
-},{"../lib/analytics":72,"../lib/assign":74,"../lib/braintree-error":77,"../lib/constants":78,"../lib/convert-methods-to-error":79,"../lib/convert-to-braintree-error":80,"../lib/create-assets-url":81,"../lib/create-authorization-data":82,"../lib/create-deferred-client":83,"../lib/frame-service/external":91,"../lib/methods":107,"../lib/querystring":109,"../lib/use-min":112,"../paypal/shared/constants":144,"./errors":141,"@braintree/extended-promise":24,"@braintree/wrap-promise":33}],144:[function(require,module,exports){
+},{"../lib/analytics":86,"../lib/assign":88,"../lib/braintree-error":91,"../lib/constants":92,"../lib/convert-methods-to-error":93,"../lib/convert-to-braintree-error":94,"../lib/create-assets-url":95,"../lib/create-authorization-data":96,"../lib/create-deferred-client":97,"../lib/frame-service/external":105,"../lib/methods":121,"../lib/querystring":123,"../lib/use-min":126,"../paypal/shared/constants":131,"./errors":128,"@braintree/extended-promise":38,"@braintree/wrap-promise":47}],131:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -10000,7 +9969,7 @@ module.exports = {
   REQUIRED_OPTIONS: ["paymentId", "currency"],
 };
 
-},{}],145:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 "use strict";
 
 var assign = require("../../../lib/assign").assign;
@@ -10019,7 +9988,7 @@ var useMin = require("../../../lib/use-min");
 var BUS_CONFIGURATION_REQUEST_EVENT =
   require("../../../lib/constants").BUS_CONFIGURATION_REQUEST_EVENT;
 
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var IFRAME_HEIGHT = 400;
 var IFRAME_WIDTH = 400;
 
@@ -10471,7 +10440,7 @@ BaseFramework.prototype.teardown = function () {
 
 module.exports = BaseFramework;
 
-},{"../../../lib/analytics":72,"../../../lib/assign":74,"../../../lib/braintree-error":77,"../../../lib/constants":78,"../../../lib/is-verified-domain":105,"../../../lib/use-min":112,"../../shared/constants":154,"../../shared/errors":155,"../../shared/events":156,"@braintree/event-emitter":23,"@braintree/extended-promise":24,"@braintree/iframer":25,"@braintree/uuid":29,"framebus":180}],146:[function(require,module,exports){
+},{"../../../lib/analytics":86,"../../../lib/assign":88,"../../../lib/braintree-error":91,"../../../lib/constants":92,"../../../lib/is-verified-domain":119,"../../../lib/use-min":126,"../../shared/constants":141,"../../shared/errors":142,"../../shared/events":143,"@braintree/event-emitter":37,"@braintree/extended-promise":38,"@braintree/iframer":39,"@braintree/uuid":43,"framebus":167}],133:[function(require,module,exports){
 "use strict";
 // NEXT_MAJOR_VERSION drop support for Bootstrap framework,
 // recomend using inline frame version and putting it in
@@ -10537,7 +10506,7 @@ Bootstrap3ModalFramework.prototype._createCardinalConfigurationOptions =
 
 module.exports = Bootstrap3ModalFramework;
 
-},{"./songbird":151}],147:[function(require,module,exports){
+},{"./songbird":138}],134:[function(require,module,exports){
 "use strict";
 
 var SongbirdFramework = require("./songbird");
@@ -10625,7 +10594,7 @@ CardinalModalFramework.prototype._createV1IframeModalElement = function (
 
 module.exports = CardinalModalFramework;
 
-},{"./songbird":151}],148:[function(require,module,exports){
+},{"./songbird":138}],135:[function(require,module,exports){
 "use strict";
 
 var LegacyFramework = require("./legacy");
@@ -10640,7 +10609,7 @@ module.exports = {
   "inline-iframe": InlineIframeFramework,
 };
 
-},{"./bootstrap3-modal":146,"./cardinal-modal":147,"./inline-iframe":149,"./legacy":150}],149:[function(require,module,exports){
+},{"./bootstrap3-modal":133,"./cardinal-modal":134,"./inline-iframe":136,"./legacy":137}],136:[function(require,module,exports){
 "use strict";
 
 var SongbirdFramework = require("./songbird");
@@ -10748,7 +10717,7 @@ InlineIframeFramework.prototype._onInlineSetup = function (
 
 module.exports = InlineIframeFramework;
 
-},{"../../../lib/braintree-error":77,"../../../lib/enumerate":86,"../../shared/errors":155,"./songbird":151}],150:[function(require,module,exports){
+},{"../../../lib/braintree-error":91,"../../../lib/enumerate":100,"../../shared/errors":142,"./songbird":138}],137:[function(require,module,exports){
 "use strict";
 
 var BaseFramework = require("./base");
@@ -10871,7 +10840,7 @@ LegacyFramework.prototype._presentChallenge = function (
 
 module.exports = LegacyFramework;
 
-},{"../../../lib/deferred":84,"./base":145}],151:[function(require,module,exports){
+},{"../../../lib/deferred":98,"./base":132}],138:[function(require,module,exports){
 "use strict";
 
 var BaseFramework = require("./base");
@@ -10889,7 +10858,7 @@ var ExtendedPromise = require("@braintree/extended-promise");
 var INTEGRATION_TIMEOUT_MS =
   require("../../../lib/constants").INTEGRATION_TIMEOUT_MS;
 var PLATFORM = require("../../../lib/constants").PLATFORM;
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var CUSTOMER_CANCELED_SONGBIRD_MODAL = "01";
 var SONGBIRD_UI_EVENTS = [
   "ui.close",
@@ -11778,7 +11747,7 @@ function extractAddressData(source, target, prefix) {
 
 module.exports = SongbirdFramework;
 
-},{"../../../lib/analytics":72,"../../../lib/assets":73,"../../../lib/assign":74,"../../../lib/braintree-error":77,"../../../lib/constants":78,"../../../lib/convert-to-braintree-error":80,"../../../lib/deferred":84,"../../../lib/enumerate":86,"../../shared/constants":154,"../../shared/errors":155,"./base":145,"@braintree/extended-promise":24}],152:[function(require,module,exports){
+},{"../../../lib/analytics":86,"../../../lib/assets":87,"../../../lib/assign":88,"../../../lib/braintree-error":91,"../../../lib/constants":92,"../../../lib/convert-to-braintree-error":94,"../../../lib/deferred":98,"../../../lib/enumerate":100,"../../shared/constants":141,"../../shared/errors":142,"./base":132,"@braintree/extended-promise":38}],139:[function(require,module,exports){
 "use strict";
 
 var wrapPromise = require("@braintree/wrap-promise");
@@ -12260,6 +12229,7 @@ EventEmitter.createChild(ThreeDSecure);
  *     // Decide if you want to submit the nonce
  *   }
  * });
+ * @example
  * <caption>Verifying a payment method nonce with 3DS 2.0 with onLookupComplete callback</caption>
  * var my3DSContainer;
  *
@@ -12356,40 +12326,6 @@ EventEmitter.createChild(ThreeDSecure);
  *   }
  *
  *   // handle success
- * });
- * @example
- * <caption>Deprecated: Verifying an existing nonce with 3DS 1.0</caption>
- * var my3DSContainer;
- *
- * threeDSecure.verifyCard({
- *   nonce: existingNonce,
- *   amount: 123.45,
- *   addFrame: function (err, iframe) {
- *     // Set up your UI and add the iframe.
- *     my3DSContainer = document.createElement('div');
- *     my3DSContainer.appendChild(iframe);
- *     document.body.appendChild(my3DSContainer);
- *   },
- *   removeFrame: function () {
- *     // Remove UI that you added in addFrame.
- *     document.body.removeChild(my3DSContainer);
- *   }
- * }, function (err, payload) {
- *   if (err) {
- *     console.error(err);
- *     return;
- *   }
- *
- *   if (payload.liabilityShifted) {
- *     // Liability has shifted
- *     submitNonceToServer(payload.nonce);
- *   } else if (payload.liabilityShiftPossible) {
- *     // Liability may still be shifted
- *     // Decide if you want to submit the nonce
- *   } else {
- *     // Liability has not shifted and will not shift
- *     // Decide if you want to submit the nonce
- *   }
  * });
  */
 ThreeDSecure.prototype.verifyCard = function (options) {
@@ -12576,7 +12512,7 @@ ThreeDSecure.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(ThreeDSecure);
 
-},{"../../lib/convert-methods-to-error":79,"../../lib/methods":107,"./frameworks":148,"@braintree/event-emitter":23,"@braintree/wrap-promise":33}],153:[function(require,module,exports){
+},{"../../lib/convert-methods-to-error":93,"../../lib/methods":121,"./frameworks":135,"@braintree/event-emitter":37,"@braintree/wrap-promise":47}],140:[function(require,module,exports){
 "use strict";
 /** @module braintree-web/three-d-secure */
 
@@ -12588,7 +12524,7 @@ var createAssetsUrl = require("../lib/create-assets-url");
 var BraintreeError = require("../lib/braintree-error");
 var analytics = require("../lib/analytics");
 var errors = require("./shared/errors");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var wrapPromise = require("@braintree/wrap-promise");
 
 /**
@@ -12808,13 +12744,13 @@ function getFramework(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.40.2`.
+   * @description The current version of the SDK, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION,
 };
 
-},{"../lib/analytics":72,"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/create-assets-url":81,"../lib/create-deferred-client":83,"../lib/is-https":104,"./external/three-d-secure":152,"./shared/errors":155,"@braintree/wrap-promise":33}],154:[function(require,module,exports){
+},{"../lib/analytics":86,"../lib/basic-component-verification":89,"../lib/braintree-error":91,"../lib/create-assets-url":95,"../lib/create-deferred-client":97,"../lib/is-https":118,"./external/three-d-secure":139,"./shared/errors":142,"@braintree/wrap-promise":47}],141:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -12825,7 +12761,7 @@ module.exports = {
   },
 };
 
-},{}],155:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 "use strict";
 
 /**
@@ -13017,14 +12953,14 @@ module.exports = {
   },
 };
 
-},{"../../lib/braintree-error":77}],156:[function(require,module,exports){
+},{"../../lib/braintree-error":91}],143:[function(require,module,exports){
 "use strict";
 
 var enumerate = require("../../lib/enumerate");
 
 module.exports = enumerate(["AUTHENTICATION_COMPLETE"], "threedsecure:");
 
-},{"../../lib/enumerate":86}],157:[function(require,module,exports){
+},{"../../lib/enumerate":100}],144:[function(require,module,exports){
 "use strict";
 
 /**
@@ -13054,7 +12990,7 @@ module.exports = {
   },
 };
 
-},{"../lib/braintree-error":77}],158:[function(require,module,exports){
+},{"../lib/braintree-error":91}],145:[function(require,module,exports){
 "use strict";
 /**
  * @module braintree-web/vault-manager
@@ -13065,7 +13001,7 @@ var basicComponentVerification = require("../lib/basic-component-verification");
 var createDeferredClient = require("../lib/create-deferred-client");
 var createAssetsUrl = require("../lib/create-assets-url");
 var VaultManager = require("./vault-manager");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var wrapPromise = require("@braintree/wrap-promise");
 
 /**
@@ -13102,13 +13038,13 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.40.2`.
+   * @description The current version of the SDK, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION,
 };
 
-},{"../lib/basic-component-verification":75,"../lib/create-assets-url":81,"../lib/create-deferred-client":83,"./vault-manager":159,"@braintree/wrap-promise":33}],159:[function(require,module,exports){
+},{"../lib/basic-component-verification":89,"../lib/create-assets-url":95,"../lib/create-deferred-client":97,"./vault-manager":146,"@braintree/wrap-promise":47}],146:[function(require,module,exports){
 "use strict";
 
 var analytics = require("../lib/analytics");
@@ -13325,7 +13261,7 @@ VaultManager.prototype.teardown = function () {
 
 module.exports = wrapPromise.wrapPrototype(VaultManager);
 
-},{"../lib/analytics":72,"../lib/braintree-error":77,"../lib/convert-methods-to-error":79,"../lib/methods":107,"./errors":157,"@braintree/wrap-promise":33}],160:[function(require,module,exports){
+},{"../lib/analytics":86,"../lib/braintree-error":91,"../lib/convert-methods-to-error":93,"../lib/methods":121,"./errors":144,"@braintree/wrap-promise":47}],147:[function(require,module,exports){
 "use strict";
 var __importDefault =
   (this && this.__importDefault) ||
@@ -13338,7 +13274,7 @@ module.exports = function createVenmoDesktop(options) {
   return instance.initialize();
 };
 
-},{"./venmo-desktop":162}],161:[function(require,module,exports){
+},{"./venmo-desktop":149}],148:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VENMO_PAYMENT_CONTEXT_STATUS_QUERY =
@@ -13361,7 +13297,7 @@ exports.LEGACY_VENMO_PAYMENT_CONTEXT_STATUS_QUERY =
 exports.VENMO_PAYMENT_CONTEXT_STATUS_QUERY =
   "query PaymentContext($id: ID!) {\n  node(id: $id) {\n    ... on VenmoPaymentContext {\n      status\n      paymentMethodId\n      userName\n      payerInfo {\n        firstName\n        lastName\n        phoneNumber\n        email\n        externalId\n        userName\n        billingAddress {\n          fullName\n          addressLine1\n          addressLine2\n          adminArea1\n          adminArea2\n          postalCode\n          countryCode\n        }\n        shippingAddress {\n          fullName\n          addressLine1\n          addressLine2\n          adminArea1\n          adminArea2\n          postalCode\n          countryCode\n        }\n      }\n    }\n  }\n}";
 
-},{}],162:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 "use strict";
 var __assign =
   (this && this.__assign) ||
@@ -13770,7 +13706,7 @@ var VenmoDesktop = /** @class */ (function () {
 })();
 exports.default = VenmoDesktop;
 
-},{"../shared/events":167,"./queries":161,"@braintree/iframer":25,"@braintree/uuid":29,"framebus":180}],163:[function(require,module,exports){
+},{"../shared/events":154,"./queries":148,"@braintree/iframer":39,"@braintree/uuid":43,"framebus":167}],150:[function(require,module,exports){
 "use strict";
 /** @module braintree-web/venmo */
 
@@ -13783,7 +13719,7 @@ var wrapPromise = require("@braintree/wrap-promise");
 var BraintreeError = require("../lib/braintree-error");
 var Venmo = require("./venmo");
 var supportsVenmo = require("./shared/supports-venmo");
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 
 /**
  * @typedef {object} Venmo~lineItem
@@ -13946,13 +13882,13 @@ module.exports = {
   create: wrapPromise(create),
   isBrowserSupported: isBrowserSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.40.2`.
+   * @description The current version of the SDK, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION,
 };
 
-},{"../lib/analytics":72,"../lib/basic-component-verification":75,"../lib/braintree-error":77,"../lib/create-assets-url":81,"../lib/create-deferred-client":83,"./shared/errors":166,"./shared/supports-venmo":169,"./venmo":171,"@braintree/wrap-promise":33}],164:[function(require,module,exports){
+},{"../lib/analytics":86,"../lib/basic-component-verification":89,"../lib/braintree-error":91,"../lib/create-assets-url":95,"../lib/create-deferred-client":97,"./shared/errors":153,"./shared/supports-venmo":156,"./venmo":158,"@braintree/wrap-promise":47}],151:[function(require,module,exports){
 "use strict";
 
 var isAndroid = require("@braintree/browser-detection/is-android");
@@ -14014,7 +13950,7 @@ module.exports = {
   doesNotSupportWindowOpenInIos: doesNotSupportWindowOpenInIos,
 };
 
-},{"@braintree/browser-detection/is-android":131,"@braintree/browser-detection/is-chrome":133,"@braintree/browser-detection/is-ios":138,"@braintree/browser-detection/is-ios-safari":135,"@braintree/browser-detection/is-ios-webview":136,"@braintree/browser-detection/is-samsung":139}],165:[function(require,module,exports){
+},{"@braintree/browser-detection/is-android":25,"@braintree/browser-detection/is-chrome":27,"@braintree/browser-detection/is-ios":34,"@braintree/browser-detection/is-ios-safari":31,"@braintree/browser-detection/is-ios-webview":32,"@braintree/browser-detection/is-samsung":35}],152:[function(require,module,exports){
 "use strict";
 
 /**
@@ -14033,7 +13969,7 @@ module.exports = {
   VENMO_WEB_LOGIN_URL: "https://account.venmo.com/go/web",
 };
 
-},{}],166:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 "use strict";
 
 /**
@@ -14180,7 +14116,7 @@ module.exports = {
   },
 };
 
-},{"../../lib/braintree-error":77}],167:[function(require,module,exports){
+},{"../../lib/braintree-error":91}],154:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VENMO_DESKTOP_UNKNOWN_ERROR =
@@ -14206,7 +14142,7 @@ exports.VENMO_DESKTOP_CLOSED_FROM_PARENT = "VENMO_DESKTOP_CLOSED_FROM_PARENT";
 exports.VENMO_DESKTOP_REQUEST_NEW_QR_CODE = "VENMO_DESKTOP_REQUEST_NEW_QR_CODE";
 exports.VENMO_DESKTOP_UNKNOWN_ERROR = "VENMO_DESKTOP_UNKNOWN_ERROR";
 
-},{}],168:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 "use strict";
 var venmoConstants = require("./constants");
 
@@ -14222,7 +14158,7 @@ function getVenmoUrl(options) {
 
 module.exports = getVenmoUrl;
 
-},{"./constants":165}],169:[function(require,module,exports){
+},{"./constants":152}],156:[function(require,module,exports){
 "use strict";
 
 var browserDetection = require("./browser-detection");
@@ -14286,14 +14222,14 @@ module.exports = {
   isBrowserSupported: isBrowserSupported,
 };
 
-},{"./browser-detection":164}],170:[function(require,module,exports){
+},{"./browser-detection":151}],157:[function(require,module,exports){
 "use strict";
 
 var frameService = require("../../lib/frame-service/external");
 var useMin = require("../../lib/use-min");
 var ExtendedPromise = require("@braintree/extended-promise");
 
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var VENMO_LOGO_SVG =
   '<svg width="198" height="58" viewBox="0 0 198 58" fill="none" xmlns="http://www.w3.org/2000/svg">\n  <path fill-rule="evenodd" clip-rule="evenodd" d="M43.0702 13.6572C44.1935 15.4585 44.6999 17.3139 44.6999 19.6576C44.6999 27.1328 38.1277 36.8436 32.7935 43.6625H20.6099L15.7236 15.2939L26.3917 14.3105L28.9751 34.4966C31.389 30.6783 34.3678 24.6779 34.3678 20.587C34.3678 18.3477 33.9727 16.8225 33.3553 15.5666L43.0702 13.6572Z" fill="white"/>\n  <path fill-rule="evenodd" clip-rule="evenodd" d="M56.8965 26.1491C58.8596 26.1491 63.8018 25.2772 63.8018 22.5499C63.8018 21.2402 62.8481 20.587 61.7242 20.587C59.7579 20.587 57.1776 22.8763 56.8965 26.1491ZM56.6715 31.5506C56.6715 34.8807 58.5787 36.1873 61.107 36.1873C63.8603 36.1873 66.4966 35.534 69.923 33.8433L68.6324 42.3523C66.2183 43.4976 62.4559 44.2617 58.8039 44.2617C49.5403 44.2617 46.2249 38.8071 46.2249 31.9879C46.2249 23.1496 51.6179 13.765 62.7365 13.765C68.858 13.765 72.2809 17.0949 72.2809 21.7317C72.2815 29.2066 62.4005 31.4965 56.6715 31.5506Z" fill="white"/>\n  <path fill-rule="evenodd" clip-rule="evenodd" d="M103.067 20.3142C103.067 21.4052 102.897 22.9875 102.727 24.0216L99.5262 43.6622H89.1385L92.0585 25.658C92.1139 25.1696 92.284 24.1865 92.284 23.6411C92.284 22.3314 91.4414 22.0047 90.4282 22.0047C89.0826 22.0047 87.7337 22.6042 86.8354 23.0418L83.5234 43.6625H73.0772L77.8495 14.257H86.8908L87.0052 16.6041C89.1382 15.2404 91.9469 13.7656 95.932 13.7656C101.212 13.765 103.067 16.3845 103.067 20.3142Z" fill="white"/>\n  <path fill-rule="evenodd" clip-rule="evenodd" d="M133.906 16.9841C136.881 14.9131 139.69 13.765 143.563 13.765C148.897 13.765 150.753 16.3845 150.753 20.3142C150.753 21.4052 150.583 22.9875 150.413 24.0216L147.216 43.6622H136.825L139.801 25.2774C139.855 24.786 139.971 24.1865 139.971 23.8063C139.971 22.3317 139.128 22.0047 138.115 22.0047C136.824 22.0047 135.535 22.5501 134.577 23.0418L131.266 43.6625H120.878L123.854 25.2777C123.908 24.7863 124.02 24.1868 124.02 23.8065C124.02 22.332 123.177 22.0049 122.167 22.0049C120.819 22.0049 119.473 22.6045 118.574 23.0421L115.26 43.6628H104.817L109.589 14.2573H118.52L118.8 16.7122C120.878 15.241 123.684 13.7662 127.446 13.7662C130.704 13.765 132.837 15.129 133.906 16.9841Z" fill="white"/>\n  <path fill-rule="evenodd" clip-rule="evenodd" d="M171.426 25.5502C171.426 23.1496 170.808 21.513 168.956 21.513C164.857 21.513 164.015 28.55 164.015 32.1498C164.015 34.8807 164.802 36.5709 166.653 36.5709C170.528 36.5709 171.426 29.1497 171.426 25.5502ZM153.458 31.7152C153.458 22.442 158.511 13.765 170.136 13.765C178.896 13.765 182.098 18.7854 182.098 25.7148C182.098 34.8805 177.099 44.3723 165.194 44.3723C156.378 44.3723 153.458 38.7525 153.458 31.7152Z" fill="white"/>\n</svg>';
 var CONTINUE_OR_CANCEL_INSTRUCTIONS =
@@ -14378,13 +14314,14 @@ function getElementStyles() {
     "display: none;",
     "}",
     "#" + ELEMENT_IDS.backdrop + " {",
+    "z-index: 3141592632;",
     "cursor: pointer;",
     "position: fixed;",
     "top: 0;",
     "left: 0;",
     "bottom: 0;",
     "width: 100%;",
-    "background: rgba(0, 0, 0, 0.4);",
+    "background: rgba(0, 0, 0, 0.8);",
     "}",
   ];
   var backdropContainerStyles = [
@@ -14525,6 +14462,10 @@ function buildAndStyleElements() {
   backDropContentContainer.appendChild(cancelButton);
   backdropDiv.appendChild(backDropContentContainer);
   document.body.appendChild(backdropDiv);
+
+  backdropDiv.addEventListener("click", function (event) {
+    event.stopPropagation();
+  });
 }
 
 /**
@@ -14593,7 +14534,7 @@ module.exports = {
   POPUP_HEIGHT: POPUP_HEIGHT,
 };
 
-},{"../../lib/frame-service/external":91,"../../lib/use-min":112,"@braintree/extended-promise":24}],171:[function(require,module,exports){
+},{"../../lib/frame-service/external":105,"../../lib/use-min":126,"@braintree/extended-promise":38}],158:[function(require,module,exports){
 "use strict";
 
 var analytics = require("../lib/analytics");
@@ -14620,7 +14561,7 @@ var snakeCaseToCamelCase = require("../lib/snake-case-to-camel-case");
 var createVenmoDesktop = require("./external/");
 var graphqlQueries = require("./external/queries");
 
-var VERSION = "3.97.1";
+var VERSION = "3.97.4";
 var DEFAULT_MOBILE_POLLING_INTERVAL = 250; // 1/4 second
 var DEFAULT_MOBILE_EXPIRING_THRESHOLD = 300000; // 5 minutes
 
@@ -15061,7 +15002,7 @@ Venmo.prototype.getUrl = function () {
 };
 
 /**
- * Returns a boolean indicating whether the current browser supports Venmo as a payment method.
+ * Returns a boolean indicating whether the current browser supports Venmo as a payment method. Please note that iOS Chrome is not supported.
  *
  * If `options.allowNewBrowserTab` is false when calling {@link module:braintree-web/venmo.create|venmo.create}, this method will return true only for browsers known to support returning from the Venmo app to the same browser tab. Currently, this is limited to iOS Safari and Android Chrome.
  * If `options.allowWebviews` is false when calling {@link module:braintree-web/venmo.create|venmo.create}, this method will return true only for mobile browsers that are not webviews.
@@ -15959,7 +15900,7 @@ function isIosWebviewInDeepLinkReturnUrlFlow() {
 
 module.exports = wrapPromise.wrapPrototype(Venmo);
 
-},{"../lib/analytics":72,"../lib/braintree-error":77,"../lib/convert-methods-to-error":79,"../lib/in-iframe":102,"../lib/is-verified-domain":105,"../lib/methods":107,"../lib/querystring":109,"../lib/snake-case-to-camel-case":111,"./external/":160,"./external/queries":161,"./shared/browser-detection":164,"./shared/constants":165,"./shared/errors":166,"./shared/get-venmo-url":168,"./shared/supports-venmo":169,"./shared/web-login-backdrop":170,"@braintree/extended-promise":24,"@braintree/wrap-promise":33}],172:[function(require,module,exports){
+},{"../lib/analytics":86,"../lib/braintree-error":91,"../lib/convert-methods-to-error":93,"../lib/in-iframe":116,"../lib/is-verified-domain":119,"../lib/methods":121,"../lib/querystring":123,"../lib/snake-case-to-camel-case":125,"./external/":147,"./external/queries":148,"./shared/browser-detection":151,"./shared/constants":152,"./shared/errors":153,"./shared/get-venmo-url":155,"./shared/supports-venmo":156,"./shared/web-login-backdrop":157,"@braintree/extended-promise":38,"@braintree/wrap-promise":47}],159:[function(require,module,exports){
 "use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -16077,7 +16018,7 @@ creditCardType.resetModifications = function () {
 creditCardType.types = cardNames;
 module.exports = creditCardType;
 
-},{"./lib/add-matching-cards-to-results":173,"./lib/card-types":174,"./lib/clone":175,"./lib/find-best-match":176,"./lib/is-valid-input-type":177}],173:[function(require,module,exports){
+},{"./lib/add-matching-cards-to-results":160,"./lib/card-types":161,"./lib/clone":162,"./lib/find-best-match":163,"./lib/is-valid-input-type":164}],160:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addMatchingCardsToResults = void 0;
@@ -16106,7 +16047,7 @@ function addMatchingCardsToResults(cardNumber, cardConfiguration, results) {
 }
 exports.addMatchingCardsToResults = addMatchingCardsToResults;
 
-},{"./clone":175,"./matches":178}],174:[function(require,module,exports){
+},{"./clone":162,"./matches":165}],161:[function(require,module,exports){
 "use strict";
 var cardTypes = {
     visa: {
@@ -16305,7 +16246,7 @@ var cardTypes = {
 };
 module.exports = cardTypes;
 
-},{}],175:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clone = void 0;
@@ -16317,7 +16258,7 @@ function clone(originalObject) {
 }
 exports.clone = clone;
 
-},{}],176:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findBestMatch = void 0;
@@ -16351,7 +16292,7 @@ function findBestMatch(results) {
 }
 exports.findBestMatch = findBestMatch;
 
-},{}],177:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isValidInputType = void 0;
@@ -16360,7 +16301,7 @@ function isValidInputType(cardNumber) {
 }
 exports.isValidInputType = isValidInputType;
 
-},{}],178:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 "use strict";
 /*
  * Adapted from https://github.com/polvo-labs/card-type/blob/aaab11f80fa1939bccc8f24905a06ae3cd864356/src/cardType.js#L37-L42
@@ -16389,7 +16330,7 @@ function matches(cardNumber, pattern) {
 }
 exports.matches = matches;
 
-},{}],179:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Framebus = void 0;
@@ -16643,14 +16584,14 @@ var Framebus = /** @class */ (function () {
 }());
 exports.Framebus = Framebus;
 
-},{"./lib":187}],180:[function(require,module,exports){
+},{"./lib":174}],167:[function(require,module,exports){
 "use strict";
 var lib_1 = require("./lib");
 var framebus_1 = require("./framebus");
 (0, lib_1.attach)();
 module.exports = framebus_1.Framebus;
 
-},{"./framebus":179,"./lib":187}],181:[function(require,module,exports){
+},{"./framebus":166,"./lib":174}],168:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.detach = exports.attach = void 0;
@@ -16672,7 +16613,7 @@ function detach() {
 exports.detach = detach;
 // endRemoveIf(production)
 
-},{"./":187}],182:[function(require,module,exports){
+},{"./":174}],169:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.broadcastToChildWindows = void 0;
@@ -16693,7 +16634,7 @@ function broadcastToChildWindows(payload, origin, source) {
 }
 exports.broadcastToChildWindows = broadcastToChildWindows;
 
-},{"./":187}],183:[function(require,module,exports){
+},{"./":174}],170:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.broadcast = void 0;
@@ -16732,7 +16673,7 @@ function broadcast(payload, options) {
 }
 exports.broadcast = broadcast;
 
-},{"./":187}],184:[function(require,module,exports){
+},{"./":174}],171:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.subscribers = exports.childWindows = exports.prefix = void 0;
@@ -16740,7 +16681,7 @@ exports.prefix = "/*framebus*/";
 exports.childWindows = [];
 exports.subscribers = {};
 
-},{}],185:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dispatch = void 0;
@@ -16765,7 +16706,7 @@ function dispatch(origin, event, data, reply, e) {
 }
 exports.dispatch = dispatch;
 
-},{"./":187}],186:[function(require,module,exports){
+},{"./":174}],173:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.hasOpener = void 0;
@@ -16786,7 +16727,7 @@ function hasOpener(frame) {
 }
 exports.hasOpener = hasOpener;
 
-},{}],187:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -16818,7 +16759,7 @@ __exportStar(require("./subscription-args-invalid"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./unpack-payload"), exports);
 
-},{"./attach":181,"./broadcast":183,"./broadcast-to-child-windows":182,"./constants":184,"./dispatch":185,"./has-opener":186,"./is-not-string":188,"./message":189,"./package-payload":190,"./send-message":191,"./subscribe-replier":192,"./subscription-args-invalid":193,"./types":194,"./unpack-payload":195}],188:[function(require,module,exports){
+},{"./attach":168,"./broadcast":170,"./broadcast-to-child-windows":169,"./constants":171,"./dispatch":172,"./has-opener":173,"./is-not-string":175,"./message":176,"./package-payload":177,"./send-message":178,"./subscribe-replier":179,"./subscription-args-invalid":180,"./types":181,"./unpack-payload":182}],175:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isntString = void 0;
@@ -16827,7 +16768,7 @@ function isntString(str) {
 }
 exports.isntString = isntString;
 
-},{}],189:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.onMessage = void 0;
@@ -16848,7 +16789,7 @@ function onMessage(e) {
 }
 exports.onMessage = onMessage;
 
-},{"./":187}],190:[function(require,module,exports){
+},{"./":174}],177:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.packagePayload = void 0;
@@ -16873,7 +16814,7 @@ function packagePayload(event, origin, data, reply) {
 }
 exports.packagePayload = packagePayload;
 
-},{"./":187}],191:[function(require,module,exports){
+},{"./":174}],178:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMessage = void 0;
@@ -16890,7 +16831,7 @@ function sendMessage(frame, payload, origin) {
 }
 exports.sendMessage = sendMessage;
 
-},{}],192:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -16914,7 +16855,7 @@ function subscribeReplier(fn, origin) {
 }
 exports.subscribeReplier = subscribeReplier;
 
-},{"../framebus":179,"@braintree/uuid":29}],193:[function(require,module,exports){
+},{"../framebus":166,"@braintree/uuid":43}],180:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.subscriptionArgsInvalid = void 0;
@@ -16930,11 +16871,11 @@ function subscriptionArgsInvalid(event, fn, origin) {
 }
 exports.subscriptionArgsInvalid = subscriptionArgsInvalid;
 
-},{"./":187}],194:[function(require,module,exports){
+},{"./":174}],181:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],195:[function(require,module,exports){
+},{}],182:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.unpackPayload = void 0;
@@ -16969,7 +16910,7 @@ function unpackPayload(e) {
 }
 exports.unpackPayload = unpackPayload;
 
-},{"./":187}],196:[function(require,module,exports){
+},{"./":174}],183:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -17155,7 +17096,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],197:[function(require,module,exports){
+},{}],184:[function(require,module,exports){
 (function (setImmediate){(function (){
 'use strict';
 
@@ -17483,7 +17424,7 @@ Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
 module.exports = Promise;
 
 }).call(this)}).call(this,require("timers").setImmediate)
-},{"timers":201}],198:[function(require,module,exports){
+},{"timers":188}],185:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isIos = exports.isIE9 = exports.isSamsungBrowser = exports.isAndroidChrome = exports.isKitKatWebview = void 0;
@@ -17528,7 +17469,7 @@ function isSamsungBrowser(ua) {
 }
 exports.isSamsungBrowser = isSamsungBrowser;
 
-},{"@braintree/browser-detection/is-android":17,"@braintree/browser-detection/is-chrome":19,"@braintree/browser-detection/is-chrome-os":18,"@braintree/browser-detection/is-ie9":21,"@braintree/browser-detection/is-ios":22}],199:[function(require,module,exports){
+},{"@braintree/browser-detection/is-android":25,"@braintree/browser-detection/is-chrome":27,"@braintree/browser-detection/is-chrome-os":26,"@braintree/browser-detection/is-ie9":30,"@braintree/browser-detection/is-ios":34}],186:[function(require,module,exports){
 "use strict";
 var device_1 = require("./lib/device");
 module.exports = function supportsInputFormatting() {
@@ -17536,10 +17477,10 @@ module.exports = function supportsInputFormatting() {
     return !(0, device_1.isSamsungBrowser)();
 };
 
-},{"./lib/device":198}],200:[function(require,module,exports){
+},{"./lib/device":185}],187:[function(require,module,exports){
 module.exports = require("./dist/supports-input-formatting");
 
-},{"./dist/supports-input-formatting":199}],201:[function(require,module,exports){
+},{"./dist/supports-input-formatting":186}],188:[function(require,module,exports){
 (function (setImmediate,clearImmediate){(function (){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -17618,7 +17559,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":196,"timers":201}],202:[function(require,module,exports){
+},{"process/browser.js":183,"timers":188}],189:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -17706,7 +17647,7 @@ module.exports = {
   STYLESHEET_ID: 'braintree-dropin-stylesheet'
 };
 
-},{}],203:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 'use strict';
 
 var analytics = require('./lib/analytics');
@@ -18228,7 +18169,7 @@ function constructHiddenPaymentMethodTypes(paymentMethods) {
 
 module.exports = DropinModel;
 
-},{"./constants":202,"./lib/analytics":207,"./lib/dropin-error":212,"./lib/is-guest-checkout":214,"./views/payment-options-view":264,"./views/payment-sheet-views":269,"@braintree/event-emitter":23,"braintree-web/vault-manager":158}],204:[function(require,module,exports){
+},{"./constants":189,"./lib/analytics":194,"./lib/dropin-error":199,"./lib/is-guest-checkout":201,"./views/payment-options-view":251,"./views/payment-sheet-views":256,"@braintree/event-emitter":37,"braintree-web/vault-manager":145}],191:[function(require,module,exports){
 'use strict';
 
 var assign = require('./lib/assign').assign;
@@ -18249,8 +18190,8 @@ var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
 var wrapPrototype = require('@braintree/wrap-promise').wrapPrototype;
 
-var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"methods-edit\" class=\"braintree-hidden braintree-heading\" role=\"button\" tabindex=\"0\">{{edit}}</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"delete-confirmation\" class=\"braintree-delete-confirmation braintree-sheet\">\n      <div data-braintree-id=\"delete-confirmation__message\"></div>\n      <div class=\"braintree-delete-confirmation__button-container\">\n        <div tabindex=\"0\" role=\"button\" data-braintree-id=\"delete-confirmation__no\" class=\"braintree-delete-confirmation__button\">{{deleteCancelButton}}</div>\n        <div tabindex=\"0\" role=\"button\" data-braintree-id=\"delete-confirmation__yes\" class=\"braintree-delete-confirmation__button\">{{deleteConfirmationButton}}</div>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"applePay\" class=\"braintree-applePay braintree-sheet\">\n        <div data-braintree-id=\"apple-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoApplePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Apple Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"apple-pay-button\" class=\"braintree-sheet__button--apple-pay apple-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"googlePay\" class=\"braintree-googlePay braintree-sheet\">\n        <div data-braintree-id=\"google-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoGooglePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Google Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"google-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"venmo\" class=\"braintree-venmo braintree-sheet\">\n        <div data-braintree-id=\"venmo-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoVenmo\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Venmo}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <svg data-braintree-id=\"venmo-button\" class=\"braintree-sheet__button--venmo\">\n            <use xlink:href=\"#buttonVenmo\"></use>\n          </svg>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <label for=\"braintree__card-view-input__cardholder-name\">\n              <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\"></div>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <label>\n              <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                  <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n            </div>\n\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{cvvLabel}}\n                  <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                      <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                      <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                      </svg>\n                    </div>\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n            </div>\n\n            <div class=\"braintree-form__notice-of-collection\">\n              <a href=\"https://www.paypal.com/us/legalhub/home\" target=\"_blank\" rel=\"noopener noreferrer\">{{noticeOfCollection}}</a>\n            </div>\n          </div>\n\n          <div data-braintree-id=\"save-card-field-group\" class=\"braintree-form__field-group braintree-hidden\">\n            <label>\n              <div class=\"braintree-form__field braintree-form__checkbox\">\n                <input type=\"checkbox\" data-braintree-id=\"save-card-input\" checked />\n              </div>\n              <div class=\"braintree-form__label\">{{saveCardLabel}}</div>\n            </label>\n          </div>\n        </div>\n      </div>\n\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-large-button braintree-toggle braintree-hidden\" tabindex=\"0\" role=\"button\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n<div data-braintree-id=\"disable-wrapper\" class=\"braintree-dropin__disabled braintree-hidden\"></div>\n";
-var svgHTML = "<svg data-braintree-id=\"svgs\">\n  <defs>\n    <symbol id=\"icon-visa\" viewBox=\"0 0 44 14.2\">\n      <title>Visa</title>\n      <path fill=\"#1434CB\" d=\"M16.8,0.2L11,13.9H7.3L4.5,3C4.3,2.3,4.2,2.1,3.6,1.8C2.8,1.3,1.4,0.9,0.1,0.6l0.1-0.4h6   c0.8,0,1.5,0.5,1.6,1.4l1.5,7.9L13,0.2H16.8z M31.4,9.4c0-3.6-5-3.8-5-5.4c0-0.5,0.5-1,1.5-1.1c0.5-0.1,1.9-0.1,3.5,0.6L32,0.6   C31.2,0.3,30.1,0,28.7,0c-3.5,0-6,1.9-6,4.5c0,2,1.8,3.1,3.1,3.7c1.4,0.7,1.8,1.1,1.8,1.7c0,0.9-1.1,1.3-2.1,1.3   c-1.8,0-2.8-0.5-3.6-0.9l-0.6,3c0.8,0.4,2.3,0.7,3.9,0.7C28.9,14.1,31.4,12.3,31.4,9.4 M40.6,13.9h3.3L41,0.2h-3   c-0.7,0-1.3,0.4-1.5,1l-5.3,12.7h3.7l0.7-2h4.5L40.6,13.9z M36.7,9.1l1.9-5.1l1.1,5.1H36.7z M21.8,0.2l-2.9,13.7h-3.5l2.9-13.7   H21.8z\"/>\n    </symbol>\n\n    <symbol id=\"icon-master-card\" viewBox=\"0 0 40 24\">\n      <title>MasterCard</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" fill=\"#FFF\" />\n      <path d=\"M11.085 22.2v-1.36c0-.522-.318-.863-.864-.863-.272 0-.568.09-.773.386-.16-.25-.386-.386-.727-.386-.228 0-.455.068-.637.318v-.272h-.478V22.2h.478v-1.202c0-.386.204-.567.523-.567.318 0 .478.205.478.568V22.2h.477v-1.202c0-.386.23-.567.524-.567.32 0 .478.205.478.568V22.2h.523zm7.075-2.177h-.774v-.658h-.478v.658h-.432v.43h.432v.998c0 .5.205.795.75.795.206 0 .433-.068.592-.16l-.136-.407c-.136.09-.296.114-.41.114-.227 0-.318-.137-.318-.363v-.976h.774v-.43zm4.048-.046c-.273 0-.454.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .204.023.295.046l.137-.454c-.09-.023-.228-.023-.32-.023zm-6.118.227c-.228-.16-.546-.227-.888-.227-.546 0-.91.272-.91.703 0 .363.274.567.75.635l.23.023c.25.045.385.113.385.227 0 .16-.182.272-.5.272-.32 0-.57-.113-.728-.227l-.228.363c.25.18.59.272.932.272.637 0 1-.295 1-.703 0-.385-.295-.59-.75-.658l-.227-.022c-.205-.023-.364-.068-.364-.204 0-.16.16-.25.41-.25.272 0 .545.114.682.182l.205-.386zm12.692-.227c-.273 0-.455.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .203.023.294.046L29.1 20c-.09-.023-.227-.023-.318-.023zm-6.096 1.134c0 .66.455 1.135 1.16 1.135.32 0 .546-.068.774-.25l-.228-.385c-.182.136-.364.204-.57.204-.385 0-.658-.272-.658-.703 0-.407.273-.68.66-.702.204 0 .386.068.568.204l.228-.385c-.228-.182-.455-.25-.774-.25-.705 0-1.16.477-1.16 1.134zm4.413 0v-1.087h-.48v.272c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.317 0 .545-.113.68-.317v.272h.48v-1.09zm-1.753 0c0-.384.25-.702.66-.702.387 0 .66.295.66.703 0 .387-.273.704-.66.704-.41-.022-.66-.317-.66-.703zm-5.71-1.133c-.636 0-1.09.454-1.09 1.134 0 .682.454 1.135 1.114 1.135.32 0 .638-.09.888-.295l-.228-.34c-.18.136-.41.227-.636.227-.296 0-.592-.136-.66-.522h1.615v-.18c.022-.704-.388-1.158-1.002-1.158zm0 .41c.297 0 .502.18.547.52h-1.137c.045-.295.25-.52.59-.52zm11.852.724v-1.95h-.48v1.135c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.68-.317v.272h.48v-1.09zm-1.752 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703zm-15.97 0v-1.087h-.476v.272c-.16-.204-.387-.318-.683-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.682-.317v.272h.477v-1.09zm-1.773 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703z\" fill=\"#000\" />\n      <path fill=\"#FF5F00\" d=\"M23.095 3.49H15.93v12.836h7.165\" />\n      <path d=\"M16.382 9.91c0-2.61 1.23-4.922 3.117-6.42-1.39-1.087-3.14-1.745-5.05-1.745-4.528 0-8.19 3.65-8.19 8.164 0 4.51 3.662 8.162 8.19 8.162 1.91 0 3.66-.657 5.05-1.746-1.89-1.474-3.118-3.81-3.118-6.417z\" fill=\"#EB001B\" />\n      <path d=\"M32.76 9.91c0 4.51-3.664 8.162-8.19 8.162-1.91 0-3.662-.657-5.05-1.746 1.91-1.496 3.116-3.81 3.116-6.417 0-2.61-1.228-4.922-3.116-6.42 1.388-1.087 3.14-1.745 5.05-1.745 4.526 0 8.19 3.674 8.19 8.164z\" fill=\"#F79E1B\" />\n    </symbol>\n\n    <symbol id=\"icon-unionpay\" viewBox=\"0 0 40 24\">\n      <title>Union Pay</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M9.877 2h8.126c1.135 0 1.84.93 1.575 2.077l-3.783 16.35c-.267 1.142-1.403 2.073-2.538 2.073H5.13c-1.134 0-1.84-.93-1.574-2.073L7.34 4.076C7.607 2.93 8.74 2 9.878 2z\" fill=\"#E21836\" />\n      <path d=\"M17.325 2h9.345c1.134 0 .623.93.356 2.077l-3.783 16.35c-.265 1.142-.182 2.073-1.32 2.073H12.58c-1.137 0-1.84-.93-1.574-2.073l3.783-16.35C15.056 2.93 16.19 2 17.324 2z\" fill=\"#00447B\" />\n      <path d=\"M26.3 2h8.126c1.136 0 1.84.93 1.575 2.077l-3.782 16.35c-.266 1.142-1.402 2.073-2.54 2.073h-8.122c-1.137 0-1.842-.93-1.574-2.073l3.78-16.35C24.03 2.93 25.166 2 26.303 2z\" fill=\"#007B84\" />\n      <path d=\"M27.633 14.072l-.99 3.3h.266l-.208.68h-.266l-.062.212h-.942l.064-.21H23.58l.193-.632h.194l1.005-3.35.2-.676h.962l-.1.34s.255-.184.498-.248c.242-.064 1.636-.088 1.636-.088l-.206.672h-.33zm-1.695 0l-.254.843s.285-.13.44-.172c.16-.04.395-.057.395-.057l.182-.614h-.764zm-.38 1.262l-.263.877s.29-.15.447-.196c.157-.037.396-.066.396-.066l.185-.614h-.766zm-.614 2.046h.767l.222-.74h-.765l-.223.74z\" fill=\"#FEFEFE\" />\n      <path d=\"M28.055 13.4h1.027l.01.385c-.005.065.05.096.17.096h.208l-.19.637h-.555c-.48.035-.662-.172-.65-.406l-.02-.71zM28.193 16.415h-.978l.167-.566H28.5l.16-.517h-1.104l.19-.638h3.072l-.193.638h-1.03l-.16.516h1.032l-.17.565H29.18l-.2.24h.454l.11.712c.013.07.014.116.036.147.023.026.158.038.238.038h.137l-.21.694h-.348c-.054 0-.133-.004-.243-.01-.105-.008-.18-.07-.25-.105-.064-.03-.16-.11-.182-.24l-.11-.712-.507.7c-.162.222-.38.39-.748.39h-.712l.186-.62h.273c.078 0 .15-.03.2-.056.052-.023.098-.05.15-.126l.74-1.05zM17.478 14.867h2.59l-.19.622H18.84l-.16.53h1.06l-.194.64h-1.06l-.256.863c-.03.095.25.108.353.108l.53-.072-.212.71h-1.193c-.096 0-.168-.013-.272-.037-.1-.023-.145-.07-.19-.138-.043-.07-.11-.128-.064-.278l.343-1.143h-.588l.195-.65h.592l.156-.53h-.588l.188-.623zM19.223 13.75h1.063l-.194.65H18.64l-.157.136c-.067.066-.09.038-.18.087-.08.04-.254.123-.477.123h-.466l.19-.625h.14c.118 0 .198-.01.238-.036.046-.03.098-.096.157-.203l.267-.487h1.057l-.187.356zM20.74 13.4h.905l-.132.46s.286-.23.487-.313c.2-.075.65-.143.65-.143l1.464-.007-.498 1.672c-.085.286-.183.472-.244.555-.055.087-.12.16-.248.23-.124.066-.236.104-.34.115-.096.007-.244.01-.45.012h-1.41l-.4 1.324c-.037.13-.055.194-.03.23.02.03.068.066.135.066l.62-.06-.21.726h-.698c-.22 0-.383-.004-.495-.013-.108-.01-.22 0-.295-.058-.065-.058-.164-.133-.162-.21.007-.073.037-.192.082-.356l1.268-4.23zm1.922 1.69h-1.484l-.09.3h1.283c.152-.018.184.004.196-.003l.096-.297zm-1.402-.272s.29-.266.786-.353c.112-.022.82-.015.82-.015l.106-.357h-1.496l-.216.725z\" fill=\"#FEFEFE\" />\n      <path d=\"M23.382 16.1l-.084.402c-.036.125-.067.22-.16.302-.1.084-.216.172-.488.172l-.502.02-.004.455c-.006.13.028.117.048.138.024.022.045.032.067.04l.157-.008.48-.028-.198.663h-.552c-.385 0-.67-.008-.765-.084-.092-.057-.105-.132-.103-.26l.035-1.77h.88l-.013.362h.212c.072 0 .12-.007.15-.026.027-.02.047-.048.06-.093l.087-.282h.692zM10.84 7.222c-.032.143-.596 2.763-.598 2.764-.12.53-.21.91-.508 1.152-.172.14-.37.21-.6.21-.37 0-.587-.185-.624-.537l-.007-.12.113-.712s.593-2.388.7-2.703c.002-.017.005-.026.007-.035-1.152.01-1.357 0-1.37-.018-.007.024-.037.173-.037.173l-.605 2.688-.05.23-.1.746c0 .22.042.4.13.553.275.485 1.06.557 1.504.557.573 0 1.11-.123 1.47-.345.63-.375.797-.962.944-1.48l.067-.267s.61-2.48.716-2.803c.003-.017.006-.026.01-.035-.835.01-1.08 0-1.16-.018zM14.21 12.144c-.407-.006-.55-.006-1.03.018l-.018-.036c.042-.182.087-.363.127-.548l.06-.25c.086-.39.173-.843.184-.98.007-.084.036-.29-.2-.29-.1 0-.203.048-.307.096-.058.207-.174.79-.23 1.055-.118.558-.126.62-.178.897l-.036.037c-.42-.006-.566-.006-1.05.018l-.024-.04c.08-.332.162-.668.24-.998.203-.9.25-1.245.307-1.702l.04-.028c.47-.067.585-.08 1.097-.185l.043.047-.077.287c.086-.052.168-.104.257-.15.242-.12.51-.155.658-.155.223 0 .468.062.57.323.098.232.034.52-.094 1.084l-.066.287c-.13.627-.152.743-.225 1.174l-.05.036zM15.87 12.144c-.245 0-.405-.006-.56 0-.153 0-.303.008-.532.018l-.013-.02-.015-.02c.062-.238.097-.322.128-.406.03-.084.06-.17.115-.41.072-.315.116-.535.147-.728.033-.187.052-.346.075-.53l.02-.014.02-.018c.244-.036.4-.057.56-.082.16-.024.32-.055.574-.103l.008.023.008.022c-.047.195-.094.39-.14.588-.047.197-.094.392-.137.587-.093.414-.13.57-.152.68-.02.105-.026.163-.063.377l-.022.02-.023.017zM19.542 10.728c.143-.633.033-.928-.108-1.11-.213-.273-.59-.36-.978-.36-.235 0-.793.023-1.23.43-.312.29-.458.687-.546 1.066-.088.387-.19 1.086.447 1.344.198.085.48.108.662.108.466 0 .945-.13 1.304-.513.278-.312.405-.775.448-.965zm-1.07-.046c-.02.106-.113.503-.24.673-.086.123-.19.198-.305.198-.033 0-.235 0-.238-.3-.003-.15.027-.304.063-.47.108-.478.236-.88.56-.88.255 0 .27.298.16.78zM29.536 12.187c-.493-.004-.635-.004-1.09.015l-.03-.037c.124-.472.248-.943.358-1.42.142-.62.175-.882.223-1.244l.037-.03c.49-.07.625-.09 1.135-.186l.015.044c-.093.388-.186.777-.275 1.166-.19.816-.258 1.23-.33 1.658l-.044.035z\" fill=\"#FEFEFE\" />\n      <path d=\"M29.77 10.784c.144-.63-.432-.056-.525-.264-.14-.323-.052-.98-.62-1.2-.22-.085-.732.025-1.17.428-.31.29-.458.683-.544 1.062-.088.38-.19 1.078.444 1.328.2.085.384.11.567.103.638-.034 1.124-1.002 1.483-1.386.277-.303.326.115.368-.07zm-.974-.047c-.024.1-.117.503-.244.67-.083.117-.283.192-.397.192-.032 0-.232 0-.24-.3 0-.146.03-.3.067-.467.11-.47.235-.87.56-.87.254 0 .363.293.254.774zM22.332 12.144c-.41-.006-.55-.006-1.03.018l-.018-.036c.04-.182.087-.363.13-.548l.057-.25c.09-.39.176-.843.186-.98.008-.084.036-.29-.198-.29-.1 0-.203.048-.308.096-.057.207-.175.79-.232 1.055-.115.558-.124.62-.176.897l-.035.037c-.42-.006-.566-.006-1.05.018l-.022-.04.238-.998c.203-.9.25-1.245.307-1.702l.038-.028c.472-.067.587-.08 1.098-.185l.04.047-.073.287c.084-.052.17-.104.257-.15.24-.12.51-.155.655-.155.224 0 .47.062.575.323.095.232.03.52-.098 1.084l-.065.287c-.133.627-.154.743-.225 1.174l-.05.036zM26.32 8.756c-.07.326-.282.603-.554.736-.225.114-.498.123-.78.123h-.183l.013-.074.336-1.468.01-.076.007-.058.132.015.71.062c.275.105.388.38.31.74zM25.88 7.22l-.34.003c-.883.01-1.238.006-1.383-.012l-.037.182-.315 1.478-.793 3.288c.77-.01 1.088-.01 1.22.004l.21-1.024s.153-.644.163-.667c0 0 .047-.066.096-.092h.07c.665 0 1.417 0 2.005-.437.4-.298.675-.74.797-1.274.03-.132.054-.29.054-.446 0-.205-.04-.41-.16-.568-.3-.423-.896-.43-1.588-.433zM33.572 9.28l-.04-.043c-.502.1-.594.118-1.058.18l-.034.034-.005.023-.003-.007c-.345.803-.334.63-.615 1.26-.003-.03-.003-.048-.004-.077l-.07-1.37-.044-.043c-.53.1-.542.118-1.03.18l-.04.034-.006.056.003.007c.06.315.047.244.108.738.03.244.065.49.093.73.05.4.077.6.134 1.21-.328.55-.408.757-.722 1.238l.017.044c.478-.018.587-.018.94-.018l.08-.088c.265-.578 2.295-4.085 2.295-4.085zM16.318 9.62c.27-.19.304-.45.076-.586-.23-.137-.634-.094-.906.095-.273.186-.304.45-.075.586.228.134.633.094.905-.096z\" fill=\"#FEFEFE\" />\n      <path d=\"M31.238 13.415l-.397.684c-.124.232-.357.407-.728.41l-.632-.01.184-.618h.124c.064 0 .11-.004.148-.022.03-.01.054-.035.08-.072l.233-.373h.988z\" fill=\"#FEFEFE\" />\n    </symbol>\n\n    <symbol id=\"icon-american-express\" viewBox=\"0 0 40 24\">\n      <title>American Express</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path fill=\"#1478BE\" d=\"M6.26 12.32h2.313L7.415 9.66M27.353 9.977h-3.738v1.23h3.666v1.384h-3.675v1.385h3.821v1.005c.623-.77 1.33-1.466 2.025-2.235l.707-.77c-.934-1.004-1.87-2.08-2.804-3.075v1.077z\" />\n      <path d=\"M38.25 7h-5.605l-1.328 1.4L30.072 7H16.984l-1.017 2.416L14.877 7h-9.58L1.25 16.5h4.826l.623-1.556h1.4l.623 1.556H29.99l1.327-1.483 1.328 1.483h5.605l-4.36-4.667L38.25 7zm-17.685 8.1h-1.557V9.883L16.673 15.1h-1.33L13.01 9.883l-.084 5.217H9.73l-.623-1.556h-3.27L5.132 15.1H3.42l2.884-6.772h2.42l2.645 6.233V8.33h2.646l2.107 4.51 1.868-4.51h2.575V15.1zm14.727 0h-2.024l-2.024-2.26-2.023 2.26H22.06V8.328H29.53l1.795 2.177 2.024-2.177h2.025L32.26 11.75l3.032 3.35z\" fill=\"#1478BE\" />\n    </symbol>\n\n    <symbol id=\"icon-jcb\" viewBox=\"0 0 40 24\">\n      <title>JCB</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M33.273 2.01h.013v17.062c-.004 1.078-.513 2.103-1.372 2.746-.63.47-1.366.67-2.14.67-.437 0-4.833.026-4.855 0-.01-.01 0-.07 0-.082v-6.82c0-.04.004-.064.033-.064h5.253c.867 0 1.344-.257 1.692-.61.44-.448.574-1.162.294-1.732-.24-.488-.736-.78-1.244-.913-.158-.04-.32-.068-.483-.083-.01 0-.064 0-.07-.006-.03-.034.023-.04.038-.046.102-.033.215-.042.32-.073.532-.164.993-.547 1.137-1.105.15-.577-.05-1.194-.524-1.552-.34-.257-.768-.376-1.187-.413-.43-.038-4.774-.022-5.21-.022-.072 0-.05-.02-.05-.09V5.63c0-.31.01-.616.073-.92.126-.592.41-1.144.815-1.59.558-.615 1.337-1.01 2.16-1.093.478-.048 4.89-.017 5.305-.017zm-4.06 8.616c.06.272-.01.567-.204.77-.173.176-.407.25-.648.253-.195.003-1.725 0-1.788 0l.003-1.645c.012-.027.02-.018.06-.018.097 0 1.713-.004 1.823.005.232.02.45.12.598.306.076.096.128.208.155.328zm-2.636 2.038h1.944c.242.002.47.063.652.228.226.204.327.515.283.815-.04.263-.194.5-.422.634-.187.112-.39.125-.6.125h-1.857v-1.8z\" fill=\"#53B230\" />\n      <path d=\"M6.574 13.89c-.06-.03-.06-.018-.07-.06-.006-.026-.005-8.365.003-8.558.04-.95.487-1.857 1.21-2.47.517-.434 1.16-.71 1.83-.778.396-.04.803-.018 1.2-.018.69 0 4.11-.013 4.12 0 .008.008.002 16.758 0 17.074-.003.956-.403 1.878-1.105 2.523-.506.465-1.15.77-1.83.86-.41.056-5.02.032-5.363.032-.066 0-.054.013-.066-.024-.01-.025 0-7 0-7.17.66.178 1.35.28 2.03.348.662.067 1.33.093 1.993.062.93-.044 1.947-.192 2.712-.762.32-.238.574-.553.73-.922.148-.353.2-.736.2-1.117 0-.348.006-3.93-.016-3.942-.023-.014-2.885-.015-2.9.012-.012.022 0 3.87 0 3.95-.003.47-.16.933-.514 1.252-.468.42-1.11.47-1.707.423-.687-.055-1.357-.245-1.993-.508-.157-.065-.312-.135-.466-.208z\" fill=\"#006CB9\" />\n      <path d=\"M15.95 9.835c-.025.02-.05.04-.072.06V6.05c0-.295-.012-.594.01-.888.12-1.593 1.373-2.923 2.944-3.126.382-.05 5.397-.042 5.41-.026.01.01 0 .062 0 .074v16.957c0 1.304-.725 2.52-1.89 3.1-.504.25-1.045.35-1.605.35-.322 0-4.757.015-4.834 0-.05-.01-.023.01-.035-.02-.007-.022 0-6.548 0-7.44v-.422c.554.48 1.256.75 1.96.908.536.12 1.084.176 1.63.196.537.02 1.076.01 1.61-.037.546-.05 1.088-.136 1.625-.244.137-.028.274-.057.41-.09.033-.006.17-.017.187-.044.013-.02 0-.097 0-.12v-1.324c-.582.292-1.19.525-1.83.652-.778.155-1.64.198-2.385-.123-.752-.326-1.2-1.024-1.274-1.837-.076-.837.173-1.716.883-2.212.736-.513 1.7-.517 2.553-.38.634.1 1.245.305 1.825.58.078.037.154.075.23.113V9.322c0-.02.013-.1 0-.118-.02-.028-.152-.038-.188-.046-.066-.016-.133-.03-.2-.045C22.38 9 21.84 8.908 21.3 8.85c-.533-.06-1.068-.077-1.603-.066-.542.01-1.086.054-1.62.154-.662.125-1.32.337-1.883.716-.085.056-.167.117-.245.18z\" fill=\"#E20138\" />\n    </symbol>\n\n    <symbol id=\"icon-discover\" viewBox=\"0 0 40 24\">\n      <title>Discover</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M38.995 11.75S27.522 20.1 6.5 23.5h31.495c.552 0 1-.448 1-1V11.75z\" fill=\"#F48024\" />\n      <path d=\"M5.332 11.758c-.338.305-.776.438-1.47.438h-.29V8.55h.29c.694 0 1.115.124 1.47.446.37.33.595.844.595 1.372 0 .53-.224 1.06-.595 1.39zM4.077 7.615H2.5v5.515h1.57c.833 0 1.435-.197 1.963-.637.63-.52 1-1.305 1-2.116 0-1.628-1.214-2.762-2.956-2.762zM7.53 13.13h1.074V7.616H7.53M11.227 9.732c-.645-.24-.834-.397-.834-.695 0-.347.338-.61.8-.61.322 0 .587.132.867.446l.562-.737c-.462-.405-1.015-.612-1.618-.612-.975 0-1.718.678-1.718 1.58 0 .76.346 1.15 1.355 1.513.42.148.635.247.743.314.215.14.322.34.322.57 0 .448-.354.78-.834.78-.51 0-.924-.258-1.17-.736l-.695.67c.495.726 1.09 1.05 1.907 1.05 1.116 0 1.9-.745 1.9-1.812 0-.876-.363-1.273-1.585-1.72zM13.15 10.377c0 1.62 1.27 2.877 2.907 2.877.462 0 .858-.09 1.347-.32v-1.267c-.43.43-.81.604-1.297.604-1.082 0-1.85-.785-1.85-1.9 0-1.06.792-1.895 1.8-1.895.512 0 .9.183 1.347.62V7.83c-.472-.24-.86-.34-1.322-.34-1.627 0-2.932 1.283-2.932 2.887zM25.922 11.32l-1.468-3.705H23.28l2.337 5.656h.578l2.38-5.655H27.41M29.06 13.13h3.046v-.934h-1.973v-1.488h1.9v-.934h-1.9V8.55h1.973v-.935H29.06M34.207 10.154h-.314v-1.67h.33c.67 0 1.034.28 1.034.818 0 .554-.364.852-1.05.852zm2.155-.91c0-1.033-.71-1.628-1.95-1.628H32.82v5.514h1.073v-2.215h.14l1.487 2.215h1.32l-1.733-2.323c.81-.165 1.255-.72 1.255-1.563z\" fill=\"#221F20\" />\n      <path d=\"M23.6 10.377c0 1.62-1.31 2.93-2.927 2.93-1.617.002-2.928-1.31-2.928-2.93s1.31-2.932 2.928-2.932c1.618 0 2.928 1.312 2.928 2.932z\" fill=\"#F48024\" />\n    </symbol>\n\n    <symbol id=\"icon-diners-club\" viewBox=\"0 0 40 24\">\n      <title>Diners Club</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M9.02 11.83c0-5.456 4.54-9.88 10.14-9.88 5.6 0 10.139 4.424 10.139 9.88-.002 5.456-4.54 9.88-10.14 9.88-5.6 0-10.14-4.424-10.14-9.88z\" fill=\"#FEFEFE\" />\n      <path fill=\"#FFF\" d=\"M32.522 22H8.5V1.5h24.022\" />\n      <path d=\"M25.02 11.732c-.003-2.534-1.607-4.695-3.868-5.55v11.102c2.26-.857 3.865-3.017 3.87-5.552zm-8.182 5.55V6.18c-2.26.86-3.86 3.017-3.867 5.55.007 2.533 1.61 4.69 3.868 5.55zm2.158-14.934c-5.25.002-9.503 4.202-9.504 9.384 0 5.182 4.254 9.38 9.504 9.382 5.25 0 9.504-4.2 9.505-9.382 0-5.182-4.254-9.382-9.504-9.384zM18.973 22C13.228 22.027 8.5 17.432 8.5 11.84 8.5 5.726 13.228 1.5 18.973 1.5h2.692c5.677 0 10.857 4.225 10.857 10.34 0 5.59-5.18 10.16-10.857 10.16h-2.692z\" fill=\"#004A97\" />\n    </symbol>\n\n    <symbol id=\"icon-maestro\" viewBox=\"0 0 40 24\">\n      <title>Maestro</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M14.67 22.39V21c.022-.465-.303-.86-.767-.882h-.116c-.3-.023-.603.14-.788.394-.164-.255-.442-.417-.743-.394-.256-.023-.51.116-.65.324v-.278h-.487v2.203h.487v-1.183c-.046-.278.162-.533.44-.58h.094c.325 0 .488.21.488.58v1.23h.487v-1.23c-.047-.278.162-.556.44-.58h.093c.325 0 .487.21.487.58v1.23l.534-.024zm2.712-1.09v-1.113h-.487v.28c-.162-.21-.417-.326-.695-.326-.65 0-1.16.51-1.16 1.16 0 .65.51 1.16 1.16 1.16.278 0 .533-.117.695-.325v.278h.487V21.3zm-1.786 0c.024-.37.348-.65.72-.626.37.023.65.348.626.72-.023.347-.302.625-.673.625-.372 0-.674-.28-.674-.65-.023-.047-.023-.047 0-.07zm12.085-1.16c.163 0 .325.024.465.094.14.046.278.14.37.255.117.115.186.23.256.37.117.3.117.626 0 .927-.046.14-.138.255-.254.37-.116.117-.232.186-.37.256-.303.116-.65.116-.952 0-.14-.046-.28-.14-.37-.255-.118-.116-.187-.232-.257-.37-.116-.302-.116-.627 0-.928.047-.14.14-.255.256-.37.115-.117.23-.187.37-.256.163-.07.325-.116.488-.093zm0 .465c-.092 0-.185.023-.278.046-.092.024-.162.094-.232.14-.07.07-.116.14-.14.232-.068.185-.068.394 0 .58.024.092.094.162.14.23.07.07.14.117.232.14.186.07.37.07.557 0 .092-.023.16-.092.23-.14.07-.068.117-.138.14-.23.07-.186.07-.395 0-.58-.023-.093-.093-.162-.14-.232-.07-.07-.138-.116-.23-.14-.094-.045-.187-.07-.28-.045zm-7.677.695c0-.695-.44-1.16-1.043-1.16-.65 0-1.16.534-1.137 1.183.023.65.534 1.16 1.183 1.136.325 0 .65-.093.905-.302l-.23-.348c-.187.14-.42.232-.65.232-.326.023-.627-.21-.673-.533h1.646v-.21zm-1.646-.21c.023-.3.278-.532.58-.532.3 0 .556.232.556.533h-1.136zm3.664-.346c-.207-.116-.44-.186-.695-.186-.255 0-.417.093-.417.255 0 .163.162.186.37.21l.233.022c.488.07.766.278.766.672 0 .395-.37.72-1.02.72-.348 0-.673-.094-.95-.28l.23-.37c.21.162.465.232.743.232.324 0 .51-.094.51-.28 0-.115-.117-.185-.395-.23l-.232-.024c-.487-.07-.765-.302-.765-.65 0-.44.37-.718.927-.718.325 0 .627.07.905.232l-.21.394zm2.32-.116h-.788v.997c0 .23.07.37.325.37.14 0 .3-.046.417-.115l.14.417c-.186.116-.395.162-.604.162-.58 0-.765-.302-.765-.812v-1.02h-.44v-.44h.44v-.673h.487v.672h.79v.44zm1.67-.51c.117 0 .233.023.35.07l-.14.463c-.093-.045-.21-.045-.302-.045-.325 0-.464.208-.464.58v1.25h-.487v-2.2h.487v.277c.116-.255.325-.37.557-.394z\" fill=\"#000\" />\n      <path fill=\"#7673C0\" d=\"M23.64 3.287h-7.305V16.41h7.306\" />\n      <path d=\"M16.8 9.848c0-2.55 1.183-4.985 3.2-6.56C16.384.435 11.12 1.06 8.29 4.7 5.435 8.32 6.06 13.58 9.703 16.41c3.038 2.387 7.283 2.387 10.32 0-2.04-1.578-3.223-3.99-3.223-6.562z\" fill=\"#EB001B\" />\n      <path d=\"M33.5 9.848c0 4.613-3.735 8.346-8.35 8.346-1.88 0-3.69-.626-5.15-1.785 3.618-2.83 4.245-8.092 1.415-11.71-.418-.532-.882-.996-1.415-1.413C23.618.437 28.883 1.06 31.736 4.7 32.873 6.163 33.5 7.994 33.5 9.85z\" fill=\"#00A1DF\" />\n    </symbol>\n\n    <symbol id=\"icon-elo\" viewBox=\"0 0 48 29\">\n      <title>Elo</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" fill=\"#FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" fill=\"#828282\" />\n      <rect fill=\"#828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect fill=\"#828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" fill=\"#828282\" />\n      <ellipse fill=\"#828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"icon-hiper\" viewBox=\"0 0 48 29\">\n      <title>Hiper</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" fill=\"#FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" fill=\"#828282\" />\n      <rect fill=\"#828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect fill=\"#828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" fill=\"#828282\" />\n      <ellipse fill=\"#828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"icon-hipercard\" viewBox=\"0 0 48 29\">\n      <title>Hipercard</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" fill=\"#FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" fill=\"#828282\" />\n      <rect fill=\"#828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect fill=\"#828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" fill=\"#828282\" />\n      <ellipse fill=\"#828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"logoPayPal\" viewBox=\"0 0 48 29\">\n      <title>PayPal Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" fill=\"#FFF\" />\n      <path d=\"M31.216 16.4c.394-.7.69-1.5.886-2.4.196-.8.196-1.6.1-2.2-.1-.7-.396-1.2-.79-1.7-.195-.3-.59-.5-.885-.7.1-.8.1-1.5 0-2.1-.1-.6-.394-1.1-.886-1.6-.885-1-2.56-1.6-4.922-1.6h-6.4c-.492 0-.787.3-.886.8l-2.658 17.2c0 .2 0 .3.1.4.097.1.294.2.393.2h4.036l-.295 1.8c0 .1 0 .3.1.4.098.1.195.2.393.2h3.35c.393 0 .688-.3.786-.7v-.2l.59-4.1v-.2c.1-.4.395-.7.788-.7h.59c1.675 0 3.152-.4 4.137-1.1.59-.5 1.083-1 1.478-1.7h-.002z\" fill=\"#263B80\" />\n      <path d=\"M21.364 9.4c0-.3.196-.5.492-.6.098-.1.196-.1.394-.1h5.02c.592 0 1.183 0 1.675.1.1 0 .295.1.394.1.098 0 .294.1.393.1.1 0 .1 0 .197.102.295.1.492.2.69.3.295-1.6 0-2.7-.887-3.8-.985-1.1-2.658-1.6-4.923-1.6h-6.4c-.49 0-.885.3-.885.8l-2.758 17.3c-.098.3.197.6.59.6h3.94l.985-6.4 1.083-6.9z\" fill=\"#263B80\" />\n      <path d=\"M30.523 9.4c0 .1 0 .3-.098.4-.887 4.4-3.742 5.9-7.484 5.9h-1.87c-.492 0-.787.3-.886.8l-.985 6.2-.296 1.8c0 .3.196.6.492.6h3.348c.394 0 .69-.3.787-.7v-.2l.592-4.1v-.2c.1-.4.394-.7.787-.7h.69c3.248 0 5.808-1.3 6.497-5.2.296-1.6.197-3-.69-3.9-.196-.3-.49-.5-.885-.7z\" fill=\"#159BD7\" />\n      <path d=\"M29.635 9c-.098 0-.295-.1-.394-.1-.098 0-.294-.1-.393-.1-.492-.102-1.083-.102-1.673-.102h-5.022c-.1 0-.197 0-.394.1-.198.1-.394.3-.492.6l-1.083 6.9v.2c.1-.5.492-.8.886-.8h1.87c3.742 0 6.598-1.5 7.484-5.9 0-.1 0-.3.098-.4-.196-.1-.492-.2-.69-.3 0-.1-.098-.1-.196-.1z\" fill=\"#232C65\" />\n    </symbol>\n\n    <symbol id=\"logoPayPalCredit\" viewBox=\"0 0 48 29\">\n      <title>PayPal Credit Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" fill=\"#FFF\" fill-rule=\"nonzero\" />\n      <path d=\"M27.44 21.6h.518c1.377 0 2.67-.754 2.953-2.484.248-1.588-.658-2.482-2.14-2.482h-.38c-.093 0-.172.067-.187.16l-.763 4.805zm-1.254-6.646c.024-.158.16-.273.32-.273h2.993c2.47 0 4.2 1.942 3.81 4.436-.4 2.495-2.752 4.436-5.21 4.436h-3.05c-.116 0-.205-.104-.187-.218l1.323-8.38zM22.308 16.907l-.192 1.21h2.38c.116 0 .204.103.186.217l-.23 1.462c-.023.157-.16.273-.318.273h-2.048c-.16 0-.294.114-.32.27l-.203 1.26h2.52c.117 0 .205.102.187.217l-.228 1.46c-.025.16-.16.275-.32.275h-4.55c-.116 0-.204-.104-.186-.218l1.322-8.38c.025-.158.16-.273.32-.273h4.55c.116 0 .205.104.187.22l-.23 1.46c-.024.158-.16.274-.32.274H22.63c-.16 0-.295.115-.32.273M35.325 23.552h-1.81c-.115 0-.203-.104-.185-.218l1.322-8.38c.025-.158.16-.273.32-.273h1.81c.115 0 .203.104.185.22l-1.322 8.38c-.025.156-.16.272-.32.272M14.397 18.657h.224c.754 0 1.62-.14 1.777-1.106.158-.963-.345-1.102-1.15-1.104h-.326c-.097 0-.18.07-.197.168l-.326 2.043zm3.96 4.895h-2.37c-.102 0-.194-.058-.238-.15l-1.565-3.262h-.023l-.506 3.19c-.02.128-.13.222-.26.222h-1.86c-.116 0-.205-.104-.187-.218l1.33-8.432c.02-.128.13-.22.26-.22h3.222c1.753 0 2.953.834 2.66 2.728-.2 1.224-1.048 2.283-2.342 2.506l2.037 3.35c.076.125-.014.286-.16.286zM40.216 23.552h-1.808c-.116 0-.205-.104-.187-.218l1.06-6.7h-1.684c-.116 0-.205-.104-.187-.218l.228-1.462c.025-.157.16-.273.32-.273h5.62c.116 0 .205.104.186.22l-.228 1.46c-.025.158-.16.274-.32.274h-1.63l-1.05 6.645c-.025.156-.16.272-.32.272M11.467 17.202c-.027.164-.228.223-.345.104-.395-.405-.975-.62-1.6-.62-1.41 0-2.526 1.083-2.75 2.458-.21 1.4.588 2.41 2.022 2.41.592 0 1.22-.225 1.74-.6.144-.105.34.02.313.194l-.328 2.03c-.02.12-.108.22-.226.254-.702.207-1.24.355-1.9.355-3.823 0-4.435-3.266-4.238-4.655.553-3.894 3.712-4.786 5.65-4.678.623.034 1.182.117 1.73.323.177.067.282.25.252.436l-.32 1.99\" fill=\"#21306F\" />\n      <path d=\"M23.184 7.67c-.11.717-.657.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.105.123.137.305.097.557zm-.23-1.87h-1.998c-.137 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h1.024c.095 0 .177-.07.192-.164l.23-1.452c.02-.135.136-.235.273-.235h.63c1.317 0 2.076-.636 2.275-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51z\" fill=\"#0093C7\" />\n      <path d=\"M8.936 7.67c-.11.717-.656.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.104.123.136.305.096.557zm-.23-1.87H6.708c-.136 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h.955c.136 0 .252-.1.274-.234l.217-1.382c.02-.135.137-.235.274-.235h.633c1.316 0 2.075-.636 2.274-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51zM13.343 9.51c-.092.545-.526.912-1.08.912-.277 0-.5-.09-.642-.258-.14-.168-.193-.406-.148-.672.086-.542.527-.92 1.072-.92.27 0 .492.09.637.26.148.172.205.412.163.677zm1.334-1.863h-.957c-.082 0-.152.06-.164.14l-.042.268-.067-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.135 1.923-.092.56.038 1.097.356 1.47.29.344.708.487 1.204.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.017-.102-.06-.193-.163-.193z\" fill=\"#21306F\" />\n      <path d=\"M27.59 9.51c-.09.545-.525.912-1.078.912-.278 0-.5-.09-.643-.258-.142-.168-.195-.406-.15-.672.086-.542.526-.92 1.07-.92.273 0 .494.09.64.26.146.172.203.412.16.677zm1.334-1.863h-.956c-.082 0-.152.06-.164.14l-.043.268-.065-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.136 1.923-.092.56.038 1.097.355 1.47.292.344.71.487 1.205.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.015-.102-.063-.193-.166-.193z\" fill=\"#0093C7\" />\n      <path d=\"M19.77 7.647h-.96c-.092 0-.178.045-.23.122L17.254 9.72l-.562-1.877c-.035-.118-.143-.198-.266-.198h-.945c-.113 0-.194.112-.157.22l1.06 3.108-.997 1.404c-.078.11 0 .262.136.262h.96c.092 0 .177-.044.23-.12l3.196-4.614c.077-.11-.002-.26-.137-.26\" fill=\"#21306F\" />\n      <path d=\"M30.052 5.94l-.82 5.216c-.016.1.062.192.165.192h.824c.138 0 .254-.1.275-.234l.81-5.122c.015-.1-.064-.193-.166-.193h-.924c-.082 0-.15.06-.164.14\" fill=\"#0093C7\" />\n    </symbol>\n\n    <symbol id=\"iconCardFront\" viewBox=\"0 0 48 29\">\n      <title>Generic Card</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" fill=\"#FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" fill=\"#828282\" />\n      <rect fill=\"#828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect fill=\"#828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" fill=\"#828282\" />\n      <ellipse fill=\"#828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"iconCVVBack\" viewBox=\"0 0 40 24\">\n      <title>CVV Back</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" fill=\"#FFF\"/>\n      <path fill=\"#828282\" d=\"M0 5h40v4H0z\" />\n      <path d=\"M20 13.772v5.456c0 .423.37.772.82.772h13.36c.45 0 .82-.35.82-.772v-5.456c0-.423-.37-.772-.82-.772H20.82c-.45 0-.82.35-.82.772zm-1-.142c0-.9.76-1.63 1.68-1.63h13.64c.928 0 1.68.737 1.68 1.63v5.74c0 .9-.76 1.63-1.68 1.63H20.68c-.928 0-1.68-.737-1.68-1.63v-5.74z\" fill=\"#000\" fill-rule=\"nonzero\" />\n      <circle fill=\"#828282\" cx=\"23.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"27.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"31.5\" cy=\"16.5\" r=\"1.5\" />\n    </symbol>\n\n    <symbol id=\"iconCVVFront\" viewBox=\"0 0 40 24\">\n      <title>CVV Front</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" fill=\"#FFF\" />\n      <path d=\"M16 5.772v5.456c0 .423.366.772.81.772h17.38c.444 0 .81-.348.81-.772V5.772C35 5.35 34.634 5 34.19 5H16.81c-.444 0-.81.348-.81.772zm-1-.142c0-.9.75-1.63 1.66-1.63h17.68c.917 0 1.66.737 1.66 1.63v5.74c0 .9-.75 1.63-1.66 1.63H16.66c-.917 0-1.66-.737-1.66-1.63V5.63z\" fill=\"#000\" fill-rule=\"nonzero\" />\n      <circle fill=\"#828282\" cx=\"19.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"27.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"23.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"31.5\" cy=\"8.5\" r=\"1.5\" />\n      <path d=\"M4 7.833C4 7.47 4.476 7 4.89 7h6.22c.414 0 .89.47.89.833v3.334c0 .364-.476.833-.89.833H4.89c-.414 0-.89-.47-.89-.833V7.833zM4 18.5c0-.828.668-1.5 1.5-1.5h29c.828 0 1.5.666 1.5 1.5 0 .828-.668 1.5-1.5 1.5h-29c-.828 0-1.5-.666-1.5-1.5z\" fill=\"#828282\" />\n    </symbol>\n\n    <symbol id=\"iconCheck\" viewBox=\"0 0 42 32\">\n      <title>Check</title>\n      <path class=\"path1\" d=\"M14.379 29.76L39.741 3.415 36.194.001l-21.815 22.79-10.86-11.17L0 15.064z\" />\n    </symbol>\n\n    <symbol id=\"iconX\" viewBox=\"0 0 32 32\">\n      <title>X</title>\n      <path d=\"M29 3.54L25.46 0 14.5 10.97 3.54 0.01 0 3.54 10.96 14.5 0.01 25.46 3.54 28.99 14.5 18.04 25.46 29 28.99 25.46 18.03 14.5 29 3.54z\"/>\n    </symbol>\n\n    <symbol id=\"iconLockLoader\" viewBox=\"0 0 28 32\">\n      <title>Lock Loader</title>\n      <path d=\"M6 10V8c0-4.422 3.582-8 8-8 4.41 0 8 3.582 8 8v2h-4V7.995C18 5.79 16.205 4 14 4c-2.21 0-4 1.792-4 3.995V10H6zM.997 14c-.55 0-.997.445-.997.993v16.014c0 .548.44.993.997.993h26.006c.55 0 .997-.445.997-.993V14.993c0-.548-.44-.993-.997-.993H.997z\" />\n    </symbol>\n\n    <symbol id=\"iconError\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\n      <path d=\"M0 0h24v24H0z\" fill=\"none\" />\n      <path d=\"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z\" />\n    </symbol>\n\n    <symbol id=\"logoApplePay\" viewBox=\"0 0 165.52 105.97\" width=\"24\">\n      <title>Apple Pay Logo</title>\n      <path id=\"_Path_\" data-name=\"&lt;Path&gt;\" fill=\"#231f20\" d=\"M150.7 0h-139a20.78 20.78 0 0 0-3.12.3 10.51 10.51 0 0 0-3 1 9.94 9.94 0 0 0-4.31 4.32 10.46 10.46 0 0 0-1 3A20.65 20.65 0 0 0 0 11.7v82.57a20.64 20.64 0 0 0 .3 3.11 10.46 10.46 0 0 0 1 3 9.94 9.94 0 0 0 4.35 4.35 10.47 10.47 0 0 0 3 1 20.94 20.94 0 0 0 3.11.27h142.06a21 21 0 0 0 3.11-.27 10.48 10.48 0 0 0 3-1 9.94 9.94 0 0 0 4.35-4.35 10.4 10.4 0 0 0 1-3 20.63 20.63 0 0 0 .27-3.11V11.69a20.64 20.64 0 0 0-.27-3.11 10.4 10.4 0 0 0-1-3 9.94 9.94 0 0 0-4.35-4.35 10.52 10.52 0 0 0-3-1 20.84 20.84 0 0 0-3.1-.23h-1.43z\"/>\n      <path id=\"_Path_2\" data-name=\"&lt;Path&gt;\" fill=\"#fff\" d=\"M150.7 3.53h3.03a17.66 17.66 0 0 1 2.58.22 7 7 0 0 1 2 .65 6.41 6.41 0 0 1 2.8 2.81 6.88 6.88 0 0 1 .64 2 17.56 17.56 0 0 1 .22 2.58v82.38a17.54 17.54 0 0 1-.22 2.59 6.85 6.85 0 0 1-.64 2 6.41 6.41 0 0 1-2.81 2.81 6.92 6.92 0 0 1-2 .65 18 18 0 0 1-2.57.22H11.79a18 18 0 0 1-2.58-.22 6.94 6.94 0 0 1-2-.65 6.41 6.41 0 0 1-2.8-2.8 6.93 6.93 0 0 1-.65-2 17.47 17.47 0 0 1-.22-2.58v-82.4a17.49 17.49 0 0 1 .22-2.59 6.92 6.92 0 0 1 .65-2 6.41 6.41 0 0 1 2.8-2.8 7 7 0 0 1 2-.65 17.63 17.63 0 0 1 2.58-.22H150.7\"/>\n      <g id=\"_Group_\" data-name=\"&lt;Group&gt;\">\n      <g id=\"_Group_2\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Path_3\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M43.51 35.77a9.15 9.15 0 0 0 2.1-6.52 9.07 9.07 0 0 0-6 3.11 8.56 8.56 0 0 0-2.16 6.27 7.57 7.57 0 0 0 6.06-2.86\"/>\n      <path id=\"_Path_4\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M45.59 39.08c-3.35-.2-6.2 1.9-7.79 1.9s-4-1.8-6.7-1.75a9.87 9.87 0 0 0-8.4 5.1c-3.6 6.2-.95 15.4 2.55 20.45 1.7 2.5 3.75 5.25 6.45 5.15s3.55-1.65 6.65-1.65 4 1.65 6.7 1.6 4.55-2.5 6.25-5a22.2 22.2 0 0 0 2.8-5.75 9.08 9.08 0 0 1-5.45-8.25A9.26 9.26 0 0 1 53 43.13a9.57 9.57 0 0 0-7.45-4\"/>\n      </g>\n      <g id=\"_Group_3\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Compound_Path_\" data-name=\"&lt;Compound Path&gt;\" fill=\"#231f20\" d=\"M79 32.11c7.28 0 12.35 5 12.35 12.32S86.15 56.8 78.79 56.8h-8.06v12.82h-5.82V32.11zm-8.27 19.81h6.68c5.07 0 8-2.73 8-7.46S82.48 37 77.44 37h-6.71z\"/>\n      <path id=\"_Compound_Path_2\" data-name=\"&lt;Compound Path&gt;\" fill=\"#231f20\" d=\"M92.76 61.85c0-4.81 3.67-7.56 10.42-8l7.25-.44v-2.06c0-3-2-4.7-5.56-4.7-2.94 0-5.07 1.51-5.51 3.82h-5.24c.16-4.86 4.73-8.4 10.92-8.4 6.65 0 11 3.48 11 8.89v18.66h-5.38v-4.5h-.13a9.59 9.59 0 0 1-8.58 4.78c-5.42 0-9.19-3.22-9.19-8.05zm17.68-2.42v-2.11l-6.47.42c-3.64.23-5.54 1.59-5.54 4s2 3.77 5.07 3.77c3.95-.05 6.94-2.57 6.94-6.08z\"/>\n      <path id=\"_Compound_Path_3\" data-name=\"&lt;Compound Path&gt;\" fill=\"#231f20\" d=\"M121 79.65v-4.5a17.14 17.14 0 0 0 1.72.1c2.57 0 4-1.09 4.91-3.9l.52-1.66-9.88-27.29h6.08l6.86 22.15h.13l6.86-22.15h5.93l-10.21 28.67c-2.34 6.58-5 8.73-10.68 8.73a15.93 15.93 0 0 1-2.24-.15z\"/>\n      </g>\n      </g>\n    </symbol>\n    <symbol id=\"logoGooglePay\" viewbox=\"0 0 752 400\" >\n      <g>\n        <title>Google Pay Mark</title>\n        <path d=\"m552.7,0l-352,0c-110,0 -200,90 -200,200l0,0c0,110 90,200 200,200l352,0c110,0 200,-90 200,-200l0,0c0,-110 -90,-200 -200,-200z\" fill=\"#FFFFFF\" id=\"Base_1_\"/>\n        <path d=\"m552.7,16.2c24.7,0 48.7,4.9 71.3,14.5c21.9,9.3 41.5,22.6 58.5,39.5c16.9,16.9 30.2,36.6 39.5,58.5c9.6,22.6 14.5,46.6 14.5,71.3s-4.9,48.7 -14.5,71.3c-9.3,21.9 -22.6,41.5 -39.5,58.5c-16.9,16.9 -36.6,30.2 -58.5,39.5c-22.6,9.6 -46.6,14.5 -71.3,14.5l-352,0c-24.7,0 -48.7,-4.9 -71.3,-14.5c-21.9,-9.3 -41.5,-22.6 -58.5,-39.5c-16.9,-16.9 -30.2,-36.6 -39.5,-58.5c-9.6,-22.6 -14.5,-46.6 -14.5,-71.3s4.9,-48.7 14.5,-71.3c9.3,-21.9 22.6,-41.5 39.5,-58.5c16.9,-16.9 36.6,-30.2 58.5,-39.5c22.6,-9.6 46.6,-14.5 71.3,-14.5l352,0m0,-16.2l-352,0c-110,0 -200,90 -200,200l0,0c0,110 90,200 200,200l352,0c110,0 200,-90 200,-200l0,0c0,-110 -90,-200 -200,-200l0,0z\" fill=\"#3C4043\" id=\"Outline\"/>\n        <g id=\"G_Pay_Lockup_1_\">\n         <g id=\"Pay_Typeface_3_\">\n          <path d=\"m359.3,214.2l0,60.5l-19.2,0l0,-149.4l50.9,0c12.9,0 23.9,4.3 32.9,12.9c9.2,8.6 13.8,19.1 13.8,31.5c0,12.7 -4.6,23.2 -13.8,31.7c-8.9,8.5 -19.9,12.7 -32.9,12.7l-31.7,0l0,0.1zm0,-70.5l0,52.1l32.1,0c7.6,0 14,-2.6 19,-7.7c5.1,-5.1 7.7,-11.3 7.7,-18.3c0,-6.9 -2.6,-13 -7.7,-18.1c-5,-5.3 -11.3,-7.9 -19,-7.9l-32.1,0l0,-0.1z\" fill=\"#3C4043\" id=\"Letter_p_3_\"/>\n          <path d=\"m487.9,169.1c14.2,0 25.4,3.8 33.6,11.4c8.2,7.6 12.3,18 12.3,31.2l0,63l-18.3,0l0,-14.2l-0.8,0c-7.9,11.7 -18.5,17.5 -31.7,17.5c-11.3,0 -20.7,-3.3 -28.3,-10s-11.4,-15 -11.4,-25c0,-10.6 4,-19 12,-25.2c8,-6.3 18.7,-9.4 32,-9.4c11.4,0 20.8,2.1 28.1,6.3l0,-4.4c0,-6.7 -2.6,-12.3 -7.9,-17c-5.3,-4.7 -11.5,-7 -18.6,-7c-10.7,0 -19.2,4.5 -25.4,13.6l-16.9,-10.6c9.3,-13.5 23.1,-20.2 41.3,-20.2zm-24.8,74.2c0,5 2.1,9.2 6.4,12.5c4.2,3.3 9.2,5 14.9,5c8.1,0 15.3,-3 21.6,-9s9.5,-13 9.5,-21.1c-6,-4.7 -14.3,-7.1 -25,-7.1c-7.8,0 -14.3,1.9 -19.5,5.6c-5.3,3.9 -7.9,8.6 -7.9,14.1z\" fill=\"#3C4043\" id=\"Letter_a_3_\"/>\n          <path d=\"m638.2,172.4l-64,147.2l-19.8,0l23.8,-51.5l-42.2,-95.7l20.9,0l30.4,73.4l0.4,0l29.6,-73.4l20.9,0z\" fill=\"#3C4043\" id=\"Letter_y_3_\"/>\n         </g>\n         <g id=\"G_Mark_1_\">\n          <path d=\"m282.93,202c0,-6.26 -0.56,-12.25 -1.6,-18.01l-80.48,0l0,33l46.35,0.01c-1.88,10.98 -7.93,20.34 -17.2,26.58l0,21.41l27.59,0c16.11,-14.91 25.34,-36.95 25.34,-62.99z\" fill=\"#4285F4\" id=\"Blue_500\"/>\n          <path d=\"m230.01,243.58c-7.68,5.18 -17.57,8.21 -29.14,8.21c-22.35,0 -41.31,-15.06 -48.1,-35.36l-28.46,0l0,22.08c14.1,27.98 43.08,47.18 76.56,47.18c23.14,0 42.58,-7.61 56.73,-20.71l-27.59,-21.4z\" fill=\"#34A853\" id=\"Green_500_1_\"/>\n          <path d=\"m150.09,200.05c0,-5.7 0.95,-11.21 2.68,-16.39l0,-22.08l-28.46,0c-5.83,11.57 -9.11,24.63 -9.11,38.47s3.29,26.9 9.11,38.47l28.46,-22.08c-1.73,-5.18 -2.68,-10.69 -2.68,-16.39z\" fill=\"#FABB05\" id=\"Yellow_500_1_\"/>\n          <path d=\"m200.87,148.3c12.63,0 23.94,4.35 32.87,12.85l24.45,-24.43c-14.85,-13.83 -34.21,-22.32 -57.32,-22.32c-33.47,0 -62.46,19.2 -76.56,47.18l28.46,22.08c6.79,-20.3 25.75,-35.36 48.1,-35.36z\" fill=\"#E94235\" id=\"Red_500\"/>\n         </g>\n        </g>\n       </g>\n    </symbol>\n\n    <symbol id=\"logoVenmo\" viewBox=\"0 0 48 32\">\n      <title>Venmo</title>\n      <g fill=\"none\" fill-rule=\"evenodd\">\n        <rect fill=\"#3D95CE\" width=\"47.4074074\" height=\"31.6049383\" rx=\"3.16049383\"/>\n        <path d=\"M33.1851852,10.1131555 C33.1851852,14.8373944 29.2425262,20.9745161 26.0425868,25.2839506 L18.7337285,25.2839506 L15.8024691,7.35534396 L22.202175,6.73384536 L23.7519727,19.4912014 C25.2000422,17.0781163 26.9870326,13.2859484 26.9870326,10.7005 C26.9870326,9.28531656 26.7500128,8.32139205 26.3796046,7.52770719 L32.207522,6.32098765 C32.8813847,7.45939896 33.1851852,8.63196439 33.1851852,10.1131555 Z\" fill=\"#FFF\"/>\n      </g>\n    </symbol>\n    <symbol id=\"buttonVenmo\" viewBox=\"0 0 295 42\">\n      <g fill=\"none\" fill-rule=\"evenodd\">\n        <rect fill=\"#3D95CE\" width=\"295\" height=\"42\" rx=\"3\"/>\n        <path d=\"M11.3250791 0C11.7902741.780434316 12 1.58428287 12 2.59970884 12 5.838396 9.27822123 10.0456806 7.06917212 13L2.02356829 13 0 .709099732 4.41797878.283033306 5.48786751 9.02879887C6.48752911 7.3745159 7.72116169 4.77480706 7.72116169 3.00236102 7.72116169 2.03218642 7.55753727 1.37137098 7.30182933.827262801L11.3250791 0 11.3250791 0zM17.5051689 5.68512193C18.333931 5.68512193 20.4203856 5.28483546 20.4203856 4.03281548 20.4203856 3.43161451 20.0177536 3.13172102 19.5432882 3.13172102 18.7131868 3.13172102 17.6238766 4.18269796 17.5051689 5.68512193L17.5051689 5.68512193zM17.4102028 8.1647385C17.4102028 9.69351403 18.2153451 10.293301 19.2827401 10.293301 20.4451012 10.293301 21.5580312 9.99340752 23.0045601 9.21725797L22.4597224 13.1234575C21.440541 13.649203 19.8521716 14 18.310433 14 14.3996547 14 13 11.49596 13 8.36552446 13 4.30815704 15.2767521 0 19.9706358 0 22.554932 0 24 1.52864698 24 3.65720949 24.0002435 7.08869546 19.8287953 8.13992948 17.4102028 8.1647385L17.4102028 8.1647385zM37 2.84753211C37 3.32189757 36.9261179 4.00994664 36.8526108 4.45959542L35.4649774 12.9998782 30.9621694 12.9998782 32.2279161 5.1711436C32.2519185 4.95879931 32.3256755 4.53131032 32.3256755 4.29412759 32.3256755 3.72466988 31.9603904 3.5825794 31.5212232 3.5825794 30.9379171 3.5825794 30.3532359 3.84326124 29.9638234 4.03356751L28.5281854 13 24 13 26.0686989.213683657 29.9878258.213683657 30.0374555 1.23425123C30.9620444.641294408 32.1795365 3.90379019e-8 33.9069526 3.90379019e-8 36.1955476-.000243475057 37 1.1387937 37 2.84753211L37 2.84753211zM51.2981937 1.39967969C52.6582977.49918987 53.9425913 0 55.7133897 0 58.1518468 0 59 1.13900518 59 2.84769558 59 3.32204771 58.9223438 4.01007745 58.8448195 4.4597136L57.3830637 12.9997565 52.6328518 12.9997565 53.9932194 5.00577861C54.0182698 4.792101 54.0708756 4.53142648 54.0708756 4.36608506 54.0708756 3.72493046 53.6854953 3.58272222 53.2224587 3.58272222 52.6325881 3.58272222 52.0429812 3.81989829 51.6052587 4.03369766L50.0914245 12.9998782 45.3423992 12.9998782 46.7027668 5.00590037C46.7278172 4.79222275 46.7788409 4.53154824 46.7788409 4.36620681 46.7788409 3.72505221 46.3933287 3.58284398 45.9318743 3.58284398 45.3153711 3.58284398 44.7000546 3.84351849 44.2893602 4.03381941L42.7740757 13 38 13 40.1814929.214042876 44.2643098.214042876 44.3925941 1.28145692C45.3423992.641763367 46.6253743.000487014507 48.3452809.000487014507 49.8344603 0 50.8094476.593061916 51.2981937 1.39967969L51.2981937 1.39967969zM67.5285327 5.39061542C67.5285327 4.29258876 67.2694573 3.54396333 66.4936812 3.54396333 64.7759775 3.54396333 64.4232531 6.76273249 64.4232531 8.4093242 64.4232531 9.65848482 64.7530184 10.4315735 65.5285529 10.4315735 67.1521242 10.4315735 67.5285327 7.03707905 67.5285327 5.39061542L67.5285327 5.39061542zM60 8.21054461C60 3.96893154 62.1170713 0 66.988027 0 70.6583423 0 72 2.29633967 72 5.46592624 72 9.65835674 69.905767 14 64.9173573 14 61.2233579 14 60 11.4294418 60 8.21054461L60 8.21054461z\" transform=\"translate(112 14)\" fill=\"#FFF\"/>\n      </g>\n    </symbol>\n\n    <symbol id=\"iconClose\" width=\"21\" height=\"21\" viewBox=\"0 0 21 21\" overflow=\"visible\">\n      <path d=\"M16 5.414L14.586 4 10 8.586 5.414 4 4 5.414 8.586 10 4 14.586 5.414 16 10 11.414 14.586 16 16 14.586 11.414 10\"/>\n    </symbol>\n  </defs>\n</svg>\n";
+var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"methods-edit\" class=\"braintree-hidden braintree-heading\" role=\"button\" tabindex=\"0\">{{edit}}</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"delete-confirmation\" class=\"braintree-delete-confirmation braintree-sheet\">\n      <div data-braintree-id=\"delete-confirmation__message\"></div>\n      <div class=\"braintree-delete-confirmation__button-container\">\n        <div tabindex=\"0\" role=\"button\" data-braintree-id=\"delete-confirmation__no\" class=\"braintree-delete-confirmation__button\">{{deleteCancelButton}}</div>\n        <div tabindex=\"0\" role=\"button\" data-braintree-id=\"delete-confirmation__yes\" class=\"braintree-delete-confirmation__button\">{{deleteConfirmationButton}}</div>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"applePay\" class=\"braintree-applePay braintree-sheet\">\n        <div data-braintree-id=\"apple-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoApplePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Apple Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"apple-pay-button\" class=\"braintree-sheet__button--apple-pay apple-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"googlePay\" class=\"braintree-googlePay braintree-sheet\">\n        <div data-braintree-id=\"google-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoGooglePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Google Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"google-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"venmo\" class=\"braintree-venmo braintree-sheet\">\n        <div data-braintree-id=\"venmo-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoVenmo\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Venmo}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <svg data-braintree-id=\"venmo-button\" class=\"braintree-sheet__button--venmo\">\n            <use xlink:href=\"#buttonVenmo\"></use>\n          </svg>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\" aria-hidden=\"true\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <label for=\"braintree__card-view-input__cardholder-name\">\n              <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\"></div>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <label>\n              <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                  <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n            </div>\n\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{cvvLabel}}\n                  <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                      <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                      <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                      </svg>\n                    </div>\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\" role=\"alert\"></div>\n            </div>\n\n            <div class=\"braintree-form__notice-of-collection\">\n              <a href=\"https://www.paypal.com/us/legalhub/home\" target=\"_blank\" rel=\"noopener noreferrer\">{{noticeOfCollection}}</a>\n            </div>\n          </div>\n\n          <div data-braintree-id=\"save-card-field-group\" class=\"braintree-form__field-group braintree-hidden\">\n            <label>\n              <div class=\"braintree-form__field braintree-form__checkbox\">\n                <input type=\"checkbox\" data-braintree-id=\"save-card-input\" checked />\n              </div>\n              <div class=\"braintree-form__label\">{{saveCardLabel}}</div>\n            </label>\n          </div>\n        </div>\n      </div>\n\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-large-button braintree-toggle braintree-hidden\" tabindex=\"0\" role=\"button\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n<div data-braintree-id=\"disable-wrapper\" class=\"braintree-dropin__disabled braintree-hidden\"></div>\n";
+var svgHTML = "<svg data-braintree-id=\"svgs\">\n  <defs>\n    <symbol id=\"icon-visa\" viewBox=\"0 0 44 14.2\">\n      <title>Visa</title>\n      <path fill=\"#1434CB\" d=\"M16.8,0.2L11,13.9H7.3L4.5,3C4.3,2.3,4.2,2.1,3.6,1.8C2.8,1.3,1.4,0.9,0.1,0.6l0.1-0.4h6   c0.8,0,1.5,0.5,1.6,1.4l1.5,7.9L13,0.2H16.8z M31.4,9.4c0-3.6-5-3.8-5-5.4c0-0.5,0.5-1,1.5-1.1c0.5-0.1,1.9-0.1,3.5,0.6L32,0.6   C31.2,0.3,30.1,0,28.7,0c-3.5,0-6,1.9-6,4.5c0,2,1.8,3.1,3.1,3.7c1.4,0.7,1.8,1.1,1.8,1.7c0,0.9-1.1,1.3-2.1,1.3   c-1.8,0-2.8-0.5-3.6-0.9l-0.6,3c0.8,0.4,2.3,0.7,3.9,0.7C28.9,14.1,31.4,12.3,31.4,9.4 M40.6,13.9h3.3L41,0.2h-3   c-0.7,0-1.3,0.4-1.5,1l-5.3,12.7h3.7l0.7-2h4.5L40.6,13.9z M36.7,9.1l1.9-5.1l1.1,5.1H36.7z M21.8,0.2l-2.9,13.7h-3.5l2.9-13.7   H21.8z\"/>\n    </symbol>\n\n    <symbol id=\"icon-master-card\" viewBox=\"0 0 40 24\">\n      <title>MasterCard</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" fill=\"#FFF\" />\n      <path d=\"M11.085 22.2v-1.36c0-.522-.318-.863-.864-.863-.272 0-.568.09-.773.386-.16-.25-.386-.386-.727-.386-.228 0-.455.068-.637.318v-.272h-.478V22.2h.478v-1.202c0-.386.204-.567.523-.567.318 0 .478.205.478.568V22.2h.477v-1.202c0-.386.23-.567.524-.567.32 0 .478.205.478.568V22.2h.523zm7.075-2.177h-.774v-.658h-.478v.658h-.432v.43h.432v.998c0 .5.205.795.75.795.206 0 .433-.068.592-.16l-.136-.407c-.136.09-.296.114-.41.114-.227 0-.318-.137-.318-.363v-.976h.774v-.43zm4.048-.046c-.273 0-.454.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .204.023.295.046l.137-.454c-.09-.023-.228-.023-.32-.023zm-6.118.227c-.228-.16-.546-.227-.888-.227-.546 0-.91.272-.91.703 0 .363.274.567.75.635l.23.023c.25.045.385.113.385.227 0 .16-.182.272-.5.272-.32 0-.57-.113-.728-.227l-.228.363c.25.18.59.272.932.272.637 0 1-.295 1-.703 0-.385-.295-.59-.75-.658l-.227-.022c-.205-.023-.364-.068-.364-.204 0-.16.16-.25.41-.25.272 0 .545.114.682.182l.205-.386zm12.692-.227c-.273 0-.455.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .203.023.294.046L29.1 20c-.09-.023-.227-.023-.318-.023zm-6.096 1.134c0 .66.455 1.135 1.16 1.135.32 0 .546-.068.774-.25l-.228-.385c-.182.136-.364.204-.57.204-.385 0-.658-.272-.658-.703 0-.407.273-.68.66-.702.204 0 .386.068.568.204l.228-.385c-.228-.182-.455-.25-.774-.25-.705 0-1.16.477-1.16 1.134zm4.413 0v-1.087h-.48v.272c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.317 0 .545-.113.68-.317v.272h.48v-1.09zm-1.753 0c0-.384.25-.702.66-.702.387 0 .66.295.66.703 0 .387-.273.704-.66.704-.41-.022-.66-.317-.66-.703zm-5.71-1.133c-.636 0-1.09.454-1.09 1.134 0 .682.454 1.135 1.114 1.135.32 0 .638-.09.888-.295l-.228-.34c-.18.136-.41.227-.636.227-.296 0-.592-.136-.66-.522h1.615v-.18c.022-.704-.388-1.158-1.002-1.158zm0 .41c.297 0 .502.18.547.52h-1.137c.045-.295.25-.52.59-.52zm11.852.724v-1.95h-.48v1.135c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.68-.317v.272h.48v-1.09zm-1.752 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703zm-15.97 0v-1.087h-.476v.272c-.16-.204-.387-.318-.683-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.682-.317v.272h.477v-1.09zm-1.773 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703z\" fill=\"#000\" />\n      <path fill=\"#FF5F00\" d=\"M23.095 3.49H15.93v12.836h7.165\" />\n      <path d=\"M16.382 9.91c0-2.61 1.23-4.922 3.117-6.42-1.39-1.087-3.14-1.745-5.05-1.745-4.528 0-8.19 3.65-8.19 8.164 0 4.51 3.662 8.162 8.19 8.162 1.91 0 3.66-.657 5.05-1.746-1.89-1.474-3.118-3.81-3.118-6.417z\" fill=\"#EB001B\" />\n      <path d=\"M32.76 9.91c0 4.51-3.664 8.162-8.19 8.162-1.91 0-3.662-.657-5.05-1.746 1.91-1.496 3.116-3.81 3.116-6.417 0-2.61-1.228-4.922-3.116-6.42 1.388-1.087 3.14-1.745 5.05-1.745 4.526 0 8.19 3.674 8.19 8.164z\" fill=\"#F79E1B\" />\n    </symbol>\n\n    <symbol id=\"icon-unionpay\" viewBox=\"0 0 40 24\">\n      <title>Union Pay</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M9.877 2h8.126c1.135 0 1.84.93 1.575 2.077l-3.783 16.35c-.267 1.142-1.403 2.073-2.538 2.073H5.13c-1.134 0-1.84-.93-1.574-2.073L7.34 4.076C7.607 2.93 8.74 2 9.878 2z\" fill=\"#E21836\" />\n      <path d=\"M17.325 2h9.345c1.134 0 .623.93.356 2.077l-3.783 16.35c-.265 1.142-.182 2.073-1.32 2.073H12.58c-1.137 0-1.84-.93-1.574-2.073l3.783-16.35C15.056 2.93 16.19 2 17.324 2z\" fill=\"#00447B\" />\n      <path d=\"M26.3 2h8.126c1.136 0 1.84.93 1.575 2.077l-3.782 16.35c-.266 1.142-1.402 2.073-2.54 2.073h-8.122c-1.137 0-1.842-.93-1.574-2.073l3.78-16.35C24.03 2.93 25.166 2 26.303 2z\" fill=\"#007B84\" />\n      <path d=\"M27.633 14.072l-.99 3.3h.266l-.208.68h-.266l-.062.212h-.942l.064-.21H23.58l.193-.632h.194l1.005-3.35.2-.676h.962l-.1.34s.255-.184.498-.248c.242-.064 1.636-.088 1.636-.088l-.206.672h-.33zm-1.695 0l-.254.843s.285-.13.44-.172c.16-.04.395-.057.395-.057l.182-.614h-.764zm-.38 1.262l-.263.877s.29-.15.447-.196c.157-.037.396-.066.396-.066l.185-.614h-.766zm-.614 2.046h.767l.222-.74h-.765l-.223.74z\" fill=\"#FEFEFE\" />\n      <path d=\"M28.055 13.4h1.027l.01.385c-.005.065.05.096.17.096h.208l-.19.637h-.555c-.48.035-.662-.172-.65-.406l-.02-.71zM28.193 16.415h-.978l.167-.566H28.5l.16-.517h-1.104l.19-.638h3.072l-.193.638h-1.03l-.16.516h1.032l-.17.565H29.18l-.2.24h.454l.11.712c.013.07.014.116.036.147.023.026.158.038.238.038h.137l-.21.694h-.348c-.054 0-.133-.004-.243-.01-.105-.008-.18-.07-.25-.105-.064-.03-.16-.11-.182-.24l-.11-.712-.507.7c-.162.222-.38.39-.748.39h-.712l.186-.62h.273c.078 0 .15-.03.2-.056.052-.023.098-.05.15-.126l.74-1.05zM17.478 14.867h2.59l-.19.622H18.84l-.16.53h1.06l-.194.64h-1.06l-.256.863c-.03.095.25.108.353.108l.53-.072-.212.71h-1.193c-.096 0-.168-.013-.272-.037-.1-.023-.145-.07-.19-.138-.043-.07-.11-.128-.064-.278l.343-1.143h-.588l.195-.65h.592l.156-.53h-.588l.188-.623zM19.223 13.75h1.063l-.194.65H18.64l-.157.136c-.067.066-.09.038-.18.087-.08.04-.254.123-.477.123h-.466l.19-.625h.14c.118 0 .198-.01.238-.036.046-.03.098-.096.157-.203l.267-.487h1.057l-.187.356zM20.74 13.4h.905l-.132.46s.286-.23.487-.313c.2-.075.65-.143.65-.143l1.464-.007-.498 1.672c-.085.286-.183.472-.244.555-.055.087-.12.16-.248.23-.124.066-.236.104-.34.115-.096.007-.244.01-.45.012h-1.41l-.4 1.324c-.037.13-.055.194-.03.23.02.03.068.066.135.066l.62-.06-.21.726h-.698c-.22 0-.383-.004-.495-.013-.108-.01-.22 0-.295-.058-.065-.058-.164-.133-.162-.21.007-.073.037-.192.082-.356l1.268-4.23zm1.922 1.69h-1.484l-.09.3h1.283c.152-.018.184.004.196-.003l.096-.297zm-1.402-.272s.29-.266.786-.353c.112-.022.82-.015.82-.015l.106-.357h-1.496l-.216.725z\" fill=\"#FEFEFE\" />\n      <path d=\"M23.382 16.1l-.084.402c-.036.125-.067.22-.16.302-.1.084-.216.172-.488.172l-.502.02-.004.455c-.006.13.028.117.048.138.024.022.045.032.067.04l.157-.008.48-.028-.198.663h-.552c-.385 0-.67-.008-.765-.084-.092-.057-.105-.132-.103-.26l.035-1.77h.88l-.013.362h.212c.072 0 .12-.007.15-.026.027-.02.047-.048.06-.093l.087-.282h.692zM10.84 7.222c-.032.143-.596 2.763-.598 2.764-.12.53-.21.91-.508 1.152-.172.14-.37.21-.6.21-.37 0-.587-.185-.624-.537l-.007-.12.113-.712s.593-2.388.7-2.703c.002-.017.005-.026.007-.035-1.152.01-1.357 0-1.37-.018-.007.024-.037.173-.037.173l-.605 2.688-.05.23-.1.746c0 .22.042.4.13.553.275.485 1.06.557 1.504.557.573 0 1.11-.123 1.47-.345.63-.375.797-.962.944-1.48l.067-.267s.61-2.48.716-2.803c.003-.017.006-.026.01-.035-.835.01-1.08 0-1.16-.018zM14.21 12.144c-.407-.006-.55-.006-1.03.018l-.018-.036c.042-.182.087-.363.127-.548l.06-.25c.086-.39.173-.843.184-.98.007-.084.036-.29-.2-.29-.1 0-.203.048-.307.096-.058.207-.174.79-.23 1.055-.118.558-.126.62-.178.897l-.036.037c-.42-.006-.566-.006-1.05.018l-.024-.04c.08-.332.162-.668.24-.998.203-.9.25-1.245.307-1.702l.04-.028c.47-.067.585-.08 1.097-.185l.043.047-.077.287c.086-.052.168-.104.257-.15.242-.12.51-.155.658-.155.223 0 .468.062.57.323.098.232.034.52-.094 1.084l-.066.287c-.13.627-.152.743-.225 1.174l-.05.036zM15.87 12.144c-.245 0-.405-.006-.56 0-.153 0-.303.008-.532.018l-.013-.02-.015-.02c.062-.238.097-.322.128-.406.03-.084.06-.17.115-.41.072-.315.116-.535.147-.728.033-.187.052-.346.075-.53l.02-.014.02-.018c.244-.036.4-.057.56-.082.16-.024.32-.055.574-.103l.008.023.008.022c-.047.195-.094.39-.14.588-.047.197-.094.392-.137.587-.093.414-.13.57-.152.68-.02.105-.026.163-.063.377l-.022.02-.023.017zM19.542 10.728c.143-.633.033-.928-.108-1.11-.213-.273-.59-.36-.978-.36-.235 0-.793.023-1.23.43-.312.29-.458.687-.546 1.066-.088.387-.19 1.086.447 1.344.198.085.48.108.662.108.466 0 .945-.13 1.304-.513.278-.312.405-.775.448-.965zm-1.07-.046c-.02.106-.113.503-.24.673-.086.123-.19.198-.305.198-.033 0-.235 0-.238-.3-.003-.15.027-.304.063-.47.108-.478.236-.88.56-.88.255 0 .27.298.16.78zM29.536 12.187c-.493-.004-.635-.004-1.09.015l-.03-.037c.124-.472.248-.943.358-1.42.142-.62.175-.882.223-1.244l.037-.03c.49-.07.625-.09 1.135-.186l.015.044c-.093.388-.186.777-.275 1.166-.19.816-.258 1.23-.33 1.658l-.044.035z\" fill=\"#FEFEFE\" />\n      <path d=\"M29.77 10.784c.144-.63-.432-.056-.525-.264-.14-.323-.052-.98-.62-1.2-.22-.085-.732.025-1.17.428-.31.29-.458.683-.544 1.062-.088.38-.19 1.078.444 1.328.2.085.384.11.567.103.638-.034 1.124-1.002 1.483-1.386.277-.303.326.115.368-.07zm-.974-.047c-.024.1-.117.503-.244.67-.083.117-.283.192-.397.192-.032 0-.232 0-.24-.3 0-.146.03-.3.067-.467.11-.47.235-.87.56-.87.254 0 .363.293.254.774zM22.332 12.144c-.41-.006-.55-.006-1.03.018l-.018-.036c.04-.182.087-.363.13-.548l.057-.25c.09-.39.176-.843.186-.98.008-.084.036-.29-.198-.29-.1 0-.203.048-.308.096-.057.207-.175.79-.232 1.055-.115.558-.124.62-.176.897l-.035.037c-.42-.006-.566-.006-1.05.018l-.022-.04.238-.998c.203-.9.25-1.245.307-1.702l.038-.028c.472-.067.587-.08 1.098-.185l.04.047-.073.287c.084-.052.17-.104.257-.15.24-.12.51-.155.655-.155.224 0 .47.062.575.323.095.232.03.52-.098 1.084l-.065.287c-.133.627-.154.743-.225 1.174l-.05.036zM26.32 8.756c-.07.326-.282.603-.554.736-.225.114-.498.123-.78.123h-.183l.013-.074.336-1.468.01-.076.007-.058.132.015.71.062c.275.105.388.38.31.74zM25.88 7.22l-.34.003c-.883.01-1.238.006-1.383-.012l-.037.182-.315 1.478-.793 3.288c.77-.01 1.088-.01 1.22.004l.21-1.024s.153-.644.163-.667c0 0 .047-.066.096-.092h.07c.665 0 1.417 0 2.005-.437.4-.298.675-.74.797-1.274.03-.132.054-.29.054-.446 0-.205-.04-.41-.16-.568-.3-.423-.896-.43-1.588-.433zM33.572 9.28l-.04-.043c-.502.1-.594.118-1.058.18l-.034.034-.005.023-.003-.007c-.345.803-.334.63-.615 1.26-.003-.03-.003-.048-.004-.077l-.07-1.37-.044-.043c-.53.1-.542.118-1.03.18l-.04.034-.006.056.003.007c.06.315.047.244.108.738.03.244.065.49.093.73.05.4.077.6.134 1.21-.328.55-.408.757-.722 1.238l.017.044c.478-.018.587-.018.94-.018l.08-.088c.265-.578 2.295-4.085 2.295-4.085zM16.318 9.62c.27-.19.304-.45.076-.586-.23-.137-.634-.094-.906.095-.273.186-.304.45-.075.586.228.134.633.094.905-.096z\" fill=\"#FEFEFE\" />\n      <path d=\"M31.238 13.415l-.397.684c-.124.232-.357.407-.728.41l-.632-.01.184-.618h.124c.064 0 .11-.004.148-.022.03-.01.054-.035.08-.072l.233-.373h.988z\" fill=\"#FEFEFE\" />\n    </symbol>\n\n    <symbol id=\"icon-american-express\" viewBox=\"0 0 40 24\">\n      <title>American Express</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path fill=\"#1478BE\" d=\"M6.26 12.32h2.313L7.415 9.66M27.353 9.977h-3.738v1.23h3.666v1.384h-3.675v1.385h3.821v1.005c.623-.77 1.33-1.466 2.025-2.235l.707-.77c-.934-1.004-1.87-2.08-2.804-3.075v1.077z\" />\n      <path d=\"M38.25 7h-5.605l-1.328 1.4L30.072 7H16.984l-1.017 2.416L14.877 7h-9.58L1.25 16.5h4.826l.623-1.556h1.4l.623 1.556H29.99l1.327-1.483 1.328 1.483h5.605l-4.36-4.667L38.25 7zm-17.685 8.1h-1.557V9.883L16.673 15.1h-1.33L13.01 9.883l-.084 5.217H9.73l-.623-1.556h-3.27L5.132 15.1H3.42l2.884-6.772h2.42l2.645 6.233V8.33h2.646l2.107 4.51 1.868-4.51h2.575V15.1zm14.727 0h-2.024l-2.024-2.26-2.023 2.26H22.06V8.328H29.53l1.795 2.177 2.024-2.177h2.025L32.26 11.75l3.032 3.35z\" fill=\"#1478BE\" />\n    </symbol>\n\n    <symbol id=\"icon-jcb\" viewBox=\"0 0 40 24\">\n      <title>JCB</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M33.273 2.01h.013v17.062c-.004 1.078-.513 2.103-1.372 2.746-.63.47-1.366.67-2.14.67-.437 0-4.833.026-4.855 0-.01-.01 0-.07 0-.082v-6.82c0-.04.004-.064.033-.064h5.253c.867 0 1.344-.257 1.692-.61.44-.448.574-1.162.294-1.732-.24-.488-.736-.78-1.244-.913-.158-.04-.32-.068-.483-.083-.01 0-.064 0-.07-.006-.03-.034.023-.04.038-.046.102-.033.215-.042.32-.073.532-.164.993-.547 1.137-1.105.15-.577-.05-1.194-.524-1.552-.34-.257-.768-.376-1.187-.413-.43-.038-4.774-.022-5.21-.022-.072 0-.05-.02-.05-.09V5.63c0-.31.01-.616.073-.92.126-.592.41-1.144.815-1.59.558-.615 1.337-1.01 2.16-1.093.478-.048 4.89-.017 5.305-.017zm-4.06 8.616c.06.272-.01.567-.204.77-.173.176-.407.25-.648.253-.195.003-1.725 0-1.788 0l.003-1.645c.012-.027.02-.018.06-.018.097 0 1.713-.004 1.823.005.232.02.45.12.598.306.076.096.128.208.155.328zm-2.636 2.038h1.944c.242.002.47.063.652.228.226.204.327.515.283.815-.04.263-.194.5-.422.634-.187.112-.39.125-.6.125h-1.857v-1.8z\" fill=\"#53B230\" />\n      <path d=\"M6.574 13.89c-.06-.03-.06-.018-.07-.06-.006-.026-.005-8.365.003-8.558.04-.95.487-1.857 1.21-2.47.517-.434 1.16-.71 1.83-.778.396-.04.803-.018 1.2-.018.69 0 4.11-.013 4.12 0 .008.008.002 16.758 0 17.074-.003.956-.403 1.878-1.105 2.523-.506.465-1.15.77-1.83.86-.41.056-5.02.032-5.363.032-.066 0-.054.013-.066-.024-.01-.025 0-7 0-7.17.66.178 1.35.28 2.03.348.662.067 1.33.093 1.993.062.93-.044 1.947-.192 2.712-.762.32-.238.574-.553.73-.922.148-.353.2-.736.2-1.117 0-.348.006-3.93-.016-3.942-.023-.014-2.885-.015-2.9.012-.012.022 0 3.87 0 3.95-.003.47-.16.933-.514 1.252-.468.42-1.11.47-1.707.423-.687-.055-1.357-.245-1.993-.508-.157-.065-.312-.135-.466-.208z\" fill=\"#006CB9\" />\n      <path d=\"M15.95 9.835c-.025.02-.05.04-.072.06V6.05c0-.295-.012-.594.01-.888.12-1.593 1.373-2.923 2.944-3.126.382-.05 5.397-.042 5.41-.026.01.01 0 .062 0 .074v16.957c0 1.304-.725 2.52-1.89 3.1-.504.25-1.045.35-1.605.35-.322 0-4.757.015-4.834 0-.05-.01-.023.01-.035-.02-.007-.022 0-6.548 0-7.44v-.422c.554.48 1.256.75 1.96.908.536.12 1.084.176 1.63.196.537.02 1.076.01 1.61-.037.546-.05 1.088-.136 1.625-.244.137-.028.274-.057.41-.09.033-.006.17-.017.187-.044.013-.02 0-.097 0-.12v-1.324c-.582.292-1.19.525-1.83.652-.778.155-1.64.198-2.385-.123-.752-.326-1.2-1.024-1.274-1.837-.076-.837.173-1.716.883-2.212.736-.513 1.7-.517 2.553-.38.634.1 1.245.305 1.825.58.078.037.154.075.23.113V9.322c0-.02.013-.1 0-.118-.02-.028-.152-.038-.188-.046-.066-.016-.133-.03-.2-.045C22.38 9 21.84 8.908 21.3 8.85c-.533-.06-1.068-.077-1.603-.066-.542.01-1.086.054-1.62.154-.662.125-1.32.337-1.883.716-.085.056-.167.117-.245.18z\" fill=\"#E20138\" />\n    </symbol>\n\n    <symbol id=\"icon-discover\" viewBox=\"0 0 40 24\">\n      <title>Discover</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M38.995 11.75S27.522 20.1 6.5 23.5h31.495c.552 0 1-.448 1-1V11.75z\" fill=\"#F48024\" />\n      <path d=\"M5.332 11.758c-.338.305-.776.438-1.47.438h-.29V8.55h.29c.694 0 1.115.124 1.47.446.37.33.595.844.595 1.372 0 .53-.224 1.06-.595 1.39zM4.077 7.615H2.5v5.515h1.57c.833 0 1.435-.197 1.963-.637.63-.52 1-1.305 1-2.116 0-1.628-1.214-2.762-2.956-2.762zM7.53 13.13h1.074V7.616H7.53M11.227 9.732c-.645-.24-.834-.397-.834-.695 0-.347.338-.61.8-.61.322 0 .587.132.867.446l.562-.737c-.462-.405-1.015-.612-1.618-.612-.975 0-1.718.678-1.718 1.58 0 .76.346 1.15 1.355 1.513.42.148.635.247.743.314.215.14.322.34.322.57 0 .448-.354.78-.834.78-.51 0-.924-.258-1.17-.736l-.695.67c.495.726 1.09 1.05 1.907 1.05 1.116 0 1.9-.745 1.9-1.812 0-.876-.363-1.273-1.585-1.72zM13.15 10.377c0 1.62 1.27 2.877 2.907 2.877.462 0 .858-.09 1.347-.32v-1.267c-.43.43-.81.604-1.297.604-1.082 0-1.85-.785-1.85-1.9 0-1.06.792-1.895 1.8-1.895.512 0 .9.183 1.347.62V7.83c-.472-.24-.86-.34-1.322-.34-1.627 0-2.932 1.283-2.932 2.887zM25.922 11.32l-1.468-3.705H23.28l2.337 5.656h.578l2.38-5.655H27.41M29.06 13.13h3.046v-.934h-1.973v-1.488h1.9v-.934h-1.9V8.55h1.973v-.935H29.06M34.207 10.154h-.314v-1.67h.33c.67 0 1.034.28 1.034.818 0 .554-.364.852-1.05.852zm2.155-.91c0-1.033-.71-1.628-1.95-1.628H32.82v5.514h1.073v-2.215h.14l1.487 2.215h1.32l-1.733-2.323c.81-.165 1.255-.72 1.255-1.563z\" fill=\"#221F20\" />\n      <path d=\"M23.6 10.377c0 1.62-1.31 2.93-2.927 2.93-1.617.002-2.928-1.31-2.928-2.93s1.31-2.932 2.928-2.932c1.618 0 2.928 1.312 2.928 2.932z\" fill=\"#F48024\" />\n    </symbol>\n\n    <symbol id=\"icon-diners-club\" viewBox=\"0 0 40 24\">\n      <title>Diners Club</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M9.02 11.83c0-5.456 4.54-9.88 10.14-9.88 5.6 0 10.139 4.424 10.139 9.88-.002 5.456-4.54 9.88-10.14 9.88-5.6 0-10.14-4.424-10.14-9.88z\" fill=\"#FEFEFE\" />\n      <path fill=\"#FFF\" d=\"M32.522 22H8.5V1.5h24.022\" />\n      <path d=\"M25.02 11.732c-.003-2.534-1.607-4.695-3.868-5.55v11.102c2.26-.857 3.865-3.017 3.87-5.552zm-8.182 5.55V6.18c-2.26.86-3.86 3.017-3.867 5.55.007 2.533 1.61 4.69 3.868 5.55zm2.158-14.934c-5.25.002-9.503 4.202-9.504 9.384 0 5.182 4.254 9.38 9.504 9.382 5.25 0 9.504-4.2 9.505-9.382 0-5.182-4.254-9.382-9.504-9.384zM18.973 22C13.228 22.027 8.5 17.432 8.5 11.84 8.5 5.726 13.228 1.5 18.973 1.5h2.692c5.677 0 10.857 4.225 10.857 10.34 0 5.59-5.18 10.16-10.857 10.16h-2.692z\" fill=\"#004A97\" />\n    </symbol>\n\n    <symbol id=\"icon-maestro\" viewBox=\"0 0 40 24\">\n      <title>Maestro</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" fill=\"#FFF\" />\n      <path d=\"M14.67 22.39V21c.022-.465-.303-.86-.767-.882h-.116c-.3-.023-.603.14-.788.394-.164-.255-.442-.417-.743-.394-.256-.023-.51.116-.65.324v-.278h-.487v2.203h.487v-1.183c-.046-.278.162-.533.44-.58h.094c.325 0 .488.21.488.58v1.23h.487v-1.23c-.047-.278.162-.556.44-.58h.093c.325 0 .487.21.487.58v1.23l.534-.024zm2.712-1.09v-1.113h-.487v.28c-.162-.21-.417-.326-.695-.326-.65 0-1.16.51-1.16 1.16 0 .65.51 1.16 1.16 1.16.278 0 .533-.117.695-.325v.278h.487V21.3zm-1.786 0c.024-.37.348-.65.72-.626.37.023.65.348.626.72-.023.347-.302.625-.673.625-.372 0-.674-.28-.674-.65-.023-.047-.023-.047 0-.07zm12.085-1.16c.163 0 .325.024.465.094.14.046.278.14.37.255.117.115.186.23.256.37.117.3.117.626 0 .927-.046.14-.138.255-.254.37-.116.117-.232.186-.37.256-.303.116-.65.116-.952 0-.14-.046-.28-.14-.37-.255-.118-.116-.187-.232-.257-.37-.116-.302-.116-.627 0-.928.047-.14.14-.255.256-.37.115-.117.23-.187.37-.256.163-.07.325-.116.488-.093zm0 .465c-.092 0-.185.023-.278.046-.092.024-.162.094-.232.14-.07.07-.116.14-.14.232-.068.185-.068.394 0 .58.024.092.094.162.14.23.07.07.14.117.232.14.186.07.37.07.557 0 .092-.023.16-.092.23-.14.07-.068.117-.138.14-.23.07-.186.07-.395 0-.58-.023-.093-.093-.162-.14-.232-.07-.07-.138-.116-.23-.14-.094-.045-.187-.07-.28-.045zm-7.677.695c0-.695-.44-1.16-1.043-1.16-.65 0-1.16.534-1.137 1.183.023.65.534 1.16 1.183 1.136.325 0 .65-.093.905-.302l-.23-.348c-.187.14-.42.232-.65.232-.326.023-.627-.21-.673-.533h1.646v-.21zm-1.646-.21c.023-.3.278-.532.58-.532.3 0 .556.232.556.533h-1.136zm3.664-.346c-.207-.116-.44-.186-.695-.186-.255 0-.417.093-.417.255 0 .163.162.186.37.21l.233.022c.488.07.766.278.766.672 0 .395-.37.72-1.02.72-.348 0-.673-.094-.95-.28l.23-.37c.21.162.465.232.743.232.324 0 .51-.094.51-.28 0-.115-.117-.185-.395-.23l-.232-.024c-.487-.07-.765-.302-.765-.65 0-.44.37-.718.927-.718.325 0 .627.07.905.232l-.21.394zm2.32-.116h-.788v.997c0 .23.07.37.325.37.14 0 .3-.046.417-.115l.14.417c-.186.116-.395.162-.604.162-.58 0-.765-.302-.765-.812v-1.02h-.44v-.44h.44v-.673h.487v.672h.79v.44zm1.67-.51c.117 0 .233.023.35.07l-.14.463c-.093-.045-.21-.045-.302-.045-.325 0-.464.208-.464.58v1.25h-.487v-2.2h.487v.277c.116-.255.325-.37.557-.394z\" fill=\"#000\" />\n      <path fill=\"#7673C0\" d=\"M23.64 3.287h-7.305V16.41h7.306\" />\n      <path d=\"M16.8 9.848c0-2.55 1.183-4.985 3.2-6.56C16.384.435 11.12 1.06 8.29 4.7 5.435 8.32 6.06 13.58 9.703 16.41c3.038 2.387 7.283 2.387 10.32 0-2.04-1.578-3.223-3.99-3.223-6.562z\" fill=\"#EB001B\" />\n      <path d=\"M33.5 9.848c0 4.613-3.735 8.346-8.35 8.346-1.88 0-3.69-.626-5.15-1.785 3.618-2.83 4.245-8.092 1.415-11.71-.418-.532-.882-.996-1.415-1.413C23.618.437 28.883 1.06 31.736 4.7 32.873 6.163 33.5 7.994 33.5 9.85z\" fill=\"#00A1DF\" />\n    </symbol>\n\n    <symbol id=\"icon-elo\" viewBox=\"0 0 48 29\">\n      <title>Elo</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" fill=\"#FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" fill=\"#828282\" />\n      <rect fill=\"#828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect fill=\"#828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" fill=\"#828282\" />\n      <ellipse fill=\"#828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"icon-hiper\" viewBox=\"0 0 48 29\">\n      <title>Hiper</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" fill=\"#FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" fill=\"#828282\" />\n      <rect fill=\"#828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect fill=\"#828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" fill=\"#828282\" />\n      <ellipse fill=\"#828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"icon-hipercard\" viewBox=\"0 0 48 29\">\n      <title>Hipercard</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" fill=\"#FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" fill=\"#828282\" />\n      <rect fill=\"#828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect fill=\"#828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" fill=\"#828282\" />\n      <ellipse fill=\"#828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"logoPayPal\" viewBox=\"0 0 48 29\">\n      <title>PayPal Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" fill=\"#FFF\" />\n      <path d=\"M31.216 16.4c.394-.7.69-1.5.886-2.4.196-.8.196-1.6.1-2.2-.1-.7-.396-1.2-.79-1.7-.195-.3-.59-.5-.885-.7.1-.8.1-1.5 0-2.1-.1-.6-.394-1.1-.886-1.6-.885-1-2.56-1.6-4.922-1.6h-6.4c-.492 0-.787.3-.886.8l-2.658 17.2c0 .2 0 .3.1.4.097.1.294.2.393.2h4.036l-.295 1.8c0 .1 0 .3.1.4.098.1.195.2.393.2h3.35c.393 0 .688-.3.786-.7v-.2l.59-4.1v-.2c.1-.4.395-.7.788-.7h.59c1.675 0 3.152-.4 4.137-1.1.59-.5 1.083-1 1.478-1.7h-.002z\" fill=\"#263B80\" />\n      <path d=\"M21.364 9.4c0-.3.196-.5.492-.6.098-.1.196-.1.394-.1h5.02c.592 0 1.183 0 1.675.1.1 0 .295.1.394.1.098 0 .294.1.393.1.1 0 .1 0 .197.102.295.1.492.2.69.3.295-1.6 0-2.7-.887-3.8-.985-1.1-2.658-1.6-4.923-1.6h-6.4c-.49 0-.885.3-.885.8l-2.758 17.3c-.098.3.197.6.59.6h3.94l.985-6.4 1.083-6.9z\" fill=\"#263B80\" />\n      <path d=\"M30.523 9.4c0 .1 0 .3-.098.4-.887 4.4-3.742 5.9-7.484 5.9h-1.87c-.492 0-.787.3-.886.8l-.985 6.2-.296 1.8c0 .3.196.6.492.6h3.348c.394 0 .69-.3.787-.7v-.2l.592-4.1v-.2c.1-.4.394-.7.787-.7h.69c3.248 0 5.808-1.3 6.497-5.2.296-1.6.197-3-.69-3.9-.196-.3-.49-.5-.885-.7z\" fill=\"#159BD7\" />\n      <path d=\"M29.635 9c-.098 0-.295-.1-.394-.1-.098 0-.294-.1-.393-.1-.492-.102-1.083-.102-1.673-.102h-5.022c-.1 0-.197 0-.394.1-.198.1-.394.3-.492.6l-1.083 6.9v.2c.1-.5.492-.8.886-.8h1.87c3.742 0 6.598-1.5 7.484-5.9 0-.1 0-.3.098-.4-.196-.1-.492-.2-.69-.3 0-.1-.098-.1-.196-.1z\" fill=\"#232C65\" />\n    </symbol>\n\n    <symbol id=\"logoPayPalCredit\" viewBox=\"0 0 48 29\">\n      <title>PayPal Credit Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" fill=\"#FFF\" fill-rule=\"nonzero\" />\n      <path d=\"M27.44 21.6h.518c1.377 0 2.67-.754 2.953-2.484.248-1.588-.658-2.482-2.14-2.482h-.38c-.093 0-.172.067-.187.16l-.763 4.805zm-1.254-6.646c.024-.158.16-.273.32-.273h2.993c2.47 0 4.2 1.942 3.81 4.436-.4 2.495-2.752 4.436-5.21 4.436h-3.05c-.116 0-.205-.104-.187-.218l1.323-8.38zM22.308 16.907l-.192 1.21h2.38c.116 0 .204.103.186.217l-.23 1.462c-.023.157-.16.273-.318.273h-2.048c-.16 0-.294.114-.32.27l-.203 1.26h2.52c.117 0 .205.102.187.217l-.228 1.46c-.025.16-.16.275-.32.275h-4.55c-.116 0-.204-.104-.186-.218l1.322-8.38c.025-.158.16-.273.32-.273h4.55c.116 0 .205.104.187.22l-.23 1.46c-.024.158-.16.274-.32.274H22.63c-.16 0-.295.115-.32.273M35.325 23.552h-1.81c-.115 0-.203-.104-.185-.218l1.322-8.38c.025-.158.16-.273.32-.273h1.81c.115 0 .203.104.185.22l-1.322 8.38c-.025.156-.16.272-.32.272M14.397 18.657h.224c.754 0 1.62-.14 1.777-1.106.158-.963-.345-1.102-1.15-1.104h-.326c-.097 0-.18.07-.197.168l-.326 2.043zm3.96 4.895h-2.37c-.102 0-.194-.058-.238-.15l-1.565-3.262h-.023l-.506 3.19c-.02.128-.13.222-.26.222h-1.86c-.116 0-.205-.104-.187-.218l1.33-8.432c.02-.128.13-.22.26-.22h3.222c1.753 0 2.953.834 2.66 2.728-.2 1.224-1.048 2.283-2.342 2.506l2.037 3.35c.076.125-.014.286-.16.286zM40.216 23.552h-1.808c-.116 0-.205-.104-.187-.218l1.06-6.7h-1.684c-.116 0-.205-.104-.187-.218l.228-1.462c.025-.157.16-.273.32-.273h5.62c.116 0 .205.104.186.22l-.228 1.46c-.025.158-.16.274-.32.274h-1.63l-1.05 6.645c-.025.156-.16.272-.32.272M11.467 17.202c-.027.164-.228.223-.345.104-.395-.405-.975-.62-1.6-.62-1.41 0-2.526 1.083-2.75 2.458-.21 1.4.588 2.41 2.022 2.41.592 0 1.22-.225 1.74-.6.144-.105.34.02.313.194l-.328 2.03c-.02.12-.108.22-.226.254-.702.207-1.24.355-1.9.355-3.823 0-4.435-3.266-4.238-4.655.553-3.894 3.712-4.786 5.65-4.678.623.034 1.182.117 1.73.323.177.067.282.25.252.436l-.32 1.99\" fill=\"#21306F\" />\n      <path d=\"M23.184 7.67c-.11.717-.657.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.105.123.137.305.097.557zm-.23-1.87h-1.998c-.137 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h1.024c.095 0 .177-.07.192-.164l.23-1.452c.02-.135.136-.235.273-.235h.63c1.317 0 2.076-.636 2.275-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51z\" fill=\"#0093C7\" />\n      <path d=\"M8.936 7.67c-.11.717-.656.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.104.123.136.305.096.557zm-.23-1.87H6.708c-.136 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h.955c.136 0 .252-.1.274-.234l.217-1.382c.02-.135.137-.235.274-.235h.633c1.316 0 2.075-.636 2.274-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51zM13.343 9.51c-.092.545-.526.912-1.08.912-.277 0-.5-.09-.642-.258-.14-.168-.193-.406-.148-.672.086-.542.527-.92 1.072-.92.27 0 .492.09.637.26.148.172.205.412.163.677zm1.334-1.863h-.957c-.082 0-.152.06-.164.14l-.042.268-.067-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.135 1.923-.092.56.038 1.097.356 1.47.29.344.708.487 1.204.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.017-.102-.06-.193-.163-.193z\" fill=\"#21306F\" />\n      <path d=\"M27.59 9.51c-.09.545-.525.912-1.078.912-.278 0-.5-.09-.643-.258-.142-.168-.195-.406-.15-.672.086-.542.526-.92 1.07-.92.273 0 .494.09.64.26.146.172.203.412.16.677zm1.334-1.863h-.956c-.082 0-.152.06-.164.14l-.043.268-.065-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.136 1.923-.092.56.038 1.097.355 1.47.292.344.71.487 1.205.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.015-.102-.063-.193-.166-.193z\" fill=\"#0093C7\" />\n      <path d=\"M19.77 7.647h-.96c-.092 0-.178.045-.23.122L17.254 9.72l-.562-1.877c-.035-.118-.143-.198-.266-.198h-.945c-.113 0-.194.112-.157.22l1.06 3.108-.997 1.404c-.078.11 0 .262.136.262h.96c.092 0 .177-.044.23-.12l3.196-4.614c.077-.11-.002-.26-.137-.26\" fill=\"#21306F\" />\n      <path d=\"M30.052 5.94l-.82 5.216c-.016.1.062.192.165.192h.824c.138 0 .254-.1.275-.234l.81-5.122c.015-.1-.064-.193-.166-.193h-.924c-.082 0-.15.06-.164.14\" fill=\"#0093C7\" />\n    </symbol>\n\n    <symbol id=\"iconCardFront\" viewBox=\"0 0 48 29\">\n      <title>Generic Card</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" fill=\"#FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" fill=\"#828282\" />\n      <rect fill=\"#828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect fill=\"#828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" fill=\"#828282\" />\n      <ellipse fill=\"#828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"iconCVVBack\" viewBox=\"0 0 40 24\">\n      <title>CVV Back</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" fill=\"#FFF\"/>\n      <path fill=\"#828282\" d=\"M0 5h40v4H0z\" />\n      <path d=\"M20 13.772v5.456c0 .423.37.772.82.772h13.36c.45 0 .82-.35.82-.772v-5.456c0-.423-.37-.772-.82-.772H20.82c-.45 0-.82.35-.82.772zm-1-.142c0-.9.76-1.63 1.68-1.63h13.64c.928 0 1.68.737 1.68 1.63v5.74c0 .9-.76 1.63-1.68 1.63H20.68c-.928 0-1.68-.737-1.68-1.63v-5.74z\" fill=\"#000\" fill-rule=\"nonzero\" />\n      <circle fill=\"#828282\" cx=\"23.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"27.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"31.5\" cy=\"16.5\" r=\"1.5\" />\n    </symbol>\n\n    <symbol id=\"iconCVVFront\" viewBox=\"0 0 40 24\">\n      <title>CVV Front</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" fill=\"#FFF\" />\n      <path d=\"M16 5.772v5.456c0 .423.366.772.81.772h17.38c.444 0 .81-.348.81-.772V5.772C35 5.35 34.634 5 34.19 5H16.81c-.444 0-.81.348-.81.772zm-1-.142c0-.9.75-1.63 1.66-1.63h17.68c.917 0 1.66.737 1.66 1.63v5.74c0 .9-.75 1.63-1.66 1.63H16.66c-.917 0-1.66-.737-1.66-1.63V5.63z\" fill=\"#000\" fill-rule=\"nonzero\" />\n      <circle fill=\"#828282\" cx=\"19.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"27.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"23.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle fill=\"#828282\" cx=\"31.5\" cy=\"8.5\" r=\"1.5\" />\n      <path d=\"M4 7.833C4 7.47 4.476 7 4.89 7h6.22c.414 0 .89.47.89.833v3.334c0 .364-.476.833-.89.833H4.89c-.414 0-.89-.47-.89-.833V7.833zM4 18.5c0-.828.668-1.5 1.5-1.5h29c.828 0 1.5.666 1.5 1.5 0 .828-.668 1.5-1.5 1.5h-29c-.828 0-1.5-.666-1.5-1.5z\" fill=\"#828282\" />\n    </symbol>\n\n    <symbol id=\"iconCheck\" viewBox=\"0 0 42 32\">\n      <title>Check</title>\n      <path class=\"path1\" d=\"M14.379 29.76L39.741 3.415 36.194.001l-21.815 22.79-10.86-11.17L0 15.064z\" />\n    </symbol>\n\n    <symbol id=\"iconX\" viewBox=\"0 0 32 32\">\n      <title>X</title>\n      <path d=\"M29 3.54L25.46 0 14.5 10.97 3.54 0.01 0 3.54 10.96 14.5 0.01 25.46 3.54 28.99 14.5 18.04 25.46 29 28.99 25.46 18.03 14.5 29 3.54z\"/>\n    </symbol>\n\n    <symbol id=\"iconLockLoader\" viewBox=\"0 0 28 32\">\n      <title>Lock Loader</title>\n      <path d=\"M6 10V8c0-4.422 3.582-8 8-8 4.41 0 8 3.582 8 8v2h-4V7.995C18 5.79 16.205 4 14 4c-2.21 0-4 1.792-4 3.995V10H6zM.997 14c-.55 0-.997.445-.997.993v16.014c0 .548.44.993.997.993h26.006c.55 0 .997-.445.997-.993V14.993c0-.548-.44-.993-.997-.993H.997z\" />\n    </symbol>\n\n    <symbol id=\"iconError\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\n      <path d=\"M0 0h24v24H0z\" fill=\"none\" />\n      <path d=\"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z\" />\n    </symbol>\n\n    <symbol id=\"logoApplePay\" viewBox=\"0 0 165.52 105.97\">\n      <title>Apple Pay Logo</title>\n      <path id=\"_Path_\" data-name=\"&lt;Path&gt;\" fill=\"#231f20\" d=\"M150.7 0h-139a20.78 20.78 0 0 0-3.12.3 10.51 10.51 0 0 0-3 1 9.94 9.94 0 0 0-4.31 4.32 10.46 10.46 0 0 0-1 3A20.65 20.65 0 0 0 0 11.7v82.57a20.64 20.64 0 0 0 .3 3.11 10.46 10.46 0 0 0 1 3 9.94 9.94 0 0 0 4.35 4.35 10.47 10.47 0 0 0 3 1 20.94 20.94 0 0 0 3.11.27h142.06a21 21 0 0 0 3.11-.27 10.48 10.48 0 0 0 3-1 9.94 9.94 0 0 0 4.35-4.35 10.4 10.4 0 0 0 1-3 20.63 20.63 0 0 0 .27-3.11V11.69a20.64 20.64 0 0 0-.27-3.11 10.4 10.4 0 0 0-1-3 9.94 9.94 0 0 0-4.35-4.35 10.52 10.52 0 0 0-3-1 20.84 20.84 0 0 0-3.1-.23h-1.43z\"/>\n      <path id=\"_Path_2\" data-name=\"&lt;Path&gt;\" fill=\"#fff\" d=\"M150.7 3.53h3.03a17.66 17.66 0 0 1 2.58.22 7 7 0 0 1 2 .65 6.41 6.41 0 0 1 2.8 2.81 6.88 6.88 0 0 1 .64 2 17.56 17.56 0 0 1 .22 2.58v82.38a17.54 17.54 0 0 1-.22 2.59 6.85 6.85 0 0 1-.64 2 6.41 6.41 0 0 1-2.81 2.81 6.92 6.92 0 0 1-2 .65 18 18 0 0 1-2.57.22H11.79a18 18 0 0 1-2.58-.22 6.94 6.94 0 0 1-2-.65 6.41 6.41 0 0 1-2.8-2.8 6.93 6.93 0 0 1-.65-2 17.47 17.47 0 0 1-.22-2.58v-82.4a17.49 17.49 0 0 1 .22-2.59 6.92 6.92 0 0 1 .65-2 6.41 6.41 0 0 1 2.8-2.8 7 7 0 0 1 2-.65 17.63 17.63 0 0 1 2.58-.22H150.7\"/>\n      <g id=\"_Group_\" data-name=\"&lt;Group&gt;\">\n      <g id=\"_Group_2\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Path_3\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M43.51 35.77a9.15 9.15 0 0 0 2.1-6.52 9.07 9.07 0 0 0-6 3.11 8.56 8.56 0 0 0-2.16 6.27 7.57 7.57 0 0 0 6.06-2.86\"/>\n      <path id=\"_Path_4\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M45.59 39.08c-3.35-.2-6.2 1.9-7.79 1.9s-4-1.8-6.7-1.75a9.87 9.87 0 0 0-8.4 5.1c-3.6 6.2-.95 15.4 2.55 20.45 1.7 2.5 3.75 5.25 6.45 5.15s3.55-1.65 6.65-1.65 4 1.65 6.7 1.6 4.55-2.5 6.25-5a22.2 22.2 0 0 0 2.8-5.75 9.08 9.08 0 0 1-5.45-8.25A9.26 9.26 0 0 1 53 43.13a9.57 9.57 0 0 0-7.45-4\"/>\n      </g>\n      <g id=\"_Group_3\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Compound_Path_\" data-name=\"&lt;Compound Path&gt;\" fill=\"#231f20\" d=\"M79 32.11c7.28 0 12.35 5 12.35 12.32S86.15 56.8 78.79 56.8h-8.06v12.82h-5.82V32.11zm-8.27 19.81h6.68c5.07 0 8-2.73 8-7.46S82.48 37 77.44 37h-6.71z\"/>\n      <path id=\"_Compound_Path_2\" data-name=\"&lt;Compound Path&gt;\" fill=\"#231f20\" d=\"M92.76 61.85c0-4.81 3.67-7.56 10.42-8l7.25-.44v-2.06c0-3-2-4.7-5.56-4.7-2.94 0-5.07 1.51-5.51 3.82h-5.24c.16-4.86 4.73-8.4 10.92-8.4 6.65 0 11 3.48 11 8.89v18.66h-5.38v-4.5h-.13a9.59 9.59 0 0 1-8.58 4.78c-5.42 0-9.19-3.22-9.19-8.05zm17.68-2.42v-2.11l-6.47.42c-3.64.23-5.54 1.59-5.54 4s2 3.77 5.07 3.77c3.95-.05 6.94-2.57 6.94-6.08z\"/>\n      <path id=\"_Compound_Path_3\" data-name=\"&lt;Compound Path&gt;\" fill=\"#231f20\" d=\"M121 79.65v-4.5a17.14 17.14 0 0 0 1.72.1c2.57 0 4-1.09 4.91-3.9l.52-1.66-9.88-27.29h6.08l6.86 22.15h.13l6.86-22.15h5.93l-10.21 28.67c-2.34 6.58-5 8.73-10.68 8.73a15.93 15.93 0 0 1-2.24-.15z\"/>\n      </g>\n      </g>\n    </symbol>\n    <symbol id=\"logoGooglePay\" viewbox=\"0 0 752 400\" >\n      <g>\n        <title>Google Pay Mark</title>\n        <path d=\"m552.7,0l-352,0c-110,0 -200,90 -200,200l0,0c0,110 90,200 200,200l352,0c110,0 200,-90 200,-200l0,0c0,-110 -90,-200 -200,-200z\" fill=\"#FFFFFF\" id=\"Base_1_\"/>\n        <path d=\"m552.7,16.2c24.7,0 48.7,4.9 71.3,14.5c21.9,9.3 41.5,22.6 58.5,39.5c16.9,16.9 30.2,36.6 39.5,58.5c9.6,22.6 14.5,46.6 14.5,71.3s-4.9,48.7 -14.5,71.3c-9.3,21.9 -22.6,41.5 -39.5,58.5c-16.9,16.9 -36.6,30.2 -58.5,39.5c-22.6,9.6 -46.6,14.5 -71.3,14.5l-352,0c-24.7,0 -48.7,-4.9 -71.3,-14.5c-21.9,-9.3 -41.5,-22.6 -58.5,-39.5c-16.9,-16.9 -30.2,-36.6 -39.5,-58.5c-9.6,-22.6 -14.5,-46.6 -14.5,-71.3s4.9,-48.7 14.5,-71.3c9.3,-21.9 22.6,-41.5 39.5,-58.5c16.9,-16.9 36.6,-30.2 58.5,-39.5c22.6,-9.6 46.6,-14.5 71.3,-14.5l352,0m0,-16.2l-352,0c-110,0 -200,90 -200,200l0,0c0,110 90,200 200,200l352,0c110,0 200,-90 200,-200l0,0c0,-110 -90,-200 -200,-200l0,0z\" fill=\"#3C4043\" id=\"Outline\"/>\n        <g id=\"G_Pay_Lockup_1_\">\n         <g id=\"Pay_Typeface_3_\">\n          <path d=\"m359.3,214.2l0,60.5l-19.2,0l0,-149.4l50.9,0c12.9,0 23.9,4.3 32.9,12.9c9.2,8.6 13.8,19.1 13.8,31.5c0,12.7 -4.6,23.2 -13.8,31.7c-8.9,8.5 -19.9,12.7 -32.9,12.7l-31.7,0l0,0.1zm0,-70.5l0,52.1l32.1,0c7.6,0 14,-2.6 19,-7.7c5.1,-5.1 7.7,-11.3 7.7,-18.3c0,-6.9 -2.6,-13 -7.7,-18.1c-5,-5.3 -11.3,-7.9 -19,-7.9l-32.1,0l0,-0.1z\" fill=\"#3C4043\" id=\"Letter_p_3_\"/>\n          <path d=\"m487.9,169.1c14.2,0 25.4,3.8 33.6,11.4c8.2,7.6 12.3,18 12.3,31.2l0,63l-18.3,0l0,-14.2l-0.8,0c-7.9,11.7 -18.5,17.5 -31.7,17.5c-11.3,0 -20.7,-3.3 -28.3,-10s-11.4,-15 -11.4,-25c0,-10.6 4,-19 12,-25.2c8,-6.3 18.7,-9.4 32,-9.4c11.4,0 20.8,2.1 28.1,6.3l0,-4.4c0,-6.7 -2.6,-12.3 -7.9,-17c-5.3,-4.7 -11.5,-7 -18.6,-7c-10.7,0 -19.2,4.5 -25.4,13.6l-16.9,-10.6c9.3,-13.5 23.1,-20.2 41.3,-20.2zm-24.8,74.2c0,5 2.1,9.2 6.4,12.5c4.2,3.3 9.2,5 14.9,5c8.1,0 15.3,-3 21.6,-9s9.5,-13 9.5,-21.1c-6,-4.7 -14.3,-7.1 -25,-7.1c-7.8,0 -14.3,1.9 -19.5,5.6c-5.3,3.9 -7.9,8.6 -7.9,14.1z\" fill=\"#3C4043\" id=\"Letter_a_3_\"/>\n          <path d=\"m638.2,172.4l-64,147.2l-19.8,0l23.8,-51.5l-42.2,-95.7l20.9,0l30.4,73.4l0.4,0l29.6,-73.4l20.9,0z\" fill=\"#3C4043\" id=\"Letter_y_3_\"/>\n         </g>\n         <g id=\"G_Mark_1_\">\n          <path d=\"m282.93,202c0,-6.26 -0.56,-12.25 -1.6,-18.01l-80.48,0l0,33l46.35,0.01c-1.88,10.98 -7.93,20.34 -17.2,26.58l0,21.41l27.59,0c16.11,-14.91 25.34,-36.95 25.34,-62.99z\" fill=\"#4285F4\" id=\"Blue_500\"/>\n          <path d=\"m230.01,243.58c-7.68,5.18 -17.57,8.21 -29.14,8.21c-22.35,0 -41.31,-15.06 -48.1,-35.36l-28.46,0l0,22.08c14.1,27.98 43.08,47.18 76.56,47.18c23.14,0 42.58,-7.61 56.73,-20.71l-27.59,-21.4z\" fill=\"#34A853\" id=\"Green_500_1_\"/>\n          <path d=\"m150.09,200.05c0,-5.7 0.95,-11.21 2.68,-16.39l0,-22.08l-28.46,0c-5.83,11.57 -9.11,24.63 -9.11,38.47s3.29,26.9 9.11,38.47l28.46,-22.08c-1.73,-5.18 -2.68,-10.69 -2.68,-16.39z\" fill=\"#FABB05\" id=\"Yellow_500_1_\"/>\n          <path d=\"m200.87,148.3c12.63,0 23.94,4.35 32.87,12.85l24.45,-24.43c-14.85,-13.83 -34.21,-22.32 -57.32,-22.32c-33.47,0 -62.46,19.2 -76.56,47.18l28.46,22.08c6.79,-20.3 25.75,-35.36 48.1,-35.36z\" fill=\"#E94235\" id=\"Red_500\"/>\n         </g>\n        </g>\n       </g>\n    </symbol>\n\n    <symbol id=\"logoVenmo\" viewBox=\"0 0 48 32\">\n      <title>Venmo</title>\n      <g fill=\"none\" fill-rule=\"evenodd\">\n        <rect fill=\"#3D95CE\" width=\"47.4074074\" height=\"31.6049383\" rx=\"3.16049383\"/>\n        <path d=\"M33.1851852,10.1131555 C33.1851852,14.8373944 29.2425262,20.9745161 26.0425868,25.2839506 L18.7337285,25.2839506 L15.8024691,7.35534396 L22.202175,6.73384536 L23.7519727,19.4912014 C25.2000422,17.0781163 26.9870326,13.2859484 26.9870326,10.7005 C26.9870326,9.28531656 26.7500128,8.32139205 26.3796046,7.52770719 L32.207522,6.32098765 C32.8813847,7.45939896 33.1851852,8.63196439 33.1851852,10.1131555 Z\" fill=\"#FFF\"/>\n      </g>\n    </symbol>\n    <symbol id=\"buttonVenmo\" viewBox=\"0 0 295 42\">\n      <g fill=\"none\" fill-rule=\"evenodd\">\n        <rect fill=\"#3D95CE\" width=\"295\" height=\"42\" rx=\"3\"/>\n        <path d=\"M11.3250791 0C11.7902741.780434316 12 1.58428287 12 2.59970884 12 5.838396 9.27822123 10.0456806 7.06917212 13L2.02356829 13 0 .709099732 4.41797878.283033306 5.48786751 9.02879887C6.48752911 7.3745159 7.72116169 4.77480706 7.72116169 3.00236102 7.72116169 2.03218642 7.55753727 1.37137098 7.30182933.827262801L11.3250791 0 11.3250791 0zM17.5051689 5.68512193C18.333931 5.68512193 20.4203856 5.28483546 20.4203856 4.03281548 20.4203856 3.43161451 20.0177536 3.13172102 19.5432882 3.13172102 18.7131868 3.13172102 17.6238766 4.18269796 17.5051689 5.68512193L17.5051689 5.68512193zM17.4102028 8.1647385C17.4102028 9.69351403 18.2153451 10.293301 19.2827401 10.293301 20.4451012 10.293301 21.5580312 9.99340752 23.0045601 9.21725797L22.4597224 13.1234575C21.440541 13.649203 19.8521716 14 18.310433 14 14.3996547 14 13 11.49596 13 8.36552446 13 4.30815704 15.2767521 0 19.9706358 0 22.554932 0 24 1.52864698 24 3.65720949 24.0002435 7.08869546 19.8287953 8.13992948 17.4102028 8.1647385L17.4102028 8.1647385zM37 2.84753211C37 3.32189757 36.9261179 4.00994664 36.8526108 4.45959542L35.4649774 12.9998782 30.9621694 12.9998782 32.2279161 5.1711436C32.2519185 4.95879931 32.3256755 4.53131032 32.3256755 4.29412759 32.3256755 3.72466988 31.9603904 3.5825794 31.5212232 3.5825794 30.9379171 3.5825794 30.3532359 3.84326124 29.9638234 4.03356751L28.5281854 13 24 13 26.0686989.213683657 29.9878258.213683657 30.0374555 1.23425123C30.9620444.641294408 32.1795365 3.90379019e-8 33.9069526 3.90379019e-8 36.1955476-.000243475057 37 1.1387937 37 2.84753211L37 2.84753211zM51.2981937 1.39967969C52.6582977.49918987 53.9425913 0 55.7133897 0 58.1518468 0 59 1.13900518 59 2.84769558 59 3.32204771 58.9223438 4.01007745 58.8448195 4.4597136L57.3830637 12.9997565 52.6328518 12.9997565 53.9932194 5.00577861C54.0182698 4.792101 54.0708756 4.53142648 54.0708756 4.36608506 54.0708756 3.72493046 53.6854953 3.58272222 53.2224587 3.58272222 52.6325881 3.58272222 52.0429812 3.81989829 51.6052587 4.03369766L50.0914245 12.9998782 45.3423992 12.9998782 46.7027668 5.00590037C46.7278172 4.79222275 46.7788409 4.53154824 46.7788409 4.36620681 46.7788409 3.72505221 46.3933287 3.58284398 45.9318743 3.58284398 45.3153711 3.58284398 44.7000546 3.84351849 44.2893602 4.03381941L42.7740757 13 38 13 40.1814929.214042876 44.2643098.214042876 44.3925941 1.28145692C45.3423992.641763367 46.6253743.000487014507 48.3452809.000487014507 49.8344603 0 50.8094476.593061916 51.2981937 1.39967969L51.2981937 1.39967969zM67.5285327 5.39061542C67.5285327 4.29258876 67.2694573 3.54396333 66.4936812 3.54396333 64.7759775 3.54396333 64.4232531 6.76273249 64.4232531 8.4093242 64.4232531 9.65848482 64.7530184 10.4315735 65.5285529 10.4315735 67.1521242 10.4315735 67.5285327 7.03707905 67.5285327 5.39061542L67.5285327 5.39061542zM60 8.21054461C60 3.96893154 62.1170713 0 66.988027 0 70.6583423 0 72 2.29633967 72 5.46592624 72 9.65835674 69.905767 14 64.9173573 14 61.2233579 14 60 11.4294418 60 8.21054461L60 8.21054461z\" transform=\"translate(112 14)\" fill=\"#FFF\"/>\n      </g>\n    </symbol>\n\n    <symbol id=\"iconClose\" width=\"21\" height=\"21\" viewBox=\"0 0 21 21\" overflow=\"visible\">\n      <path d=\"M16 5.414L14.586 4 10 8.586 5.414 4 4 5.414 8.586 10 4 14.586 5.414 16 10 11.414 14.586 16 16 14.586 11.414 10\"/>\n    </symbol>\n  </defs>\n</svg>\n";
 
 var PASS_THROUGH_EVENTS = [
   'changeActiveView',
@@ -18287,7 +18228,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.googlePay
 ];
 var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = '1.40.2';
+var VERSION = '1.41.0';
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -18295,7 +18236,7 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the card.
- * @property {object} details Additional account details. See a full list of details in the [Hosted Fields client reference](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#~tokenizePayload).
+ * @property {object} details Additional account details. See a full list of details in the [Hosted Fields client reference](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#~tokenizePayload).
  * @property {string} description A human-readable description.
  * @property {string} type The payment method type, always `CreditCard` when the method requested is a card.
  * @property {object} binData Information about the card based on the bin. Documented {@link Dropin~binData|here}.
@@ -18303,14 +18244,14 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  * @property {?boolean} liabilityShifted If 3D Secure is configured, whether or not liability did shift.
  * @property {?boolean} liabilityShiftPossible If 3D Secure is configured, whether or not liability shift is possible.
- * @property {?object} threeDSecureInfo If 3D Secure is configured, the `threeDSecureInfo` documented in the [Three D Secure client reference](http://braintree.github.io/braintree-web/3.97.1/ThreeDSecure.html#~verifyPayload)
+ * @property {?object} threeDSecureInfo If 3D Secure is configured, the `threeDSecureInfo` documented in the [Three D Secure client reference](http://braintree.github.io/braintree-web/3.97.4/ThreeDSecure.html#~verifyPayload)
  */
 
 /**
  * @typedef {object} Dropin~paypalPaymentMethodPayload
  * @property {string} nonce The payment method nonce, used by your server to charge the PayPal account.
  * @property {?boolean} vaulted If present and true, indicates that the payment method refers to a vaulted payment method.
- * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/3.97.1/PayPalCheckout.html#~tokenizePayload).
+ * @property {object} details Additional PayPal account details. See a full list of details in the [PayPal client reference](http://braintree.github.io/braintree-web/3.97.4/PayPalCheckout.html#~tokenizePayload).
  * @property {string} type The payment method type, always `PayPalAccount` when the method requested is a PayPal account.
  * @property {?string} deviceData If data collector is configured, the device data property to be used when making a transaction.
  */
@@ -18576,67 +18517,67 @@ HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
  */
 
 /**
- * The underlying [hosted fields `binAvailable` event](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#event:binAvailable).
+ * The underlying [hosted fields `binAvailable` event](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#event:binAvailable).
  * @event Dropin#card:binAvailable
  * @type {Dropin~card:binAvailable}
  */
 
 /**
- * The underlying [hosted fields `blur` event](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#event:blur).
+ * The underlying [hosted fields `blur` event](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#event:blur).
  * @event Dropin#card:blur
  * @type {Dropin~card:blur}
  */
 
 /**
- * The underlying [hosted fields `cardTypeChange` event](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#event:cardTypeChange).
+ * The underlying [hosted fields `cardTypeChange` event](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#event:cardTypeChange).
  * @event Dropin#card:cardTypeChange
  * @type {Dropin~card:cardTypeChange}
  */
 
 /**
- * The underlying [hosted fields `empty` event](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#event:empty).
+ * The underlying [hosted fields `empty` event](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#event:empty).
  * @event Dropin#card:empty
  * @type {Dropin~card:empty}
  */
 
 /**
- * The underlying [hosted fields `focus` event](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#event:focus).
+ * The underlying [hosted fields `focus` event](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#event:focus).
  * @event Dropin#card:focus
  * @type {Dropin~card:focus}
  */
 
 /**
- * The underlying [hosted fields `inputSubmitRequest` event](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#event:inputSubmitRequest).
+ * The underlying [hosted fields `inputSubmitRequest` event](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#event:inputSubmitRequest).
  * @event Dropin#card:inputSubmitRequest
  * @type {Dropin~card:inputSubmitRequest}
  */
 
 /**
- * The underlying [hosted fields `notEmpty` event](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#event:notEmpty).
+ * The underlying [hosted fields `notEmpty` event](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#event:notEmpty).
  * @event Dropin#card:notEmpty
  * @type {Dropin~card:notEmpty}
  */
 
 /**
- * The underlying [hosted fields `validityChange` event](http://braintree.github.io/braintree-web/3.97.1/HostedFields.html#event:validityChange).
+ * The underlying [hosted fields `validityChange` event](http://braintree.github.io/braintree-web/3.97.4/HostedFields.html#event:validityChange).
  * @event Dropin#card:validityChange
  * @type {Dropin~card:validityChange}
  */
 
 /**
- * The underlying [3D Secure `customer-canceled` event](http://braintree.github.io/braintree-web/3.97.1/ThreeDSecure.html#event:customer-canceled).
+ * The underlying [3D Secure `customer-canceled` event](http://braintree.github.io/braintree-web/3.97.4/ThreeDSecure.html#event:customer-canceled).
  * @event Dropin#3ds:customer-canceled
  * @type {Dropin~3ds:customer-canceled}
  */
 
 /**
- * The underlying [3D Secure `authentication-modal-render` event](http://braintree.github.io/braintree-web/3.97.1/ThreeDSecure.html#event:authentication-modal-render).
+ * The underlying [3D Secure `authentication-modal-render` event](http://braintree.github.io/braintree-web/3.97.4/ThreeDSecure.html#event:authentication-modal-render).
  * @event Dropin#3ds:authentication-modal-render
  * @type {Dropin~3ds:authentication-modal-render}
  */
 
 /**
- * The underlying [3D Secure `authentication-modal-close` event](http://braintree.github.io/braintree-web/3.97.1/ThreeDSecure.html#event:authentication-modal-close).
+ * The underlying [3D Secure `authentication-modal-close` event](http://braintree.github.io/braintree-web/3.97.4/ThreeDSecure.html#event:authentication-modal-close).
  * @event Dropin#3ds:authentication-modal-close
  * @type {Dropin~3ds:authentication-modal-close}
  */
@@ -19023,7 +18964,7 @@ Dropin.prototype._handleAppSwitch = function () {
  * If a payment method is not available, an error will appear in the UI. When a callback is used, an error will be passed to it. If no callback is used, the returned Promise will be rejected with an error.
  * @public
  * @param {object} [options] All options for requesting a payment method.
- * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/3.97.1/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. When 3DS is enabled, both credit cards and non-network tokenized Google Pay cards will perform verfication. The recommended fields for achieving a 3DS v2 verification are:
+ * @param {object} [options.threeDSecure] Any of the options in the [Braintree 3D Secure client reference](https://braintree.github.io/braintree-web/3.97.4/ThreeDSecure.html#verifyCard) except for `nonce`, `bin`, and `onLookupComplete`. If `amount` is provided, it will override the value of `amount` in the [3D Secure create options](module-braintree-web-drop-in.html#~threeDSecureOptions). The more options provided, the more likely the customer will not need to answer a 3DS challenge. When 3DS is enabled, both credit cards and non-network tokenized Google Pay cards will perform verfication. The recommended fields for achieving a 3DS v2 verification are:
  * * `email`
  * * `mobilePhoneNumber`
  * * `billingAddress`
@@ -19300,7 +19241,7 @@ function formatPaymentMethodPayload(paymentMethod) {
 
 module.exports = wrapPrototype(Dropin);
 
-},{"./constants":202,"./dropin-model":203,"./lib/analytics":207,"./lib/assign":208,"./lib/data-collector":211,"./lib/dropin-error":212,"./lib/is-utf-8":216,"./lib/sanitize-html":219,"./lib/three-d-secure":221,"./translations":242,"./views/main-view":261,"@braintree/asset-loader":1,"@braintree/event-emitter":23,"@braintree/uuid":29,"@braintree/wrap-promise":33}],205:[function(require,module,exports){
+},{"./constants":189,"./dropin-model":190,"./lib/analytics":194,"./lib/assign":195,"./lib/data-collector":198,"./lib/dropin-error":199,"./lib/is-utf-8":203,"./lib/sanitize-html":206,"./lib/three-d-secure":208,"./translations":229,"./views/main-view":248,"@braintree/asset-loader":1,"@braintree/event-emitter":37,"@braintree/uuid":43,"@braintree/wrap-promise":47}],192:[function(require,module,exports){
 'use strict';
 /**
  * @module braintree-web-drop-in
@@ -19340,7 +19281,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.40.2/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.41.0/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *       ></script>
  *       <input type="submit" value="Purchase"></input>
@@ -19358,7 +19299,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.40.2/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.41.0/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *        data-paypal.flow="checkout"
  *        data-paypal.amount="10.00"
@@ -19373,7 +19314,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Specifying a locale and payment option priority</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.40.2/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.41.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-locale="de_DE"
  *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
@@ -19388,7 +19329,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including an optional cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.40.2/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.41.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="false"
  *   ></script>
@@ -19398,7 +19339,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including a required cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.40.2/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.41.0/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="true"
  *   ></script>
@@ -19414,15 +19355,15 @@ var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = '1.40.2';
+var VERSION = '1.41.0';
 
 /**
- * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/3.97.1/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
+ * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/3.97.4/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
  *
  * @param {(boolean|object)} [cardholderName] Will enable a cardholder name field above the card number field. If set to an object, you can specify whether or not the field is required. If set to a `true`, it will default the field to being present, but not required.
  * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
- * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/3.97.1/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/3.97.1/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
- * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/3.97.1/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#customize-your-ui).
+ * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/3.97.4/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/3.97.4/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
+ * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/3.97.4/module-braintree-web_hosted-fields.html#~styleOptions). These can be used to add custom styles to the Hosted Fields iframes. To style the rest of Drop-in, [review the documentation for customizing Drop-in](https://developer.paypal.com/braintree/docs/guides/drop-in/customization/javascript/v3#customize-your-ui).
  * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a successful tokenization.
  * @param {object} [vault] Configuration for vaulting credit cards. Only applies when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id).
  * @param {boolean} [vault.allowVaultCardOverride=false] When true, the card form will include an option to let the customer decide not to vault the credit card they enter.
@@ -19438,11 +19379,11 @@ var VERSION = '1.40.2';
 /**
  * @typedef {object} threeDSecureOptions Configuration options to pass when creating the 3D Secure module used in Drop-in. `amount` for 3D Secure verification can be passed here, but it's recomended that it and all other 3D Secure verification options be passed to the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead. Any `cardinalSDKConfig` options must be passed here when creating Drop-in.
  *
- * @param {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/3.97.1/module-braintree-web_three-d-secure.html#.create) for all options.
+ * @param {options} cardinalSDKConfig A configuration object to adjust the configuration for the underlying Cardinal SDK (Braintree's 3D Secure provider). See [`cardinalSDKConfig` options](http://braintree.github.io/braintree-web/3.97.4/module-braintree-web_three-d-secure.html#.create) for all options.
  * @param {string} amount __Deprecated__ The amount to verify with 3D Secure. Set amount in the {@link Dropin#requestPaymentMethod|requestPaymentMethod options} instead.
  */
 
-/** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.97.1/PayPalCheckout.html#createPayment).
+/** @typedef {object} paypalCreateOptions The configuration options for PayPal and PayPalCredit. For a full list of options see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.97.4/PayPalCheckout.html#createPayment).
  *
  * @param {string} flow Either `checkout` for a one-time [Checkout with PayPal](https://developer.paypal.com/braintree/docs/guides/paypal/checkout-with-paypal/javascript/v3) flow or `vault` for a [Vault flow](https://developer.paypal.com/braintree/docs/guides/paypal/vault/javascript/v3). Required when using PayPal or PayPal Credit.
  * @param {(string|number)} [amount] The amount of the transaction. Required when using the Checkout flow.
@@ -19546,11 +19487,11 @@ var VERSION = '1.40.2';
  * @param {(boolean|object)} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards, pass `false` for the value.
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#linked-paypal-testing).
  *
- * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.97.1/PayPalCheckout.html#createPayment).
+ * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.97.4/PayPalCheckout.html#createPayment).
  *
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live).
  *
- * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.97.1/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developer.paypal.com/braintree/docs/guides/paypal/paypal-credit/javascript/v3).
+ * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/3.97.4/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developer.paypal.com/braintree/docs/guides/paypal/paypal-credit/javascript/v3).
  *
  * @param {(object|boolean)} [options.venmo] The configuration options for Pay with Venmo. To include a Venmo option in your Drop-in integration, include the `venmo` parameter and [follow the documentation for setting up Venmo in the Braintree control panel](https://articles.braintreepayments.com/guides/payment-methods/venmo#setup). If a user's browser does not support Venmo, the Venmo option will not be rendered.
  *
@@ -19588,7 +19529,7 @@ var VERSION = '1.40.2';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.40.2/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.41.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -19627,7 +19568,7 @@ var VERSION = '1.40.2';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.40.2/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.41.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -19707,7 +19648,7 @@ var VERSION = '1.40.2';
  *       <input type="hidden" id="nonce" name="payment_method_nonce"></input>
  *     </form>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.40.2/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.41.0/js/dropin.min.js"></script>
  *
  *     <script>
  *       var form = document.querySelector('#payment-form');
@@ -19925,13 +19866,13 @@ createFromScriptTag(create, typeof document !== 'undefined' && document.querySel
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of Drop-in, i.e. `1.40.2`.
+   * @description The current version of Drop-in, i.e. `1.41.0`.
    * @type {string}
    */
   VERSION: VERSION
 };
 
-},{"./constants":202,"./dropin":204,"./lib/analytics":207,"./lib/create-from-script-tag":210,"./lib/dropin-error":212,"@braintree/wrap-promise":33,"braintree-web/client":41}],206:[function(require,module,exports){
+},{"./constants":189,"./dropin":191,"./lib/analytics":194,"./lib/create-from-script-tag":197,"./lib/dropin-error":199,"@braintree/wrap-promise":47,"braintree-web/client":55}],193:[function(require,module,exports){
 'use strict';
 
 function addSelectionEventHandler(element, func) {
@@ -19945,7 +19886,7 @@ function addSelectionEventHandler(element, func) {
 
 module.exports = addSelectionEventHandler;
 
-},{}],207:[function(require,module,exports){
+},{}],194:[function(require,module,exports){
 'use strict';
 
 var atob = require('./polyfill').atob;
@@ -19988,7 +19929,7 @@ module.exports = {
   sendEvent: sendAnalyticsEvent
 };
 
-},{"../constants":202,"./polyfill":218,"braintree-web/client":41}],208:[function(require,module,exports){
+},{"../constants":189,"./polyfill":205,"braintree-web/client":55}],195:[function(require,module,exports){
 'use strict';
 
 var assignNormalized = typeof Object.assign === 'function' ? Object.assign : assignPolyfill;
@@ -20013,7 +19954,7 @@ module.exports = {
   _assign: assignPolyfill
 };
 
-},{}],209:[function(require,module,exports){
+},{}],196:[function(require,module,exports){
 'use strict';
 
 var isIe9 = require('@braintree/browser-detection/is-ie9');
@@ -20024,7 +19965,7 @@ module.exports = {
   isIe10: isIe10
 };
 
-},{"@braintree/browser-detection/is-ie10":20,"@braintree/browser-detection/is-ie9":21}],210:[function(require,module,exports){
+},{"@braintree/browser-detection/is-ie10":29,"@braintree/browser-detection/is-ie9":30}],197:[function(require,module,exports){
 'use strict';
 
 var analytics = require('./analytics');
@@ -20156,7 +20097,7 @@ function createFromScriptTag(createFunction, scriptTag) {
 
 module.exports = createFromScriptTag;
 
-},{"./analytics":207,"./dropin-error":212,"./find-parent-form":213,"./kebab-case-to-camel-case":217,"@braintree/uuid":29}],211:[function(require,module,exports){
+},{"./analytics":194,"./dropin-error":199,"./find-parent-form":200,"./kebab-case-to-camel-case":204,"@braintree/uuid":43}],198:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -20219,7 +20160,7 @@ DataCollector.prototype.teardown = function () {
 module.exports = DataCollector;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../constants":202,"./analytics":207,"@braintree/asset-loader":1}],212:[function(require,module,exports){
+},{"../constants":189,"./analytics":194,"@braintree/asset-loader":1}],199:[function(require,module,exports){
 'use strict';
 
 function isBraintreeWebError(err) {
@@ -20247,7 +20188,7 @@ DropinError.prototype.constructor = DropinError;
 
 module.exports = DropinError;
 
-},{}],213:[function(require,module,exports){
+},{}],200:[function(require,module,exports){
 'use strict';
 
 function findParentForm(element) {
@@ -20264,7 +20205,7 @@ module.exports = {
   findParentForm: findParentForm
 };
 
-},{}],214:[function(require,module,exports){
+},{}],201:[function(require,module,exports){
 'use strict';
 
 var atob = require('./polyfill').atob;
@@ -20282,7 +20223,7 @@ module.exports = function (client) {
   return true;
 };
 
-},{"./polyfill":218}],215:[function(require,module,exports){
+},{"./polyfill":205}],202:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -20295,7 +20236,7 @@ module.exports = {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],216:[function(require,module,exports){
+},{}],203:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -20306,7 +20247,7 @@ module.exports = function (win) {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],217:[function(require,module,exports){
+},{}],204:[function(require,module,exports){
 'use strict';
 
 function kebabCaseToCamelCase(kebab) {
@@ -20321,7 +20262,7 @@ function kebabCaseToCamelCase(kebab) {
 
 module.exports = kebabCaseToCamelCase;
 
-},{}],218:[function(require,module,exports){
+},{}],205:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 /* eslint-disable no-mixed-operators */
@@ -20363,7 +20304,7 @@ module.exports = {
 };
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],219:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 'use strict';
 
 module.exports = function (string) {
@@ -20376,7 +20317,7 @@ module.exports = function (string) {
     .replace(/>/g, '&gt;');
 };
 
-},{}],220:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -20397,7 +20338,7 @@ module.exports = function () {
   return Boolean(el.style.length);
 };
 
-},{}],221:[function(require,module,exports){
+},{}],208:[function(require,module,exports){
 'use strict';
 
 var assign = require('./assign').assign;
@@ -20468,7 +20409,7 @@ ThreeDSecure.prototype.teardown = function () {
 
 module.exports = ThreeDSecure;
 
-},{"./assign":208,"braintree-web/three-d-secure":153}],222:[function(require,module,exports){
+},{"./assign":195,"braintree-web/three-d-secure":140}],209:[function(require,module,exports){
 'use strict';
 
 var browserDetection = require('./browser-detection');
@@ -20506,7 +20447,7 @@ module.exports = {
   onTransitionEnd: onTransitionEnd
 };
 
-},{"./browser-detection":209}],223:[function(require,module,exports){
+},{"./browser-detection":196}],210:[function(require,module,exports){
 'use strict';
 
 function delay(time) {
@@ -20521,7 +20462,7 @@ module.exports = {
   delay: delay
 };
 
-},{}],224:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20600,7 +20541,7 @@ module.exports = {
 }
 ;
 
-},{}],225:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20679,7 +20620,7 @@ module.exports = {
 }
 ;
 
-},{}],226:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20758,7 +20699,7 @@ module.exports = {
 }
 ;
 
-},{}],227:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20837,7 +20778,7 @@ module.exports = {
 }
 ;
 
-},{}],228:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20916,7 +20857,7 @@ module.exports = {
 }
 ;
 
-},{}],229:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -20995,7 +20936,7 @@ module.exports = {
 }
 ;
 
-},{}],230:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21074,7 +21015,7 @@ module.exports = {
 }
 ;
 
-},{}],231:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21153,7 +21094,7 @@ module.exports = {
 }
 ;
 
-},{}],232:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21234,7 +21175,7 @@ module.exports = {
   UnionPay: 'UnionPay'
 };
 
-},{}],233:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21313,7 +21254,7 @@ module.exports = {
 }
 ;
 
-},{}],234:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21392,7 +21333,7 @@ module.exports = {
 }
 ;
 
-},{}],235:[function(require,module,exports){
+},{}],222:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21471,7 +21412,7 @@ module.exports = {
 }
 ;
 
-},{}],236:[function(require,module,exports){
+},{}],223:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21550,7 +21491,7 @@ module.exports = {
 }
 ;
 
-},{}],237:[function(require,module,exports){
+},{}],224:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21629,7 +21570,7 @@ module.exports = {
 }
 ;
 
-},{}],238:[function(require,module,exports){
+},{}],225:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21708,7 +21649,7 @@ module.exports = {
 }
 ;
 
-},{}],239:[function(require,module,exports){
+},{}],226:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21787,7 +21728,7 @@ module.exports = {
 }
 ;
 
-},{}],240:[function(require,module,exports){
+},{}],227:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21866,7 +21807,7 @@ module.exports = {
 }
 ;
 
-},{}],241:[function(require,module,exports){
+},{}],228:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21945,7 +21886,7 @@ module.exports = {
 }
 ;
 
-},{}],242:[function(require,module,exports){
+},{}],229:[function(require,module,exports){
 /* eslint-disable camelcase */
 'use strict';
 
@@ -22021,7 +21962,7 @@ module.exports = {
 };
 /* eslint-enable camelcase */
 
-},{"../lib/assign":208,"./ar_EG":224,"./cs_CZ":225,"./da_DK":226,"./de_DE":227,"./el_GR":228,"./en_AU":229,"./en_GB":230,"./en_IN":231,"./en_US":232,"./es_ES":233,"./es_XC":234,"./fi_FI":235,"./fr_CA":236,"./fr_FR":237,"./fr_XC":238,"./he_IL":239,"./hu_HU":240,"./id_ID":241,"./it_IT":243,"./ja_JP":244,"./ko_KR":245,"./nl_NL":246,"./no_NO":247,"./pl_PL":248,"./pt_BR":249,"./pt_PT":250,"./ru_RU":251,"./sk_SK":252,"./sv_SE":253,"./th_TH":254,"./zh_CN":255,"./zh_HK":256,"./zh_TW":257,"./zh_XC":258}],243:[function(require,module,exports){
+},{"../lib/assign":195,"./ar_EG":211,"./cs_CZ":212,"./da_DK":213,"./de_DE":214,"./el_GR":215,"./en_AU":216,"./en_GB":217,"./en_IN":218,"./en_US":219,"./es_ES":220,"./es_XC":221,"./fi_FI":222,"./fr_CA":223,"./fr_FR":224,"./fr_XC":225,"./he_IL":226,"./hu_HU":227,"./id_ID":228,"./it_IT":230,"./ja_JP":231,"./ko_KR":232,"./nl_NL":233,"./no_NO":234,"./pl_PL":235,"./pt_BR":236,"./pt_PT":237,"./ru_RU":238,"./sk_SK":239,"./sv_SE":240,"./th_TH":241,"./zh_CN":242,"./zh_HK":243,"./zh_TW":244,"./zh_XC":245}],230:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22100,7 +22041,7 @@ module.exports = {
 }
 ;
 
-},{}],244:[function(require,module,exports){
+},{}],231:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22179,7 +22120,7 @@ module.exports = {
 }
 ;
 
-},{}],245:[function(require,module,exports){
+},{}],232:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22258,7 +22199,7 @@ module.exports = {
 }
 ;
 
-},{}],246:[function(require,module,exports){
+},{}],233:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22337,7 +22278,7 @@ module.exports = {
 }
 ;
 
-},{}],247:[function(require,module,exports){
+},{}],234:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22416,7 +22357,7 @@ module.exports = {
 }
 ;
 
-},{}],248:[function(require,module,exports){
+},{}],235:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22495,7 +22436,7 @@ module.exports = {
 }
 ;
 
-},{}],249:[function(require,module,exports){
+},{}],236:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22574,7 +22515,7 @@ module.exports = {
 }
 ;
 
-},{}],250:[function(require,module,exports){
+},{}],237:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22653,7 +22594,7 @@ module.exports = {
 }
 ;
 
-},{}],251:[function(require,module,exports){
+},{}],238:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22732,7 +22673,7 @@ module.exports = {
 }
 ;
 
-},{}],252:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22811,7 +22752,7 @@ module.exports = {
 }
 ;
 
-},{}],253:[function(require,module,exports){
+},{}],240:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22890,7 +22831,7 @@ module.exports = {
 }
 ;
 
-},{}],254:[function(require,module,exports){
+},{}],241:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22969,7 +22910,7 @@ module.exports = {
 }
 ;
 
-},{}],255:[function(require,module,exports){
+},{}],242:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -23048,7 +22989,7 @@ module.exports = {
 }
 ;
 
-},{}],256:[function(require,module,exports){
+},{}],243:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -23127,7 +23068,7 @@ module.exports = {
 }
 ;
 
-},{}],257:[function(require,module,exports){
+},{}],244:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -23206,7 +23147,7 @@ module.exports = {
 }
 ;
 
-},{}],258:[function(require,module,exports){
+},{}],245:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -23285,7 +23226,7 @@ module.exports = {
 }
 ;
 
-},{}],259:[function(require,module,exports){
+},{}],246:[function(require,module,exports){
 'use strict';
 
 var assign = require('../lib/assign').assign;
@@ -23336,7 +23277,7 @@ BaseView.prototype.allowUserAction = function () {
 
 module.exports = BaseView;
 
-},{"../constants":202,"../lib/assign":208,"../lib/dropin-error":212}],260:[function(require,module,exports){
+},{"../constants":189,"../lib/assign":195,"../lib/dropin-error":199}],247:[function(require,module,exports){
 'use strict';
 
 var BaseView = require('./base-view');
@@ -23405,7 +23346,7 @@ DeleteConfirmationView.prototype.onSelection = function () {
 
 module.exports = DeleteConfirmationView;
 
-},{"../constants":202,"../lib/add-selection-event-handler":206,"./base-view":259}],261:[function(require,module,exports){
+},{"../constants":189,"../lib/add-selection-event-handler":193,"./base-view":246}],248:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -23824,7 +23765,7 @@ function prefixShowClass(classname) {
 
 module.exports = MainView;
 
-},{"../constants":202,"../lib/add-selection-event-handler":206,"../lib/analytics":207,"../lib/supports-flexbox":220,"../lib/wait":223,"./base-view":259,"./delete-confirmation-view":260,"./payment-methods-view":263,"./payment-options-view":264,"./payment-sheet-views":269}],262:[function(require,module,exports){
+},{"../constants":189,"../lib/add-selection-event-handler":193,"../lib/analytics":194,"../lib/supports-flexbox":207,"../lib/wait":210,"./base-view":246,"./delete-confirmation-view":247,"./payment-methods-view":250,"./payment-options-view":251,"./payment-sheet-views":256}],249:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -23942,7 +23883,7 @@ PaymentMethodView.prototype._selectDelete = function () {
 
 module.exports = PaymentMethodView;
 
-},{"../constants":202,"../lib/add-selection-event-handler":206,"../lib/analytics":207,"./base-view":259}],263:[function(require,module,exports){
+},{"../constants":189,"../lib/add-selection-event-handler":193,"../lib/analytics":194,"./base-view":246}],250:[function(require,module,exports){
 'use strict';
 
 var BaseView = require('./base-view');
@@ -24119,7 +24060,7 @@ PaymentMethodsView.prototype.refreshPaymentMethods = function () {
 
 module.exports = PaymentMethodsView;
 
-},{"../constants":202,"../lib/add-selection-event-handler":206,"../lib/dropin-error":212,"./base-view":259,"./payment-method-view":262}],264:[function(require,module,exports){
+},{"../constants":189,"../lib/add-selection-event-handler":193,"../lib/dropin-error":199,"./base-view":246,"./payment-method-view":249}],251:[function(require,module,exports){
 'use strict';
 
 var analytics = require('../lib/analytics');
@@ -24214,7 +24155,7 @@ PaymentOptionsView.prototype._generateOptionLabel = function (paymentSourceStrin
 
 module.exports = PaymentOptionsView;
 
-},{"../constants":202,"../lib/add-selection-event-handler":206,"../lib/analytics":207,"./base-view":259}],265:[function(require,module,exports){
+},{"../constants":189,"../lib/add-selection-event-handler":193,"../lib/analytics":194,"./base-view":246}],252:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -24342,7 +24283,7 @@ ApplePayView.isEnabled = function (options) {
 module.exports = ApplePayView;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../constants":202,"../../lib/assign":208,"../../lib/dropin-error":212,"../../lib/is-https":215,"../base-view":259,"braintree-web/apple-pay":36}],266:[function(require,module,exports){
+},{"../../constants":189,"../../lib/assign":195,"../../lib/dropin-error":199,"../../lib/is-https":202,"../base-view":246,"braintree-web/apple-pay":50}],253:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -24523,7 +24464,7 @@ BasePayPalView.isEnabled = function (options) {
 module.exports = BasePayPalView;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../constants":202,"../../lib/analytics":207,"../../lib/assign":208,"../../lib/browser-detection":209,"../../lib/dropin-error":212,"../../translations":242,"../base-view":259,"@braintree/asset-loader":1,"braintree-web/paypal-checkout":142}],267:[function(require,module,exports){
+},{"../../constants":189,"../../lib/analytics":194,"../../lib/assign":195,"../../lib/browser-detection":196,"../../lib/dropin-error":199,"../../translations":229,"../base-view":246,"@braintree/asset-loader":1,"braintree-web/paypal-checkout":129}],254:[function(require,module,exports){
 'use strict';
 
 var assign = require('../../lib/assign').assign;
@@ -24542,6 +24483,14 @@ var PASSTHROUGH_EVENTS = [
   // TODO should intercept this event and call tokenize
   'inputSubmitRequest',
   'binAvailable'
+];
+
+var HOSTED_FIELDS = [
+  'number',
+  'expirationDate',
+  'cvv',
+  'postalCode',
+  'cardholderName'
 ];
 
 function CardView() {
@@ -24583,16 +24532,25 @@ CardView.prototype.initialize = function () {
 
   if (!this.hasCardholderName) {
     cardholderNameGroup.parentNode.removeChild(cardholderNameGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'cardholderName';
+    });
   }
 
   if (!this.hasCVV) {
     cvvFieldGroup = this.getElementById('cvv-field-group');
     cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'cvv';
+    });
   }
 
   if (!hfOptions.fields.postalCode) {
     postalCodeFieldGroup = this.getElementById('postal-code-field-group');
     postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'postalCode';
+    });
   }
 
   if (!this.model.isGuestCheckout && this.merchantConfiguration.vault.allowVaultCardOverride === true) {
@@ -24614,6 +24572,11 @@ CardView.prototype.initialize = function () {
     this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
     this.hostedFieldsInstance.on('notEmpty', this._onNotEmptyEvent.bind(this));
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
+    HOSTED_FIELDS.forEach(function (hostedField) {
+      this.hostedFieldsInstance.setAttribute({
+        field: hostedField, attribute: 'aria-required', value: true
+      });
+    }.bind(this));
 
     PASSTHROUGH_EVENTS.forEach(function (eventName) {
       this.hostedFieldsInstance.on(eventName, function (event) {
@@ -25203,7 +25166,7 @@ function generateCardNumberPlaceholder() {
 
 module.exports = CardView;
 
-},{"../../constants":202,"../../lib/assign":208,"../../lib/dropin-error":212,"../../lib/is-utf-8":216,"../../lib/transition-helper":222,"../base-view":259,"braintree-web/hosted-fields":64}],268:[function(require,module,exports){
+},{"../../constants":189,"../../lib/assign":195,"../../lib/dropin-error":199,"../../lib/is-utf-8":203,"../../lib/transition-helper":209,"../base-view":246,"braintree-web/hosted-fields":78}],255:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -25340,7 +25303,7 @@ function createPaymentsClient(client) {
 module.exports = GooglePayView;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../constants":202,"../../lib/analytics":207,"../../lib/assign":208,"../../lib/dropin-error":212,"../base-view":259,"@braintree/asset-loader":1,"braintree-web/google-payment":57}],269:[function(require,module,exports){
+},{"../../constants":189,"../../lib/analytics":194,"../../lib/assign":195,"../../lib/dropin-error":199,"../base-view":246,"@braintree/asset-loader":1,"braintree-web/google-payment":71}],256:[function(require,module,exports){
 'use strict';
 
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
@@ -25356,7 +25319,7 @@ result[paymentOptionIDs.venmo] = require('./venmo-view');
 
 module.exports = result;
 
-},{"../../constants":202,"./apple-pay-view":265,"./card-view":267,"./google-pay-view":268,"./paypal-credit-view":270,"./paypal-view":271,"./venmo-view":272}],270:[function(require,module,exports){
+},{"../../constants":189,"./apple-pay-view":252,"./card-view":254,"./google-pay-view":255,"./paypal-credit-view":257,"./paypal-view":258,"./venmo-view":259}],257:[function(require,module,exports){
 'use strict';
 
 var assign = require('../../lib/assign').assign;
@@ -25384,7 +25347,7 @@ PayPalCreditView.isEnabled = function (options) {
 };
 module.exports = PayPalCreditView;
 
-},{"../../constants":202,"../../lib/assign":208,"./base-paypal-view":266}],271:[function(require,module,exports){
+},{"../../constants":189,"../../lib/assign":195,"./base-paypal-view":253}],258:[function(require,module,exports){
 'use strict';
 
 var assign = require('../../lib/assign').assign;
@@ -25411,7 +25374,7 @@ PayPalView.isEnabled = function (options) {
 
 module.exports = PayPalView;
 
-},{"../../constants":202,"../../lib/assign":208,"./base-paypal-view":266}],272:[function(require,module,exports){
+},{"../../constants":189,"../../lib/assign":195,"./base-paypal-view":253}],259:[function(require,module,exports){
 'use strict';
 
 var assign = require('../../lib/assign').assign;
@@ -25503,5 +25466,5 @@ VenmoView.isEnabled = function (options) {
 
 module.exports = VenmoView;
 
-},{"../../constants":202,"../../lib/assign":208,"../../lib/dropin-error":212,"../base-view":259,"braintree-web/venmo":163}]},{},[205])(205)
+},{"../../constants":189,"../../lib/assign":195,"../../lib/dropin-error":199,"../base-view":246,"braintree-web/venmo":150}]},{},[192])(192)
 });
