@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## UNRELEASED
+  - Apple Pay: add error message prompting the customer to click the Apple Pay button when `requestPaymentMethod` is called.
+
 ## 1.41.0
   - Update braintree-web to 3.97.4
   - Accessibility improvements
@@ -8,7 +11,6 @@
   - Update browser-detection to v1.17.1
   - Update Google Pay CSP Directives
   - Updated Apple Pay logo to scale correctly
-  - Apple Pay: add error message prompting the customer to click the Apple Pay button when `requestPaymentMethod` is called.
 
 ## 1.40.2
   - Fix issue where some assets for the Drop-In would not load from the CDN
