@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Verifiering av kreditkortet misslyckades. Kontrollera uppgifterna och försök igen.",
   "paypalButtonMustBeUsed" : "Använd PayPal-knappen för att fortsätta med din betalning.",
   "venmoButtonMustBeUsed": "Använd Venmo-knappen för att fortsätta med din betalning.",
+  "applePayButtonMustBeUsed": "Använd PayPal-knappen för att fortsätta med din betalning.",
   "paypalAccountTokenizationFailedError" : "Något gick fel när du lade till PayPal-kontot. Försök igen.",
   "paypalFlowFailedError" : "Något gick fel med att ansluta till PayPal. Försök igen.",
   "paypalTokenizationRequestActiveError" : "Godkännande av PayPal-betalning pågår redan.",

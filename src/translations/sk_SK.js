@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Overenie kreditnej karty nebolo úspešné. Skontrolujte údaje a skúste to znova.",
   "paypalButtonMustBeUsed" : "Ak chcete pokračovať v platbe, použite tlačidlo PayPal.",
   "venmoButtonMustBeUsed": "Ak chcete pokračovať v platbe, použite tlačidlo Venmo.",
+  "applePayButtonMustBeUsed": "Ak chcete pokračovať v platbe, použite tlačidlo Apple Pay.",
   "paypalAccountTokenizationFailedError" : "Vyskytla sa chyba pri pridávaní účtu PayPal. Skúste to znova.",
   "paypalFlowFailedError" : "Vyskytla sa chyba pri pripájaní do účtu PayPal. Skúste to znova.",
   "paypalTokenizationRequestActiveError" : "Autorizácia platby PayPal už prebieha.",

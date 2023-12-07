@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Сбой при проверке кредитной карты. Проверьте правильность ввода данных и повторите попытку.",
   "paypalButtonMustBeUsed" : "Используйте кнопку PayPal, чтобы продолжить оплату.",
   "venmoButtonMustBeUsed": "Используйте кнопку Venmo, чтобы продолжить оплату.",
+  "applePayButtonMustBeUsed": "Нажмите кнопку Apple Pay, чтобы продолжить оплату.",
   "paypalAccountTokenizationFailedError" : "Возникла ошибка при добавлении счета PayPal. Повторите попытку.",
   "paypalFlowFailedError" : "Возникла ошибка при подключении к PayPal. Повторите попытку.",
   "paypalTokenizationRequestActiveError" : "Авторизация платежа через PayPal уже выполняется.",

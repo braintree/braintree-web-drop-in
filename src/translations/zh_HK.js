@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "信用卡認證失敗。請檢查你的資料，然後重試。",
   "paypalButtonMustBeUsed" : "使用「PayPal 按鈕」繼續付款。",
   "venmoButtonMustBeUsed": "使用 Venmo 按鈕以繼續付款。",
+  "applePayButtonMustBeUsed": "使用 Apple Pay 按鈕繼續付款。",
   "paypalAccountTokenizationFailedError" : "新增 PayPal 帳戶出現問題，請再試一次。",
   "paypalFlowFailedError" : "連接至 PayPal 出現問題，請再試一次。",
   "paypalTokenizationRequestActiveError" : "正在處理 PayPal 授權付款。",
