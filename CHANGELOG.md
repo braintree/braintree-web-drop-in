@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## Unreleased
+## 1.41.0
+  - Update braintree-web to 3.97.4
   - Accessibility improvements
     - Add `aria-hidden` attribute to generic card icon
     - Add `aria-required` attribute to Hosted Fields
