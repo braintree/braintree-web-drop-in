@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "فشلت مصادقة بطاقة الائتمان. يرجى مراجعة معلوماتك وإعادة المحاولة.",
   "paypalButtonMustBeUsed" : "استخدم زر PayPal لاستئناف الدفع.",
   "venmoButtonMustBeUsed": "استخدِم زر Venmo لمتابعة إجراء دفعتك",
+  "applePayButtonMustBeUsed":" استخدِم زر Apple Pay لمتابعة عملية الدفع التي تُجريها.",
   "paypalAccountTokenizationFailedError" : "وقع خطأ أثناء إضافة حساب PayPal. يرجى إعادة المحاولة.",
   "paypalFlowFailedError" : "وقع خطأ أثناء الاتصال بـ PayPal. يرجى إعادة المحاولة.",
   "paypalTokenizationRequestActiveError" : "تفويض الدفع عبر PayPal قيد التنفيذ.",

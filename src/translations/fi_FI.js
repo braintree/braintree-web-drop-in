@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Luottokortin varmennus epäonnistui. Tarkista tiedot ja yritä uudelleen.",
   "paypalButtonMustBeUsed" : "Jatka maksua PayPal-painikkeen avulla.",
   "venmoButtonMustBeUsed": "Jatka maksua Venmo-painikkeella.",
+  "applePayButtonMustBeUsed": "Jatka maksua Apple Pay-painikkeen avulla.",
   "paypalAccountTokenizationFailedError" : "Jotain meni pieleen PayPal-tiliä lisätessä. Yritä uudelleen.",
   "paypalFlowFailedError" : "Jotain meni pieleen muodostettaessa yhteyttä PayPaliin. Yritä uudelleen.",
   "paypalTokenizationRequestActiveError" : "PayPal-maksun valtuutus on jo meneillään.",

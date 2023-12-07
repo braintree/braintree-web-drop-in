@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Verifikasi kartu kredit gagal. Mohon periksa informasi Anda dan coba lagi.",
   "paypalButtonMustBeUsed" : "Gunakan tombol PayPal untuk melanjutkan pembayaran.",
   "venmoButtonMustBeUsed": "Gunakan tombol Venmo untuk melanjutkan pembayaran Anda.",
+  "applePayButtonMustBeUsed": "Gunakan tombol Apple Pay untuk melanjutkan pembayaran.",
   "paypalAccountTokenizationFailedError" : "Terjadi kesalahan saat menambahkan rekening PayPal. Mohon coba lagi.",
   "paypalFlowFailedError" : "Terjadi kesalahan ketika menghubungkan ke PayPal. Mohon coba lagi.",
   "paypalTokenizationRequestActiveError" : "Otorisasi pembayaran PayPal sedang diproses.",

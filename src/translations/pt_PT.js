@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "A verificação do cartão de crédito falhou. Verifique as suas informações e tente novamente.",
   "paypalButtonMustBeUsed" : "Use o botão PayPal para continuar o seu pagamento.",
   "venmoButtonMustBeUsed": "Utilize o botão Venmo para continuar o seu pagamento.",
+  "applePayButtonMustBeUsed": "Utilize o botão Apple Pay para continuar o seu pagamento.",
   "paypalAccountTokenizationFailedError" : "Ocorreu um erro ao adicionar a conta PayPal. Tente novamente.",
   "paypalFlowFailedError" : "Ocorreu um erro ao ligar ao PayPal. Tente novamente.",
   "paypalTokenizationRequestActiveError" : "A autorização de pagamento com PayPal já está em curso.",

@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Bekræftelse af betalingskort mislykkedes. Tjek oplysningerne, og prøv igen.",
   "paypalButtonMustBeUsed" : "Brug PayPal-knappen til at fortsætte med din betaling.",
   "venmoButtonMustBeUsed": "Brug Venmo-knappen til at fortsætte med din betaling.",
+  "applePayButtonMustBeUsed": "Brug Apple Pay-knappen til at fortsætte med din betaling.",
   "paypalAccountTokenizationFailedError" : "Der opstod en fejl under tilføjelsen af PayPal-kontoen. Prøv igen.",
   "paypalFlowFailedError" : "Det lykkedes ikke at oprette forbindelse til PayPal. Prøv igen.",
   "paypalTokenizationRequestActiveError" : "PayPals betalingsautorisation er allerede i gang.",

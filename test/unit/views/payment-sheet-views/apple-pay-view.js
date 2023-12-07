@@ -541,4 +541,17 @@ describe('ApplePayView', () => {
       });
     });
   });
+
+  describe('requestPaymentMethod', () => {
+    test('always rejects', () => {
+      const view = new ApplePayView(testContext.applePayViewOptions);
+
+      return view.requestPaymentMethod().then(() => {
+        throw new Error('should not resolve');
+      }).catch(err => {
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe('No payment method is available.');
+      });
+    });
+  });
 });

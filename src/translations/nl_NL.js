@@ -34,6 +34,7 @@ module.exports = {
   "hostedFieldsTokenizationCvvVerificationFailedError" : "Verificatie van creditcard is mislukt. Controleer je gegevens en probeer het opnieuw.",
   "paypalButtonMustBeUsed" : "Gebruik de PayPal-knop om door te gaan met je betaling.",
   "venmoButtonMustBeUsed": "Gebruik de Venmo-knop om door te gaan met je betaling.",
+  "applePayButtonMustBeUsed": "Gebruik de knop Apple Pay om door te gaan met je betaling.",
   "paypalAccountTokenizationFailedError" : "Er is iets fout gegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
   "paypalFlowFailedError" : "Er is iets fout gegaan bij het verbinden met PayPal. Probeer het opnieuw.",
   "paypalTokenizationRequestActiveError" : "PayPal-betaalautorisatie is al in voortgang.",

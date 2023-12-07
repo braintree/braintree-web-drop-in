@@ -42,6 +42,12 @@ ApplePayView.prototype.initialize = function () {
   });
 };
 
+ApplePayView.prototype.requestPaymentMethod = function () {
+  this.model.reportError('applePayButtonMustBeUsed');
+
+  return BaseView.prototype.requestPaymentMethod.call(this);
+};
+
 ApplePayView.prototype._showPaymentSheet = function () {
   var self = this;
   var request, session;
