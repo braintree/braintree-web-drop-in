@@ -52,6 +52,7 @@ function DropinModel(options) {
   this.failedDependencies = {};
   this._options = options;
   this._setupComplete = false;
+  this._shouldWaitForVerifyCard = false;
 
   while (this.rootNode.parentNode) {
     this.rootNode = this.rootNode.parentNode;
@@ -96,6 +97,10 @@ DropinModel.prototype.initialize = function () {
 
 DropinModel.prototype.confirmDropinReady = function () {
   this._setupComplete = true;
+};
+
+DropinModel.prototype.verifyCardReady = function () {
+  this._shouldWaitForVerifyCard = !this._shouldWaitForVerifyCard;
 };
 
 DropinModel.prototype.isPaymentMethodRequestable = function () {
@@ -220,6 +225,10 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
     // fixes issues with lazy loading of imports where event
     // should not be emitted
     // https://github.com/braintree/braintree-web-drop-in/issues/511
+    return false;
+  }
+
+  if (this._shouldWaitForVerifyCard) {
     return false;
   }
 

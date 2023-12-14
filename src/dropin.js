@@ -876,10 +876,16 @@ Dropin.prototype.requestPaymentMethod = function (options) {
       self._mainView.showLoadingIndicator();
 
       return self._threeDSecure.verify(payload, options.threeDSecure).then(function (newPayload) {
+        self._model.verifyCardReady();
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
         payload.threeDSecureInfo = newPayload.threeDSecureInfo;
+        self._model.setPaymentMethodRequestable({
+          isRequestable: Boolean(newPayload),
+          type: newPayload.type,
+          selectedPaymentMethod: payload
+        });
 
         self._mainView.hideLoadingIndicator();
 
