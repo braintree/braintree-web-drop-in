@@ -1101,6 +1101,31 @@ describe('DropinModel', () => {
     );
 
     test(
+      'does not emit paymentMethodRequestable event until after three D secure verification has been completed',
+      () => {
+        testContext.model._shouldWaitForVerifyCard = true;
+        testContext.model.setPaymentMethodRequestable({
+          isRequestable: true,
+          type: 'card'
+        });
+
+        expect(testContext.model._emit).not.toBeCalled();
+
+        testContext.model._shouldWaitForVerifyCard = false;
+
+        testContext.model.setPaymentMethodRequestable({
+          isRequestable: true,
+          type: 'card',
+          selectedPaymentMethod: {
+            nonce: 'fake-nonce'
+          }
+        });
+
+        expect(testContext.model._emit).toBeCalled();
+      }
+    );
+
+    test(
       'sets isPaymentMethodRequestable to false when isRequestable is false',
       () => {
         testContext.model._paymentMethodIsRequestable = true;
