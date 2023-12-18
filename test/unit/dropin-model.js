@@ -208,6 +208,22 @@ describe('DropinModel', () => {
     });
   });
 
+  describe('verifyCardReady', () => {
+    test('toggles _shouldWaitForVerifyCard from true to false', () => {
+      const model = new DropinModel(testContext.modelOptions);
+
+      expect(model._shouldWaitForVerifyCard).toBe(false);
+
+      model.verifyCardReady();
+
+      expect(model._shouldWaitForVerifyCard).toBe(true);
+
+      model.verifyCardReady();
+
+      expect(model._shouldWaitForVerifyCard).toBe(false);
+    });
+  });
+
   describe('initialize', () => {
     test('emits asyncDependenciesReady event when no dependencies are set to initializing', (done) => {
       jest.useFakeTimers();
