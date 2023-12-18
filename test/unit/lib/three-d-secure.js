@@ -119,6 +119,19 @@ describe('ThreeDSecure', () => {
       });
     });
 
+    test('calls verifyCardReady', () => {
+      jest.spyOn(testContext.model, 'verifyCardReady').mockResolvedValue();
+
+      return testContext.tds.verify({
+        nonce: 'old-nonce',
+        details: {
+          bin: '123456'
+        }
+      }).then(() => {
+        expect(testContext.model.verifyCardReady).toBeCalled();
+      });
+    });
+
     test('rejects if verifyCard rejects', () => {
       testContext.threeDSecureInstance.verifyCard.mockRejectedValue({
         message: 'A message'
