@@ -1212,6 +1212,44 @@ describe('Dropin', () => {
       }
     );
 
+    test('calls verifyCardReady and setPaymentMethodRequestable when 3D secure is called', done => {
+      let instance;
+      const fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+      const fakeNewPayload = {
+        nonce: 'new-nonce',
+        liabilityShifted: true,
+        liabilityShiftPossible: true,
+        type: fakePayload.type
+      };
+
+      testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+        jest.spyOn(instance._model, 'verifyCardReady').mockResolvedValue();
+        jest.spyOn(instance._model, 'setPaymentMethodRequestable').mockResolvedValue();
+        instance._threeDSecure = {
+          verify: jest.fn().mockResolvedValue(fakeNewPayload)
+        };
+
+        instance.requestPaymentMethod(() => {
+          expect(instance._model.verifyCardReady).toBeCalled();
+          expect(instance._model.setPaymentMethodRequestable).toBeCalledWith({
+            isRequestable: true,
+            type: fakeNewPayload.type,
+            selectedPaymentMethod: fakeNewPayload
+          });
+
+          done();
+        });
+      });
+    });
+
     test(
       'does not call 3D Secure if network tokenized google pay',
       done => {
