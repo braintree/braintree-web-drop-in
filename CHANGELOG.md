@@ -4,7 +4,7 @@
   - Apple Pay
     - add error message prompting the customer to click the Apple Pay button when `requestPaymentMethod` is called.
   - 3D Secure
-    - Fix issue where `paymentMethodRequestable` event would fire before 3DS challenge has been completed.
+    - Fix issue where `paymentMethodRequestable` event would fire before 3DS challenge has been completed. (closes [#805](https://github.com/braintree/braintree-web-drop-in/issues/805))
 
 ## 1.41.0
   - Update braintree-web to 3.97.4
