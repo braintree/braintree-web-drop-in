@@ -39,8 +39,6 @@ ThreeDSecure.prototype.initialize = function () {
 };
 
 ThreeDSecure.prototype.verify = function (payload, merchantProvidedData) {
-  var self = this;
-
   var verifyOptions = assign({
     amount: this._config.amount
   }, merchantProvidedData, {
@@ -56,7 +54,7 @@ ThreeDSecure.prototype.verify = function (payload, merchantProvidedData) {
 
   verifyOptions.additionalInformation = verifyOptions.additionalInformation || {};
   verifyOptions.additionalInformation.acsWindowSize = verifyOptions.additionalInformation.acsWindowSize || DEFAULT_ACS_WINDOW_SIZE;
-  self._model.verifyCardReady();
+  this._model.verifyCardReady();
 
   return this._instance.verifyCard(verifyOptions);
 };
