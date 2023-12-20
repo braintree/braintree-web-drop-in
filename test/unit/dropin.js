@@ -1212,7 +1212,7 @@ describe('Dropin', () => {
       }
     );
 
-    test('calls verifyCardReady and setPaymentMethodRequestable when 3D secure is called', done => {
+    test('calls verifyCardReady and setPaymentMethodRequestable when 3D secure is complete', done => {
       let instance;
       const fakePayload = {
         nonce: 'cool-nonce',
