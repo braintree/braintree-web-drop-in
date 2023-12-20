@@ -208,22 +208,6 @@ describe('DropinModel', () => {
     });
   });
 
-  describe('verifyCardReady', () => {
-    test('toggles _shouldWaitForVerifyCard from true to false', () => {
-      const model = new DropinModel(testContext.modelOptions);
-
-      expect(model._shouldWaitForVerifyCard).toBe(false);
-
-      model.verifyCardReady();
-
-      expect(model._shouldWaitForVerifyCard).toBe(true);
-
-      model.verifyCardReady();
-
-      expect(model._shouldWaitForVerifyCard).toBe(false);
-    });
-  });
-
   describe('initialize', () => {
     test('emits asyncDependenciesReady event when no dependencies are set to initializing', (done) => {
       jest.useFakeTimers();
@@ -1103,7 +1087,7 @@ describe('DropinModel', () => {
     test(
       'does not emit paymentMethodRequestable event until after three D secure verification has been completed',
       () => {
-        testContext.model._shouldWaitForVerifyCard = true;
+        testContext.model.shouldWaitForVerifyCard = true;
         testContext.model.setPaymentMethodRequestable({
           isRequestable: true,
           type: 'card'
@@ -1111,7 +1095,7 @@ describe('DropinModel', () => {
 
         expect(testContext.model._emit).not.toBeCalled();
 
-        testContext.model._shouldWaitForVerifyCard = false;
+        testContext.model.shouldWaitForVerifyCard = false;
 
         testContext.model.setPaymentMethodRequestable({
           isRequestable: true,

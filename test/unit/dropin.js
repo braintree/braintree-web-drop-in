@@ -1212,7 +1212,7 @@ describe('Dropin', () => {
       }
     );
 
-    test('calls verifyCardReady and setPaymentMethodRequestable when 3D secure is complete', done => {
+    test('sets shouldWaitForVerifyCard to false and calls setPaymentMethodRequestable when 3D secure is complete', done => {
       let instance;
       const fakePayload = {
         nonce: 'cool-nonce',
@@ -1231,14 +1231,13 @@ describe('Dropin', () => {
 
       instance._initialize(() => {
         jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
-        jest.spyOn(instance._model, 'verifyCardReady').mockResolvedValue();
         jest.spyOn(instance._model, 'setPaymentMethodRequestable').mockResolvedValue();
         instance._threeDSecure = {
           verify: jest.fn().mockResolvedValue(fakeNewPayload)
         };
 
         instance.requestPaymentMethod(() => {
-          expect(instance._model.verifyCardReady).toBeCalled();
+          expect(instance._model.shouldWaitForVerifyCard).toBe(false);
           expect(instance._model.setPaymentMethodRequestable).toBeCalledWith({
             isRequestable: true,
             type: fakeNewPayload.type,

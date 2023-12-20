@@ -119,8 +119,8 @@ describe('ThreeDSecure', () => {
       });
     });
 
-    test('calls verifyCardReady', () => {
-      jest.spyOn(testContext.model, 'verifyCardReady').mockResolvedValue();
+    test('sets shouldWaitForVerifyCard to true', () => {
+      expect(testContext.model.shouldWaitForVerifyCard).toBe(false);
 
       return testContext.tds.verify({
         nonce: 'old-nonce',
@@ -128,7 +128,7 @@ describe('ThreeDSecure', () => {
           bin: '123456'
         }
       }).then(() => {
-        expect(testContext.model.verifyCardReady).toBeCalled();
+        expect(testContext.model.shouldWaitForVerifyCard).toBe(true);
       });
     });
 

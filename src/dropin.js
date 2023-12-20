@@ -876,7 +876,7 @@ Dropin.prototype.requestPaymentMethod = function (options) {
       self._mainView.showLoadingIndicator();
 
       return self._threeDSecure.verify(payload, options.threeDSecure).then(function (newPayload) {
-        self._model.verifyCardReady();
+        self._model.shouldWaitForVerifyCard = false;
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;

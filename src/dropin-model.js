@@ -52,7 +52,7 @@ function DropinModel(options) {
   this.failedDependencies = {};
   this._options = options;
   this._setupComplete = false;
-  this._shouldWaitForVerifyCard = false;
+  this.shouldWaitForVerifyCard = false;
 
   while (this.rootNode.parentNode) {
     this.rootNode = this.rootNode.parentNode;
@@ -97,10 +97,6 @@ DropinModel.prototype.initialize = function () {
 
 DropinModel.prototype.confirmDropinReady = function () {
   this._setupComplete = true;
-};
-
-DropinModel.prototype.verifyCardReady = function () {
-  this._shouldWaitForVerifyCard = !this._shouldWaitForVerifyCard;
 };
 
 DropinModel.prototype.isPaymentMethodRequestable = function () {
@@ -228,7 +224,7 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
     return false;
   }
 
-  if (this._shouldWaitForVerifyCard) {
+  if (this.shouldWaitForVerifyCard) {
     return false;
   }
 
