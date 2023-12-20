@@ -52,6 +52,7 @@ function DropinModel(options) {
   this.failedDependencies = {};
   this._options = options;
   this._setupComplete = false;
+  this.shouldWaitForVerifyCard = false;
 
   while (this.rootNode.parentNode) {
     this.rootNode = this.rootNode.parentNode;
@@ -220,6 +221,10 @@ DropinModel.prototype._shouldEmitRequestableEvent = function (options) {
     // fixes issues with lazy loading of imports where event
     // should not be emitted
     // https://github.com/braintree/braintree-web-drop-in/issues/511
+    return false;
+  }
+
+  if (this.shouldWaitForVerifyCard) {
     return false;
   }
 

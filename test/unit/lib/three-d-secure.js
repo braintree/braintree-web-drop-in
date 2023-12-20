@@ -119,6 +119,19 @@ describe('ThreeDSecure', () => {
       });
     });
 
+    test('sets shouldWaitForVerifyCard to true', () => {
+      expect(testContext.model.shouldWaitForVerifyCard).toBe(false);
+
+      return testContext.tds.verify({
+        nonce: 'old-nonce',
+        details: {
+          bin: '123456'
+        }
+      }).then(() => {
+        expect(testContext.model.shouldWaitForVerifyCard).toBe(true);
+      });
+    });
+
     test('rejects if verifyCard rejects', () => {
       testContext.threeDSecureInstance.verifyCard.mockRejectedValue({
         message: 'A message'
