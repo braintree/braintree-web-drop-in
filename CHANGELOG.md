@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## UNRELEASED
+  - Update braintree-web to 3.99.2
+
 ## 1.42.0
   - Apple Pay
     - add error message prompting the customer to click the Apple Pay button when `requestPaymentMethod` is called.
