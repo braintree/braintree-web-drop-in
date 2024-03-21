@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## UNRELEASED
-  - Update braintree-web to 3.100.0
+  - Update braintree-web to 3.101.0
 
 ## 1.42.0
   - Apple Pay
