@@ -3,9 +3,7 @@
 var BaseView = require('./base-view');
 var PaymentMethodView = require('./payment-method-view');
 var DropinError = require('../lib/dropin-error');
-var classList = require('@braintree/class-list');
 var errors = require('../constants').errors;
-var Promise = require('../lib/promise');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 
 var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
@@ -49,7 +47,7 @@ PaymentMethodsView.prototype._initialize = function () {
       }
     }.bind(this));
 
-    classList.remove(this._editButton, 'braintree-hidden');
+    this._editButton.classList.remove('braintree-hidden');
   }
 };
 
@@ -59,7 +57,7 @@ PaymentMethodsView.prototype.removeActivePaymentMethod = function () {
   }
   this.activeMethodView.setActive(false);
   this.activeMethodView = null;
-  classList.add(this._headingLabel, 'braintree-no-payment-method-selected');
+  this._headingLabel.classList.add('braintree-no-payment-method-selected');
 };
 
 PaymentMethodsView.prototype._getPaymentMethodString = function () {
@@ -76,7 +74,7 @@ PaymentMethodsView.prototype._getPaymentMethodString = function () {
 };
 
 PaymentMethodsView.prototype.enableEditMode = function () {
-  classList.add(this.container, 'braintree-methods--edit');
+  this.container.classList.add('braintree-methods--edit');
 
   this._editButton.innerHTML = this.strings.deleteCancelButton;
   this._headingLabel.innerHTML = this.strings.editPaymentMethods;
@@ -87,7 +85,7 @@ PaymentMethodsView.prototype.enableEditMode = function () {
 };
 
 PaymentMethodsView.prototype.disableEditMode = function () {
-  classList.remove(this.container, 'braintree-methods--edit');
+  this.container.classList.remove('braintree-methods--edit');
 
   this._editButton.innerHTML = this.strings.edit;
   this._headingLabel.innerHTML = this._getPaymentMethodString();
@@ -148,7 +146,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
     previousActiveMethodView.setActive(false);
   }
   this.activeMethodView.setActive(true);
-  classList.remove(this._headingLabel, 'braintree-no-payment-method-selected');
+  this._headingLabel.classList.remove('braintree-no-payment-method-selected');
 };
 
 PaymentMethodsView.prototype.requestPaymentMethod = function () {

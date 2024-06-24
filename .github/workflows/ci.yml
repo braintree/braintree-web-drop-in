@@ -1,0 +1,339 @@
+name: "Braintree Web Drop-in CI"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  PAYPAL_USERNAME: ${{ secrets.PAYPAL_USERNAME }}
+  PAYPAL_PASSWORD: ${{ secrets.PAYPAL_PASSWORD }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+
+      - name: Setup Node ⬢
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Cache node modules 🗃
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          # npm packages are cached in node_modules
+          # npm also provides a local cache in .npm
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-modules-build-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Node Modules 📦
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: npm install
+
+  unit-tests:
+    name: Unit Tests and Linter
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+
+      - name: Setup Node ⬢
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Restore Node Modules from cache 📦
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          # npm packages are cached in node_modules
+          # npm also provides a local cache in .npm
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-modules-build-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Verify Node Modules 📦
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: echo "Restoring node module cache failed. Check your Github Actions ci.yml"; exit 1;
+
+      - name: Run Unit Tests 🧪
+        run: npm test
+
+  publishing-tests:
+    name: Publishing Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+
+      - name: Setup Node ⬢
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Restore Node Modules from cache 📦
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          # npm packages are cached in node_modules
+          # npm also provides a local cache in .npm
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-modules-build-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Verify Node Modules 📦
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: echo "Restoring node module cache failed. Check your Github Actions ci.yml"; exit 1;
+
+      - name: Run Publishing Tests 📕
+        run: npm run test:publishing
+
+  non-paypal:
+    name: Non-PayPal Tests on Chrome, Firefox and Safari 🚔🔥🐯
+    needs: setup
+    concurrency: browserstack_lock
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+
+      - name: Setup Node ⬢
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Restore Node Modules from cache 📦
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          # npm packages are cached in node_modules
+          # npm also provides a local cache in .npm
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-modules-build-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Verify Node Modules 📦
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: echo "Restoring node module cache failed. Check your Github Actions ci.yml"; exit 1;
+
+      - name: BrowserStack Env Setup 🥞
+        uses: "browserstack/github-actions/setup-env@master"
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          build-name: BUILD_INFO
+          project-name: REPO_NAME
+
+      - name: BrowserStackLocal Setup 🥞
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: start
+          local-identifier: random
+
+      - name: Demo App Setup 👩‍💻
+        run: |
+          rm -rf node_modules/@types/mocha
+          sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+          npm run development & echo "starting integration app"
+
+      - name: Non-PayPal tests on Chrome, Safari and Firefox
+        run: npm run test:integration:paypal-skipped
+        env:
+          ONLY_BROWSERS: chrome,safari,firefox
+
+      - name: BrowserStackLocal Stop 🥞
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: stop
+
+  paypal-on-firefox:
+    needs: setup
+    concurrency: browserstack_lock
+    name: PayPal Tests on Firefox 🔥
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+
+      - name: Setup Node ⬢
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Restore Node Modules from cache 📦
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          # npm packages are cached in node_modules
+          # npm also provides a local cache in .npm
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-modules-build-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Verify Node Modules 📦
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: echo "Restoring node module cache failed. Check your Github Actions ci.yml"; exit 1;
+
+      - name: BrowserStack Env Setup 🥞
+        uses: "browserstack/github-actions/setup-env@master"
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          build-name: BUILD_INFO
+          project-name: REPO_NAME
+
+      - name: BrowserStackLocal Setup 🥞
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: start
+          local-identifier: random
+
+      - name: Demo App Setup 👩‍💻
+        run: |
+          rm -rf node_modules/@types/mocha
+          sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+          npm run development & echo "starting integration app"
+
+      - name: PayPal tests on Firefox 🔥
+        env:
+          ONLY_BROWSERS: firefox
+        run: npm run test:integration:paypal-only
+
+      - name: BrowserStackLocal Stop 🥞
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: stop
+
+  paypal-on-chrome:
+    needs: setup
+    concurrency: browserstack_lock
+    name: PayPal Tests on Chrome 🚔
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+
+      - name: Setup Node ⬢
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Restore Node Modules from cache 📦
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          # npm packages are cached in node_modules
+          # npm also provides a local cache in .npm
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-modules-build-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Verify Node Modules 📦
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: echo "Restoring node module cache failed. Check your Github Actions ci.yml"; exit 1;
+
+      - name: BrowserStack Env Setup 🥞
+        uses: "browserstack/github-actions/setup-env@master"
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          build-name: BUILD_INFO
+          project-name: REPO_NAME
+
+      - name: BrowserStackLocal Setup 🥞
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: start
+          local-identifier: random
+
+      - name: Demo App Setup 👩‍💻
+        run: |
+          rm -rf node_modules/@types/mocha
+          sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+          npm run development & echo "starting integration app"
+
+      - name: PayPal tests on Chrome 🚔
+        env:
+          ONLY_BROWSERS: chrome
+        run: npm run test:integration:paypal-only
+
+      - name: BrowserStackLocal Stop 🥞
+        uses: "browserstack/github-actions/setup-local@master"
+        with:
+          local-testing: stop
+
+  # safari is struggling to open the PayPal popup for some reason
+  # paypal-on-safari:
+  #   needs: setup
+  #   concurrency: browserstack_lock
+  #   name: PayPal Tests on Safari 🐯
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #    - name: Checkout 🛎
+  #     uses: actions/checkout@v3
+
+  #     - name: Setup Node ⬢
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 14
+
+  #     - name: Restore Node Modules from cache 📦
+  #       id: cache-nodemodules
+  #       uses: actions/cache@v3
+  #       with:
+  #         # npm packages are cached in node_modules
+  #         # npm also provides a local cache in .npm
+  #         path: |
+  #           node_modules
+  #           ~/.npm
+  #         key: ${{ runner.os }}-node-modules-build-${{ hashFiles('**/package-lock.json') }}
+
+  #     - name: Verify Node Modules 📦
+  #       if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+  #       run: echo "Restoring node module cache failed. Check your Github Actions ci.yml"; exit 1;
+
+  #     - name: BrowserStack Env Setup 🥞
+  #       uses: "browserstack/github-actions/setup-env@master"
+  #       with:
+  #         username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+  #         access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+  #         build-name: BUILD_INFO
+  #         project-name: REPO_NAME
+
+  #     - name: BrowserStackLocal Setup 🥞
+  #       uses: "browserstack/github-actions/setup-local@master"
+  #       with:
+  #         local-testing: start
+  #         local-identifier: random
+
+  #     - name: Demo App Setup 👩‍💻
+  #       run: |
+  #         rm -rf node_modules/@types/mocha
+  #         sudo echo "127.0.0.1 bs-local.com" | sudo tee -a /etc/hosts
+  #         npm run development & echo "starting integration app"
+
+  #     - name: PayPal tests on Safari 🐯
+  #       env:
+  #         ONLY_BROWSERS: safari
+  #       run: npm run test:integration:paypal-only
+
+  #     - name: BrowserStackLocal Stop 🥞
+  #       uses: "browserstack/github-actions/setup-local@master"
+  #       with:
+  #         local-testing: stop

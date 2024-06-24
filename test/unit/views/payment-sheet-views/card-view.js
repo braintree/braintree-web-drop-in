@@ -1,7 +1,6 @@
 
 const BaseView = require('../../../../src/views/base-view');
 const CardView = require('../../../../src/views/payment-sheet-views/card-view');
-const classList = require('@braintree/class-list');
 const DropinModel = require('../../../../src/dropin-model');
 const fake = require('../../../helpers/fake');
 const fs = require('fs');
@@ -14,6 +13,7 @@ const {
 
 const mainHTML = fs.readFileSync(__dirname + '/../../../../src/html/main.html', 'utf8');
 const CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = require('../../../../src/constants').CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
+const constants = require('../../../../src/constants');
 
 describe('CardView', () => {
   let fakeClient, fakeHostedFieldsInstance, cardElement, container;
@@ -69,6 +69,61 @@ describe('CardView', () => {
       fakeModel = fake.model();
 
       return fakeModel.initialize();
+    });
+
+    test('sets aria-required attribute on hosted fields', () => {
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: ['cvv', 'postal_code'],
+          creditCards: {
+            supportedCardTypes: []
+          }
+        }
+      });
+
+      fakeModel.merchantConfiguration.card = {
+        cardholderName: true
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'number', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'expirationDate', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cardholderName', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'postalCode', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalledWith({ field: 'cvv', attribute: 'aria-required', value: true });
+      });
+    });
+
+    test('does not set aria-required attribute on hosted field if it is not rendered', () => {
+      fakeClient.getConfiguration.mockReturnValue({
+        gatewayConfiguration: {
+          challenges: [],
+          creditCards: {
+            supportedCardTypes: []
+          }
+        }
+      });
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      return view.initialize().then(() => {
+        expect(fakeHostedFieldsInstance.setAttribute).toBeCalled();
+        expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'cvv', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'postalCode', attribute: 'aria-required', value: true });
+        expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'cardholderName', attribute: 'aria-required', value: true });
+      });
     });
 
     test('defaults merchant configuration when not configured with a card configuration', () => {
@@ -507,7 +562,10 @@ describe('CardView', () => {
         strings: strings
       });
 
+      jest.spyOn(view, '_renderCardIcons');
+
       return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
         supportedCardTypes.forEach(cardType => {
           const cardIcon = cardElement.querySelector('[data-braintree-id="' + cardType + '-card-icon"]');
 
@@ -532,6 +590,87 @@ describe('CardView', () => {
 
           expect(cardIcon.classList.contains('braintree-hidden')).toBe(true);
         });
+      });
+    });
+
+    test('hides card icons if they are overriden', () => {
+      fakeModel.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              supportedCardBrands: {
+                'american-express': false,
+                jcb: false
+              }
+            }
+          }
+        }
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      jest.spyOn(view, '_renderCardIcons');
+
+      return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
+        const amexIcon = cardElement.querySelector('[data-braintree-id="' + constants.cardTypeIcons['american-express'] + '-card-icon"]');
+        const jcbIcon = cardElement.querySelector('[data-braintree-id="' + constants.cardTypeIcons.jcb + '-card-icon"]');
+
+        expect(amexIcon.classList.contains('braintree-hidden')).toBe(true);
+        expect(jcbIcon.classList.contains('braintree-hidden')).toBe(true);
+      });
+    });
+
+    test('does not error if overridden icons is empty', () => {
+      fakeModel.merchantConfiguration.card = {
+        overrides: {}
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      jest.spyOn(view, '_renderCardIcons');
+
+      return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
+        expect(view._renderCardIcons).toReturn();
+      });
+    });
+
+    test('does not error if merchant passes in an unknown card vendor to card overrides', () => {
+      fakeModel.merchantConfiguration.card = {
+        overrides: {
+          fields: {
+            number: {
+              supportedCardBrands: {
+                'unknown-card-vendor': false
+              }
+            }
+          }
+        }
+      };
+
+      const view = new CardView({
+        element: cardElement,
+        model: fakeModel,
+        client: fakeClient,
+        strings: strings
+      });
+
+      jest.spyOn(view, '_renderCardIcons');
+
+      return view.initialize().then(() => {
+        expect(view._renderCardIcons).toBeCalledTimes(1);
+        expect(view._renderCardIcons).toReturn();
       });
     });
 
@@ -995,7 +1134,7 @@ describe('CardView', () => {
         };
         const numberFieldGroup = cardElement.querySelector('[data-braintree-id="number-field-group"]');
 
-        classList.remove(numberFieldGroup, 'braintree-form__field-group--is-focused');
+        numberFieldGroup.classList.remove('braintree-form__field-group--is-focused');
 
         return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).toBe(true);
@@ -1027,7 +1166,7 @@ describe('CardView', () => {
           }
         };
 
-        classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+        numberFieldGroup.classList.add('braintree-form__field-group--is-focused');
 
         return cardView.initialize().then(() => {
           expect(cardView.model._emit).toBeCalledWith('card:blur', eventPayload);
@@ -1047,7 +1186,7 @@ describe('CardView', () => {
             }
           };
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--is-focused');
+          numberFieldGroup.classList.add('braintree-form__field-group--is-focused');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--is-focused')).toBe(false);
@@ -1078,11 +1217,39 @@ describe('CardView', () => {
           }
         });
 
-        classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+        numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
         return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
           expect(numberFieldError.textContent).toBe('This card number is not valid.');
+        });
+      });
+
+      test('removes field errors if field is potentially valid', () => {
+        eventPayload = {
+          emittedBy: 'number',
+          fields: {
+            number: {
+              isEmpty: false,
+              isPotentiallyValid: true,
+              isValid: false
+            }
+          }
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: ['cvv'],
+            creditCards: {
+              supportedCardTypes: ['Visa']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).toBeCalledTimes(1);
         });
       });
 
@@ -1124,7 +1291,7 @@ describe('CardView', () => {
 
           cardView.model = fake.model(modelOptions);
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
@@ -1172,7 +1339,7 @@ describe('CardView', () => {
 
           cardView.model = fake.model(modelOptions);
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
           cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -1223,7 +1390,7 @@ describe('CardView', () => {
 
           cardView.model = fake.model(modelOptions);
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -1268,7 +1435,7 @@ describe('CardView', () => {
 
           cardView.model = fake.model(modelOptions);
 
-          classList.remove(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.remove('braintree-form__field-group--has-error');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -1300,6 +1467,73 @@ describe('CardView', () => {
         });
       });
 
+      test('hides field errors when card type changes and card type is supported', () => {
+        eventPayload = {
+          cards: [{ type: 'master-card' }],
+          emittedBy: 'number'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).toBeCalledTimes(1);
+          expect(cardView.hideFieldError).toBeCalledWith('number');
+        });
+      });
+
+      test('does not hide field errors when card type changes and card type is not supported', () => {
+        eventPayload = {
+          cards: [{ type: 'Maestro' }],
+          emittedBy: 'number'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).not.toBeCalled();
+        });
+      });
+
+      test('does not hide field errors when card did not emit card change event', () => {
+        eventPayload = {
+          cards: [{ type: 'MasterCard' }],
+          emittedBy: 'cvv'
+        };
+
+        client.getConfiguration.mockReturnValue({
+          gatewayConfiguration: {
+            challenges: [],
+            creditCards: {
+              supportedCardTypes: ['MasterCard']
+            }
+          }
+        });
+
+        jest.spyOn(cardView, 'hideFieldError');
+
+        return cardView.initialize().then(() => {
+          expect(cardView.hideFieldError).not.toBeCalled();
+        });
+      });
+
       test(
         'adds the card-type-known class when there is one possible card type',
         () => {
@@ -1326,7 +1560,7 @@ describe('CardView', () => {
             emittedBy: 'number'
           };
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+          numberFieldGroup.classList.add('braintree-form__field-group--card-type-known');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(false);
@@ -1344,7 +1578,7 @@ describe('CardView', () => {
             emittedBy: 'number'
           };
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+          numberFieldGroup.classList.add('braintree-form__field-group--card-type-known');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--card-type-known')).toBe(false);
@@ -1538,7 +1772,7 @@ describe('CardView', () => {
           });
 
           return cardView.initialize().then(() => {
-            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'cvv', attribute: 'placeholder', value: '•••' });
           });
         }
       );
@@ -1559,7 +1793,7 @@ describe('CardView', () => {
           };
 
           return cardView.initialize().then(() => {
-            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ attribute: 'placeholder', field: 'cvv', value: '•••' });
           });
         }
       );
@@ -1583,7 +1817,8 @@ describe('CardView', () => {
           };
 
           return cardView.initialize().then(() => {
-            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+            expect(fakeHostedFieldsInstance.setAttribute).toBeCalled();
+            expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({ field: 'cvv' });
           });
         }
       );
@@ -1638,7 +1873,7 @@ describe('CardView', () => {
             }
           };
 
-          classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
+          numberFieldGroup.classList.add('braintree-form__field-group--has-error');
 
           return cardView.initialize().then(() => {
             expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -1924,7 +2159,7 @@ describe('CardView', () => {
           }
         };
 
-        classList.add(numberFieldGroup, 'braintree-form__field-group--has-error');
+        numberFieldGroup.classList.add('braintree-form__field-group--has-error');
 
         return cardView.initialize().then(() => {
           expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
@@ -2313,22 +2548,13 @@ describe('CardView', () => {
     test(
       'sets the aria-invalid attribute on an input when a field error is hidden',
       () => {
-        const input = {
-          id: {
-            indexOf: function () {
-              return 1;
-            }
-          },
-          setAttribute: jest.fn()
-        };
-        const fieldGroup = {
-          querySelector: function () {
-            return input;
-          }
-        };
+        const input = document.createElement('input');
+        const fieldGroup = document.createElement('div');
 
+        fieldGroup.appendChild(input);
+
+        jest.spyOn(input, 'setAttribute').mockImplementation();
         jest.spyOn(cardView, 'getElementById').mockReturnValue(fieldGroup);
-        jest.spyOn(classList, 'add').mockImplementation();
 
         cardView.showFieldError('foo');
 
@@ -2367,22 +2593,13 @@ describe('CardView', () => {
     test(
       'removes the aria-invalid attribute on an input when a field error is hidden',
       () => {
-        const input = {
-          id: {
-            indexOf: function () {
-              return 1;
-            }
-          },
-          removeAttribute: jest.fn()
-        };
-        const fieldGroup = {
-          querySelector: function () {
-            return input;
-          }
-        };
+        const input = document.createElement('input');
+        const fieldGroup = document.createElement('div');
 
+        fieldGroup.appendChild(input);
+
+        jest.spyOn(input, 'removeAttribute').mockImplementation();
         jest.spyOn(cardView, 'getElementById').mockReturnValue(fieldGroup);
-        jest.spyOn(classList, 'remove').mockImplementation();
 
         cardView.hideFieldError('foo');
 
@@ -2655,12 +2872,11 @@ describe('CardView', () => {
       done => {
         const stubPayload = {};
 
-        jest.spyOn(classList, 'remove').mockImplementation();
         fakeHostedFieldsInstance.tokenize.mockResolvedValue(stubPayload);
 
         cardView.tokenize().then(() => {
           setTimeout(() => {
-            expect(classList.remove).toBeCalledWith(cardElement, 'braintree-sheet--loading');
+            expect(cardElement.classList.contains('braintree-sheet--loading')).toBe(false);
             done();
           }, CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
         });
@@ -2672,11 +2888,10 @@ describe('CardView', () => {
       () => {
         expect.assertions(1);
 
-        jest.spyOn(classList, 'remove').mockImplementation();
         fakeHostedFieldsInstance.tokenize.mockRejectedValue(new Error('foo'));
 
         return cardView.tokenize().catch(() => {
-          expect(classList.remove).toBeCalledWith(cardElement, 'braintree-sheet--loading');
+          expect(cardElement.classList.contains('braintree-sheet--loading')).toBe(false);
         });
       }
     );
@@ -2711,10 +2926,6 @@ describe('CardView', () => {
   });
 
   describe('field errors', () => {
-    beforeEach(() => {
-      jest.spyOn(classList, 'add').mockImplementation();
-    });
-
     describe('showFieldError', () => {
       let cardView;
 
@@ -2756,7 +2967,11 @@ describe('CardView', () => {
 
           cardView.showFieldError('foo', 'errorMessage');
 
-          expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalled();
+          expect(fakeHostedFieldsInstance.setAttribute).not.toBeCalledWith({
+            field: 'foo',
+            attribute: 'aria-invalid',
+            value: true
+          });
         }
       );
     });

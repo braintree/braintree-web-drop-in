@@ -1,7 +1,6 @@
 'use strict';
 
 var assign = require('../../lib/assign').assign;
-var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 var BasePayPalView = require('./base-paypal-view');
 

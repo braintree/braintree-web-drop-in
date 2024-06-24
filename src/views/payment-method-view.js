@@ -2,7 +2,6 @@
 
 var analytics = require('../lib/analytics');
 var BaseView = require('./base-view');
-var classList = require('@braintree/class-list');
 var constants = require('../constants');
 var fs = require('fs');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
@@ -80,20 +79,20 @@ PaymentMethodView.prototype._initialize = function () {
 PaymentMethodView.prototype.setActive = function (isActive) {
   // setTimeout required to animate addition of new payment methods
   setTimeout(function () {
-    classList.toggle(this.element, 'braintree-method--active', isActive);
+    this.element.classList.toggle('braintree-method--active', isActive);
   }.bind(this), 0);
 };
 
 PaymentMethodView.prototype.enableEditMode = function () {
-  classList.add(this.checkMark, 'braintree-hidden');
+  this.checkMark.classList.add('braintree-hidden');
   if (this.paymentMethod.hasSubscription) {
-    classList.add(this.element, 'braintree-method--disabled');
+    this.element.classList.add('braintree-method--disabled');
   }
 };
 
 PaymentMethodView.prototype.disableEditMode = function () {
-  classList.remove(this.checkMark, 'braintree-hidden');
-  classList.remove(this.element, 'braintree-method--disabled');
+  this.checkMark.classList.remove('braintree-hidden');
+  this.element.classList.remove('braintree-method--disabled');
 };
 
 PaymentMethodView.prototype.teardown = function () {

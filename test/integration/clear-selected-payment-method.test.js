@@ -9,6 +9,7 @@ describe('Drop-in#clearSelectedPaymentMethod', function () {
     browser.hostedFieldSendInput('number');
     browser.hostedFieldSendInput('expirationDate');
     browser.hostedFieldSendInput('cvv');
+    browser.hostedFieldSendInput('postalCode');
 
     browser.submitPay();
 

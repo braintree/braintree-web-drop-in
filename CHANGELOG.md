@@ -1,8 +1,98 @@
 # CHANGELOG
 
+## UNRELEASED
+  - Update braintree-web to 3.101.3
+
+## 1.42.0
+  - Apple Pay
+    - add error message prompting the customer to click the Apple Pay button when `requestPaymentMethod` is called.
+  - 3D Secure
+    - Fix issue where `paymentMethodRequestable` event would fire before 3DS challenge has been completed. (closes [#805](https://github.com/braintree/braintree-web-drop-in/issues/805))
+  - Update braintree-web to 3.99.0
+
+## 1.41.0
+  - Update braintree-web to 3.97.4
+  - Accessibility improvements
+    - Add `aria-hidden` attribute to generic card icon
+    - Add `aria-required` attribute to Hosted Fields
+  - Update browser-detection to v1.17.1
+  - Update Google Pay CSP Directives
+  - Updated Apple Pay logo to scale correctly
+
+## 1.40.2
+  - Fix issue where some assets for the Drop-In would not load from the CDN
+
+## 1.40.1
+  - Update braintree-web to 3.97.1
+
+## 1.40.0
+  - Add CA compliance notice of collection
+  - Venmo: add error message prompting the customer to click the Venmo button when `requestPaymentMethod` is called. (closes [#882](https://github.com/braintree/braintree-web-drop-in/issues/845))
+
+## 1.39.1
+  - Update braintree-web to v3.96.1
+
+## 1.39.0
+  - Update braintree-web to v3.96.0
+
+## 1.38.1
+ - Fix issue where `clearSelectedPaymentMethod` does not navigate back to the initial view unless we are in the methods view (issue [#883](https://github.com/braintree/braintree-web-drop-in/issues/883))
+ - Add alert role to error message divs beneath card inputs. (Issue [#845](https://github.com/braintree/braintree-web-drop-in/issues/845))
+
+## 1.38.0
+  - Fix issue where supportedCardBrands overrides were incorrectly showing images for hidden card brands
+
+## 1.37.0
+  - Drop dependency on `promise-polyfill`
+  - Drop dependency on @braintree/class-list
+  - Update braintree-web to 3.94.0
+
+## 1.36.1
+  - Update braintree-web to 3.92.1
+
+## 1.36.0
+  - Update braintree-web to v3.92.0
+
+## 1.35.0
+
+  - Add `hiddenVaultedPaymentMethodTypes` option to `dropin.create`
+  - Update braintree-web to v3.91.0
+
+## 1.34.0
+
+  - Update braintree-web to v3.90.0
+
+## 1.33.7
+
+  - Better handling of card validation cases to ensure new values are re-evaluated.
+
+## 1.33.6
+
+  - Update braintree-web to v3.88.4
+
+## 1.33.5
+
+  - Update braintree-web to v3.88.3
+
+## 1.33.4
+
+  - Update braintree-web to v3.86.0
+
+## 1.33.3
+
+  - Update braintree-web to v3.85.5
+  - Fix test app accessibility errors
+
+## 1.33.2
+
+  - Update VISA icon (SVG)
+
 ## 1.33.1
-  - Fix issue where Drop-In fields escape Drop-In container when errors are present on multiple inputs
-  - Fix issue where Hipercard icon was not hidden (#812, thanks @tamtamchik)
+
+  - Fix issue where Drop-In fields escape Drop-In container when errors
+    are present on multiple inputs
+  - Fix issue where Hipercard icon was not hidden (\#812, thanks
+    @tamtamchik)
   - Update braintree-web to v3.85.3
   - Update promise-polyfill to v8.2.3
 

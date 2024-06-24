@@ -2,7 +2,6 @@
 
 var assign = require('./lib/assign').assign;
 var analytics = require('./lib/analytics');
-var classList = require('@braintree/class-list');
 var constants = require('./constants');
 var DropinError = require('./lib/dropin-error');
 var DropinModel = require('./dropin-model');
@@ -10,12 +9,10 @@ var EventEmitter = require('@braintree/event-emitter');
 var assets = require('@braintree/asset-loader');
 var fs = require('fs');
 var MainView = require('./views/main-view');
-var paymentMethodsViewID = require('./views/payment-methods-view').ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
 var translations = require('./translations').translations;
 var isUtf8 = require('./lib/is-utf-8');
 var uuid = require('@braintree/uuid');
-var Promise = require('./lib/promise');
 var sanitizeHtml = require('./lib/sanitize-html');
 var DataCollector = require('./lib/data-collector');
 var ThreeDSecure = require('./lib/three-d-secure');
@@ -716,9 +713,10 @@ Dropin.prototype._removeUnvaultedPaymentMethods = function (filter) {
 };
 
 Dropin.prototype._navigateToInitialView = function () {
-  var isOnMethodsView = this._mainView.primaryView.ID === paymentMethodsViewID;
+  var initViewId = this._model.getInitialViewId();
+  var isOnInitView = this._mainView.primaryView.ID === initViewId;
 
-  if (!isOnMethodsView) {
+  if (isOnInitView) {
     return;
   }
 
@@ -726,7 +724,7 @@ Dropin.prototype._navigateToInitialView = function () {
     return;
   }
 
-  this._mainView.setPrimaryView(this._model.getInitialViewId());
+  this._mainView.setPrimaryView(initViewId);
 };
 
 Dropin.prototype._supportsPaymentOption = function (paymentOption) {
@@ -750,7 +748,7 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
     var error = this._model.failedDependencies[paymentMethodId];
     var errorMessageDiv = div.querySelector('.braintree-option__disabled-message');
 
-    classList.add(div, 'braintree-disabled');
+    div.classList.add('braintree-disabled');
     div.removeEventListener('click', clickHandler);
     errorMessageDiv.innerHTML = constants.errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
     console.error(error); // eslint-disable-line no-console
@@ -878,10 +876,16 @@ Dropin.prototype.requestPaymentMethod = function (options) {
       self._mainView.showLoadingIndicator();
 
       return self._threeDSecure.verify(payload, options.threeDSecure).then(function (newPayload) {
+        self._model.shouldWaitForVerifyCard = false;
         payload.nonce = newPayload.nonce;
         payload.liabilityShifted = newPayload.liabilityShifted;
         payload.liabilityShiftPossible = newPayload.liabilityShiftPossible;
         payload.threeDSecureInfo = newPayload.threeDSecureInfo;
+        self._model.setPaymentMethodRequestable({
+          isRequestable: Boolean(newPayload),
+          type: newPayload.type,
+          selectedPaymentMethod: payload
+        });
 
         self._mainView.hideLoadingIndicator();
 

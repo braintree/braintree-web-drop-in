@@ -37,6 +37,19 @@ module.exports = {
     Hiper: 'hiper',
     Hipercard: 'hipercard'
   },
+  cardTypeIcons: {
+    visa: 'visa',
+    mastercard: 'master-card',
+    'american-express': 'american-express',
+    'diners-club': 'diners-club',
+    discover: 'discover',
+    jcb: 'jcb',
+    'union-pay': 'unionpay',
+    maestro: 'maestro',
+    elo: 'elo',
+    hiper: 'hiper',
+    hipercard: 'hipercard'
+  },
   configurationCardTypes: {
     visa: 'Visa',
     'master-card': 'MasterCard',

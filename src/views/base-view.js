@@ -1,10 +1,8 @@
 'use strict';
 
 var assign = require('../lib/assign').assign;
-var classList = require('@braintree/class-list');
 var DropinError = require('../lib/dropin-error');
 var errors = require('../constants').errors;
-var Promise = require('../lib/promise');
 
 function BaseView(options) {
   options = options || {};
@@ -34,7 +32,7 @@ BaseView.prototype.teardown = function () {
 
 BaseView.prototype.preventUserAction = function () {
   if (this.element) {
-    classList.add(this.element, 'braintree-sheet--loading');
+    this.element.classList.add('braintree-sheet--loading');
   }
 
   this.model.preventUserAction();
@@ -42,7 +40,7 @@ BaseView.prototype.preventUserAction = function () {
 
 BaseView.prototype.allowUserAction = function () {
   if (this.element) {
-    classList.remove(this.element, 'braintree-sheet--loading');
+    this.element.classList.remove('braintree-sheet--loading');
   }
 
   this.model.allowUserAction();

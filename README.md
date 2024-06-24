@@ -1,6 +1,6 @@
 # Braintree Web Drop-in
 
- [![Build Status](https://github.com/braintree/braintree-web-drop-in/workflows/Unit%20Tests/badge.svg)](https://github.com/braintree/braintree-web-drop-in/actions?query=workflow%3A%22Unit+Tests%22) [![Build Status](https://github.com/braintree/braintree-web-drop-in/workflows/Integration%20Tests%20-%20Internet%20Explorer/badge.svg)](https://github.com/braintree/braintree-web-drop-in/actions?query=workflow%3A%22Integration+Tests+-+Internet+Explorer%22) [![Build Status](https://github.com/braintree/braintree-web-drop-in/workflows/Integration%20Tests%20-%20Chrome,%20Firefox%20&%20Safari/badge.svg)](https://github.com/braintree/braintree-web-drop-in/actions?query=workflow%3A%22Integration+Tests+-+Chrome%2C+Firefox+%26+Safari%22) [![Build Status](https://github.com/braintree/braintree-web-drop-in/workflows/Publishing%20Tests/badge.svg)](https://github.com/braintree/braintree-web-drop-in/actions?query=workflow%3A%22Publishing+Tests%22)
+ [![Build Status](https://github.com/braintree/braintree-web-drop-in/workflows/Unit%20Tests/badge.svg)](https://github.com/braintree/braintree-web-drop-in/actions?query=workflow%3A%22Unit+Tests%22) [![Build Status](https://github.com/braintree/braintree-web-drop-in/workflows/Integration%20Tests%20-%20Chrome,%20Firefox%20&%20Safari/badge.svg)](https://github.com/braintree/braintree-web-drop-in/actions?query=workflow%3A%22Integration+Tests+-+Chrome%2C+Firefox+%26+Safari%22) [![Build Status](https://github.com/braintree/braintree-web-drop-in/workflows/Publishing%20Tests/badge.svg)](https://github.com/braintree/braintree-web-drop-in/actions?query=workflow%3A%22Publishing+Tests%22)
 
  [![npm version](https://badge.fury.io/js/braintree-web-drop-in.svg)](https://badge.fury.io/js/braintree-web-drop-in)
 
@@ -35,7 +35,7 @@ This is a full example of a Drop-in integration that only accepts credit cards.
     <div id="dropin-container"></div>
     <button id="submit-button">Purchase</button>
 
-    <script src="https://js.braintreegateway.com/web/dropin/1.33.1/js/dropin.min.js"></script>
+    <script src="https://js.braintreegateway.com/web/dropin/1.42.0/js/dropin.min.js"></script>
 
     <script>
       var submitButton = document.querySelector('#submit-button');

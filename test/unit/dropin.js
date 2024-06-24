@@ -1212,6 +1212,43 @@ describe('Dropin', () => {
       }
     );
 
+    test('sets shouldWaitForVerifyCard to false and calls setPaymentMethodRequestable when 3D secure is complete', done => {
+      let instance;
+      const fakePayload = {
+        nonce: 'cool-nonce',
+        type: 'CreditCard'
+      };
+      const fakeNewPayload = {
+        nonce: 'new-nonce',
+        liabilityShifted: true,
+        liabilityShiftPossible: true,
+        type: fakePayload.type
+      };
+
+      testContext.dropinOptions.merchantConfiguration.threeDSecure = {};
+
+      instance = new Dropin(testContext.dropinOptions);
+
+      instance._initialize(() => {
+        jest.spyOn(instance._mainView, 'requestPaymentMethod').mockResolvedValue(fakePayload);
+        jest.spyOn(instance._model, 'setPaymentMethodRequestable').mockResolvedValue();
+        instance._threeDSecure = {
+          verify: jest.fn().mockResolvedValue(fakeNewPayload)
+        };
+
+        instance.requestPaymentMethod(() => {
+          expect(instance._model.shouldWaitForVerifyCard).toBe(false);
+          expect(instance._model.setPaymentMethodRequestable).toBeCalledWith({
+            isRequestable: true,
+            type: fakeNewPayload.type,
+            selectedPaymentMethod: fakeNewPayload
+          });
+
+          done();
+        });
+      });
+    });
+
     test(
       'does not call 3D Secure if network tokenized google pay',
       done => {
@@ -1913,8 +1950,9 @@ describe('Dropin', () => {
     );
 
     test(
-      'does not set primary view if current primary view is not methods',
+      'does not set primary view if current primary view is already initial view',
       () => {
+        const initialViewID = 'options';
         const instance = new Dropin(testContext.dropinOptions);
         const getViewStub = jest.fn();
         const fakePayPalView = {
@@ -1929,7 +1967,7 @@ describe('Dropin', () => {
         instance._mainView = {
           getView: getViewStub,
           primaryView: {
-            ID: 'any-id-but-methods'
+            ID: initialViewID
           },
           setPrimaryView: jest.fn()
         };
@@ -1937,7 +1975,7 @@ describe('Dropin', () => {
           getPaymentMethods: jest.fn().mockReturnValue([]),
           removePaymentMethod: jest.fn(),
           hasPaymentMethods: jest.fn().mockReturnValue(false),
-          getInitialViewId: jest.fn().mockReturnValue('options')
+          getInitialViewId: jest.fn().mockReturnValue(initialViewID)
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -1951,6 +1989,50 @@ describe('Dropin', () => {
         instance.updateConfiguration('paypal', 'foo', 'bar');
 
         expect(instance._mainView.setPrimaryView).not.toBeCalled();
+      }
+    );
+
+    test(
+      'sets primary view if current primary view is not the initial view',
+      () => {
+        const initialViewID = 'options';
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakePayPalView = {
+          updateConfiguration: jest.fn()
+        };
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'PayPalAccount'
+          })
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          primaryView: {
+            ID: 'any-id-but-options'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          getPaymentMethods: jest.fn().mockReturnValue([]),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue(initialViewID)
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'paypal') {
+            return fakePayPalView;
+          } else if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.updateConfiguration('paypal', 'foo', 'bar');
+
+        expect(instance._mainView.setPrimaryView).toBeCalledTimes(1);
+        expect(instance._mainView.setPrimaryView).toBeCalledWith(initialViewID);
       }
     );
 
@@ -2149,8 +2231,9 @@ describe('Dropin', () => {
     );
 
     test(
-      'does not set primary view if current primary view is not methods',
+      'does not set primary view if current primary view is already initial view',
       () => {
+        const initialViewID = 'paypal';
         const instance = new Dropin(testContext.dropinOptions);
         const getViewStub = jest.fn();
         const fakeMethodsView = {
@@ -2164,7 +2247,7 @@ describe('Dropin', () => {
           showLoadingIndicator: jest.fn(),
           hideLoadingIndicator: jest.fn(),
           primaryView: {
-            ID: 'any-id-but-methods'
+            ID: initialViewID
           },
           setPrimaryView: jest.fn()
         };
@@ -2174,7 +2257,7 @@ describe('Dropin', () => {
           removeActivePaymentMethod: jest.fn(),
           removePaymentMethod: jest.fn(),
           hasPaymentMethods: jest.fn().mockReturnValue(false),
-          getInitialViewId: jest.fn().mockReturnValue('paypal')
+          getInitialViewId: jest.fn().mockReturnValue(initialViewID)
         };
 
         getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
@@ -2186,6 +2269,81 @@ describe('Dropin', () => {
         instance.clearSelectedPaymentMethod();
 
         expect(instance._mainView.setPrimaryView).not.toBeCalled();
+      }
+    );
+
+    test(
+      'sets primary view if current primary view is not the initial view',
+      () => {
+        const initialViewID = 'card';
+        const instance = new Dropin(testContext.dropinOptions);
+        const getViewStub = jest.fn();
+        const fakeMethodsView = {
+          getPaymentMethod: jest.fn().mockReturnValue({
+            type: 'PayPalAccount'
+          })
+        };
+
+        instance._mainView = {
+          getView: getViewStub,
+          showLoadingIndicator: jest.fn(),
+          hideLoadingIndicator: jest.fn(),
+          primaryView: {
+            ID: 'any-id-but-card'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          refreshPaymentMethods: jest.fn().mockResolvedValue(),
+          getPaymentMethods: jest.fn().mockReturnValue([]),
+          removeActivePaymentMethod: jest.fn(),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue(initialViewID)
+        };
+
+        getViewStub.mockImplementation(arg => { // eslint-disable-line consistent-return
+          if (arg === 'methods') {
+            return fakeMethodsView;
+          }
+        });
+
+        instance.clearSelectedPaymentMethod();
+
+        expect(instance._mainView.setPrimaryView).toBeCalledTimes(1);
+        expect(instance._mainView.setPrimaryView).toBeCalledWith(initialViewID);
+      }
+    );
+
+    test(
+      'sets primary view from card view when initial view is options and there are no payment methods',
+      () => {
+        const initialViewID = 'options';
+        const instance = new Dropin(testContext.dropinOptions);
+
+        instance._mainView = {
+          getView: jest.fn(),
+          showLoadingIndicator: jest.fn(),
+          hideLoadingIndicator: jest.fn(),
+          primaryView: {
+            ID: 'card'
+          },
+          setPrimaryView: jest.fn()
+        };
+        instance._model = {
+          refreshPaymentMethods: jest.fn().mockResolvedValue(),
+          getPaymentMethods: jest.fn().mockReturnValue([]),
+          removeActivePaymentMethod: jest.fn(),
+          removePaymentMethod: jest.fn(),
+          hasPaymentMethods: jest.fn().mockReturnValue(false),
+          getInitialViewId: jest.fn().mockReturnValue(initialViewID)
+        };
+
+        instance.clearSelectedPaymentMethod();
+
+        expect(instance._model.hasPaymentMethods()).toBe(false);
+        expect(instance._mainView.setPrimaryView).toBeCalledTimes(1);
+        expect(instance._mainView.setPrimaryView).toBeCalledWith(initialViewID);
       }
     );
 

@@ -5,7 +5,6 @@ var BaseView = require('../base-view');
 var btApplePay = require('braintree-web/apple-pay');
 var DropinError = require('../../lib/dropin-error');
 var isHTTPS = require('../../lib/is-https');
-var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
 var DEFAULT_APPLE_PAY_SESSION_VERSION = 2;
@@ -41,6 +40,12 @@ ApplePayView.prototype.initialize = function () {
       error: new DropinError(err)
     });
   });
+};
+
+ApplePayView.prototype.requestPaymentMethod = function () {
+  this.model.reportError('applePayButtonMustBeUsed');
+
+  return BaseView.prototype.requestPaymentMethod.call(this);
 };
 
 ApplePayView.prototype._showPaymentSheet = function () {

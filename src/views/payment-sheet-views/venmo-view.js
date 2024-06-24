@@ -4,7 +4,6 @@ var assign = require('../../lib/assign').assign;
 var BaseView = require('../base-view');
 var btVenmo = require('braintree-web/venmo');
 var DropinError = require('../../lib/dropin-error');
-var Promise = require('../../lib/promise');
 var paymentOptionIDs = require('../../constants').paymentOptionIDs;
 
 function VenmoView() {
@@ -62,6 +61,12 @@ VenmoView.prototype.initialize = function () {
       error: new DropinError(err)
     });
   });
+};
+
+VenmoView.prototype.requestPaymentMethod = function () {
+  this.model.reportError('venmoButtonMustBeUsed');
+
+  return BaseView.prototype.requestPaymentMethod.call(this);
 };
 
 VenmoView.prototype._isIgnorableError = function (error) {

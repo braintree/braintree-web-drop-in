@@ -3,13 +3,11 @@
 var assign = require('../../lib/assign').assign;
 var fs = require('fs');
 var BaseView = require('../base-view');
-var classList = require('@braintree/class-list');
 var constants = require('../../constants');
 var DropinError = require('../../lib/dropin-error');
 var hostedFields = require('braintree-web/hosted-fields');
 var isUtf8 = require('../../lib/is-utf-8');
 var transitionHelper = require('../../lib/transition-helper');
-var Promise = require('../../lib/promise');
 
 var cardIconHTML = fs.readFileSync(__dirname + '/../../html/card-icons.html', 'utf8');
 
@@ -18,6 +16,14 @@ var PASSTHROUGH_EVENTS = [
   // TODO should intercept this event and call tokenize
   'inputSubmitRequest',
   'binAvailable'
+];
+
+var HOSTED_FIELDS = [
+  'number',
+  'expirationDate',
+  'cvv',
+  'postalCode',
+  'cardholderName'
 ];
 
 function CardView() {
@@ -31,7 +37,6 @@ CardView.ID = CardView.prototype.ID = constants.paymentOptionIDs.card;
 CardView.prototype.initialize = function () {
   var cvvFieldGroup, postalCodeFieldGroup, hfOptions;
   var cardholderNameGroup = this.getElementById('cardholder-name-field-group');
-  var cardIcons = this.getElementById('card-view-icons');
 
   // If merchant explicty passes a value of `true` for card configuration,
   // we need to treat it as if no card configuration was passed, and provide
@@ -46,7 +51,7 @@ CardView.prototype.initialize = function () {
   this.cardholderNameRequired = this.hasCardholderName && this.merchantConfiguration.cardholderName.required === true;
   hfOptions = this._generateHostedFieldsOptions();
 
-  cardIcons.innerHTML = cardIconHTML;
+  this._renderCardIcons();
   this._hideUnsupportedCardIcons();
 
   this.hasCVV = hfOptions.fields.cvv;
@@ -59,20 +64,29 @@ CardView.prototype.initialize = function () {
 
   if (!this.hasCardholderName) {
     cardholderNameGroup.parentNode.removeChild(cardholderNameGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'cardholderName';
+    });
   }
 
   if (!this.hasCVV) {
     cvvFieldGroup = this.getElementById('cvv-field-group');
     cvvFieldGroup.parentNode.removeChild(cvvFieldGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'cvv';
+    });
   }
 
   if (!hfOptions.fields.postalCode) {
     postalCodeFieldGroup = this.getElementById('postal-code-field-group');
     postalCodeFieldGroup.parentNode.removeChild(postalCodeFieldGroup);
+    HOSTED_FIELDS = HOSTED_FIELDS.filter(function (field) {
+      return field !== 'postalCode';
+    });
   }
 
   if (!this.model.isGuestCheckout && this.merchantConfiguration.vault.allowVaultCardOverride === true) {
-    classList.remove(this.getElementById('save-card-field-group'), 'braintree-hidden');
+    this.getElementById('save-card-field-group').classList.remove('braintree-hidden');
   }
 
   // NEXT_MAJOR_VERSION change out this vaultCard property
@@ -90,6 +104,11 @@ CardView.prototype.initialize = function () {
     this.hostedFieldsInstance.on('focus', this._onFocusEvent.bind(this));
     this.hostedFieldsInstance.on('notEmpty', this._onNotEmptyEvent.bind(this));
     this.hostedFieldsInstance.on('validityChange', this._onValidityChangeEvent.bind(this));
+    HOSTED_FIELDS.forEach(function (hostedField) {
+      this.hostedFieldsInstance.setAttribute({
+        field: hostedField, attribute: 'aria-required', value: true
+      });
+    }.bind(this));
 
     PASSTHROUGH_EVENTS.forEach(function (eventName) {
       this.hostedFieldsInstance.on(eventName, function (event) {
@@ -111,6 +130,27 @@ CardView.prototype._sendRequestableEvent = function () {
     this.model.setPaymentMethodRequestable({
       isRequestable: this._validateForm(),
       type: constants.paymentMethodTypes.card
+    });
+  }
+};
+
+CardView.prototype._renderCardIcons = function () {
+  var overrides = this.merchantConfiguration.overrides;
+  var cardIcons = this.getElementById('card-view-icons');
+  var supportedCardBrands = overrides && overrides.fields && overrides.fields.number && overrides.fields.number.supportedCardBrands;
+
+  cardIcons.innerHTML = cardIconHTML;
+
+  if (supportedCardBrands) {
+    Object.keys(supportedCardBrands).forEach(function (cardBrand) {
+      var value = supportedCardBrands[cardBrand];
+      var selector, iconDiv;
+
+      if (value === false) {
+        selector = 'div[data-braintree-id="' + constants.cardTypeIcons[cardBrand] + '-card-icon"]';
+        iconDiv = document.querySelector(selector);
+        hideCardIcon(iconDiv);
+      }
     });
   }
 };
@@ -340,7 +380,7 @@ CardView.prototype.tokenize = function () {
         setTimeout(function () {
           self.model.addPaymentMethod(payload);
           resolve(payload);
-          classList.remove(self.element, 'braintree-sheet--tokenized');
+          self.element.classList.remove('braintree-sheet--tokenized');
         }, 0);
       };
 
@@ -351,7 +391,7 @@ CardView.prototype.tokenize = function () {
         self._isTokenizing = false;
       }, constants.CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
 
-      classList.add(self.element, 'braintree-sheet--tokenized');
+      self.element.classList.add('braintree-sheet--tokenized');
     });
   }).catch(function (err) {
     self._isTokenizing = false;
@@ -378,7 +418,7 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
     this.fieldErrors[field] = this.getElementById(camelCaseToKebabCase(field) + '-field-error');
   }
 
-  classList.add(fieldGroup, 'braintree-form__field-group--has-error');
+  fieldGroup.classList.add('braintree-form__field-group--has-error');
 
   fieldError = this.fieldErrors[field];
   fieldError.innerHTML = errorMessage;
@@ -406,7 +446,7 @@ CardView.prototype.hideFieldError = function (field) {
     this.fieldErrors[field] = this.getElementById(camelCaseToKebabCase(field) + '-field-error');
   }
 
-  classList.remove(fieldGroup, 'braintree-form__field-group--has-error');
+  fieldGroup.classList.remove('braintree-form__field-group--has-error');
 
   if (input) {
     input.removeAttribute('aria-invalid');
@@ -444,13 +484,17 @@ CardView.prototype._onBlurEvent = function (event) {
   var field = event.fields[event.emittedBy];
   var fieldGroup = this.getElementById(camelCaseToKebabCase(event.emittedBy) + '-field-group');
 
-  classList.remove(fieldGroup, 'braintree-form__field-group--is-focused');
+  fieldGroup.classList.remove('braintree-form__field-group--is-focused');
+
+  if (field.isPotentiallyValid) {
+    this.hideFieldError(event.emittedBy);
+  }
 
   if (this._shouldApplyFieldEmptyError(event.emittedBy, field)) {
     this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
   } else if (!field.isEmpty && !field.isValid) {
     this.showFieldError(event.emittedBy, this.strings['fieldInvalidFor' + capitalize(event.emittedBy)]);
-  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0].type)) {
+  } else if (event.emittedBy === 'number' && !this._isCardTypeSupported(event.cards[0])) {
     this.showFieldError('number', this.strings.unsupportedCardTypeError);
   }
 
@@ -483,9 +527,16 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
       cvvPlaceholder = addBullets(4);
     }
     // Keep icon visible when field is not focused
-    classList.add(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+    numberFieldGroup.classList.add('braintree-form__field-group--card-type-known');
   } else {
-    classList.remove(numberFieldGroup, 'braintree-form__field-group--card-type-known');
+    numberFieldGroup.classList.remove('braintree-form__field-group--card-type-known');
+  }
+
+  // if the number field emitted the card change event fires
+  // and the card type is supported, we need to clear out the errors
+  // field in case that there was a "card type is unsupported" error
+  if (event.emittedBy === 'number' && this._isCardTypeSupported(event.cards[0])) {
+    this.hideFieldError(event.emittedBy);
   }
 
   this.cardNumberIconSvg.setAttribute('xlink:href', cardNumberHrefLink);
@@ -508,7 +559,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 CardView.prototype._onFocusEvent = function (event) {
   var fieldGroup = this.getElementById(camelCaseToKebabCase(event.emittedBy) + '-field-group');
 
-  classList.add(fieldGroup, 'braintree-form__field-group--is-focused');
+  fieldGroup.classList.add('braintree-form__field-group--is-focused');
 
   this.model._emit('card:focus', event);
 };
@@ -524,12 +575,12 @@ CardView.prototype._onValidityChangeEvent = function (event) {
   var field = event.fields[event.emittedBy];
 
   if (event.emittedBy === 'number' && event.cards[0]) {
-    isValid = field.isValid && this._isCardTypeSupported(event.cards[0].type);
+    isValid = field.isValid && this._isCardTypeSupported(event.cards[0]);
   } else {
     isValid = field.isValid;
   }
 
-  classList.toggle(field.container, 'braintree-form__field--valid', isValid);
+  field.container.classList.toggle('braintree-form__field--valid', isValid);
 
   if (field.isPotentiallyValid) {
     this.hideFieldError(event.emittedBy);
@@ -571,12 +622,13 @@ CardView.prototype._hideUnsupportedCardIcons = function () {
 
     if (supportedCardTypes.indexOf(configurationCardType) === -1) {
       cardIcon = this.getElementById(paymentMethodCardType + '-card-icon');
-      classList.add(cardIcon, 'braintree-hidden');
+      cardIcon.classList.add('braintree-hidden');
     }
   }.bind(this));
 };
 
-CardView.prototype._isCardTypeSupported = function (cardType) {
+CardView.prototype._isCardTypeSupported = function (card) {
+  var cardType = card && card.type;
   var configurationCardType = constants.configurationCardTypes[cardType];
   var supportedCardTypes = this.client.getConfiguration().gatewayConfiguration.creditCards.supportedCardTypes;
 
@@ -601,6 +653,12 @@ CardView.prototype._shouldApplyFieldEmptyError = function (fieldId, field) {
 
   return isCardViewElement();
 };
+
+function hideCardIcon(icon) {
+  if (icon) {
+    icon.classList.add('braintree-hidden');
+  }
+}
 
 function isCardViewElement() {
   var activeId = document.activeElement && document.activeElement.id;

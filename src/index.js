@@ -109,7 +109,6 @@ var createFromScriptTag = require('./lib/create-from-script-tag');
 var constants = require('./constants');
 var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
-var Promise = require('./lib/promise');
 var wrapPromise = require('@braintree/wrap-promise');
 
 var VERSION = '__VERSION__';
@@ -235,20 +234,20 @@ var VERSION = '__VERSION__';
  * `zh_XC`.
  *
  * @param {object} [options.translations] To use your own translations, pass an object with the strings you wish to replace. This object must use the same structure as the object used internally for supported translations, which can be found [here](https://github.com/braintree/braintree-web-drop-in/blob/main/src/translations/en_US.js). Any strings that are not included will be those from the provided `locale` or `en_US` if no `locale` is provided. See below for an example of creating Drop-in with custom translations.
- * @param {array} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']`. Payment options omitted from this array will not be offered to the customer.
+ * @param {string[]} [options.paymentOptionPriority] Use this option to indicate the order in which enabled payment options should appear when multiple payment options are enabled. By default, payment options will appear in this order: `['card', 'paypal', 'paypalCredit', 'venmo', 'applePay', 'googlePay']`. Payment options omitted from this array will not be offered to the customer.
+ * @param {string[]} [options.hiddenVaultedPaymentMethodTypes] Use this option to hide certain types of vaulted payment methods from being displayed to the customer. Apple Pay, Google Pay and Venmo are always hidden (as those payment methods are only availabe as vaulted payment methods for existing subscriptions, new transactions or subscriptions must be newly authorized). Available options:
+ * * `'card'`
+ * * `'paypal'`
+ * * `'paypalCredit'` (same as PayPal)
  *
  * @param {(boolean|object)} [options.card] The configuration options for cards. See [`cardCreateOptions`](#~cardCreateOptions) for all `card` options. If this option is omitted, cards will still appear as a payment option. To remove cards, pass `false` for the value.
  * @param {object} [options.paypal] The configuration options for PayPal. To include a PayPal option in your Drop-in integration, include the `paypal` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live). To test in Sandbox, you will need to [link a PayPal sandbox test account to your Braintree sandbox account](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#linked-paypal-testing).
  *
  * Some of the PayPal configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment).
  *
- * PayPal is not [supported in Internet Explorer versions lower than 11](https://developer.paypal.com/docs/archive/checkout/reference/faq/#link-whichbrowsersdoespaypalcheckoutsupport).
- *
  * @param {object} [options.paypalCredit] The configuration options for PayPal Credit. To include a PayPal Credit option in your Drop-in integration, include the `paypalCredit` parameter and [enable PayPal in the Braintree Control Panel](https://developer.paypal.com/braintree/docs/guides/paypal/testing-go-live#go-live).
  *
  * Some of the PayPal Credit configuration options are listed [here](#~paypalCreateOptions), but for a full list see the [PayPal Checkout client reference options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/PayPalCheckout.html#createPayment). For more information on PayPal Credit, see the [Braintree Developer Docs](https://developer.paypal.com/braintree/docs/guides/paypal/paypal-credit/javascript/v3).
- *
- * PayPal Credit is not [supported in Internet Explorer versions lower than 11](https://developer.paypal.com/docs/archive/checkout/reference/faq/#link-whichbrowsersdoespaypalcheckoutsupport).
  *
  * @param {(object|boolean)} [options.venmo] The configuration options for Pay with Venmo. To include a Venmo option in your Drop-in integration, include the `venmo` parameter and [follow the documentation for setting up Venmo in the Braintree control panel](https://articles.braintreepayments.com/guides/payment-methods/venmo#setup). If a user's browser does not support Venmo, the Venmo option will not be rendered.
  *
@@ -266,7 +265,7 @@ var VERSION = '__VERSION__';
  *
  * @param {(boolean|object)} [options.threeDSecure] When `true` is passed, the 3D Secure module will be created with a default configuration. See [`threeDSecureOptions`](#~threeDSecureOptions) for additional create options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
  *
- * @param {boolean} [options.vaultManager=false] Whether or not to allow a customer to delete saved payment methods when used with a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id). *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system. This feature is not supported in Internet Explorer 9.
+ * @param {boolean} [options.vaultManager=false] Whether or not to allow a customer to delete saved payment methods when used with a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id). *Note:* Deleting a payment method from Drop-in will permanently delete the payment method, so this option is not recommended for merchants using Braintree's recurring billing system.
  *
  * @param {boolean} [options.preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developer.paypal.com/braintree/docs/reference/request/client-token/generate#customer_id) and a customer with saved payment methods.
  *

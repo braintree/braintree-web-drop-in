@@ -54,6 +54,7 @@ ThreeDSecure.prototype.verify = function (payload, merchantProvidedData) {
 
   verifyOptions.additionalInformation = verifyOptions.additionalInformation || {};
   verifyOptions.additionalInformation.acsWindowSize = verifyOptions.additionalInformation.acsWindowSize || DEFAULT_ACS_WINDOW_SIZE;
+  this._model.shouldWaitForVerifyCard = true;
 
   return this._instance.verifyCard(verifyOptions);
 };

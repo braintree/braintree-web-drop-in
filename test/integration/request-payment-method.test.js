@@ -10,6 +10,7 @@ describe('Drop-in#requestPaymentMethod', function () {
       browser.hostedFieldSendInput('number');
       browser.hostedFieldSendInput('expirationDate');
       browser.hostedFieldSendInput('cvv');
+      browser.hostedFieldSendInput('postalCode');
 
       browser.submitPay();
 
@@ -44,13 +45,8 @@ describe('Drop-in#requestPaymentMethod', function () {
     });
 
     it('tokenizes PayPal Credit @paypal', function () {
-      switch (browser.name()) {
-        case 'SAFARI':
-        case 'INTERNET EXPLORER':
-          this.skip(`${browser.name()} broken for the credit flow. It makes the user apply for PP credit :( :( :(`);
-
-          return;
-        default:
+      if (browser.name() === 'SAFARI') {
+        this.skip(`${browser.name()} broken for the credit flow. It makes the user apply for PP credit :( :( :(`);
       }
 
       browser.start({
@@ -59,7 +55,7 @@ describe('Drop-in#requestPaymentMethod', function () {
 
       browser.clickOption('paypalCredit');
       browser.openPayPalAndCompleteLogin(function () {
-        expect($('.fsPanel.CREDIT').isExisting()).toBe(true);
+        expect($('img[alt="PayPal Credit"]').isExisting()).toBe(true);
       });
 
       browser.submitPay();
@@ -83,6 +79,7 @@ describe('Drop-in#requestPaymentMethod', function () {
       browser.hostedFieldSendInput('number');
       browser.hostedFieldSendInput('expirationDate');
       browser.hostedFieldSendInput('cvv');
+      browser.hostedFieldSendInput('postalCode');
 
       browser.submitPay();
 
