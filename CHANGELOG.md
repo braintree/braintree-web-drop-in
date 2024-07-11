@@ -1,7 +1,11 @@
 # CHANGELOG
 
 ## UNRELEASED
-  - Update braintree-web to 3.101.3
+  - Update Braintree web dependancies
+    - asset-loader to 2.0.1
+    - browser-detection to 2.0.1
+    - uuid to 1.0.0
+    - braintree-web to 3.103.0
 
 ## 1.42.0
   - Apple Pay
