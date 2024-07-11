@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## UNRELEASED
+## 1.43.0
   - Update Braintree web dependancies
     - asset-loader to 2.0.1
     - browser-detection to 2.0.1
