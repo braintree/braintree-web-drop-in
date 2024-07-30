@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.44.0
+  - Update braintree-web to 3.105.0
+
 ## 1.43.0
   - Update Braintree web dependancies
     - asset-loader to 2.0.1
