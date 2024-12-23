@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## UNRELEASED
+
+  - Update dependencies
+    - asset-loader to 2.0.2
+    - browser-detection to 2.0.2
+    - uuid to 1.0.1
+  - Update Braintree web dependency
+    - braintree-web to 3.113.0
+
 ## 1.44.0
   - Update Braintree web dependancies
     - braintree-web to 3.112.0
