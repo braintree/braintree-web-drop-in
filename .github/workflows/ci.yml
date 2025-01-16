@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Node Modules 📦
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-        run: npm install
+        run: npm install --registry=https://registry.npmjs.org
 
   unit-tests:
     name: Unit Tests and Linter
