@@ -1,13 +1,8 @@
 # CHANGELOG
 
-## UNRELEASED
-
+## 1.44.0
   - Update Braintree web dependency
     - braintree-web to 3.113.0
-
-## 1.44.0
-  - Update Braintree web dependancies
-    - braintree-web to 3.112.0
 
 ## 1.43.0
   - Update Braintree web dependancies
