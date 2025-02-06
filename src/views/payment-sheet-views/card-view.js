@@ -665,6 +665,11 @@ function hideCardIcon(icon) {
 function isCardViewElement() {
   var activeId = document.activeElement && document.activeElement.id;
   var isHostedFieldsElement = document.activeElement instanceof HTMLIFrameElement && activeId.indexOf('braintree-hosted-field') !== -1;
+  var isPaypalCollectionNotice = document.activeElement && document.activeElement.parentElement.className === 'braintree-form__notice-of-collection';
+
+  if (isPaypalCollectionNotice) {
+    return true;
+  }
 
   return isHostedFieldsElement;
 }
