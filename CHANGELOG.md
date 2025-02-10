@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## UNRELEASED
+## 1.44.1
   - Fix bug where the last card field would not display a message if the user tabbed to the Paypal Collection notice
   - Update Braintree web dependancies
     - asset-loader to 2.0.2
