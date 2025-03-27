@@ -80,5 +80,8 @@
   "browserslist": [
     "last 2 versions",
     "iOS 8"
-  ]
+  ],
+  "overrides": {
+    "cross-fetch": "4.1.0"
+  }
 }
