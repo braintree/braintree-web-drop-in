@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 1.45.0
   - Fix bug where field would be incorrectly presented as invalid while using autocomplete
   - Update Braintree web dependencies
     - braintree-web to 3.122.0
