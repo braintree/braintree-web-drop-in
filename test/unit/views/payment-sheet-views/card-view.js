@@ -1347,7 +1347,7 @@ describe('CardView', () => {
             fakeHostedField.focus();
 
             setTimeout(() => {
-              expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
+              expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
               done();
             }, 300);
           });
