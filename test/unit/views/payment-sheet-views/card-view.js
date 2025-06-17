@@ -1301,7 +1301,7 @@ describe('CardView', () => {
       );
 
       test(
-        'sets the empty error when programatically focussing a hosted field (requires a setTimeout)',
+        'does not set the empty error when programatically focussing a hosted field (requires a setTimeout)',
         done => {
           const fakeElement = document.createElement('div');
           const fakeHostedField = document.createElement('iframe');
@@ -1347,7 +1347,7 @@ describe('CardView', () => {
             fakeHostedField.focus();
 
             setTimeout(() => {
-              expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(true);
+              expect(numberFieldGroup.classList.contains('braintree-form__field-group--has-error')).toBe(false);
               done();
             }, 300);
           });

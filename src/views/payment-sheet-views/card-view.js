@@ -501,14 +501,20 @@ CardView.prototype._onBlurEvent = function (event) {
 
   this.model._emit('card:blur', event);
 
-  setTimeout(function () {
-    // when focusing on a field by clicking the label,
-    // we need to wait a bit for the iframe to be
-    // focused properly before applying validations
-    if (this._shouldApplyFieldEmptyError(event.emittedBy, field)) {
-      this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
-    }
-  }.bind(this), 150);
+  if (field.isEmpty) {
+    setTimeout(function () {
+      // When focusing on a field by clicking the label,
+      // we need to wait a bit for the iframe to be
+      // focused properly before applying validations.
+      // New fix guarantees that we have actual state at the moment
+      var currentState = this.hostedFieldsInstance.getState();
+      var currentField = currentState.fields[event.emittedBy];
+
+      if (currentField && currentField.isEmpty && this._shouldApplyFieldEmptyError(event.emittedBy, currentField)) {
+        this.showFieldError(event.emittedBy, this.strings['fieldEmptyFor' + capitalize(event.emittedBy)]);
+      }
+    }.bind(this), 150);
+  }
 };
 
 CardView.prototype._onCardTypeChangeEvent = function (event) {
