@@ -64,7 +64,7 @@
     "watchify": "^4.0.0"
   },
   "dependencies": {
-    "@braintree/asset-loader": "2.0.2",
+    "@braintree/asset-loader": "2.0.3",
     "@braintree/browser-detection": "2.0.2",
     "@braintree/event-emitter": "0.4.1",
     "@braintree/uuid": "1.0.1",
