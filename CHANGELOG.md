@@ -1,8 +1,13 @@
 # CHANGELOG
 
+## Unreleased
+  - Fix bug where field would be incorrectly presented as invalid while using autocomplete
+  - Update Braintree web dependencies
+    - braintree-web to 3.122.0
+
 ## 1.44.1
   - Fix bug where the last card field would not display a message if the user tabbed to the Paypal Collection notice
-  - Update Braintree web dependancies
+  - Update Braintree web dependencies
     - asset-loader to 2.0.2
     - browser-detection to 2.0.2
     - uuid to 1.0.1
