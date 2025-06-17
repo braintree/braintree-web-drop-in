@@ -1301,7 +1301,7 @@ describe('CardView', () => {
       );
 
       test(
-        'sets the empty error when programatically focussing a hosted field (requires a setTimeout)',
+        'does not set the empty error when programatically focussing a hosted field (requires a setTimeout)',
         done => {
           const fakeElement = document.createElement('div');
           const fakeHostedField = document.createElement('iframe');
