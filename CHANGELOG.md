@@ -1,9 +1,10 @@
 # CHANGELOG
 
-## UNRELEASED
+## 1.45.1
 
 - Update dependencies
   - braintree-web to 3.123.2
+    - Fixes bug where some UK postal codes were incorrectly failing validation
 
 ## 1.45.0
   - Fix bug where field would be incorrectly presented as invalid while using autocomplete
