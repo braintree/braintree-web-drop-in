@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.45.2
+- Fix translations strings that had an extra '}' in some languages.
+
 ## 1.45.1
 
 - Update dependencies
