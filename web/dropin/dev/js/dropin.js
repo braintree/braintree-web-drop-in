@@ -1664,7 +1664,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.1`.
+   * @description The current version of the SDK, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -2444,7 +2444,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.1`.
+   * @description The current version of the SDK, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -4558,7 +4558,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.1`.
+   * @description The current version of the SDK, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -6707,7 +6707,7 @@ module.exports = {
   supportsInputFormatting: supportsInputFormatting,
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.1`.
+   * @description The current version of the SDK, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -9242,7 +9242,7 @@ module.exports = {
   create: wrapPromise(create),
   isSupported: isSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.45.1`.
+   * @description The current version of the SDK, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -13899,7 +13899,7 @@ function getFramework(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.1`.
+   * @description The current version of the SDK, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -14189,7 +14189,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.1`.
+   * @description The current version of the SDK, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -15035,7 +15035,7 @@ module.exports = {
   create: wrapPromise(create),
   isBrowserSupported: isBrowserSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.45.1`.
+   * @description The current version of the SDK, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -19034,7 +19034,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.googlePay
 ];
 var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = '1.45.1';
+var VERSION = '1.45.2';
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -20093,7 +20093,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.45.1/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *       ></script>
  *       <input type="submit" value="Purchase"></input>
@@ -20111,7 +20111,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.45.1/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *        data-paypal.flow="checkout"
  *        data-paypal.amount="10.00"
@@ -20126,7 +20126,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Specifying a locale and payment option priority</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.45.1/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-locale="de_DE"
  *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
@@ -20141,7 +20141,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including an optional cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.45.1/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="false"
  *   ></script>
@@ -20151,7 +20151,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including a required cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.45.1/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="true"
  *   ></script>
@@ -20167,7 +20167,7 @@ var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = '1.45.1';
+var VERSION = '1.45.2';
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/3.123.2/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -20341,7 +20341,7 @@ var VERSION = '1.45.1';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.45.1/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -20380,7 +20380,7 @@ var VERSION = '1.45.1';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.45.1/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -20460,7 +20460,7 @@ var VERSION = '1.45.1';
  *       <input type="hidden" id="nonce" name="payment_method_nonce"></input>
  *     </form>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.45.1/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"></script>
  *
  *     <script>
  *       var form = document.querySelector('#payment-form');
@@ -20678,7 +20678,7 @@ createFromScriptTag(create, typeof document !== 'undefined' && document.querySel
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of Drop-in, i.e. `1.45.1`.
+   * @description The current version of Drop-in, i.e. `1.45.2`.
    * @type {string}
    */
   VERSION: VERSION
@@ -22168,9 +22168,9 @@ module.exports = {
   "edit" : "Muokkaa",
   "doneEditing" : "Valmis",
   "editPaymentMethods" : "Muokkaa maksutapoja",
-  "CreditCardDeleteConfirmationMessage" : "Haluatko poistaa {{secondaryIdentifier}}} -kortin, joka päättyy {{identifier}}}?",
-  "PayPalAccountDeleteConfirmationMessage" : "Haluatko poistaa PayPal-tilin {{identifier}}}?",
-  "VenmoAccountDeleteConfirmationMessage" : "Haluatko varmasti poistaa Venmo-tilin, jonka käyttäjätunnus on {{identifier}}}?",
+  "CreditCardDeleteConfirmationMessage" : "Haluatko poistaa {{secondaryIdentifier}} -kortin, joka päättyy {{identifier}}?",
+  "PayPalAccountDeleteConfirmationMessage" : "Haluatko poistaa PayPal-tilin {{identifier}}?",
+  "VenmoAccountDeleteConfirmationMessage" : "Haluatko varmasti poistaa Venmo-tilin, jonka käyttäjätunnus on {{identifier}}?",
   "genericDeleteConfirmationMessage" : "Haluatko varmasti poistaa tämän maksutavan?",
   "deleteCancelButton" : "Peruuta",
   "deleteConfirmationButton" : "Poista",
@@ -22216,7 +22216,7 @@ module.exports = {
   "postalCodeLabel" : "Postinumero",
   "saveCardLabel" : "Tallenna kortti",
   "payWithCard" : "Maksa kortilla",
-  "endingIn" : "Päättyy {{lastFourCardDigits}}}",
+  "endingIn" : "Päättyy {{lastFourCardDigits}}",
   "Apple Pay" : "Apple Pay",
   "Venmo" : "Venmo",
   "Card" : "Kortti",
@@ -22408,9 +22408,9 @@ module.exports = {
   "edit" : "Modifier",
   "doneEditing" : "Terminé",
   "editPaymentMethods" : "Modifier les modes de paiement",
-  "CreditCardDeleteConfirmationMessage" : "Supprimer la carte {{secondaryIdentifier}}} se terminant par {{identifier}}} ?",
-  "PayPalAccountDeleteConfirmationMessage" : "Supprimer le compte PayPal {{identifier}}} ?",
-  "VenmoAccountDeleteConfirmationMessage" : "Souhaitez-vous vraiment supprimer le compte Venmo associé au nom d'utilisateur {{identifier}}} ?",
+  "CreditCardDeleteConfirmationMessage" : "Supprimer la carte {{secondaryIdentifier}} se terminant par {{identifier}} ?",
+  "PayPalAccountDeleteConfirmationMessage" : "Supprimer le compte PayPal {{identifier}} ?",
+  "VenmoAccountDeleteConfirmationMessage" : "Souhaitez-vous vraiment supprimer le compte Venmo associé au nom d'utilisateur {{identifier}} ?",
   "genericDeleteConfirmationMessage" : "Souhaitez-vous vraiment supprimer ce mode de paiement ?",
   "deleteCancelButton" : "Annuler",
   "deleteConfirmationButton" : "Supprimer",
@@ -22568,7 +22568,7 @@ module.exports = {
   "edit" : "Szerkesztés",
   "doneEditing" : "Kész",
   "editPaymentMethods" : "Fizetési módok szerkesztése",
-  "CreditCardDeleteConfirmationMessage" : "Törli a(z) {{identifier}}} végű {{secondaryIdentifier}}} kártyát?",
+  "CreditCardDeleteConfirmationMessage" : "Törli a(z) {{identifier}} végű {{secondaryIdentifier}} kártyát?",
   "PayPalAccountDeleteConfirmationMessage" : "Törli a(z) {{identifier}} PayPal-számlát?",
   "VenmoAccountDeleteConfirmationMessage" : "Biztosan törli a(z) {{identifier}} felhasználónévhez tartozó Venmo-számlát?",
   "genericDeleteConfirmationMessage" : "Biztosan törli ezt a fizetési módot?",
@@ -22616,7 +22616,7 @@ module.exports = {
   "postalCodeLabel" : "Irányítószám",
   "saveCardLabel" : "Kártya mentése",
   "payWithCard" : "Fizetés bankkártyával vagy hitelkártyával",
-  "endingIn" : "{{lastFourCardDigits}}} végű",
+  "endingIn" : "{{lastFourCardDigits}} végű",
   "Apple Pay" : "Apple Pay",
   "Venmo" : "Venmo",
   "Card" : "Kártya",
@@ -24004,9 +24004,9 @@ module.exports = {
   "edit" : "编辑",
   "doneEditing" : "完成",
   "editPaymentMethods" : "编辑付款方式",
-  "CreditCardDeleteConfirmationMessage" : "删除以{{identifier}}}结尾的{{secondaryIdentifier}}}卡？",
-  "PayPalAccountDeleteConfirmationMessage" : "删除PayPal账户{{identifier}}}？",
-  "VenmoAccountDeleteConfirmationMessage" : "确定要删除用户名为{{identifier}}}的Venmo账户吗？",
+  "CreditCardDeleteConfirmationMessage" : "删除以{{identifier}}结尾的{{secondaryIdentifier}}卡？",
+  "PayPalAccountDeleteConfirmationMessage" : "删除PayPal账户{{identifier}}？",
+  "VenmoAccountDeleteConfirmationMessage" : "确定要删除用户名为{{identifier}}的Venmo账户吗？",
   "genericDeleteConfirmationMessage" : "确定要删除此付款方式吗？",
   "deleteCancelButton" : "取消",
   "deleteConfirmationButton" : "删除",
@@ -24052,7 +24052,7 @@ module.exports = {
   "postalCodeLabel" : "邮政编码",
   "saveCardLabel" : "保存卡",
   "payWithCard" : "使用卡支付",
-  "endingIn" : "以{{lastFourCardDigits}}}结尾",
+  "endingIn" : "以{{lastFourCardDigits}}结尾",
   "Apple Pay" : "Apple Pay",
   "Venmo" : "Venmo",
   "Card" : "卡",
