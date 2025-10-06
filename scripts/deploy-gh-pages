@@ -36,7 +36,7 @@ git config user.name Braintree
 git config user.email code@getbraintree.com
 
 echo -e "Copying new jsdocs gh-pages...\n"
-cp -r dist/gh-pages/* .
+cp -rP dist/gh-pages/* .
 
 echo -e "Copying new dropin.css/js...\n"
 cp dist/web/dropin/dev/css/dropin.css web/dropin/dev/css
