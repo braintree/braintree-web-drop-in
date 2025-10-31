@@ -227,6 +227,21 @@ describe('ApplePayView', () => {
           });
         });
 
+        test('includes domainName when provided', () => {
+          const stubEvent = { validationURL: 'fake' };
+
+          testContext.view.applePayConfiguration.domainName = 'jsdk.bt.local';
+
+          button.onclick();
+          testContext.fakeApplePaySession.onvalidatemerchant(stubEvent);
+
+          expect(testContext.view.applePayInstance.performValidation).toBeCalledWith({
+            validationURL: stubEvent.validationURL,
+            displayName: 'Unit Test Display Name',
+            domainName: 'jsdk.bt.local'
+          });
+        });
+
         test(
           'completes merchant validation when validation succeeds',
           done => {

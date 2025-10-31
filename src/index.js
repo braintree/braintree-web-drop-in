@@ -154,6 +154,7 @@ var VERSION = '__VERSION__';
  *
  * @param {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
  * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a utf-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {string} [domainName] The domain name to use for merchant validation. Required when Drop-in is used within a cross-origin iframe. If not provided, the domain will be auto-detected from `window.location.hostname` or `window.parent.location.hostname`.
  * @param {number} [applePaySessionVersion=2] The [version of the `ApplePaySession`](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history) to use. It's recommended to use the lowest version that contains all the features you need for your checkout to maximize compatibility.
  * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
  */

@@ -62,10 +62,16 @@ ApplePayView.prototype._showPaymentSheet = function () {
   session = new global.ApplePaySession(self.applePaySessionVersion, request);
 
   session.onvalidatemerchant = function (event) {
-    self.applePayInstance.performValidation({
+    var performValidationOptions = {
       validationURL: event.validationURL,
       displayName: self.applePayConfiguration.displayName
-    }).then(function (validationData) {
+    };
+
+    if (self.applePayConfiguration.domainName) {
+      performValidationOptions.domainName = self.applePayConfiguration.domainName;
+    }
+
+    self.applePayInstance.performValidation(performValidationOptions).then(function (validationData) {
       session.completeMerchantValidation(validationData);
     }).catch(function (validationErr) {
       self.model.reportError(validationErr);
