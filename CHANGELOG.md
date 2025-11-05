@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.46.0
+- Add optional domainName parameter to Drop-in Apple Pay configuration to support merchants using Drop-in in cross-origin iframes.
+
 ## 1.45.2
 - Fix translations strings that had an extra '}' in some languages.
 
