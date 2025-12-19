@@ -9,7 +9,7 @@ require('dotenv').config();
 const ONLY_BROWSERS = process.env.ONLY_BROWSERS;
 const localIdentifier = uuid();
 
-const projectName = 'Braintee Web Drop-in';
+const projectName = 'Braintee Web - Drop-in';
 let type;
 
 if (!process.env.GITHUB_REF) {
