@@ -1,6 +1,7 @@
 const createHelpers = require('./test/integration/helper');
 const uuid = require('@braintree/uuid');
 const browserstack = require('browserstack-local');
+const projectName = require('../../package.json').name;
 
 // Stop node from complaining about fake memory leaks at higher concurrency
 require('events').defaultMaxListeners = 20;
@@ -9,7 +10,6 @@ require('dotenv').config();
 const ONLY_BROWSERS = process.env.ONLY_BROWSERS;
 const localIdentifier = uuid();
 
-const projectName = 'Braintee Web - Drop-in';
 let type;
 
 if (!process.env.GITHUB_REF) {
@@ -22,6 +22,8 @@ const build = `${projectName} - ${type} ${Date.now()}`;
 
 const desktopCapabilities = {
   'bstack:options' : {
+    projectName: projectName,
+    buildName: build,
     os : 'Windows',
     osVersion : '10',
     local : 'true',
