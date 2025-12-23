@@ -1,7 +1,7 @@
 const createHelpers = require('./test/integration/helper');
 const uuid = require('@braintree/uuid');
 const browserstack = require('browserstack-local');
-const projectName = require('../../package.json').name;
+const projectName = require('./package.json').name;
 
 // Stop node from complaining about fake memory leaks at higher concurrency
 require('events').defaultMaxListeners = 20;
