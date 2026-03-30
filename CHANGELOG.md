@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## UNRELEASED
+- Sanitize Venmo username before adding it to the DOM
+
 ## 1.46.0
 - Add optional domainName parameter to Drop-in Apple Pay configuration to support merchants using Drop-in in cross-origin iframes.
 
