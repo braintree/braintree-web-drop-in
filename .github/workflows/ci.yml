@@ -1,12 +1,15 @@
 name: "Braintree Web Drop-in CI"
 
+# changing this to a manual trigger since we are planning on deprecating this soon
+# so there's no reason to waste our browserstack test runs on it
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main
 
 env:
   PAYPAL_USERNAME: ${{ secrets.PAYPAL_USERNAME }}
@@ -133,7 +136,7 @@ jobs:
       - name: BrowserStack Env Setup 🥞
         uses: "browserstack/github-actions/setup-env@master"
         with:
-          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          username: ${{ secrets.BROWSERSTACK_USERNAME }}
           access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           build-name: BUILD_INFO
           project-name: REPO_NAME
@@ -192,7 +195,7 @@ jobs:
       - name: BrowserStack Env Setup 🥞
         uses: "browserstack/github-actions/setup-env@master"
         with:
-          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          username: ${{ secrets.BROWSERSTACK_USERNAME }}
           access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           build-name: BUILD_INFO
           project-name: REPO_NAME
@@ -251,7 +254,7 @@ jobs:
       - name: BrowserStack Env Setup 🥞
         uses: "browserstack/github-actions/setup-env@master"
         with:
-          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          username: ${{ secrets.BROWSERSTACK_USERNAME }}
           access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           build-name: BUILD_INFO
           project-name: REPO_NAME

@@ -1,6 +1,7 @@
 'use strict';
 
 var analytics = require('../lib/analytics');
+var sanitizeHtml = require('../lib/sanitize-html');
 var BaseView = require('./base-view');
 var constants = require('../constants');
 var fs = require('fs');
@@ -65,7 +66,7 @@ PaymentMethodView.prototype._initialize = function () {
     case paymentMethodTypes.venmo:
       html = html.replace(/@ICON/g, 'logoVenmo')
         .replace(/@CLASSNAME/g, '')
-        .replace(/@TITLE/g, this.paymentMethod.details.username)
+        .replace(/@TITLE/g, sanitizeHtml(this.paymentMethod.details.username))
         .replace(/@SUBTITLE/g, this.strings.Venmo);
       break;
     default:
