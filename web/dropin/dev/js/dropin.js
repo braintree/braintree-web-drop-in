@@ -1664,7 +1664,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.2`.
+   * @description The current version of the SDK, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -2444,7 +2444,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.2`.
+   * @description The current version of the SDK, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -4558,7 +4558,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.2`.
+   * @description The current version of the SDK, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -6707,7 +6707,7 @@ module.exports = {
   supportsInputFormatting: supportsInputFormatting,
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.2`.
+   * @description The current version of the SDK, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -9242,7 +9242,7 @@ module.exports = {
   create: wrapPromise(create),
   isSupported: isSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.45.2`.
+   * @description The current version of the SDK, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -13899,7 +13899,7 @@ function getFramework(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.2`.
+   * @description The current version of the SDK, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -14189,7 +14189,7 @@ function create(options) {
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of the SDK, i.e. `1.45.2`.
+   * @description The current version of the SDK, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -15035,7 +15035,7 @@ module.exports = {
   create: wrapPromise(create),
   isBrowserSupported: isBrowserSupported,
   /**
-   * @description The current version of the SDK, i.e. `1.45.2`.
+   * @description The current version of the SDK, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION,
@@ -19034,7 +19034,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.googlePay
 ];
 var HAS_RAW_PAYMENT_DATA = {};
-var VERSION = '1.45.2';
+var VERSION = '1.46.1';
 
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.googlePay] = true;
 HAS_RAW_PAYMENT_DATA[constants.paymentMethodTypes.applePay] = true;
@@ -20093,7 +20093,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *       ></script>
  *       <input type="submit" value="Purchase"></input>
@@ -20111,7 +20111,7 @@ module.exports = wrapPrototype(Dropin);
  *   </head>
  *   <body>
  *     <form id="payment-form" action="/" method="post">
- *       <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
+ *       <script src="https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js"
  *        data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *        data-paypal.flow="checkout"
  *        data-paypal.amount="10.00"
@@ -20126,7 +20126,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Specifying a locale and payment option priority</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-locale="de_DE"
  *    data-payment-option-priority='["paypal","card", "paypalCredit"]'
@@ -20141,7 +20141,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including an optional cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="false"
  *   ></script>
@@ -20151,7 +20151,7 @@ module.exports = wrapPrototype(Dropin);
  * @example
  * <caption>Including a required cardholder name field in card form</caption>
  * <form id="payment-form" action="/" method="post">
- *   <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"
+ *   <script src="https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js"
  *    data-braintree-dropin-authorization="CLIENT_AUTHORIZATION"
  *    data-card.cardholder-name.required="true"
  *   ></script>
@@ -20167,7 +20167,7 @@ var analytics = require('./lib/analytics');
 var DropinError = require('./lib/dropin-error');
 var wrapPromise = require('@braintree/wrap-promise');
 
-var VERSION = '1.45.2';
+var VERSION = '1.46.1';
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/3.123.2/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -20210,6 +20210,7 @@ var VERSION = '1.45.2';
  *
  * @param {string} [buttonStyle=black] Configures the Apple Pay button style. Valid values are `black`, `white`, `white-outline`.
  * @param {string} displayName The canonical name for your store. Use a non-localized name. This parameter should be a utf-8 string that is a maximum of 128 characters. The system may display this name to the user.
+ * @param {string} [domainName] The domain name to use for merchant validation. Required when Drop-in is used within a cross-origin iframe. If not provided, the domain will be auto-detected from `window.location.hostname` or `window.parent.location.hostname`.
  * @param {number} [applePaySessionVersion=2] The [version of the `ApplePaySession`](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history) to use. It's recommended to use the lowest version that contains all the features you need for your checkout to maximize compatibility.
  * @param {external:ApplePayPaymentRequest} paymentRequest The payment request details to apply on top of those from Braintree.
  */
@@ -20341,7 +20342,7 @@ var VERSION = '1.45.2';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -20380,7 +20381,7 @@ var VERSION = '1.45.2';
  *     <div id="dropin-container"></div>
  *     <button id="submit-button">Purchase</button>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js"></script>
  *
  *     <script>
  *       var submitButton = document.querySelector('#submit-button');
@@ -20460,7 +20461,7 @@ var VERSION = '1.45.2';
  *       <input type="hidden" id="nonce" name="payment_method_nonce"></input>
  *     </form>
  *
- *     <script src="https://js.braintreegateway.com/web/dropin/1.45.2/js/dropin.min.js"></script>
+ *     <script src="https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js"></script>
  *
  *     <script>
  *       var form = document.querySelector('#payment-form');
@@ -20678,7 +20679,7 @@ createFromScriptTag(create, typeof document !== 'undefined' && document.querySel
 module.exports = {
   create: wrapPromise(create),
   /**
-   * @description The current version of Drop-in, i.e. `1.45.2`.
+   * @description The current version of Drop-in, i.e. `1.46.1`.
    * @type {string}
    */
   VERSION: VERSION
@@ -24616,6 +24617,7 @@ module.exports = MainView;
 'use strict';
 
 var analytics = require('../lib/analytics');
+var sanitizeHtml = require('../lib/sanitize-html');
 var BaseView = require('./base-view');
 var constants = require('../constants');
 
@@ -24680,7 +24682,7 @@ PaymentMethodView.prototype._initialize = function () {
     case paymentMethodTypes.venmo:
       html = html.replace(/@ICON/g, 'logoVenmo')
         .replace(/@CLASSNAME/g, '')
-        .replace(/@TITLE/g, this.paymentMethod.details.username)
+        .replace(/@TITLE/g, sanitizeHtml(this.paymentMethod.details.username))
         .replace(/@SUBTITLE/g, this.strings.Venmo);
       break;
     default:
@@ -24730,7 +24732,7 @@ PaymentMethodView.prototype._selectDelete = function () {
 
 module.exports = PaymentMethodView;
 
-},{"../constants":205,"../lib/add-selection-event-handler":209,"../lib/analytics":210,"./base-view":262}],266:[function(require,module,exports){
+},{"../constants":205,"../lib/add-selection-event-handler":209,"../lib/analytics":210,"../lib/sanitize-html":222,"./base-view":262}],266:[function(require,module,exports){
 'use strict';
 
 var BaseView = require('./base-view');
@@ -25068,10 +25070,16 @@ ApplePayView.prototype._showPaymentSheet = function () {
   session = new global.ApplePaySession(self.applePaySessionVersion, request);
 
   session.onvalidatemerchant = function (event) {
-    self.applePayInstance.performValidation({
+    var performValidationOptions = {
       validationURL: event.validationURL,
       displayName: self.applePayConfiguration.displayName
-    }).then(function (validationData) {
+    };
+
+    if (self.applePayConfiguration.domainName) {
+      performValidationOptions.domainName = self.applePayConfiguration.domainName;
+    }
+
+    self.applePayInstance.performValidation(performValidationOptions).then(function (validationData) {
       session.completeMerchantValidation(validationData);
     }).catch(function (validationErr) {
       self.model.reportError(validationErr);
