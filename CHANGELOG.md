@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## UNRELEASED
+## 1.46.1
 - Sanitize Venmo username before adding it to the DOM
 
 ## 1.46.0
