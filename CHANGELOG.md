@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## UNRELEASED
+
+- feat(deps): Add [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) to the repo
+
 ## 1.46.1
 - Sanitize Venmo username before adding it to the DOM
 
