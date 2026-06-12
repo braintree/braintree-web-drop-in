@@ -60,7 +60,7 @@ PaymentMethodView.prototype._initialize = function () {
     case paymentMethodTypes.paypal:
       html = html.replace(/@ICON/g, 'logoPayPal')
         .replace(/@CLASSNAME/g, '')
-        .replace(/@TITLE/g, this.paymentMethod.details.email)
+        .replace(/@TITLE/g, sanitizeHtml(this.paymentMethod.details.email))
         .replace(/@SUBTITLE/g, this.strings.PayPal);
       break;
     case paymentMethodTypes.venmo:

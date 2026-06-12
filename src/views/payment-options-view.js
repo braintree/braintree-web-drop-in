@@ -1,6 +1,7 @@
 'use strict';
 
 var analytics = require('../lib/analytics');
+var sanitizeHtml = require('../lib/sanitize-html');
 var addSelectionEventHandler = require('../lib/add-selection-event-handler');
 var BaseView = require('./base-view');
 var fs = require('fs');
@@ -36,6 +37,8 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
     this.model.selectPaymentOption(paymentOptionID);
     analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
   }.bind(this);
+
+  paymentOptionID = sanitizeHtml(paymentOptionID);
 
   div.className = 'braintree-option braintree-option__' + paymentOptionID;
   div.setAttribute('tabindex', '0');
@@ -87,7 +90,7 @@ PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
 };
 
 PaymentOptionsView.prototype._generateOptionLabel = function (paymentSourceString) {
-  return this.strings.payingWith.replace('{{paymentSource}}', paymentSourceString);
+  return this.strings.payingWith.replace('{{paymentSource}}', sanitizeHtml(paymentSourceString));
 };
 
 module.exports = PaymentOptionsView;
