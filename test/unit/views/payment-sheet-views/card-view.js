@@ -2974,6 +2974,19 @@ describe('CardView', () => {
           });
         }
       );
+
+      test('renders HTML in error messages as text, not parsed markup', () => {
+        const xssPayload = '<img src=x onerror="alert(1)">';
+        const fakeFieldError = document.createElement('div');
+
+        cardView.fieldErrors.foo = fakeFieldError;
+        jest.spyOn(cardView, 'getElementById').mockReturnValue(document.createElement('div'));
+
+        cardView.showFieldError('foo', xssPayload);
+
+        expect(fakeFieldError.textContent).toBe(xssPayload);
+        expect(fakeFieldError.querySelector('img')).toBeNull();
+      });
     });
 
     describe('hideFieldError', () => {

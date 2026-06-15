@@ -76,8 +76,8 @@ PaymentMethodsView.prototype._getPaymentMethodString = function () {
 PaymentMethodsView.prototype.enableEditMode = function () {
   this.container.classList.add('braintree-methods--edit');
 
-  this._editButton.innerHTML = this.strings.deleteCancelButton;
-  this._headingLabel.innerHTML = this.strings.editPaymentMethods;
+  this._editButton.textContent = this.strings.deleteCancelButton;
+  this._headingLabel.textContent = this.strings.editPaymentMethods;
 
   this.views.forEach(function (view) {
     view.enableEditMode();
@@ -87,8 +87,8 @@ PaymentMethodsView.prototype.enableEditMode = function () {
 PaymentMethodsView.prototype.disableEditMode = function () {
   this.container.classList.remove('braintree-methods--edit');
 
-  this._editButton.innerHTML = this.strings.edit;
-  this._headingLabel.innerHTML = this._getPaymentMethodString();
+  this._editButton.textContent = this.strings.edit;
+  this._headingLabel.textContent = this._getPaymentMethodString();
 
   this.views.forEach(function (view) {
     view.disableEditMode();
@@ -123,7 +123,7 @@ PaymentMethodsView.prototype._removePaymentMethod = function (paymentMethod) {
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
       this.views[i].teardown();
-      this._headingLabel.innerHTML = '&nbsp;';
+      this._headingLabel.textContent = ' ';
       this.views.splice(i, 1);
       break;
     }
@@ -137,7 +137,7 @@ PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentM
   for (i = 0; i < this.views.length; i++) {
     if (this.views[i].paymentMethod === paymentMethod) {
       this.activeMethodView = this.views[i];
-      this._headingLabel.innerHTML = this._getPaymentMethodString();
+      this._headingLabel.textContent = this._getPaymentMethodString();
       break;
     }
   }

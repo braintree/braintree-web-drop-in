@@ -422,7 +422,7 @@ CardView.prototype.showFieldError = function (field, errorMessage) {
   fieldGroup.classList.add('braintree-form__field-group--has-error');
 
   fieldError = this.fieldErrors[field];
-  fieldError.innerHTML = errorMessage;
+  fieldError.textContent = errorMessage;
 
   if (input) {
     input.setAttribute('aria-invalid', true);
@@ -550,7 +550,7 @@ CardView.prototype._onCardTypeChangeEvent = function (event) {
 
   if (this.hasCVV) {
     this.cvvIconSvg.setAttribute('xlink:href', cvvHrefLink);
-    this.cvvLabelDescriptor.innerHTML = cvvDescriptor;
+    this.cvvLabelDescriptor.textContent = cvvDescriptor;
 
     if (!this._hasCustomCVVPlaceholder) {
       this.hostedFieldsInstance.setAttribute({
