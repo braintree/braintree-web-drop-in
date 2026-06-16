@@ -643,6 +643,17 @@ describe('MainView', () => {
         expect(testContext.context.sheetErrorText.textContent).toBe('Developer Error: Something went wrong. Check the console for details.');
       }
     );
+
+    test('renders HTML in error messages as text, not parsed markup', () => {
+      const xssPayload = '<img src=x onerror="alert(1)">';
+      const stringsWithPayload = Object.assign({}, strings, { genericError: xssPayload });
+
+      testContext.context.strings = stringsWithPayload;
+      MainView.prototype.showSheetError.call(testContext.context, {});
+
+      expect(testContext.context.sheetErrorText.textContent).toBe(xssPayload);
+      expect(testContext.context.sheetErrorText.querySelector('img')).toBeNull();
+    });
   });
 
   describe('hideSheetError', () => {

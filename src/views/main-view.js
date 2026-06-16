@@ -288,7 +288,7 @@ MainView.prototype.showSheetError = function (error) {
   }
 
   this.dropinContainer.classList.add('braintree-sheet--has-error');
-  this.sheetErrorText.innerHTML = errorMessage;
+  this.sheetErrorText.textContent = errorMessage;
 };
 
 MainView.prototype.hideSheetError = function () {
