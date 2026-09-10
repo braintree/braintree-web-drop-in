@@ -1,11 +1,14 @@
 # CHANGELOG
 
+## 1.48.0
+
+- fix: tighten `lastFour` innerHtml usage
+
 ## 1.47.0
 
 - feat(deps): Add [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) to the repo
 - fix: tighten `sanitizeHtml` function to escape ', ", and &
 - fix: stop using `innerHtml` in favor of `textContent` (where possible)
-- fix: tighten `lastFour` innerHtml usage
 - chore: Add deprecation notice
 
 ## 1.46.1
