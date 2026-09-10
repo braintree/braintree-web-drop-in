@@ -50,6 +50,65 @@ describe('PaymentMethodView', () => {
     );
 
     test(
+      'last4 does not allow more than 4 characters',
+      () => {
+        config.paymentMethod = {
+          type: 'CreditCard',
+          details: {
+            cardType: 'Visa',
+            lastFour: '123457890'
+          }
+        };
+
+        const view = new PaymentMethodView(config);
+
+        const labelElement = view.element.querySelector('.braintree-method__label');
+
+        expect(labelElement.textContent).toMatch('Ending in 1234');
+        expect(labelElement.textContent).not.toMatch('Ending in 1234567890');
+      }
+    );
+
+    test(
+      'last4does not allow non-numeric characters',
+      () => {
+        config.paymentMethod = {
+          type: 'CreditCard',
+          details: {
+            cardType: 'Visa',
+            lastFour: '<alert>test!</alert>'
+          }
+        };
+
+        const view = new PaymentMethodView(config);
+
+        const labelElement = view.element.querySelector('.braintree-method__label');
+
+        expect(labelElement.textContent).toMatch('NaN');
+        expect(labelElement.textContent).not.toMatch('<alert>test!</alert>');
+      }
+    );
+
+    test(
+      'last4 allows leading 0s',
+      () => {
+        config.paymentMethod = {
+          type: 'CreditCard',
+          details: {
+            cardType: 'Visa',
+            lastFour: '0000'
+          }
+        };
+
+        const view = new PaymentMethodView(config);
+
+        const labelElement = view.element.querySelector('.braintree-method__label');
+
+        expect(labelElement.textContent).toMatch('0000');
+      }
+    );
+
+    test(
       'sets the inner HTML correctly when the paymentMethod is a PayPal account',
       () => {
         config.paymentMethod = {
